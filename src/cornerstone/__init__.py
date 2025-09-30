@@ -12,6 +12,7 @@ __all__ = [
     "QdrantVectorStore",
     "VectorRecord",
     "SearchResult",
+    "create_app",
 ]
 
 
@@ -20,4 +21,8 @@ def __getattr__(name: str):  # pragma: no cover - small helper
         from .embeddings import EmbeddingBackend, EmbeddingService
 
         return {"EmbeddingService": EmbeddingService, "EmbeddingBackend": EmbeddingBackend}[name]
+    if name == "create_app":
+        from .app import create_app
+
+        return create_app
     raise AttributeError(f"module 'cornerstone' has no attribute {name}")

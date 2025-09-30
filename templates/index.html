@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cornerstone Search</title>
+    <style>
+      body { font-family: sans-serif; margin: 2rem; }
+      form { display: flex; gap: 0.5rem; }
+      input[type="text"] { flex: 1; padding: 0.5rem; }
+      button { padding: 0.5rem 1rem; }
+      ul { list-style: none; padding: 0; }
+      li { margin: 0.75rem 0; }
+      .score { color: #555; font-size: 0.9rem; }
+      .empty { margin-top: 1.5rem; color: #777; }
+    </style>
+  </head>
+  <body>
+    <h1>Cornerstone Semantic Search</h1>
+    <form method="post" action="/search">
+      <input
+        type="text"
+        name="query"
+        placeholder="Enter a query..."
+        value="{{ query | default('') }}"
+        required
+      />
+      <button type="submit">Search</button>
+    </form>
+
+    {% if results is defined %}
+      {% if results %}
+        <h2>Results</h2>
+        <ul>
+          {% for item in results %}
+            <li>
+              <div>{{ item.payload.get("text", item.payload) }}</div>
+              <div class="score">Score: {{ item.score }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No results found.</p>
+      {% endif %}
+    {% endif %}
+  </body>
+</html>

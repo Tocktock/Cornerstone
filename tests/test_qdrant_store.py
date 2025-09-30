@@ -87,7 +87,7 @@ def test_integration_upsert_and_search_against_docker(qdrant_docker_store: Qdran
     vec_id_1 = str(uuid4())
     vec_id_2 = str(uuid4())
     records = [
-                VectorRecord(id=vec_id_1, vector=[1.0, 0.0, 0.0], payload={'text': 'docker-first'}),
+        VectorRecord(id=vec_id_1, vector=[1.0, 0.0, 0.0], payload={'text': 'docker-first'}),
         VectorRecord(id=vec_id_2, vector=[0.0, 1.0, 0.0], payload={'text': 'docker-second'}),
     ]
     qdrant_docker_store.upsert(records)
