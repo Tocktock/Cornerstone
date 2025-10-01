@@ -16,14 +16,15 @@ dependencies = [
     "sentence-transformers>=2.2,<3.0",
     "python-multipart>=0.0.9",
     "pydantic>=2.6,<3.0",
-    "pyyaml>=6.0,<7.0"
+    "pyyaml>=6.0,<7.0",
+    "httpx>=0.26,<0.28",
+    "python-dotenv>=1.0,<2.0"
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.2,<9.0",
-    "pytest-asyncio>=0.23,<0.24",
-    "httpx>=0.26,<0.28"
+    "pytest-asyncio>=0.23,<0.24"
 ]
 
 [tool.hatch.metadata]

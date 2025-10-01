@@ -12,12 +12,23 @@ from cornerstone import EmbeddingService, QdrantVectorStore, Settings, VectorRec
 
 def main(limit: int, collection_action: str) -> None:
     settings = Settings.from_env()
+    print(
+        "[seed] Using embedding backend '",
+        settings.embedding_model,
+        "' and chat backend '",
+        settings.chat_backend,
+        "'.",
+        sep="",
+    )
     embedding = EmbeddingService(settings)
+    print(f"[seed] Embedding dimension resolved to {embedding.dimension}.")
     store = QdrantVectorStore.from_settings(settings, vector_size=embedding.dimension)
 
     if collection_action == "recreate":
+        print("[seed] Recreating collection before ingesting data.")
         store.ensure_collection(force_recreate=True)
     else:
+        print("[seed] Ensuring collection exists before ingesting data.")
         store.ensure_collection()
 
     dataset = load_dataset("ag_news", split=f"train[:{limit}]")
@@ -36,6 +47,8 @@ def main(limit: int, collection_action: str) -> None:
             text = text_field or title or description or ""
 
         vector = embedding.embed_one(text)
+        if len(records) % 25 == 0:
+            print(f"[seed] Embedded {len(records) + 1} records...")
         records.append(
             VectorRecord(
                 id=str(uuid4()),
@@ -47,8 +60,9 @@ def main(limit: int, collection_action: str) -> None:
             )
         )
 
+    print(f"[seed] Upserting {len(records)} vectors to Qdrant...")
     store.upsert(records)
-    print(f"Seeded {len(records)} AG News entries.")
+    print(f"[seed] Seeded {len(records)} AG News entries.")
 
 
 if __name__ == "__main__":

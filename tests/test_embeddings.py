@@ -54,6 +54,27 @@ class _StubOpenAIClient:
         self.models = _StubOpenAIModels()
 
 
+class _StubHttpxResponse:
+    def __init__(self, vector: list[float]) -> None:
+        self._vector = vector
+
+    def raise_for_status(self) -> None:  # noqa: D401
+        return None
+
+    def json(self) -> dict[str, list[float]]:
+        return {"embedding": self._vector}
+
+
+class _StubHttpx:
+    def __init__(self) -> None:
+        self.requests: list[tuple[str, dict[str, str], float]] = []
+
+    def post(self, url: str, json: dict[str, str], timeout: float) -> _StubHttpxResponse:
+        self.requests.append((url, json, timeout))
+        length = float(len(json.get("prompt", "")))
+        return _StubHttpxResponse([length, 1.0, 0.0])
+
+
 def test_huggingface_backend_uses_sentence_transformer(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         "cornerstone.embeddings.SentenceTransformer", lambda name: _StubModel(name=name)
@@ -89,3 +110,18 @@ def test_openai_backend_requires_api_key(monkeypatch: pytest.MonkeyPatch) -> Non
     settings = Settings(embedding_model="text-embedding-3-large", openai_api_key=None)
     with pytest.raises(ValueError):
         EmbeddingService(settings)
+
+
+def test_ollama_backend_calls_local_api(monkeypatch: pytest.MonkeyPatch) -> None:
+    stub_httpx = _StubHttpx()
+    monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
+
+    settings = Settings(embedding_model="ollama:qwen3-embedding")
+    service = EmbeddingService(settings, validate=False)
+
+    assert service.backend is EmbeddingBackend.OLLAMA
+    assert service.dimension == 3
+
+    vectors = service.embed(["hi", "team"])
+    assert vectors == [[2.0, 1.0, 0.0], [4.0, 1.0, 0.0]]
+    assert len(stub_httpx.requests) == 1 + 2  # dimension probe + two embedding calls

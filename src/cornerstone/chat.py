@@ -10,10 +10,10 @@ from .embeddings import EmbeddingService
 from .glossary import Glossary
 from .vector_store import QdrantVectorStore, SearchResult
 
-try:  # pragma: no cover - optional import for local llama backend
-    from llama_cpp import Llama  # type: ignore
+try:  # pragma: no cover - optional import for Ollama HTTP client
+    import httpx
 except Exception:  # pragma: no cover
-    Llama = None
+    httpx = None  # type: ignore[assignment]
 
 try:  # pragma: no cover - guard openai import for static analysis
     from openai import OpenAI
@@ -46,7 +46,6 @@ class SupportAgentService:
         self._glossary = glossary
         self._retrieval_top_k = retrieval_top_k
         self._openai_client: OpenAI | None = None
-        self._llama: Llama | None = None
 
     def generate(self, query: str, *, conversation: Sequence[str] | None = None) -> SupportAgentResponse:
         conversation = conversation or []
@@ -113,8 +112,8 @@ class SupportAgentService:
     def _invoke_backend(self, prompt: str) -> str:
         if self._settings.is_openai_chat_backend:
             return self._invoke_openai(prompt)
-        if self._settings.is_local_chat_backend:
-            return self._invoke_llama(prompt)
+        if self._settings.is_ollama_chat_backend:
+            return self._invoke_ollama(prompt)
         raise RuntimeError(f"Unsupported chat backend: {self._settings.chat_backend}")
 
     def _invoke_openai(self, prompt: str) -> str:
@@ -143,20 +142,36 @@ class SupportAgentService:
             return str(response.output_text).strip()
         return "I'm sorry, I could not generate a response at this time."
 
-    def _invoke_llama(self, prompt: str) -> str:
-        if Llama is None:  # pragma: no cover
-            raise RuntimeError("llama-cpp-python must be installed for the local chat backend")
-        if not self._settings.llama_model_path:
-            raise RuntimeError("LLAMA_MODEL_PATH must be set when using the local chat backend")
-        if self._llama is None:
-            self._llama = Llama(
-                model_path=self._settings.llama_model_path,
-                n_ctx=self._settings.llama_context_window,
-                verbose=False,
-            )
-        completion = self._llama.create_completion(prompt=prompt, temperature=0.2, max_tokens=512)
-        text = completion.get("choices", [{}])[0].get("text", "")
-        return text.strip() or "I'm sorry, I could not generate a response at this time."
+    def _invoke_ollama(self, prompt: str) -> str:
+        if httpx is None:  # pragma: no cover
+            raise RuntimeError("httpx must be installed for the Ollama chat backend")
+
+        model = (self._settings.ollama_model or "").strip()
+        if not model:
+            raise RuntimeError("OLLAMA_MODEL must be set when using the Ollama chat backend")
+
+        base_url = self._settings.ollama_base_url.rstrip("/")
+        url = f"{base_url}/api/chat"
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": "You are an empathetic technical support agent."},
+                {"role": "user", "content": prompt},
+            ],
+            "stream": False,
+        }
+
+        try:
+            response = httpx.post(url, json=payload, timeout=self._settings.ollama_request_timeout)
+            response.raise_for_status()
+        except Exception as exc:  # pragma: no cover - network errors
+            raise RuntimeError(f"Ollama request failed: {exc}") from exc
+
+        data = response.json()
+        message = data.get("message") or {}
+        content = message.get("content") or data.get("response", "")
+        text = str(content).strip() if content else ""
+        return text or "I'm sorry, I could not generate a response at this time."
 
 
 __all__ = ["SupportAgentService", "SupportAgentResponse"]

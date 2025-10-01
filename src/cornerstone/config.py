@@ -6,6 +6,14 @@ from dataclasses import dataclass
 import os
 from typing import Any, Final, Literal
 
+try:  # pragma: no cover - optional dependency loaded at runtime
+    from dotenv import load_dotenv
+except Exception:  # pragma: no cover
+    load_dotenv = None
+
+if load_dotenv is not None:
+    load_dotenv()
+
 # Model identifiers
 OpenAIModelName = Literal["text-embedding-3-large"]
 
@@ -16,7 +24,9 @@ _DEFAULT_CHAT_BACKEND: Final[str] = "openai"
 _DEFAULT_OPENAI_CHAT_MODEL: Final[str] = "gpt-4o-mini"
 _DEFAULT_GLOSSARY_PATH: Final[str] = "glossary/glossary.yaml"
 _DEFAULT_GLOSSARY_TOP_K: Final[int] = 3
-_DEFAULT_LLAMA_CTX_SIZE: Final[int] = 4096
+_DEFAULT_OLLAMA_URL: Final[str] = "http://localhost:11434"
+_DEFAULT_OLLAMA_MODEL: Final[str] = "llama3.1:8b"
+_DEFAULT_OLLAMA_TIMEOUT: Final[float] = 60.0
 
 
 @dataclass(slots=True)
@@ -30,8 +40,9 @@ class Settings:
     qdrant_collection: str = _DEFAULT_QDRANT_COLLECTION
     chat_backend: str = _DEFAULT_CHAT_BACKEND
     openai_chat_model: str = _DEFAULT_OPENAI_CHAT_MODEL
-    llama_model_path: str | None = None
-    llama_context_window: int = _DEFAULT_LLAMA_CTX_SIZE
+    ollama_base_url: str = _DEFAULT_OLLAMA_URL
+    ollama_model: str = _DEFAULT_OLLAMA_MODEL
+    ollama_request_timeout: float = _DEFAULT_OLLAMA_TIMEOUT
     glossary_path: str = _DEFAULT_GLOSSARY_PATH
     glossary_top_k: int = _DEFAULT_GLOSSARY_TOP_K
 
@@ -47,8 +58,9 @@ class Settings:
             qdrant_collection=os.getenv("QDRANT_COLLECTION", _DEFAULT_QDRANT_COLLECTION),
             chat_backend=os.getenv("CHAT_BACKEND", _DEFAULT_CHAT_BACKEND),
             openai_chat_model=os.getenv("OPENAI_CHAT_MODEL", _DEFAULT_OPENAI_CHAT_MODEL),
-            llama_model_path=os.getenv("LLAMA_MODEL_PATH"),
-            llama_context_window=int(os.getenv("LLAMA_CONTEXT_WINDOW", _DEFAULT_LLAMA_CTX_SIZE)),
+            ollama_base_url=os.getenv("OLLAMA_BASE_URL", _DEFAULT_OLLAMA_URL),
+            ollama_model=os.getenv("OLLAMA_MODEL", _DEFAULT_OLLAMA_MODEL),
+            ollama_request_timeout=float(os.getenv("OLLAMA_TIMEOUT", _DEFAULT_OLLAMA_TIMEOUT)),
             glossary_path=os.getenv("GLOSSARY_PATH", _DEFAULT_GLOSSARY_PATH),
             glossary_top_k=int(os.getenv("GLOSSARY_TOP_K", _DEFAULT_GLOSSARY_TOP_K)),
         )
@@ -57,13 +69,29 @@ class Settings:
     def is_openai_backend(self) -> bool:
         """Return True when the configured embedding backend is OpenAI."""
 
-        return self.embedding_model == "text-embedding-3-large"
+        return self.embedding_model.strip().lower() == "text-embedding-3-large"
 
     @property
     def is_huggingface_backend(self) -> bool:
         """Return True when the configured embedding backend is a local HuggingFace model."""
 
-        return not self.is_openai_backend
+        return not self.is_openai_backend and not self.is_ollama_embedding_backend
+
+    @property
+    def is_ollama_embedding_backend(self) -> bool:
+        """Return True when embeddings should be generated via an Ollama-hosted model."""
+
+        return self.embedding_model.strip().lower().startswith("ollama:")
+
+    @property
+    def ollama_embedding_model(self) -> str | None:
+        """Return the Ollama embedding model name without the prefix when configured."""
+
+        if not self.is_ollama_embedding_backend:
+            return None
+        _, _, name = self.embedding_model.partition(":")
+        model = name.strip()
+        return model or None
 
     @property
     def required_openai_model(self) -> OpenAIModelName:
@@ -81,10 +109,10 @@ class Settings:
         return self.chat_backend.lower() == "openai"
 
     @property
-    def is_local_chat_backend(self) -> bool:
-        """Return True when the chat backend is configured for a local model."""
+    def is_ollama_chat_backend(self) -> bool:
+        """Return True when the chat backend is configured for an Ollama-hosted model."""
 
-        return self.chat_backend.lower() == "llama"
+        return self.chat_backend.lower() == "ollama"
 
     def qdrant_client_kwargs(self) -> dict[str, Any]:
         """Configuration arguments for instantiating a Qdrant client."""
