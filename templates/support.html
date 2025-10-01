@@ -4,16 +4,168 @@
     <meta charset="utf-8" />
     <title>Support Agent</title>
     <style>
-      body { font-family: sans-serif; margin: 2rem; }
-      h1 { margin-bottom: 0.5rem; }
-      textarea { width: 100%; height: 120px; padding: 0.75rem; }
-      button { margin-top: 1rem; padding: 0.5rem 1rem; }
-      .response { margin-top: 2rem; }
-      .sources { margin-top: 1rem; }
-      .source-item { margin-bottom: 0.75rem; }
-      .definitions { margin-top: 1rem; color: #444; }
-      #status { color: #777; margin-top: 0.5rem; }
-      nav a { margin-right: 1rem; }
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        background: #f5f7fb;
+        color: #1b1f24;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      nav {
+        background: #111827;
+        padding: 1rem 2rem;
+      }
+      nav a {
+        color: #d1d5db;
+        margin-right: 1.5rem;
+        text-decoration: none;
+      }
+      nav a strong {
+        color: #fff;
+      }
+      main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        padding: 2rem 1rem 3rem;
+      }
+      .chat-shell {
+        width: min(840px, 100%);
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      header {
+        padding: 1.5rem 2rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      header h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.75rem;
+      }
+      header p {
+        margin: 0.25rem 0;
+        color: #4b5563;
+      }
+      .chat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem 2rem;
+        background: linear-gradient(180deg, #f9fafb 0%, #eef2ff 100%);
+      }
+      .messages {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .bubble {
+        max-width: 80%;
+        padding: 0.85rem 1rem;
+        border-radius: 16px;
+        position: relative;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
+      }
+      .bubble.user {
+        margin-left: auto;
+        background: #2563eb;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+      }
+      .bubble.assistant {
+        margin-right: auto;
+        background: #fff;
+        border-bottom-left-radius: 4px;
+      }
+      .bubble footer {
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+        color: #4b5563;
+      }
+      .bubble footer h3 {
+        margin: 0 0 0.35rem;
+        font-size: 0.95rem;
+        color: #1f2937;
+      }
+      .bubble footer ul {
+        margin: 0;
+        padding-left: 1.1rem;
+      }
+      .composer {
+        padding: 1.5rem 2rem 1.75rem;
+        border-top: 1px solid #e5e7eb;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .composer textarea {
+        width: 100%;
+        min-height: 110px;
+        resize: vertical;
+        padding: 0.85rem 1rem;
+        border-radius: 12px;
+        border: 1px solid #d1d5db;
+        font-size: 1rem;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+      }
+      .composer textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+      }
+      .composer-tools {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #6b7280;
+        font-size: 0.95rem;
+      }
+      .composer button {
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 999px;
+        padding: 0.6rem 1.8rem;
+        font-size: 1rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+        transition: transform 0.15s ease, box-shadow 0.2s ease;
+      }
+      .composer button:disabled {
+        background: #cbd5f5;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .composer button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28);
+      }
+      .status-line {
+        font-size: 0.9rem;
+        color: #6b7280;
+      }
+      @media (max-width: 640px) {
+        .chat-shell {
+          border-radius: 0;
+          box-shadow: none;
+        }
+        nav { padding: 0.75rem 1.25rem; }
+        .chat-body { padding: 1rem 1.25rem; }
+        .composer { padding: 1rem 1.25rem 1.25rem; }
+      }
     </style>
   </head>
   <body>
@@ -21,79 +173,104 @@
       <a href="/">Search</a>
       <a href="/support"><strong>Support Agent</strong></a>
     </nav>
-    <h1>Support Agent</h1>
-    <p>Ask a question and the assistant will respond with guided troubleshooting steps.</p>
-    <p><small>Glossary entries loaded: {{ glossary_count }}</small></p>
-    <textarea id="query" placeholder="Describe the issue..." required></textarea>
-    <button id="submit">Get Help</button>
-    <div id="status"></div>
-
-    <div class="response" id="response" hidden>
-      <h2>Suggested Resolution</h2>
-      <div id="answer"></div>
-      <div class="definitions" id="definitions"></div>
-      <div class="sources" id="sources"></div>
-    </div>
+    <main>
+      <div class="chat-shell">
+        <header>
+          <h1>Support Agent</h1>
+          <p>Conversational troubleshooting with embedded knowledge and glossary guidance.</p>
+          <p class="status-line">Glossary entries loaded: {{ glossary_count }}</p>
+        </header>
+        <div class="chat-body">
+          <div id="messages" class="messages" aria-live="polite"></div>
+        </div>
+        <div class="composer">
+          <textarea id="query" placeholder="Describe the issue or ask a question..." required></textarea>
+          <div class="composer-tools">
+            <span id="status">Press ⌘⏎ / Ctrl⏎ to send</span>
+            <button id="submit" type="button" aria-label="Send message">Send ▷</button>
+          </div>
+        </div>
+      </div>
+    </main>
 
     <script>
       const button = document.getElementById('submit');
       const statusEl = document.getElementById('status');
       const queryEl = document.getElementById('query');
-      const responseEl = document.getElementById('response');
-      const answerEl = document.getElementById('answer');
-      const definitionsEl = document.getElementById('definitions');
-      const sourcesEl = document.getElementById('sources');
+      const messagesEl = document.getElementById('messages');
       const history = [];
+
+      function appendMessage(role, text, extras = {}) {
+        const bubble = document.createElement('div');
+        bubble.className = `bubble ${role}`;
+        bubble.textContent = text;
+
+        if (role === 'assistant' && (extras.definitions?.length || extras.sources?.length)) {
+          const footer = document.createElement('footer');
+          if (extras.definitions?.length) {
+            const defHeading = document.createElement('h3');
+            defHeading.textContent = 'Definitions';
+            footer.appendChild(defHeading);
+            const list = document.createElement('ul');
+            extras.definitions.forEach((def) => {
+              const item = document.createElement('li');
+              item.textContent = def;
+              list.appendChild(item);
+            });
+            footer.appendChild(list);
+          }
+          if (extras.sources?.length) {
+            const sourceHeading = document.createElement('h3');
+            sourceHeading.textContent = 'Sources';
+            footer.appendChild(sourceHeading);
+            extras.sources.forEach((source) => {
+              const item = document.createElement('div');
+              item.innerHTML = `<strong>${source.title || 'Snippet'}</strong><br />${source.snippet || ''}`;
+              footer.appendChild(item);
+            });
+          }
+          bubble.appendChild(footer);
+        }
+
+        messagesEl.appendChild(bubble);
+        bubble.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
 
       async function submitQuery() {
         const query = queryEl.value.trim();
         if (!query) {
-          statusEl.textContent = 'Please provide a description of the issue.';
+          statusEl.textContent = 'Please enter a question before sending.';
           return;
         }
-        statusEl.textContent = 'Working on it...';
+
+        history.push(`User: ${query}`);
+        appendMessage('user', query);
+        queryEl.value = '';
         button.disabled = true;
+        statusEl.textContent = 'Thinking...';
+
         try {
           const response = await fetch('/support/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query, history })
           });
+
           const data = await response.json();
           if (!response.ok) {
-            throw new Error(data.error || 'Unexpected error');
+            throw new Error(data.error || 'Unexpected error while contacting the assistant');
           }
-          answerEl.textContent = data.message || 'No response generated.';
-          definitionsEl.innerHTML = '';
-          if (data.definitions && data.definitions.length) {
-            const list = document.createElement('ul');
-            data.definitions.forEach((def) => {
-              const li = document.createElement('li');
-              li.textContent = def;
-              list.appendChild(li);
-            });
-            definitionsEl.appendChild(list);
-          }
-          sourcesEl.innerHTML = '';
-          if (data.sources && data.sources.length) {
-            const heading = document.createElement('h3');
-            heading.textContent = 'Sources';
-            sourcesEl.appendChild(heading);
-            data.sources.forEach((source) => {
-              const div = document.createElement('div');
-              div.className = 'source-item';
-              div.innerHTML = `<strong>${source.title || 'Snippet'}</strong><br />${source.snippet || ''}`;
-              sourcesEl.appendChild(div);
-            });
-          }
-          responseEl.hidden = false;
-          history.push(`User: ${query}`);
-          history.push(`Assistant: ${data.message}`);
-          statusEl.textContent = 'Response ready.';
+
+          const message = data.message || 'I could not generate a response at this time.';
+          appendMessage('assistant', message, { definitions: data.definitions, sources: data.sources });
+          history.push(`Assistant: ${message}`);
+          statusEl.textContent = 'Ready for the next question.';
         } catch (error) {
-          statusEl.textContent = `Error: ${error.message}`;
+          appendMessage('assistant', `⚠️ ${error.message}`);
+          statusEl.textContent = 'Encountered an error. Try again.';
         } finally {
           button.disabled = false;
+          queryEl.focus();
         }
       }
 
@@ -101,8 +278,11 @@
       queryEl.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
           submitQuery();
+          event.preventDefault();
         }
       });
+
+      queryEl.focus();
     </script>
   </body>
 </html>
