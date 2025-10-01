@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Iterable, List, Sequence
 
@@ -9,6 +10,9 @@ from .config import Settings
 from .embeddings import EmbeddingService
 from .glossary import Glossary
 from .vector_store import QdrantVectorStore, SearchResult
+
+logger = logging.getLogger(__name__)
+
 
 try:  # pragma: no cover - optional import for Ollama HTTP client
     import httpx
@@ -49,13 +53,34 @@ class SupportAgentService:
 
     def generate(self, query: str, *, conversation: Sequence[str] | None = None) -> SupportAgentResponse:
         conversation = conversation or []
+        logger.info(
+            "support.generate.start backend=%s embedding=%s query=%s",
+            self._settings.chat_backend,
+            self._settings.embedding_model,
+            query,
+        )
         vector = self._embedding.embed_one(query)
-        search_results = self._store.search(vector, limit=self._retrieval_top_k)
+        search_results = list(self._store.search(vector, limit=self._retrieval_top_k))
+        top_titles = [
+            (result.payload or {}).get("title")
+            for result in search_results
+        ]
+        logger.info(
+            "support.generate.matches count=%s titles=%s",
+            len(search_results),
+            top_titles,
+        )
         prompt = self._build_prompt(query, search_results, conversation)
 
         answer = self._invoke_backend(prompt)
         sources = self._format_sources(search_results)
         definitions = self._collect_definitions(query)
+        logger.info(
+            "support.generate.completed backend=%s chars=%s sources=%s",
+            self._settings.chat_backend,
+            len(answer),
+            len(sources),
+        )
         return SupportAgentResponse(message=answer, sources=sources, definitions=definitions)
 
     # Internal helpers -------------------------------------------------
@@ -111,8 +136,10 @@ class SupportAgentService:
 
     def _invoke_backend(self, prompt: str) -> str:
         if self._settings.is_openai_chat_backend:
+            logger.info("support.backend.openai.invoke")
             return self._invoke_openai(prompt)
         if self._settings.is_ollama_chat_backend:
+            logger.info("support.backend.ollama.invoke model=%s", self._settings.ollama_model)
             return self._invoke_ollama(prompt)
         raise RuntimeError(f"Unsupported chat backend: {self._settings.chat_backend}")
 
@@ -136,10 +163,22 @@ class SupportAgentService:
             if getattr(item, "type", "") == "output_text":
                 texts.append(getattr(item, "text", ""))
         if texts:
-            return "\n".join(texts).strip()
+            result = "\n".join(texts).strip()
+            logger.info(
+                "support.backend.openai.success model=%s chars=%s",
+                self._settings.openai_chat_model,
+                len(result),
+            )
+            return result
         # Fallback: inspect content
         if getattr(response, "output_text", None):
-            return str(response.output_text).strip()
+            result = str(response.output_text).strip()
+            logger.info(
+                "support.backend.openai.success model=%s chars=%s fallback=True",
+                self._settings.openai_chat_model,
+                len(result),
+            )
+            return result
         return "I'm sorry, I could not generate a response at this time."
 
     def _invoke_ollama(self, prompt: str) -> str:
@@ -165,13 +204,18 @@ class SupportAgentService:
             response = httpx.post(url, json=payload, timeout=self._settings.ollama_request_timeout)
             response.raise_for_status()
         except Exception as exc:  # pragma: no cover - network errors
+            logger.error("support.backend.ollama.error model=%s error=%s", model, exc)
             raise RuntimeError(f"Ollama request failed: {exc}") from exc
 
         data = response.json()
         message = data.get("message") or {}
         content = message.get("content") or data.get("response", "")
         text = str(content).strip() if content else ""
-        return text or "I'm sorry, I could not generate a response at this time."
+        if not text:
+            logger.warning("support.backend.ollama.empty_response model=%s", model)
+            return "I'm sorry, I could not generate a response at this time."
+        logger.info("support.backend.ollama.success model=%s chars=%s", model, len(text))
+        return text
 
 
 __all__ = ["SupportAgentService", "SupportAgentResponse"]
