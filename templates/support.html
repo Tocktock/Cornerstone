@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Support Agent</title>
+    <style>
+      body { font-family: sans-serif; margin: 2rem; }
+      h1 { margin-bottom: 0.5rem; }
+      textarea { width: 100%; height: 120px; padding: 0.75rem; }
+      button { margin-top: 1rem; padding: 0.5rem 1rem; }
+      .response { margin-top: 2rem; }
+      .sources { margin-top: 1rem; }
+      .source-item { margin-bottom: 0.75rem; }
+      .definitions { margin-top: 1rem; color: #444; }
+      #status { color: #777; margin-top: 0.5rem; }
+      nav a { margin-right: 1rem; }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="/">Search</a>
+      <a href="/support"><strong>Support Agent</strong></a>
+    </nav>
+    <h1>Support Agent</h1>
+    <p>Ask a question and the assistant will respond with guided troubleshooting steps.</p>
+    <p><small>Glossary entries loaded: {{ glossary_count }}</small></p>
+    <textarea id="query" placeholder="Describe the issue..." required></textarea>
+    <button id="submit">Get Help</button>
+    <div id="status"></div>
+
+    <div class="response" id="response" hidden>
+      <h2>Suggested Resolution</h2>
+      <div id="answer"></div>
+      <div class="definitions" id="definitions"></div>
+      <div class="sources" id="sources"></div>
+    </div>
+
+    <script>
+      const button = document.getElementById('submit');
+      const statusEl = document.getElementById('status');
+      const queryEl = document.getElementById('query');
+      const responseEl = document.getElementById('response');
+      const answerEl = document.getElementById('answer');
+      const definitionsEl = document.getElementById('definitions');
+      const sourcesEl = document.getElementById('sources');
+      const history = [];
+
+      async function submitQuery() {
+        const query = queryEl.value.trim();
+        if (!query) {
+          statusEl.textContent = 'Please provide a description of the issue.';
+          return;
+        }
+        statusEl.textContent = 'Working on it...';
+        button.disabled = true;
+        try {
+          const response = await fetch('/support/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, history })
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || 'Unexpected error');
+          }
+          answerEl.textContent = data.message || 'No response generated.';
+          definitionsEl.innerHTML = '';
+          if (data.definitions && data.definitions.length) {
+            const list = document.createElement('ul');
+            data.definitions.forEach((def) => {
+              const li = document.createElement('li');
+              li.textContent = def;
+              list.appendChild(li);
+            });
+            definitionsEl.appendChild(list);
+          }
+          sourcesEl.innerHTML = '';
+          if (data.sources && data.sources.length) {
+            const heading = document.createElement('h3');
+            heading.textContent = 'Sources';
+            sourcesEl.appendChild(heading);
+            data.sources.forEach((source) => {
+              const div = document.createElement('div');
+              div.className = 'source-item';
+              div.innerHTML = `<strong>${source.title || 'Snippet'}</strong><br />${source.snippet || ''}`;
+              sourcesEl.appendChild(div);
+            });
+          }
+          responseEl.hidden = false;
+          history.push(`User: ${query}`);
+          history.push(`Assistant: ${data.message}`);
+          statusEl.textContent = 'Response ready.';
+        } catch (error) {
+          statusEl.textContent = `Error: ${error.message}`;
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      button.addEventListener('click', submitQuery);
+      queryEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+          submitQuery();
+        }
+      });
+    </script>
+  </body>
+</html>

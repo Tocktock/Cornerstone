@@ -13,6 +13,7 @@ __all__ = [
     "VectorRecord",
     "SearchResult",
     "create_app",
+    "SupportAgentService",
 ]
 
 
@@ -25,4 +26,8 @@ def __getattr__(name: str):  # pragma: no cover - small helper
         from .app import create_app
 
         return create_app
+    if name == "SupportAgentService":
+        from .chat import SupportAgentService
+
+        return SupportAgentService
     raise AttributeError(f"module 'cornerstone' has no attribute {name}")

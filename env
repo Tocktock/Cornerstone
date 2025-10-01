@@ -1,0 +1,23 @@
+# Cornerstone environment example
+# Copy to .env.local or export variables as needed before running the app/tests.
+
+# Embedding configuration
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+OPENAI_API_KEY=changeme
+
+# Chat backend selection and defaults
+CHAT_BACKEND=openai
+OPENAI_CHAT_MODEL=gpt-5-mini
+
+# Qdrant vector store
+QDRANT_URL=http://localhost:6333
+QDRANT_API_KEY=
+QDRANT_COLLECTION=embeddings
+
+# Local LLaMA backend (optional)
+LLAMA_MODEL_PATH=
+LLAMA_CONTEXT_WINDOW=4096
+
+# Glossary controls
+GLOSSARY_PATH=glossary/glossary.yaml
+GLOSSARY_TOP_K=3
