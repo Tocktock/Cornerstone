@@ -17,6 +17,7 @@ from .config import Settings
 from .embeddings import EmbeddingService
 from .glossary import Glossary, load_glossary
 from .ingestion import DocumentIngestor, ProjectVectorStoreManager
+from .keywords import KeywordLLMFilter, build_excerpt, extract_keyword_candidates
 from .projects import Project, ProjectStore
 from .vector_store import QdrantVectorStore, SearchResult
 
@@ -24,6 +25,15 @@ _MIN_RESULT_SCORE = 1e-6
 _TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "templates"
 
 logger = logging.getLogger(__name__)
+if logger.level == logging.NOTSET:
+    logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+logger.propagate = False
 
 
 class ApplicationState:
@@ -120,6 +130,9 @@ def create_app(
 
     def get_embedding_service(request: Request) -> EmbeddingService:
         return get_state(request).embedding_service
+
+    def get_settings_dependency(request: Request) -> Settings:
+        return get_state(request).settings
 
     def get_project_store(request: Request) -> ProjectStore:
         return get_state(request).project_store
@@ -284,6 +297,143 @@ def create_app(
             "documents": documents,
         }
         return templates.TemplateResponse("knowledge.html", context)
+
+    @app.get("/keywords", response_class=HTMLResponse)
+    async def keywords_dashboard(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
+        project_store = get_project_store(request)
+        projects = project_store.list_projects()
+        selected_project = request.query_params.get("project_id") or _default_project_id(project_store)
+        context = {
+            "request": request,
+            "projects": projects,
+            "selected_project": selected_project,
+        }
+        return templates.TemplateResponse("keywords.html", context)
+
+    @app.get("/keywords/{project_id}/candidates", response_class=JSONResponse)
+    async def project_keywords(
+        project_id: str,
+        project_store: ProjectStore = Depends(get_project_store),
+        store_manager: ProjectVectorStoreManager = Depends(get_store_manager),
+        settings: Settings = Depends(get_settings_dependency),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        payloads = list(store_manager.iter_project_payloads(project.id))
+        texts = [payload.get("text", "") for payload in payloads if payload.get("text")]
+        keywords = extract_keyword_candidates(texts)
+
+        context_snippets: list[str] = []
+        for payload in payloads:
+            snippet = str(payload.get("text", "")).strip()
+            if not snippet:
+                continue
+            context_snippets.append(snippet[:400])
+            if len(context_snippets) >= 5:
+                break
+
+        llm_filter = KeywordLLMFilter(settings)
+        original_count = len(keywords)
+        debug_payload: dict[str, object] = {}
+        if llm_filter.enabled:
+            keywords = llm_filter.filter_keywords(keywords, context_snippets)
+            logger.info(
+                "keyword.llm.apply backend=%s project=%s before=%s after=%s",
+                llm_filter.backend,
+                project.id,
+                original_count,
+                len(keywords),
+            )
+            debug_payload = llm_filter.debug_payload()
+        else:
+            logger.info(
+                "keyword.llm.bypass backend=%s project=%s candidate_count=%s",
+                llm_filter.backend,
+                project.id,
+                original_count,
+            )
+            debug_payload = llm_filter.debug_payload()
+            debug_payload.setdefault("candidate_count", original_count)
+
+        logger.info(
+            "keyword.llm.summary project=%s backend=%s details=%s",
+            project.id,
+            debug_payload.get("backend"),
+            debug_payload,
+        )
+
+        data = {
+            "projectId": project.id,
+            "keywords": [
+                {
+                    "term": item.term,
+                    "count": item.count,
+                    "core": item.is_core,
+                    "generated": item.generated,
+                    "reason": item.reason,
+                    "source": item.source,
+                }
+                for item in keywords
+            ],
+            "filter": debug_payload,
+        }
+        return JSONResponse(data)
+
+    @app.get("/keywords/{project_id}/definition", response_class=JSONResponse)
+    async def keyword_definition(
+        project_id: str,
+        term: str,
+        project_store: ProjectStore = Depends(get_project_store),
+        store_manager: ProjectVectorStoreManager = Depends(get_store_manager),
+        embedding: EmbeddingService = Depends(get_embedding_service),
+        glossary: Glossary = Depends(get_glossary),
+        settings: Settings = Depends(get_settings_dependency),
+    ) -> JSONResponse:
+        cleaned = term.strip()
+        if not cleaned:
+            raise HTTPException(status_code=400, detail="Term is required")
+        project = _resolve_project(project_store, project_id)
+        vector = embedding.embed_one(cleaned)
+        store = store_manager.get_store(project.id)
+        hits = store.search(vector, limit=5, with_payload=True)
+        candidates: list[dict[str, object]] = []
+        context_snippets: list[str] = []
+        for hit in hits:
+            payload = hit.payload or {}
+            snippet = payload.get("text")
+            if not snippet:
+                continue
+            excerpt = build_excerpt(snippet)
+            context_snippets.append(snippet)
+            candidates.append(
+                {
+                    "snippet": snippet,
+                    "excerpt": excerpt,
+                    "score": float(hit.score),
+                    "doc_id": payload.get("doc_id"),
+                    "chunk_index": payload.get("chunk_index"),
+                    "source": payload.get("source"),
+                }
+            )
+        definitions = [
+            f"{entry.term}: {entry.definition}"
+            for entry in glossary.top_matches(cleaned, settings.glossary_top_k)
+        ]
+
+        llm_filter = KeywordLLMFilter(settings)
+        if not definitions and llm_filter.enabled:
+            definitions.extend(llm_filter.generate_definitions(cleaned, context_snippets[:3]))
+
+        if not definitions and context_snippets:
+            definitions.append(build_excerpt(context_snippets[0], max_chars=200))
+
+        return JSONResponse(
+            {
+                "projectId": project.id,
+                "term": cleaned,
+                "candidates": candidates,
+                "definitions": definitions,
+            }
+        )
 
     @app.post("/knowledge/projects", response_class=RedirectResponse)
     async def create_project(

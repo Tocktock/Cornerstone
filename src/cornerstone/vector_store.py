@@ -48,6 +48,31 @@ class QdrantVectorStore:
         self._vector_size = vector_size
         self._distance = distance
 
+    def iter_payloads(
+        self,
+        *,
+        scroll_filter: models.Filter | None = None,
+        batch_size: int = 256,
+    ) -> Iterable[dict[str, Any]]:
+        """Yield payload dictionaries for points that match the optional filter."""
+
+        offset = None
+        while True:
+            points, offset = self._client.scroll(
+                collection_name=self._collection_name,
+                scroll_filter=scroll_filter,
+                with_payload=True,
+                limit=batch_size,
+                offset=offset,
+            )
+            for point in points:
+                payload = point.payload or {}
+                if not payload:
+                    continue
+                yield dict(payload)
+            if offset is None:
+                break
+
     @classmethod
     def from_settings(cls, settings: Settings, *, vector_size: int) -> "QdrantVectorStore":
         """Instantiate the store using application settings."""
