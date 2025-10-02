@@ -33,6 +33,7 @@
       <a href="/">Search</a>
       <a href="/support">Support Agent</a>
       <a href="/knowledge"><strong>Knowledge Base</strong></a>
+      <a href="/keywords">Keyword Explorer</a>
     </nav>
     <main>
       <aside>
@@ -55,7 +56,7 @@
         </form>
       </aside>
 
-      <section>
+      <section data-project-id="{{ selected_project }}">
         <h1>Documents</h1>
         <p>Upload documents to enrich <strong>{{ project_name }}</strong>.</p>
         <form method="post" action="/knowledge/upload" enctype="multipart/form-data">

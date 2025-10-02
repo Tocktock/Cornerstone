@@ -80,6 +80,15 @@ class ProjectVectorStoreManager:
         result = store.delete_by_filter(flt)
         return result.status == models.UpdateStatus.COMPLETED
 
+    def iter_project_payloads(self, project_id: str, *, batch_size: int = 256):
+        """Yield payload dictionaries for all vectors stored for a project."""
+
+        store = self.get_store(project_id)
+        flt = models.Filter(
+            must=[models.FieldCondition(key="project_id", match=models.MatchValue(value=project_id))]
+        )
+        yield from store.iter_payloads(scroll_filter=flt, batch_size=batch_size)
+
 
 class DocumentIngestor:
     """Convert uploaded documents into embeddings stored per project."""

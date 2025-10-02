@@ -85,8 +85,14 @@ def fastapi_app() -> TestClient:
 
 def test_index_route_renders_form(fastapi_app: TestClient) -> None:
     response = fastapi_app.get("/")
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     assert "Cornerstone Semantic Search" in response.text
+
+
+def test_keywords_page_renders(fastapi_app: TestClient) -> None:
+    response = fastapi_app.get("/keywords")
+    assert response.status_code == 200, response.text
+    assert "Keyword Explorer" in response.text
 
 
 def test_search_route_returns_results(fastapi_app: TestClient) -> None:
@@ -94,7 +100,7 @@ def test_search_route_returns_results(fastapi_app: TestClient) -> None:
         "/search",
         data={"query": "Alpha", "project_id": fastapi_app.default_project_id},
     )
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     assert "Alpha document" in response.text
     assert "Score:" in response.text
 
@@ -104,5 +110,37 @@ def test_search_route_handles_no_results(fastapi_app: TestClient) -> None:
         "/search",
         data={"query": "Gamma", "project_id": fastapi_app.default_project_id},
     )
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     assert "No results found for this project." in response.text
+
+
+def test_keywords_endpoint_returns_candidates(fastapi_app: TestClient) -> None:
+    response = fastapi_app.get(f"/keywords/{fastapi_app.default_project_id}/candidates")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    terms = {item["term"].lower() for item in data.get("keywords", [])}
+    assert "alpha" in terms
+    assert "beta" in terms
+    first = data["keywords"][0]
+    assert "generated" in first
+    assert "reason" in first
+    assert "source" in first
+    filter_info = data.get("filter")
+    assert filter_info is not None
+    assert filter_info.get("backend") in {None, "openai", "ollama"}
+    assert "status" in filter_info
+
+
+def test_keyword_definition_endpoint_provides_snippets(fastapi_app: TestClient) -> None:
+    response = fastapi_app.get(
+        f"/keywords/{fastapi_app.default_project_id}/definition",
+        params={"term": "Alpha"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["term"].lower() == "alpha"
+    assert data["candidates"], "Expected candidate definitions for Alpha"
+    first_candidate = data["candidates"][0]
+    assert "excerpt" in first_candidate
+    assert len(first_candidate["excerpt"]) <= len(first_candidate["snippet"])
+    assert any("Alpha" in result["snippet"] for result in data["candidates"])
