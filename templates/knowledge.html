@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Knowledge Base Management</title>
+    <style>
+      body { font-family: sans-serif; margin: 0; background: #f3f4f6; color: #111827; }
+      nav { background: #111827; padding: 1rem 2rem; }
+      nav a { color: #d1d5db; margin-right: 1.5rem; text-decoration: none; }
+      nav a strong { color: #fff; }
+      main { max-width: 980px; margin: 2.5rem auto; display: grid; gap: 1.5rem; grid-template-columns: 1fr 1.2fr; }
+      section, aside { background: #fff; border-radius: 16px; padding: 1.75rem 2rem; box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12); }
+      h1 { margin-top: 0; }
+      form { display: grid; gap: 0.75rem; margin-top: 1rem; }
+      input[type="text"], textarea, select { padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #d1d5db; font-size: 1rem; }
+      textarea { min-height: 90px; resize: vertical; }
+      button { padding: 0.65rem 1.5rem; border-radius: 999px; border: none; background: #2563eb; color: #fff; font-size: 1rem; box-shadow: 0 12px 28px rgba(37,99,235,0.18); cursor: pointer; justify-self: start; }
+      button:hover { box-shadow: 0 16px 32px rgba(37,99,235,0.24); }
+      table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+      th, td { text-align: left; padding: 0.65rem 0.5rem; border-bottom: 1px solid #e5e7eb; font-size: 0.96rem; }
+      th { color: #4b5563; font-weight: 600; }
+      .empty { margin-top: 1.5rem; color: #6b7280; }
+      .project-list { list-style: none; padding: 0; margin: 1rem 0 0; }
+      .project-list li { margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: center; }
+      .project-list a { color: #2563eb; text-decoration: none; font-weight: 600; }
+      @media (max-width: 900px) {
+        main { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="/">Search</a>
+      <a href="/support">Support Agent</a>
+      <a href="/knowledge"><strong>Knowledge Base</strong></a>
+    </nav>
+    <main>
+      <aside>
+        <h1>Projects</h1>
+        <p>Manage knowledge bases and switch the active project.</p>
+        <ul class="project-list">
+          {% for project in projects %}
+            <li>
+              <a href="/knowledge?project_id={{ project.id }}" {% if project.id == selected_project %}style="color:#1d4ed8"{% endif %}>{{ project.name }}</a>
+              <span style="color:#6b7280; font-size:0.85rem;">{{ project.created_at.split('T')[0] }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <h2 style="margin-top:2rem;">Create Project</h2>
+        <form method="post" action="/knowledge/projects">
+          <input type="text" name="name" placeholder="Project name" required />
+          <textarea name="description" placeholder="Description (optional)"></textarea>
+          <button type="submit">Create</button>
+        </form>
+      </aside>
+
+      <section>
+        <h1>Documents</h1>
+        <p>Upload documents to enrich <strong>{{ project_name }}</strong>.</p>
+        <form method="post" action="/knowledge/upload" enctype="multipart/form-data">
+          <input type="hidden" name="project_id" value="{{ selected_project }}" />
+          <input type="file" name="file" accept=".txt,.md,.markdown,.pdf" required />
+          <button type="submit">Upload & Ingest</button>
+        </form>
+        <form method="post" action="/knowledge/cleanup" style="margin-top: 0.75rem;">
+          <input type="hidden" name="project_id" value="{{ selected_project }}" />
+          <button type="submit" style="background:#1f2937; color:#fff; border:none; padding:0.55rem 1.4rem; border-radius:999px; cursor:pointer; box-shadow:0 10px 22px rgba(17,24,39,0.18);">Clear Embedded Data</button>
+        </form>
+        <p style="color:#6b7280; font-size:0.85rem; margin-top:0.35rem;">Removes all vectors and document records for this project.</p>
+
+        {% if documents %}
+          <table>
+            <thead>
+              <tr>
+                <th>Filename</th>
+                <th>Chunks</th>
+                <th>Size</th>
+                <th>Uploaded</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for doc in documents %}
+                <tr>
+                  <td>{{ doc.filename }}</td>
+                  <td>{{ doc.chunk_count }}</td>
+                  <td>{% if doc.size_bytes %}{{ (doc.size_bytes / 1024)|round(1) }} KB{% else %}-{% endif %}</td>
+                  <td>{{ doc.created_at.split('T')[0] }}</td>
+                  <td style="text-align:right;">
+                    <form method="post" action="/knowledge/delete" style="display:inline;">
+                      <input type="hidden" name="project_id" value="{{ selected_project }}" />
+                      <input type="hidden" name="doc_id" value="{{ doc.id }}" />
+                      <button type="submit" style="background:#dc2626; color:#fff; border:none; padding:0.4rem 1rem; border-radius:999px; cursor:pointer; box-shadow:0 8px 18px rgba(220,38,38,0.25);">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="empty">No documents ingested for this project yet.</p>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>

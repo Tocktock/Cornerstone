@@ -4,47 +4,63 @@
     <meta charset="utf-8" />
     <title>Cornerstone Search</title>
     <style>
-      body { font-family: sans-serif; margin: 2rem; }
-      form { display: flex; gap: 0.5rem; }
-      input[type="text"] { flex: 1; padding: 0.5rem; }
-      button { padding: 0.5rem 1rem; }
-      ul { list-style: none; padding: 0; }
-      li { margin: 0.75rem 0; }
-      .score { color: #555; font-size: 0.9rem; }
-      .empty { margin-top: 1.5rem; color: #777; }
+      body { font-family: sans-serif; margin: 0; background: #f3f4f6; color: #111827; }
+      nav { background: #111827; padding: 1rem 2rem; }
+      nav a { color: #d1d5db; margin-right: 1.5rem; text-decoration: none; }
+      nav a strong { color: #fff; }
+      main { max-width: 900px; margin: 2.5rem auto; background: #fff; border-radius: 16px; padding: 2rem 2.5rem; box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12); }
+      h1 { margin-top: 0; }
+      form { display: flex; gap: 0.75rem; align-items: center; margin-top: 1.5rem; }
+      input[type="text"] { flex: 1; padding: 0.65rem 0.9rem; border-radius: 10px; border: 1px solid #d1d5db; font-size: 1rem; }
+      select { padding: 0.65rem 0.9rem; border-radius: 10px; border: 1px solid #d1d5db; font-size: 1rem; }
+      button { padding: 0.65rem 1.5rem; border-radius: 999px; border: none; background: #2563eb; color: #fff; font-size: 1rem; box-shadow: 0 10px 25px rgba(37,99,235,0.2); cursor: pointer; }
+      button:hover { box-shadow: 0 14px 30px rgba(37,99,235,0.28); }
+      ul { list-style: none; padding: 0; margin: 1.5rem 0 0; }
+      li { margin: 0 0 1rem; padding: 1rem 1.25rem; border-radius: 12px; background: #f9fafb; border: 1px solid #e5e7eb; }
+      .score { color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem; }
+      .empty { margin-top: 1.5rem; color: #6b7280; }
     </style>
   </head>
   <body>
     <nav>
       <a href="/"><strong>Search</strong></a>
       <a href="/support">Support Agent</a>
+      <a href="/knowledge">Knowledge Base</a>
     </nav>
-    <h1>Cornerstone Semantic Search</h1>
-    <form method="post" action="/search">
-      <input
-        type="text"
-        name="query"
-        placeholder="Enter a query..."
-        value="{{ query | default('') }}"
-        required
-      />
-      <button type="submit">Search</button>
-    </form>
-
-    {% if results is defined %}
-      {% if results %}
-        <h2>Results</h2>
-        <ul>
-          {% for item in results %}
-            <li>
-              <div>{{ item.payload.get("text", item.payload) }}</div>
-              <div class="score">Score: {{ item.score }}</div>
-            </li>
+    <main>
+      <h1>Cornerstone Semantic Search</h1>
+      <p>Search across project-specific knowledge bases with embedded vectors.</p>
+      <form method="post" action="/search">
+        <select name="project_id" aria-label="Select project">
+          {% for project in projects %}
+            <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>{{ project.name }}</option>
           {% endfor %}
-        </ul>
-      {% else %}
-        <p class="empty">No results found.</p>
+        </select>
+        <input
+          type="text"
+          name="query"
+          placeholder="Enter a query..."
+          value="{{ query | default('') }}"
+          required
+        />
+        <button type="submit">Search</button>
+      </form>
+
+      {% if results is defined %}
+        {% if results %}
+          <h2>Results</h2>
+          <ul>
+            {% for item in results %}
+              <li>
+                <div>{{ item.payload.get("text", item.payload) }}</div>
+                <div class="score">Score: {{ item.score }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="empty">No results found for this project.</p>
+        {% endif %}
       {% endif %}
-    {% endif %}
+    </main>
   </body>
 </html>

@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 from uuid import uuid4
 
 from datasets import load_dataset
+from qdrant_client import QdrantClient
 
-from cornerstone import EmbeddingService, QdrantVectorStore, Settings, VectorRecord
+from cornerstone import EmbeddingService, Settings, VectorRecord
+from cornerstone.vector_store import QdrantVectorStore
+from cornerstone.projects import ProjectStore
 
 
-def main(limit: int, collection_action: str) -> None:
+def main(limit: int, collection_action: str, project_name: str | None) -> None:
     settings = Settings.from_env()
     print(
         "[seed] Using embedding backend '",
@@ -22,7 +26,18 @@ def main(limit: int, collection_action: str) -> None:
     )
     embedding = EmbeddingService(settings)
     print(f"[seed] Embedding dimension resolved to {embedding.dimension}.")
-    store = QdrantVectorStore.from_settings(settings, vector_size=embedding.dimension)
+
+    project_store = ProjectStore(Path(settings.data_dir).resolve(), default_project_name=settings.default_project_name)
+    project = resolve_project(project_store, project_name)
+    print(f"[seed] Target project: {project.name} (id={project.id}).")
+
+    client = QdrantClient(**settings.qdrant_client_kwargs())
+    collection_name = settings.project_collection_name(project.id)
+    store = QdrantVectorStore(
+        client=client,
+        collection_name=collection_name,
+        vector_size=embedding.dimension,
+    )
 
     if collection_action == "recreate":
         print("[seed] Recreating collection before ingesting data.")
@@ -56,6 +71,7 @@ def main(limit: int, collection_action: str) -> None:
                 payload={
                     "text": text,
                     "label": int(row["label"]),
+                    "project_id": project.id,
                 },
             )
         )
@@ -63,6 +79,18 @@ def main(limit: int, collection_action: str) -> None:
     print(f"[seed] Upserting {len(records)} vectors to Qdrant...")
     store.upsert(records)
     print(f"[seed] Seeded {len(records)} AG News entries.")
+
+
+def resolve_project(project_store: ProjectStore, project_name: str | None):
+    if project_name:
+        project = project_store.get_project(project_name) or project_store.find_by_name(project_name)
+        if project:
+            return project
+        return project_store.create_project(project_name, "Created via seed script")
+    projects = project_store.list_projects()
+    if not projects:
+        raise RuntimeError("No projects configured")
+    return projects[0]
 
 
 if __name__ == "__main__":
@@ -74,5 +102,11 @@ if __name__ == "__main__":
         default="ensure",
         help="Whether to recreate the collection before ingesting",
     )
+    parser.add_argument(
+        "--project",
+        type=str,
+        default=None,
+        help="Project name or identifier to ingest into (default: first project)",
+    )
     args = parser.parse_args()
-    main(limit=args.limit, collection_action=args.collection_action)
+    main(limit=args.limit, collection_action=args.collection_action, project_name=args.project)

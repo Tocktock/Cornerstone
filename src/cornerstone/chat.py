@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence
+import json
+from typing import Iterable, Iterator, List, Sequence, Tuple
 
 from .config import Settings
 from .embeddings import EmbeddingService
@@ -32,6 +33,15 @@ class SupportAgentResponse:
     definitions: list[str]
 
 
+@dataclass(slots=True)
+class SupportAgentContext:
+    """Precomputed retrieval and glossary context for an agent response."""
+
+    prompt: str
+    sources: list[dict[str, str]]
+    definitions: list[str]
+
+
 class SupportAgentService:
     """Generate support-oriented answers using retrieval augmented generation."""
 
@@ -39,51 +49,79 @@ class SupportAgentService:
         self,
         settings: Settings,
         embedding_service: EmbeddingService,
-        vector_store: QdrantVectorStore,
+        store_manager,
         glossary: Glossary,
         *,
         retrieval_top_k: int = 3,
     ) -> None:
         self._settings = settings
         self._embedding = embedding_service
-        self._store = vector_store
+        self._stores = store_manager
         self._glossary = glossary
         self._retrieval_top_k = retrieval_top_k
         self._openai_client: OpenAI | None = None
 
-    def generate(self, query: str, *, conversation: Sequence[str] | None = None) -> SupportAgentResponse:
-        conversation = conversation or []
-        logger.info(
-            "support.generate.start backend=%s embedding=%s query=%s",
-            self._settings.chat_backend,
-            self._settings.embedding_model,
-            query,
-        )
-        vector = self._embedding.embed_one(query)
-        search_results = list(self._store.search(vector, limit=self._retrieval_top_k))
-        top_titles = [
-            (result.payload or {}).get("title")
-            for result in search_results
-        ]
-        logger.info(
-            "support.generate.matches count=%s titles=%s",
-            len(search_results),
-            top_titles,
-        )
-        prompt = self._build_prompt(query, search_results, conversation)
-
-        answer = self._invoke_backend(prompt)
-        sources = self._format_sources(search_results)
-        definitions = self._collect_definitions(query)
+    def generate(
+        self,
+        project_id: str,
+        query: str,
+        *,
+        conversation: Sequence[str] | None = None,
+    ) -> SupportAgentResponse:
+        context, _ = self._build_context(project_id, query, conversation)
+        answer = self._invoke_backend(context.prompt)
         logger.info(
             "support.generate.completed backend=%s chars=%s sources=%s",
             self._settings.chat_backend,
             len(answer),
-            len(sources),
+            len(context.sources),
         )
-        return SupportAgentResponse(message=answer, sources=sources, definitions=definitions)
+        return SupportAgentResponse(message=answer, sources=context.sources, definitions=context.definitions)
+
+    def stream_generate(
+        self,
+        project_id: str,
+        query: str,
+        *,
+        conversation: Sequence[str] | None = None,
+    ) -> Tuple[SupportAgentContext, Iterable[str]]:
+        """Stream a response for the given query, yielding incremental text deltas."""
+
+        context, _ = self._build_context(project_id, query, conversation)
+        stream = self._stream_backend(context.prompt)
+        return context, stream
 
     # Internal helpers -------------------------------------------------
+
+    def _build_context(
+        self,
+        project_id: str,
+        query: str,
+        conversation: Sequence[str] | None,
+    ) -> Tuple[SupportAgentContext, list[SearchResult]]:
+        history = list(conversation or [])
+        logger.info(
+            "support.generate.start backend=%s embedding=%s project=%s query=%s",
+            self._settings.chat_backend,
+            self._settings.embedding_model,
+            project_id,
+            query,
+        )
+        vector = self._embedding.embed_one(query)
+        store = self._stores.get_store(project_id)
+        search_results = list(store.search(vector, limit=self._retrieval_top_k))
+        top_titles = [(result.payload or {}).get("title") for result in search_results]
+        logger.info(
+            "support.generate.matches project=%s count=%s titles=%s",
+            project_id,
+            len(search_results),
+            top_titles,
+        )
+        sources = self._format_sources(search_results)
+        definitions = self._collect_definitions(query)
+        prompt = self._build_prompt(query, search_results, history)
+        context = SupportAgentContext(prompt=prompt, sources=sources, definitions=definitions)
+        return context, search_results
 
     def _build_prompt(
         self,
@@ -134,6 +172,19 @@ class SupportAgentService:
             formatted.append({"title": title, "snippet": text})
         return formatted
 
+    def _stream_backend(self, prompt: str) -> Iterable[str]:
+        if self._settings.is_openai_chat_backend:
+            logger.info("support.backend.openai.stream")
+            return self._stream_openai(prompt)
+        if self._settings.is_ollama_chat_backend:
+            logger.info("support.backend.ollama.stream model=%s", self._settings.ollama_model)
+            return self._stream_ollama(prompt)
+
+        def generator() -> Iterator[str]:
+            yield self._invoke_backend(prompt)
+
+        return generator()
+
     def _invoke_backend(self, prompt: str) -> str:
         if self._settings.is_openai_chat_backend:
             logger.info("support.backend.openai.invoke")
@@ -144,14 +195,9 @@ class SupportAgentService:
         raise RuntimeError(f"Unsupported chat backend: {self._settings.chat_backend}")
 
     def _invoke_openai(self, prompt: str) -> str:
-        if OpenAI is None:  # pragma: no cover
-            raise RuntimeError("openai package is not available")
-        if self._openai_client is None:
-            if not self._settings.openai_api_key:
-                raise RuntimeError("OPENAI_API_KEY must be set for the OpenAI chat backend")
-            self._openai_client = OpenAI(api_key=self._settings.openai_api_key)
+        client = self._get_openai_client()
 
-        response = self._openai_client.responses.create(
+        response = client.responses.create(
             model=self._settings.openai_chat_model,
             input=[
                 {"role": "system", "content": "You are an empathetic technical support agent."},
@@ -167,7 +213,7 @@ class SupportAgentService:
             logger.info(
                 "support.backend.openai.success model=%s chars=%s",
                 self._settings.openai_chat_model,
-                len(result),
+            len(result),
             )
             return result
         # Fallback: inspect content
@@ -217,5 +263,75 @@ class SupportAgentService:
         logger.info("support.backend.ollama.success model=%s chars=%s", model, len(text))
         return text
 
+    def _get_openai_client(self) -> OpenAI:
+        if OpenAI is None:  # pragma: no cover
+            raise RuntimeError("openai package is not available")
+        if self._openai_client is None:
+            if not self._settings.openai_api_key:
+                raise RuntimeError("OPENAI_API_KEY must be set for the OpenAI chat backend")
+            self._openai_client = OpenAI(api_key=self._settings.openai_api_key)
+        return self._openai_client
 
-__all__ = ["SupportAgentService", "SupportAgentResponse"]
+    def _stream_openai(self, prompt: str) -> Iterable[str]:
+        client = self._get_openai_client()
+
+        def generator() -> Iterator[str]:
+            with client.responses.stream(
+                model=self._settings.openai_chat_model,
+                input=[
+                    {"role": "system", "content": "You are an empathetic technical support agent."},
+                    {"role": "user", "content": prompt},
+                ],
+            ) as stream:
+                for event in stream:
+                    if getattr(event, "type", "") == "response.output_text.delta":
+                        delta = getattr(event, "delta", "")
+                        if delta:
+                            yield str(delta)
+                stream.get_final_response()
+
+        return generator()
+
+    def _stream_ollama(self, prompt: str) -> Iterable[str]:
+        if httpx is None:  # pragma: no cover
+            raise RuntimeError("httpx must be installed for the Ollama chat backend")
+
+        model = (self._settings.ollama_model or "").strip()
+        if not model:
+            raise RuntimeError("OLLAMA_MODEL must be set when using the Ollama chat backend")
+
+        base_url = self._settings.ollama_base_url.rstrip("/")
+        url = f"{base_url}/api/chat"
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": "You are an empathetic technical support agent."},
+                {"role": "user", "content": prompt},
+            ],
+            "stream": True,
+        }
+
+        def generator() -> Iterator[str]:
+            try:
+                with httpx.stream("POST", url, json=payload, timeout=self._settings.ollama_request_timeout) as response:
+                    response.raise_for_status()
+                    for line in response.iter_lines():
+                        if not line:
+                            continue
+                        try:
+                            data = json.loads(line)
+                        except json.JSONDecodeError:  # pragma: no cover - malformed chunk
+                            logger.debug("support.backend.ollama.stream.decode_error line=%s", line)
+                            continue
+                        message = data.get("message") or {}
+                        content = message.get("content") or data.get("response", "")
+                        if content:
+                            yield str(content)
+            except Exception as exc:  # pragma: no cover - network errors
+                logger.error("support.backend.ollama.stream.error model=%s error=%s", model, exc)
+                raise RuntimeError(f"Ollama streaming request failed: {exc}") from exc
+
+        return generator()
+
+
+__all__ = ["SupportAgentService", "SupportAgentResponse", "SupportAgentContext"]
