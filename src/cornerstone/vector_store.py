@@ -63,6 +63,10 @@ class QdrantVectorStore:
     def vector_size(self) -> int:
         return self._vector_size
 
+    @property
+    def distance(self) -> models.Distance:
+        return self._distance
+
     def ensure_collection(self, *, force_recreate: bool = False) -> None:
         """Ensure the Qdrant collection exists with the expected vector size."""
 
@@ -167,4 +171,12 @@ class QdrantVectorStore:
         self._client.delete(
             collection_name=self._collection_name,
             points_selector=models.PointIdsList(points=id_list),
+        )
+
+    def delete_by_filter(self, filter: models.Filter) -> models.UpdateResult:
+        """Remove vectors matching the provided Qdrant filter."""
+
+        return self._client.delete(
+            collection_name=self._collection_name,
+            points_selector=models.FilterSelector(filter=filter),
         )

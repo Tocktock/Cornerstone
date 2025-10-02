@@ -72,8 +72,10 @@
         border-radius: 16px;
         position: relative;
         line-height: 1.5;
-        white-space: pre-wrap;
         box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
+      }
+      .bubble .content {
+        white-space: pre-wrap;
       }
       .bubble.user {
         margin-left: auto;
@@ -99,6 +101,29 @@
       .bubble footer ul {
         margin: 0;
         padding-left: 1.1rem;
+      }
+      .bubble footer .sources-toggle {
+        margin-top: 0.35rem;
+        background: transparent;
+        color: #2563eb;
+        border: none;
+        padding: 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .bubble footer .sources-list {
+        margin-top: 0.5rem;
+        border-left: 2px solid #e5e7eb;
+        padding-left: 0.75rem;
+        color: #374151;
+      }
+      .bubble footer .sources-list > div {
+        margin-bottom: 0.5rem;
+      }
+      .bubble footer .sources-list > div strong {
+        display: block;
+        color: #111827;
       }
       .composer {
         padding: 1.5rem 2rem 1.75rem;
@@ -172,13 +197,22 @@
     <nav>
       <a href="/">Search</a>
       <a href="/support"><strong>Support Agent</strong></a>
+      <a href="/knowledge">Knowledge Base</a>
     </nav>
     <main>
       <div class="chat-shell">
         <header>
           <h1>Support Agent</h1>
           <p>Conversational troubleshooting with embedded knowledge and glossary guidance.</p>
-          <p class="status-line">Glossary entries loaded: {{ glossary_count }}</p>
+          <div class="status-line">
+            <label for="project">Project:</label>
+            <select id="project" aria-label="Select project">
+              {% for project in projects %}
+                <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>{{ project.name }}</option>
+              {% endfor %}
+            </select>
+            <span>Glossary entries loaded: {{ glossary_count }}</span>
+          </div>
         </header>
         <div class="chat-body">
           <div id="messages" class="messages" aria-live="polite"></div>
@@ -199,41 +233,92 @@
       const queryEl = document.getElementById('query');
       const messagesEl = document.getElementById('messages');
       const history = [];
+      const projectEl = document.getElementById('project');
+      let activeStreamController = null;
+
+      function applyExtras(bubble, extras = {}) {
+        const existingFooter = bubble.querySelector('footer');
+        if (existingFooter) {
+          existingFooter.remove();
+        }
+
+        const definitions = extras.definitions || [];
+        const sources = extras.sources || [];
+        if (!definitions.length && !sources.length) {
+          return;
+        }
+
+        const footer = document.createElement('footer');
+        if (definitions.length) {
+          const defHeading = document.createElement('h3');
+          defHeading.textContent = 'Definitions';
+          footer.appendChild(defHeading);
+          const list = document.createElement('ul');
+          definitions.forEach((def) => {
+            const item = document.createElement('li');
+            item.textContent = def;
+            list.appendChild(item);
+          });
+          footer.appendChild(list);
+        }
+        if (sources.length) {
+          const sourceHeading = document.createElement('h3');
+          sourceHeading.textContent = 'Sources';
+          footer.appendChild(sourceHeading);
+
+          const toggle = document.createElement('button');
+          toggle.type = 'button';
+          toggle.className = 'sources-toggle';
+
+          const list = document.createElement('div');
+          list.className = 'sources-list';
+
+          sources.forEach((source) => {
+            const item = document.createElement('div');
+            const titleEl = document.createElement('strong');
+            titleEl.textContent = source.title || 'Snippet';
+            const snippetEl = document.createElement('div');
+            snippetEl.textContent = source.snippet || '';
+            snippetEl.style.whiteSpace = 'pre-wrap';
+            item.appendChild(titleEl);
+            item.appendChild(snippetEl);
+            list.appendChild(item);
+          });
+
+          let expanded = false;
+          const updateToggle = () => {
+            list.hidden = !expanded;
+            toggle.textContent = expanded ? 'Hide sources' : 'Show sources';
+            toggle.setAttribute('aria-expanded', String(expanded));
+          };
+          toggle.addEventListener('click', () => {
+            expanded = !expanded;
+            updateToggle();
+          });
+          updateToggle();
+
+          footer.appendChild(toggle);
+          footer.appendChild(list);
+        }
+        bubble.appendChild(footer);
+      }
 
       function appendMessage(role, text, extras = {}) {
         const bubble = document.createElement('div');
         bubble.className = `bubble ${role}`;
-        bubble.textContent = text;
 
-        if (role === 'assistant' && (extras.definitions?.length || extras.sources?.length)) {
-          const footer = document.createElement('footer');
-          if (extras.definitions?.length) {
-            const defHeading = document.createElement('h3');
-            defHeading.textContent = 'Definitions';
-            footer.appendChild(defHeading);
-            const list = document.createElement('ul');
-            extras.definitions.forEach((def) => {
-              const item = document.createElement('li');
-              item.textContent = def;
-              list.appendChild(item);
-            });
-            footer.appendChild(list);
-          }
-          if (extras.sources?.length) {
-            const sourceHeading = document.createElement('h3');
-            sourceHeading.textContent = 'Sources';
-            footer.appendChild(sourceHeading);
-            extras.sources.forEach((source) => {
-              const item = document.createElement('div');
-              item.innerHTML = `<strong>${source.title || 'Snippet'}</strong><br />${source.snippet || ''}`;
-              footer.appendChild(item);
-            });
-          }
-          bubble.appendChild(footer);
+        const content = document.createElement('div');
+        content.className = 'content';
+        content.textContent = text;
+        bubble.appendChild(content);
+
+        if (role === 'assistant') {
+          applyExtras(bubble, extras);
         }
 
         messagesEl.appendChild(bubble);
         bubble.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        return bubble;
       }
 
       async function submitQuery() {
@@ -247,28 +332,94 @@
         appendMessage('user', query);
         queryEl.value = '';
         button.disabled = true;
-        statusEl.textContent = 'Thinking...';
+        if (activeStreamController) {
+          activeStreamController.abort();
+        }
+        const controller = new AbortController();
+        activeStreamController = controller;
+
+        const assistantBubble = appendMessage('assistant', '');
+        const contentEl = assistantBubble.querySelector('.content');
+        contentEl.textContent = 'Streaming response...';
+        let accumulated = '';
 
         try {
-          const response = await fetch('/support/chat', {
+          const response = await fetch('/support/chat/stream', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, history })
+            body: JSON.stringify({ query, history, projectId: projectEl.value }),
+            signal: controller.signal,
           });
 
-          const data = await response.json();
-          if (!response.ok) {
-            throw new Error(data.error || 'Unexpected error while contacting the assistant');
+          if (!response.ok || !response.body) {
+            let detail = 'Unexpected error while contacting the assistant';
+            try {
+              const data = await response.json();
+              detail = data.error || data.detail || detail;
+            } catch (err) {
+              detail = `${detail} (status ${response.status})`;
+            }
+            throw new Error(detail);
           }
 
-          const message = data.message || 'I could not generate a response at this time.';
-          appendMessage('assistant', message, { definitions: data.definitions, sources: data.sources });
-          history.push(`Assistant: ${message}`);
-          statusEl.textContent = 'Ready for the next question.';
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) {
+              break;
+            }
+            buffer += decoder.decode(value, { stream: true });
+            let newlineIndex = buffer.indexOf('\n');
+            while (newlineIndex !== -1) {
+              const rawLine = buffer.slice(0, newlineIndex).trim();
+              buffer = buffer.slice(newlineIndex + 1);
+              if (rawLine) {
+                try {
+                  const event = JSON.parse(rawLine);
+                  if (event.event === 'metadata') {
+                    applyExtras(assistantBubble, {
+                      definitions: event.definitions,
+                      sources: event.sources,
+                    });
+                  } else if (event.event === 'delta') {
+                    if (event.data) {
+                      accumulated += event.data;
+                      contentEl.textContent = accumulated;
+                    }
+                  } else if (event.event === 'done') {
+                    if (event.message) {
+                      accumulated = event.message;
+                      contentEl.textContent = accumulated;
+                    }
+                    history.push(`Assistant: ${accumulated}`);
+                    statusEl.textContent = 'Ready for the next question.';
+                    return;
+                  } else if (event.event === 'error') {
+                    throw new Error(event.message || 'Streaming error');
+                  }
+                } catch (parseErr) {
+                  console.debug('Streaming parse error', parseErr);
+                }
+              }
+              newlineIndex = buffer.indexOf('\n');
+            }
+          }
+
+          throw new Error('Stream ended unexpectedly.');
         } catch (error) {
-          appendMessage('assistant', `⚠️ ${error.message}`);
+          if (error.name === 'AbortError') {
+            return;
+          }
+          contentEl.textContent = `⚠️ ${error.message}`;
+          applyExtras(assistantBubble, {});
           statusEl.textContent = 'Encountered an error. Try again.';
         } finally {
+          if (activeStreamController === controller) {
+            activeStreamController = null;
+          }
           button.disabled = false;
           queryEl.focus();
         }

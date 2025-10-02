@@ -27,6 +27,8 @@ _DEFAULT_GLOSSARY_TOP_K: Final[int] = 3
 _DEFAULT_OLLAMA_URL: Final[str] = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL: Final[str] = "llama3.1:8b"
 _DEFAULT_OLLAMA_TIMEOUT: Final[float] = 60.0
+_DEFAULT_DATA_DIR: Final[str] = "data"
+_DEFAULT_PROJECT_NAME: Final[str] = "Default Project"
 
 
 @dataclass(slots=True)
@@ -45,6 +47,8 @@ class Settings:
     ollama_request_timeout: float = _DEFAULT_OLLAMA_TIMEOUT
     glossary_path: str = _DEFAULT_GLOSSARY_PATH
     glossary_top_k: int = _DEFAULT_GLOSSARY_TOP_K
+    data_dir: str = _DEFAULT_DATA_DIR
+    default_project_name: str = _DEFAULT_PROJECT_NAME
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -63,6 +67,8 @@ class Settings:
             ollama_request_timeout=float(os.getenv("OLLAMA_TIMEOUT", _DEFAULT_OLLAMA_TIMEOUT)),
             glossary_path=os.getenv("GLOSSARY_PATH", _DEFAULT_GLOSSARY_PATH),
             glossary_top_k=int(os.getenv("GLOSSARY_TOP_K", _DEFAULT_GLOSSARY_TOP_K)),
+            data_dir=os.getenv("DATA_DIR", _DEFAULT_DATA_DIR),
+            default_project_name=os.getenv("DEFAULT_PROJECT_NAME", _DEFAULT_PROJECT_NAME),
         )
 
     @property
@@ -121,3 +127,9 @@ class Settings:
         if self.qdrant_api_key:
             kwargs["api_key"] = self.qdrant_api_key
         return kwargs
+
+    def project_collection_name(self, project_id: str) -> str:
+        """Return the Qdrant collection name for the given project."""
+
+        safe_project = project_id.replace(" ", "-")
+        return f"{self.qdrant_collection}_{safe_project}"
