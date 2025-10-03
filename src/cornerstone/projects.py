@@ -39,6 +39,8 @@ class DocumentMetadata:
     chunk_count: int
     created_at: str
     size_bytes: int | None = None
+    title: str | None = None
+    content_type: str | None = None
 
 
 class ProjectStore:

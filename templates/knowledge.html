@@ -30,8 +30,27 @@
       .persona-preview strong { display: block; font-size: 1rem; color: #111827; }
       .persona-preview span { display: block; font-size: 0.85rem; color: #4b5563; margin-top: 0.35rem; }
       .persona-preview p { margin: 0.45rem 0 0; font-size: 0.9rem; line-height: 1.45; }
+      .upload-panel { background:#fff; border:1px dashed #cbd5f5; border-radius:16px; padding:1.25rem 1.5rem; margin:1.5rem 0; box-shadow: inset 0 1px 2px rgba(15,23,42,0.06); }
+      .drop-zone { border:2px dashed #93c5fd; border-radius:14px; padding:1.25rem; text-align:center; color:#2563eb; background:#eff6ff; cursor:pointer; transition: background 0.2s ease, border-color 0.2s ease; }
+      .drop-zone.dragover { background:#dbeafe; border-color:#1d4ed8; }
+      .drop-zone p { margin:0.35rem 0; }
+      .upload-actions { display:flex; gap:0.65rem; margin-top:0.85rem; }
+      .upload-actions button { background:#111827; box-shadow:0 12px 28px rgba(17,24,39,0.18); }
+      .upload-status { list-style:none; padding:0; margin:1rem 0 0; display:flex; flex-direction:column; gap:0.45rem; font-size:0.9rem; color:#4b5563; }
+      .upload-status li { background:#f8fafc; border-radius:10px; padding:0.65rem 0.8rem; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; }
+      .upload-status li span.status { font-weight:600; }
+      .upload-status li.completed span.status { color:#047857; }
+      .upload-status li.failed span.status { color:#dc2626; }
+      .upload-status li.processing span.status { color:#2563eb; }
+      .upload-hint { font-size:0.85rem; color:#6b7280; margin-top:0.45rem; }
+      .url-upload { margin-top:1.25rem; display:flex; flex-direction:column; gap:0.5rem; }
+      .url-input-group { display:flex; gap:0.65rem; }
+      .url-input-group input { flex:1; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
+      .url-input-group button { padding:0.65rem 1.5rem; border-radius:999px; border:none; background:#2563eb; color:#fff; font-size:0.95rem; box-shadow:0 12px 28px rgba(37,99,235,0.2); cursor:pointer; }
       @media (max-width: 900px) {
         main { grid-template-columns: 1fr; }
+        .url-input-group { flex-direction:column; }
+        .url-input-group button { width:100%; }
       }
     </style>
   </head>
@@ -143,11 +162,34 @@
       <section data-project-id="{{ selected_project }}">
         <h1>Documents</h1>
         <p>Upload documents to enrich <strong>{{ project_name }}</strong>.</p>
-        <form method="post" action="/knowledge/upload" enctype="multipart/form-data">
-          <input type="hidden" name="project_id" value="{{ selected_project }}" />
-          <input type="file" name="file" accept=".txt,.md,.markdown,.pdf" required />
-          <button type="submit">Upload & Ingest</button>
-        </form>
+        <div class="upload-panel">
+          <div id="drop-zone" class="drop-zone" tabindex="0">
+            <strong>Drop files here</strong>
+            <p>Supported formats: TXT, MD, PDF, DOCX, HTML</p>
+            <p class="upload-hint">Files upload asynchronously so you can keep working.</p>
+          </div>
+          <div class="upload-actions">
+            <button type="button" id="select-files">Select files</button>
+          </div>
+          <div class="url-upload">
+            <label for="url-input" style="font-weight:600; color:#1f2937;">Fetch from URL</label>
+            <div class="url-input-group">
+              <input id="url-input" type="url" placeholder="https://example.com/help.html" />
+              <button type="button" id="submit-url">Fetch &amp; Ingest</button>
+            </div>
+            <span class="upload-hint">We download the page HTML and embed it like other documents.</span>
+          </div>
+          <input id="file-input" type="file" name="files" accept=".txt,.md,.markdown,.pdf,.docx,.html" multiple hidden />
+          <ul id="upload-status" class="upload-status"></ul>
+          <noscript>
+            <form method="post" action="/knowledge/upload" enctype="multipart/form-data" style="margin-top:1rem;">
+              <input type="hidden" name="project_id" value="{{ selected_project }}" />
+              <input type="file" name="file" accept=".txt,.md,.markdown,.pdf,.docx,.html" required />
+              <button type="submit">Upload & Ingest</button>
+            </form>
+          </noscript>
+        </div>
+
         <form method="post" action="/knowledge/cleanup" style="margin-top: 0.75rem;">
           <input type="hidden" name="project_id" value="{{ selected_project }}" />
           <button type="submit" style="background:#1f2937; color:#fff; border:none; padding:0.55rem 1.4rem; border-radius:999px; cursor:pointer; box-shadow:0 10px 22px rgba(17,24,39,0.18);">Clear Embedded Data</button>
@@ -159,6 +201,8 @@
             <thead>
               <tr>
                 <th>Filename</th>
+                <th>Title</th>
+                <th>Type</th>
                 <th>Chunks</th>
                 <th>Size</th>
                 <th>Uploaded</th>
@@ -169,6 +213,8 @@
               {% for doc in documents %}
                 <tr>
                   <td>{{ doc.filename }}</td>
+                  <td>{% if doc.title %}{{ doc.title }}{% else %}<span style="color:#9ca3af;">—</span>{% endif %}</td>
+                  <td>{% if doc.content_type %}{{ doc.content_type }}{% else %}<span style="color:#9ca3af;">unknown</span>{% endif %}</td>
                   <td>{{ doc.chunk_count }}</td>
                   <td>{% if doc.size_bytes %}{{ (doc.size_bytes / 1024)|round(1) }} KB{% else %}-{% endif %}</td>
                   <td>{{ doc.created_at.split('T')[0] }}</td>
@@ -188,5 +234,233 @@
         {% endif %}
       </section>
     </main>
+  <script>
+    (function () {
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('file-input');
+      const selectBtn = document.getElementById('select-files');
+      const statusList = document.getElementById('upload-status');
+      const projectSection = document.querySelector('section[data-project-id]');
+      const urlInput = document.getElementById('url-input');
+      const submitUrl = document.getElementById('submit-url');
+      if (!dropZone || !fileInput || !selectBtn || !statusList || !projectSection) {
+        return;
+      }
+
+      const projectId = projectSection.dataset.projectId;
+      const activeJobs = new Set();
+      let pollTimer = null;
+
+      function renderJobs(jobs) {
+        statusList.innerHTML = '';
+        if (!jobs || !jobs.length) {
+          return;
+        }
+        const sorted = [...jobs].sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
+        for (const job of sorted) {
+          const item = document.createElement('li');
+          item.className = job.status;
+          const name = document.createElement('span');
+          name.textContent = job.filename || 'File';
+          const status = document.createElement('span');
+          status.className = 'status';
+          status.textContent = job.status;
+          item.appendChild(name);
+          item.appendChild(status);
+          if (job.error) {
+            const error = document.createElement('span');
+            error.style.marginLeft = '0.5rem';
+            error.style.color = '#dc2626';
+            error.textContent = job.error;
+            item.appendChild(error);
+          }
+          statusList.appendChild(item);
+        }
+      }
+
+      async function pollStatuses() {
+        if (!activeJobs.size) {
+          stopPolling();
+          return;
+        }
+        try {
+          const response = await fetch(`/knowledge/uploads?project_id=${encodeURIComponent(projectId)}`);
+          if (!response.ok) {
+            throw new Error('Failed to poll job status');
+          }
+          const data = await response.json();
+          renderJobs(data.jobs);
+          const completed = (data.jobs || []).filter((job) => activeJobs.has(job.id) && (job.status === 'completed' || job.status === 'failed'));
+          for (const job of completed) {
+            activeJobs.delete(job.id);
+          }
+          if (!activeJobs.size) {
+            stopPolling();
+            setTimeout(() => window.location.reload(), 800);
+          }
+        } catch (error) {
+          console.error(error);
+          stopPolling();
+        }
+      }
+
+      function startPolling() {
+        if (!pollTimer) {
+          pollTimer = window.setInterval(pollStatuses, 1200);
+        }
+      }
+
+      function stopPolling() {
+        if (pollTimer) {
+          window.clearInterval(pollTimer);
+          pollTimer = null;
+        }
+      }
+
+      async function uploadFiles(fileList) {
+        const files = Array.from(fileList || []);
+        if (!files.length) {
+          return;
+        }
+        const formData = new FormData();
+        formData.append('project_id', projectId);
+        files.forEach((file) => formData.append('files', file));
+        renderJobs([]);
+        try {
+          const response = await fetch('/knowledge/uploads', {
+            method: 'POST',
+            body: formData,
+          });
+          if (!response.ok) {
+            const detail = await response.json().catch(() => ({}));
+            renderJobs([
+              {
+                id: 'error',
+                filename: 'Upload',
+                status: 'failed',
+                error: detail.detail || 'Upload failed.',
+                updated_at: new Date().toISOString(),
+              },
+            ]);
+            return;
+          }
+          const payload = await response.json();
+          if (payload.jobs && payload.jobs.length) {
+            payload.jobs.forEach((job) => activeJobs.add(job.id));
+            renderJobs(payload.jobs);
+            startPolling();
+          }
+        } catch (error) {
+          renderJobs([
+            {
+              id: 'error',
+              filename: 'Upload',
+              status: 'failed',
+              error: error.message,
+              updated_at: new Date().toISOString(),
+            },
+          ]);
+        }
+      }
+
+      dropZone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+      });
+
+      dropZone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (event.dataTransfer && event.dataTransfer.files) {
+          uploadFiles(event.dataTransfer.files);
+        }
+      });
+
+      dropZone.addEventListener('click', () => fileInput.click());
+
+      dropZone.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          fileInput.click();
+        }
+      });
+
+      selectBtn.addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', (event) => {
+        if (event.target.files) {
+          uploadFiles(event.target.files);
+          event.target.value = '';
+        }
+      });
+
+      async function uploadUrl() {
+        if (!urlInput) {
+          return;
+        }
+        const value = urlInput.value.trim();
+        if (!value) {
+          return;
+        }
+        const formData = new FormData();
+        formData.append('project_id', projectId);
+        formData.append('url', value);
+        renderJobs([]);
+        try {
+          const response = await fetch('/knowledge/upload-url', {
+            method: 'POST',
+            body: formData,
+          });
+          if (!response.ok) {
+            const detail = await response.json().catch(() => ({}));
+            renderJobs([
+              {
+                id: 'url-error',
+                filename: value,
+                status: 'failed',
+                error: detail.detail || 'URL upload failed.',
+                updated_at: new Date().toISOString(),
+              },
+            ]);
+            return;
+          }
+          const payload = await response.json();
+          if (payload.job) {
+            activeJobs.add(payload.job.id);
+            renderJobs([payload.job]);
+            startPolling();
+            urlInput.value = '';
+          }
+        } catch (error) {
+          renderJobs([
+            {
+              id: 'url-error',
+              filename: value,
+              status: 'failed',
+              error: error.message,
+              updated_at: new Date().toISOString(),
+            },
+          ]);
+        }
+      }
+
+      if (submitUrl) {
+        submitUrl.addEventListener('click', uploadUrl);
+      }
+
+      if (urlInput) {
+        urlInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            uploadUrl();
+          }
+        });
+      }
+    })();
+  </script>
   </body>
 </html>

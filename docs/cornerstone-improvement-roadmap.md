@@ -3,11 +3,13 @@
 This document translates the audit findings into a sequenced backlog for the next improvement cycle. Tasks are grouped by theme, sorted in the order we should tackle them. Each item calls out owners, dependencies, and measurable outcomes whenever possible.
 
 ## Guiding Principles
+
 - Preserve the working prototype while layering upgrades iteratively.
 - Ship user-facing wins early (persona controls, UX polish) to validate value quickly.
 - Instrument the pipeline so later analytics and scaling work rest on real metrics.
 
 ## Phase 0 – Preparation (Day 0-1)
+
 1. **Confirm environment prerequisites**
    - Owners: Eng
    - Steps: Verify `.env` completeness, ensure Qdrant + Ollama optional dependencies documented.
@@ -16,6 +18,7 @@ This document translates the audit findings into a sequenced backlog for the nex
    - Steps: Capture current ingestion latency, chat response latency, vector count per project.
 
 ## Phase 1 – UX & Persona Quick Wins (Week 1)
+
 1. **Persona catalog and project assignment**
    - Owners: Backend + Frontend
    - Steps:
@@ -41,6 +44,7 @@ This document translates the audit findings into a sequenced backlog for the nex
      2. Show inline error banners for failed sends or retrieval issues.
 
 ## Phase 2 – Ingestion & Retrieval Enhancements (Week 2)
+
 1. **Multi-file upload + drag-and-drop**
    - Owners: Frontend + Backend
    - Steps:
@@ -50,7 +54,7 @@ This document translates the audit findings into a sequenced backlog for the nex
    - Owners: Backend
    - Steps:
      1. Add DOCX parsing (python-docx) and HTML ingestion.
-     2. Surface user-friendly errors for unsupported formats.
+     2. Surface user-friendly errorsㅔ for unsupported formats.
 3. **Asynchronous ingestion jobs**
    - Owners: Backend
    - Steps:
@@ -63,6 +67,7 @@ This document translates the audit findings into a sequenced backlog for the nex
      2. Include metadata in retrieval payload and source display.
 
 ## Phase 3 – Retrieval Quality & Personalization (Week 3)
+
 1. **Hybrid + rerank retrieval**
    - Owners: Backend
    - Steps:
@@ -80,6 +85,7 @@ This document translates the audit findings into a sequenced backlog for the nex
      2. Allow tagging glossary entries with keywords for retrieval weighting.
 
 ## Phase 4 – Analytics & Observability (Week 4)
+
 1. **Conversation logging service**
    - Owners: Backend
    - Steps:
@@ -97,6 +103,7 @@ This document translates the audit findings into a sequenced backlog for the nex
      2. Forward metrics to Prometheus/Grafana or hosted alternative.
 
 ## Phase 5 – Scalability & Multi-Tenancy Hardening (Week 5+)
+
 1. **Project storage refactor**
    - Owners: Backend
    - Steps:
@@ -114,11 +121,13 @@ This document translates the audit findings into a sequenced backlog for the nex
      2. Gate project CRUD + ingestion endpoints by role.
 
 ## Supporting Tracks
+
 - **Documentation**: Maintain updated setup + architecture guides after each major feature drop.
 - **Testing**: Expand integration tests to cover persona prompts, new file types, analytics endpoints.
 - **Design Review**: Host weekly UX review to align on polish and copy updates.
 
 ## Acceptance Criteria for Completion
+
 - Persona-aware chats, multi-file ingestion, and analytics dashboard are demonstrable with automated tests where applicable.
 - Observability baseline established (dashboards + alerts).
 - Migration pathways documented for future contributors.
