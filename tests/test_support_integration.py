@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import os
-
 import tempfile
+from pathlib import Path
+from uuid import uuid4
 
 import pytest
-from pathlib import Path
 
 from fastapi.testclient import TestClient
 from qdrant_client import QdrantClient, models
@@ -49,7 +49,7 @@ def test_support_chat_with_openai_backend() -> None:
     store.upsert(
         [
             VectorRecord(
-                id="doc-1",
+                id=str(uuid4()),
                 vector=embedding.embed_one(seed_text),
                 payload={"title": "Password Reset", "text": seed_text},
             )
