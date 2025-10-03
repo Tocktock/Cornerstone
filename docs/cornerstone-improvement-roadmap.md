@@ -16,18 +16,25 @@ This document translates the audit findings into a sequenced backlog for the nex
    - Steps: Capture current ingestion latency, chat response latency, vector count per project.
 
 ## Phase 1 – UX & Persona Quick Wins (Week 1)
-1. **Persona configuration UI**
-   - Owners: Frontend + Backend
+1. **Persona catalog and project assignment**
+   - Owners: Backend + Frontend
    - Steps:
-     1. Add persona fields (name, tone, system prompt, avatar URL) to project schema.
-     2. Create edit form in Knowledge Base pane with validation + preview.
-     3. Persist persona data; update chat prompt builder to use selected persona.
-2. **Session management controls**
+     1. Introduce a global persona store (id, name, tone, system prompt, avatar, tags) and seed “Chatty”, “Sleepy”, “Analyze Agent” examples.
+     2. Build persona management UI (list/create/edit) with guidance for best-practice fields (clear persona goal, tone descriptors, escalation guidance).
+     3. Update project schema to reference a persona id plus optional project-level overrides; hydrate chat prompts by resolving the assigned persona.
+     4. Allow multiple projects to reuse the same persona and surface assignment status in both persona and project views.
+2. **Persona best-practice playbook**
+   - Owners: PM + Design
+   - Steps:
+     1. Document guardrails for persona design (inclusive language, escalation rules, brand tone alignment) and weave them into the UI as helper copy.
+     2. Establish a lightweight approval checklist so newly created personas get reviewed before production use.
+     3. Capture analytics hooks needed later (e.g., persona id on conversations) to evaluate persona performance.
+3. **Session management controls**
    - Owners: Frontend
    - Steps:
      1. Add "New Chat" button to reset conversation state.
      2. Provide confirmation modal before clearing history.
-3. **Chat accessibility + feedback polish**
+4. **Chat accessibility + feedback polish**
    - Owners: Frontend
    - Steps:
      1. Improve focus management after send/receive events.

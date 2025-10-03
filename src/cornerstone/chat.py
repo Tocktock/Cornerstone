@@ -10,6 +10,8 @@ from typing import Iterable, Iterator, List, Sequence, Tuple
 from .config import Settings
 from .embeddings import EmbeddingService
 from .glossary import Glossary
+from .projects import Project
+from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .vector_store import QdrantVectorStore, SearchResult
 
 logger = logging.getLogger(__name__)
@@ -53,6 +55,7 @@ class SupportAgentService:
         glossary: Glossary,
         *,
         retrieval_top_k: int = 3,
+        persona_store: PersonaStore | None = None,
     ) -> None:
         self._settings = settings
         self._embedding = embedding_service
@@ -60,15 +63,17 @@ class SupportAgentService:
         self._glossary = glossary
         self._retrieval_top_k = retrieval_top_k
         self._openai_client: OpenAI | None = None
+        self._persona_store = persona_store
 
     def generate(
         self,
-        project_id: str,
+        project: Project,
         query: str,
         *,
         conversation: Sequence[str] | None = None,
     ) -> SupportAgentResponse:
-        context, _ = self._build_context(project_id, query, conversation)
+        persona = self._resolve_persona(project)
+        context, _ = self._build_context(project, persona, query, conversation)
         answer = self._invoke_backend(context.prompt)
         logger.info(
             "support.generate.completed backend=%s chars=%s sources=%s",
@@ -80,14 +85,15 @@ class SupportAgentService:
 
     def stream_generate(
         self,
-        project_id: str,
+        project: Project,
         query: str,
         *,
         conversation: Sequence[str] | None = None,
     ) -> Tuple[SupportAgentContext, Iterable[str]]:
         """Stream a response for the given query, yielding incremental text deltas."""
 
-        context, _ = self._build_context(project_id, query, conversation)
+        persona = self._resolve_persona(project)
+        context, _ = self._build_context(project, persona, query, conversation)
         stream = self._stream_backend(context.prompt)
         return context, stream
 
@@ -99,7 +105,8 @@ class SupportAgentService:
 
     def _build_context(
         self,
-        project_id: str,
+        project: Project,
+        persona: PersonaSnapshot,
         query: str,
         conversation: Sequence[str] | None,
     ) -> Tuple[SupportAgentContext, list[SearchResult]]:
@@ -108,27 +115,29 @@ class SupportAgentService:
             "support.generate.start backend=%s embedding=%s project=%s query=%s",
             self._settings.chat_backend,
             self._settings.embedding_model,
-            project_id,
+            project.id,
             query,
         )
         vector = self._embedding.embed_one(query)
-        store = self._stores.get_store(project_id)
+        store = self._stores.get_store(project.id)
         search_results = list(store.search(vector, limit=self._retrieval_top_k))
         top_titles = [(result.payload or {}).get("title") for result in search_results]
         logger.info(
             "support.generate.matches project=%s count=%s titles=%s",
-            project_id,
+            project.id,
             len(search_results),
             top_titles,
         )
         sources = self._format_sources(search_results)
         definitions = self._collect_definitions(query)
-        prompt = self._build_prompt(query, search_results, history)
+        prompt = self._build_prompt(project, persona, query, search_results, history)
         context = SupportAgentContext(prompt=prompt, sources=sources, definitions=definitions)
         return context, search_results
 
     def _build_prompt(
         self,
+        project: Project,
+        persona: PersonaSnapshot,
         query: str,
         search_results: Iterable[SearchResult],
         conversation: Sequence[str],
@@ -151,12 +160,7 @@ class SupportAgentService:
             else "Write the full response in English."
         )
 
-        instructions = (
-            "You are a support agent helping customers diagnose and resolve issues. "
-            "Ask for missing details when necessary, provide step-by-step guidance, and when uncertain, "
-            "suggest escalating to a human agent. "
-            + language_instruction
-        )
+        instructions = self._persona_instructions(project, persona, language_instruction)
 
         prompt_sections = [
             f"INSTRUCTIONS:\n{instructions}",
@@ -173,6 +177,68 @@ class SupportAgentService:
     def _collect_definitions(self, query: str) -> List[str]:
         matches = self._glossary.top_matches(query, self._settings.glossary_top_k)
         return [f"{entry.term}: {entry.definition}" for entry in matches]
+
+    def _persona_instructions(
+        self,
+        project: Project,
+        persona: PersonaSnapshot,
+        language_instruction: str,
+    ) -> str:
+        segments: list[str] = []
+
+        if persona.name:
+            name = persona.name.strip()
+            if name:
+                project_name = project.name or "this project"
+                segments.append(f"You are {name}, the designated support agent for {project_name}.")
+
+        base_prompt = persona.system_prompt or (
+            "You are a support agent helping customers diagnose and resolve issues. "
+            "Ask for missing details when necessary, provide step-by-step guidance, and when uncertain, "
+            "suggest escalating to a human agent."
+        )
+        if base_prompt:
+            segments.append(base_prompt.strip())
+
+        if persona.tone:
+            tone = persona.tone.strip()
+            if tone:
+                segments.append(f"Maintain a {tone} tone throughout the conversation.")
+
+        segments.append(language_instruction)
+
+        return " ".join(segment for segment in segments if segment)
+
+    def _resolve_persona(self, project: Project) -> PersonaSnapshot:
+        overrides = getattr(project, "persona_overrides", None)
+        if isinstance(overrides, dict):  # defensive guard during legacy migrations
+            overrides = PersonaOverrides(
+                name=overrides.get("name"),
+                tone=overrides.get("tone"),
+                system_prompt=overrides.get("system_prompt"),
+                avatar_url=overrides.get("avatar_url"),
+            )
+
+        if self._persona_store is not None:
+            return self._persona_store.resolve_persona(getattr(project, "persona_id", None), overrides)
+
+        legacy_persona = getattr(project, "persona", None)
+        if legacy_persona is not None:
+            overrides = PersonaOverrides(
+                name=getattr(legacy_persona, "name", None),
+                tone=getattr(legacy_persona, "tone", None),
+                system_prompt=getattr(legacy_persona, "system_prompt", None),
+                avatar_url=getattr(legacy_persona, "avatar_url", None),
+            )
+        overrides = overrides or PersonaOverrides()
+        return PersonaSnapshot(
+            id=None,
+            name=overrides.name,
+            tone=overrides.tone,
+            system_prompt=overrides.system_prompt,
+            avatar_url=overrides.avatar_url,
+            overrides=overrides,
+        )
 
     def _format_sources(self, results: Iterable[SearchResult]) -> list[dict[str, str]]:
         formatted: list[dict[str, str]] = []

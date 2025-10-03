@@ -23,6 +23,13 @@
       .project-list { list-style: none; padding: 0; margin: 1rem 0 0; }
       .project-list li { margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: center; }
       .project-list a { color: #2563eb; text-decoration: none; font-weight: 600; }
+      .persona-form { display: grid; gap: 0.65rem; margin-top: 1rem; }
+      .persona-form label { font-weight: 600; font-size: 0.9rem; color: #374151; }
+      .persona-form small { color: #6b7280; font-size: 0.8rem; display: block; margin-top: 0.2rem; }
+      .persona-preview { margin-top: 1rem; background: #f9fafb; border-radius: 12px; padding: 0.85rem 1rem; color: #374151; box-shadow: inset 0 1px 2px rgba(15,23,42,0.06); }
+      .persona-preview strong { display: block; font-size: 1rem; color: #111827; }
+      .persona-preview span { display: block; font-size: 0.85rem; color: #4b5563; margin-top: 0.35rem; }
+      .persona-preview p { margin: 0.45rem 0 0; font-size: 0.9rem; line-height: 1.45; }
       @media (max-width: 900px) {
         main { grid-template-columns: 1fr; }
       }
@@ -34,6 +41,7 @@
       <a href="/support">Support Agent</a>
       <a href="/knowledge"><strong>Knowledge Base</strong></a>
       <a href="/keywords">Keyword Explorer</a>
+      <a href="/personas">Personas</a>
     </nav>
     <main>
       <aside>
@@ -54,6 +62,82 @@
           <textarea name="description" placeholder="Description (optional)"></textarea>
           <button type="submit">Create</button>
         </form>
+
+        <h2 style="margin-top:2rem;">Agent Persona</h2>
+        <p>Assign a reusable persona from the catalog, then optionally layer project-specific overrides.</p>
+        <a href="/personas" style="display:inline-block; margin-top:0.35rem; color:#2563eb; font-weight:600; text-decoration:none;">Open persona catalog →</a>
+
+        <form class="persona-form" method="post" action="/knowledge/persona" style="margin-top:1.25rem;">
+          <input type="hidden" name="project_id" value="{{ selected_project }}" />
+          <div>
+            <label for="persona_id">Catalog persona</label>
+            <select id="persona_id" name="persona_id">
+              <option value="" {% if not project_persona_id %}selected{% endif %}>Default system persona</option>
+              {% for catalog in personas %}
+                <option value="{{ catalog.id }}" {% if project_persona_id == catalog.id %}selected{% endif %}>{{ catalog.name }}</option>
+              {% endfor %}
+            </select>
+            <small>Selecting a persona applies its base instructions to this project.</small>
+          </div>
+
+          <fieldset style="border:none; padding:0; margin:0;">
+            <legend style="font-weight:600; margin-top:0.85rem;">Project overrides (optional)</legend>
+            <div>
+              <label for="persona_name">Display name</label>
+              <input id="persona_name" type="text" name="persona_name" value="{{ (persona_overrides.name if persona_overrides else '') or '' }}" placeholder="e.g. Atlas Assistant" />
+            </div>
+            <div>
+              <label for="persona_tone">Tone descriptor</label>
+              <input id="persona_tone" type="text" name="persona_tone" value="{{ (persona_overrides.tone if persona_overrides else '') or '' }}" placeholder="e.g. calm and encouraging" />
+            </div>
+            <div>
+              <label for="persona_system_prompt">System prompt additions</label>
+              <textarea id="persona_system_prompt" name="persona_system_prompt" rows="4" placeholder="Custom instructions for this project">{{ (persona_overrides.system_prompt if persona_overrides else '') or '' }}</textarea>
+              <small>Overrides merge with the base persona. Leave blank to inherit.</small>
+            </div>
+            <div>
+              <label for="persona_avatar_url">Avatar URL</label>
+              <input id="persona_avatar_url" type="url" name="persona_avatar_url" value="{{ (persona_overrides.avatar_url if persona_overrides else '') or '' }}" placeholder="Link to an image (optional)" />
+            </div>
+          </fieldset>
+
+          <button type="submit">Save Persona Settings</button>
+        </form>
+
+        <div class="persona-preview">
+          <strong>{{ (persona.name if persona and persona.name else 'Support Agent') }}</strong>
+          {% if persona and persona.tone %}
+            <span>Tone: {{ persona.tone }}</span>
+          {% elif persona_base and persona_base.tone %}
+            <span>Tone: {{ persona_base.tone }} (inherited)</span>
+          {% else %}
+            <span>Tone: default support voice</span>
+          {% endif %}
+          {% if persona and persona.system_prompt %}
+            <p>{{ persona.system_prompt }}</p>
+          {% elif persona_base and persona_base.system_prompt %}
+            <p>{{ persona_base.system_prompt }}</p>
+          {% else %}
+            <p>No custom prompt yet. The platform default instructions will be used.</p>
+          {% endif %}
+          {% if persona_base %}
+            <p style="margin-top:0.65rem; font-size:0.8rem; color:#6b7280;">
+              Base persona: <strong>{{ persona_base.name }}</strong>
+              {% if persona_base.description %}— {{ persona_base.description }}{% endif %}
+              {% if persona_base.tags %}<br />Tags: {{ persona_base.tags | join(', ') }}{% endif %}
+            </p>
+          {% endif %}
+        </div>
+
+        <div style="margin-top:1.25rem; background:#f9fafb; border-radius:12px; padding:0.85rem 1rem; color:#374151;">
+          <strong style="display:block; color:#111827;">Persona best practices</strong>
+          <ul style="padding-left:1.2rem; margin:0.5rem 0 0;">
+            <li>Keep instructions specific to the support goal and avoid conflicting tone guidance.</li>
+            <li>Include escalation cues (when to route to a human) and empathy prompts.</li>
+            <li>Favor inclusive language; avoid slang that might age poorly.</li>
+            <li>Document overrides when deviating from the shared persona so teammates understand why.</li>
+          </ul>
+        </div>
       </aside>
 
       <section data-project-id="{{ selected_project }}">
