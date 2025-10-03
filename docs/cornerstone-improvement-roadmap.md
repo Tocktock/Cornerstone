@@ -66,7 +66,33 @@ This document translates the audit findings into a sequenced backlog for the nex
      1. Capture document title, author, section headers when available.
      2. Include metadata in retrieval payload and source display.
 
-## Phase 3 – Retrieval Quality & Personalization (Week 3)
+## Phase 3 – Local Corpus Ingestion & Hybrid Retrieval (Week 3)
+
+1. **Local data ingestion workflow**
+   - Owners: Backend + Frontend
+   - Steps:
+     1. Build Knowledge Base UI picker for directories under `data/local/**` with file count/size preview and job status.
+     2. Extend ingestion API to enqueue local-file jobs (stream from disk, reuse job manager) and surface status in UI.
+     3. Deliver CLI (`python -m cornerstone.ingest_local`) with resumable manifest support for bulk indexing.
+2. **Advanced chunking pipeline**
+   - Owners: Backend
+   - Steps:
+     1. Implement hierarchical splitter (headings → paragraphs) targeting 200–500 token chunks with ~10% overlap.
+     2. Normalize text and capture rich metadata (path, section, language, timestamps) per chunk.
+     3. Generate optional section summaries and store alongside chunk metadata for faster preview.
+3. **Hybrid search enablement**
+   - Owners: Backend
+   - Steps:
+     1. Create FTS index (e.g., SQLite FTS5) for chunk text + metadata and populate during ingestion.
+     2. Fuse BM25 + vector hits via Reciprocal Rank Fusion; update SupportAgentService retrieval path.
+     3. Add regression tests ensuring keyword-only and semantic-only matches surface correctly.
+4. **Qdrant tuning for scale**
+   - Owners: Infrastructure
+   - Steps:
+     1. Enable on-disk vectors/payloads, tune HNSW parameters, and index frequently filtered payload fields.
+     2. Configure monitoring for ingestion throughput, query latency, and recall sampling.
+
+## Phase 4 – Retrieval Quality & Personalization (Week 4)
 
 1. **Hybrid + rerank retrieval**
    - Owners: Backend
@@ -84,7 +110,7 @@ This document translates the audit findings into a sequenced backlog for the nex
      1. Provide inline glossary editor per project.
      2. Allow tagging glossary entries with keywords for retrieval weighting.
 
-## Phase 4 – Analytics & Observability (Week 4)
+## Phase 5 – Analytics & Observability (Week 5)
 
 1. **Conversation logging service**
    - Owners: Backend
@@ -102,7 +128,7 @@ This document translates the audit findings into a sequenced backlog for the nex
      1. Add tracing/timing around ingestion + query pipeline.
      2. Forward metrics to Prometheus/Grafana or hosted alternative.
 
-## Phase 5 – Scalability & Multi-Tenancy Hardening (Week 5+)
+## Phase 6 – Scalability & Multi-Tenancy Hardening (Week 6+)
 
 1. **Project storage refactor**
    - Owners: Backend
