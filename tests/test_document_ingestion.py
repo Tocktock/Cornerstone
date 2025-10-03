@@ -19,6 +19,7 @@ from cornerstone.chat import SupportAgentService
 from cornerstone.config import Settings
 from cornerstone.glossary import Glossary
 from cornerstone.ingestion import DocumentIngestor, ProjectVectorStoreManager
+from cornerstone.personas import PersonaStore
 from cornerstone.projects import ProjectStore
 
 
@@ -42,6 +43,7 @@ def build_app():
     settings = Settings(data_dir=str(tmpdir), default_project_name="Project One")
     embedding = FakeEmbeddingService()
     project_store = ProjectStore(tmpdir, default_project_name=settings.default_project_name)
+    persona_store = PersonaStore(tmpdir)
     default_project = project_store.list_projects()[0]
 
     client = QdrantClient(path=":memory:")
@@ -59,6 +61,7 @@ def build_app():
         embedding_service=embedding,  # type: ignore[arg-type]
         store_manager=store_manager,
         glossary=glossary,
+        persona_store=persona_store,
     )
     ingestion_service = DocumentIngestor(embedding, store_manager, project_store)
 
@@ -67,6 +70,7 @@ def build_app():
         embedding_service=embedding,  # type: ignore[arg-type]
         glossary=glossary,
         project_store=project_store,
+        persona_store=persona_store,
         store_manager=store_manager,
         chat_service=chat_service,
         ingestion_service=ingestion_service,

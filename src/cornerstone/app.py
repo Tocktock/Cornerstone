@@ -18,6 +18,7 @@ from .embeddings import EmbeddingService
 from .glossary import Glossary, load_glossary
 from .ingestion import DocumentIngestor, ProjectVectorStoreManager
 from .keywords import KeywordLLMFilter, build_excerpt, extract_keyword_candidates
+from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .projects import Project, ProjectStore
 from .vector_store import QdrantVectorStore, SearchResult
 
@@ -46,6 +47,7 @@ class ApplicationState:
         embedding_service: EmbeddingService,
         glossary: Glossary,
         project_store: ProjectStore,
+        persona_store: PersonaStore,
         store_manager: ProjectVectorStoreManager,
         chat_service: SupportAgentService,
         ingestion_service: DocumentIngestor,
@@ -54,6 +56,7 @@ class ApplicationState:
         self.embedding_service = embedding_service
         self.glossary = glossary
         self.project_store = project_store
+        self.persona_store = persona_store
         self.store_manager = store_manager
         self.chat_service = chat_service
         self.ingestion_service = ingestion_service
@@ -65,6 +68,7 @@ def create_app(
     embedding_service: EmbeddingService | None = None,
     glossary: Glossary | None = None,
     project_store: ProjectStore | None = None,
+    persona_store: PersonaStore | None = None,
     store_manager: ProjectVectorStoreManager | None = None,
     chat_service: SupportAgentService | None = None,
     ingestion_service: DocumentIngestor | None = None,
@@ -76,7 +80,12 @@ def create_app(
 
     project_root = Path(settings.data_dir).resolve()
     project_store = project_store or ProjectStore(project_root, default_project_name=settings.default_project_name)
-    logger.info("app.start settings_loaded data_dir=%s default_project=%s", project_root, settings.default_project_name)
+    persona_store = persona_store or PersonaStore(project_root)
+    logger.info(
+        "app.start settings_loaded data_dir=%s default_project=%s",
+        project_root,
+        settings.default_project_name,
+    )
 
     if store_manager is None:
         client = QdrantClient(**settings.qdrant_client_kwargs())
@@ -104,6 +113,7 @@ def create_app(
         embedding_service=embedding_service,
         store_manager=store_manager,
         glossary=glossary,
+        persona_store=persona_store,
     )
 
     ingestion_service = ingestion_service or DocumentIngestor(
@@ -118,6 +128,7 @@ def create_app(
         embedding_service=embedding_service,
         glossary=glossary,
         project_store=project_store,
+        persona_store=persona_store,
         store_manager=store_manager,
         chat_service=chat_service,
         ingestion_service=ingestion_service,
@@ -136,6 +147,9 @@ def create_app(
 
     def get_project_store(request: Request) -> ProjectStore:
         return get_state(request).project_store
+
+    def get_persona_store(request: Request) -> PersonaStore:
+        return get_state(request).persona_store
 
     def get_store_manager(request: Request) -> ProjectVectorStoreManager:
         return get_state(request).store_manager
@@ -189,12 +203,19 @@ def create_app(
     async def support_page(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
         glossary_count = len(get_glossary(request))
         project_store = get_project_store(request)
+        persona_store = get_persona_store(request)
         selected_project = request.query_params.get("project_id") or _default_project_id(project_store)
+        active_project = project_store.get_project(selected_project) if selected_project else None
+        persona_snapshot: PersonaSnapshot | None = None
+        if active_project is not None:
+            persona_snapshot = persona_store.resolve_persona(active_project.persona_id, active_project.persona_overrides)
         context = {
             "request": request,
             "glossary_count": glossary_count,
             "projects": project_store.list_projects(),
             "selected_project": selected_project,
+            "persona": persona_snapshot,
+            "persona_base": persona_snapshot.base_persona if persona_snapshot else None,
         }
         return templates.TemplateResponse("support.html", context)
 
@@ -212,7 +233,7 @@ def create_app(
         if not query:
             return JSONResponse({"error": "Query is required."}, status_code=400)
         logger.info("support.endpoint request project=%s history_turns=%s", project.id, len(history))
-        response = chat_service.generate(project.id, query, conversation=history)
+        response = chat_service.generate(project, query, conversation=history)
         logger.info("support.endpoint completed project=%s message_chars=%s", project.id, len(response.message))
         return JSONResponse(
             {
@@ -237,7 +258,7 @@ def create_app(
             raise HTTPException(status_code=400, detail="Query is required.")
 
         try:
-            context, stream = chat_service.stream_generate(project.id, query, conversation=history)
+            context, stream = chat_service.stream_generate(project, query, conversation=history)
         except Exception as exc:  # pragma: no cover - defensive guard
             logger.exception("support.stream.setup_failed project=%s error=%s", project.id, exc)
             raise HTTPException(status_code=500, detail=str(exc)) from exc
@@ -281,22 +302,238 @@ def create_app(
 
         return StreamingResponse(_event_iterator(), media_type="application/x-ndjson")
 
+    def _persona_to_dict(persona) -> dict:
+        return {
+            "id": persona.id,
+            "name": persona.name,
+            "description": persona.description,
+            "tone": persona.tone,
+            "system_prompt": persona.system_prompt,
+            "avatar_url": persona.avatar_url,
+            "tags": persona.tags,
+            "created_at": persona.created_at,
+        }
+
+    def _parse_tags(raw: str | None) -> list[str]:
+        if not raw:
+            return []
+        return [tag.strip() for tag in raw.split(",") if tag.strip()]
+
     @app.get("/knowledge", response_class=HTMLResponse)
     async def knowledge_dashboard(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
         project_store = get_project_store(request)
+        persona_store = get_persona_store(request)
         projects = project_store.list_projects()
         selected_project = request.query_params.get("project_id") or _default_project_id(project_store)
         logger.info("knowledge.dashboard load project=%s", selected_project)
         project = _resolve_project(project_store, selected_project)
         documents = project_store.list_documents(project.id)
+        personas = persona_store.list_personas()
+        persona_snapshot = persona_store.resolve_persona(project.persona_id, project.persona_overrides)
         context = {
             "request": request,
             "projects": projects,
             "selected_project": project.id,
             "project_name": project.name,
             "documents": documents,
+            "persona": persona_snapshot,
+            "persona_base": persona_snapshot.base_persona if persona_snapshot else None,
+            "personas": personas,
+            "project_persona_id": project.persona_id,
+            "persona_overrides": project.persona_overrides,
         }
         return templates.TemplateResponse("knowledge.html", context)
+
+    @app.post("/knowledge/persona", response_class=RedirectResponse)
+    async def update_persona_settings(
+        request: Request,
+        project_id: str = Form(...),
+        persona_id: str | None = Form(None),
+        persona_name: str | None = Form(None),
+        persona_tone: str | None = Form(None),
+        persona_system_prompt: str | None = Form(None),
+        persona_avatar_url: str | None = Form(None),
+        project_store: ProjectStore = Depends(get_project_store),
+        persona_store: PersonaStore = Depends(get_persona_store),
+    ) -> RedirectResponse:
+        project = _resolve_project(project_store, project_id)
+        overrides = PersonaOverrides(
+            name=persona_name,
+            tone=persona_tone,
+            system_prompt=persona_system_prompt,
+            avatar_url=persona_avatar_url,
+        )
+        updated = project_store.configure_persona(
+            project.id,
+            persona_id=persona_id,
+            overrides=overrides,
+        )
+        resolved = persona_store.resolve_persona(updated.persona_id, updated.persona_overrides)
+        has_overrides = any(
+            getattr(updated.persona_overrides, field)
+            for field in ("name", "tone", "system_prompt", "avatar_url")
+        )
+        logger.info(
+            "knowledge.persona.updated project=%s persona=%s overrides=%s",
+            updated.id,
+            resolved.id,
+            has_overrides,
+        )
+        url = request.url_for("knowledge_dashboard").include_query_params(project_id=updated.id)
+        return RedirectResponse(url=str(url), status_code=303)
+
+    @app.get("/personas", response_class=HTMLResponse)
+    async def personas_dashboard(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
+        persona_store = get_persona_store(request)
+        project_store = get_project_store(request)
+        personas = persona_store.list_personas()
+        assignments: dict[str, list[str]] = {}
+        for project in project_store.list_projects():
+            if project.persona_id:
+                assignments.setdefault(project.persona_id, []).append(project.name)
+        context = {
+            "request": request,
+            "personas": personas,
+            "assignments": assignments,
+        }
+        return templates.TemplateResponse("personas.html", context)
+
+    @app.post("/personas", response_class=RedirectResponse)
+    async def create_persona(
+        request: Request,
+        name: str = Form(...),
+        description: str | None = Form(None),
+        tone: str | None = Form(None),
+        system_prompt: str = Form(...),
+        avatar_url: str | None = Form(None),
+        tags: str | None = Form(None),
+        persona_store: PersonaStore = Depends(get_persona_store),
+    ) -> RedirectResponse:
+        new_persona = persona_store.create_persona(
+            name=name,
+            description=description,
+            tone=tone,
+            system_prompt=system_prompt,
+            avatar_url=avatar_url,
+            tags=_parse_tags(tags),
+        )
+        logger.info("persona.form.created id=%s name=%s", new_persona.id, new_persona.name)
+        return RedirectResponse(url="/personas", status_code=303)
+
+    @app.post("/personas/{persona_id}", response_class=RedirectResponse)
+    async def edit_persona(
+        persona_id: str,
+        delete: str | None = Form(None),
+        name: str = Form(...),
+        description: str | None = Form(None),
+        tone: str | None = Form(None),
+        system_prompt: str = Form(...),
+        avatar_url: str | None = Form(None),
+        tags: str | None = Form(None),
+        persona_store: PersonaStore = Depends(get_persona_store),
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> RedirectResponse:
+        if delete:
+            assigned = [project.name for project in project_store.list_projects() if project.persona_id == persona_id]
+            if assigned:
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"Persona in use by: {', '.join(assigned)}",
+                )
+            persona_store.delete_persona(persona_id)
+            logger.info("persona.form.deleted id=%s", persona_id)
+            return RedirectResponse(url="/personas", status_code=303)
+
+        try:
+            persona_store.update_persona(
+                persona_id,
+                name=name,
+                description=description,
+                tone=tone,
+                system_prompt=system_prompt,
+                avatar_url=avatar_url,
+                tags=_parse_tags(tags),
+            )
+        except ValueError as exc:  # pragma: no cover - defensive guard
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        logger.info("persona.form.updated id=%s", persona_id)
+        return RedirectResponse(url="/personas", status_code=303)
+
+    @app.get("/api/personas", response_class=JSONResponse)
+    async def list_personas_api(
+        persona_store: PersonaStore = Depends(get_persona_store),
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> JSONResponse:
+        projects = project_store.list_projects()
+        assignments: dict[str, list[str]] = {}
+        for project in projects:
+            if project.persona_id:
+                assignments.setdefault(project.persona_id, []).append(project.name)
+        personas = [
+            {
+                **_persona_to_dict(persona),
+                "assigned_projects": assignments.get(persona.id, []),
+            }
+            for persona in persona_store.list_personas()
+        ]
+        return JSONResponse(personas)
+
+    @app.post("/api/personas", response_class=JSONResponse)
+    async def create_persona_api(
+        request: Request,
+        persona_store: PersonaStore = Depends(get_persona_store),
+    ) -> JSONResponse:
+        payload = await request.json()
+        name = (payload.get("name") or "").strip()
+        if not name:
+            raise HTTPException(status_code=400, detail="name is required")
+        persona = persona_store.create_persona(
+            name=name,
+            description=payload.get("description"),
+            tone=payload.get("tone"),
+            system_prompt=payload.get("system_prompt"),
+            avatar_url=payload.get("avatar_url"),
+            tags=payload.get("tags") or [],
+        )
+        return JSONResponse(_persona_to_dict(persona), status_code=201)
+
+    @app.post("/api/personas/{persona_id}", response_class=JSONResponse)
+    async def update_persona_api(
+        persona_id: str,
+        request: Request,
+        persona_store: PersonaStore = Depends(get_persona_store),
+    ) -> JSONResponse:
+        payload = await request.json()
+        try:
+            persona = persona_store.update_persona(
+                persona_id,
+                name=payload.get("name"),
+                description=payload.get("description"),
+                tone=payload.get("tone"),
+                system_prompt=payload.get("system_prompt"),
+                avatar_url=payload.get("avatar_url"),
+                tags=payload.get("tags"),
+            )
+        except ValueError as exc:  # pragma: no cover - defensive guard
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return JSONResponse(_persona_to_dict(persona))
+
+    @app.delete("/api/personas/{persona_id}", response_class=JSONResponse)
+    async def delete_persona_api(
+        persona_id: str,
+        persona_store: PersonaStore = Depends(get_persona_store),
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> JSONResponse:
+        assigned = [project.name for project in project_store.list_projects() if project.persona_id == persona_id]
+        if assigned:
+            raise HTTPException(
+                status_code=409,
+                detail={"message": "Persona is assigned to active projects.", "projects": assigned},
+            )
+        deleted = persona_store.delete_persona(persona_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Persona not found")
+        return JSONResponse({"status": "deleted", "persona_id": persona_id})
 
     @app.get("/keywords", response_class=HTMLResponse)
     async def keywords_dashboard(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering

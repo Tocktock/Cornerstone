@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 import json
 import re
@@ -11,6 +11,8 @@ from typing import Iterable, List
 from uuid import uuid4
 
 import logging
+
+from .personas import PersonaOverrides
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +26,8 @@ class Project:
     name: str
     description: str | None
     created_at: str
+    persona_id: str | None = None
+    persona_overrides: PersonaOverrides = field(default_factory=PersonaOverrides)
 
 
 @dataclass(slots=True)
@@ -52,7 +56,7 @@ class ProjectStore:
 
     def list_projects(self) -> List[Project]:
         data = self._read_projects()
-        projects = [Project(**item) for item in data.get("projects", [])]
+        projects = [self._deserialize_project(item) for item in data.get("projects", [])]
         return sorted(projects, key=lambda project: project.created_at)
 
     def get_project(self, project_id: str) -> Project | None:
@@ -78,7 +82,12 @@ class ProjectStore:
             description=description,
             created_at=self._now(),
         )
-        projects.setdefault("projects", []).append(asdict(project))
+        record = asdict(project)
+        if record.get("persona_id") is None:
+            record.pop("persona_id", None)
+        if not self._normalize_overrides(project.persona_overrides):
+            record.pop("persona_overrides", None)
+        projects.setdefault("projects", []).append(record)
         self._write_projects(projects)
         logger.info("project.created id=%s name=%s", project.id, project.name)
         return project
@@ -131,6 +140,39 @@ class ProjectStore:
 
     # Keyword insight persistence -------------------------------------------------
 
+    def configure_persona(
+        self,
+        project_id: str,
+        *,
+        persona_id: str | None,
+        overrides: PersonaOverrides | None = None,
+    ) -> Project:
+        projects = self._read_projects()
+        project_items = projects.get("projects", [])
+        persona_id = persona_id.strip() if persona_id and persona_id.strip() else None
+        for item in project_items:
+            if item.get("id") != project_id:
+                continue
+            if persona_id:
+                item["persona_id"] = persona_id
+            elif "persona_id" in item:
+                item.pop("persona_id")
+            normalized = self._normalize_overrides(overrides)
+            if normalized:
+                item["persona_overrides"] = normalized
+            elif "persona_overrides" in item:
+                item.pop("persona_overrides")
+            self._write_projects(projects)
+            updated = self._deserialize_project(item)
+            logger.info(
+                "project.persona.assigned project=%s persona=%s overrides=%s",
+                updated.id,
+                updated.persona_id,
+                bool(normalized),
+            )
+            return updated
+        raise ValueError(f"Project {project_id} not found")
+
     def save_keyword_insight(self, project_id: str, insight: dict) -> dict:
         path = self._keywords_dir / f"{project_id}.json"
         insights: list[dict] = []
@@ -166,6 +208,45 @@ class ProjectStore:
             created_at=self._now(),
         )
         self._write_projects({"projects": [asdict(default_project)]})
+
+    def _deserialize_project(self, payload: dict) -> Project:
+        overrides_payload = payload.get("persona_overrides") or {}
+        persona_payload = payload.get("persona") or {}
+        if not overrides_payload and persona_payload:
+            overrides_payload = persona_payload  # legacy field support
+        overrides = PersonaOverrides(
+            name=overrides_payload.get("name"),
+            tone=overrides_payload.get("tone"),
+            system_prompt=overrides_payload.get("system_prompt"),
+            avatar_url=overrides_payload.get("avatar_url"),
+        )
+        return Project(
+            id=payload.get("id"),
+            name=payload.get("name"),
+            description=payload.get("description"),
+            created_at=payload.get("created_at"),
+            persona_id=payload.get("persona_id"),
+            persona_overrides=overrides,
+        )
+
+    @staticmethod
+    def _normalize(value: str | None) -> str | None:
+        if value is None:
+            return None
+        cleaned = value.strip()
+        return cleaned or None
+
+    def _normalize_overrides(self, overrides: PersonaOverrides | None) -> dict | None:
+        if overrides is None:
+            return None
+        normalized = {
+            "name": self._normalize(overrides.name),
+            "tone": self._normalize(overrides.tone),
+            "system_prompt": self._normalize(overrides.system_prompt),
+            "avatar_url": self._normalize(overrides.avatar_url),
+        }
+        filtered = {key: value for key, value in normalized.items() if value is not None}
+        return filtered or None
 
     def _read_projects(self) -> dict:
         if not self._projects_file.exists():

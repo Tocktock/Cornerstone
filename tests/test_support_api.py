@@ -30,17 +30,21 @@ class DummyChatService:
     def __init__(self) -> None:
         self.calls: list[dict[str, object]] = []
 
-    def generate(self, project_id: str, query: str, *, conversation=None):
-        self.calls.append({"project_id": project_id, "query": query, "conversation": conversation})
+    def generate(self, project, query: str, *, conversation=None):
+        self.calls.append({
+            "project_id": getattr(project, "id", project),
+            "query": query,
+            "conversation": conversation,
+        })
         return SupportAgentResponse(
             message="Here is how to resolve it.",
             sources=[{"title": "Doc", "snippet": "Step details"}],
             definitions=["SLA: agreement"],
         )
 
-    def stream_generate(self, project_id: str, query: str, *, conversation=None):
+    def stream_generate(self, project, query: str, *, conversation=None):
         self.calls.append({
-            "project_id": project_id,
+            "project_id": getattr(project, "id", project),
             "query": query,
             "conversation": conversation,
             "stream": True,
