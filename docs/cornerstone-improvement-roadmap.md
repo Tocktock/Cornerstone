@@ -1,0 +1,117 @@
+# Cornerstone Improvement Roadmap
+
+This document translates the audit findings into a sequenced backlog for the next improvement cycle. Tasks are grouped by theme, sorted in the order we should tackle them. Each item calls out owners, dependencies, and measurable outcomes whenever possible.
+
+## Guiding Principles
+- Preserve the working prototype while layering upgrades iteratively.
+- Ship user-facing wins early (persona controls, UX polish) to validate value quickly.
+- Instrument the pipeline so later analytics and scaling work rest on real metrics.
+
+## Phase 0 – Preparation (Day 0-1)
+1. **Confirm environment prerequisites**
+   - Owners: Eng
+   - Steps: Verify `.env` completeness, ensure Qdrant + Ollama optional dependencies documented.
+2. **Establish baseline metrics**
+   - Owners: Eng + PM
+   - Steps: Capture current ingestion latency, chat response latency, vector count per project.
+
+## Phase 1 – UX & Persona Quick Wins (Week 1)
+1. **Persona configuration UI**
+   - Owners: Frontend + Backend
+   - Steps:
+     1. Add persona fields (name, tone, system prompt, avatar URL) to project schema.
+     2. Create edit form in Knowledge Base pane with validation + preview.
+     3. Persist persona data; update chat prompt builder to use selected persona.
+2. **Session management controls**
+   - Owners: Frontend
+   - Steps:
+     1. Add "New Chat" button to reset conversation state.
+     2. Provide confirmation modal before clearing history.
+3. **Chat accessibility + feedback polish**
+   - Owners: Frontend
+   - Steps:
+     1. Improve focus management after send/receive events.
+     2. Show inline error banners for failed sends or retrieval issues.
+
+## Phase 2 – Ingestion & Retrieval Enhancements (Week 2)
+1. **Multi-file upload + drag-and-drop**
+   - Owners: Frontend + Backend
+   - Steps:
+     1. Update upload UI for multi-select and drag targets.
+     2. Batch backend ingestion by file, return per-file status payload.
+2. **Expanded file type support**
+   - Owners: Backend
+   - Steps:
+     1. Add DOCX parsing (python-docx) and HTML ingestion.
+     2. Surface user-friendly errors for unsupported formats.
+3. **Asynchronous ingestion jobs**
+   - Owners: Backend
+   - Steps:
+     1. Move heavy ingestion to background worker (Celery/RQ or FastAPI background task with queue).
+     2. Provide progress polling endpoint; show status indicator in UI.
+4. **Metadata enrichment**
+   - Owners: Backend
+   - Steps:
+     1. Capture document title, author, section headers when available.
+     2. Include metadata in retrieval payload and source display.
+
+## Phase 3 – Retrieval Quality & Personalization (Week 3)
+1. **Hybrid + rerank retrieval**
+   - Owners: Backend
+   - Steps:
+     1. Introduce keyword BM25 (e.g., Qdrant full-text) alongside vector search.
+     2. Experiment with rerankers (Cohere Rerank or open-source) and A/B evaluate answer quality.
+2. **Dynamic prompt tuning**
+   - Owners: Backend + PM
+   - Steps:
+     1. Parameterize glossary depth, top-K snippets per persona.
+     2. Add temperature and max tokens controls surfaced in UI.
+3. **Glossary management UX**
+   - Owners: Frontend
+   - Steps:
+     1. Provide inline glossary editor per project.
+     2. Allow tagging glossary entries with keywords for retrieval weighting.
+
+## Phase 4 – Analytics & Observability (Week 4)
+1. **Conversation logging service**
+   - Owners: Backend
+   - Steps:
+     1. Persist chat transcripts with project + persona metadata.
+     2. Anonymize sensitive fields; enforce retention policy.
+2. **Admin analytics dashboard MVP**
+   - Owners: Frontend + Data
+   - Steps:
+     1. Display daily conversation counts, resolution rate (heuristic), token usage.
+     2. Surface top queries and unanswered questions list.
+3. **Telemetry instrumentation**
+   - Owners: Engineering
+   - Steps:
+     1. Add tracing/timing around ingestion + query pipeline.
+     2. Forward metrics to Prometheus/Grafana or hosted alternative.
+
+## Phase 5 – Scalability & Multi-Tenancy Hardening (Week 5+)
+1. **Project storage refactor**
+   - Owners: Backend
+   - Steps:
+     1. Migrate project + document metadata from JSON to SQLite/PostgreSQL.
+     2. Implement migrations and data seeding scripts.
+2. **Vector store optimization**
+   - Owners: Backend
+   - Steps:
+     1. Evaluate consolidating collections vs. metadata filtering under load.
+     2. Add automated cleanup routines for stale projects.
+3. **Role-based access control**
+   - Owners: Backend + Frontend
+   - Steps:
+     1. Introduce user accounts with roles (admin, editor, viewer).
+     2. Gate project CRUD + ingestion endpoints by role.
+
+## Supporting Tracks
+- **Documentation**: Maintain updated setup + architecture guides after each major feature drop.
+- **Testing**: Expand integration tests to cover persona prompts, new file types, analytics endpoints.
+- **Design Review**: Host weekly UX review to align on polish and copy updates.
+
+## Acceptance Criteria for Completion
+- Persona-aware chats, multi-file ingestion, and analytics dashboard are demonstrable with automated tests where applicable.
+- Observability baseline established (dashboards + alerts).
+- Migration pathways documented for future contributors.
