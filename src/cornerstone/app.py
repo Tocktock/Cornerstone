@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 from typing import Iterable, Optional
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from qdrant_client import QdrantClient, models
@@ -16,7 +16,11 @@ from .chat import SupportAgentService
 from .config import Settings
 from .embeddings import EmbeddingService
 from .glossary import Glossary, load_glossary
-from .ingestion import DocumentIngestor, ProjectVectorStoreManager
+from .ingestion import (
+    DocumentIngestor,
+    IngestionJobManager,
+    ProjectVectorStoreManager,
+)
 from .keywords import KeywordLLMFilter, build_excerpt, extract_keyword_candidates
 from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .projects import Project, ProjectStore
@@ -51,6 +55,7 @@ class ApplicationState:
         store_manager: ProjectVectorStoreManager,
         chat_service: SupportAgentService,
         ingestion_service: DocumentIngestor,
+        ingestion_jobs: IngestionJobManager,
     ) -> None:
         self.settings = settings
         self.embedding_service = embedding_service
@@ -60,6 +65,7 @@ class ApplicationState:
         self.store_manager = store_manager
         self.chat_service = chat_service
         self.ingestion_service = ingestion_service
+        self.ingestion_jobs = ingestion_jobs
 
 
 def create_app(
@@ -72,6 +78,7 @@ def create_app(
     store_manager: ProjectVectorStoreManager | None = None,
     chat_service: SupportAgentService | None = None,
     ingestion_service: DocumentIngestor | None = None,
+    ingestion_jobs: IngestionJobManager | None = None,
 ) -> FastAPI:
     """Create and configure the FastAPI application."""
 
@@ -122,6 +129,8 @@ def create_app(
         project_store=project_store,
     )
 
+    ingestion_jobs = ingestion_jobs or IngestionJobManager()
+
     app = FastAPI()
     app.state.services = ApplicationState(
         settings=settings,
@@ -132,6 +141,7 @@ def create_app(
         store_manager=store_manager,
         chat_service=chat_service,
         ingestion_service=ingestion_service,
+        ingestion_jobs=ingestion_jobs,
     )
 
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
@@ -162,6 +172,9 @@ def create_app(
 
     def get_glossary(request: Request) -> Glossary:
         return get_state(request).glossary
+
+    def get_ingestion_jobs(request: Request) -> IngestionJobManager:
+        return get_state(request).ingestion_jobs
 
     @app.get("/", response_class=HTMLResponse)
     async def index(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
@@ -726,6 +739,88 @@ def create_app(
         url = request.url_for("knowledge_dashboard").include_query_params(project_id=project.id)
         return RedirectResponse(url=str(url), status_code=303)
 
+    @app.post("/knowledge/uploads", response_class=JSONResponse)
+    async def upload_documents_async(
+        background_tasks: BackgroundTasks,
+        project_id: str = Form(...),
+        files: list[UploadFile] = File(...),
+        project_store: ProjectStore = Depends(get_project_store),
+        ingestion: DocumentIngestor = Depends(get_ingestion_service),
+        job_manager: IngestionJobManager = Depends(get_ingestion_jobs),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        if not files:
+            raise HTTPException(status_code=400, detail="At least one file is required")
+
+        job_ids: list[str] = []
+        for upload in files:
+            filename = upload.filename or "document"
+            try:
+                raw_bytes = await upload.read()
+            except Exception as exc:  # pragma: no cover - unexpected IO errors
+                job = job_manager.create_job(project.id, filename)
+                job_manager.mark_failed(job.id, f"Failed to read file: {exc}")
+                job_ids.append(job.id)
+                continue
+
+            job = job_manager.create_job(project.id, filename)
+            job_ids.append(job.id)
+
+            if not raw_bytes:
+                job_manager.mark_failed(job.id, "File is empty")
+                continue
+
+            background_tasks.add_task(
+                _process_ingestion_job,
+                job_manager,
+                ingestion,
+                job.id,
+                project.id,
+                filename,
+                upload.content_type,
+                raw_bytes,
+            )
+
+        jobs_payload = [job_manager.get(job_id).to_dict() for job_id in job_ids if job_manager.get(job_id)]
+        return JSONResponse({"jobs": jobs_payload}, status_code=202)
+
+    @app.post("/knowledge/upload-url", response_class=JSONResponse)
+    async def upload_document_url(
+        background_tasks: BackgroundTasks,
+        project_id: str = Form(...),
+        url: str = Form(...),
+        project_store: ProjectStore = Depends(get_project_store),
+        ingestion: DocumentIngestor = Depends(get_ingestion_service),
+        job_manager: IngestionJobManager = Depends(get_ingestion_jobs),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        sanitized_url = url.strip()
+        if not sanitized_url:
+            raise HTTPException(status_code=400, detail="URL is required")
+
+        job = job_manager.create_job(project.id, sanitized_url)
+        background_tasks.add_task(
+            _process_ingestion_job,
+            job_manager,
+            ingestion,
+            job.id,
+            project.id,
+            sanitized_url,
+            None,
+            None,
+            sanitized_url,
+        )
+
+        return JSONResponse({"job": job.to_dict()}, status_code=202)
+
+    @app.get("/knowledge/uploads", response_class=JSONResponse)
+    async def list_upload_jobs(
+        project_id: str = Query(...),
+        job_manager: IngestionJobManager = Depends(get_ingestion_jobs),
+    ) -> JSONResponse:
+        jobs = [job.to_dict() for job in job_manager.list_for_project(project_id)]
+        return JSONResponse({"jobs": jobs})
+
     @app.post("/knowledge/cleanup", response_class=RedirectResponse)
     async def cleanup_project(
         request: Request,
@@ -805,3 +900,36 @@ def _format_results(results: Iterable[SearchResult]) -> list[dict[str, object]]:
 
 
 __all__ = ["create_app", "ApplicationState"]
+
+
+def _process_ingestion_job(
+    job_manager: IngestionJobManager,
+    ingestion_service: DocumentIngestor,
+    job_id: str,
+    project_id: str,
+    filename: str,
+    content_type: str | None,
+    data: bytes | None = None,
+    source_url: str | None = None,
+) -> None:
+    job_manager.mark_processing(job_id)
+    try:
+        if source_url:
+            result = ingestion_service.ingest_url(
+                project_id,
+                url=source_url,
+            )
+        else:
+            if data is None:
+                raise ValueError("No data provided for ingestion job")
+            result = ingestion_service.ingest_bytes(
+                project_id,
+                filename=filename,
+                data=data,
+                content_type=content_type,
+            )
+        job_manager.mark_completed(job_id, result.document)
+        logger.info("ingest.job.completed job_id=%s project=%s", job_id, project_id)
+    except Exception as exc:  # pragma: no cover - background task failure
+        logger.exception("ingest.job.failed job_id=%s project=%s error=%s", job_id, project_id, exc)
+        job_manager.mark_failed(job_id, str(exc))

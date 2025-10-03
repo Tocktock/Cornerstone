@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import io
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Sequence
+from typing import Iterable, Sequence
+from urllib.parse import urlparse
 from uuid import uuid4
 
+import httpx
 from fastapi import UploadFile
 
 try:  # pragma: no cover - optional dependency
@@ -16,7 +18,19 @@ try:  # pragma: no cover - optional dependency
 except Exception:  # pragma: no cover
     PdfReader = None
 
+try:  # pragma: no cover - optional dependency
+    from docx import Document as DocxDocument
+except Exception:  # pragma: no cover
+    DocxDocument = None
+
+try:  # pragma: no cover - optional dependency
+    from bs4 import BeautifulSoup
+except Exception:  # pragma: no cover
+    BeautifulSoup = None
+
 import logging
+import mimetypes
+import threading
 
 from .embeddings import EmbeddingService
 from .projects import DocumentMetadata, ProjectStore
@@ -31,6 +45,101 @@ logger = logging.getLogger(__name__)
 class IngestionResult:
     document: DocumentMetadata
     chunks_ingested: int
+
+
+@dataclass(slots=True)
+class ExtractedDocument:
+    text: str
+    title: str | None
+    content_type: str | None
+
+
+@dataclass(slots=True)
+class IngestionJob:
+    id: str
+    project_id: str
+    filename: str
+    status: str
+    created_at: str
+    updated_at: str
+    document: DocumentMetadata | None = None
+    error: str | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "project_id": self.project_id,
+            "filename": self.filename,
+            "status": self.status,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "error": self.error,
+            "document": asdict(self.document) if self.document else None,
+        }
+
+
+class IngestionJobManager:
+    """Track ingestion job status for asynchronous uploads."""
+
+    def __init__(self) -> None:
+        self._jobs: dict[str, IngestionJob] = {}
+        self._lock = threading.Lock()
+
+    def create_job(self, project_id: str, filename: str) -> IngestionJob:
+        now = self._now()
+        job = IngestionJob(
+            id=uuid4().hex,
+            project_id=project_id,
+            filename=filename,
+            status="pending",
+            created_at=now,
+            updated_at=now,
+        )
+        with self._lock:
+            self._jobs[job.id] = job
+        return job
+
+    def mark_processing(self, job_id: str) -> None:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if not job:
+                return
+            job.status = "processing"
+            job.updated_at = self._now()
+
+    def mark_completed(self, job_id: str, document: DocumentMetadata) -> None:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if not job:
+                return
+            job.status = "completed"
+            job.document = document
+            job.error = None
+            job.updated_at = self._now()
+
+    def mark_failed(self, job_id: str, error: str) -> None:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if not job:
+                return
+            job.status = "failed"
+            job.error = error
+            job.updated_at = self._now()
+
+    def list_for_project(self, project_id: str) -> list[IngestionJob]:
+        with self._lock:
+            return sorted(
+                (job for job in self._jobs.values() if job.project_id == project_id),
+                key=lambda job: job.created_at,
+            )
+
+    def get(self, job_id: str) -> IngestionJob | None:
+        with self._lock:
+            return self._jobs.get(job_id)
+
+    @staticmethod
+    def _now() -> str:
+        return datetime.now(timezone.utc).isoformat()
 
 
 class ProjectVectorStoreManager:
@@ -104,17 +213,44 @@ class DocumentIngestor:
         self._projects = project_store
 
     async def ingest_upload(self, project_id: str, upload: UploadFile) -> IngestionResult:
-        logger.info("ingest.start project=%s filename=%s", project_id, upload.filename)
+        filename = upload.filename or "document"
+        logger.info("ingest.start project=%s filename=%s", project_id, filename)
         raw_bytes = await upload.read()
-        text = self._extract_text(upload.filename or upload.content_type or "", raw_bytes)
-        chunks = self._chunk_text(text)
+        return self.ingest_bytes(
+            project_id,
+            filename=filename,
+            data=raw_bytes,
+            content_type=upload.content_type,
+        )
+
+    def ingest_bytes(
+        self,
+        project_id: str,
+        *,
+        filename: str,
+        data: bytes,
+        content_type: str | None = None,
+    ) -> IngestionResult:
+        if not data:
+            raise ValueError("Uploaded file is empty")
+
+        extracted = self._extract_document(filename, data, content_type)
+        chunks = self._chunk_text(extracted.text)
         if not chunks:
             raise ValueError("No textual content could be extracted from the document")
 
         embeddings = self._embedding.embed(chunks)
         doc_id = uuid4().hex
         store = self._stores.get_store(project_id)
-        records = self._build_records(doc_id, upload.filename or "document", chunks, embeddings, project_id)
+        records = self._build_records(
+            doc_id,
+            filename,
+            chunks,
+            embeddings,
+            project_id,
+            extracted.content_type,
+            extracted.title,
+        )
         store.upsert(records)
         logger.info(
             "ingest.upserted project=%s doc_id=%s chunks=%s",
@@ -125,14 +261,53 @@ class DocumentIngestor:
 
         metadata = DocumentMetadata(
             id=doc_id,
-            filename=upload.filename or "document",
+            filename=filename,
             chunk_count=len(records),
             created_at=self._now(),
-            size_bytes=len(raw_bytes),
+            size_bytes=len(data),
+            title=extracted.title,
+            content_type=extracted.content_type,
         )
         self._projects.record_document(project_id, metadata)
         logger.info("ingest.completed project=%s doc_id=%s", project_id, doc_id)
         return IngestionResult(document=metadata, chunks_ingested=len(records))
+
+    def ingest_url(
+        self,
+        project_id: str,
+        *,
+        url: str,
+        timeout: float = 10.0,
+    ) -> IngestionResult:
+        parsed = urlparse(url)
+        if parsed.scheme not in {"http", "https"}:
+            raise ValueError("Only http and https URLs are supported")
+        try:
+            response = httpx.get(url, timeout=timeout, follow_redirects=True)
+        except httpx.HTTPError as exc:  # pragma: no cover - network failure
+            raise ValueError(f"Failed to download URL: {exc}") from exc
+        if response.status_code >= 400:
+            raise ValueError(f"Failed to download URL (status {response.status_code})")
+        content = response.content
+        if not content:
+            raise ValueError("URL returned no content")
+
+        content_type = response.headers.get("content-type")
+        if content_type:
+            content_type = content_type.split(";", 1)[0].strip()
+
+        filename = Path(parsed.path).name or "document"
+        if not Path(filename).suffix and content_type:
+            extension = mimetypes.guess_extension(content_type.split(";", 1)[0])
+            if extension:
+                filename = f"{filename}{extension}"
+
+        return self.ingest_bytes(
+            project_id,
+            filename=filename,
+            data=content,
+            content_type=content_type,
+        )
 
     def _build_records(
         self,
@@ -141,6 +316,8 @@ class DocumentIngestor:
         chunks: Sequence[str],
         embeddings: Sequence[Sequence[float]],
         project_id: str,
+        content_type: str | None,
+        title: str | None,
     ) -> list[VectorRecord]:
         records: list[VectorRecord] = []
         for index, (chunk, vector) in enumerate(zip(chunks, embeddings, strict=True)):
@@ -150,29 +327,96 @@ class DocumentIngestor:
                 "doc_id": doc_id,
                 "chunk_index": index,
                 "source": filename,
+                "content_type": content_type,
+                "title": title,
             }
             records.append(VectorRecord(id=uuid4().hex, vector=vector, payload=payload))
         return records
 
     @staticmethod
-    def _extract_text(filename: str, data: bytes) -> str:
+    def _extract_document(filename: str, data: bytes, content_type: str | None) -> ExtractedDocument:
         suffix = Path(filename).suffix.lower()
-        if suffix in {".md", ".markdown", ".txt", ""}:
-            return data.decode("utf-8", errors="ignore")
+        guessed_type = content_type or mimetypes.guess_type(filename)[0]
+
+        if suffix in {".md", ".markdown"}:
+            text = data.decode("utf-8", errors="ignore")
+            title = DocumentIngestor._derive_markdown_title(text)
+            return ExtractedDocument(text=text, title=title, content_type=guessed_type or "text/markdown")
+
+        if suffix in {".txt", ""} or (guessed_type and guessed_type.startswith("text/")):
+            text = data.decode("utf-8", errors="ignore")
+            title = DocumentIngestor._derive_plain_title(text)
+            return ExtractedDocument(text=text, title=title, content_type=guessed_type or "text/plain")
+
         if suffix == ".pdf":
             if PdfReader is None:
                 raise ValueError("PDF support requires the 'pypdf' package")
             try:
                 reader = PdfReader(io.BytesIO(data))
                 texts = [page.extract_text() or "" for page in reader.pages]
+                metadata_title = None
+                try:  # pragma: no cover - optional metadata
+                    metadata_title = getattr(reader, "metadata", None)
+                    if metadata_title and getattr(metadata_title, "title", None):
+                        metadata_title = metadata_title.title
+                    else:
+                        metadata_title = None
+                except Exception:
+                    metadata_title = None
             except Exception as exc:  # pragma: no cover - parsing errors
                 raise ValueError(f"Failed to extract text from PDF: {exc}") from exc
             combined = "\n\n".join(filter(None, texts))
-            if combined.strip():
-                return combined
-            # Fallback: best effort decode to avoid empty ingestion
-            return data.decode("utf-8", errors="ignore")
-        return data.decode("utf-8", errors="ignore")
+            if not combined.strip():
+                combined = data.decode("utf-8", errors="ignore")
+            title = metadata_title or DocumentIngestor._derive_plain_title(combined)
+            return ExtractedDocument(text=combined, title=title, content_type=guessed_type or "application/pdf")
+
+        if suffix == ".docx":
+            if DocxDocument is None:
+                raise ValueError("DOCX support requires the 'python-docx' package")
+            try:
+                document = DocxDocument(io.BytesIO(data))
+            except Exception as exc:  # pragma: no cover - parsing errors
+                raise ValueError(f"Failed to extract text from DOCX: {exc}") from exc
+            paragraphs = [paragraph.text.strip() for paragraph in document.paragraphs if paragraph.text.strip()]
+            text = "\n\n".join(paragraphs)
+            core_title = None
+            try:
+                core_title = document.core_properties.title
+            except Exception:  # pragma: no cover
+                core_title = None
+            base_title = core_title or (paragraphs[0] if paragraphs else None)
+            if base_title:
+                base_title = base_title.strip()
+            return ExtractedDocument(
+                text=text,
+                title=base_title or DocumentIngestor._derive_plain_title(text),
+                content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+
+        if suffix in {".html", ".htm"} or (guessed_type and "html" in guessed_type):
+            if BeautifulSoup is None:
+                raise ValueError("HTML support requires the 'beautifulsoup4' package")
+            soup = BeautifulSoup(data, "html.parser")
+            for tag in soup(["script", "style"]):
+                tag.extract()
+            title = None
+            if soup.title and soup.title.string:
+                title = soup.title.string.strip()
+            text = soup.get_text(separator="\n")
+            return ExtractedDocument(
+                text=text,
+                title=title or DocumentIngestor._derive_plain_title(text),
+                content_type="text/html",
+            )
+
+        # Fallback: treat as UTF-8 text
+        text = data.decode("utf-8", errors="ignore")
+        return ExtractedDocument(
+            text=text,
+            title=DocumentIngestor._derive_plain_title(text),
+            content_type=guessed_type or "text/plain",
+        )
 
     @staticmethod
     def _chunk_text(text: str, *, max_chars: int = 1200, overlap: int = 150) -> list[str]:
@@ -211,8 +455,33 @@ class DocumentIngestor:
         return merged
 
     @staticmethod
+    def _derive_markdown_title(text: str) -> str | None:
+        for line in text.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith("#"):
+                return stripped.lstrip("#").strip()[:160] or None
+            return stripped[:160]
+        return None
+
+    @staticmethod
+    def _derive_plain_title(text: str) -> str | None:
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped:
+                return stripped[:160]
+        return None
+
+    @staticmethod
     def _now() -> str:
         return datetime.now(timezone.utc).isoformat()
 
 
-__all__ = ["DocumentIngestor", "ProjectVectorStoreManager", "IngestionResult"]
+__all__ = [
+    "DocumentIngestor",
+    "ProjectVectorStoreManager",
+    "IngestionResult",
+    "IngestionJob",
+    "IngestionJobManager",
+]
