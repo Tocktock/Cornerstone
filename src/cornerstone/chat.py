@@ -93,6 +93,10 @@ class SupportAgentService:
 
     # Internal helpers -------------------------------------------------
 
+    @staticmethod
+    def _is_korean(text: str) -> bool:
+        return any("\uAC00" <= char <= "\uD7A3" for char in text)
+
     def _build_context(
         self,
         project_id: str,
@@ -141,10 +145,17 @@ class SupportAgentService:
         conversation_history = "\n".join(conversation)
         glossary_section = self._glossary.to_prompt_section(query, self._settings.glossary_top_k)
 
+        language_instruction = (
+            "모든 답변은 한국어로 작성하세요."
+            if self._is_korean(query) or any(self._is_korean(turn) for turn in conversation)
+            else "Write the full response in English."
+        )
+
         instructions = (
             "You are a support agent helping customers diagnose and resolve issues. "
             "Ask for missing details when necessary, provide step-by-step guidance, and when uncertain, "
-            "suggest escalating to a human agent."
+            "suggest escalating to a human agent. "
+            + language_instruction
         )
 
         prompt_sections = [
