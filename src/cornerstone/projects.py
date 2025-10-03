@@ -44,8 +44,10 @@ class ProjectStore:
         self._root = root
         self._projects_file = root / "projects.json"
         self._documents_dir = root / "documents"
+        self._keywords_dir = root / "keywords"
         self._root.mkdir(parents=True, exist_ok=True)
         self._documents_dir.mkdir(parents=True, exist_ok=True)
+        self._keywords_dir.mkdir(parents=True, exist_ok=True)
         self._ensure_default_project(default_project_name)
 
     def list_projects(self) -> List[Project]:
@@ -126,6 +128,33 @@ class ProjectStore:
         if path.exists():
             path.unlink()
             logger.info("project.documents.cleared project=%s", project_id)
+
+    # Keyword insight persistence -------------------------------------------------
+
+    def save_keyword_insight(self, project_id: str, insight: dict) -> dict:
+        path = self._keywords_dir / f"{project_id}.json"
+        insights: list[dict] = []
+        if path.exists():
+            with path.open("r", encoding="utf-8") as handle:
+                insights = json.load(handle)
+
+        insight_with_meta = {
+            "id": uuid4().hex,
+            "created_at": self._now(),
+            **insight,
+        }
+        insights.append(insight_with_meta)
+
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(insights, handle, indent=2)
+
+        logger.info(
+            "project.keyword.saved project=%s term=%s insight_id=%s",
+            project_id,
+            insight.get("term"),
+            insight_with_meta["id"],
+        )
+        return insight_with_meta
 
     def _ensure_default_project(self, default_project_name: str) -> None:
         if self._projects_file.exists():

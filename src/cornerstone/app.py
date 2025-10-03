@@ -435,6 +435,26 @@ def create_app(
             }
         )
 
+    @app.post("/keywords/{project_id}/insights", response_class=JSONResponse)
+    async def save_keyword_insight(
+        project_id: str,
+        request: Request,
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        payload = await request.json()
+        term = str(payload.get("term", "")).strip()
+        if not term:
+            raise HTTPException(status_code=400, detail="term is required")
+        insight = {
+            "term": term,
+            "candidates": payload.get("candidates") or [],
+            "definitions": payload.get("definitions") or [],
+            "filter": payload.get("filter") or {},
+        }
+        saved = project_store.save_keyword_insight(project.id, insight)
+        return JSONResponse(saved, status_code=201)
+
     @app.post("/knowledge/projects", response_class=RedirectResponse)
     async def create_project(
         request: Request,

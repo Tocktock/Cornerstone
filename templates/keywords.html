@@ -27,6 +27,10 @@
       .status-line { color: #6b7280; font-size: 0.9rem; margin-top: 0.65rem; }
       .detail-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
       .detail-header h2 { margin: 0; font-size: 1.4rem; }
+      .detail-actions { display: flex; align-items: center; gap: 0.75rem; }
+      .save-button { padding: 0.5rem 1.2rem; border-radius: 999px; border: none; background: #2563eb; color: #fff; font-size: 0.95rem; cursor: pointer; box-shadow: 0 10px 24px rgba(37,99,235,0.18); }
+      .save-button:disabled { background: #9ca3af; cursor: not-allowed; box-shadow: none; }
+      .save-status { font-size: 0.85rem; color: #6b7280; }
       .detail-columns { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 1.5rem; }
       .detail-card { border: 1px solid #e5e7eb; border-radius: 14px; padding: 1rem 1.25rem; background: #f9fafb; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08); min-height: 180px; display: flex; flex-direction: column; }
       .detail-card h3 { margin: 0 0 0.85rem; font-size: 1.1rem; }
@@ -66,7 +70,11 @@
       <section>
         <div class="detail-header">
           <h2 id="detail-title">Keyword details</h2>
-          <span id="detail-subtitle" class="status-line"></span>
+          <div class="detail-actions">
+            <span id="detail-subtitle" class="status-line"></span>
+            <button id="save-insight" class="save-button" type="button" disabled>Save insight</button>
+            <span id="save-status" class="save-status"></span>
+          </div>
         </div>
         <div class="detail-columns">
           <div class="detail-card" id="candidate-card">
@@ -88,11 +96,15 @@
         const keywordList = document.getElementById('keyword-list');
         const detailTitle = document.getElementById('detail-title');
         const detailSubtitle = document.getElementById('detail-subtitle');
+        const saveButton = document.getElementById('save-insight');
+        const saveStatus = document.getElementById('save-status');
         const candidateList = document.getElementById('candidate-list');
         const definitionList = document.getElementById('definition-list');
 
         let keywords = [];
         let selectedTerm = null;
+        let currentInsight = null;
+        let currentFilter = {};
 
         function clearKeywordList() {
           keywordList.innerHTML = '';
@@ -121,6 +133,9 @@
           clearKeywordList();
           clearDetail();
           selectedTerm = null;
+          currentInsight = null;
+          saveButton.disabled = true;
+          saveStatus.textContent = '';
 
           try {
             const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/candidates`);
@@ -130,6 +145,7 @@
             const data = await response.json();
             const filterInfo = data.filter || {};
             const status = filterInfo.status || 'unknown';
+            currentFilter = filterInfo;
             keywordStatus.dataset.status = status;
             keywordStatus.style.color = '#1f2937';
             keywords = data.keywords || [];
@@ -209,6 +225,8 @@
           detailSubtitle.textContent = 'Loading contextual matches...';
           candidateList.innerHTML = '';
           definitionList.innerHTML = '';
+          saveStatus.textContent = '';
+          saveButton.disabled = true;
 
           try {
             const projectId = projectSelect.value;
@@ -223,11 +241,24 @@
             renderCandidates(candidates);
             renderDefinitions(definitions);
             detailSubtitle.textContent = `${candidates.length} candidate snippet${candidates.length === 1 ? '' : 's'} • ${definitions.length} glossary definition${definitions.length === 1 ? '' : 's'}`;
+            currentInsight = {
+              term,
+              candidates,
+              definitions,
+              filter: { ...currentFilter, status: keywordStatus.dataset.status },
+            };
+            const selectedKeywordMeta = keywords.find((item) => item.term === term);
+            if (selectedKeywordMeta) {
+              currentInsight.filter.termMeta = selectedKeywordMeta;
+            }
+            saveButton.disabled = false;
           } catch (error) {
             console.error(error);
             candidateList.innerHTML = '<p class="status-line">Unable to load candidate snippets.</p>';
             definitionList.innerHTML = '<p class="status-line">Unable to load definitions.</p>';
             detailSubtitle.textContent = 'Lookup failed.';
+            currentInsight = null;
+            saveButton.disabled = true;
           }
         }
 
@@ -286,6 +317,41 @@
           clearKeywordList();
           clearDetail();
           keywordStatus.textContent = 'Select a project and click search to generate keyword candidates.';
+          keywordStatus.style.color = '#1f2937';
+          keywordStatus.dataset.status = '';
+          currentInsight = null;
+          currentFilter = {};
+          saveButton.disabled = true;
+          saveStatus.textContent = '';
+        });
+
+        saveButton.addEventListener('click', async () => {
+          if (!currentInsight) {
+            return;
+          }
+          const projectId = projectSelect.value;
+          saveButton.disabled = true;
+          saveStatus.style.color = '#1f2937';
+          saveStatus.textContent = 'Saving insight…';
+          try {
+            const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/insights`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(currentInsight),
+            });
+            if (!response.ok) {
+              throw new Error(`Save failed with status ${response.status}`);
+            }
+            const data = await response.json();
+            saveStatus.style.color = '#047857';
+            saveStatus.textContent = `Saved insight (${data.id.slice(0, 6)})`; 
+          } catch (error) {
+            console.error(error);
+            saveStatus.style.color = '#b91c1c';
+            saveStatus.textContent = 'Failed to save insight.';
+          } finally {
+            saveButton.disabled = false;
+          }
         });
 
         clearDetail();

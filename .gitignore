@@ -81,6 +81,7 @@ coverage.xml
 # Local data / artifacts
 /tmp/
 *.log
+data/
 
 # Qdrant snapshots
 qdrant_storage/
