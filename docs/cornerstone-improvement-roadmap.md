@@ -54,7 +54,7 @@ This document translates the audit findings into a sequenced backlog for the nex
    - Owners: Backend
    - Steps:
      1. Add DOCX parsing (python-docx) and HTML ingestion.
-     2. Surface user-friendly errorsㅔ for unsupported formats.
+     2. Surface user-friendly errors for unsupported formats.
 3. **Asynchronous ingestion jobs**
    - Owners: Backend
    - Steps:
@@ -74,6 +74,7 @@ This document translates the audit findings into a sequenced backlog for the nex
      1. Build Knowledge Base UI picker for directories under `data/local/**` with file count/size preview and job status.
      2. Extend ingestion API to enqueue local-file jobs (stream from disk, reuse job manager) and surface status in UI.
      3. Deliver CLI (`python -m cornerstone.ingest_local`) with resumable manifest support for bulk indexing.
+     4. Persist ingestion manifests/checkpoints so multi-day jobs resume cleanly and apply per-tenant throttles during imports.
 2. **Advanced chunking pipeline**
    - Owners: Backend
    - Steps:
@@ -145,6 +146,13 @@ This document translates the audit findings into a sequenced backlog for the nex
    - Steps:
      1. Introduce user accounts with roles (admin, editor, viewer).
      2. Gate project CRUD + ingestion endpoints by role.
+4. **Massive corpus operations**
+   - Owners: Backend + Infrastructure
+   - Steps:
+     1. Promote the ingestion queue to a horizontally scalable broker (Redis Streams baseline; evaluate Kafka when throughput exceeds 10k docs/hr) with autoscaled workers and backpressure safeguards.
+     2. Implement tiered storage policies (hot SSD, warm object store) with deduplication, versioning, and purge/archival tooling for compliance-driven deletes.
+     3. Benchmark hybrid retrieval on corpora exceeding 1M chunks, tuning ANN + RRF parameters, warming caches for top intents, and alerting on relevance drift.
+     4. Track per-tenant storage, compute, and token spend with capacity alerts; publish scale-event runbooks covering bulk imports, capacity adds, and partial outages.
 
 ## Supporting Tracks
 
