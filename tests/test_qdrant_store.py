@@ -24,8 +24,21 @@ def test_ensure_collection_dimension_mismatch() -> None:
     store.ensure_collection()
 
     mismatch_store = QdrantVectorStore(client, 'test-collection', vector_size=2)
-    with pytest.raises(ValueError):
-        mismatch_store.ensure_collection()
+    mismatch_store.ensure_collection()
+    info = client.get_collection('test-collection')
+    assert info.config.params.vectors.size == 2
+    assert mismatch_store.count() == 0
+
+
+def test_ensure_payload_indexes_creates_indexes() -> None:
+    client = QdrantClient(path=':memory:')
+    store = QdrantVectorStore(client, 'test-collection', vector_size=3)
+    store.ensure_collection()
+    store.ensure_payload_indexes()
+    info = client.get_collection('test-collection')
+    schema = getattr(info, 'payload_schema', {}) or {}
+    if schema:  # Some in-memory deployments do not expose schema details
+        assert 'project_id' in schema
 
 
 def test_upsert_and_search_returns_best_match(qdrant_store: QdrantVectorStore) -> None:

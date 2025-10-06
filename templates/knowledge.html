@@ -42,15 +42,21 @@
       .upload-status li.completed span.status { color:#047857; }
       .upload-status li.failed span.status { color:#dc2626; }
       .upload-status li.processing span.status { color:#2563eb; }
+      .upload-status li.throttled span.status { color:#f59e0b; }
+      .directory-meta { color:#6b7280; font-size:0.85rem; margin-left:0.35rem; }
       .upload-hint { font-size:0.85rem; color:#6b7280; margin-top:0.45rem; }
-      .url-upload { margin-top:1.25rem; display:flex; flex-direction:column; gap:0.5rem; }
-      .url-input-group { display:flex; gap:0.65rem; }
+      .local-import { margin-top:1.1rem; display:flex; flex-direction:column; gap:0.5rem; }
+      .local-input-group { display:flex; gap:0.65rem; align-items:center; }
+      .local-input-group input { flex:1; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
+      .local-input-group button { padding:0.65rem 1.5rem; border-radius:999px; border:none; background:#1f2937; color:#fff; font-size:0.95rem; box-shadow:0 12px 28px rgba(17,24,39,0.18); cursor:pointer; }
+      .url-upload { margin-top:1.1rem; display:flex; flex-direction:column; gap:0.5rem; }
+      .url-input-group { display:flex; gap:0.65rem; align-items:center; }
       .url-input-group input { flex:1; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
       .url-input-group button { padding:0.65rem 1.5rem; border-radius:999px; border:none; background:#2563eb; color:#fff; font-size:0.95rem; box-shadow:0 12px 28px rgba(37,99,235,0.2); cursor:pointer; }
       @media (max-width: 900px) {
         main { grid-template-columns: 1fr; }
-        .url-input-group { flex-direction:column; }
-        .url-input-group button { width:100%; }
+        .local-input-group, .url-input-group { flex-direction:column; align-items:stretch; }
+        .local-input-group button, .url-input-group button { width:100%; }
       }
     </style>
   </head>
@@ -171,6 +177,16 @@
           <div class="upload-actions">
             <button type="button" id="select-files">Select files</button>
           </div>
+          <div class="local-import">
+            <label for="local-path" style="font-weight:600; color:#1f2937;">Import local directory</label>
+          <div class="local-input-group">
+            <input id="local-path" list="local-directories" placeholder="e.g. team-notes/2024-q2" />
+            <datalist id="local-directories"></datalist>
+            <button type="button" id="import-local">Import</button>
+          </div>
+          <div id="local-directory-meta" class="directory-meta"></div>
+          <span class="upload-hint">Directories are resolved relative to <code>data/local/</code>.</span>
+        </div>
           <div class="url-upload">
             <label for="url-input" style="font-weight:600; color:#1f2937;">Fetch from URL</label>
             <div class="url-input-group">
@@ -243,6 +259,10 @@
       const projectSection = document.querySelector('section[data-project-id]');
       const urlInput = document.getElementById('url-input');
       const submitUrl = document.getElementById('submit-url');
+      const localPathInput = document.getElementById('local-path');
+      const localDataList = document.getElementById('local-directories');
+      const directoryMeta = document.getElementById('local-directory-meta');
+      const importLocalBtn = document.getElementById('import-local');
       if (!dropZone || !fileInput || !selectBtn || !statusList || !projectSection) {
         return;
       }
@@ -460,6 +480,134 @@
           }
         });
       }
+
+      async function importLocalDirectory() {
+        if (!localPathInput) {
+          return;
+        }
+        const value = localPathInput.value.trim();
+        if (!value) {
+          return;
+        }
+        const formData = new FormData();
+        formData.append('project_id', projectId);
+        formData.append('path', value);
+        try {
+          const response = await fetch('/knowledge/local-import', {
+            method: 'POST',
+            body: formData,
+          });
+          if (!response.ok) {
+            const detail = await response.json().catch(() => ({}));
+            renderJobs([
+              {
+                id: 'local-error',
+                filename: value,
+                status: 'failed',
+                error: detail.detail || 'Local import failed.',
+                updated_at: new Date().toISOString(),
+              },
+            ]);
+            return;
+          }
+          const payload = await response.json();
+          if (payload.job) {
+            renderJobs([payload.job]);
+            activeJobs.add(payload.job.id);
+            startPolling();
+          }
+        } catch (error) {
+          renderJobs([
+            {
+              id: 'local-error',
+              filename: value,
+              status: 'failed',
+              error: error.message,
+              updated_at: new Date().toISOString(),
+            },
+          ]);
+        }
+      }
+
+      if (importLocalBtn) {
+        importLocalBtn.addEventListener('click', importLocalDirectory);
+      }
+
+      if (localPathInput) {
+        localPathInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            importLocalDirectory();
+          }
+        });
+      }
+
+      async function loadLocalDirectories() {
+        if (!localDataList) {
+          return;
+        }
+        try {
+          const response = await fetch('/knowledge/local-directories');
+          if (!response.ok) {
+            return;
+          }
+          const data = await response.json();
+          localDataList.innerHTML = '';
+          (data.directories || []).forEach((dir) => {
+            const option = document.createElement('option');
+            option.value = dir.path;
+            option.label = dir.path;
+            option.dataset.fileCount = dir.file_count;
+            option.dataset.totalBytes = dir.total_bytes;
+            localDataList.appendChild(option);
+          });
+        } catch (error) {
+          console.error('Failed to load local directories', error);
+        }
+      }
+
+      function formatBytes(bytes) {
+        if (!Number.isFinite(bytes) || bytes <= 0) {
+          return '0 B';
+        }
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let value = bytes;
+        let unitIndex = 0;
+        while (value >= 1024 && unitIndex < units.length - 1) {
+          value /= 1024;
+          unitIndex += 1;
+        }
+        return `${value.toFixed(value >= 10 || value < 0.1 ? 0 : 1)} ${units[unitIndex]}`;
+      }
+
+      function updateDirectoryMeta(value) {
+        if (!directoryMeta) {
+          return;
+        }
+        const option = Array.from(localDataList?.options || []).find((opt) => opt.value === value);
+        if (!option) {
+          directoryMeta.textContent = '';
+          return;
+        }
+        const files = Number(option.dataset.fileCount || 0);
+        const bytes = Number(option.dataset.totalBytes || 0);
+        if (!files) {
+          directoryMeta.textContent = 'No supported files detected';
+          return;
+        }
+        directoryMeta.textContent = `${files} file${files === 1 ? '' : 's'} · ${formatBytes(bytes)}`;
+      }
+
+      if (localPathInput) {
+        localPathInput.addEventListener('input', (event) => {
+          updateDirectoryMeta(event.target.value);
+        });
+        localPathInput.addEventListener('change', (event) => {
+          updateDirectoryMeta(event.target.value);
+        });
+      }
+
+      loadLocalDirectories();
     })();
   </script>
   </body>

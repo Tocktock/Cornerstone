@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any, Iterable, List, Sequence
 
 from qdrant_client import QdrantClient, models
 
 from .config import Settings
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -110,11 +114,45 @@ class QdrantVectorStore:
         info = self._client.get_collection(self._collection_name)
         existing_size = info.config.params.vectors.size
         if existing_size != self._vector_size:
-            msg = (
-                "Existing collection vector size "
-                f"({existing_size}) does not match expected size {self._vector_size}."
+            logger.warning(
+                (
+                    "Qdrant collection '%s' has vector size %s but %s is expected; "
+                    "dropping existing collection and recreating (stored vectors will be lost)."
+                ),
+                self._collection_name,
+                existing_size,
+                self._vector_size,
             )
-            raise ValueError(msg)
+            self._client.delete_collection(self._collection_name)
+            self._create_collection()
+
+    def ensure_payload_indexes(self) -> None:
+        """Ensure frequently filtered payload fields are indexed."""
+
+        fields: dict[str, models.PayloadSchemaType] = {
+            "project_id": models.PayloadSchemaType.KEYWORD,
+            "doc_id": models.PayloadSchemaType.KEYWORD,
+            "chunk_id": models.PayloadSchemaType.KEYWORD,
+            "source": models.PayloadSchemaType.KEYWORD,
+        }
+
+        for field_name, schema in fields.items():
+            try:
+                self._client.create_payload_index(
+                    collection_name=self._collection_name,
+                    field_name=field_name,
+                    field_schema=schema,
+                )
+            except Exception as exc:  # pragma: no cover - already exists
+                message = str(exc).lower()
+                if "already exists" in message or "exists" in message:
+                    continue
+                logger.warning(
+                    "Failed to create payload index for field '%s' on '%s': %s",
+                    field_name,
+                    self._collection_name,
+                    exc,
+                )
 
     def upsert(self, records: Sequence[VectorRecord], *, wait: bool = True) -> None:
         """Insert or update vectors in the collection."""

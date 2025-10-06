@@ -28,7 +28,11 @@ _DEFAULT_OLLAMA_URL: Final[str] = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL: Final[str] = "llama3.1:8b"
 _DEFAULT_OLLAMA_TIMEOUT: Final[float] = 60.0
 _DEFAULT_DATA_DIR: Final[str] = "data"
+_DEFAULT_LOCAL_DATA_DIR: Final[str] = "data/local"
+_DEFAULT_FTS_DB: Final[str] = "data/fts.sqlite"
 _DEFAULT_PROJECT_NAME: Final[str] = "Default Project"
+_DEFAULT_INGESTION_CONCURRENCY: Final[int] = 3
+_DEFAULT_INGESTION_FILES_PER_MINUTE: Final[int] = 180
 
 
 @dataclass(slots=True)
@@ -48,7 +52,11 @@ class Settings:
     glossary_path: str = _DEFAULT_GLOSSARY_PATH
     glossary_top_k: int = _DEFAULT_GLOSSARY_TOP_K
     data_dir: str = _DEFAULT_DATA_DIR
+    local_data_dir: str = _DEFAULT_LOCAL_DATA_DIR
+    fts_db_path: str = _DEFAULT_FTS_DB
     default_project_name: str = _DEFAULT_PROJECT_NAME
+    ingestion_project_concurrency_limit: int = _DEFAULT_INGESTION_CONCURRENCY
+    ingestion_files_per_minute: int = _DEFAULT_INGESTION_FILES_PER_MINUTE
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -68,7 +76,15 @@ class Settings:
             glossary_path=os.getenv("GLOSSARY_PATH", _DEFAULT_GLOSSARY_PATH),
             glossary_top_k=int(os.getenv("GLOSSARY_TOP_K", _DEFAULT_GLOSSARY_TOP_K)),
             data_dir=os.getenv("DATA_DIR", _DEFAULT_DATA_DIR),
+            local_data_dir=os.getenv("LOCAL_DATA_DIR", _DEFAULT_LOCAL_DATA_DIR),
+            fts_db_path=os.getenv("FTS_DB_PATH", _DEFAULT_FTS_DB),
             default_project_name=os.getenv("DEFAULT_PROJECT_NAME", _DEFAULT_PROJECT_NAME),
+            ingestion_project_concurrency_limit=int(
+                os.getenv("INGESTION_PROJECT_CONCURRENCY_LIMIT", _DEFAULT_INGESTION_CONCURRENCY)
+            ),
+            ingestion_files_per_minute=int(
+                os.getenv("INGESTION_FILES_PER_MINUTE", _DEFAULT_INGESTION_FILES_PER_MINUTE)
+            ),
         )
 
     @property

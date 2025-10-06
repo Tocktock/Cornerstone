@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import tempfile
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
@@ -38,9 +39,11 @@ from cornerstone.config import Settings
 from cornerstone.glossary import Glossary
 from cornerstone.ingestion import (
     DocumentIngestor,
+    IngestionJobManager,
     IngestionResult,
     ProjectVectorStoreManager,
 )
+from cornerstone.fts import FTSIndex
 from cornerstone.personas import PersonaStore
 from cornerstone.projects import DocumentMetadata, ProjectStore
 
@@ -62,9 +65,18 @@ SAMPLE_PDF_BYTES = b"%PDF-1.1\n1 0 obj<<>>endobj\n2 0 obj<< /Length 56 >>stream\
 HTML_SAMPLE_BYTES = b"""<html><head><title>Support FAQ</title></head><body><h1>FAQ</h1><p>Step one.</p></body></html>"""
 
 
-def build_app():
+def build_app(settings: Settings | None = None):
     tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-ingest-"))
-    settings = Settings(data_dir=str(tmpdir), default_project_name="Project One")
+    base_settings = settings or Settings()
+    settings_kwargs = {field: getattr(base_settings, field) for field in Settings.__dataclass_fields__ if field != 'local_data_dir'}
+    settings_kwargs.update(
+        {
+            "data_dir": str(tmpdir),
+            "local_data_dir": str(Path(tmpdir) / "local"),
+        }
+    )
+    settings = Settings(**settings_kwargs)
+    Path(settings.local_data_dir).mkdir(parents=True, exist_ok=True)
     embedding = FakeEmbeddingService()
     project_store = ProjectStore(tmpdir, default_project_name=settings.default_project_name)
     persona_store = PersonaStore(tmpdir)
@@ -80,14 +92,16 @@ def build_app():
     store_manager.get_store(default_project.id)
 
     glossary = Glossary()
+    fts_index = FTSIndex(Path(tmpdir) / "fts.sqlite")
     chat_service = SupportAgentService(
         settings=settings,
         embedding_service=embedding,  # type: ignore[arg-type]
         store_manager=store_manager,
         glossary=glossary,
         persona_store=persona_store,
+        fts_index=fts_index,
     )
-    ingestion_service = DocumentIngestor(embedding, store_manager, project_store)
+    ingestion_service = DocumentIngestor(embedding, store_manager, project_store, fts_index=fts_index)
 
     app = create_app(
         settings=settings,
@@ -99,6 +113,7 @@ def build_app():
         chat_service=chat_service,
         ingestion_service=ingestion_service,
     )
+    app.state.services.fts_index = fts_index
 
     return TestClient(app)
 
@@ -192,6 +207,24 @@ def test_uploads_across_multiple_projects():
     assert project_store.list_documents(target_project.id) == []
     store = state.store_manager.get_store(target_project.id)
     assert store.count() == 0
+
+
+def test_fts_index_populated_after_ingest():
+    client = build_app()
+    state = client.app.state.services
+    project = state.project_store.list_projects()[0]
+
+    response = client.post(
+        "/knowledge/upload",
+        data={"project_id": project.id},
+        files={"file": ("alpha.md", b"# Alpha\nContent about Alpha", "text/markdown")},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    hits = state.fts_index.search(project.id, "Alpha", limit=2)
+    assert hits
+    assert any("Alpha" in hit["text"] for hit in hits)
 
 
 def test_async_multi_file_uploads_return_jobs():
@@ -447,3 +480,121 @@ def test_cleanup_endpoint_purges_project_vectors():
     assert response.status_code == 303
     assert project_store.list_documents(project.id) == []
     assert store.count() == 0
+
+
+def test_ingested_chunks_include_metadata_summary_and_language():
+    client = build_app()
+    state = client.app.state.services
+    project = state.project_store.list_projects()[0]
+
+    rich_text = "# Getting Started\n\n" + " ".join(
+        f"This sentence number {i} explains the setup." for i in range(120)
+    )
+
+    response = client.post(
+        "/knowledge/upload",
+        data={"project_id": project.id},
+        files={"file": ("guide.md", rich_text.encode("utf-8"), "text/markdown")},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    payloads = list(state.store_manager.iter_project_payloads(project.id))
+    assert payloads
+    first_payload = payloads[0]
+    assert first_payload.get("summary")
+    assert first_payload.get("language") == "en"
+    assert first_payload.get("token_count", 0) > 0
+    assert "section_path" in first_payload
+
+
+def test_local_directories_response_includes_stats(tmp_path: Path):
+    settings = Settings(
+        data_dir=str(tmp_path),
+        default_project_name="Project One",
+        local_data_dir=str(tmp_path / "local"),
+    )
+    client = build_app(settings)
+
+    local_root = Path(client.app.state.services.settings.local_data_dir)
+    (local_root / "alpha").mkdir(parents=True)
+    sample_file = local_root / "alpha" / "guide.md"
+    sample_file.write_text("Hello world", encoding="utf-8")
+    (local_root / "alpha" / "ignore.bin").write_bytes(b"\x00\x01")
+
+    response = client.get("/knowledge/local-directories")
+    assert response.status_code == 200
+    data = response.json()
+    assert "directories" in data
+    alpha = next((entry for entry in data["directories"] if entry["name"] == "alpha"), None)
+    assert alpha is not None
+    assert alpha.get("path") == "alpha"
+    assert alpha.get("file_count") == 1
+    assert isinstance(alpha.get("total_bytes"), int)
+    assert alpha["total_bytes"] >= len("Hello world".encode("utf-8"))
+
+
+def test_job_manager_throttles_when_project_over_limit():
+    manager = IngestionJobManager(
+        max_active_per_project=1,
+        max_files_per_minute=None,
+        throttle_poll_interval=0.05,
+    )
+    job1 = manager.create_job("proj", "alpha.txt")
+    job2 = manager.create_job("proj", "bravo.txt")
+
+    release = threading.Event()
+
+    def worker(job_id: str, doc_id: str) -> None:
+        manager.mark_processing(job_id)
+        release.wait()
+        manager.mark_completed(
+            job_id,
+            DocumentMetadata(
+                id=doc_id,
+                filename="doc.txt",
+                chunk_count=1,
+                created_at=datetime.now().isoformat(),
+                size_bytes=10,
+                title="Doc",
+                content_type="text/plain",
+            ),
+        )
+
+    t1 = threading.Thread(target=worker, args=(job1.id, "d1"), daemon=True)
+    t2 = threading.Thread(target=worker, args=(job2.id, "d2"), daemon=True)
+
+    t1.start()
+    time.sleep(0.05)
+    t2.start()
+
+    time.sleep(0.15)
+    throttled_job = manager.get(job2.id)
+    assert throttled_job is not None
+    assert throttled_job.status == "throttled"
+
+    release.set()
+    t1.join(timeout=1.0)
+    t2.join(timeout=1.0)
+
+    assert manager.get(job1.id).status == "completed"
+    assert manager.get(job2.id).status == "completed"
+
+
+def test_job_manager_wait_for_rate_limits_throughput():
+    manager = IngestionJobManager(
+        max_active_per_project=2,
+        max_files_per_minute=2,
+        throttle_poll_interval=0.01,
+        rate_window_seconds=1.0,
+    )
+
+    start = time.monotonic()
+    manager.wait_for_rate("proj")
+    manager.wait_for_rate("proj")
+    pre_third = time.monotonic() - start
+    manager.wait_for_rate("proj")
+    total_elapsed = time.monotonic() - start
+
+    assert pre_third < 1.0
+    assert total_elapsed >= 0.95
