@@ -8,7 +8,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Any, Iterable, Sequence
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -39,6 +39,7 @@ from .projects import DocumentMetadata, ProjectStore
 from .vector_store import QdrantVectorStore, VectorRecord
 from .chunker import chunk_text, Chunk
 from .fts import FTSIndex
+from .observability import MetricsRecorder
 from qdrant_client import models
 
 
@@ -211,11 +212,13 @@ class ProjectVectorStoreManager:
         vector_size: int,
         distance,
         collection_name_fn,
+        collection_kwargs: dict[str, Any] | None = None,
     ) -> None:
         self._client_factory = client_factory
         self._vector_size = vector_size
         self._distance = distance
         self._collection_name_fn = collection_name_fn
+        self._collection_kwargs = dict(collection_kwargs or {})
         self._stores: dict[str, QdrantVectorStore] = {}
 
     def get_store(self, project_id: str) -> QdrantVectorStore:
@@ -227,6 +230,7 @@ class ProjectVectorStoreManager:
             collection_name=collection_name,
             vector_size=self._vector_size,
             distance=self._distance,
+            **self._collection_kwargs,
         )
         store.ensure_collection()
         store.ensure_payload_indexes()
@@ -268,11 +272,13 @@ class DocumentIngestor:
         store_manager: ProjectVectorStoreManager,
         project_store: ProjectStore,
         fts_index: FTSIndex | None = None,
+        metrics: MetricsRecorder | None = None,
     ) -> None:
         self._embedding = embedding_service
         self._stores = store_manager
         self._projects = project_store
         self._fts = fts_index
+        self._metrics = metrics
 
     async def ingest_upload(self, project_id: str, upload: UploadFile) -> IngestionResult:
         filename = upload.filename or "document"
@@ -296,6 +302,8 @@ class DocumentIngestor:
         if not data:
             raise ValueError("Uploaded file is empty")
 
+        metrics = self._metrics
+        overall_start = time.perf_counter() if metrics else None
         extracted = self._extract_document(filename, data, content_type)
         chunk_objects = chunk_text(
             extracted.text,
@@ -305,7 +313,15 @@ class DocumentIngestor:
             raise ValueError("No textual content could be extracted from the document")
 
         doc_id = uuid4().hex
+        embed_start = time.perf_counter() if metrics else None
         embeddings = self._embedding.embed([chunk.text for chunk in chunk_objects])
+        if metrics and embed_start is not None:
+            metrics.record_timing(
+                "ingestion.embedding_duration",
+                time.perf_counter() - embed_start,
+                project_id=project_id,
+                chunks=len(chunk_objects),
+            )
         store = self._stores.get_store(project_id)
         records, fts_entries = self._build_records(
             doc_id,
@@ -316,13 +332,29 @@ class DocumentIngestor:
             extracted.content_type,
             extracted.title,
         )
+        upsert_start = time.perf_counter() if metrics else None
         store.upsert(records)
+        if metrics and upsert_start is not None:
+            metrics.record_timing(
+                "ingestion.vector_upsert_duration",
+                time.perf_counter() - upsert_start,
+                project_id=project_id,
+                chunks=len(records),
+            )
         if self._fts is not None:
+            fts_start = time.perf_counter() if metrics else None
             self._fts.upsert_chunks(
                 project_id=project_id,
                 doc_id=doc_id,
                 entries=fts_entries,
             )
+            if metrics and fts_start is not None:
+                metrics.record_timing(
+                    "ingestion.fts_upsert_duration",
+                    time.perf_counter() - fts_start,
+                    project_id=project_id,
+                    chunks=len(fts_entries),
+                )
         logger.info(
             "ingest.upserted project=%s doc_id=%s chunks=%s",
             project_id,
@@ -341,6 +373,24 @@ class DocumentIngestor:
         )
         self._projects.record_document(project_id, metadata)
         logger.info("ingest.completed project=%s doc_id=%s", project_id, doc_id)
+        if metrics and overall_start is not None:
+            metrics.record_timing(
+                "ingestion.total_duration",
+                time.perf_counter() - overall_start,
+                project_id=project_id,
+                content_type=extracted.content_type or "unknown",
+                chunks=len(records),
+                size_bytes=len(data),
+            )
+            metrics.increment(
+                "ingestion.documents",
+                project_id=project_id,
+            )
+            metrics.increment(
+                "ingestion.chunks",
+                value=len(records),
+                project_id=project_id,
+            )
         return IngestionResult(document=metadata, chunks_ingested=len(records))
 
     def ingest_url(

@@ -92,6 +92,8 @@ This document translates the audit findings into a sequenced backlog for the nex
    - Steps:
      1. Enable on-disk vectors/payloads, tune HNSW parameters, and index frequently filtered payload fields.
      2. Configure monitoring for ingestion throughput, query latency, and recall sampling.
+      - [done] Qdrant tuning switches exposed via `QDRANT_ON_DISK_*` and `QDRANT_HNSW_*` environment variables.
+      - [done] Baseline metrics logger enabled with `OBSERVABILITY_METRICS_ENABLED`/`OBSERVABILITY_NAMESPACE` capturing ingestion and retrieval timings.
 
 ## Phase 4 – Retrieval Quality & Personalization (Week 4)
 

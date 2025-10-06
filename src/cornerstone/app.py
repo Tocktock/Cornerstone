@@ -27,6 +27,7 @@ from .keywords import KeywordLLMFilter, build_excerpt, extract_keyword_candidate
 from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .projects import Project, ProjectStore
 from .vector_store import QdrantVectorStore, SearchResult
+from .observability import MetricsRecorder
 
 _MIN_RESULT_SCORE = 1e-6
 _TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "templates"
@@ -59,6 +60,7 @@ class ApplicationState:
         ingestion_service: DocumentIngestor,
         ingestion_jobs: IngestionJobManager,
         fts_index,
+        metrics: MetricsRecorder | None,
     ) -> None:
         self.settings = settings
         self.embedding_service = embedding_service
@@ -70,6 +72,7 @@ class ApplicationState:
         self.ingestion_service = ingestion_service
         self.ingestion_jobs = ingestion_jobs
         self.fts_index = fts_index
+        self.metrics = metrics
 
 
 def create_app(
@@ -83,11 +86,13 @@ def create_app(
     chat_service: SupportAgentService | None = None,
     ingestion_service: DocumentIngestor | None = None,
     ingestion_jobs: IngestionJobManager | None = None,
+    metrics: MetricsRecorder | None = None,
 ) -> FastAPI:
     """Create and configure the FastAPI application."""
 
     settings = settings or Settings.from_env()
     embedding_service = embedding_service or EmbeddingService(settings)
+    metrics = metrics or settings.build_metrics_recorder()
 
     project_root = Path(settings.data_dir).resolve()
     project_store = project_store or ProjectStore(project_root, default_project_name=settings.default_project_name)
@@ -101,11 +106,13 @@ def create_app(
     if store_manager is None:
         client = QdrantClient(**settings.qdrant_client_kwargs())
         base_collection_name = settings.project_collection_name(_default_project_id(project_store))
+        collection_kwargs = settings.qdrant_collection_tuning_kwargs()
         base_store = QdrantVectorStore(
             client=client,
             collection_name=base_collection_name,
             vector_size=embedding_service.dimension,
             distance=models.Distance.COSINE,
+            **collection_kwargs,
         )
         base_store.ensure_collection()
         store_manager = ProjectVectorStoreManager(
@@ -113,6 +120,7 @@ def create_app(
             vector_size=embedding_service.dimension,
             distance=models.Distance.COSINE,
             collection_name_fn=settings.project_collection_name,
+            collection_kwargs=collection_kwargs,
         )
 
     store_manager.get_store(_default_project_id(project_store))
@@ -128,6 +136,7 @@ def create_app(
         glossary=glossary,
         persona_store=persona_store,
         fts_index=fts_index,
+        metrics=metrics,
     )
 
     ingestion_service = ingestion_service or DocumentIngestor(
@@ -135,6 +144,7 @@ def create_app(
         store_manager=store_manager,
         project_store=project_store,
         fts_index=fts_index,
+        metrics=metrics,
     )
 
     ingestion_jobs = ingestion_jobs or IngestionJobManager(
@@ -154,6 +164,7 @@ def create_app(
         ingestion_service=ingestion_service,
         ingestion_jobs=ingestion_jobs,
         fts_index=fts_index,
+        metrics=metrics,
     )
 
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
@@ -190,6 +201,9 @@ def create_app(
 
     def get_fts_index(request: Request) -> FTSIndex:
         return get_state(request).fts_index
+
+    def get_metrics(request: Request) -> MetricsRecorder | None:
+        return get_state(request).metrics
 
     @app.get("/", response_class=HTMLResponse)
     async def index(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
