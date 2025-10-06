@@ -21,6 +21,8 @@ from .ingestion import (
     IngestionJobManager,
     ProjectVectorStoreManager,
 )
+from .fts import FTSIndex
+from . import local_ingest
 from .keywords import KeywordLLMFilter, build_excerpt, extract_keyword_candidates
 from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .projects import Project, ProjectStore
@@ -56,6 +58,7 @@ class ApplicationState:
         chat_service: SupportAgentService,
         ingestion_service: DocumentIngestor,
         ingestion_jobs: IngestionJobManager,
+        fts_index,
     ) -> None:
         self.settings = settings
         self.embedding_service = embedding_service
@@ -66,6 +69,7 @@ class ApplicationState:
         self.chat_service = chat_service
         self.ingestion_service = ingestion_service
         self.ingestion_jobs = ingestion_jobs
+        self.fts_index = fts_index
 
 
 def create_app(
@@ -115,21 +119,28 @@ def create_app(
 
     glossary = glossary or load_glossary(settings.glossary_path)
 
+    fts_index = FTSIndex(Path(settings.fts_db_path).resolve())
+
     chat_service = chat_service or SupportAgentService(
         settings=settings,
         embedding_service=embedding_service,
         store_manager=store_manager,
         glossary=glossary,
         persona_store=persona_store,
+        fts_index=fts_index,
     )
 
     ingestion_service = ingestion_service or DocumentIngestor(
         embedding_service=embedding_service,
         store_manager=store_manager,
         project_store=project_store,
+        fts_index=fts_index,
     )
 
-    ingestion_jobs = ingestion_jobs or IngestionJobManager()
+    ingestion_jobs = ingestion_jobs or IngestionJobManager(
+        max_active_per_project=settings.ingestion_project_concurrency_limit,
+        max_files_per_minute=settings.ingestion_files_per_minute,
+    )
 
     app = FastAPI()
     app.state.services = ApplicationState(
@@ -142,6 +153,7 @@ def create_app(
         chat_service=chat_service,
         ingestion_service=ingestion_service,
         ingestion_jobs=ingestion_jobs,
+        fts_index=fts_index,
     )
 
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
@@ -175,6 +187,9 @@ def create_app(
 
     def get_ingestion_jobs(request: Request) -> IngestionJobManager:
         return get_state(request).ingestion_jobs
+
+    def get_fts_index(request: Request) -> FTSIndex:
+        return get_state(request).fts_index
 
     @app.get("/", response_class=HTMLResponse)
     async def index(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
@@ -784,6 +799,52 @@ def create_app(
         jobs_payload = [job_manager.get(job_id).to_dict() for job_id in job_ids if job_manager.get(job_id)]
         return JSONResponse({"jobs": jobs_payload}, status_code=202)
 
+    @app.get("/knowledge/local-directories", response_class=JSONResponse)
+    async def get_local_directories(
+        path: str | None = Query(None),
+        settings: Settings = Depends(get_settings_dependency),
+    ) -> JSONResponse:
+        base_dir = Path(settings.local_data_dir).resolve()
+        try:
+            directories = local_ingest.list_directories(base_dir, path)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return JSONResponse({"directories": directories})
+
+    @app.post("/knowledge/local-import", response_class=JSONResponse)
+    async def import_local_directory(
+        background_tasks: BackgroundTasks,
+        project_id: str = Form(...),
+        path: str = Form(...),
+        settings: Settings = Depends(get_settings_dependency),
+        project_store: ProjectStore = Depends(get_project_store),
+        ingestion: DocumentIngestor = Depends(get_ingestion_service),
+        job_manager: IngestionJobManager = Depends(get_ingestion_jobs),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        base_dir = Path(settings.local_data_dir).resolve()
+        try:
+            target_dir = local_ingest.resolve_local_path(base_dir, path)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        if not target_dir.exists() or not target_dir.is_dir():
+            raise HTTPException(status_code=404, detail="Directory not found")
+
+        display_name = str(target_dir.relative_to(base_dir)) or "."
+        manifest_path = Path(settings.data_dir).resolve() / "manifests" / f"{project.id}.json"
+        job = job_manager.create_job(project.id, f"{display_name}/")
+        background_tasks.add_task(
+            local_ingest.ingest_directory,
+            project_id=project.id,
+            target_dir=target_dir,
+            base_dir=base_dir,
+            ingestion_service=ingestion,
+            manifest_path=manifest_path,
+            job_manager=job_manager,
+            job_id=job.id,
+        )
+        return JSONResponse({"job": job.to_dict()}, status_code=202)
+
     @app.post("/knowledge/upload-url", response_class=JSONResponse)
     async def upload_document_url(
         background_tasks: BackgroundTasks,
@@ -827,9 +888,13 @@ def create_app(
         project_id: str = Form(...),
         project_store: ProjectStore = Depends(get_project_store),
         store_manager: ProjectVectorStoreManager = Depends(get_store_manager),
+        fts_index: FTSIndex = Depends(get_fts_index),
     ) -> RedirectResponse:
         project = _resolve_project(project_store, project_id)
+        documents = project_store.list_documents(project.id)
         cleared = store_manager.purge_project(project.id)
+        for doc in documents:
+            fts_index.delete_document(project.id, doc.id)
         project_store.clear_documents(project.id)
         logger.info(
             "knowledge.cleanup.completed project=%s cleared=%s",
@@ -846,11 +911,13 @@ def create_app(
         doc_id: str = Form(...),
         project_store: ProjectStore = Depends(get_project_store),
         store_manager: ProjectVectorStoreManager = Depends(get_store_manager),
+        fts_index: FTSIndex = Depends(get_fts_index),
     ) -> RedirectResponse:
         project = _resolve_project(project_store, project_id)
         if not project_store.remove_document(project.id, doc_id):
             raise HTTPException(status_code=404, detail="Document not found")
         removed_vectors = store_manager.delete_document(project.id, doc_id)
+        fts_index.delete_document(project.id, doc_id)
         logger.info(
             "knowledge.delete.completed project=%s doc_id=%s success=%s",
             project.id,

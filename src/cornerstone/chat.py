@@ -56,6 +56,7 @@ class SupportAgentService:
         *,
         retrieval_top_k: int = 3,
         persona_store: PersonaStore | None = None,
+        fts_index=None,
     ) -> None:
         self._settings = settings
         self._embedding = embedding_service
@@ -64,6 +65,7 @@ class SupportAgentService:
         self._retrieval_top_k = retrieval_top_k
         self._openai_client: OpenAI | None = None
         self._persona_store = persona_store
+        self._fts = fts_index
 
     def generate(
         self,
@@ -109,7 +111,7 @@ class SupportAgentService:
         persona: PersonaSnapshot,
         query: str,
         conversation: Sequence[str] | None,
-    ) -> Tuple[SupportAgentContext, list[SearchResult]]:
+    ) -> Tuple[SupportAgentContext, list[dict]]:
         history = list(conversation or [])
         logger.info(
             "support.generate.start backend=%s embedding=%s project=%s query=%s",
@@ -120,33 +122,43 @@ class SupportAgentService:
         )
         vector = self._embedding.embed_one(query)
         store = self._stores.get_store(project.id)
-        search_results = list(store.search(vector, limit=self._retrieval_top_k))
-        top_titles = [(result.payload or {}).get("title") for result in search_results]
+        vector_results = list(store.search(vector, limit=self._retrieval_top_k))
+        vector_chunks = self._vector_results_to_chunks(vector_results)
+        keyword_chunks: list[dict] = []
+        if self._fts is not None:
+            keyword_hits = self._fts.search(project.id, query, limit=self._retrieval_top_k * 2)
+            keyword_chunks = self._keyword_hits_to_chunks(keyword_hits)
+        fused_chunks = self._fuse_chunks(vector_chunks, keyword_chunks)
+        top_titles = [chunk.get("title") for chunk in fused_chunks]
         logger.info(
-            "support.generate.matches project=%s count=%s titles=%s",
+            "support.generate.matches project=%s vector=%s keyword=%s fused=%s titles=%s",
             project.id,
-            len(search_results),
+            len(vector_chunks),
+            len(keyword_chunks),
+            len(fused_chunks),
             top_titles,
         )
-        sources = self._format_sources(search_results)
+        sources = self._format_sources(fused_chunks)
         definitions = self._collect_definitions(query)
-        prompt = self._build_prompt(project, persona, query, search_results, history)
+        prompt = self._build_prompt(project, persona, query, fused_chunks, history)
         context = SupportAgentContext(prompt=prompt, sources=sources, definitions=definitions)
-        return context, search_results
+        return context, fused_chunks
 
     def _build_prompt(
         self,
         project: Project,
         persona: PersonaSnapshot,
         query: str,
-        search_results: Iterable[SearchResult],
+        chunks: Iterable[dict],
         conversation: Sequence[str],
     ) -> str:
         context_lines = ["Relevant documentation snippets:"]
-        for idx, result in enumerate(search_results, start=1):
-            payload = result.payload or {}
-            title = payload.get("title") or payload.get("text", "Untitled snippet")[:64]
-            text = payload.get("text") or ""
+        for idx, chunk in enumerate(chunks, start=1):
+            heading_path = chunk.get("heading_path") or []
+            title = chunk.get("title") or "Untitled snippet"
+            if heading_path:
+                title = " · ".join(heading_path)
+            text = chunk.get("text") or ""
             context_lines.append(f"[{idx}] {title}\n{text}\n---")
         if len(context_lines) == 1:
             context_lines = ["No matching documentation was found."]
@@ -240,14 +252,119 @@ class SupportAgentService:
             overrides=overrides,
         )
 
-    def _format_sources(self, results: Iterable[SearchResult]) -> list[dict[str, str]]:
+    def _format_sources(self, chunks: Iterable[dict]) -> list[dict[str, str]]:
         formatted: list[dict[str, str]] = []
-        for result in results:
-            payload = result.payload or {}
-            title = payload.get("title") or payload.get("text", "")[:50]
-            text = payload.get("text") or ""
-            formatted.append({"title": title, "snippet": text})
+        for chunk in chunks:
+            title = chunk.get("title") or chunk.get("source") or "Snippet"
+            text = chunk.get("text") or ""
+            snippet = chunk.get("summary") or text[:300]
+            formatted.append(
+                {
+                    "title": title,
+                    "snippet": snippet,
+                    "source": chunk.get("source") or "",
+                    "score": f"{chunk.get('score', 0.0):.3f}",
+                    "origin": ", ".join(chunk.get("origin", [])),
+                }
+            )
         return formatted
+
+    def _vector_results_to_chunks(self, results: Sequence[SearchResult]) -> list[dict]:
+        chunks: list[dict] = []
+        for rank, result in enumerate(results, start=1):
+            payload = result.payload or {}
+            text = payload.get("text") or ""
+            if not text:
+                continue
+            chunk_id = payload.get("chunk_id") or f"{payload.get('doc_id')}:{payload.get('chunk_index')}"
+            heading_path = payload.get("heading_path") or []
+            chunks.append(
+                {
+                    "chunk_id": chunk_id,
+                    "text": text,
+                    "title": payload.get("title") or payload.get("source") or "Snippet",
+                    "source": payload.get("source") or "",
+                    "doc_id": payload.get("doc_id"),
+                    "heading_path": heading_path,
+                    "origin": {"vector"},
+                    "rank_vector": rank,
+                    "summary": payload.get("summary"),
+                    "language": payload.get("language"),
+                }
+            )
+        return chunks
+
+    def _keyword_hits_to_chunks(self, hits: Sequence[dict]) -> list[dict]:
+        chunks: list[dict] = []
+        for rank, hit in enumerate(hits, start=1):
+            text = hit.get("text") or ""
+            if not text:
+                continue
+            metadata = hit.get("metadata") or {}
+            heading_path = metadata.get("heading_path") or []
+            source = metadata.get("source") or ""
+            title = hit.get("title") or (heading_path[-1] if heading_path else source) or "Snippet"
+            chunks.append(
+                {
+                    "chunk_id": hit.get("chunk_id"),
+                    "text": text,
+                    "title": title,
+                    "source": source,
+                    "doc_id": hit.get("doc_id"),
+                    "heading_path": heading_path,
+                    "origin": {"keyword"},
+                    "rank_keyword": rank,
+                    "summary": metadata.get("summary"),
+                    "language": metadata.get("language"),
+                }
+            )
+        return chunks
+
+    def _fuse_chunks(
+        self,
+        vector_chunks: Sequence[dict],
+        keyword_chunks: Sequence[dict],
+        *,
+        limit: int = 6,
+    ) -> list[dict]:
+        fused: dict[str, dict] = {}
+        scores: dict[str, float] = {}
+
+        def add_entry(entry: dict, rank: int) -> None:
+            chunk_id = entry.get("chunk_id")
+            if not chunk_id:
+                return
+            existing = fused.get(chunk_id)
+            if existing is None:
+                existing = entry.copy()
+                existing_origin = set(entry.get("origin", []))
+                existing["origin"] = existing_origin
+                fused[chunk_id] = existing
+            else:
+                existing["origin"].update(entry.get("origin", []))
+                for key, value in entry.items():
+                    if key in {"origin", "rank_vector", "rank_keyword", "chunk_id"}:
+                        continue
+                    if not existing.get(key) and value:
+                        existing[key] = value
+            rr = 1.0 / (rank + 1)
+            scores[chunk_id] = scores.get(chunk_id, 0.0) + rr
+
+        for entry in vector_chunks:
+            add_entry(entry, entry.get("rank_vector", 0))
+
+        for entry in keyword_chunks:
+            add_entry(entry, entry.get("rank_keyword", 0))
+
+        fused_list = list(fused.values())
+        for entry in fused_list:
+            chunk_id = entry.get("chunk_id")
+            entry["score"] = scores.get(chunk_id, 0.0)
+            entry["origin"] = sorted(entry.get("origin", []))
+
+        fused_list.sort(key=lambda item: item.get("score", 0.0), reverse=True)
+        max_chunks = max(limit, self._retrieval_top_k * 2)
+        return fused_list[:max_chunks]
 
     def _stream_backend(self, prompt: str) -> Iterable[str]:
         if self._settings.is_openai_chat_backend:

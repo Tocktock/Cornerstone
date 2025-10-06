@@ -3,16 +3,20 @@ from __future__ import annotations
 import json
 import tempfile
 from pathlib import Path
+import shutil
 
 from fastapi.testclient import TestClient
 from qdrant_client import QdrantClient, models
 
 from cornerstone.app import create_app
-from cornerstone.chat import SupportAgentContext, SupportAgentResponse
+from cornerstone.chat import SupportAgentContext, SupportAgentResponse, SupportAgentService
 from cornerstone.config import Settings
 from cornerstone.glossary import Glossary
 from cornerstone.ingestion import DocumentIngestor, ProjectVectorStoreManager
+from cornerstone.vector_store import VectorRecord
+from cornerstone.fts import FTSIndex
 from cornerstone.projects import ProjectStore
+from cornerstone.personas import PersonaStore
 
 
 class FakeEmbeddingService:
@@ -20,10 +24,11 @@ class FakeEmbeddingService:
         self.dimension = 3
 
     def embed(self, texts):  # pragma: no cover - unused
-        return [[1.0, 0.0, 0.0] for _ in texts]
+        return [self.embed_one(text) for text in texts]
 
     def embed_one(self, text):
-        return [1.0, 0.0, 0.0]
+        length = float(len(text)) or 1.0
+        return [length, length / 2.0, 1.0]
 
 
 class DummyChatService:
@@ -62,12 +67,13 @@ class DummyChatService:
         return context, generator()
 
 
-def build_test_app() -> tuple[TestClient, str]:
+def build_test_app(*, use_real_chat: bool = False) -> tuple[TestClient, str]:
     tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-test-"))
     settings = Settings(data_dir=str(tmpdir), default_project_name="Test Project")
     embedding = FakeEmbeddingService()
     glossary = Glossary()
     project_store = ProjectStore(tmpdir, default_project_name=settings.default_project_name)
+    persona_store = PersonaStore(tmpdir)
     default_project = project_store.list_projects()[0]
 
     client = QdrantClient(path=":memory:")
@@ -79,18 +85,33 @@ def build_test_app() -> tuple[TestClient, str]:
     )
     store_manager.get_store(default_project.id)
 
-    chat = DummyChatService()
-    ingestion = DocumentIngestor(embedding, store_manager, project_store)
+    fts_index = FTSIndex(Path(tmpdir) / "fts.sqlite")
+    ingestion = DocumentIngestor(embedding, store_manager, project_store, fts_index=fts_index)
+
+    chat_service = (
+        SupportAgentService(
+            settings=settings,
+            embedding_service=embedding,  # type: ignore[arg-type]
+            store_manager=store_manager,
+            glossary=glossary,
+            persona_store=persona_store,
+            fts_index=fts_index,
+        )
+        if use_real_chat
+        else DummyChatService()
+    )
 
     app = create_app(
         settings=settings,
         embedding_service=embedding,  # type: ignore[arg-type]
         glossary=glossary,
         project_store=project_store,
+        persona_store=persona_store,
         store_manager=store_manager,
-        chat_service=chat,
+        chat_service=chat_service,
         ingestion_service=ingestion,
     )
+    app.state.services.fts_index = fts_index
 
     return TestClient(app), default_project.id
 
