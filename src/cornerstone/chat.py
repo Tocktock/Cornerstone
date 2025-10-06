@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass
 import json
 from typing import Iterable, Iterator, List, Sequence, Tuple
@@ -13,6 +14,7 @@ from .glossary import Glossary
 from .projects import Project
 from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .vector_store import QdrantVectorStore, SearchResult
+from .observability import MetricsRecorder
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +59,7 @@ class SupportAgentService:
         retrieval_top_k: int = 3,
         persona_store: PersonaStore | None = None,
         fts_index=None,
+        metrics: MetricsRecorder | None = None,
     ) -> None:
         self._settings = settings
         self._embedding = embedding_service
@@ -66,6 +69,7 @@ class SupportAgentService:
         self._openai_client: OpenAI | None = None
         self._persona_store = persona_store
         self._fts = fts_index
+        self._metrics = metrics
 
     def generate(
         self,
@@ -74,6 +78,8 @@ class SupportAgentService:
         *,
         conversation: Sequence[str] | None = None,
     ) -> SupportAgentResponse:
+        metrics = self._metrics
+        generate_start = time.perf_counter() if metrics else None
         persona = self._resolve_persona(project)
         context, _ = self._build_context(project, persona, query, conversation)
         answer = self._invoke_backend(context.prompt)
@@ -83,6 +89,19 @@ class SupportAgentService:
             len(answer),
             len(context.sources),
         )
+        if metrics and generate_start is not None:
+            metrics.record_timing(
+                "chat.generate_duration",
+                time.perf_counter() - generate_start,
+                project_id=project.id,
+                backend=self._settings.chat_backend,
+                sources=len(context.sources),
+            )
+            metrics.increment(
+                "chat.responses",
+                project_id=project.id,
+                backend=self._settings.chat_backend,
+            )
         return SupportAgentResponse(message=answer, sources=context.sources, definitions=context.definitions)
 
     def stream_generate(
@@ -96,6 +115,12 @@ class SupportAgentService:
 
         persona = self._resolve_persona(project)
         context, _ = self._build_context(project, persona, query, conversation)
+        if self._metrics:
+            self._metrics.increment(
+                "chat.stream_requests",
+                project_id=project.id,
+                backend=self._settings.chat_backend,
+            )
         stream = self._stream_backend(context.prompt)
         return context, stream
 
@@ -113,6 +138,7 @@ class SupportAgentService:
         conversation: Sequence[str] | None,
     ) -> Tuple[SupportAgentContext, list[dict]]:
         history = list(conversation or [])
+        metrics = self._metrics
         logger.info(
             "support.generate.start backend=%s embedding=%s project=%s query=%s",
             self._settings.chat_backend,
@@ -120,15 +146,46 @@ class SupportAgentService:
             project.id,
             query,
         )
+        embed_start = time.perf_counter() if metrics else None
         vector = self._embedding.embed_one(query)
+        if metrics and embed_start is not None:
+            metrics.record_timing(
+                "retrieval.embedding_duration",
+                time.perf_counter() - embed_start,
+                project_id=project.id,
+            )
         store = self._stores.get_store(project.id)
+        vector_start = time.perf_counter() if metrics else None
         vector_results = list(store.search(vector, limit=self._retrieval_top_k))
+        if metrics and vector_start is not None:
+            metrics.record_timing(
+                "retrieval.vector_duration",
+                time.perf_counter() - vector_start,
+                project_id=project.id,
+                hits=len(vector_results),
+            )
+            metrics.increment("retrieval.vector_queries", project_id=project.id)
         vector_chunks = self._vector_results_to_chunks(vector_results)
         keyword_chunks: list[dict] = []
         if self._fts is not None:
+            keyword_start = time.perf_counter() if metrics else None
             keyword_hits = self._fts.search(project.id, query, limit=self._retrieval_top_k * 2)
+            if metrics and keyword_start is not None:
+                metrics.record_timing(
+                    "retrieval.keyword_duration",
+                    time.perf_counter() - keyword_start,
+                    project_id=project.id,
+                    hits=len(keyword_hits),
+                )
+                metrics.increment("retrieval.keyword_queries", project_id=project.id)
             keyword_chunks = self._keyword_hits_to_chunks(keyword_hits)
         fused_chunks = self._fuse_chunks(vector_chunks, keyword_chunks)
+        if metrics:
+            metrics.increment(
+                "retrieval.fused_chunks",
+                value=len(fused_chunks),
+                project_id=project.id,
+            )
         top_titles = [chunk.get("title") for chunk in fused_chunks]
         logger.info(
             "support.generate.matches project=%s vector=%s keyword=%s fused=%s titles=%s",

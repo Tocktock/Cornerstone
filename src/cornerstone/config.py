@@ -35,6 +35,45 @@ _DEFAULT_INGESTION_CONCURRENCY: Final[int] = 3
 _DEFAULT_INGESTION_FILES_PER_MINUTE: Final[int] = 180
 
 
+def _env_optional_bool(name: str) -> bool | None:
+    """Read an optional boolean environment variable."""
+
+    raw = os.getenv(name)
+    if raw is None:
+        return None
+    value = raw.strip().lower()
+    if value in {"1", "true", "yes", "on"}:
+        return True
+    if value in {"0", "false", "no", "off"}:
+        return False
+    msg = f"Environment variable {name} must be a boolean value (true/false)."
+    raise ValueError(msg)
+
+
+def _env_optional_int(name: str) -> int | None:
+    """Read an optional integer environment variable."""
+
+    raw = os.getenv(name)
+    if raw is None:
+        return None
+    value = raw.strip()
+    if not value:
+        return None
+    try:
+        return int(value)
+    except ValueError as exc:  # pragma: no cover - defensive guard
+        raise ValueError(f"Environment variable {name} must be an integer") from exc
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    """Read a boolean environment variable with a fallback."""
+
+    value = _env_optional_bool(name)
+    if value is None:
+        return default
+    return value
+
+
 @dataclass(slots=True)
 class Settings:
     """Runtime settings loaded from environment variables."""
@@ -57,10 +96,19 @@ class Settings:
     default_project_name: str = _DEFAULT_PROJECT_NAME
     ingestion_project_concurrency_limit: int = _DEFAULT_INGESTION_CONCURRENCY
     ingestion_files_per_minute: int = _DEFAULT_INGESTION_FILES_PER_MINUTE
+    qdrant_on_disk_payload: bool | None = None
+    qdrant_on_disk_vectors: bool | None = None
+    qdrant_hnsw_m: int | None = None
+    qdrant_hnsw_ef_construct: int | None = None
+    qdrant_hnsw_full_scan_threshold: int | None = None
+    observability_metrics_enabled: bool = True
+    observability_namespace: str = "cornerstone"
 
     @classmethod
     def from_env(cls) -> "Settings":
         """Create settings by reading environment variables."""
+
+        metrics_enabled = _env_optional_bool("OBSERVABILITY_METRICS_ENABLED")
 
         return cls(
             embedding_model=os.getenv("EMBEDDING_MODEL", _DEFAULT_EMBEDDING_MODEL),
@@ -85,6 +133,13 @@ class Settings:
             ingestion_files_per_minute=int(
                 os.getenv("INGESTION_FILES_PER_MINUTE", _DEFAULT_INGESTION_FILES_PER_MINUTE)
             ),
+            qdrant_on_disk_payload=_env_optional_bool("QDRANT_ON_DISK_PAYLOAD"),
+            qdrant_on_disk_vectors=_env_optional_bool("QDRANT_ON_DISK_VECTORS"),
+            qdrant_hnsw_m=_env_optional_int("QDRANT_HNSW_M"),
+            qdrant_hnsw_ef_construct=_env_optional_int("QDRANT_HNSW_EF_CONSTRUCT"),
+            qdrant_hnsw_full_scan_threshold=_env_optional_int("QDRANT_HNSW_FULL_SCAN_THRESHOLD"),
+            observability_metrics_enabled=metrics_enabled if metrics_enabled is not None else True,
+            observability_namespace=os.getenv("OBSERVABILITY_NAMESPACE", "cornerstone"),
         )
 
     @property
@@ -149,3 +204,38 @@ class Settings:
 
         safe_project = project_id.replace(" ", "-")
         return f"{self.qdrant_collection}_{safe_project}"
+
+    def qdrant_hnsw_config(self) -> dict[str, int]:
+        """Return HNSW tuning parameters, omitting unset values."""
+
+        config: dict[str, int] = {}
+        if self.qdrant_hnsw_m is not None:
+            config["m"] = self.qdrant_hnsw_m
+        if self.qdrant_hnsw_ef_construct is not None:
+            config["ef_construct"] = self.qdrant_hnsw_ef_construct
+        if self.qdrant_hnsw_full_scan_threshold is not None:
+            config["full_scan_threshold"] = self.qdrant_hnsw_full_scan_threshold
+        return config
+
+    def qdrant_collection_tuning_kwargs(self) -> dict[str, Any]:
+        """Return keyword arguments for collection creation tuned for scale."""
+
+        kwargs: dict[str, Any] = {}
+        if self.qdrant_on_disk_payload is not None:
+            kwargs["on_disk_payload"] = self.qdrant_on_disk_payload
+        if self.qdrant_on_disk_vectors is not None:
+            kwargs["on_disk_vectors"] = self.qdrant_on_disk_vectors
+        hnsw_config = self.qdrant_hnsw_config()
+        if hnsw_config:
+            kwargs["hnsw_config"] = hnsw_config
+        return kwargs
+
+    def build_metrics_recorder(self) -> "MetricsRecorder":
+        """Instantiate the configured metrics recorder."""
+
+        from .observability import MetricsRecorder
+
+        return MetricsRecorder(
+            enabled=self.observability_metrics_enabled,
+            namespace=self.observability_namespace,
+        )
