@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-import logging
-import time
-from dataclasses import dataclass
 import json
+import logging
+import re
+import time
+import unicodedata
+from dataclasses import dataclass
 from typing import Iterable, Iterator, List, Sequence, Tuple
 
 from .config import Settings
@@ -18,6 +20,20 @@ from .observability import MetricsRecorder
 from .reranker import Reranker
 
 logger = logging.getLogger(__name__)
+
+
+_QUERY_SYNONYM_MAP: dict[str, list[str]] = {
+    "business": ["사업", "비즈니스"],
+    "company": ["회사", "기업"],
+    "core": ["핵심", "주요"],
+    "service": ["서비스"],
+    "transport": ["운송", "물류"],
+    "logistics": ["물류"],
+    "delivery": ["배송"],
+    "customer": ["고객"],
+    "shipper": ["화주"],
+    "driver": ["기사"],
+}
 
 
 try:  # pragma: no cover - optional import for Ollama HTTP client
@@ -205,8 +221,10 @@ class SupportAgentService:
             options.chat_temperature,
             options.chat_max_tokens,
         )
+        glossary_resource = self._project_glossary(project)
+        augmented_query = self._augment_query_text(query, glossary_resource)
         embed_start = time.perf_counter() if metrics else None
-        vector = self._embedding.embed_one(query)
+        vector = self._embedding.embed_one(augmented_query)
         if metrics and embed_start is not None:
             metrics.record_timing(
                 "retrieval.embedding_duration",
@@ -228,7 +246,7 @@ class SupportAgentService:
         keyword_chunks: list[dict] = []
         if self._fts is not None:
             keyword_start = time.perf_counter() if metrics else None
-            keyword_hits = self._fts.search(project.id, query, limit=options.retrieval_top_k * 2)
+            keyword_hits = self._fts.search(project.id, augmented_query, limit=options.retrieval_top_k * 2)
             if metrics and keyword_start is not None:
                 metrics.record_timing(
                     "retrieval.keyword_duration",
@@ -265,7 +283,6 @@ class SupportAgentService:
             top_titles,
         )
         sources = self._format_sources(fused_chunks)
-        glossary_resource = self._project_glossary(project)
         definitions = self._collect_definitions(
             project,
             query,
@@ -282,6 +299,46 @@ class SupportAgentService:
         )
         context = SupportAgentContext(prompt=prompt, sources=sources, definitions=definitions)
         return context, fused_chunks
+
+    @staticmethod
+    def _normalize_query_text(query: str) -> str:
+        normalized = unicodedata.normalize("NFKC", query or "")
+        return normalized.strip()
+
+    def _augment_query_text(self, query: str, glossary: Glossary | None) -> str:
+        normalized = self._normalize_query_text(query)
+        if not normalized:
+            return normalized
+        tokens = re.findall(r"[A-Za-z]+", normalized.lower())
+        extras: list[str] = []
+        for token in tokens:
+            extras.extend(_QUERY_SYNONYM_MAP.get(token, []))
+        if glossary is not None:
+            extras.extend(self._glossary_keyword_matches(tokens, glossary))
+        deduped: list[str] = []
+        for item in extras:
+            cleaned = item.strip()
+            if not cleaned or cleaned in deduped:
+                continue
+            deduped.append(cleaned)
+        if deduped:
+            return f"{normalized} {' '.join(deduped)}"
+        return normalized
+
+    @staticmethod
+    def _glossary_keyword_matches(tokens: Sequence[str], glossary: Glossary) -> list[str]:
+        if not tokens:
+            return []
+        lowercase_tokens = set(tokens)
+        supplements: list[str] = []
+        for entry in glossary.entries():
+            for keyword in entry.keywords:
+                cleaned = (keyword or "").strip()
+                if not cleaned:
+                    continue
+                if cleaned.lower() in lowercase_tokens:
+                    supplements.extend(entry.synonyms)
+        return supplements
 
     def _build_prompt(
         self,
