@@ -34,6 +34,9 @@ _DEFAULT_FTS_DB: Final[str] = "data/fts.sqlite"
 _DEFAULT_PROJECT_NAME: Final[str] = "Default Project"
 _DEFAULT_INGESTION_CONCURRENCY: Final[int] = 3
 _DEFAULT_INGESTION_FILES_PER_MINUTE: Final[int] = 180
+_DEFAULT_RETRIEVAL_TOP_K: Final[int] = 3
+_DEFAULT_CHAT_TEMPERATURE: Final[float] = 0.2
+_DEFAULT_CHAT_MAX_TOKENS: Final[int] = 600
 _DEFAULT_RERANKER_STRATEGY: Final[str] = "none"
 _DEFAULT_RERANKER_MODEL: Final[str] = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 _DEFAULT_RERANKER_MAX_CANDIDATES: Final[int] = 8
@@ -101,6 +104,9 @@ class Settings:
     default_project_name: str = _DEFAULT_PROJECT_NAME
     ingestion_project_concurrency_limit: int = _DEFAULT_INGESTION_CONCURRENCY
     ingestion_files_per_minute: int = _DEFAULT_INGESTION_FILES_PER_MINUTE
+    retrieval_top_k: int = _DEFAULT_RETRIEVAL_TOP_K
+    chat_temperature: float = _DEFAULT_CHAT_TEMPERATURE
+    chat_max_tokens: int | None = _DEFAULT_CHAT_MAX_TOKENS
     qdrant_on_disk_payload: bool | None = None
     qdrant_on_disk_vectors: bool | None = None
     qdrant_hnsw_m: int | None = None
@@ -144,6 +150,10 @@ class Settings:
             ingestion_files_per_minute=int(
                 os.getenv("INGESTION_FILES_PER_MINUTE", _DEFAULT_INGESTION_FILES_PER_MINUTE)
             ),
+            retrieval_top_k=int(os.getenv("RETRIEVAL_TOP_K", _DEFAULT_RETRIEVAL_TOP_K)),
+            chat_temperature=float(os.getenv("CHAT_TEMPERATURE", _DEFAULT_CHAT_TEMPERATURE)),
+            chat_max_tokens=_env_optional_int("CHAT_MAX_TOKENS")
+            or _DEFAULT_CHAT_MAX_TOKENS,
             qdrant_on_disk_payload=_env_optional_bool("QDRANT_ON_DISK_PAYLOAD"),
             qdrant_on_disk_vectors=_env_optional_bool("QDRANT_ON_DISK_VECTORS"),
             qdrant_hnsw_m=_env_optional_int("QDRANT_HNSW_M"),

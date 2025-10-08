@@ -221,6 +221,10 @@ class ProjectStore:
             tone=overrides_payload.get("tone"),
             system_prompt=overrides_payload.get("system_prompt"),
             avatar_url=overrides_payload.get("avatar_url"),
+            glossary_top_k=overrides_payload.get("glossary_top_k"),
+            retrieval_top_k=overrides_payload.get("retrieval_top_k"),
+            chat_temperature=overrides_payload.get("chat_temperature"),
+            chat_max_tokens=overrides_payload.get("chat_max_tokens"),
         )
         return Project(
             id=payload.get("id"),
@@ -247,6 +251,14 @@ class ProjectStore:
             "system_prompt": self._normalize(overrides.system_prompt),
             "avatar_url": self._normalize(overrides.avatar_url),
         }
+        if overrides.glossary_top_k is not None:
+            normalized["glossary_top_k"] = overrides.glossary_top_k
+        if overrides.retrieval_top_k is not None:
+            normalized["retrieval_top_k"] = overrides.retrieval_top_k
+        if overrides.chat_temperature is not None:
+            normalized["chat_temperature"] = overrides.chat_temperature
+        if overrides.chat_max_tokens is not None:
+            normalized["chat_max_tokens"] = overrides.chat_max_tokens
         filtered = {key: value for key, value in normalized.items() if value is not None}
         return filtered or None
 

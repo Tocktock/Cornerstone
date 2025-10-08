@@ -129,6 +129,28 @@
               <label for="persona_avatar_url">Avatar URL</label>
               <input id="persona_avatar_url" type="url" name="persona_avatar_url" value="{{ (persona_overrides.avatar_url if persona_overrides else '') or '' }}" placeholder="Link to an image (optional)" />
             </div>
+            <div style="display:grid; gap:0.75rem; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); margin-top:0.85rem;">
+              <div>
+                <label for="persona_glossary_top_k">Glossary entries (override)</label>
+                <input id="persona_glossary_top_k" type="number" min="0" name="persona_glossary_top_k" value="{{ persona_overrides.glossary_top_k if persona_overrides and persona_overrides.glossary_top_k is not none else '' }}" placeholder="{{ defaults.glossary_top_k }}" />
+                <small>Leave blank to inherit default ({{ defaults.glossary_top_k }}).</small>
+              </div>
+              <div>
+                <label for="persona_retrieval_top_k">Context chunks (top K)</label>
+                <input id="persona_retrieval_top_k" type="number" min="1" name="persona_retrieval_top_k" value="{{ persona_overrides.retrieval_top_k if persona_overrides and persona_overrides.retrieval_top_k is not none else '' }}" placeholder="{{ defaults.retrieval_top_k }}" />
+                <small>Higher numbers surface more snippets but can dilute relevance.</small>
+              </div>
+              <div>
+                <label for="persona_chat_temperature">Response temperature</label>
+                <input id="persona_chat_temperature" type="number" min="0" step="0.1" name="persona_chat_temperature" value="{{ persona_overrides.chat_temperature if persona_overrides and persona_overrides.chat_temperature is not none else '' }}" placeholder="{{ '%.1f' % defaults.chat_temperature }}" />
+                <small>0 keeps answers deterministic; increase for more creative tone.</small>
+              </div>
+              <div>
+                <label for="persona_chat_max_tokens">Max response tokens</label>
+                <input id="persona_chat_max_tokens" type="number" min="0" name="persona_chat_max_tokens" value="{{ persona_overrides.chat_max_tokens if persona_overrides and persona_overrides.chat_max_tokens is not none else '' }}" placeholder="{{ defaults.chat_max_tokens if defaults.chat_max_tokens is not none else 'auto' }}" />
+                <small>Set to 0 or leave blank to use the backend default.</small>
+              </div>
+            </div>
           </fieldset>
 
           <button type="submit">Save Persona Settings</button>
@@ -150,6 +172,12 @@
           {% else %}
             <p>No custom prompt yet. The platform default instructions will be used.</p>
           {% endif %}
+          <p style="margin-top:0.65rem; font-size:0.85rem; color:#4b5563;">
+            Context window: {{ (persona.retrieval_top_k if persona and persona.retrieval_top_k is not none else defaults.retrieval_top_k) }} chunks · glossary top-{{ (persona.glossary_top_k if persona and persona.glossary_top_k is not none else defaults.glossary_top_k) }}
+          </p>
+          <p style="margin-top:0.15rem; font-size:0.85rem; color:#4b5563;">
+            Generation: temperature {{ '%.1f' % (persona.chat_temperature if persona and persona.chat_temperature is not none else defaults.chat_temperature) }} · max tokens {{ (persona.chat_max_tokens if persona and persona.chat_max_tokens is not none else (defaults.chat_max_tokens if defaults.chat_max_tokens is not none else 'auto')) }}
+          </p>
           {% if persona_base %}
             <p style="margin-top:0.65rem; font-size:0.8rem; color:#6b7280;">
               Base persona: <strong>{{ persona_base.name }}</strong>

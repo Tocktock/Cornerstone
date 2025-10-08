@@ -47,6 +47,14 @@ class SupportAgentContext:
     definitions: list[str]
 
 
+@dataclass(slots=True)
+class PersonaRuntimeOptions:
+    retrieval_top_k: int
+    glossary_top_k: int
+    chat_temperature: float
+    chat_max_tokens: int | None
+
+
 class SupportAgentService:
     """Generate support-oriented answers using retrieval augmented generation."""
 
@@ -57,7 +65,7 @@ class SupportAgentService:
         store_manager,
         glossary: Glossary,
         *,
-        retrieval_top_k: int = 3,
+        retrieval_top_k: int | None = None,
         persona_store: PersonaStore | None = None,
         fts_index=None,
         metrics: MetricsRecorder | None = None,
@@ -67,12 +75,18 @@ class SupportAgentService:
         self._embedding = embedding_service
         self._stores = store_manager
         self._glossary = glossary
-        self._retrieval_top_k = retrieval_top_k
+        default_top_k = retrieval_top_k if retrieval_top_k and retrieval_top_k > 0 else settings.retrieval_top_k
+        self._retrieval_top_k = max(1, default_top_k)
         self._openai_client: OpenAI | None = None
         self._persona_store = persona_store
         self._fts = fts_index
         self._metrics = metrics
         self._reranker = reranker
+        self._default_chat_temperature = max(0.0, settings.chat_temperature)
+        default_max_tokens = settings.chat_max_tokens
+        if default_max_tokens is not None and default_max_tokens <= 0:
+            default_max_tokens = None
+        self._default_chat_max_tokens = default_max_tokens
 
     def generate(
         self,
@@ -84,8 +98,13 @@ class SupportAgentService:
         metrics = self._metrics
         generate_start = time.perf_counter() if metrics else None
         persona = self._resolve_persona(project)
-        context, _ = self._build_context(project, persona, query, conversation)
-        answer = self._invoke_backend(context.prompt)
+        options = self._persona_options(persona)
+        context, _ = self._build_context(project, persona, query, conversation, options)
+        answer = self._invoke_backend(
+            context.prompt,
+            temperature=options.chat_temperature,
+            max_tokens=options.chat_max_tokens,
+        )
         logger.info(
             "support.generate.completed backend=%s chars=%s sources=%s",
             self._settings.chat_backend,
@@ -117,14 +136,19 @@ class SupportAgentService:
         """Stream a response for the given query, yielding incremental text deltas."""
 
         persona = self._resolve_persona(project)
-        context, _ = self._build_context(project, persona, query, conversation)
+        options = self._persona_options(persona)
+        context, _ = self._build_context(project, persona, query, conversation, options)
         if self._metrics:
             self._metrics.increment(
                 "chat.stream_requests",
                 project_id=project.id,
                 backend=self._settings.chat_backend,
             )
-        stream = self._stream_backend(context.prompt)
+        stream = self._stream_backend(
+            context.prompt,
+            temperature=options.chat_temperature,
+            max_tokens=options.chat_max_tokens,
+        )
         return context, stream
 
     # Internal helpers -------------------------------------------------
@@ -133,21 +157,51 @@ class SupportAgentService:
     def _is_korean(text: str) -> bool:
         return any("\uAC00" <= char <= "\uD7A3" for char in text)
 
+    def _persona_options(self, persona: PersonaSnapshot) -> PersonaRuntimeOptions:
+        retrieval_top_k = persona.retrieval_top_k
+        if retrieval_top_k is None or retrieval_top_k <= 0:
+            retrieval_top_k = self._retrieval_top_k
+        glossary_top_k = persona.glossary_top_k
+        if glossary_top_k is None:
+            glossary_top_k = self._settings.glossary_top_k
+        glossary_top_k = max(0, glossary_top_k)
+        chat_temperature = persona.chat_temperature
+        if chat_temperature is None:
+            chat_temperature = self._default_chat_temperature
+        chat_temperature = max(0.0, chat_temperature)
+        chat_max_tokens = persona.chat_max_tokens
+        if chat_max_tokens is None:
+            chat_max_tokens = self._default_chat_max_tokens
+        if chat_max_tokens is not None and chat_max_tokens <= 0:
+            chat_max_tokens = None
+        return PersonaRuntimeOptions(
+            retrieval_top_k=max(1, retrieval_top_k),
+            glossary_top_k=glossary_top_k,
+            chat_temperature=chat_temperature,
+            chat_max_tokens=chat_max_tokens,
+        )
+
     def _build_context(
         self,
         project: Project,
         persona: PersonaSnapshot,
         query: str,
         conversation: Sequence[str] | None,
+        options: PersonaRuntimeOptions | None = None,
     ) -> Tuple[SupportAgentContext, list[dict]]:
+        options = options or self._persona_options(persona)
         history = list(conversation or [])
         metrics = self._metrics
         logger.info(
-            "support.generate.start backend=%s embedding=%s project=%s query=%s",
+            "support.generate.start backend=%s embedding=%s project=%s query=%s retrieval_k=%s glossary_k=%s temperature=%.2f max_tokens=%s",
             self._settings.chat_backend,
             self._settings.embedding_model,
             project.id,
             query,
+            options.retrieval_top_k,
+            options.glossary_top_k,
+            options.chat_temperature,
+            options.chat_max_tokens,
         )
         embed_start = time.perf_counter() if metrics else None
         vector = self._embedding.embed_one(query)
@@ -159,7 +213,7 @@ class SupportAgentService:
             )
         store = self._stores.get_store(project.id)
         vector_start = time.perf_counter() if metrics else None
-        vector_results = list(store.search(vector, limit=self._retrieval_top_k))
+        vector_results = list(store.search(vector, limit=options.retrieval_top_k))
         if metrics and vector_start is not None:
             metrics.record_timing(
                 "retrieval.vector_duration",
@@ -172,7 +226,7 @@ class SupportAgentService:
         keyword_chunks: list[dict] = []
         if self._fts is not None:
             keyword_start = time.perf_counter() if metrics else None
-            keyword_hits = self._fts.search(project.id, query, limit=self._retrieval_top_k * 2)
+            keyword_hits = self._fts.search(project.id, query, limit=options.retrieval_top_k * 2)
             if metrics and keyword_start is not None:
                 metrics.record_timing(
                     "retrieval.keyword_duration",
@@ -182,12 +236,14 @@ class SupportAgentService:
                 )
                 metrics.increment("retrieval.keyword_queries", project_id=project.id)
             keyword_chunks = self._keyword_hits_to_chunks(keyword_hits)
-        fused_chunks = self._fuse_chunks(vector_chunks, keyword_chunks)
+        max_chunks = max(options.retrieval_top_k * 2, options.retrieval_top_k)
+        fused_chunks = self._fuse_chunks(vector_chunks, keyword_chunks, limit=max_chunks)
         reranked_chunks = self._apply_reranker(
             project,
             query,
             query_vector=vector,
             fused_chunks=fused_chunks,
+            limit=max_chunks,
         )
         if reranked_chunks is not None:
             fused_chunks = reranked_chunks
@@ -207,7 +263,7 @@ class SupportAgentService:
             top_titles,
         )
         sources = self._format_sources(fused_chunks)
-        definitions = self._collect_definitions(query)
+        definitions = self._collect_definitions(query, top_k=options.glossary_top_k)
         prompt = self._build_prompt(project, persona, query, fused_chunks, history)
         context = SupportAgentContext(prompt=prompt, sources=sources, definitions=definitions)
         return context, fused_chunks
@@ -254,8 +310,10 @@ class SupportAgentService:
 
         return "\n\n".join(section for section in prompt_sections if section)
 
-    def _collect_definitions(self, query: str) -> List[str]:
-        matches = self._glossary.top_matches(query, self._settings.glossary_top_k)
+    def _collect_definitions(self, query: str, top_k: int) -> List[str]:
+        if top_k <= 0:
+            return []
+        matches = self._glossary.top_matches(query, top_k)
         return [f"{entry.term}: {entry.definition}" for entry in matches]
 
     def _persona_instructions(
@@ -297,6 +355,10 @@ class SupportAgentService:
                 tone=overrides.get("tone"),
                 system_prompt=overrides.get("system_prompt"),
                 avatar_url=overrides.get("avatar_url"),
+                glossary_top_k=overrides.get("glossary_top_k"),
+                retrieval_top_k=overrides.get("retrieval_top_k"),
+                chat_temperature=overrides.get("chat_temperature"),
+                chat_max_tokens=overrides.get("chat_max_tokens"),
             )
 
         if self._persona_store is not None:
@@ -309,6 +371,10 @@ class SupportAgentService:
                 tone=getattr(legacy_persona, "tone", None),
                 system_prompt=getattr(legacy_persona, "system_prompt", None),
                 avatar_url=getattr(legacy_persona, "avatar_url", None),
+                glossary_top_k=getattr(legacy_persona, "glossary_top_k", None),
+                retrieval_top_k=getattr(legacy_persona, "retrieval_top_k", None),
+                chat_temperature=getattr(legacy_persona, "chat_temperature", None),
+                chat_max_tokens=getattr(legacy_persona, "chat_max_tokens", None),
             )
         overrides = overrides or PersonaOverrides()
         return PersonaSnapshot(
@@ -318,6 +384,10 @@ class SupportAgentService:
             system_prompt=overrides.system_prompt,
             avatar_url=overrides.avatar_url,
             overrides=overrides,
+            glossary_top_k=overrides.glossary_top_k,
+            retrieval_top_k=overrides.retrieval_top_k,
+            chat_temperature=overrides.chat_temperature,
+            chat_max_tokens=overrides.chat_max_tokens,
         )
 
     def _format_sources(self, chunks: Iterable[dict]) -> list[dict[str, str]]:
@@ -393,8 +463,10 @@ class SupportAgentService:
         vector_chunks: Sequence[dict],
         keyword_chunks: Sequence[dict],
         *,
-        limit: int = 6,
+        limit: int,
     ) -> list[dict]:
+        if limit <= 0:
+            return []
         fused: dict[str, dict] = {}
         scores: dict[str, float] = {}
 
@@ -431,8 +503,7 @@ class SupportAgentService:
             entry["origin"] = sorted(entry.get("origin", []))
 
         fused_list.sort(key=lambda item: item.get("score", 0.0), reverse=True)
-        max_chunks = max(limit, self._retrieval_top_k * 2)
-        return fused_list[:max_chunks]
+        return fused_list[:limit]
 
     def _apply_reranker(
         self,
@@ -441,6 +512,7 @@ class SupportAgentService:
         *,
         query_vector: Sequence[float],
         fused_chunks: Sequence[dict],
+        limit: int,
     ) -> list[dict] | None:
         reranker = self._reranker
         if reranker is None or not fused_chunks:
@@ -453,7 +525,7 @@ class SupportAgentService:
                 query,
                 query_embedding=query_vector,
                 chunks=fused_chunks,
-                top_k=len(fused_chunks),
+                top_k=limit,
             )
         except Exception as exc:  # pragma: no cover - defensive guard
             logger.warning(
@@ -495,29 +567,41 @@ class SupportAgentService:
             return list(reranked)
         return None
 
-    def _stream_backend(self, prompt: str) -> Iterable[str]:
+    def _stream_backend(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> Iterable[str]:
         if self._settings.is_openai_chat_backend:
             logger.info("support.backend.openai.stream")
-            return self._stream_openai(prompt)
+            return self._stream_openai(prompt, temperature=temperature, max_tokens=max_tokens)
         if self._settings.is_ollama_chat_backend:
             logger.info("support.backend.ollama.stream model=%s", self._settings.ollama_model)
-            return self._stream_ollama(prompt)
+            return self._stream_ollama(prompt, temperature=temperature, max_tokens=max_tokens)
 
         def generator() -> Iterator[str]:
-            yield self._invoke_backend(prompt)
+            yield self._invoke_backend(prompt, temperature=temperature, max_tokens=max_tokens)
 
         return generator()
 
-    def _invoke_backend(self, prompt: str) -> str:
+    def _invoke_backend(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> str:
         if self._settings.is_openai_chat_backend:
             logger.info("support.backend.openai.invoke")
-            return self._invoke_openai(prompt)
+            return self._invoke_openai(prompt, temperature=temperature, max_tokens=max_tokens)
         if self._settings.is_ollama_chat_backend:
             logger.info("support.backend.ollama.invoke model=%s", self._settings.ollama_model)
-            return self._invoke_ollama(prompt)
+            return self._invoke_ollama(prompt, temperature=temperature, max_tokens=max_tokens)
         raise RuntimeError(f"Unsupported chat backend: {self._settings.chat_backend}")
 
-    def _invoke_openai(self, prompt: str) -> str:
+    def _invoke_openai(self, prompt: str, *, temperature: float, max_tokens: int | None) -> str:
         client = self._get_openai_client()
 
         response = client.responses.create(
@@ -526,6 +610,8 @@ class SupportAgentService:
                 {"role": "system", "content": "You are an empathetic technical support agent."},
                 {"role": "user", "content": prompt},
             ],
+            temperature=temperature,
+            max_output_tokens=max_tokens,
         )
         texts: list[str] = []
         for item in response.output:  # type: ignore[attr-defined]
@@ -550,7 +636,13 @@ class SupportAgentService:
             return result
         return "I'm sorry, I could not generate a response at this time."
 
-    def _invoke_ollama(self, prompt: str) -> str:
+    def _invoke_ollama(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> str:
         if httpx is None:  # pragma: no cover
             raise RuntimeError("httpx must be installed for the Ollama chat backend")
 
@@ -568,6 +660,13 @@ class SupportAgentService:
             ],
             "stream": False,
         }
+        options: dict[str, float | int] = {}
+        if temperature > 0.0:
+            options["temperature"] = temperature
+        if max_tokens is not None:
+            options["num_predict"] = max_tokens
+        if options:
+            payload["options"] = options
 
         try:
             response = httpx.post(url, json=payload, timeout=self._settings.ollama_request_timeout)
@@ -595,7 +694,13 @@ class SupportAgentService:
             self._openai_client = OpenAI(api_key=self._settings.openai_api_key)
         return self._openai_client
 
-    def _stream_openai(self, prompt: str) -> Iterable[str]:
+    def _stream_openai(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> Iterable[str]:
         client = self._get_openai_client()
 
         def generator() -> Iterator[str]:
@@ -605,6 +710,8 @@ class SupportAgentService:
                     {"role": "system", "content": "You are an empathetic technical support agent."},
                     {"role": "user", "content": prompt},
                 ],
+                temperature=temperature,
+                max_output_tokens=max_tokens,
             ) as stream:
                 for event in stream:
                     if getattr(event, "type", "") == "response.output_text.delta":
@@ -615,7 +722,13 @@ class SupportAgentService:
 
         return generator()
 
-    def _stream_ollama(self, prompt: str) -> Iterable[str]:
+    def _stream_ollama(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> Iterable[str]:
         if httpx is None:  # pragma: no cover
             raise RuntimeError("httpx must be installed for the Ollama chat backend")
 
@@ -633,6 +746,13 @@ class SupportAgentService:
             ],
             "stream": True,
         }
+        options: dict[str, float | int] = {}
+        if temperature > 0.0:
+            options["temperature"] = temperature
+        if max_tokens is not None:
+            options["num_predict"] = max_tokens
+        if options:
+            payload["options"] = options
 
         def generator() -> Iterator[str]:
             try:

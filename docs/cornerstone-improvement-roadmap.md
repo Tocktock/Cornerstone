@@ -110,6 +110,7 @@ This document translates the audit findings into a sequenced backlog for the nex
    - Steps:
      1. Parameterize glossary depth, top-K snippets per persona.
      2. Add temperature and max tokens controls surfaced in UI.
+     - [done] Persona/project overrides now expose glossary depth, retrieval top-K, and LLM temperature/token caps with API + UI plumbing.
 3. **Glossary management UX**
    - Owners: Frontend
    - Steps:
