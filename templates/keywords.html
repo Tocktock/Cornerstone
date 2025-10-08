@@ -17,6 +17,12 @@
       button.primary:disabled { background: #9ca3af; cursor: not-allowed; box-shadow: none; }
       button.primary:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 16px 32px rgba(37,99,235,0.26); }
       .keyword-list { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.25rem; }
+      .keyword-pagination { display: none; align-items: center; gap: 0.75rem; margin-top: 1rem; }
+      .keyword-pagination.active { display: flex; }
+      .keyword-pagination button { padding: 0.4rem 0.9rem; border-radius: 999px; border: 1px solid #d1d5db; background: #fff; color: #1f2937; font-size: 0.85rem; cursor: pointer; transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease; }
+      .keyword-pagination button:hover:not(:disabled) { background: #eff6ff; color: #1d4ed8; box-shadow: 0 6px 18px rgba(37,99,235,0.12); }
+      .keyword-pagination button:disabled { cursor: not-allowed; opacity: 0.5; box-shadow: none; }
+      .keyword-pagination span { font-size: 0.85rem; color: #4b5563; }
       .keyword-pill { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.55rem 0.95rem; border-radius: 999px; border: 1px solid #d1d5db; background: #f9fafb; cursor: pointer; font-size: 0.95rem; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08); }
       .keyword-pill.core { border-color: #1d4ed8; background: #dbeafe; font-weight: 600; }
       .keyword-pill.active { background: #2563eb; border-color: #1e3a8a; color: #fff; box-shadow: 0 10px 28px rgba(37,99,235,0.28); }
@@ -67,6 +73,11 @@
           <p id="keyword-status" class="status-line">Select a project and click search to generate keyword candidates.</p>
         </div>
         <div id="keyword-list" class="keyword-list" aria-live="polite"></div>
+        <div id="keyword-pagination" class="keyword-pagination" aria-live="polite">
+          <button id="keyword-prev" type="button">Previous</button>
+          <span id="keyword-page-label"></span>
+          <button id="keyword-next" type="button">Next</button>
+        </div>
       </aside>
       <section>
         <div class="detail-header">
@@ -92,9 +103,13 @@
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         const projectSelect = document.getElementById('project');
-        const searchButton = document.getElementById('keyword-search');
-        const keywordStatus = document.getElementById('keyword-status');
         const keywordList = document.getElementById('keyword-list');
+        const paginationContainer = document.getElementById('keyword-pagination');
+        const prevButton = document.getElementById('keyword-prev');
+        const nextButton = document.getElementById('keyword-next');
+        const paginationLabel = document.getElementById('keyword-page-label');
+        const keywordStatus = document.getElementById('keyword-status');
+        const searchButton = document.getElementById('keyword-search');
         const detailTitle = document.getElementById('detail-title');
         const detailSubtitle = document.getElementById('detail-subtitle');
         const saveButton = document.getElementById('save-insight');
@@ -102,13 +117,39 @@
         const candidateList = document.getElementById('candidate-list');
         const definitionList = document.getElementById('definition-list');
 
+        const DEFAULT_PAGE_SIZE = 50;
+
         let keywords = [];
         let selectedTerm = null;
         let currentInsight = null;
         let currentFilter = {};
+        let pageSize = DEFAULT_PAGE_SIZE;
+
+        function emptyPaginationState() {
+          return {
+            page: 1,
+            page_size: pageSize,
+            total: 0,
+            pages: 0,
+            has_next: false,
+            has_prev: false,
+            range_start: 0,
+            range_end: 0,
+          };
+        }
+
+        let pagination = emptyPaginationState();
+
+        function resetPaginationControls() {
+          paginationContainer.classList.remove('active');
+          paginationLabel.textContent = '';
+          prevButton.disabled = true;
+          nextButton.disabled = true;
+        }
 
         function clearKeywordList() {
           keywordList.innerHTML = '';
+          resetPaginationControls();
         }
 
         function clearDetail() {
@@ -118,7 +159,26 @@
           detailSubtitle.textContent = '';
         }
 
-        async function loadKeywords() {
+        function toNumber(value, fallback = 0) {
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? parsed : fallback;
+        }
+
+        function formatRangeDescription(info) {
+          const total = toNumber(info.total, 0);
+          if (!total) {
+            return '';
+          }
+          const start = Math.min(toNumber(info.range_start, 1), total);
+          const tentativeEnd = toNumber(info.range_end, start + Math.max(0, keywords.length) - 1);
+          const end = Math.min(Math.max(start, tentativeEnd), total);
+          const basePageSize = Math.max(1, toNumber(info.page_size, pageSize));
+          const pages = Math.max(1, toNumber(info.pages, Math.ceil(total / basePageSize)));
+          const pageNumber = Math.min(Math.max(1, toNumber(info.page, 1)), pages);
+          return `Showing ${start}–${end} of ${total} keyword${total === 1 ? '' : 's'} (page ${pageNumber} of ${pages}).`;
+        }
+
+        async function loadKeywords(page = 1) {
           const projectId = projectSelect.value;
           if (!projectId) {
             keywordStatus.textContent = 'Select a project first.';
@@ -127,6 +187,7 @@
             return;
           }
 
+          pagination = emptyPaginationState();
           searchButton.disabled = true;
           keywordStatus.dataset.status = 'loading';
           keywordStatus.style.color = '#1f2937';
@@ -135,11 +196,17 @@
           clearDetail();
           selectedTerm = null;
           currentInsight = null;
+          currentFilter = {};
           saveButton.disabled = true;
           saveStatus.textContent = '';
 
+          const params = new URLSearchParams({
+            page: String(page),
+            page_size: String(pageSize),
+          });
+
           try {
-            const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/candidates`);
+            const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/candidates?${params.toString()}`);
             if (!response.ok) {
               throw new Error(`Failed to fetch keywords (status ${response.status})`);
             }
@@ -149,35 +216,64 @@
             currentFilter = filterInfo;
             keywordStatus.dataset.status = status;
             keywordStatus.style.color = '#1f2937';
+
             keywords = data.keywords || [];
 
+            const paginationInfo = data.pagination || {};
+            const resolvedPageSize = Math.max(1, toNumber(paginationInfo.page_size, pageSize));
+            pageSize = resolvedPageSize;
+            const total = Math.max(0, toNumber(paginationInfo.total, keywords.length));
+            const totalPages = total ? Math.max(1, toNumber(paginationInfo.pages, Math.ceil(total / resolvedPageSize))) : 0;
+            const currentPage = total ? Math.min(Math.max(1, toNumber(paginationInfo.page, page)), totalPages) : 1;
+            const rangeStart = total ? Math.min(Math.max(1, toNumber(paginationInfo.range_start, (currentPage - 1) * resolvedPageSize + 1)), total) : 0;
+            const computedRangeEnd = total ? Math.min(total, Math.max(rangeStart, toNumber(paginationInfo.range_end, rangeStart + Math.max(0, keywords.length) - 1))) : 0;
+            const hasPrev = total ? currentPage > 1 : false;
+            const hasNext = total ? computedRangeEnd < total : false;
+
+            pagination = {
+              page: currentPage,
+              page_size: resolvedPageSize,
+              total,
+              pages: totalPages,
+              has_next: hasNext,
+              has_prev: hasPrev,
+              range_start: rangeStart,
+              range_end: computedRangeEnd,
+            };
+
+            const candidateCount = toNumber(filterInfo.candidate_count, total);
+            const retainedCount = toNumber(filterInfo.selected_total, total);
+            const rangeSuffix = formatRangeDescription(pagination);
+            const suffix = rangeSuffix ? ` ${rangeSuffix}` : '';
             if (status === 'filtered') {
-              const total = filterInfo.candidate_count ?? keywords.length;
-              keywordStatus.textContent = `LLM filtered ${total} candidates to ${keywords.length}.`;
+              keywordStatus.textContent = `LLM filtered ${candidateCount} candidates to ${retainedCount}.${suffix}`;
             } else if (status === 'bypass') {
               const reason = filterInfo.reason ? ` (reason: ${filterInfo.reason})` : '';
-              keywordStatus.textContent = `LLM filtering bypassed${reason}; showing frequency list (${keywords.length}).`;
+              keywordStatus.textContent = `LLM filtering bypassed${reason}; showing frequency list (${total}).${suffix}`;
               keywordStatus.style.color = '#b45309';
             } else if (status === 'error') {
               const reason = filterInfo.reason ? ` (${filterInfo.reason})` : '';
-              keywordStatus.textContent = `LLM filtering failed${reason}; showing frequency list (${keywords.length}).`;
+              keywordStatus.textContent = `LLM filtering failed${reason}; showing frequency list (${total}).${suffix}`;
               keywordStatus.style.color = '#b91c1c';
             } else {
-              keywordStatus.textContent = `Found ${keywords.length} keyword candidate${keywords.length === 1 ? '' : 's'}.`;
+              keywordStatus.textContent = `Found ${total} keyword candidate${total === 1 ? '' : 's'}.${suffix}`;
             }
 
             if (!keywords.length) {
               keywordStatus.textContent = 'No keyword candidates detected. Try ingesting more content.';
               keywordStatus.style.color = '#b91c1c';
+              renderPagination();
               return;
             }
 
             renderKeywordList();
+            renderPagination();
           } catch (error) {
             console.error(error);
             keywordStatus.textContent = 'Unable to load keywords right now. Please try again later.';
             keywordStatus.style.color = '#b91c1c';
             keywordStatus.dataset.status = 'error';
+            resetPaginationControls();
           } finally {
             searchButton.disabled = false;
           }
@@ -212,6 +308,21 @@
             button.addEventListener('click', () => selectKeyword(item.term, button));
             keywordList.appendChild(button);
           });
+        }
+
+        function renderPagination() {
+          const total = pagination.total || 0;
+          const inferredPages = total ? Math.max(1, Math.ceil(total / Math.max(1, pagination.page_size))) : 0;
+          const pages = pagination.pages || inferredPages;
+          if (!total || pages <= 1) {
+            resetPaginationControls();
+            return;
+          }
+          paginationContainer.classList.add('active');
+          prevButton.disabled = !pagination.has_prev;
+          nextButton.disabled = !pagination.has_next;
+          const displayPages = pages || 1;
+          paginationLabel.textContent = `Page ${pagination.page} of ${displayPages} · ${pagination.range_start}–${pagination.range_end} / ${pagination.total}`;
         }
 
         async function selectKeyword(term, button) {
@@ -311,10 +422,12 @@
           });
         }
 
-        searchButton.addEventListener('click', loadKeywords);
+        searchButton.addEventListener('click', () => loadKeywords(1));
         projectSelect.addEventListener('change', () => {
           keywords = [];
           selectedTerm = null;
+          pageSize = DEFAULT_PAGE_SIZE;
+          pagination = emptyPaginationState();
           clearKeywordList();
           clearDetail();
           keywordStatus.textContent = 'Select a project and click search to generate keyword candidates.';
@@ -324,6 +437,16 @@
           currentFilter = {};
           saveButton.disabled = true;
           saveStatus.textContent = '';
+        });
+        prevButton.addEventListener('click', () => {
+          if (pagination.has_prev) {
+            loadKeywords(Math.max(1, pagination.page - 1));
+          }
+        });
+        nextButton.addEventListener('click', () => {
+          if (pagination.has_next) {
+            loadKeywords(pagination.page + 1);
+          }
         });
 
         saveButton.addEventListener('click', async () => {
@@ -345,7 +468,7 @@
             }
             const data = await response.json();
             saveStatus.style.color = '#047857';
-            saveStatus.textContent = `Saved insight (${data.id.slice(0, 6)})`; 
+            saveStatus.textContent = `Saved insight (${data.id.slice(0, 6)})`;
           } catch (error) {
             console.error(error);
             saveStatus.style.color = '#b91c1c';
@@ -355,6 +478,7 @@
           }
         });
 
+        resetPaginationControls();
         clearDetail();
       });
     </script>
