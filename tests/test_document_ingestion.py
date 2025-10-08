@@ -98,6 +98,7 @@ def build_app(settings: Settings | None = None):
         embedding_service=embedding,  # type: ignore[arg-type]
         store_manager=store_manager,
         glossary=glossary,
+        project_store=project_store,
         persona_store=persona_store,
         fts_index=fts_index,
     )
@@ -632,3 +633,53 @@ def test_local_import_reports_progress(tmp_path: Path):
             break
     else:  # pragma: no cover - defensive timeout
         pytest.fail("Local import job did not complete")
+
+
+def test_project_glossary_endpoints(tmp_path: Path) -> None:
+    settings = Settings(data_dir=str(tmp_path), default_project_name="Glossary Project")
+    client = build_app(settings)
+    services = client.app.state.services
+    project_store: ProjectStore = services.project_store
+    project = project_store.list_projects()[0]
+
+    create_response = client.post(
+        "/knowledge/glossary",
+        json={
+            "project_id": project.id,
+            "term": "SLA",
+            "definition": "Service level agreement defining response targets.",
+            "synonyms": ["service level agreement"],
+            "keywords": ["response time", "uptime"],
+        },
+    )
+    assert create_response.status_code == 201, create_response.text
+    created = create_response.json()
+    assert created["term"] == "SLA"
+    assert "uptime" in created["keywords"]
+
+    list_response = client.get(f"/knowledge/glossary?project_id={project.id}")
+    assert list_response.status_code == 200
+    payload = list_response.json()
+    assert payload["projectId"] == project.id
+    assert len(payload.get("entries", [])) == 1
+
+    update_response = client.put(
+        f"/knowledge/glossary/{created['id']}",
+        json={
+            "project_id": project.id,
+            "definition": "Support contract describing escalation timelines.",
+            "keywords": ["contract", "SLA"],
+        },
+    )
+    assert update_response.status_code == 200
+    updated = update_response.json()
+    assert "contract" in updated["keywords"]
+    assert updated["definition"].startswith("Support contract")
+
+    delete_response = client.delete(
+        f"/knowledge/glossary/{created['id']}?project_id={project.id}"
+    )
+    assert delete_response.status_code == 200
+
+    final_entries = client.get(f"/knowledge/glossary?project_id={project.id}").json()
+    assert final_entries.get("entries") == []

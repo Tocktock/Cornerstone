@@ -51,9 +51,11 @@ class ProjectStore:
         self._projects_file = root / "projects.json"
         self._documents_dir = root / "documents"
         self._keywords_dir = root / "keywords"
+        self._glossary_dir = root / "glossary"
         self._root.mkdir(parents=True, exist_ok=True)
         self._documents_dir.mkdir(parents=True, exist_ok=True)
         self._keywords_dir.mkdir(parents=True, exist_ok=True)
+        self._glossary_dir.mkdir(parents=True, exist_ok=True)
         self._ensure_default_project(default_project_name)
 
     def list_projects(self) -> List[Project]:
@@ -200,6 +202,83 @@ class ProjectStore:
         )
         return insight_with_meta
 
+    # Glossary entry persistence -------------------------------------------------
+
+    def list_glossary_entries(self, project_id: str) -> list[dict]:
+        return list(self._read_glossary_entries(project_id))
+
+    def create_glossary_entry(
+        self,
+        project_id: str,
+        *,
+        term: str,
+        definition: str,
+        synonyms: Iterable[str] | None = None,
+        keywords: Iterable[str] | None = None,
+    ) -> dict:
+        term_clean = term.strip()
+        definition_clean = definition.strip()
+        if not term_clean or not definition_clean:
+            raise ValueError("term and definition are required")
+
+        entries = self._read_glossary_entries(project_id)
+        entry = {
+            "id": uuid4().hex,
+            "term": term_clean,
+            "definition": definition_clean,
+            "synonyms": self._normalize_string_list(synonyms),
+            "keywords": self._normalize_string_list(keywords),
+            "created_at": self._now(),
+            "updated_at": self._now(),
+        }
+        entries.append(entry)
+        self._write_glossary_entries(project_id, entries)
+        logger.info("project.glossary.created project=%s entry_id=%s", project_id, entry["id"])
+        return entry
+
+    def update_glossary_entry(
+        self,
+        project_id: str,
+        entry_id: str,
+        *,
+        term: str | None = None,
+        definition: str | None = None,
+        synonyms: Iterable[str] | None = None,
+        keywords: Iterable[str] | None = None,
+    ) -> dict:
+        entries = self._read_glossary_entries(project_id)
+        for item in entries:
+            if item.get("id") != entry_id:
+                continue
+            if term is not None:
+                term_clean = term.strip()
+                if not term_clean:
+                    raise ValueError("term cannot be empty")
+                item["term"] = term_clean
+            if definition is not None:
+                definition_clean = definition.strip()
+                if not definition_clean:
+                    raise ValueError("definition cannot be empty")
+                item["definition"] = definition_clean
+            if synonyms is not None:
+                item["synonyms"] = self._normalize_string_list(synonyms)
+            if keywords is not None:
+                item["keywords"] = self._normalize_string_list(keywords)
+            item["updated_at"] = self._now()
+            self._write_glossary_entries(project_id, entries)
+            logger.info("project.glossary.updated project=%s entry_id=%s", project_id, entry_id)
+            return item
+        raise ValueError(f"Glossary entry {entry_id} not found for project {project_id}")
+
+    def delete_glossary_entry(self, project_id: str, entry_id: str) -> bool:
+        entries = self._read_glossary_entries(project_id)
+        filtered = [item for item in entries if item.get("id") != entry_id]
+        if len(filtered) == len(entries):
+            return False
+        self._write_glossary_entries(project_id, filtered)
+        logger.info("project.glossary.deleted project=%s entry_id=%s", project_id, entry_id)
+        return True
+
     def _ensure_default_project(self, default_project_name: str) -> None:
         if self._projects_file.exists():
             return
@@ -287,6 +366,42 @@ class ProjectStore:
     @staticmethod
     def _now() -> str:
         return datetime.now(timezone.utc).isoformat()
+
+    def _glossary_path(self, project_id: str) -> Path:
+        return self._glossary_dir / f"{project_id}.json"
+
+    def _read_glossary_entries(self, project_id: str) -> list[dict]:
+        path = self._glossary_path(project_id)
+        if not path.exists():
+            return []
+        with path.open("r", encoding="utf-8") as handle:
+            try:
+                data = json.load(handle)
+            except json.JSONDecodeError:
+                logger.warning("project.glossary.decode_failed project=%s path=%s", project_id, path)
+                return []
+        if not isinstance(data, list):
+            return []
+        return data
+
+    def _write_glossary_entries(self, project_id: str, entries: list[dict]) -> None:
+        path = self._glossary_path(project_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(entries, handle, indent=2)
+
+    @staticmethod
+    def _normalize_string_list(values: Iterable[str] | None) -> list[str]:
+        if not values:
+            return []
+        normalized: list[str] = []
+        for value in values:
+            if value is None:
+                continue
+            cleaned = str(value).strip()
+            if cleaned and cleaned not in normalized:
+                normalized.append(cleaned)
+        return normalized
 
 
 __all__ = ["Project", "DocumentMetadata", "ProjectStore"]

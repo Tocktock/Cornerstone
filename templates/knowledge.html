@@ -76,6 +76,30 @@
       .url-input-group { display:flex; gap:0.65rem; align-items:center; }
       .url-input-group input { flex:1; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
       .url-input-group button { padding:0.65rem 1.5rem; border-radius:999px; border:none; background:#2563eb; color:#fff; font-size:0.95rem; box-shadow:0 12px 28px rgba(37,99,235,0.2); cursor:pointer; }
+      .glossary-panel { margin-top:2rem; background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; padding:1.5rem 1.75rem; box-shadow:0 16px 32px rgba(15,23,42,0.08); display:flex; flex-direction:column; gap:1rem; }
+      .glossary-header h2 { margin:0; font-size:1.25rem; color:#111827; }
+      .glossary-header p { margin:0.25rem 0 0; color:#6b7280; font-size:0.9rem; }
+      .glossary-form-grid { display:grid; gap:0.75rem; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
+      .glossary-form-grid label { display:flex; flex-direction:column; gap:0.35rem; font-weight:600; color:#1f2937; font-size:0.9rem; }
+      .glossary-form-grid input,
+      .glossary-form-grid textarea { border-radius:10px; border:1px solid #d1d5db; padding:0.6rem 0.75rem; font-size:0.95rem; }
+      .glossary-form-grid textarea { min-height:120px; resize:vertical; grid-column:1 / -1; }
+      .glossary-actions { display:flex; gap:0.6rem; align-items:center; }
+      .button-ghost { background:#fff; border:1px solid #d1d5db; color:#1f2937; box-shadow:none; }
+      .button-ghost:hover { background:#f3f4f6; }
+      .glossary-status { min-height:1em; font-size:0.85rem; color:#6b7280; }
+      .glossary-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.85rem; }
+      .glossary-entry { border:1px solid #e5e7eb; border-radius:14px; padding:0.9rem 1rem; background:#f9fafb; box-shadow:0 6px 18px rgba(15,23,42,0.08); }
+      .glossary-entry header { display:flex; justify-content:space-between; align-items:center; gap:0.75rem; }
+      .glossary-entry header h3 { margin:0; font-size:1rem; color:#111827; }
+      .glossary-entry header span { font-size:0.78rem; color:#6b7280; }
+      .glossary-entry p { margin:0.6rem 0 0; font-size:0.95rem; line-height:1.45; color:#1f2937; }
+      .glossary-tags { margin-top:0.5rem; display:flex; flex-wrap:wrap; gap:0.45rem; font-size:0.78rem; color:#4b5563; }
+      .glossary-tag { background:#eff6ff; color:#1d4ed8; border-radius:999px; padding:0.18rem 0.6rem; }
+      .glossary-chip { background:#fef3c7; color:#92400e; border-radius:999px; padding:0.18rem 0.6rem; }
+      .glossary-entry .entry-actions { display:flex; gap:0.5rem; }
+      .glossary-entry .entry-actions button { background:#fff; border:1px solid #cbd5f5; color:#1d4ed8; font-size:0.8rem; padding:0.35rem 0.65rem; border-radius:999px; box-shadow:none; }
+      .glossary-entry .entry-actions button:hover { background:#eff6ff; }
       @media (max-width: 900px) {
         main { grid-template-columns: 1fr; padding: 0 1rem; }
         .local-input-group, .url-input-group { flex-direction:column; align-items:stretch; }
@@ -343,6 +367,35 @@
         {% else %}
           <p class="empty">No documents ingested for this project yet.</p>
         {% endif %}
+
+        <div class="glossary-panel">
+          <div class="glossary-header">
+            <h2>Project Glossary</h2>
+            <p>Add domain definitions and keywords to strengthen retrieval prompts.</p>
+          </div>
+          <form id="glossary-form" class="glossary-form">
+            <div class="glossary-form-grid">
+              <label for="glossary-term">Term
+                <input id="glossary-term" type="text" placeholder="e.g. SLA" required />
+              </label>
+              <label for="glossary-synonyms">Synonyms
+                <input id="glossary-synonyms" type="text" placeholder="Comma-separated alternate names" />
+              </label>
+              <label for="glossary-keywords">Keywords
+                <input id="glossary-keywords" type="text" placeholder="Comma-separated search keywords" />
+              </label>
+              <label for="glossary-definition">Definition
+                <textarea id="glossary-definition" rows="4" placeholder="Write a concise, user-facing explanation" required></textarea>
+              </label>
+            </div>
+            <div class="glossary-actions">
+              <button type="submit" id="glossary-submit">Save Entry</button>
+              <button type="button" id="glossary-cancel" class="button-ghost" style="display:none;">Cancel</button>
+            </div>
+          </form>
+          <div id="glossary-status" class="glossary-status"></div>
+          <ul id="glossary-entries" class="glossary-list"></ul>
+        </div>
       </section>
     </main>
   <script>
@@ -351,6 +404,7 @@
       const fileInput = document.getElementById('file-input');
       const selectBtn = document.getElementById('select-files');
       const statusList = document.getElementById('upload-status');
+      const projectSelect = document.getElementById('project');
       const projectSection = document.querySelector('section[data-project-id]');
       const urlInput = document.getElementById('url-input');
       const submitUrl = document.getElementById('submit-url');
@@ -358,11 +412,11 @@
       const localDataList = document.getElementById('local-directories');
       const directoryMeta = document.getElementById('local-directory-meta');
       const importLocalBtn = document.getElementById('import-local');
-      if (!dropZone || !fileInput || !selectBtn || !statusList || !projectSection) {
+      if (!dropZone || !fileInput || !selectBtn || !statusList || !projectSection || !projectSelect) {
         return;
       }
 
-      const projectId = projectSection.dataset.projectId;
+      let projectId = projectSection.dataset.projectId || '';
       const activeJobs = new Set();
       let pollTimer = null;
       const STATUS_LABELS = {
@@ -373,6 +427,237 @@
         throttled: 'throttled (queued)',
       };
       const THROTTLE_MESSAGE = 'Waiting for an ingestion slot. This job resumes automatically.';
+      const glossaryList = document.getElementById('glossary-entries');
+      const glossaryForm = document.getElementById('glossary-form');
+      const glossaryTerm = document.getElementById('glossary-term');
+      const glossaryDefinition = document.getElementById('glossary-definition');
+      const glossarySynonyms = document.getElementById('glossary-synonyms');
+      const glossaryKeywords = document.getElementById('glossary-keywords');
+      const glossarySubmit = document.getElementById('glossary-submit');
+      const glossaryCancel = document.getElementById('glossary-cancel');
+      const glossaryStatus = document.getElementById('glossary-status');
+      let editingGlossaryId = null;
+      let glossaryEntries = [];
+
+      function parseListInput(value) {
+        if (!value) {
+          return [];
+        }
+        const parts = Array.isArray(value) ? value : String(value).split(',');
+        const seen = new Set();
+        parts.forEach((part) => {
+          const cleaned = String(part).trim();
+          if (cleaned) {
+            seen.add(cleaned);
+          }
+        });
+        return Array.from(seen);
+      }
+
+      function setGlossaryStatus(message, tone = 'info') {
+        if (!glossaryStatus) {
+          return;
+        }
+        glossaryStatus.textContent = message || '';
+        if (!message) {
+          glossaryStatus.style.color = '#6b7280';
+          return;
+        }
+        if (tone === 'error') {
+          glossaryStatus.style.color = '#b91c1c';
+        } else if (tone === 'success') {
+          glossaryStatus.style.color = '#047857';
+        } else {
+          glossaryStatus.style.color = '#6b7280';
+        }
+      }
+
+      function resetGlossaryForm() {
+        editingGlossaryId = null;
+        if (glossaryTerm) glossaryTerm.value = '';
+        if (glossaryDefinition) glossaryDefinition.value = '';
+        if (glossarySynonyms) glossarySynonyms.value = '';
+        if (glossaryKeywords) glossaryKeywords.value = '';
+        if (glossarySubmit) glossarySubmit.textContent = 'Save Entry';
+        if (glossaryCancel) glossaryCancel.style.display = 'none';
+        setGlossaryStatus('');
+      }
+
+      function beginGlossaryEdit(entry) {
+        editingGlossaryId = entry.id;
+        if (glossaryTerm) glossaryTerm.value = entry.term || '';
+        if (glossaryDefinition) glossaryDefinition.value = entry.definition || '';
+        if (glossarySynonyms) glossarySynonyms.value = (entry.synonyms || []).join(', ');
+        if (glossaryKeywords) glossaryKeywords.value = (entry.keywords || []).join(', ');
+        if (glossarySubmit) glossarySubmit.textContent = 'Update Entry';
+        if (glossaryCancel) glossaryCancel.style.display = 'inline-flex';
+        setGlossaryStatus('Editing glossary entry…');
+      }
+
+      function renderGlossaryEntries(entries) {
+        if (!glossaryList) {
+          return;
+        }
+        glossaryList.innerHTML = '';
+        if (!entries.length) {
+          const emptyItem = document.createElement('li');
+          emptyItem.className = 'glossary-entry';
+          emptyItem.textContent = 'No glossary entries yet. Add one above.';
+          glossaryList.appendChild(emptyItem);
+          return;
+        }
+
+        entries.forEach((entry) => {
+          const item = document.createElement('li');
+          item.className = 'glossary-entry';
+
+          const header = document.createElement('header');
+          const title = document.createElement('h3');
+          title.textContent = entry.term;
+          header.appendChild(title);
+
+          const actions = document.createElement('div');
+          actions.className = 'entry-actions';
+
+          const editButton = document.createElement('button');
+          editButton.type = 'button';
+          editButton.textContent = 'Edit';
+          editButton.addEventListener('click', () => beginGlossaryEdit(entry));
+          actions.appendChild(editButton);
+
+          const deleteButton = document.createElement('button');
+          deleteButton.type = 'button';
+          deleteButton.textContent = 'Delete';
+          deleteButton.addEventListener('click', () => removeGlossaryEntry(entry.id));
+          actions.appendChild(deleteButton);
+
+          header.appendChild(actions);
+          item.appendChild(header);
+
+          const definition = document.createElement('p');
+          definition.textContent = entry.definition;
+          item.appendChild(definition);
+
+          const tags = document.createElement('div');
+          tags.className = 'glossary-tags';
+          const synonyms = entry.synonyms || [];
+          const keywords = entry.keywords || [];
+          if (synonyms.length) {
+            const synLabel = document.createElement('span');
+            synLabel.className = 'glossary-tag';
+            synLabel.textContent = `Synonyms · ${synonyms.join(', ')}`;
+            tags.appendChild(synLabel);
+          }
+          if (keywords.length) {
+            keywords.forEach((keyword) => {
+              const chip = document.createElement('span');
+              chip.className = 'glossary-chip';
+              chip.textContent = keyword;
+              tags.appendChild(chip);
+            });
+          }
+          if (tags.children.length) {
+            item.appendChild(tags);
+          }
+
+          glossaryList.appendChild(item);
+        });
+      }
+
+      async function loadGlossaryEntries() {
+        if (!glossaryList) {
+          return;
+        }
+        if (!projectId) {
+          glossaryEntries = [];
+          renderGlossaryEntries(glossaryEntries);
+          return;
+        }
+        try {
+          const response = await fetch(`/knowledge/glossary?project_id=${encodeURIComponent(projectId)}`);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch glossary (${response.status})`);
+          }
+          const data = await response.json();
+          glossaryEntries = data.entries || [];
+          renderGlossaryEntries(glossaryEntries);
+          setGlossaryStatus('');
+        } catch (error) {
+          console.error(error);
+          glossaryEntries = [];
+          renderGlossaryEntries(glossaryEntries);
+          setGlossaryStatus('Unable to load glossary entries.', 'error');
+        }
+      }
+
+      async function submitGlossaryEntry(event) {
+        event.preventDefault();
+        if (!projectId) {
+          setGlossaryStatus('Select a project before adding glossary entries.', 'error');
+          return;
+        }
+        const term = glossaryTerm ? glossaryTerm.value.trim() : '';
+        const definition = glossaryDefinition ? glossaryDefinition.value.trim() : '';
+        if (!term || !definition) {
+          setGlossaryStatus('Term and definition are required.', 'error');
+          return;
+        }
+        const payload = {
+          project_id: projectId,
+          term,
+          definition,
+          synonyms: parseListInput(glossarySynonyms ? glossarySynonyms.value : ''),
+          keywords: parseListInput(glossaryKeywords ? glossaryKeywords.value : ''),
+        };
+        const isUpdate = Boolean(editingGlossaryId);
+        const url = isUpdate ? `/knowledge/glossary/${editingGlossaryId}` : '/knowledge/glossary';
+        const method = isUpdate ? 'PUT' : 'POST';
+        try {
+          const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          if (!response.ok) {
+            const detail = await response.json().catch(() => ({}));
+            const reason = detail.detail || `status ${response.status}`;
+            throw new Error(`Failed to save entry (${reason})`);
+          }
+          await loadGlossaryEntries();
+          setGlossaryStatus(isUpdate ? 'Glossary entry updated.' : 'Glossary entry added.', 'success');
+          resetGlossaryForm();
+        } catch (error) {
+          console.error(error);
+          setGlossaryStatus('Unable to save glossary entry.', 'error');
+        }
+      }
+
+      async function removeGlossaryEntry(entryId) {
+        if (!projectId) {
+          return;
+        }
+        if (!window.confirm('Delete this glossary entry?')) {
+          return;
+        }
+        try {
+          const response = await fetch(`/knowledge/glossary/${encodeURIComponent(entryId)}?project_id=${encodeURIComponent(projectId)}`, {
+            method: 'DELETE',
+          });
+          if (!response.ok) {
+            const detail = await response.json().catch(() => ({}));
+            const reason = detail.detail || `status ${response.status}`;
+            throw new Error(`Failed to delete entry (${reason})`);
+          }
+          if (editingGlossaryId === entryId) {
+            resetGlossaryForm();
+          }
+          await loadGlossaryEntries();
+          setGlossaryStatus('Glossary entry removed.', 'success');
+        } catch (error) {
+          console.error(error);
+          setGlossaryStatus('Unable to delete glossary entry.', 'error');
+        }
+      }
 
       function renderJobs(jobs) {
         statusList.innerHTML = '';
@@ -759,6 +1044,25 @@
         });
       }
 
+      if (glossaryForm) {
+        glossaryForm.addEventListener('submit', submitGlossaryEntry);
+      }
+      if (glossaryCancel) {
+        glossaryCancel.addEventListener('click', resetGlossaryForm);
+      }
+      if (projectSelect) {
+        projectSelect.addEventListener('change', () => {
+          projectId = projectSelect.value || '';
+          if (projectSection) {
+            projectSection.dataset.projectId = projectId;
+          }
+          resetGlossaryForm();
+          loadGlossaryEntries();
+        });
+      }
+
+      resetGlossaryForm();
+      loadGlossaryEntries();
       loadLocalDirectories();
     })();
   </script>

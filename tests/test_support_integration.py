@@ -65,6 +65,7 @@ def test_support_chat_with_openai_backend() -> None:
         store_manager=store_manager,
         glossary=glossary,
         retrieval_top_k=1,
+        project_store=project_store,
         persona_store=persona_store,
     )
 

@@ -94,6 +94,7 @@ def build_test_app(*, use_real_chat: bool = False) -> tuple[TestClient, str]:
             embedding_service=embedding,  # type: ignore[arg-type]
             store_manager=store_manager,
             glossary=glossary,
+            project_store=project_store,
             persona_store=persona_store,
             fts_index=fts_index,
         )
