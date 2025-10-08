@@ -46,15 +46,32 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     manifest_path = Path(state.settings.data_dir).resolve() / "manifests" / f"{project_id}.json"
+    job_manager = getattr(state, "ingestion_jobs", None)
+    job = None
+    if job_manager is not None:
+        try:
+            job_filename = str(target_dir.relative_to(base_dir))
+        except ValueError:  # pragma: no cover - fallback guard
+            job_filename = target_dir.name or str(target_dir)
+        label = job_filename or target_dir.name or str(target_dir)
+        job = job_manager.create_job(project_id, label)
+
     metadata = ingest_directory(
         project_id=project_id,
         target_dir=target_dir,
         base_dir=base_dir,
         ingestion_service=state.ingestion_service,
         manifest_path=manifest_path,
+        job_manager=job_manager if job else None,
+        job_id=job.id if job else None,
     )
     chunks = metadata.chunk_count
-    print(f"Ingested {chunks} chunk{'s' if chunks != 1 else ''} from {metadata.filename}")
+    file_suffix = ""
+    if job_manager is not None and job is not None:
+        job_state = job_manager.get(job.id)
+        if job_state and job_state.processed_files is not None and job_state.total_files is not None:
+            file_suffix = f" ({job_state.processed_files}/{job_state.total_files} files)"
+    print(f"Ingested {chunks} chunk{'s' if chunks != 1 else ''} from {metadata.filename}{file_suffix}")
     return 0
 
 

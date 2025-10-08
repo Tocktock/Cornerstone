@@ -65,6 +65,7 @@
       .upload-status li.failed span.status { color:#dc2626; }
       .upload-status li.processing span.status { color:#2563eb; }
       .upload-status li.throttled span.status { color:#f59e0b; }
+      .job-throttled-note { font-size:0.82rem; color:#92400e; background:#fffbeb; border-radius:8px; padding:0.45rem 0.65rem; line-height:1.35; }
       .directory-meta { color:#6b7280; font-size:0.85rem; margin-left:0.35rem; }
       .upload-hint { font-size:0.85rem; color:#6b7280; margin-top:0.45rem; }
       .local-import { margin-top:1.1rem; display:flex; flex-direction:column; gap:0.5rem; }
@@ -364,6 +365,14 @@
       const projectId = projectSection.dataset.projectId;
       const activeJobs = new Set();
       let pollTimer = null;
+      const STATUS_LABELS = {
+        completed: 'completed',
+        failed: 'failed',
+        pending: 'pending',
+        processing: 'processing',
+        throttled: 'throttled (queued)',
+      };
+      const THROTTLE_MESSAGE = 'Waiting for an ingestion slot. This job resumes automatically.';
 
       function renderJobs(jobs) {
         statusList.innerHTML = '';
@@ -380,7 +389,8 @@
           name.textContent = job.filename || 'File';
           const status = document.createElement('span');
           status.className = 'status';
-          status.textContent = job.status;
+          const displayStatus = STATUS_LABELS[job.status] || job.status;
+          status.textContent = displayStatus;
           row.appendChild(name);
           row.appendChild(status);
           item.appendChild(row);
@@ -422,6 +432,18 @@
               label.textContent = labelParts.join(' · ');
               item.appendChild(label);
             }
+          }
+
+          if (job.status === 'throttled') {
+            const throttleNote = document.createElement('div');
+            throttleNote.className = 'job-throttled-note';
+            let queueSuffix = '';
+            if (typeof job.total_files === 'number' && job.total_files > 0) {
+              const processed = Math.max(0, Math.min(job.total_files, typeof job.processed_files === 'number' ? job.processed_files : 0));
+              queueSuffix = ` (${processed} / ${job.total_files} files queued)`;
+            }
+            throttleNote.textContent = `${THROTTLE_MESSAGE}${queueSuffix}`;
+            item.appendChild(throttleNote);
           }
 
           statusList.appendChild(item);
