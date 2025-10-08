@@ -112,6 +112,7 @@ def ingest_directory(
     """Ingest all supported files under target_dir into the given project."""
 
     manifest = load_manifest(manifest_path)
+    embedding_model_id = getattr(ingestion_service, "embedding_model_id", None)
 
     # Determine pending files before acquiring the processing slot so we can expose totals.
     all_supported_files: list[Path] = []
@@ -124,14 +125,27 @@ def ingest_directory(
 
     pending_files: list[Path] = []
     total_target_bytes = 0
+    manifest_updated = False
     for file_path in all_supported_files:
         stat = file_path.stat()
         rel_path = str(file_path.relative_to(base_dir))
         entry = manifest.get(rel_path)
-        if entry and entry.get("mtime_ns") == stat.st_mtime_ns and entry.get("status") == "completed":
-            continue
+        if entry and entry.get("status") == "completed" and entry.get("mtime_ns") == stat.st_mtime_ns:
+            if embedding_model_id is None:
+                continue
+            recorded_model = entry.get("embedding_model")
+            if recorded_model == embedding_model_id:
+                continue
+            if recorded_model is None:
+                entry["embedding_model"] = embedding_model_id
+                manifest[rel_path] = entry
+                manifest_updated = True
+                continue
         pending_files.append(file_path)
         total_target_bytes += stat.st_size
+
+    if manifest_updated:
+        save_manifest(manifest_path, manifest)
 
     processed_files = 0
     processed_bytes = 0
@@ -172,10 +186,13 @@ def ingest_directory(
                     data=data,
                     content_type=content_type,
                 )
-                manifest[rel_path] = {
+                entry: dict[str, object] = {
                     "mtime_ns": stat.st_mtime_ns,
                     "status": "completed",
                 }
+                if embedding_model_id is not None:
+                    entry["embedding_model"] = embedding_model_id
+                manifest[rel_path] = entry
                 total_bytes += stat.st_size
                 total_chunks += result.chunks_ingested
                 completed_files += 1
@@ -198,6 +215,8 @@ def ingest_directory(
                     "status": "failed",
                     "error": str(exc),
                 }
+                if embedding_model_id is not None:
+                    manifest[rel_path]["embedding_model"] = embedding_model_id
                 logger.warning(
                     "local.ingest.file.failed project=%s dir=%s file=%s size_bytes=%s processed_files=%s/%s",
                     project_id,

@@ -1047,6 +1047,7 @@ def create_app(
         project_store: ProjectStore = Depends(get_project_store),
         store_manager: ProjectVectorStoreManager = Depends(get_store_manager),
         fts_index: FTSIndex = Depends(get_fts_index),
+        settings: Settings = Depends(get_settings_dependency),
     ) -> RedirectResponse:
         project = _resolve_project(project_store, project_id)
         documents = project_store.list_documents(project.id)
@@ -1054,6 +1055,22 @@ def create_app(
         for doc in documents:
             fts_index.delete_document(project.id, doc.id)
         project_store.clear_documents(project.id)
+        manifest_path = Path(settings.data_dir).resolve() / "manifests" / f"{project.id}.json"
+        if manifest_path.exists():
+            try:
+                manifest_path.unlink()
+                logger.info(
+                    "knowledge.cleanup.manifest_removed project=%s path=%s",
+                    project.id,
+                    manifest_path,
+                )
+            except OSError as exc:  # pragma: no cover - filesystem failure
+                logger.warning(
+                    "knowledge.cleanup.manifest_remove_failed project=%s path=%s error=%s",
+                    project.id,
+                    manifest_path,
+                    exc,
+                )
         logger.info(
             "knowledge.cleanup.completed project=%s cleared=%s",
             project.id,
