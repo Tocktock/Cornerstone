@@ -166,6 +166,7 @@ def create_app(
         embedding_service=embedding_service,
         store_manager=store_manager,
         glossary=glossary,
+        project_store=project_store,
         persona_store=persona_store,
         fts_index=fts_index,
         metrics=metrics,
@@ -239,6 +240,23 @@ def create_app(
 
     def get_metrics(request: Request) -> MetricsRecorder | None:
         return get_state(request).metrics
+
+    def _parse_string_list(value) -> list[str]:
+        if not value:
+            return []
+        if isinstance(value, str):
+            candidates = value.split(',')
+        else:
+            try:
+                candidates = list(value)
+            except TypeError:
+                candidates = [value]
+        items: list[str] = []
+        for candidate in candidates:
+            cleaned = str(candidate).strip()
+            if cleaned and cleaned not in items:
+                items.append(cleaned)
+        return items
 
     @app.get("/", response_class=HTMLResponse)
     async def index(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
@@ -1105,6 +1123,72 @@ def create_app(
     ) -> JSONResponse:
         jobs = [job.to_dict() for job in job_manager.list_for_project(project_id)]
         return JSONResponse({"jobs": jobs})
+
+    @app.get("/knowledge/glossary", response_class=JSONResponse)
+    async def list_glossary_entries_endpoint(
+        project_id: str = Query(...),
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        entries = project_store.list_glossary_entries(project.id)
+        entries.sort(key=lambda item: str(item.get("term", "")).lower())
+        return JSONResponse({"projectId": project.id, "entries": entries})
+
+    @app.post("/knowledge/glossary", response_class=JSONResponse)
+    async def create_glossary_entry_endpoint(
+        request: Request,
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> JSONResponse:
+        payload = await request.json()
+        project_id = (payload.get("project_id") or payload.get("projectId") or "").strip()
+        project = _resolve_project(project_store, project_id)
+        try:
+            entry = project_store.create_glossary_entry(
+                project.id,
+                term=str(payload.get("term", "")),
+                definition=str(payload.get("definition", "")),
+                synonyms=_parse_string_list(payload.get("synonyms")),
+                keywords=_parse_string_list(payload.get("keywords")),
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return JSONResponse(entry, status_code=201)
+
+    @app.put("/knowledge/glossary/{entry_id}", response_class=JSONResponse)
+    async def update_glossary_entry_endpoint(
+        entry_id: str,
+        request: Request,
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> JSONResponse:
+        payload = await request.json()
+        project_id = (payload.get("project_id") or payload.get("projectId") or "").strip()
+        project = _resolve_project(project_store, project_id)
+        try:
+            entry = project_store.update_glossary_entry(
+                project.id,
+                entry_id,
+                term=payload.get("term"),
+                definition=payload.get("definition"),
+                synonyms=_parse_string_list(payload.get("synonyms")) if "synonyms" in payload else None,
+                keywords=_parse_string_list(payload.get("keywords")) if "keywords" in payload else None,
+            )
+        except ValueError as exc:
+            message = str(exc)
+            status = 404 if "not found" in message.lower() else 400
+            raise HTTPException(status_code=status, detail=message) from exc
+        return JSONResponse(entry)
+
+    @app.delete("/knowledge/glossary/{entry_id}", response_class=JSONResponse)
+    async def delete_glossary_entry_endpoint(
+        entry_id: str,
+        project_id: str = Query(...),
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        deleted = project_store.delete_glossary_entry(project.id, entry_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Glossary entry not found")
+        return JSONResponse({"status": "deleted"})
 
     @app.post("/knowledge/cleanup", response_class=RedirectResponse)
     async def cleanup_project(

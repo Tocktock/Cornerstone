@@ -10,8 +10,8 @@ from typing import Iterable, Iterator, List, Sequence, Tuple
 
 from .config import Settings
 from .embeddings import EmbeddingService
-from .glossary import Glossary
-from .projects import Project
+from .glossary import Glossary, GlossaryEntry
+from .projects import Project, ProjectStore
 from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .vector_store import QdrantVectorStore, SearchResult
 from .observability import MetricsRecorder
@@ -66,6 +66,7 @@ class SupportAgentService:
         glossary: Glossary,
         *,
         retrieval_top_k: int | None = None,
+        project_store: ProjectStore | None = None,
         persona_store: PersonaStore | None = None,
         fts_index=None,
         metrics: MetricsRecorder | None = None,
@@ -75,6 +76,7 @@ class SupportAgentService:
         self._embedding = embedding_service
         self._stores = store_manager
         self._glossary = glossary
+        self._project_store = project_store
         default_top_k = retrieval_top_k if retrieval_top_k and retrieval_top_k > 0 else settings.retrieval_top_k
         self._retrieval_top_k = max(1, default_top_k)
         self._openai_client: OpenAI | None = None
@@ -263,8 +265,21 @@ class SupportAgentService:
             top_titles,
         )
         sources = self._format_sources(fused_chunks)
-        definitions = self._collect_definitions(query, top_k=options.glossary_top_k)
-        prompt = self._build_prompt(project, persona, query, fused_chunks, history)
+        glossary_resource = self._project_glossary(project)
+        definitions = self._collect_definitions(
+            project,
+            query,
+            top_k=options.glossary_top_k,
+            glossary=glossary_resource,
+        )
+        prompt = self._build_prompt(
+            project,
+            persona,
+            query,
+            fused_chunks,
+            history,
+            glossary=glossary_resource,
+        )
         context = SupportAgentContext(prompt=prompt, sources=sources, definitions=definitions)
         return context, fused_chunks
 
@@ -275,6 +290,8 @@ class SupportAgentService:
         query: str,
         chunks: Iterable[dict],
         conversation: Sequence[str],
+        *,
+        glossary: Glossary | None = None,
     ) -> str:
         context_lines = ["Relevant documentation snippets:"]
         for idx, chunk in enumerate(chunks, start=1):
@@ -288,7 +305,8 @@ class SupportAgentService:
             context_lines = ["No matching documentation was found."]
 
         conversation_history = "\n".join(conversation)
-        glossary_section = self._glossary.to_prompt_section(query, self._settings.glossary_top_k)
+        glossary_resource = glossary or self._project_glossary(project)
+        glossary_section = glossary_resource.to_prompt_section(query, self._settings.glossary_top_k)
 
         language_instruction = (
             "모든 답변은 한국어로 작성하세요."
@@ -310,11 +328,57 @@ class SupportAgentService:
 
         return "\n\n".join(section for section in prompt_sections if section)
 
-    def _collect_definitions(self, query: str, top_k: int) -> List[str]:
+    def _collect_definitions(
+        self,
+        project: Project,
+        query: str,
+        top_k: int,
+        *,
+        glossary: Glossary | None = None,
+    ) -> List[str]:
         if top_k <= 0:
             return []
-        matches = self._glossary.top_matches(query, top_k)
+        glossary_resource = glossary or self._project_glossary(project)
+        matches = glossary_resource.top_matches(query, top_k)
         return [f"{entry.term}: {entry.definition}" for entry in matches]
+
+    def _project_glossary(self, project: Project) -> Glossary:
+        base_entries = self._glossary.entries()
+        if not self._project_store:
+            return Glossary(base_entries)
+        extras: list[GlossaryEntry] = []
+        for raw in self._project_store.list_glossary_entries(project.id):
+            term = str(raw.get("term", "")).strip()
+            definition = str(raw.get("definition", "")).strip()
+            if not term or not definition:
+                continue
+            synonyms = self._normalize_terms(raw.get("synonyms"))
+            keywords = self._normalize_terms(raw.get("keywords"))
+            extras.append(
+                GlossaryEntry(
+                    term=term,
+                    definition=definition,
+                    synonyms=synonyms,
+                    keywords=keywords,
+                )
+            )
+        combined = Glossary(base_entries)
+        if extras:
+            combined.extend(extras)
+        return combined
+
+    @staticmethod
+    def _normalize_terms(values) -> list[str]:
+        if not values:
+            return []
+        normalized: list[str] = []
+        for value in values:
+            if value is None:
+                continue
+            cleaned = str(value).strip()
+            if cleaned and cleaned not in normalized:
+                normalized.append(cleaned)
+        return normalized
 
     def _persona_instructions(
         self,

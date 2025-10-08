@@ -60,6 +60,7 @@ def build_service(tmpdir: Path, *, reranker=None):
         embedding_service=embedding,
         store_manager=store_manager,
         glossary=Glossary(),
+        project_store=project_store,
         persona_store=None,
         fts_index=fts_index,
         reranker=reranker,
@@ -174,6 +175,24 @@ def test_support_service_applies_reranker_when_present():
 
         assert dummy.called_with == ["follow"]
         assert reranked == list(reversed(fused))
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+def test_support_service_uses_project_glossary_entries():
+    tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-retrieval-"))
+    try:
+        service, ingestion, project, project_store = build_service(tmpdir)
+        project_store.create_glossary_entry(
+            project.id,
+            term="SLA",
+            definition="Service level agreement defining support timelines.",
+            keywords=["uptime", "contract"],
+        )
+        persona = service._resolve_persona(project)
+        options = service._persona_options(persona)
+        context, _ = service._build_context(project, persona, "uptime SLA", [], options)
+        assert any(definition.startswith("SLA:") for definition in context.definitions)
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
