@@ -23,7 +23,14 @@
       textarea { min-height: 90px; resize: vertical; }
       button { padding: 0.65rem 1.5rem; border-radius: 999px; border: none; background: #2563eb; color: #fff; font-size: 1rem; box-shadow: 0 12px 28px rgba(37,99,235,0.18); cursor: pointer; justify-self: start; }
       button:hover { box-shadow: 0 16px 32px rgba(37,99,235,0.24); }
-      .table-wrapper { width: 100%; overflow-x: auto; margin-top: 1.5rem; }
+      .table-toolbar { margin-top: 1.5rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+      .table-summary { font-size:0.9rem; color:#4b5563; }
+      .pager { display:flex; gap:0.5rem; align-items:center; }
+      .pager-link { padding:0.4rem 0.9rem; border-radius:999px; border:1px solid #d1d5db; font-size:0.85rem; text-decoration:none; color:#2563eb; background:#fff; }
+      .pager-link:hover { background:#eff6ff; }
+      .pager-link.disabled { color:#9ca3af; border-color:#e5e7eb; pointer-events:none; background:#f3f4f6; }
+      .pager-page { font-size:0.85rem; color:#6b7280; }
+      .table-wrapper { width: 100%; overflow-x: auto; }
       table { width: 100%; min-width: 640px; border-collapse: collapse; }
       th, td { text-align: left; padding: 0.65rem 0.5rem; border-bottom: 1px solid #e5e7eb; font-size: 0.96rem; }
       th { color: #4b5563; font-weight: 600; }
@@ -77,6 +84,8 @@
         section, aside { padding: 1.25rem 1.35rem; }
         nav { padding: 1rem; }
         nav a { display: inline-block; margin-right: 1rem; font-size: 0.95rem; }
+        .pager { width:100%; justify-content:space-between; }
+        .pager-page { flex:1; text-align:center; }
       }
     </style>
   </head>
@@ -261,6 +270,24 @@
         <p style="color:#6b7280; font-size:0.85rem; margin-top:0.35rem;">Removes all vectors and document records for this project.</p>
 
         {% if documents %}
+          {% if pagination %}
+            <div class="table-toolbar">
+              <span class="table-summary">Showing {{ pagination.start_index + 1 }}–{{ pagination.end_index }} of {{ pagination.total_documents }} documents</span>
+              <div class="pager">
+                {% if pagination.has_prev %}
+                  <a class="pager-link" href="/knowledge?project_id={{ selected_project }}&amp;page={{ pagination.page - 1 }}">Previous</a>
+                {% else %}
+                  <span class="pager-link disabled">Previous</span>
+                {% endif %}
+                <span class="pager-page">Page {{ pagination.page }} of {{ pagination.total_pages }}</span>
+                {% if pagination.has_next %}
+                  <a class="pager-link" href="/knowledge?project_id={{ selected_project }}&amp;page={{ pagination.page + 1 }}">Next</a>
+                {% else %}
+                  <span class="pager-link disabled">Next</span>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
           <div class="table-wrapper">
             <table>
               <thead>
@@ -295,6 +322,23 @@
               </tbody>
             </table>
           </div>
+          {% if pagination and pagination.total_pages > 1 %}
+            <div class="table-toolbar" style="justify-content:flex-end; margin-top:1rem;">
+              <div class="pager">
+                {% if pagination.has_prev %}
+                  <a class="pager-link" href="/knowledge?project_id={{ selected_project }}&amp;page={{ pagination.page - 1 }}">Previous</a>
+                {% else %}
+                  <span class="pager-link disabled">Previous</span>
+                {% endif %}
+                <span class="pager-page">Page {{ pagination.page }} of {{ pagination.total_pages }}</span>
+                {% if pagination.has_next %}
+                  <a class="pager-link" href="/knowledge?project_id={{ selected_project }}&amp;page={{ pagination.page + 1 }}">Next</a>
+                {% else %}
+                  <span class="pager-link disabled">Next</span>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
         {% else %}
           <p class="empty">No documents ingested for this project yet.</p>
         {% endif %}
