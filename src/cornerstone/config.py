@@ -40,6 +40,7 @@ _DEFAULT_CHAT_MAX_TOKENS: Final[int] = 600
 _DEFAULT_RERANKER_STRATEGY: Final[str] = "none"
 _DEFAULT_RERANKER_MODEL: Final[str] = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 _DEFAULT_RERANKER_MAX_CANDIDATES: Final[int] = 8
+_DEFAULT_KEYWORD_FILTER_MAX_RESULTS: Final[int] = 10
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -117,6 +118,7 @@ class Settings:
     reranker_strategy: str = _DEFAULT_RERANKER_STRATEGY
     reranker_model: str | None = None
     reranker_max_candidates: int = _DEFAULT_RERANKER_MAX_CANDIDATES
+    keyword_filter_max_results: int = _DEFAULT_KEYWORD_FILTER_MAX_RESULTS
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -165,6 +167,9 @@ class Settings:
             reranker_model=os.getenv("RERANKER_MODEL"),
             reranker_max_candidates=int(
                 os.getenv("RERANKER_MAX_CANDIDATES", str(_DEFAULT_RERANKER_MAX_CANDIDATES))
+            ),
+            keyword_filter_max_results=int(
+                os.getenv("KEYWORD_FILTER_MAX_RESULTS", str(_DEFAULT_KEYWORD_FILTER_MAX_RESULTS))
             ),
         )
 
