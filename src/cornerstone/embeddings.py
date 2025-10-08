@@ -74,6 +74,12 @@ class EmbeddingService:
             raise RuntimeError(msg)
         return self._dimension
 
+    @property
+    def model_identifier(self) -> str:
+        """Return the configured embedding model identifier."""
+
+        return self._settings.embedding_model
+
     def embed(self, texts: Sequence[str]) -> List[List[float]]:
         """Generate embeddings for a sequence of texts."""
 

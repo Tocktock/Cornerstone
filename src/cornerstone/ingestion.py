@@ -360,6 +360,12 @@ class DocumentIngestor:
         self._fts = fts_index
         self._metrics = metrics
 
+    @property
+    def embedding_model_id(self) -> str | None:
+        """Return the identifier for the active embedding model, if available."""
+
+        return getattr(self._embedding, "model_identifier", None)
+
     async def ingest_upload(self, project_id: str, upload: UploadFile) -> IngestionResult:
         filename = upload.filename or "document"
         logger.info("ingest.start project=%s filename=%s", project_id, filename)
