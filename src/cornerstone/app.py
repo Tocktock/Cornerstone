@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 from pathlib import Path
 from typing import Iterable, Optional
 
@@ -462,7 +463,35 @@ def create_app(
         selected_project = request.query_params.get("project_id") or _default_project_id(project_store)
         logger.info("knowledge.dashboard load project=%s", selected_project)
         project = _resolve_project(project_store, selected_project)
-        documents = project_store.list_documents(project.id)
+        documents_all = project_store.list_documents(project.id)
+        total_documents = len(documents_all)
+        per_page = 25
+        try:
+            page = int(request.query_params.get("page", "1"))
+        except ValueError:
+            page = 1
+        page = max(page, 1)
+
+        if total_documents:
+            total_pages = max(1, math.ceil(total_documents / per_page))
+            if page > total_pages:
+                page = total_pages
+            start_index = (page - 1) * per_page
+            end_index = min(start_index + per_page, total_documents)
+            documents = documents_all[start_index:end_index]
+            pagination = {
+                "page": page,
+                "per_page": per_page,
+                "total_pages": total_pages,
+                "total_documents": total_documents,
+                "start_index": start_index,
+                "end_index": end_index,
+                "has_prev": page > 1,
+                "has_next": page < total_pages,
+            }
+        else:
+            documents = []
+            pagination = None
         personas = persona_store.list_personas()
         persona_snapshot = persona_store.resolve_persona(project.persona_id, project.persona_overrides)
         context = {
@@ -471,6 +500,8 @@ def create_app(
             "selected_project": project.id,
             "project_name": project.name,
             "documents": documents,
+            "documents_total": total_documents,
+            "pagination": pagination,
             "persona": persona_snapshot,
             "persona_base": persona_snapshot.base_persona if persona_snapshot else None,
             "personas": personas,

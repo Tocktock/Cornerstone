@@ -12,7 +12,7 @@ from cornerstone.app import create_app
 from cornerstone.config import Settings
 from cornerstone.embeddings import EmbeddingBackend, EmbeddingService
 from cornerstone.ingestion import DocumentIngestor, ProjectVectorStoreManager
-from cornerstone.projects import ProjectStore
+from cornerstone.projects import DocumentMetadata, ProjectStore
 from cornerstone.vector_store import QdrantVectorStore, VectorRecord
 
 
@@ -144,3 +144,40 @@ def test_keyword_definition_endpoint_provides_snippets(fastapi_app: TestClient) 
     assert "excerpt" in first_candidate
     assert len(first_candidate["excerpt"]) <= len(first_candidate["snippet"])
     assert any("Alpha" in result["snippet"] for result in data["candidates"])
+
+
+def test_knowledge_dashboard_paginates_documents(fastapi_app: TestClient) -> None:
+    client = fastapi_app
+    services = client.app.state.services
+    project_store: ProjectStore = services.project_store
+    project = project_store.get_project(client.default_project_id)  # type: ignore[attr-defined]
+    assert project is not None
+
+    try:
+        for idx in range(30):
+            metadata = DocumentMetadata(
+                id=f"doc-{idx}",
+                filename=f"file-{idx:02d}.txt",
+                chunk_count=1,
+                created_at=DocumentIngestor._now(),
+                size_bytes=128,
+                title=f"Document {idx}",
+                content_type="text/plain",
+            )
+            project_store.record_document(project.id, metadata)
+
+        response = client.get(f"/knowledge?project_id={project.id}")
+        assert response.status_code == 200
+        text = response.text
+        assert "file-24.txt" in text
+        assert "file-29.txt" not in text
+        assert "Page 1 of 2" in text
+
+        response = client.get(f"/knowledge?project_id={project.id}&page=2")
+        assert response.status_code == 200
+        text = response.text
+        assert "file-29.txt" in text
+        assert "file-00.txt" not in text
+        assert "Page 2 of 2" in text
+    finally:
+        project_store.clear_documents(project.id)
