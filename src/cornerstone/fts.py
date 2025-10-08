@@ -3,9 +3,15 @@
 from __future__ import annotations
 
 import json
+import logging
+import re
 import sqlite3
 from pathlib import Path
 from typing import Iterable, List, Sequence
+
+logger = logging.getLogger(__name__)
+
+_SAFE_FTS_QUERY_RE = re.compile(r'[0-9A-Za-z가-힣_]+', re.UNICODE)
 
 
 class FTSIndex:
@@ -89,17 +95,42 @@ class FTSIndex:
         query = (query or "").strip()
         if not query:
             return []
+        sanitized_query = query
         with self._connect() as conn:
-            cursor = conn.execute(
-                """
-                SELECT chunk_id, doc_id, title, body, metadata, bm25(chunk_search) as score
-                FROM chunk_search
-                WHERE project_id = ? AND chunk_search MATCH ?
-                ORDER BY score
-                LIMIT ?
-                """,
-                (project_id, query, limit),
-            )
+            try:
+                cursor = conn.execute(
+                    """
+                    SELECT chunk_id, doc_id, title, body, metadata, bm25(chunk_search) as score
+                    FROM chunk_search
+                    WHERE project_id = ? AND chunk_search MATCH ?
+                    ORDER BY score
+                    LIMIT ?
+                    """,
+                    (project_id, sanitized_query, limit),
+                )
+            except sqlite3.OperationalError as exc:
+                fallback_terms = []
+                for match in _SAFE_FTS_QUERY_RE.findall(query):
+                    if match and match not in fallback_terms:
+                        fallback_terms.append(match)
+                fallback = " OR ".join(fallback_terms)
+                if not fallback:
+                    logger.debug("fts.query.skip", exc_info=exc)
+                    return []
+                logger.debug(
+                    "fts.query.retry",
+                    extra={"project_id": project_id, "query": query},
+                )
+                cursor = conn.execute(
+                    """
+                    SELECT chunk_id, doc_id, title, body, metadata, bm25(chunk_search) as score
+                    FROM chunk_search
+                    WHERE project_id = ? AND chunk_search MATCH ?
+                    ORDER BY score
+                    LIMIT ?
+                    """,
+                    (project_id, fallback, limit),
+                )
             rows = cursor.fetchall()
         results: List[dict[str, str]] = []
         for row in rows:

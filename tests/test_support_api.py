@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import tempfile
+import types
 from pathlib import Path
 import shutil
 
@@ -127,6 +128,37 @@ def test_support_chat_endpoint():
     data = response.json()
     assert data["message"].startswith("Here is how")
     assert data["definitions"]
+
+
+def test_support_chat_endpoint_includes_project_glossary_entries():
+    client, project_id = build_test_app(use_real_chat=True)
+    services = client.app.state.services
+    chat_service = services.chat_service
+    chat_service._fts = None
+
+    def fake_invoke_backend(self, prompt, *, temperature, max_tokens):
+        return "Mocked support response."
+
+    chat_service._invoke_backend = types.MethodType(fake_invoke_backend, chat_service)
+
+    create_response = client.post(
+        "/knowledge/glossary",
+        json={
+            "project_id": project_id,
+            "term": "SLA",
+            "definition": "Service level agreement defining response times.",
+            "keywords": ["uptime"],
+        },
+    )
+    assert create_response.status_code == 201
+
+    response = client.post(
+        "/support/chat",
+        json={"query": "What is our SLA policy?", "projectId": project_id},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert any(definition.startswith("SLA:") for definition in data["definitions"])
 
 
 def test_support_chat_stream_endpoint():

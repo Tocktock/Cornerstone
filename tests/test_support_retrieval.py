@@ -219,3 +219,32 @@ def test_persona_options_respect_project_overrides():
         assert options.chat_max_tokens == 240
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+def test_fts_search_handles_punctuation_and_non_latin_characters():
+    tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-retrieval-"))
+    try:
+        service, ingestion, project, _ = build_service(tmpdir)
+        service._fts.upsert_chunks(  # type: ignore[attr-defined]
+            project_id=project.id,
+            doc_id="kr-doc",
+            entries=[
+                {
+                    "chunk_id": "KR-1",
+                    "text": "이 회사의 중요 비지니스는 물류 서비스입니다.",
+                    "title": "회사 소개",
+                    "metadata": {"language": "ko"},
+                }
+            ],
+        )
+
+        results = service._fts.search(
+            project.id,
+            "이 회사의 중요 비지니스는 뭐야 ?",
+            limit=5,
+        )
+
+        assert results
+        assert any(result["chunk_id"] == "KR-1" for result in results)
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
