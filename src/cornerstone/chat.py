@@ -15,6 +15,7 @@ from .projects import Project
 from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .vector_store import QdrantVectorStore, SearchResult
 from .observability import MetricsRecorder
+from .reranker import Reranker
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,7 @@ class SupportAgentService:
         persona_store: PersonaStore | None = None,
         fts_index=None,
         metrics: MetricsRecorder | None = None,
+        reranker: Reranker | None = None,
     ) -> None:
         self._settings = settings
         self._embedding = embedding_service
@@ -70,6 +72,7 @@ class SupportAgentService:
         self._persona_store = persona_store
         self._fts = fts_index
         self._metrics = metrics
+        self._reranker = reranker
 
     def generate(
         self,
@@ -180,6 +183,14 @@ class SupportAgentService:
                 metrics.increment("retrieval.keyword_queries", project_id=project.id)
             keyword_chunks = self._keyword_hits_to_chunks(keyword_hits)
         fused_chunks = self._fuse_chunks(vector_chunks, keyword_chunks)
+        reranked_chunks = self._apply_reranker(
+            project,
+            query,
+            query_vector=vector,
+            fused_chunks=fused_chunks,
+        )
+        if reranked_chunks is not None:
+            fused_chunks = reranked_chunks
         if metrics:
             metrics.increment(
                 "retrieval.fused_chunks",
@@ -422,6 +433,67 @@ class SupportAgentService:
         fused_list.sort(key=lambda item: item.get("score", 0.0), reverse=True)
         max_chunks = max(limit, self._retrieval_top_k * 2)
         return fused_list[:max_chunks]
+
+    def _apply_reranker(
+        self,
+        project: Project,
+        query: str,
+        *,
+        query_vector: Sequence[float],
+        fused_chunks: Sequence[dict],
+    ) -> list[dict] | None:
+        reranker = self._reranker
+        if reranker is None or not fused_chunks:
+            return None
+
+        metrics = self._metrics
+        start = time.perf_counter() if metrics else None
+        try:
+            reranked = reranker.rerank(
+                query,
+                query_embedding=query_vector,
+                chunks=fused_chunks,
+                top_k=len(fused_chunks),
+            )
+        except Exception as exc:  # pragma: no cover - defensive guard
+            logger.warning(
+                "support.generate.rerank.error strategy=%s project=%s error=%s",
+                getattr(reranker, "name", "unknown"),
+                project.id,
+                exc,
+            )
+            if metrics:
+                metrics.increment(
+                    "retrieval.rerank_errors",
+                    project_id=project.id,
+                    strategy=getattr(reranker, "name", "unknown"),
+                )
+            return None
+
+        if metrics and start is not None:
+            metrics.record_timing(
+                "retrieval.rerank_duration",
+                time.perf_counter() - start,
+                project_id=project.id,
+                strategy=getattr(reranker, "name", "unknown"),
+                candidates=len(fused_chunks),
+            )
+            metrics.increment(
+                "retrieval.rerank_applied",
+                project_id=project.id,
+                strategy=getattr(reranker, "name", "unknown"),
+            )
+
+        if reranked:
+            logger.info(
+                "support.generate.rerank strategy=%s project=%s before=%s after=%s",
+                getattr(reranker, "name", "unknown"),
+                project.id,
+                len(fused_chunks),
+                len(reranked),
+            )
+            return list(reranked)
+        return None
 
     def _stream_backend(self, prompt: str) -> Iterable[str]:
         if self._settings.is_openai_chat_backend:
