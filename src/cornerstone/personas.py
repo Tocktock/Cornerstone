@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 import json
 from pathlib import Path
-from typing import Iterable, List
+from typing import Any, Iterable, List
 
 import logging
 
@@ -22,6 +22,10 @@ class PersonaOverrides:
     tone: str | None = None
     system_prompt: str | None = None
     avatar_url: str | None = None
+    glossary_top_k: int | None = None
+    retrieval_top_k: int | None = None
+    chat_temperature: float | None = None
+    chat_max_tokens: int | None = None
 
 
 @dataclass(slots=True)
@@ -36,6 +40,10 @@ class Persona:
     avatar_url: str | None
     tags: list[str]
     created_at: str
+    glossary_top_k: int | None = None
+    retrieval_top_k: int | None = None
+    chat_temperature: float | None = None
+    chat_max_tokens: int | None = None
 
 
 @dataclass(slots=True)
@@ -49,6 +57,13 @@ class PersonaSnapshot:
     avatar_url: str | None
     base_persona: Persona | None = None
     overrides: PersonaOverrides = field(default_factory=PersonaOverrides)
+    glossary_top_k: int | None = None
+    retrieval_top_k: int | None = None
+    chat_temperature: float | None = None
+    chat_max_tokens: int | None = None
+
+
+_UNSET: Any = object()
 
 
 class PersonaStore:
@@ -82,6 +97,10 @@ class PersonaStore:
         system_prompt: str | None = None,
         avatar_url: str | None = None,
         tags: Iterable[str] | None = None,
+        glossary_top_k: int | None = None,
+        retrieval_top_k: int | None = None,
+        chat_temperature: float | None = None,
+        chat_max_tokens: int | None = None,
     ) -> Persona:
         payload = self._read_personas()
         existing_ids = {item["id"] for item in payload.get("personas", [])}
@@ -95,6 +114,10 @@ class PersonaStore:
             avatar_url=_normalize(avatar_url),
             tags=sorted({tag.strip() for tag in (tags or []) if tag.strip()}),
             created_at=self._now(),
+            glossary_top_k=glossary_top_k,
+            retrieval_top_k=retrieval_top_k,
+            chat_temperature=chat_temperature,
+            chat_max_tokens=chat_max_tokens,
         )
         payload.setdefault("personas", []).append(self._serialize_persona(persona))
         self._write_personas(payload)
@@ -105,29 +128,53 @@ class PersonaStore:
         self,
         persona_id: str,
         *,
-        name: str | None = None,
-        description: str | None = None,
-        tone: str | None = None,
-        system_prompt: str | None = None,
-        avatar_url: str | None = None,
-        tags: Iterable[str] | None = None,
+        name: str | None | Any = _UNSET,
+        description: str | None | Any = _UNSET,
+        tone: str | None | Any = _UNSET,
+        system_prompt: str | None | Any = _UNSET,
+        avatar_url: str | None | Any = _UNSET,
+        tags: Iterable[str] | None | Any = _UNSET,
+        glossary_top_k: int | None | Any = _UNSET,
+        retrieval_top_k: int | None | Any = _UNSET,
+        chat_temperature: float | None | Any = _UNSET,
+        chat_max_tokens: int | None | Any = _UNSET,
     ) -> Persona:
         payload = self._read_personas()
         for item in payload.get("personas", []):
             if item.get("id") != persona_id:
                 continue
-            if name is not None:
-                item["name"] = name.strip()
-            if description is not None:
+            if name is not _UNSET:
+                item["name"] = name.strip() if isinstance(name, str) else None
+            if description is not _UNSET:
                 item["description"] = _normalize(description)
-            if tone is not None:
+            if tone is not _UNSET:
                 item["tone"] = _normalize(tone)
-            if system_prompt is not None:
+            if system_prompt is not _UNSET:
                 item["system_prompt"] = _normalize(system_prompt)
-            if avatar_url is not None:
+            if avatar_url is not _UNSET:
                 item["avatar_url"] = _normalize(avatar_url)
-            if tags is not None:
-                item["tags"] = sorted({tag.strip() for tag in tags if tag.strip()})
+            if tags is not _UNSET:
+                item["tags"] = sorted({tag.strip() for tag in (tags or []) if tag.strip()}) if tags is not None else []
+            if glossary_top_k is not _UNSET:
+                if glossary_top_k is None:
+                    item.pop("glossary_top_k", None)
+                else:
+                    item["glossary_top_k"] = glossary_top_k
+            if retrieval_top_k is not _UNSET:
+                if retrieval_top_k is None:
+                    item.pop("retrieval_top_k", None)
+                else:
+                    item["retrieval_top_k"] = retrieval_top_k
+            if chat_temperature is not _UNSET:
+                if chat_temperature is None:
+                    item.pop("chat_temperature", None)
+                else:
+                    item["chat_temperature"] = chat_temperature
+            if chat_max_tokens is not _UNSET:
+                if chat_max_tokens is None:
+                    item.pop("chat_max_tokens", None)
+                else:
+                    item["chat_max_tokens"] = chat_max_tokens
             self._write_personas(payload)
             updated = self._deserialize_persona(item)
             logger.info("persona.updated id=%s name=%s", updated.id, updated.name)
@@ -156,6 +203,18 @@ class PersonaStore:
         tone = overrides.tone or (base.tone if base else None)
         system_prompt = overrides.system_prompt or (base.system_prompt if base else None)
         avatar_url = overrides.avatar_url or (base.avatar_url if base else None)
+        glossary_top_k = overrides.glossary_top_k
+        if glossary_top_k is None and base is not None:
+            glossary_top_k = base.glossary_top_k
+        retrieval_top_k = overrides.retrieval_top_k
+        if retrieval_top_k is None and base is not None:
+            retrieval_top_k = base.retrieval_top_k
+        chat_temperature = overrides.chat_temperature
+        if chat_temperature is None and base is not None:
+            chat_temperature = base.chat_temperature
+        chat_max_tokens = overrides.chat_max_tokens
+        if chat_max_tokens is None and base is not None:
+            chat_max_tokens = base.chat_max_tokens
         return PersonaSnapshot(
             id=base.id if base else None,
             name=name,
@@ -164,6 +223,10 @@ class PersonaStore:
             avatar_url=avatar_url,
             base_persona=base,
             overrides=overrides,
+            glossary_top_k=glossary_top_k,
+            retrieval_top_k=retrieval_top_k,
+            chat_temperature=chat_temperature,
+            chat_max_tokens=chat_max_tokens,
         )
 
     def _ensure_seed_personas(self) -> None:
@@ -235,6 +298,10 @@ class PersonaStore:
             avatar_url=payload.get("avatar_url"),
             tags=list(payload.get("tags", [])),
             created_at=payload.get("created_at") or self._now(),
+            glossary_top_k=payload.get("glossary_top_k"),
+            retrieval_top_k=payload.get("retrieval_top_k"),
+            chat_temperature=payload.get("chat_temperature"),
+            chat_max_tokens=payload.get("chat_max_tokens"),
         )
 
     def _serialize_persona(self, persona: Persona) -> dict:

@@ -11,6 +11,7 @@ from cornerstone.config import Settings
 from cornerstone.glossary import Glossary
 from cornerstone.ingestion import DocumentIngestor, ProjectVectorStoreManager
 from cornerstone.fts import FTSIndex
+from cornerstone.personas import PersonaOverrides
 from cornerstone.projects import ProjectStore
 
 
@@ -64,13 +65,13 @@ def build_service(tmpdir: Path, *, reranker=None):
         reranker=reranker,
     )
 
-    return service, ingestion, project
+    return service, ingestion, project, project_store
 
 
 def test_support_service_fuses_keyword_and_semantic_results():
     tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-retrieval-"))
     try:
-        service, ingestion, project = build_service(tmpdir)
+        service, ingestion, project, project_store = build_service(tmpdir)
 
         semantic_doc = (
             "# Troubleshooting Guide\n\n"
@@ -98,12 +99,14 @@ def test_support_service_fuses_keyword_and_semantic_results():
         )
 
         persona = service._resolve_persona(project)
+        options = service._persona_options(persona)
 
         _, keyword_chunks = service._build_context(
             project,
             persona,
             "legacy outage runbook",
             [],
+            options,
         )
         assert any(chunk["title"] == "Legacy Runbook" for chunk in keyword_chunks)
 
@@ -112,6 +115,7 @@ def test_support_service_fuses_keyword_and_semantic_results():
             persona,
             "restart widget error 42",
             [],
+            options,
         )
         assert any("Error 42" in chunk.get("title", "") for chunk in semantic_chunks)
 
@@ -120,6 +124,7 @@ def test_support_service_fuses_keyword_and_semantic_results():
             persona,
             "widget outage error 42 runbook",
             [],
+            options,
         )
         fused_titles = {chunk["title"] for chunk in fused_chunks}
         assert "Legacy Runbook" in fused_titles
@@ -142,7 +147,7 @@ def test_support_service_applies_reranker_when_present():
     tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-retrieval-"))
     try:
         dummy = DummyReranker()
-        service, ingestion, project = build_service(tmpdir, reranker=dummy)
+        service, ingestion, project, project_store = build_service(tmpdir, reranker=dummy)
         persona = service._resolve_persona(project)
         fused = [
             {
@@ -164,9 +169,34 @@ def test_support_service_applies_reranker_when_present():
             "follow",
             query_vector=service._embedding.embed_one("follow"),
             fused_chunks=fused,
+            limit=len(fused),
         )
 
         assert dummy.called_with == ["follow"]
         assert reranked == list(reversed(fused))
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+def test_persona_options_respect_project_overrides():
+    tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-retrieval-"))
+    try:
+        service, ingestion, project, project_store = build_service(tmpdir)
+        updated = project_store.configure_persona(
+            project.id,
+            persona_id=None,
+            overrides=PersonaOverrides(
+                retrieval_top_k=5,
+                glossary_top_k=1,
+                chat_temperature=0.65,
+                chat_max_tokens=240,
+            ),
+        )
+        persona = service._resolve_persona(updated)
+        options = service._persona_options(persona)
+        assert options.retrieval_top_k == 5
+        assert options.glossary_top_k == 1
+        assert abs(options.chat_temperature - 0.65) < 1e-6
+        assert options.chat_max_tokens == 240
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)

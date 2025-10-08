@@ -86,6 +86,26 @@
                 <label for="tags-{{ persona.id }}">Tags (comma separated)</label>
                 <input id="tags-{{ persona.id }}" type="text" name="tags" value="{{ persona.tags | join(', ') }}" placeholder="support, onboarding" />
                 <div class="row">
+                  <div>
+                    <label for="glossary-{{ persona.id }}">Glossary top K</label>
+                    <input id="glossary-{{ persona.id }}" type="number" min="0" name="glossary_top_k" value="{{ persona.glossary_top_k if persona.glossary_top_k is not none else '' }}" placeholder="default" />
+                  </div>
+                  <div>
+                    <label for="retrieval-{{ persona.id }}">Retrieval top K</label>
+                    <input id="retrieval-{{ persona.id }}" type="number" min="1" name="retrieval_top_k" value="{{ persona.retrieval_top_k if persona.retrieval_top_k is not none else '' }}" placeholder="default" />
+                  </div>
+                </div>
+                <div class="row">
+                  <div>
+                    <label for="temperature-{{ persona.id }}">Temperature</label>
+                    <input id="temperature-{{ persona.id }}" type="number" min="0" step="0.1" name="chat_temperature" value="{{ persona.chat_temperature if persona.chat_temperature is not none else '' }}" placeholder="default" />
+                  </div>
+                  <div>
+                    <label for="maxtokens-{{ persona.id }}">Max tokens</label>
+                    <input id="maxtokens-{{ persona.id }}" type="number" min="0" name="chat_max_tokens" value="{{ persona.chat_max_tokens if persona.chat_max_tokens is not none else '' }}" placeholder="auto" />
+                  </div>
+                </div>
+                <div class="row">
                   <button type="submit">Save Changes</button>
                   <button class="danger" type="submit" name="delete" value="1" {% if assignments.get(persona.id) %}disabled{% endif %}>Delete</button>
                 </div>
@@ -116,6 +136,26 @@
           <input id="new-avatar" type="url" name="avatar_url" placeholder="https://..." />
           <label for="new-tags">Tags (comma separated)</label>
           <input id="new-tags" type="text" name="tags" placeholder="support, escalation" />
+          <div class="row">
+            <div>
+              <label for="new-glossary">Glossary top K</label>
+              <input id="new-glossary" type="number" min="0" name="glossary_top_k" placeholder="default" />
+            </div>
+            <div>
+              <label for="new-retrieval">Retrieval top K</label>
+              <input id="new-retrieval" type="number" min="1" name="retrieval_top_k" placeholder="default" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="new-temperature">Temperature</label>
+              <input id="new-temperature" type="number" min="0" step="0.1" name="chat_temperature" placeholder="default" />
+            </div>
+            <div>
+              <label for="new-maxtokens">Max tokens</label>
+              <input id="new-maxtokens" type="number" min="0" name="chat_max_tokens" placeholder="auto" />
+            </div>
+          </div>
           <button type="submit">Create Persona</button>
         </form>
 

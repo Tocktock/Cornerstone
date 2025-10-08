@@ -148,3 +148,109 @@ def test_support_chat_stream_endpoint():
     done = json.loads(lines[-1])
     assert done["event"] == "done"
     assert done["message"].startswith("Here is how")
+
+
+def test_persona_form_updates_tuning_settings():
+    client, project_id = build_test_app(use_real_chat=True)
+    services = client.app.state.services
+    persona_store = services.persona_store
+    project_store = services.project_store
+
+    existing_ids = {persona.id for persona in persona_store.list_personas()}
+    response = client.post(
+        "/personas",
+        data={
+            "name": "Field Ops",
+            "description": "Handles complex escalations",
+            "tone": "steady and pragmatic",
+            "system_prompt": "Always cite explicit runbooks and provide escalation paths.",
+            "glossary_top_k": "5",
+            "retrieval_top_k": "7",
+            "chat_temperature": "0.3",
+            "chat_max_tokens": "450",
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    new_persona = next(
+        persona for persona in persona_store.list_personas() if persona.id not in existing_ids
+    )
+    assert new_persona.glossary_top_k == 5
+    assert new_persona.retrieval_top_k == 7
+    assert abs(new_persona.chat_temperature - 0.3) < 1e-6
+    assert new_persona.chat_max_tokens == 450
+
+    response = client.post(
+        "/knowledge/persona",
+        data={
+            "project_id": project_id,
+            "persona_id": new_persona.id,
+            "persona_glossary_top_k": "4",
+            "persona_retrieval_top_k": "6",
+            "persona_chat_temperature": "0.7",
+            "persona_chat_max_tokens": "512",
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    project = project_store.get_project(project_id)
+    overrides = project.persona_overrides
+    assert overrides.glossary_top_k == 4
+    assert overrides.retrieval_top_k == 6
+    assert abs(overrides.chat_temperature - 0.7) < 1e-6
+    assert overrides.chat_max_tokens == 512
+
+    persona_snapshot = persona_store.resolve_persona(project.persona_id, overrides)
+    options = services.chat_service._persona_options(persona_snapshot)
+    assert options.retrieval_top_k == 6
+    assert options.glossary_top_k == 4
+    assert abs(options.chat_temperature - 0.7) < 1e-6
+    assert options.chat_max_tokens == 512
+
+
+def test_persona_api_handles_tuning_fields():
+    client, _ = build_test_app(use_real_chat=True)
+    services = client.app.state.services
+    persona_store = services.persona_store
+
+    response = client.post(
+        "/api/personas",
+        json={
+            "name": "Ops Warden",
+            "description": "Keeps systems healthy",
+            "tone": "direct and analytical",
+            "system_prompt": "Provide immediate triage steps before escalating.",
+            "tags": ["operations"],
+            "glossary_top_k": 2,
+            "retrieval_top_k": 5,
+            "chat_temperature": 0.25,
+            "chat_max_tokens": 380,
+        },
+    )
+    assert response.status_code == 201
+    persona_data = response.json()
+    assert persona_data["glossary_top_k"] == 2
+    assert persona_data["retrieval_top_k"] == 5
+    assert abs(persona_data["chat_temperature"] - 0.25) < 1e-6
+    assert persona_data["chat_max_tokens"] == 380
+    persona_id = persona_data["id"]
+
+    response = client.post(
+        f"/api/personas/{persona_id}",
+        json={
+            "name": "Ops Warden",
+            "chat_temperature": 0.55,
+            "chat_max_tokens": 640,
+        },
+    )
+    assert response.status_code == 200
+    updated_data = response.json()
+    assert abs(updated_data["chat_temperature"] - 0.55) < 1e-6
+    assert updated_data["chat_max_tokens"] == 640
+
+    stored_persona = persona_store.get_persona(persona_id)
+    assert stored_persona is not None
+    assert abs(stored_persona.chat_temperature - 0.55) < 1e-6
+    assert stored_persona.chat_max_tokens == 640

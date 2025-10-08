@@ -168,6 +168,7 @@ def create_app(
         persona_store=persona_store,
         fts_index=fts_index,
         metrics=metrics,
+        retrieval_top_k=settings.retrieval_top_k,
         reranker=reranker,
     )
 
@@ -387,6 +388,10 @@ def create_app(
             "avatar_url": persona.avatar_url,
             "tags": persona.tags,
             "created_at": persona.created_at,
+            "glossary_top_k": persona.glossary_top_k,
+            "retrieval_top_k": persona.retrieval_top_k,
+            "chat_temperature": persona.chat_temperature,
+            "chat_max_tokens": persona.chat_max_tokens,
         }
 
     def _parse_tags(raw: str | None) -> list[str]:
@@ -394,10 +399,65 @@ def create_app(
             return []
         return [tag.strip() for tag in raw.split(",") if tag.strip()]
 
+    def _parse_optional_int(raw: str | None, *, min_value: int | None = None) -> int | None:
+        if raw is None:
+            return None
+        value = raw.strip()
+        if not value:
+            return None
+        try:
+            parsed = int(value)
+        except ValueError as exc:  # pragma: no cover - defensive guard
+            raise HTTPException(status_code=400, detail="Expected integer value") from exc
+        if min_value is not None and parsed < min_value:
+            raise HTTPException(status_code=400, detail=f"Value must be ≥ {min_value}")
+        return parsed
+
+    def _parse_optional_float(raw: str | None, *, min_value: float | None = None) -> float | None:
+        if raw is None:
+            return None
+        value = raw.strip()
+        if not value:
+            return None
+        try:
+            parsed = float(value)
+        except ValueError as exc:  # pragma: no cover - defensive guard
+            raise HTTPException(status_code=400, detail="Expected numeric value") from exc
+        if min_value is not None and parsed < min_value:
+            raise HTTPException(status_code=400, detail=f"Value must be ≥ {min_value}")
+        return parsed
+
+    def _coerce_optional_int(value, *, min_value: int | None = None) -> int | None:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            return _parse_optional_int(value, min_value=min_value)
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError) as exc:  # pragma: no cover - defensive guard
+            raise HTTPException(status_code=400, detail="Expected integer value") from exc
+        if min_value is not None and parsed < min_value:
+            raise HTTPException(status_code=400, detail=f"Value must be ≥ {min_value}")
+        return parsed
+
+    def _coerce_optional_float(value, *, min_value: float | None = None) -> float | None:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            return _parse_optional_float(value, min_value=min_value)
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError) as exc:  # pragma: no cover - defensive guard
+            raise HTTPException(status_code=400, detail="Expected numeric value") from exc
+        if min_value is not None and parsed < min_value:
+            raise HTTPException(status_code=400, detail=f"Value must be ≥ {min_value}")
+        return parsed
+
     @app.get("/knowledge", response_class=HTMLResponse)
     async def knowledge_dashboard(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
         project_store = get_project_store(request)
         persona_store = get_persona_store(request)
+        settings_inst = get_settings_dependency(request)
         projects = project_store.list_projects()
         selected_project = request.query_params.get("project_id") or _default_project_id(project_store)
         logger.info("knowledge.dashboard load project=%s", selected_project)
@@ -416,6 +476,12 @@ def create_app(
             "personas": personas,
             "project_persona_id": project.persona_id,
             "persona_overrides": project.persona_overrides,
+            "defaults": {
+                "glossary_top_k": settings_inst.glossary_top_k,
+                "retrieval_top_k": settings_inst.retrieval_top_k,
+                "chat_temperature": settings_inst.chat_temperature,
+                "chat_max_tokens": settings_inst.chat_max_tokens,
+            },
         }
         return templates.TemplateResponse("knowledge.html", context)
 
@@ -428,15 +494,27 @@ def create_app(
         persona_tone: str | None = Form(None),
         persona_system_prompt: str | None = Form(None),
         persona_avatar_url: str | None = Form(None),
+        persona_glossary_top_k: str | None = Form(None),
+        persona_retrieval_top_k: str | None = Form(None),
+        persona_chat_temperature: str | None = Form(None),
+        persona_chat_max_tokens: str | None = Form(None),
         project_store: ProjectStore = Depends(get_project_store),
         persona_store: PersonaStore = Depends(get_persona_store),
     ) -> RedirectResponse:
         project = _resolve_project(project_store, project_id)
+        glossary_top_k = _parse_optional_int(persona_glossary_top_k, min_value=0)
+        retrieval_top_k = _parse_optional_int(persona_retrieval_top_k, min_value=1)
+        chat_temperature = _parse_optional_float(persona_chat_temperature, min_value=0.0)
+        chat_max_tokens = _parse_optional_int(persona_chat_max_tokens, min_value=0)
         overrides = PersonaOverrides(
             name=persona_name,
             tone=persona_tone,
             system_prompt=persona_system_prompt,
             avatar_url=persona_avatar_url,
+            glossary_top_k=glossary_top_k,
+            retrieval_top_k=retrieval_top_k,
+            chat_temperature=chat_temperature,
+            chat_max_tokens=chat_max_tokens,
         )
         updated = project_store.configure_persona(
             project.id,
@@ -445,8 +523,17 @@ def create_app(
         )
         resolved = persona_store.resolve_persona(updated.persona_id, updated.persona_overrides)
         has_overrides = any(
-            getattr(updated.persona_overrides, field)
-            for field in ("name", "tone", "system_prompt", "avatar_url")
+            getattr(updated.persona_overrides, field) is not None
+            for field in (
+                "name",
+                "tone",
+                "system_prompt",
+                "avatar_url",
+                "glossary_top_k",
+                "retrieval_top_k",
+                "chat_temperature",
+                "chat_max_tokens",
+            )
         )
         logger.info(
             "knowledge.persona.updated project=%s persona=%s overrides=%s",
@@ -482,6 +569,10 @@ def create_app(
         system_prompt: str = Form(...),
         avatar_url: str | None = Form(None),
         tags: str | None = Form(None),
+        glossary_top_k: str | None = Form(None),
+        retrieval_top_k: str | None = Form(None),
+        chat_temperature: str | None = Form(None),
+        chat_max_tokens: str | None = Form(None),
         persona_store: PersonaStore = Depends(get_persona_store),
     ) -> RedirectResponse:
         new_persona = persona_store.create_persona(
@@ -491,6 +582,10 @@ def create_app(
             system_prompt=system_prompt,
             avatar_url=avatar_url,
             tags=_parse_tags(tags),
+            glossary_top_k=_parse_optional_int(glossary_top_k, min_value=0),
+            retrieval_top_k=_parse_optional_int(retrieval_top_k, min_value=1),
+            chat_temperature=_parse_optional_float(chat_temperature, min_value=0.0),
+            chat_max_tokens=_parse_optional_int(chat_max_tokens, min_value=0),
         )
         logger.info("persona.form.created id=%s name=%s", new_persona.id, new_persona.name)
         return RedirectResponse(url="/personas", status_code=303)
@@ -505,6 +600,10 @@ def create_app(
         system_prompt: str = Form(...),
         avatar_url: str | None = Form(None),
         tags: str | None = Form(None),
+        glossary_top_k: str | None = Form(None),
+        retrieval_top_k: str | None = Form(None),
+        chat_temperature: str | None = Form(None),
+        chat_max_tokens: str | None = Form(None),
         persona_store: PersonaStore = Depends(get_persona_store),
         project_store: ProjectStore = Depends(get_project_store),
     ) -> RedirectResponse:
@@ -528,6 +627,10 @@ def create_app(
                 system_prompt=system_prompt,
                 avatar_url=avatar_url,
                 tags=_parse_tags(tags),
+                glossary_top_k=_parse_optional_int(glossary_top_k, min_value=0),
+                retrieval_top_k=_parse_optional_int(retrieval_top_k, min_value=1),
+                chat_temperature=_parse_optional_float(chat_temperature, min_value=0.0),
+                chat_max_tokens=_parse_optional_int(chat_max_tokens, min_value=0),
             )
         except ValueError as exc:  # pragma: no cover - defensive guard
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -569,6 +672,10 @@ def create_app(
             system_prompt=payload.get("system_prompt"),
             avatar_url=payload.get("avatar_url"),
             tags=payload.get("tags") or [],
+            glossary_top_k=_coerce_optional_int(payload.get("glossary_top_k"), min_value=0),
+            retrieval_top_k=_coerce_optional_int(payload.get("retrieval_top_k"), min_value=1),
+            chat_temperature=_coerce_optional_float(payload.get("chat_temperature"), min_value=0.0),
+            chat_max_tokens=_coerce_optional_int(payload.get("chat_max_tokens"), min_value=0),
         )
         return JSONResponse(_persona_to_dict(persona), status_code=201)
 
@@ -588,6 +695,10 @@ def create_app(
                 system_prompt=payload.get("system_prompt"),
                 avatar_url=payload.get("avatar_url"),
                 tags=payload.get("tags"),
+                glossary_top_k=_coerce_optional_int(payload.get("glossary_top_k"), min_value=0),
+                retrieval_top_k=_coerce_optional_int(payload.get("retrieval_top_k"), min_value=1),
+                chat_temperature=_coerce_optional_float(payload.get("chat_temperature"), min_value=0.0),
+                chat_max_tokens=_coerce_optional_int(payload.get("chat_max_tokens"), min_value=0),
             )
         except ValueError as exc:  # pragma: no cover - defensive guard
             raise HTTPException(status_code=404, detail=str(exc)) from exc
