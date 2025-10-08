@@ -22,7 +22,7 @@ from .reranker import Reranker
 logger = logging.getLogger(__name__)
 
 
-_QUERY_SYNONYM_MAP: dict[str, list[str]] = {
+_DEFAULT_SYNONYM_HINTS: dict[str, list[str]] = {
     "business": ["사업", "비즈니스"],
     "company": ["회사", "기업"],
     "core": ["핵심", "주요"],
@@ -309,12 +309,12 @@ class SupportAgentService:
         normalized = self._normalize_query_text(query)
         if not normalized:
             return normalized
-        tokens = re.findall(r"[A-Za-z]+", normalized.lower())
+        tokens = self._tokenize_for_lookup(normalized)
         extras: list[str] = []
         for token in tokens:
-            extras.extend(_QUERY_SYNONYM_MAP.get(token, []))
+            extras.extend(_DEFAULT_SYNONYM_HINTS.get(token, []))
         if glossary is not None:
-            extras.extend(self._glossary_keyword_matches(tokens, glossary))
+            extras.extend(self._glossary_expansion_terms(tokens, glossary))
         deduped: list[str] = []
         for item in extras:
             cleaned = item.strip()
@@ -326,19 +326,24 @@ class SupportAgentService:
         return normalized
 
     @staticmethod
-    def _glossary_keyword_matches(tokens: Sequence[str], glossary: Glossary) -> list[str]:
+    def _tokenize_for_lookup(text: str) -> list[str]:
+        if not text:
+            return []
+        return [token.lower() for token in re.findall(r"[0-9A-Za-z가-힣]+", text)]
+
+    def _glossary_expansion_terms(self, tokens: Sequence[str], glossary: Glossary) -> list[str]:
         if not tokens:
             return []
         lowercase_tokens = set(tokens)
-        supplements: list[str] = []
+        supplements: set[str] = set()
         for entry in glossary.entries():
-            for keyword in entry.keywords:
-                cleaned = (keyword or "").strip()
-                if not cleaned:
-                    continue
-                if cleaned.lower() in lowercase_tokens:
-                    supplements.extend(entry.synonyms)
-        return supplements
+            entry_strings = [entry.term, *entry.synonyms, *entry.keywords]
+            entry_tokens: set[str] = set()
+            for value in entry_strings:
+                entry_tokens.update(self._tokenize_for_lookup(value))
+            if lowercase_tokens.intersection(entry_tokens):
+                supplements.update({entry.term, *entry.synonyms, *entry.keywords})
+        return [item for item in supplements if item]
 
     def _build_prompt(
         self,
