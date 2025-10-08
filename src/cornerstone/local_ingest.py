@@ -111,27 +111,55 @@ def ingest_directory(
 ) -> DocumentMetadata:
     """Ingest all supported files under target_dir into the given project."""
 
-    if job_manager and job_id:
-        job_manager.mark_processing(job_id)
-
     manifest = load_manifest(manifest_path)
+
+    # Determine pending files before acquiring the processing slot so we can expose totals.
+    all_supported_files: list[Path] = []
+    for file_path in sorted(target_dir.rglob("*")):
+        if not file_path.is_file():
+            continue
+        if not is_supported_file(file_path):
+            continue
+        all_supported_files.append(file_path)
+
+    pending_files: list[Path] = []
+    total_target_bytes = 0
+    for file_path in all_supported_files:
+        stat = file_path.stat()
+        rel_path = str(file_path.relative_to(base_dir))
+        entry = manifest.get(rel_path)
+        if entry and entry.get("mtime_ns") == stat.st_mtime_ns and entry.get("status") == "completed":
+            continue
+        pending_files.append(file_path)
+        total_target_bytes += stat.st_size
+
+    processed_files = 0
+    processed_bytes = 0
     total_bytes = 0
     total_chunks = 0
     completed_files = 0
 
-    try:
-        files: Iterable[Path] = sorted(target_dir.rglob("*"))
-        for file_path in files:
-            if not file_path.is_file():
-                continue
-            if not is_supported_file(file_path):
-                continue
+    if job_manager and job_id:
+        job_manager.mark_processing(
+            job_id,
+            total_files=len(pending_files),
+            processed_files=0,
+            total_bytes=total_target_bytes,
+            processed_bytes=0,
+        )
 
+    logger.info(
+        "local.ingest.start project=%s dir=%s pending_files=%s pending_bytes=%s",
+        project_id,
+        target_dir,
+        len(pending_files),
+        total_target_bytes,
+    )
+
+    try:
+        for file_path in pending_files:
             rel_path = str(file_path.relative_to(base_dir))
             stat = file_path.stat()
-            entry = manifest.get(rel_path)
-            if entry and entry.get("mtime_ns") == stat.st_mtime_ns and entry.get("status") == "completed":
-                continue
 
             content_type, _ = mimetypes.guess_type(file_path.name)
             try:
@@ -151,6 +179,18 @@ def ingest_directory(
                 total_bytes += stat.st_size
                 total_chunks += result.chunks_ingested
                 completed_files += 1
+                processed_bytes += stat.st_size
+                logger.info(
+                    "local.ingest.file.completed project=%s dir=%s file=%s size_bytes=%s processed_files=%s/%s processed_bytes=%s/%s",
+                    project_id,
+                    target_dir,
+                    rel_path,
+                    stat.st_size,
+                    processed_files + 1,
+                    len(pending_files),
+                    processed_bytes,
+                    total_target_bytes,
+                )
             except Exception as exc:  # pragma: no cover - per-file failure path
                 logger.exception("Failed to ingest %s: %s", rel_path, exc)
                 manifest[rel_path] = {
@@ -158,7 +198,25 @@ def ingest_directory(
                     "status": "failed",
                     "error": str(exc),
                 }
+                logger.warning(
+                    "local.ingest.file.failed project=%s dir=%s file=%s size_bytes=%s processed_files=%s/%s",
+                    project_id,
+                    target_dir,
+                    rel_path,
+                    stat.st_size,
+                    processed_files,
+                    len(pending_files),
+                )
             finally:
+                processed_files += 1
+                if job_manager and job_id:
+                    job_manager.update_progress(
+                        job_id,
+                        processed_files=processed_files,
+                        total_files=len(pending_files),
+                        processed_bytes=processed_bytes,
+                        total_bytes=total_target_bytes,
+                    )
                 save_manifest(manifest_path, manifest)
 
         metadata = DocumentMetadata(
@@ -172,18 +230,29 @@ def ingest_directory(
         )
 
         if job_manager and job_id:
-            job_manager.mark_completed(job_id, metadata)
+            job_manager.mark_completed(
+                job_id,
+                metadata,
+                processed_files=processed_files,
+                processed_bytes=processed_bytes,
+            )
 
         logger.info(
-            "local.ingest.completed project=%s dir=%s files=%s chunks=%s",
+            "local.ingest.completed project=%s dir=%s files=%s chunks=%s bytes=%s",
             project_id,
             target_dir,
             completed_files,
             total_chunks,
+            processed_bytes,
         )
         return metadata
     except Exception as exc:
         if job_manager and job_id:
-            job_manager.mark_failed(job_id, str(exc))
+            job_manager.mark_failed(
+                job_id,
+                str(exc),
+                processed_files=processed_files,
+                total_files=len(pending_files) if pending_files else len(all_supported_files),
+            )
         logger.exception("local.ingest.failed project=%s dir=%s error=%s", project_id, target_dir, exc)
         raise

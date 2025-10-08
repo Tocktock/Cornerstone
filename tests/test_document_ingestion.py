@@ -598,3 +598,37 @@ def test_job_manager_wait_for_rate_limits_throughput():
 
     assert pre_third < 1.0
     assert total_elapsed >= 0.95
+
+
+def test_local_import_reports_progress(tmp_path: Path):
+    settings = Settings(data_dir=str(tmp_path), default_project_name="Project One")
+    client = build_app(settings)
+    project = client.app.state.services.project_store.list_projects()[0]
+    local_root = Path(client.app.state.services.settings.local_data_dir)
+    target = local_root / "docs"
+    target.mkdir(parents=True)
+    for idx in range(3):
+        (target / f"file-{idx}.md").write_text("content", encoding="utf-8")
+
+    response = client.post(
+        "/knowledge/local-import",
+        data={"project_id": project.id, "path": "docs"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 202
+    job = response.json()["job"]
+    job_id = job["id"]
+
+    for _ in range(10):
+        poll = client.get("/knowledge/uploads", params={"project_id": project.id})
+        assert poll.status_code == 200
+        jobs = poll.json().get("jobs", [])
+        target_job = next((item for item in jobs if item["id"] == job_id), None)
+        assert target_job is not None
+        if target_job["status"] == "completed":
+            assert target_job.get("total_files") == 3
+            assert target_job.get("processed_files") == 3
+            assert target_job.get("processed_bytes", 0) >= 0
+            break
+    else:  # pragma: no cover - defensive timeout
+        pytest.fail("Local import job did not complete")
