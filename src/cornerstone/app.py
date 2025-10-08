@@ -28,6 +28,7 @@ from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .projects import Project, ProjectStore
 from .vector_store import QdrantVectorStore, SearchResult
 from .observability import MetricsRecorder
+from .reranker import Reranker, build_reranker
 
 _MIN_RESULT_SCORE = 1e-6
 _TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "templates"
@@ -80,6 +81,7 @@ class ApplicationState:
         ingestion_jobs: IngestionJobManager,
         fts_index,
         metrics: MetricsRecorder | None,
+        reranker: Reranker | None,
     ) -> None:
         self.settings = settings
         self.embedding_service = embedding_service
@@ -92,6 +94,7 @@ class ApplicationState:
         self.ingestion_jobs = ingestion_jobs
         self.fts_index = fts_index
         self.metrics = metrics
+        self.reranker = reranker
 
 
 def create_app(
@@ -106,6 +109,7 @@ def create_app(
     ingestion_service: DocumentIngestor | None = None,
     ingestion_jobs: IngestionJobManager | None = None,
     metrics: MetricsRecorder | None = None,
+    reranker: Reranker | None = None,
 ) -> FastAPI:
     """Create and configure the FastAPI application."""
 
@@ -150,6 +154,12 @@ def create_app(
 
     fts_index = FTSIndex(Path(settings.fts_db_path).resolve())
 
+    if reranker is None:
+        if chat_service is None:
+            reranker = build_reranker(settings, embedding_service)
+        else:
+            reranker = getattr(chat_service, "_reranker", None)
+
     chat_service = chat_service or SupportAgentService(
         settings=settings,
         embedding_service=embedding_service,
@@ -158,6 +168,7 @@ def create_app(
         persona_store=persona_store,
         fts_index=fts_index,
         metrics=metrics,
+        reranker=reranker,
     )
 
     ingestion_service = ingestion_service or DocumentIngestor(
@@ -186,6 +197,7 @@ def create_app(
         ingestion_jobs=ingestion_jobs,
         fts_index=fts_index,
         metrics=metrics,
+        reranker=reranker,
     )
 
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))

@@ -34,6 +34,9 @@ _DEFAULT_FTS_DB: Final[str] = "data/fts.sqlite"
 _DEFAULT_PROJECT_NAME: Final[str] = "Default Project"
 _DEFAULT_INGESTION_CONCURRENCY: Final[int] = 3
 _DEFAULT_INGESTION_FILES_PER_MINUTE: Final[int] = 180
+_DEFAULT_RERANKER_STRATEGY: Final[str] = "none"
+_DEFAULT_RERANKER_MODEL: Final[str] = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+_DEFAULT_RERANKER_MAX_CANDIDATES: Final[int] = 8
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -105,6 +108,9 @@ class Settings:
     qdrant_hnsw_full_scan_threshold: int | None = None
     observability_metrics_enabled: bool = True
     observability_namespace: str = "cornerstone"
+    reranker_strategy: str = _DEFAULT_RERANKER_STRATEGY
+    reranker_model: str | None = None
+    reranker_max_candidates: int = _DEFAULT_RERANKER_MAX_CANDIDATES
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -145,6 +151,11 @@ class Settings:
             qdrant_hnsw_full_scan_threshold=_env_optional_int("QDRANT_HNSW_FULL_SCAN_THRESHOLD"),
             observability_metrics_enabled=metrics_enabled if metrics_enabled is not None else True,
             observability_namespace=os.getenv("OBSERVABILITY_NAMESPACE", "cornerstone"),
+            reranker_strategy=os.getenv("RERANKER_STRATEGY", _DEFAULT_RERANKER_STRATEGY),
+            reranker_model=os.getenv("RERANKER_MODEL"),
+            reranker_max_candidates=int(
+                os.getenv("RERANKER_MAX_CANDIDATES", str(_DEFAULT_RERANKER_MAX_CANDIDATES))
+            ),
         )
 
     @property

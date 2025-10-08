@@ -25,7 +25,7 @@ class FakeEmbedding:
         return [length, length / 2.0, 1.0]
 
 
-def build_service(tmpdir: Path):
+def build_service(tmpdir: Path, *, reranker=None):
     data_dir = tmpdir.resolve()
     settings = Settings(
         data_dir=str(data_dir),
@@ -61,6 +61,7 @@ def build_service(tmpdir: Path):
         glossary=Glossary(),
         persona_store=None,
         fts_index=fts_index,
+        reranker=reranker,
     )
 
     return service, ingestion, project
@@ -123,5 +124,49 @@ def test_support_service_fuses_keyword_and_semantic_results():
         fused_titles = {chunk["title"] for chunk in fused_chunks}
         assert "Legacy Runbook" in fused_titles
         assert any("Error 42" in title for title in fused_titles)
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+def test_support_service_applies_reranker_when_present():
+    class DummyReranker:
+        name = "dummy"
+
+        def __init__(self) -> None:
+            self.called_with: list[str] = []
+
+        def rerank(self, query, *, query_embedding, chunks, top_k=None):
+            self.called_with.append(query)
+            return list(reversed(list(chunks)))
+
+    tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-retrieval-"))
+    try:
+        dummy = DummyReranker()
+        service, ingestion, project = build_service(tmpdir, reranker=dummy)
+        persona = service._resolve_persona(project)
+        fused = [
+            {
+                "chunk_id": "c1",
+                "title": "First",
+                "text": "Alpha",
+                "origin": ["vector"],
+            },
+            {
+                "chunk_id": "c2",
+                "title": "Second",
+                "text": "Bravo",
+                "origin": ["keyword"],
+            },
+        ]
+
+        reranked = service._apply_reranker(
+            project,
+            "follow",
+            query_vector=service._embedding.embed_one("follow"),
+            fused_chunks=fused,
+        )
+
+        assert dummy.called_with == ["follow"]
+        assert reranked == list(reversed(fused))
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)

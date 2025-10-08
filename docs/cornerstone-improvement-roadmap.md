@@ -101,9 +101,10 @@ This document translates the audit findings into a sequenced backlog for the nex
 
 1. **Hybrid + rerank retrieval**
    - Owners: Backend
-   - Steps:
-     1. Introduce keyword BM25 (e.g., Qdrant full-text) alongside vector search.
-     2. Experiment with rerankers (Cohere Rerank or open-source) and A/B evaluate answer quality.
+     - Steps:
+       1. Introduce keyword BM25 (e.g., Qdrant full-text) alongside vector search.
+       2. Experiment with rerankers (Cohere Rerank or open-source) and A/B evaluate answer quality.
+      - [done] Configurable embedding-based reranker with `RERANKER_STRATEGY=embedding`; optional cross-encoder support.
 2. **Dynamic prompt tuning**
    - Owners: Backend + PM
    - Steps:
