@@ -82,6 +82,10 @@ class IngestionJob:
     updated_at: str
     document: DocumentMetadata | None = None
     error: str | None = None
+    total_files: int | None = None
+    processed_files: int | None = None
+    total_bytes: int | None = None
+    processed_bytes: int | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -93,6 +97,10 @@ class IngestionJob:
             "updated_at": self.updated_at,
             "error": self.error,
             "document": asdict(self.document) if self.document else None,
+            "total_files": self.total_files,
+            "processed_files": self.processed_files,
+            "total_bytes": self.total_bytes,
+            "processed_bytes": self.processed_bytes,
         }
 
 
@@ -130,7 +138,15 @@ class IngestionJobManager:
             self._jobs[job.id] = job
         return job
 
-    def mark_processing(self, job_id: str) -> None:
+    def mark_processing(
+        self,
+        job_id: str,
+        *,
+        total_files: int | None = None,
+        processed_files: int | None = None,
+        total_bytes: int | None = None,
+        processed_bytes: int | None = None,
+    ) -> None:
         while True:
             with self._lock:
                 job = self._jobs.get(job_id)
@@ -141,12 +157,31 @@ class IngestionJobManager:
                     job.status = "processing"
                     job.updated_at = self._now()
                     self._project_active[job.project_id] = active + 1
+                    if total_files is not None:
+                        job.total_files = total_files
+                    if processed_files is not None:
+                        job.processed_files = processed_files
+                    if total_bytes is not None:
+                        job.total_bytes = total_bytes
+                    if processed_bytes is not None:
+                        job.processed_bytes = processed_bytes
                     return
                 job.status = "throttled"
                 job.updated_at = self._now()
+                if processed_files is not None:
+                    job.processed_files = processed_files
+                if total_files is not None:
+                    job.total_files = total_files
             time.sleep(self._throttle_poll_interval)
 
-    def mark_completed(self, job_id: str, document: DocumentMetadata) -> None:
+    def mark_completed(
+        self,
+        job_id: str,
+        document: DocumentMetadata,
+        *,
+        processed_files: int | None = None,
+        processed_bytes: int | None = None,
+    ) -> None:
         with self._lock:
             job = self._jobs.get(job_id)
             if not job:
@@ -155,10 +190,25 @@ class IngestionJobManager:
             job.document = document
             job.error = None
             job.updated_at = self._now()
+            if processed_files is not None:
+                job.processed_files = processed_files
+            if processed_bytes is not None:
+                job.processed_bytes = processed_bytes
+                if job.total_bytes is None:
+                    job.total_bytes = processed_bytes
+            if processed_files is not None and job.total_files is None:
+                job.total_files = processed_files
             if self._project_active[job.project_id] > 0:
                 self._project_active[job.project_id] -= 1
 
-    def mark_failed(self, job_id: str, error: str) -> None:
+    def mark_failed(
+        self,
+        job_id: str,
+        error: str,
+        *,
+        processed_files: int | None = None,
+        total_files: int | None = None,
+    ) -> None:
         with self._lock:
             job = self._jobs.get(job_id)
             if not job:
@@ -166,8 +216,38 @@ class IngestionJobManager:
             job.status = "failed"
             job.error = error
             job.updated_at = self._now()
+            if processed_files is not None:
+                job.processed_files = processed_files
+            if total_files is not None:
+                job.total_files = total_files
             if self._project_active[job.project_id] > 0:
                 self._project_active[job.project_id] -= 1
+
+    def update_progress(
+        self,
+        job_id: str,
+        *,
+        processed_files: int | None = None,
+        total_files: int | None = None,
+        processed_bytes: int | None = None,
+        total_bytes: int | None = None,
+        status: str | None = None,
+    ) -> None:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if not job:
+                return
+            if processed_files is not None:
+                job.processed_files = processed_files
+            if total_files is not None:
+                job.total_files = total_files
+            if processed_bytes is not None:
+                job.processed_bytes = processed_bytes
+            if total_bytes is not None:
+                job.total_bytes = total_bytes
+            if status is not None:
+                job.status = status
+            job.updated_at = self._now()
 
     def list_for_project(self, project_id: str) -> list[IngestionJob]:
         with self._lock:

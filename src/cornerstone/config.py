@@ -27,6 +27,7 @@ _DEFAULT_GLOSSARY_TOP_K: Final[int] = 3
 _DEFAULT_OLLAMA_URL: Final[str] = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL: Final[str] = "llama3.1:8b"
 _DEFAULT_OLLAMA_TIMEOUT: Final[float] = 60.0
+_DEFAULT_OLLAMA_EMBED_CONCURRENCY: Final[int] = 2
 _DEFAULT_DATA_DIR: Final[str] = "data"
 _DEFAULT_LOCAL_DATA_DIR: Final[str] = "data/local"
 _DEFAULT_FTS_DB: Final[str] = "data/fts.sqlite"
@@ -88,6 +89,7 @@ class Settings:
     ollama_base_url: str = _DEFAULT_OLLAMA_URL
     ollama_model: str = _DEFAULT_OLLAMA_MODEL
     ollama_request_timeout: float = _DEFAULT_OLLAMA_TIMEOUT
+    ollama_embedding_concurrency: int = _DEFAULT_OLLAMA_EMBED_CONCURRENCY
     glossary_path: str = _DEFAULT_GLOSSARY_PATH
     glossary_top_k: int = _DEFAULT_GLOSSARY_TOP_K
     data_dir: str = _DEFAULT_DATA_DIR
@@ -121,6 +123,9 @@ class Settings:
             ollama_base_url=os.getenv("OLLAMA_BASE_URL", _DEFAULT_OLLAMA_URL),
             ollama_model=os.getenv("OLLAMA_MODEL", _DEFAULT_OLLAMA_MODEL),
             ollama_request_timeout=float(os.getenv("OLLAMA_TIMEOUT", _DEFAULT_OLLAMA_TIMEOUT)),
+            ollama_embedding_concurrency=int(
+                os.getenv("OLLAMA_EMBEDDING_CONCURRENCY", _DEFAULT_OLLAMA_EMBED_CONCURRENCY)
+            ),
             glossary_path=os.getenv("GLOSSARY_PATH", _DEFAULT_GLOSSARY_PATH),
             glossary_top_k=int(os.getenv("GLOSSARY_TOP_K", _DEFAULT_GLOSSARY_TOP_K)),
             data_dir=os.getenv("DATA_DIR", _DEFAULT_DATA_DIR),

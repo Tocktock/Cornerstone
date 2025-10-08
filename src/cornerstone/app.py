@@ -33,15 +33,34 @@ _MIN_RESULT_SCORE = 1e-6
 _TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "templates"
 
 logger = logging.getLogger(__name__)
-if logger.level == logging.NOTSET:
-    logger.setLevel(logging.INFO)
-if not logger.handlers:
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-logger.propagate = False
+
+
+_LOGGING_CONFIGURED = False
+
+
+def _ensure_logging() -> None:
+    global _LOGGING_CONFIGURED
+    if _LOGGING_CONFIGURED:
+        return
+
+    cornerstone_logger = logging.getLogger("cornerstone")
+    uvicorn_logger = logging.getLogger("uvicorn.error")
+
+    handlers = list(uvicorn_logger.handlers)
+    if handlers:
+        cornerstone_logger.handlers = []
+        for handler in handlers:
+            cornerstone_logger.addHandler(handler)
+    else:
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s"))
+        cornerstone_logger.addHandler(handler)
+
+    if cornerstone_logger.level == logging.NOTSET or cornerstone_logger.level > logging.INFO:
+        cornerstone_logger.setLevel(logging.INFO)
+    cornerstone_logger.propagate = False
+    _LOGGING_CONFIGURED = True
 
 
 class ApplicationState:
@@ -89,6 +108,8 @@ def create_app(
     metrics: MetricsRecorder | None = None,
 ) -> FastAPI:
     """Create and configure the FastAPI application."""
+
+    _ensure_logging()
 
     settings = settings or Settings.from_env()
     embedding_service = embedding_service or EmbeddingService(settings)
@@ -993,7 +1014,22 @@ def _process_ingestion_job(
     data: bytes | None = None,
     source_url: str | None = None,
 ) -> None:
-    job_manager.mark_processing(job_id)
+    total_bytes = len(data) if data is not None else None
+    logger.info(
+        "ingest.job.start job_id=%s project=%s filename=%s source=%s size_bytes=%s",
+        job_id,
+        project_id,
+        filename,
+        "url" if source_url else "upload",
+        total_bytes,
+    )
+    job_manager.mark_processing(
+        job_id,
+        total_files=1,
+        processed_files=0,
+        total_bytes=total_bytes,
+        processed_bytes=0 if total_bytes is not None else None,
+    )
     try:
         if source_url:
             result = ingestion_service.ingest_url(
@@ -1009,8 +1045,18 @@ def _process_ingestion_job(
                 data=data,
                 content_type=content_type,
             )
-        job_manager.mark_completed(job_id, result.document)
+        job_manager.mark_completed(
+            job_id,
+            result.document,
+            processed_files=1,
+            processed_bytes=result.document.size_bytes,
+        )
         logger.info("ingest.job.completed job_id=%s project=%s", job_id, project_id)
     except Exception as exc:  # pragma: no cover - background task failure
         logger.exception("ingest.job.failed job_id=%s project=%s error=%s", job_id, project_id, exc)
-        job_manager.mark_failed(job_id, str(exc))
+        job_manager.mark_failed(
+            job_id,
+            str(exc),
+            processed_files=0,
+            total_files=1,
+        )

@@ -74,7 +74,9 @@ This document translates the audit findings into a sequenced backlog for the nex
      1. Build Knowledge Base UI picker for directories under `data/local/**` with file count/size preview and job status.
      2. Extend ingestion API to enqueue local-file jobs (stream from disk, reuse job manager) and surface status in UI.
      3. Deliver CLI (`python -m cornerstone.ingest_local`) with resumable manifest support for bulk indexing.
-     4. Persist ingestion manifests/checkpoints so multi-day jobs resume cleanly and apply per-tenant throttles during imports.
+      4. Persist ingestion manifests/checkpoints so multi-day jobs resume cleanly and apply per-tenant throttles during imports.
+      - [done] Local directory imports emit file/byte progress; UI renders live progress bar and regression tests cover `/knowledge/uploads` payload.
+      - [done] Ollama embedding backend reuses connections and batches concurrent requests to reduce bulk ingest time.
 2. **Advanced chunking pipeline**
    - Owners: Backend
    - Steps:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from enum import Enum, auto
 from typing import Final, List
 
@@ -42,6 +43,8 @@ class EmbeddingService:
         self._ollama_model: str | None = None
         self._ollama_base_url: str | None = None
         self._ollama_timeout: float = settings.ollama_request_timeout
+        self._ollama_concurrency: int = max(1, settings.ollama_embedding_concurrency)
+        self._ollama_client: httpx.Client | None = None
 
         if self._backend is EmbeddingBackend.OPENAI:
             self._setup_openai(validate)
@@ -86,7 +89,7 @@ class EmbeddingService:
             return [item.embedding for item in result.data]
 
         if self._backend is EmbeddingBackend.OLLAMA:
-            return [self._ollama_embed(text) for text in texts]
+            return self._ollama_batch_embed(texts)
 
         assert self._hf_model is not None
         vectors = self._hf_model.encode(list(texts), show_progress_bar=False)
@@ -99,6 +102,20 @@ class EmbeddingService:
 
         vectors = self.embed([text])
         return vectors[0]
+
+    def close(self) -> None:
+        """Release any underlying client resources."""
+
+        if self._ollama_client is not None:
+            try:
+                self._ollama_client.close()
+            except Exception:  # pragma: no cover - best effort cleanup
+                pass
+            finally:
+                self._ollama_client = None
+
+    def __del__(self):  # pragma: no cover - defensive cleanup
+        self.close()
 
     # Internal helpers -------------------------------------------------
 
@@ -135,6 +152,10 @@ class EmbeddingService:
 
         self._ollama_model = model
         self._ollama_base_url = self._settings.ollama_base_url.rstrip("/")
+        self._ollama_client = httpx.Client(
+            base_url=self._ollama_base_url,
+            timeout=self._ollama_timeout,
+        )
 
         vector = self._ollama_embed("__dimension_probe__")
         if not vector:
@@ -151,11 +172,15 @@ class EmbeddingService:
             msg = "Ollama embedding backend is not configured."
             raise RuntimeError(msg)
 
-        url = f"{self._ollama_base_url}/api/embeddings"
+        if self._ollama_client is None:
+            msg = "Ollama embedding backend is not initialised."
+            raise RuntimeError(msg)
+
+        url = "/api/embeddings"
         payload = {"model": self._ollama_model, "prompt": text}
 
         try:
-            response = httpx.post(url, json=payload, timeout=self._ollama_timeout)
+            response = self._ollama_client.post(url, json=payload)
             response.raise_for_status()
         except Exception as exc:  # pragma: no cover - network errors
             raise RuntimeError(f"Ollama embedding request failed: {exc}") from exc
@@ -174,3 +199,25 @@ class EmbeddingService:
             raise RuntimeError(msg)
 
         return vector
+
+    def _ollama_batch_embed(self, texts: Sequence[str]) -> List[List[float]]:
+        if not texts:
+            return []
+
+        results: list[list[float]] = []
+        batch_size = max(self._ollama_concurrency * 4, self._ollama_concurrency)
+
+        for offset in range(0, len(texts), batch_size):
+            chunk = list(texts[offset : offset + batch_size])
+            vectors: list[list[float] | None] = [None] * len(chunk)
+            concurrency = min(self._ollama_concurrency, len(chunk))
+
+            with ThreadPoolExecutor(max_workers=concurrency) as executor:
+                futures = {executor.submit(self._ollama_embed, text): idx for idx, text in enumerate(chunk)}
+                for future in as_completed(futures):
+                    idx = futures[future]
+                    vectors[idx] = future.result()
+
+            results.extend([vector if vector is not None else [] for vector in vectors])
+
+        return results

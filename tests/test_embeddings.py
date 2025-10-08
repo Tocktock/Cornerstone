@@ -65,14 +65,29 @@ class _StubHttpxResponse:
         return {"embedding": self._vector}
 
 
-class _StubHttpx:
-    def __init__(self) -> None:
-        self.requests: list[tuple[str, dict[str, str], float]] = []
+class _StubHttpxClient:
+    def __init__(self, base_url: str, timeout: float) -> None:
+        self.base_url = base_url
+        self.timeout = timeout
+        self.requests: list[dict[str, str]] = []
 
-    def post(self, url: str, json: dict[str, str], timeout: float) -> _StubHttpxResponse:
-        self.requests.append((url, json, timeout))
+    def post(self, url: str, json: dict[str, str]) -> _StubHttpxResponse:
+        self.requests.append(json)
         length = float(len(json.get("prompt", "")))
         return _StubHttpxResponse([length, 1.0, 0.0])
+
+    def close(self) -> None:  # noqa: D401
+        return None
+
+
+class _StubHttpxModule:
+    def __init__(self) -> None:
+        self.created: list[_StubHttpxClient] = []
+
+    def Client(self, *args: Any, **kwargs: Any) -> _StubHttpxClient:  # noqa: N802
+        client = _StubHttpxClient(*args, **kwargs)
+        self.created.append(client)
+        return client
 
 
 def test_huggingface_backend_uses_sentence_transformer(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -113,10 +128,10 @@ def test_openai_backend_requires_api_key(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_ollama_backend_calls_local_api(monkeypatch: pytest.MonkeyPatch) -> None:
-    stub_httpx = _StubHttpx()
+    stub_httpx = _StubHttpxModule()
     monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
 
-    settings = Settings(embedding_model="ollama:qwen3-embedding")
+    settings = Settings(embedding_model="ollama:qwen3-embedding", ollama_embedding_concurrency=1)
     service = EmbeddingService(settings, validate=False)
 
     assert service.backend is EmbeddingBackend.OLLAMA
@@ -124,4 +139,6 @@ def test_ollama_backend_calls_local_api(monkeypatch: pytest.MonkeyPatch) -> None
 
     vectors = service.embed(["hi", "team"])
     assert vectors == [[2.0, 1.0, 0.0], [4.0, 1.0, 0.0]]
-    assert len(stub_httpx.requests) == 1 + 2  # dimension probe + two embedding calls
+    assert len(stub_httpx.created) == 1
+    client = stub_httpx.created[0]
+    assert len(client.requests) == 1 + 2  # dimension probe + two embedding calls
