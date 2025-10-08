@@ -248,3 +248,35 @@ def test_fts_search_handles_punctuation_and_non_latin_characters():
         assert any(result["chunk_id"] == "KR-1" for result in results)
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+def test_support_context_handles_cross_language_question():
+    tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-retrieval-"))
+    try:
+        service, ingestion, project, _ = build_service(tmpdir)
+        source_text = (
+            "# 회사 소개\n\n"
+            "센디의 핵심 사업은 중소 화주를 위한 당일/익일 화물 운송 플랫폼입니다."
+        )
+        ingestion.ingest_bytes(
+            project.id,
+            filename="company-overview.md",
+            data=source_text.encode("utf-8"),
+            content_type="text/markdown",
+        )
+
+        persona = service._resolve_persona(project)
+        options = service._persona_options(persona)
+        context, fused_chunks = service._build_context(
+            project,
+            persona,
+            "What is this company’s core business?",
+            [],
+            options,
+        )
+
+        assert fused_chunks
+        assert any("핵심 사업" in chunk.get("text", "") for chunk in fused_chunks)
+        assert context.sources
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
