@@ -369,7 +369,26 @@
           const list = document.createElement('ul');
           definitions.forEach((def) => {
             const item = document.createElement('li');
-            item.textContent = def;
+            if (typeof def === 'string') {
+              const colonIndex = def.indexOf(':');
+              if (colonIndex > 0) {
+                const termText = def.slice(0, colonIndex).trim();
+                const detailText = def.slice(colonIndex + 1).trim();
+                if (termText) {
+                  const termEl = document.createElement('strong');
+                  termEl.textContent = termText;
+                  item.appendChild(termEl);
+                }
+                if (detailText) {
+                  const detailEl = document.createElement('span');
+                  detailEl.textContent = ` - ${detailText}`;
+                  item.appendChild(detailEl);
+                }
+              }
+            }
+            if (!item.childNodes.length) {
+              item.textContent = typeof def === 'string' ? def : JSON.stringify(def);
+            }
             list.appendChild(item);
           });
           footer.appendChild(list);
