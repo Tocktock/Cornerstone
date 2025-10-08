@@ -764,12 +764,15 @@ def create_app(
         }
         return templates.TemplateResponse("keywords.html", context)
 
+
     @app.get("/keywords/{project_id}/candidates", response_class=JSONResponse)
     async def project_keywords(
         project_id: str,
         project_store: ProjectStore = Depends(get_project_store),
         store_manager: ProjectVectorStoreManager = Depends(get_store_manager),
         settings: Settings = Depends(get_settings_dependency),
+        page: int = Query(1, ge=1),
+        page_size: int = Query(50, ge=1, le=500),
     ) -> JSONResponse:
         project = _resolve_project(project_store, project_id)
         payloads = list(store_manager.iter_project_payloads(project.id))
@@ -815,20 +818,52 @@ def create_app(
             debug_payload,
         )
 
+        keyword_dicts = [
+            {
+                "term": item.term,
+                "count": item.count,
+                "core": item.is_core,
+                "generated": item.generated,
+                "reason": item.reason,
+                "source": item.source,
+            }
+            for item in keywords
+        ]
+
+        max_page_size = max(1, min(page_size, 500))
+        total = len(keyword_dicts)
+        if total:
+            total_pages = math.ceil(total / max_page_size)
+            current_page = min(max(1, page), total_pages)
+            start_index = (current_page - 1) * max_page_size
+            end_index = min(start_index + max_page_size, total)
+            range_start = start_index + 1
+            range_end = end_index
+        else:
+            total_pages = 0
+            current_page = 1
+            start_index = 0
+            end_index = 0
+            range_start = 0
+            range_end = 0
+
+        page_items = keyword_dicts[start_index:end_index]
+        pagination = {
+            "page": current_page,
+            "page_size": max_page_size,
+            "total": total,
+            "pages": total_pages,
+            "range_start": range_start,
+            "range_end": range_end,
+            "has_next": total_pages > 0 and current_page < total_pages,
+            "has_prev": total_pages > 0 and current_page > 1,
+        }
+
         data = {
             "projectId": project.id,
-            "keywords": [
-                {
-                    "term": item.term,
-                    "count": item.count,
-                    "core": item.is_core,
-                    "generated": item.generated,
-                    "reason": item.reason,
-                    "source": item.source,
-                }
-                for item in keywords
-            ],
+            "keywords": page_items,
             "filter": debug_payload,
+            "pagination": pagination,
         }
         return JSONResponse(data)
 

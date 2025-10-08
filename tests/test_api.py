@@ -129,6 +129,40 @@ def test_keywords_endpoint_returns_candidates(fastapi_app: TestClient) -> None:
     assert filter_info is not None
     assert filter_info.get("backend") in {None, "openai", "ollama"}
     assert "status" in filter_info
+    pagination = data.get("pagination")
+    assert pagination is not None
+    assert pagination.get("page") == 1
+    assert pagination.get("total") >= len(data.get("keywords", []))
+    assert pagination.get("page_size") >= len(data.get("keywords", []))
+
+def test_keywords_endpoint_respects_pagination(fastapi_app: TestClient) -> None:
+    first_page = fastapi_app.get(
+        f"/keywords/{fastapi_app.default_project_id}/candidates",
+        params={"page_size": 1},
+    )
+    assert first_page.status_code == 200, first_page.text
+    first_data = first_page.json()
+    assert len(first_data.get("keywords", [])) == 1
+    pagination = first_data.get("pagination")
+    assert pagination is not None
+    assert pagination.get("page_size") == 1
+    assert pagination.get("page") == 1
+    assert pagination.get("total") >= 2
+    assert pagination.get("has_next") is True
+
+    second_page = fastapi_app.get(
+        f"/keywords/{fastapi_app.default_project_id}/candidates",
+        params={"page_size": 1, "page": 2},
+    )
+    assert second_page.status_code == 200, second_page.text
+    second_data = second_page.json()
+    assert second_data.get("pagination", {}).get("page") == 2
+    assert second_data.get("pagination", {}).get("has_prev") is True
+    assert len(second_data.get("keywords", [])) == 1
+
+    first_term = first_data["keywords"][0]["term"]
+    second_term = second_data["keywords"][0]["term"]
+    assert first_term != second_term
 
 
 def test_keyword_definition_endpoint_provides_snippets(fastapi_app: TestClient) -> None:
