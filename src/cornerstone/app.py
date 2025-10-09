@@ -6,12 +6,13 @@ import asyncio
 import json
 import logging
 import math
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Iterable, Optional, AsyncGenerator
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse, Response
 from fastapi.templating import Jinja2Templates
 from qdrant_client import QdrantClient, models
 
@@ -34,6 +35,7 @@ from .observability import MetricsRecorder
 from .reranker import Reranker, build_reranker
 from .query_hints import QueryHintGenerator, merge_hint_sources
 from .query_hint_scheduler import QueryHintScheduler
+from .conversations import ConversationLogStore, ConversationLogger, AnalyticsService
 
 _MIN_RESULT_SCORE = 1e-6
 _TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "templates"
@@ -89,6 +91,8 @@ class ApplicationState:
         reranker: Reranker | None,
         query_hints: dict[str, list[str]] | None,
         query_hint_generator: QueryHintGenerator,
+        conversation_logger: ConversationLogger,
+        analytics_service: AnalyticsService,
     ) -> None:
         self.settings = settings
         self.embedding_service = embedding_service
@@ -105,6 +109,8 @@ class ApplicationState:
         self.query_hints = query_hints or {}
         self.query_hint_generator = query_hint_generator
         self.hint_scheduler = QueryHintScheduler(settings.query_hint_cron)
+        self.conversation_logger = conversation_logger
+        self.analytics = analytics_service
 
 
 def create_app(
@@ -120,6 +126,8 @@ def create_app(
     ingestion_jobs: IngestionJobManager | None = None,
     metrics: MetricsRecorder | None = None,
     reranker: Reranker | None = None,
+    conversation_logger: ConversationLogger | None = None,
+    analytics_service: AnalyticsService | None = None,
 ) -> FastAPI:
     """Create and configure the FastAPI application."""
 
@@ -132,6 +140,13 @@ def create_app(
     project_root = Path(settings.data_dir).resolve()
     project_store = project_store or ProjectStore(project_root, default_project_name=settings.default_project_name)
     persona_store = persona_store or PersonaStore(project_root)
+    conversation_logger = conversation_logger or ConversationLogger(
+        ConversationLogStore(settings.conversation_log_path()),
+        enabled=settings.conversation_logging_enabled,
+        retention_days=settings.conversation_retention_days,
+        metrics=metrics,
+    )
+    analytics_service = analytics_service or AnalyticsService(conversation_logger)
     logger.info(
         "app.start settings_loaded data_dir=%s default_project=%s",
         project_root,
@@ -221,6 +236,8 @@ def create_app(
         reranker=reranker,
         query_hints=query_hints,
         query_hint_generator=query_hint_generator,
+        conversation_logger=conversation_logger,
+        analytics_service=analytics_service,
     )
 
     scheduler = app.state.services.hint_scheduler
@@ -279,6 +296,12 @@ def create_app(
 
     def get_query_hint_generator(request: Request) -> QueryHintGenerator:
         return get_state(request).query_hint_generator
+
+    def get_conversation_logger(request: Request) -> ConversationLogger:
+        return get_state(request).conversation_logger
+
+    def get_analytics_service(request: Request) -> AnalyticsService:
+        return get_state(request).analytics
 
     def _parse_string_list(value) -> list[str]:
         if not value:
@@ -358,6 +381,9 @@ def create_app(
         request: Request,
         chat_service: SupportAgentService = Depends(get_chat_service),
         project_store: ProjectStore = Depends(get_project_store),
+        persona_store: PersonaStore = Depends(get_persona_store),
+        conversation_logger: ConversationLogger = Depends(get_conversation_logger),
+        settings_inst: Settings = Depends(get_settings_dependency),
     ) -> JSONResponse:
         payload = await request.json()
         query = str(payload.get("query", "")).strip()
@@ -367,7 +393,24 @@ def create_app(
         if not query:
             return JSONResponse({"error": "Query is required."}, status_code=400)
         logger.info("support.endpoint request project=%s history_turns=%s", project.id, len(history))
+        persona = persona_store.resolve_persona(project.persona_id, project.persona_overrides)
+        start_time = time.perf_counter()
         response = chat_service.generate(project, query, conversation=history)
+        duration_ms = (time.perf_counter() - start_time) * 1000.0
+        try:
+            conversation_logger.log_chat(
+                project=project,
+                persona=persona,
+                query=query,
+                response=response.message,
+                history=history,
+                sources=response.sources,
+                definitions=response.definitions,
+                backend=settings_inst.chat_backend,
+                duration_ms=duration_ms,
+            )
+        except Exception as exc:  # pragma: no cover - defensive guard
+            logger.exception("conversation.log.failed project=%s error=%s", project.id, exc)
         logger.info("support.endpoint completed project=%s message_chars=%s", project.id, len(response.message))
         return JSONResponse(
             {
@@ -382,6 +425,9 @@ def create_app(
         request: Request,
         chat_service: SupportAgentService = Depends(get_chat_service),
         project_store: ProjectStore = Depends(get_project_store),
+        persona_store: PersonaStore = Depends(get_persona_store),
+        conversation_logger: ConversationLogger = Depends(get_conversation_logger),
+        settings_inst: Settings = Depends(get_settings_dependency),
     ) -> StreamingResponse:
         payload = await request.json()
         query = str(payload.get("query", "")).strip()
@@ -391,6 +437,8 @@ def create_app(
         if not query:
             raise HTTPException(status_code=400, detail="Query is required.")
 
+        persona = persona_store.resolve_persona(project.persona_id, project.persona_overrides)
+        start_time = time.perf_counter()
         try:
             context, stream = chat_service.stream_generate(project, query, conversation=history)
         except Exception as exc:  # pragma: no cover - defensive guard
@@ -432,6 +480,20 @@ def create_app(
                 return
 
             final_message = "".join(chunks)
+            try:
+                conversation_logger.log_chat(
+                    project=project,
+                    persona=persona,
+                    query=query,
+                    response=final_message,
+                    history=history,
+                    sources=context.sources,
+                    definitions=context.definitions,
+                    backend=settings_inst.chat_backend,
+                    duration_ms=(time.perf_counter() - start_time) * 1000.0,
+                )
+            except Exception as exc:  # pragma: no cover - defensive guard
+                logger.exception("conversation.log.failed project=%s error=%s", project.id, exc)
             yield _encode_event({"event": "done", "message": final_message})
 
         return StreamingResponse(_event_iterator(), media_type="application/x-ndjson")
@@ -572,6 +634,55 @@ def create_app(
             },
         }
         return templates.TemplateResponse("knowledge.html", context)
+
+    @app.get("/admin/analytics", response_class=HTMLResponse)
+    async def analytics_dashboard(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
+        analytics_service = get_analytics_service(request)
+        project_store = get_project_store(request)
+        project_param = request.query_params.get("project_id") or "all"
+        days = _parse_optional_int(request.query_params.get("days"), min_value=1) or 30
+
+        project = None
+        project_id: str | None
+        if project_param == "all":
+            project_id = None
+        else:
+            project = _resolve_project(project_store, project_param)
+            project_id = project.id
+
+        summary = analytics_service.build_summary(project_id=project_id, days=days)
+
+        context = {
+            "request": request,
+            "projects": project_store.list_projects(),
+            "selected_project": project_param,
+            "summary": summary,
+            "project_label": project.name if project else "All Projects",
+            "days": days,
+        }
+        return templates.TemplateResponse("analytics.html", context)
+
+    @app.get("/api/analytics/summary", response_class=JSONResponse)
+    async def analytics_summary(
+        project_id: str | None = Query(None),
+        days: int = Query(30, ge=1),
+        analytics_service: AnalyticsService = Depends(get_analytics_service),
+    ) -> JSONResponse:
+        normalized = (project_id or "").strip() or None
+        if normalized and normalized.lower() == "all":
+            normalized = None
+        summary = analytics_service.build_summary(project_id=normalized, days=days)
+        return JSONResponse(summary)
+
+    @app.get("/metrics")
+    async def metrics_endpoint(metrics: MetricsRecorder | None = Depends(get_metrics)) -> Response:
+        if metrics is None or not metrics.prometheus_enabled:
+            raise HTTPException(status_code=404, detail="Metrics export disabled")
+        try:
+            payload = metrics.render_prometheus()
+        except RuntimeError as exc:  # pragma: no cover - defensive guard
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+        return Response(content=payload, media_type=metrics.prometheus_content_type)
 
     @app.post("/knowledge/persona", response_class=RedirectResponse)
     async def update_persona_settings(

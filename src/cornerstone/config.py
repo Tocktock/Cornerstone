@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import os
+from pathlib import Path
 from typing import Any, Final, Literal
 
 try:  # pragma: no cover - optional dependency loaded at runtime
@@ -44,6 +45,7 @@ _DEFAULT_RERANKER_STRATEGY: Final[str] = "none"
 _DEFAULT_RERANKER_MODEL: Final[str] = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 _DEFAULT_RERANKER_MAX_CANDIDATES: Final[int] = 8
 _DEFAULT_KEYWORD_FILTER_MAX_RESULTS: Final[int] = 10
+_DEFAULT_CONVERSATION_RETENTION_DAYS: Final[int] = 30
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -119,12 +121,16 @@ class Settings:
     qdrant_hnsw_full_scan_threshold: int | None = None
     observability_metrics_enabled: bool = True
     observability_namespace: str = "cornerstone"
+    observability_prometheus_enabled: bool = False
     reranker_strategy: str = _DEFAULT_RERANKER_STRATEGY
     reranker_model: str | None = None
     reranker_max_candidates: int = _DEFAULT_RERANKER_MAX_CANDIDATES
     keyword_filter_max_results: int = _DEFAULT_KEYWORD_FILTER_MAX_RESULTS
     query_hint_batch_size: int = _DEFAULT_QUERY_HINT_BATCH_SIZE
     query_hint_cron: str = _DEFAULT_QUERY_HINT_CRON
+    conversation_logging_enabled: bool = True
+    conversation_retention_days: int = _DEFAULT_CONVERSATION_RETENTION_DAYS
+    conversation_log_dir: str | None = None
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -170,6 +176,7 @@ class Settings:
             qdrant_hnsw_full_scan_threshold=_env_optional_int("QDRANT_HNSW_FULL_SCAN_THRESHOLD"),
             observability_metrics_enabled=metrics_enabled if metrics_enabled is not None else True,
             observability_namespace=os.getenv("OBSERVABILITY_NAMESPACE", "cornerstone"),
+            observability_prometheus_enabled=_env_bool("OBSERVABILITY_PROMETHEUS_ENABLED", False),
             reranker_strategy=os.getenv("RERANKER_STRATEGY", _DEFAULT_RERANKER_STRATEGY),
             reranker_model=os.getenv("RERANKER_MODEL"),
             reranker_max_candidates=int(
@@ -182,6 +189,12 @@ class Settings:
                 os.getenv("QUERY_HINT_BATCH_SIZE", str(_DEFAULT_QUERY_HINT_BATCH_SIZE))
             ),
             query_hint_cron=os.getenv("QUERY_HINT_CRON", _DEFAULT_QUERY_HINT_CRON),
+            conversation_logging_enabled=_env_bool("CONVERSATION_LOGGING_ENABLED", True),
+            conversation_retention_days=max(
+                0,
+                int(os.getenv("CONVERSATION_RETENTION_DAYS", str(_DEFAULT_CONVERSATION_RETENTION_DAYS))),
+            ),
+            conversation_log_dir=os.getenv("CONVERSATION_LOG_DIR"),
         )
 
     @property
@@ -280,4 +293,12 @@ class Settings:
         return MetricsRecorder(
             enabled=self.observability_metrics_enabled,
             namespace=self.observability_namespace,
+            prometheus_enabled=self.observability_prometheus_enabled,
         )
+
+    def conversation_log_path(self) -> Path:
+        """Return the directory where conversation logs should be stored."""
+
+        if self.conversation_log_dir:
+            return Path(self.conversation_log_dir).expanduser().resolve()
+        return Path(self.data_dir).resolve() / "conversations"

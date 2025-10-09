@@ -159,6 +159,7 @@ This document translates the audit findings into a sequenced backlog for the nex
      2. Implement tiered storage policies (hot SSD, warm object store) with deduplication, versioning, and purge/archival tooling for compliance-driven deletes.
      3. Benchmark hybrid retrieval on corpora exceeding 1M chunks, tuning ANN + RRF parameters, warming caches for top intents, and alerting on relevance drift.
      4. Track per-tenant storage, compute, and token spend with capacity alerts; publish scale-event runbooks covering bulk imports, capacity adds, and partial outages.
+     5. Operationalize query hint regeneration with cron/queue orchestration (nightly + weekly pipelines) and surface schedule health dashboards.
 
 ## Supporting Tracks
 
