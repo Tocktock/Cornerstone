@@ -104,7 +104,12 @@ class QueryHintGenerator:
     def disabled_reason(self) -> str | None:
         return None if self.enabled else self._disabled_reason or "not-configured"
 
-    def generate(self, entries: Sequence[GlossaryEntry]) -> HintGenerationReport:
+    def generate(
+        self,
+        entries: Sequence[GlossaryEntry],
+        *,
+        progress_callback: Callable[[int, Dict[str, List[str]]], None] | None = None,
+    ) -> HintGenerationReport:
         hints: Dict[str, List[str]] = {}
         if not entries:
             return HintGenerationReport(hints=hints, prompts_sent=0, backend=self._backend, disabled_reason=self.disabled_reason)
@@ -119,12 +124,18 @@ class QueryHintGenerator:
         for entry in entries:
             batch.append(entry)
             if len(batch) >= self._max_terms:
-                self._merge_results(hints, self._run_batch(batch))
+                batch_result = self._run_batch(batch)
+                self._merge_results(hints, batch_result)
                 prompts_sent += 1
+                if progress_callback is not None:
+                    progress_callback(prompts_sent, batch_result)
                 batch = []
         if batch:
-            self._merge_results(hints, self._run_batch(batch))
+            batch_result = self._run_batch(batch)
+            self._merge_results(hints, batch_result)
             prompts_sent += 1
+            if progress_callback is not None:
+                progress_callback(prompts_sent, batch_result)
         return HintGenerationReport(hints=hints, prompts_sent=prompts_sent, backend=self._backend)
 
     def _merge_results(self, target: Dict[str, List[str]], additions: Dict[str, List[str]]) -> None:
