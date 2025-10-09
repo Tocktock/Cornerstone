@@ -23,6 +23,7 @@ _DEFAULT_QDRANT_COLLECTION: Final[str] = "embeddings"
 _DEFAULT_CHAT_BACKEND: Final[str] = "openai"
 _DEFAULT_OPENAI_CHAT_MODEL: Final[str] = "gpt-4o-mini"
 _DEFAULT_GLOSSARY_PATH: Final[str] = "glossary/glossary.yaml"
+_DEFAULT_QUERY_HINTS_PATH: Final[str] = "glossary/query_hints.yaml"
 _DEFAULT_GLOSSARY_TOP_K: Final[int] = 3
 _DEFAULT_OLLAMA_URL: Final[str] = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL: Final[str] = "llama3.1:8b"
@@ -98,6 +99,7 @@ class Settings:
     ollama_request_timeout: float = _DEFAULT_OLLAMA_TIMEOUT
     ollama_embedding_concurrency: int = _DEFAULT_OLLAMA_EMBED_CONCURRENCY
     glossary_path: str = _DEFAULT_GLOSSARY_PATH
+    query_hint_path: str | None = _DEFAULT_QUERY_HINTS_PATH
     glossary_top_k: int = _DEFAULT_GLOSSARY_TOP_K
     data_dir: str = _DEFAULT_DATA_DIR
     local_data_dir: str = _DEFAULT_LOCAL_DATA_DIR
@@ -141,6 +143,7 @@ class Settings:
                 os.getenv("OLLAMA_EMBEDDING_CONCURRENCY", _DEFAULT_OLLAMA_EMBED_CONCURRENCY)
             ),
             glossary_path=os.getenv("GLOSSARY_PATH", _DEFAULT_GLOSSARY_PATH),
+            query_hint_path=os.getenv("QUERY_HINTS_PATH", _DEFAULT_QUERY_HINTS_PATH),
             glossary_top_k=int(os.getenv("GLOSSARY_TOP_K", _DEFAULT_GLOSSARY_TOP_K)),
             data_dir=os.getenv("DATA_DIR", _DEFAULT_DATA_DIR),
             local_data_dir=os.getenv("LOCAL_DATA_DIR", _DEFAULT_LOCAL_DATA_DIR),

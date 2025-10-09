@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cornerstone.glossary import Glossary, GlossaryEntry, load_glossary
+from cornerstone.glossary import Glossary, GlossaryEntry, load_glossary, load_query_hints
 
 
 def test_load_glossary_from_yaml(tmp_path: Path) -> None:
@@ -42,3 +42,19 @@ def test_glossary_prompt_section() -> None:
     glossary = Glossary([GlossaryEntry(term="SLA", definition="agreement")])
     section = glossary.to_prompt_section("What SLA do we have?", limit=1)
     assert "SLA" in section
+
+
+def test_load_query_hints(tmp_path: Path) -> None:
+    yaml_path = tmp_path / "query_hints.yaml"
+    yaml_path.write_text(
+        """
+        business:
+          - 사업
+          - 비즈니스
+        shipper: 화주
+        """
+    )
+
+    hints = load_query_hints(yaml_path)
+    assert hints["business"] == ["사업", "비즈니스"]
+    assert hints["shipper"] == ["화주"]

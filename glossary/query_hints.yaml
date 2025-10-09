@@ -1,0 +1,24 @@
+business:
+  - 사업
+  - 비즈니스
+company:
+  - 회사
+  - 기업
+core:
+  - 핵심
+  - 주요
+service:
+  - 서비스
+transport:
+  - 운송
+  - 물류
+logistics:
+  - 물류
+delivery:
+  - 배송
+customer:
+  - 고객
+shipper:
+  - 화주
+driver:
+  - 기사

@@ -22,7 +22,7 @@ from .reranker import Reranker
 logger = logging.getLogger(__name__)
 
 
-_DEFAULT_SYNONYM_HINTS: dict[str, list[str]] = {
+_FALLBACK_QUERY_HINTS: dict[str, list[str]] = {
     "business": ["사업", "비즈니스"],
     "company": ["회사", "기업"],
     "core": ["핵심", "주요"],
@@ -87,6 +87,7 @@ class SupportAgentService:
         fts_index=None,
         metrics: MetricsRecorder | None = None,
         reranker: Reranker | None = None,
+        query_hints: dict[str, list[str]] | None = None,
     ) -> None:
         self._settings = settings
         self._embedding = embedding_service
@@ -105,6 +106,7 @@ class SupportAgentService:
         if default_max_tokens is not None and default_max_tokens <= 0:
             default_max_tokens = None
         self._default_chat_max_tokens = default_max_tokens
+        self._query_hints = self._normalize_query_hints(query_hints)
 
     def generate(
         self,
@@ -312,7 +314,7 @@ class SupportAgentService:
         tokens = self._tokenize_for_lookup(normalized)
         extras: list[str] = []
         for token in tokens:
-            extras.extend(_DEFAULT_SYNONYM_HINTS.get(token, []))
+            extras.extend(self._query_hints.get(token, []))
         if glossary is not None:
             extras.extend(self._glossary_expansion_terms(tokens, glossary))
         deduped: list[str] = []
@@ -344,6 +346,27 @@ class SupportAgentService:
             if lowercase_tokens.intersection(entry_tokens):
                 supplements.update({entry.term, *entry.synonyms, *entry.keywords})
         return [item for item in supplements if item]
+
+    @staticmethod
+    def _normalize_query_hints(hints: dict[str, list[str]] | None) -> dict[str, list[str]]:
+        source = hints or _FALLBACK_QUERY_HINTS
+        normalized: dict[str, list[str]] = {}
+        for key, values in source.items():
+            if key is None:
+                continue
+            norm_key = str(key).strip().lower()
+            if not norm_key:
+                continue
+            cleaned_values: list[str] = []
+            for value in values:
+                if value is None:
+                    continue
+                cleaned = str(value).strip()
+                if cleaned and cleaned not in cleaned_values:
+                    cleaned_values.append(cleaned)
+            if cleaned_values:
+                normalized[norm_key] = cleaned_values
+        return normalized
 
     def _build_prompt(
         self,
