@@ -247,7 +247,7 @@
         </div>
       </aside>
 
-      <section data-project-id="{{ selected_project }}">
+      <section data-project-id="{{ selected_project }}" data-default-hint-batch="{{ settings.query_hint_batch_size }}">
         <h1>Documents</h1>
         <p>Upload documents to enrich <strong>{{ project_name }}</strong>.</p>
         <div class="upload-panel">
@@ -396,6 +396,34 @@
           <div id="glossary-status" class="glossary-status"></div>
           <ul id="glossary-entries" class="glossary-list"></ul>
         </div>
+
+        <div class="glossary-panel" id="query-hints-panel">
+          <div class="glossary-header">
+            <h2>Query Hint Bridges</h2>
+            <p>Cross-language tokens appended to chat queries before retrieval.</p>
+          </div>
+          <div class="glossary-actions">
+            <button type="button" id="query-hints-generate">Generate</button>
+            <button type="button" id="query-hints-refresh" class="button-ghost">Refresh</button>
+            <button type="button" id="query-hints-download" class="button-ghost">Download JSON</button>
+          </div>
+          <div class="glossary-actions" style="gap:0.35rem; align-items:flex-end;">
+            <label for="query-hints-batch-size" style="display:flex; flex-direction:column; gap:0.25rem; font-weight:600;">
+              Batch size
+              <input id="query-hints-batch-size" type="number" min="1" max="20" value="" style="max-width:6rem;" />
+            </label>
+            <label for="query-hints-schedule" style="display:flex; flex-direction:column; gap:0.25rem; font-weight:600;">
+              Auto refresh
+              <select id="query-hints-schedule" style="min-width:10rem;">
+                <option value="" selected>Manual only</option>
+                <option value="daily">Nightly</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </label>
+          </div>
+          <div id="query-hints-status" class="glossary-status"></div>
+          <ul id="query-hints-list" class="glossary-list"></ul>
+        </div>
       </section>
     </main>
   <script>
@@ -439,6 +467,19 @@
       let editingGlossaryId = null;
       let glossaryEntries = [];
 
+      const queryHintsList = document.getElementById('query-hints-list');
+      const queryHintsStatus = document.getElementById('query-hints-status');
+      const queryHintsRefresh = document.getElementById('query-hints-refresh');
+      const queryHintsDownload = document.getElementById('query-hints-download');
+      const queryHintsGenerate = document.getElementById('query-hints-generate');
+      const queryHintsBatchInput = document.getElementById('query-hints-batch-size');
+      const queryHintsSchedule = document.getElementById('query-hints-schedule');
+      let queryHintsData = {};
+      const DEFAULT_HINT_BATCH_SIZE = Number(projectSection?.dataset.defaultHintBatch || 6);
+      if (queryHintsBatchInput && !queryHintsBatchInput.value) {
+        queryHintsBatchInput.value = DEFAULT_HINT_BATCH_SIZE;
+      }
+
       function parseListInput(value) {
         if (!value) {
           return [];
@@ -469,6 +510,24 @@
           glossaryStatus.style.color = '#047857';
         } else {
           glossaryStatus.style.color = '#6b7280';
+        }
+      }
+
+      function setQueryHintsStatus(message, tone = 'info') {
+        if (!queryHintsStatus) {
+          return;
+        }
+        queryHintsStatus.textContent = message || '';
+        if (!message) {
+          queryHintsStatus.style.color = '#6b7280';
+          return;
+        }
+        if (tone === 'error') {
+          queryHintsStatus.style.color = '#b91c1c';
+        } else if (tone === 'success') {
+          queryHintsStatus.style.color = '#047857';
+        } else {
+          queryHintsStatus.style.color = '#6b7280';
         }
       }
 
@@ -564,6 +623,98 @@
         });
       }
 
+      function renderQueryHints(hints) {
+        if (!queryHintsList) {
+          return;
+        }
+        queryHintsList.innerHTML = '';
+        const panel = queryHintsList.parentElement;
+        if (panel) {
+          const existingPager = panel.querySelector('.pagination');
+          if (existingPager) {
+            existingPager.remove();
+          }
+        }
+        const keys = Object.keys(hints || {});
+        if (!keys.length) {
+          const emptyItem = document.createElement('li');
+          emptyItem.className = 'glossary-entry';
+          emptyItem.textContent = 'No query hints available yet.';
+          queryHintsList.appendChild(emptyItem);
+          return;
+        }
+        const pageSize = 20;
+        const totalPages = Math.ceil(keys.length / pageSize) || 1;
+        let currentPage = 1;
+
+        function renderPage(page) {
+          queryHintsList.innerHTML = '';
+          const start = (page - 1) * pageSize;
+          const end = Math.min(start + pageSize, keys.length);
+          for (let index = start; index < end; index += 1) {
+            const token = keys[index];
+            const values = hints[token] || [];
+            const item = document.createElement('li');
+            item.className = 'glossary-entry';
+
+            const header = document.createElement('header');
+            const title = document.createElement('h3');
+            title.textContent = token;
+            header.appendChild(title);
+            item.appendChild(header);
+
+            const body = document.createElement('p');
+            body.textContent = values.join(', ');
+            item.appendChild(body);
+
+            queryHintsList.appendChild(item);
+          }
+        }
+
+        renderPage(currentPage);
+
+        if (totalPages > 1 && panel) {
+          const pager = document.createElement('div');
+          pager.className = 'pagination';
+
+          const prev = document.createElement('button');
+          prev.type = 'button';
+          prev.textContent = 'Previous';
+          prev.disabled = currentPage === 1;
+          prev.addEventListener('click', () => {
+            if (currentPage > 1) {
+              currentPage -= 1;
+              renderPage(currentPage);
+              prev.disabled = currentPage === 1;
+              next.disabled = currentPage === totalPages;
+              pageLabel.textContent = `Page ${currentPage} of ${totalPages}`;
+            }
+          });
+
+          const pageLabel = document.createElement('span');
+          pageLabel.textContent = `Page ${currentPage} of ${totalPages}`;
+
+          const next = document.createElement('button');
+          next.type = 'button';
+          next.textContent = 'Next';
+          next.disabled = currentPage === totalPages;
+          next.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+              currentPage += 1;
+              renderPage(currentPage);
+              prev.disabled = currentPage === 1;
+              next.disabled = currentPage === totalPages;
+              pageLabel.textContent = `Page ${currentPage} of ${totalPages}`;
+            }
+          });
+
+          pager.appendChild(prev);
+          pager.appendChild(pageLabel);
+          pager.appendChild(next);
+          panel.appendChild(pager);
+        }
+      }
+
       async function loadGlossaryEntries() {
         if (!glossaryList) {
           return;
@@ -587,6 +738,52 @@
           glossaryEntries = [];
           renderGlossaryEntries(glossaryEntries);
           setGlossaryStatus('Unable to load glossary entries.', 'error');
+        }
+      }
+
+      async function loadQueryHints() {
+        if (!queryHintsList) {
+          return;
+        }
+        if (!projectId) {
+          queryHintsData = {};
+          renderQueryHints(queryHintsData);
+          return;
+        }
+        try {
+          const response = await fetch(`/knowledge/query-hints?project_id=${encodeURIComponent(projectId)}`);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch query hints (${response.status})`);
+          }
+          const data = await response.json();
+          queryHintsData = data.hints || {};
+          renderQueryHints(queryHintsData);
+          const meta = data.metadata || {};
+          if (queryHintsBatchInput) {
+            if (meta.batch_size) {
+              queryHintsBatchInput.value = meta.batch_size;
+            } else if (!queryHintsBatchInput.value) {
+              queryHintsBatchInput.value = DEFAULT_HINT_BATCH_SIZE;
+            }
+          }
+          if (queryHintsSchedule) {
+            queryHintsSchedule.value = meta.schedule || '';
+          }
+          if (queryHintsGenerate && meta.backend && meta.prompts !== undefined) {
+            queryHintsGenerate.title = `Last generated via ${meta.backend} (prompts ${meta.prompts})`;
+          }
+          if (meta.last_generated) {
+            const generatedDate = new Date(meta.last_generated);
+            const display = Number.isNaN(generatedDate.getTime()) ? meta.last_generated : generatedDate.toLocaleString();
+            setQueryHintsStatus(`Last generated ${display}`, 'info');
+          } else {
+            setQueryHintsStatus('');
+          }
+        } catch (error) {
+          console.error('Failed to load query hints', error);
+          queryHintsData = {};
+          renderQueryHints(queryHintsData);
+          setQueryHintsStatus('Unable to load query hints.', 'error');
         }
       }
 
@@ -656,6 +853,132 @@
         } catch (error) {
           console.error(error);
           setGlossaryStatus('Unable to delete glossary entry.', 'error');
+        }
+      }
+
+      async function downloadQueryHints() {
+        if (!projectId) {
+          setQueryHintsStatus('Select a project to download hints.', 'error');
+          return;
+        }
+        try {
+          const response = await fetch(`/knowledge/query-hints?project_id=${encodeURIComponent(projectId)}`);
+          if (!response.ok) {
+            throw new Error(`Download failed (${response.status})`);
+          }
+          const data = await response.json();
+          const payload = data.hints || {};
+          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `query-hints-${projectId}.json`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          setQueryHintsStatus('Query hints downloaded.', 'success');
+        } catch (error) {
+          console.error('Download failed', error);
+          setQueryHintsStatus('Unable to download query hints.', 'error');
+        }
+      }
+
+      async function generateQueryHints() {
+        if (!projectId) {
+          setQueryHintsStatus('Select a project before generating hints.', 'error');
+          return;
+        }
+        if (queryHintsGenerate) {
+          queryHintsGenerate.disabled = true;
+        }
+        setQueryHintsStatus('Generating query hints…');
+        try {
+          const response = await fetch('/knowledge/query-hints/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              project_id: projectId,
+              batch_size: queryHintsBatchInput && queryHintsBatchInput.value ? Number(queryHintsBatchInput.value) : undefined,
+              schedule: queryHintsSchedule ? queryHintsSchedule.value : '',
+            }),
+          });
+          if (!response.ok) {
+            const detail = await response.json().catch(() => ({}));
+            const reason = detail.detail || `status ${response.status}`;
+            throw new Error(`Generation failed (${reason})`);
+          }
+          if (!response.body) {
+            throw new Error('Streaming not supported in this browser');
+          }
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          let latestBackend = 'unknown backend';
+          let latestPrompts = '?';
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) {
+              break;
+            }
+            buffer += decoder.decode(value, { stream: true });
+            let newlineIndex;
+            while ((newlineIndex = buffer.indexOf('\n')) >= 0) {
+              const line = buffer.slice(0, newlineIndex).trim();
+              buffer = buffer.slice(newlineIndex + 1);
+              if (!line) {
+                continue;
+              }
+              let payload;
+              try {
+                payload = JSON.parse(line);
+              } catch (error) {
+                console.error('Failed to parse hint stream chunk', line);
+                continue;
+              }
+              if (payload.event === 'progress') {
+                setQueryHintsStatus(`Processing batch ${payload.batch}…`);
+              } else if (payload.event === 'completed') {
+                queryHintsData = payload.hints || {};
+                renderQueryHints(queryHintsData);
+                latestBackend = payload.backend || latestBackend;
+                latestPrompts = typeof payload.prompts === 'number' ? payload.prompts : latestPrompts;
+                const generatedDate = new Date();
+                const display = generatedDate.toLocaleString();
+                setQueryHintsStatus(`Query hints generated via ${latestBackend} (prompts ${latestPrompts}) at ${display}.`, 'success');
+                if (queryHintsGenerate) {
+                  queryHintsGenerate.title = `Last generated via ${latestBackend} (prompts ${latestPrompts})`;
+                }
+              }
+            }
+          }
+          const remaining = buffer.trim();
+          if (remaining) {
+            try {
+              const payload = JSON.parse(remaining);
+              if (payload.event === 'completed') {
+                queryHintsData = payload.hints || {};
+                renderQueryHints(queryHintsData);
+                const backend = payload.backend || 'unknown backend';
+                const prompts = typeof payload.prompts === 'number' ? payload.prompts : '?';
+                const generatedDate = new Date();
+                const display = generatedDate.toLocaleString();
+                setQueryHintsStatus(`Query hints generated via ${backend} (prompts ${prompts}) at ${display}.`, 'success');
+                if (queryHintsGenerate) {
+                  queryHintsGenerate.title = `Last generated via ${backend} (prompts ${prompts})`;
+                }
+              }
+            } catch (error) {
+              console.error('Failed to parse trailing hint chunk', remaining);
+            }
+          }
+        } catch (error) {
+          console.error('Hint generation failed', error);
+          setQueryHintsStatus('Unable to generate query hints.', 'error');
+        } finally {
+          if (queryHintsGenerate) {
+            queryHintsGenerate.disabled = false;
+          }
         }
       }
 
@@ -1050,6 +1373,15 @@
       if (glossaryCancel) {
         glossaryCancel.addEventListener('click', resetGlossaryForm);
       }
+      if (queryHintsGenerate) {
+        queryHintsGenerate.addEventListener('click', generateQueryHints);
+      }
+      if (queryHintsRefresh) {
+        queryHintsRefresh.addEventListener('click', loadQueryHints);
+      }
+      if (queryHintsDownload) {
+        queryHintsDownload.addEventListener('click', downloadQueryHints);
+      }
       if (projectSelect) {
         projectSelect.addEventListener('change', () => {
           projectId = projectSelect.value || '';
@@ -1058,11 +1390,13 @@
           }
           resetGlossaryForm();
           loadGlossaryEntries();
+          loadQueryHints();
         });
       }
 
       resetGlossaryForm();
       loadGlossaryEntries();
+      loadQueryHints();
       loadLocalDirectories();
     })();
   </script>

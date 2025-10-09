@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import math
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Dict, List, Iterable, Optional, AsyncGenerator
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
@@ -16,7 +18,7 @@ from qdrant_client import QdrantClient, models
 from .chat import SupportAgentService
 from .config import Settings
 from .embeddings import EmbeddingService
-from .glossary import Glossary, load_glossary, load_query_hints
+from .glossary import Glossary, GlossaryEntry, load_glossary, load_query_hints
 from .ingestion import (
     DocumentIngestor,
     IngestionJobManager,
@@ -30,6 +32,8 @@ from .projects import Project, ProjectStore
 from .vector_store import QdrantVectorStore, SearchResult
 from .observability import MetricsRecorder
 from .reranker import Reranker, build_reranker
+from .query_hints import QueryHintGenerator, merge_hint_sources
+from .query_hint_scheduler import QueryHintScheduler
 
 _MIN_RESULT_SCORE = 1e-6
 _TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "templates"
@@ -84,6 +88,7 @@ class ApplicationState:
         metrics: MetricsRecorder | None,
         reranker: Reranker | None,
         query_hints: dict[str, list[str]] | None,
+        query_hint_generator: QueryHintGenerator,
     ) -> None:
         self.settings = settings
         self.embedding_service = embedding_service
@@ -98,6 +103,8 @@ class ApplicationState:
         self.metrics = metrics
         self.reranker = reranker
         self.query_hints = query_hints or {}
+        self.query_hint_generator = query_hint_generator
+        self.hint_scheduler = QueryHintScheduler(settings.query_hint_cron)
 
 
 def create_app(
@@ -155,6 +162,10 @@ def create_app(
 
     glossary = glossary or load_glossary(settings.glossary_path)
     query_hints = load_query_hints(settings.query_hint_path)
+    query_hint_generator = QueryHintGenerator(
+        settings,
+        max_terms_per_prompt=max(1, settings.query_hint_batch_size),
+    )
 
     fts_index = FTSIndex(Path(settings.fts_db_path).resolve())
 
@@ -209,7 +220,21 @@ def create_app(
         metrics=metrics,
         reranker=reranker,
         query_hints=query_hints,
+        query_hint_generator=query_hint_generator,
     )
+
+    scheduler = app.state.services.hint_scheduler
+    for project in project_store.list_projects():
+        metadata = project_store.get_query_hint_metadata(project.id)
+        schedule = metadata.get("schedule") if isinstance(metadata, dict) else None
+        start = None
+        last_generated = metadata.get("last_generated") if isinstance(metadata, dict) else None
+        if isinstance(last_generated, str):
+            try:
+                start = datetime.fromisoformat(last_generated)
+            except ValueError:
+                start = None
+        scheduler.update_job(project.id, schedule, start=start)
 
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
 
@@ -248,6 +273,12 @@ def create_app(
 
     def get_metrics(request: Request) -> MetricsRecorder | None:
         return get_state(request).metrics
+
+    def get_query_hints(request: Request) -> dict[str, list[str]]:
+        return get_state(request).query_hints
+
+    def get_query_hint_generator(request: Request) -> QueryHintGenerator:
+        return get_state(request).query_hint_generator
 
     def _parse_string_list(value) -> list[str]:
         if not value:
@@ -1131,6 +1162,148 @@ def create_app(
     ) -> JSONResponse:
         jobs = [job.to_dict() for job in job_manager.list_for_project(project_id)]
         return JSONResponse({"jobs": jobs})
+
+    @app.get("/knowledge/query-hints", response_class=JSONResponse)
+    async def list_query_hints_endpoint(
+        project_id: str = Query(...),
+        project_store: ProjectStore = Depends(get_project_store),
+        base_hints: dict[str, list[str]] = Depends(get_query_hints),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        project_hints = project_store.get_query_hints(project.id)
+        metadata = project_store.get_query_hint_metadata(project.id)
+        combined = merge_hint_sources(base_hints, project_hints)
+        sorted_hints = {key: combined[key] for key in sorted(combined)}
+        return JSONResponse({"projectId": project.id, "hints": sorted_hints, "metadata": metadata})
+
+    @app.post("/knowledge/query-hints/generate", response_class=StreamingResponse)
+    async def generate_query_hints_endpoint(
+        request: Request,
+        project_store: ProjectStore = Depends(get_project_store),
+        base_hints: dict[str, list[str]] = Depends(get_query_hints),
+        generator: QueryHintGenerator = Depends(get_query_hint_generator),
+    ) -> StreamingResponse:
+        payload = await request.json()
+        project_id = str(payload.get("project_id", "")).strip()
+        if not project_id:
+            raise HTTPException(status_code=400, detail="project_id is required")
+
+        project = _resolve_project(project_store, project_id)
+
+        schedule = str(payload.get("schedule", "")).strip().lower()
+        if schedule not in {"", "daily", "weekly"}:
+            raise HTTPException(status_code=400, detail="schedule must be '', 'daily', or 'weekly'")
+
+        if generator is None or not generator.enabled:
+            raise HTTPException(status_code=503, detail="Query hint generator is not configured")
+
+        raw_entries = project_store.list_glossary_entries(project.id)
+        entries: list[GlossaryEntry] = []
+        for item in raw_entries:
+            term = str(item.get("term", "")).strip()
+            definition = str(item.get("definition", "")).strip()
+            if not term or not definition:
+                continue
+            synonyms = item.get("synonyms") or []
+            keywords = item.get("keywords") or []
+            entries.append(
+                GlossaryEntry(
+                    term=term,
+                    definition=definition,
+                    synonyms=[str(value).strip() for value in synonyms if str(value).strip()],
+                    keywords=[str(value).strip() for value in keywords if str(value).strip()],
+                )
+            )
+
+        if not entries:
+            raise HTTPException(status_code=400, detail="No glossary entries available for this project")
+
+        existing_hints = project_store.get_query_hints(project.id)
+        merged_project = dict(existing_hints)
+        metadata = project_store.get_query_hint_metadata(project.id) or {}
+
+        queue: asyncio.Queue[str | None] = asyncio.Queue()
+        loop = asyncio.get_event_loop()
+        request.app.state.services.hint_scheduler.update_job(project.id, schedule)
+
+        def progress_callback(batch_index: int, batch_hints: dict[str, list[str]]) -> None:
+            nonlocal merged_project
+            merged_project = merge_hint_sources(merged_project, batch_hints)
+            chunk = json.dumps(
+                {
+                    "event": "progress",
+                    "batch": batch_index,
+                    "hints": batch_hints,
+                }
+            )
+            loop.call_soon_threadsafe(queue.put_nowait, chunk)
+
+        payload_batch_size = max(1, min(20, int(payload.get("batch_size", settings.query_hint_batch_size))))
+        generator._max_terms = payload_batch_size
+
+        async def run_generation() -> tuple[dict[str, list[str]], str | None, int]:
+            try:
+                report = await loop.run_in_executor(
+                    None,
+                    lambda: generator.generate(entries, progress_callback=progress_callback),
+                )
+            except Exception as exc:  # pragma: no cover - defensive guard
+                logger.exception("query_hints.generate.failed project=%s", project.id)
+                raise HTTPException(status_code=500, detail=str(exc)) from exc
+            return report.hints, report.backend, report.prompts_sent
+
+        async def event_stream() -> AsyncGenerator[bytes, None]:
+            nonlocal merged_project, metadata
+            task = asyncio.create_task(run_generation())
+            try:
+                while True:
+                    if task.done() and queue.empty():
+                        break
+                    try:
+                        chunk = await asyncio.wait_for(queue.get(), timeout=0.1)
+                    except asyncio.TimeoutError:
+                        continue
+                    if chunk is None:
+                        continue
+                    yield (chunk + "\n").encode("utf-8")
+
+                hints, backend, prompts_sent = await task
+                merged_project = merge_hint_sources(merged_project, hints)
+                metadata.update(
+                    {
+                        "schedule": schedule,
+                        "backend": backend,
+                        "prompts": prompts_sent,
+                        "batch_size": payload_batch_size,
+                        "last_generated": datetime.now(timezone.utc).isoformat(),
+                    }
+                )
+                project_store.set_query_hints(project.id, merged_project, metadata=metadata)
+                request.app.state.services.hint_scheduler.update_job(
+                    project.id,
+                    schedule,
+                    start=datetime.now(timezone.utc),
+                )
+                effective = merge_hint_sources(base_hints, merged_project)
+                sorted_hints = {key: effective[key] for key in sorted(effective)}
+                final_payload = json.dumps(
+                    {
+                        "event": "completed",
+                        "projectId": project.id,
+                        "hints": sorted_hints,
+                        "backend": backend,
+                        "prompts": prompts_sent,
+                        "batch_size": payload_batch_size,
+                        "schedule": schedule,
+                        "metadata": metadata,
+                    }
+                )
+                yield (final_payload + "\n").encode("utf-8")
+            finally:
+                if not task.done():
+                    task.cancel()
+
+        return StreamingResponse(event_stream(), media_type="application/x-ndjson")
 
     @app.get("/knowledge/glossary", response_class=JSONResponse)
     async def list_glossary_entries_endpoint(

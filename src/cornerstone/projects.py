@@ -52,10 +52,12 @@ class ProjectStore:
         self._documents_dir = root / "documents"
         self._keywords_dir = root / "keywords"
         self._glossary_dir = root / "glossary"
+        self._query_hints_dir = root / "query_hints"
         self._root.mkdir(parents=True, exist_ok=True)
         self._documents_dir.mkdir(parents=True, exist_ok=True)
         self._keywords_dir.mkdir(parents=True, exist_ok=True)
         self._glossary_dir.mkdir(parents=True, exist_ok=True)
+        self._query_hints_dir.mkdir(parents=True, exist_ok=True)
         self._ensure_default_project(default_project_name)
 
     def list_projects(self) -> List[Project]:
@@ -402,6 +404,88 @@ class ProjectStore:
             if cleaned and cleaned not in normalized:
                 normalized.append(cleaned)
         return normalized
+
+    def get_query_hints(self, project_id: str) -> dict[str, list[str]]:
+        path = self._query_hints_dir / f"{project_id}.json"
+        if not path.exists():
+            return {}
+        with path.open("r", encoding="utf-8") as handle:
+            try:
+                data = json.load(handle)
+            except json.JSONDecodeError:
+                logger.warning("project.query_hints.decode_failed project=%s path=%s", project_id, path)
+                return {}
+        if not isinstance(data, dict):
+            return {}
+        if "hints" in data and isinstance(data["hints"], dict):
+            raw_hints = data["hints"]
+        else:
+            raw_hints = data
+        hints: dict[str, list[str]] = {}
+        for key, values in raw_hints.items():
+            if not isinstance(key, str):
+                continue
+            cleaned_key = key.strip().lower()
+            if not cleaned_key:
+                continue
+            bucket: list[str] = []
+            if isinstance(values, list):
+                for value in values:
+                    if isinstance(value, str):
+                        cleaned = value.strip()
+                        if cleaned and cleaned not in bucket:
+                            bucket.append(cleaned)
+            elif isinstance(values, str):
+                cleaned = values.strip()
+                if cleaned:
+                    bucket.append(cleaned)
+            if bucket:
+                hints[cleaned_key] = bucket
+        return hints
+
+    def get_query_hint_metadata(self, project_id: str) -> dict[str, object]:
+        path = self._query_hints_dir / f"{project_id}.json"
+        if not path.exists():
+            return {}
+        with path.open("r", encoding="utf-8") as handle:
+            try:
+                data = json.load(handle)
+            except json.JSONDecodeError:
+                return {}
+        if isinstance(data, dict) and "metadata" in data and isinstance(data["metadata"], dict):
+            return data["metadata"]
+        return {}
+
+    def set_query_hints(
+        self,
+        project_id: str,
+        hints: dict[str, list[str]],
+        *,
+        metadata: dict[str, object] | None = None,
+    ) -> None:
+        path = self._query_hints_dir / f"{project_id}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload_hints: dict[str, list[str]] = {}
+        for key, values in hints.items():
+            if key is None:
+                continue
+            cleaned_key = str(key).strip()
+            if not cleaned_key:
+                continue
+            bucket: list[str] = []
+            for value in values:
+                if value is None:
+                    continue
+                cleaned = str(value).strip()
+                if cleaned and cleaned not in bucket:
+                    bucket.append(cleaned)
+            payload_hints[cleaned_key.lower()] = bucket
+        payload: dict[str, object] = {"hints": payload_hints}
+        if metadata:
+            payload["metadata"] = metadata
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2, ensure_ascii=False)
+        logger.info("project.query_hints.updated project=%s keys=%s", project_id, len(payload_hints))
 
 
 __all__ = ["Project", "DocumentMetadata", "ProjectStore"]

@@ -24,6 +24,8 @@ _DEFAULT_CHAT_BACKEND: Final[str] = "openai"
 _DEFAULT_OPENAI_CHAT_MODEL: Final[str] = "gpt-4o-mini"
 _DEFAULT_GLOSSARY_PATH: Final[str] = "glossary/glossary.yaml"
 _DEFAULT_QUERY_HINTS_PATH: Final[str] = "glossary/query_hints.yaml"
+_DEFAULT_QUERY_HINT_BATCH_SIZE: Final[int] = 6
+_DEFAULT_QUERY_HINT_CRON: Final[str] = "0 3 * * *"
 _DEFAULT_GLOSSARY_TOP_K: Final[int] = 3
 _DEFAULT_OLLAMA_URL: Final[str] = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL: Final[str] = "llama3.1:8b"
@@ -121,6 +123,8 @@ class Settings:
     reranker_model: str | None = None
     reranker_max_candidates: int = _DEFAULT_RERANKER_MAX_CANDIDATES
     keyword_filter_max_results: int = _DEFAULT_KEYWORD_FILTER_MAX_RESULTS
+    query_hint_batch_size: int = _DEFAULT_QUERY_HINT_BATCH_SIZE
+    query_hint_cron: str = _DEFAULT_QUERY_HINT_CRON
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -174,6 +178,10 @@ class Settings:
             keyword_filter_max_results=int(
                 os.getenv("KEYWORD_FILTER_MAX_RESULTS", str(_DEFAULT_KEYWORD_FILTER_MAX_RESULTS))
             ),
+            query_hint_batch_size=int(
+                os.getenv("QUERY_HINT_BATCH_SIZE", str(_DEFAULT_QUERY_HINT_BATCH_SIZE))
+            ),
+            query_hint_cron=os.getenv("QUERY_HINT_CRON", _DEFAULT_QUERY_HINT_CRON),
         )
 
     @property

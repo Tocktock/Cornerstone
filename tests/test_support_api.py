@@ -13,6 +13,7 @@ from cornerstone.app import create_app
 from cornerstone.chat import SupportAgentContext, SupportAgentResponse, SupportAgentService
 from cornerstone.config import Settings
 from cornerstone.glossary import Glossary
+from cornerstone.query_hints import QueryHintGenerator
 from cornerstone.ingestion import DocumentIngestor, ProjectVectorStoreManager
 from cornerstone.vector_store import VectorRecord
 from cornerstone.fts import FTSIndex
@@ -181,6 +182,79 @@ def test_support_chat_stream_endpoint():
     done = json.loads(lines[-1])
     assert done["event"] == "done"
     assert done["message"].startswith("Here is how")
+
+
+def test_query_hints_endpoint():
+    client, project_id = build_test_app()
+    services = client.app.state.services
+    services.query_hints = {"business": ["사업"]}
+    services.project_store.set_query_hints(project_id, {"shipper": ["화주"]})
+
+    response = client.get(f"/knowledge/query-hints?project_id={project_id}")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["projectId"] == project_id
+    assert set(payload["hints"]["business"]) == {"사업"}
+    assert set(payload["hints"]["shipper"]) == {"화주"}
+    assert payload.get("metadata") == {}
+
+
+def test_generate_query_hints_endpoint():
+    client, project_id = build_test_app()
+    services = client.app.state.services
+    services.project_store.create_glossary_entry(
+        project_id,
+        term="Business",
+        definition="Core operations",
+        synonyms=["company business"],
+        keywords=["logistics"],
+    )
+
+    services.query_hint_generator = QueryHintGenerator(
+        services.settings,
+        llm_call=lambda prompt: json.dumps({"business": ["사업", "비즈니스"]}),
+        max_terms_per_prompt=1,
+    )
+
+    response = client.post(
+        "/knowledge/query-hints/generate",
+        json={"project_id": project_id, "batch_size": 1, "schedule": ""},
+    )
+    assert response.status_code == 200
+    lines = [line for line in response.text.splitlines() if line.strip()]
+    payload = json.loads(lines[-1])
+    assert payload["projectId"] == project_id
+    assert set(payload["hints"]["business"]) == {"사업", "비즈니스"}
+    assert payload["metadata"]["backend"] == "custom"
+    assert payload["metadata"]["batch_size"] == 1
+    assert payload["metadata"].get("schedule", "") == ""
+    stored = services.project_store.get_query_hints(project_id)
+    assert set(stored["business"]) == {"사업", "비즈니스"}
+    stored_meta = services.project_store.get_query_hint_metadata(project_id)
+    assert stored_meta.get("backend") == "custom"
+    assert stored_meta.get("batch_size") == 1
+    assert stored_meta.get("schedule", "") == ""
+
+
+def test_generate_query_hints_rejects_invalid_schedule():
+    client, project_id = build_test_app()
+    services = client.app.state.services
+    services.project_store.create_glossary_entry(
+        project_id,
+        term="Business",
+        definition="Core operations",
+    )
+    services.query_hint_generator = QueryHintGenerator(
+        services.settings,
+        llm_call=lambda prompt: json.dumps({"business": ["사업"]}),
+        max_terms_per_prompt=1,
+    )
+
+    response = client.post(
+        "/knowledge/query-hints/generate",
+        json={"project_id": project_id, "schedule": "monthly"},
+    )
+    assert response.status_code == 400
 
 
 def test_persona_form_updates_tuning_settings():
