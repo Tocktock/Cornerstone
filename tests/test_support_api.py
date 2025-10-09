@@ -6,6 +6,8 @@ import types
 from pathlib import Path
 import shutil
 
+from dataclasses import replace
+
 from fastapi.testclient import TestClient
 from qdrant_client import QdrantClient, models
 
@@ -69,9 +71,12 @@ class DummyChatService:
         return context, generator()
 
 
-def build_test_app(*, use_real_chat: bool = False) -> tuple[TestClient, str]:
+def build_test_app(*, use_real_chat: bool = False, settings: Settings | None = None) -> tuple[TestClient, str]:
     tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-test-"))
-    settings = Settings(data_dir=str(tmpdir), default_project_name="Test Project")
+    if settings is None:
+        settings = Settings(data_dir=str(tmpdir), default_project_name="Test Project")
+    else:
+        settings = replace(settings, data_dir=str(tmpdir))
     embedding = FakeEmbeddingService()
     glossary = Glossary()
     project_store = ProjectStore(tmpdir, default_project_name=settings.default_project_name)
@@ -129,6 +134,19 @@ def test_support_chat_endpoint():
     data = response.json()
     assert data["message"].startswith("Here is how")
     assert data["definitions"]
+
+
+def test_support_chat_persists_conversation_log():
+    client, project_id = build_test_app()
+    response = client.post(
+        "/support/chat",
+        json={"query": "Logging check", "projectId": project_id},
+    )
+    assert response.status_code == 200
+    logger = client.app.state.services.conversation_logger
+    records = logger.list_conversations(project_id=project_id)
+    assert len(records) == 1
+    assert records[0].query == "Logging check"
 
 
 def test_support_chat_endpoint_includes_project_glossary_entries():
