@@ -126,9 +126,43 @@ def load_glossary(path: str | Path) -> Glossary:
     return Glossary(entries)
 
 
+def load_query_hints(path: str | Path | None) -> dict[str, list[str]]:
+    """Load query expansion hints from YAML; return {} when unavailable."""
+
+    if not path:
+        return {}
+    hint_path = Path(path)
+    if not hint_path.exists():
+        return {}
+    if yaml is None:  # pragma: no cover - requires pyyaml
+        raise GlossaryLoadError(
+            "pyyaml is required to load query hint definitions"
+        ) from YAML_IMPORT_ERROR
+
+    data = yaml.safe_load(hint_path.read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        raise GlossaryLoadError("Query hint file must contain a mapping of tokens to lists")
+
+    hints: dict[str, list[str]] = {}
+    for raw_key, raw_values in data.items():
+        if raw_key is None:
+            continue
+        key = str(raw_key).strip().lower()
+        if not key:
+            continue
+        values: list[str]
+        if isinstance(raw_values, list):
+            values = [str(item).strip() for item in raw_values if str(item).strip()]
+        else:
+            values = [str(raw_values).strip()]
+        hints[key] = values
+    return hints
+
+
 __all__ = [
     "Glossary",
     "GlossaryEntry",
     "GlossaryLoadError",
     "load_glossary",
+    "load_query_hints",
 ]

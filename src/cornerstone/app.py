@@ -16,7 +16,7 @@ from qdrant_client import QdrantClient, models
 from .chat import SupportAgentService
 from .config import Settings
 from .embeddings import EmbeddingService
-from .glossary import Glossary, load_glossary
+from .glossary import Glossary, load_glossary, load_query_hints
 from .ingestion import (
     DocumentIngestor,
     IngestionJobManager,
@@ -83,6 +83,7 @@ class ApplicationState:
         fts_index,
         metrics: MetricsRecorder | None,
         reranker: Reranker | None,
+        query_hints: dict[str, list[str]] | None,
     ) -> None:
         self.settings = settings
         self.embedding_service = embedding_service
@@ -96,6 +97,7 @@ class ApplicationState:
         self.fts_index = fts_index
         self.metrics = metrics
         self.reranker = reranker
+        self.query_hints = query_hints or {}
 
 
 def create_app(
@@ -152,6 +154,7 @@ def create_app(
     store_manager.get_store(_default_project_id(project_store))
 
     glossary = glossary or load_glossary(settings.glossary_path)
+    query_hints = load_query_hints(settings.query_hint_path)
 
     fts_index = FTSIndex(Path(settings.fts_db_path).resolve())
 
@@ -161,18 +164,22 @@ def create_app(
         else:
             reranker = getattr(chat_service, "_reranker", None)
 
-    chat_service = chat_service or SupportAgentService(
-        settings=settings,
-        embedding_service=embedding_service,
-        store_manager=store_manager,
-        glossary=glossary,
-        project_store=project_store,
-        persona_store=persona_store,
-        fts_index=fts_index,
-        metrics=metrics,
-        retrieval_top_k=settings.retrieval_top_k,
-        reranker=reranker,
-    )
+    if chat_service is None:
+        chat_service = SupportAgentService(
+            settings=settings,
+            embedding_service=embedding_service,
+            store_manager=store_manager,
+            glossary=glossary,
+            project_store=project_store,
+            persona_store=persona_store,
+            fts_index=fts_index,
+            metrics=metrics,
+            retrieval_top_k=settings.retrieval_top_k,
+            reranker=reranker,
+            query_hints=query_hints,
+        )
+    else:
+        query_hints = getattr(chat_service, "_query_hints", query_hints)
 
     ingestion_service = ingestion_service or DocumentIngestor(
         embedding_service=embedding_service,
@@ -201,6 +208,7 @@ def create_app(
         fts_index=fts_index,
         metrics=metrics,
         reranker=reranker,
+        query_hints=query_hints,
     )
 
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
