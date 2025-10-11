@@ -109,6 +109,7 @@ class QueryHintGenerator:
         entries: Sequence[GlossaryEntry],
         *,
         progress_callback: Callable[[int, Dict[str, List[str]]], None] | None = None,
+        max_terms_per_prompt: int | None = None,
     ) -> HintGenerationReport:
         hints: Dict[str, List[str]] = {}
         if not entries:
@@ -121,9 +122,10 @@ class QueryHintGenerator:
 
         prompts_sent = 0
         batch: List[GlossaryEntry] = []
+        max_terms = self._max_terms if max_terms_per_prompt is None else max(1, max_terms_per_prompt)
         for entry in entries:
             batch.append(entry)
-            if len(batch) >= self._max_terms:
+            if len(batch) >= max_terms:
                 batch_result = self._run_batch(batch)
                 self._merge_results(hints, batch_result)
                 prompts_sent += 1
