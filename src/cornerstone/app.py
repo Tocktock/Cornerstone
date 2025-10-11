@@ -254,6 +254,7 @@ def create_app(
         scheduler.update_job(project.id, schedule, start=start)
 
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
+    templates.env.globals["settings"] = settings
 
     def get_state(request: Request) -> ApplicationState:
         return request.app.state.services
@@ -1350,13 +1351,16 @@ def create_app(
             loop.call_soon_threadsafe(queue.put_nowait, chunk)
 
         payload_batch_size = max(1, min(20, int(payload.get("batch_size", settings.query_hint_batch_size))))
-        generator._max_terms = payload_batch_size
 
         async def run_generation() -> tuple[dict[str, list[str]], str | None, int]:
             try:
                 report = await loop.run_in_executor(
                     None,
-                    lambda: generator.generate(entries, progress_callback=progress_callback),
+                    lambda: generator.generate(
+                        entries,
+                        progress_callback=progress_callback,
+                        max_terms_per_prompt=payload_batch_size,
+                    ),
                 )
             except Exception as exc:  # pragma: no cover - defensive guard
                 logger.exception("query_hints.generate.failed project=%s", project.id)
