@@ -115,7 +115,7 @@ def test_ingest_directory_reprocesses_when_model_changes(tmp_path: Path) -> None
     assert entry and entry.get("embedding_model") == "model-b"
 
 
-def test_missing_embedding_model_is_backfilled_without_reingesting(tmp_path: Path) -> None:
+def test_missing_embedding_model_triggers_reingest(tmp_path: Path) -> None:
     base_dir, target_dir, _, manifest_path = _setup_directory(tmp_path)
 
     ingestor_a = DummyIngestor("model-a")
@@ -141,7 +141,7 @@ def test_missing_embedding_model_is_backfilled_without_reingesting(tmp_path: Pat
         ingestion_service=backfill,
         manifest_path=manifest_path,
     )
-    assert backfill.calls == []
+    assert backfill.calls == ["docs/sample.txt"]
     updated_manifest = load_manifest(manifest_path)
     assert updated_manifest["docs/sample.txt"].get("embedding_model") == "model-a"
 
