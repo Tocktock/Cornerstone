@@ -31,10 +31,13 @@ ALLOWED_SUFFIXES = {
 def resolve_local_path(base_dir: Path, relative_path: str) -> Path:
     """Resolve a user-supplied relative path within the local data directory."""
 
+    base_dir = base_dir.resolve()
     relative_path = relative_path.strip().lstrip("/\\")
     target = (base_dir / relative_path).resolve()
-    if not str(target).startswith(str(base_dir.resolve())):
-        raise ValueError("Path must reside inside the local data directory")
+    try:
+        target.relative_to(base_dir)
+    except ValueError:
+        raise ValueError("Path must reside inside the local data directory") from None
     return target
 
 

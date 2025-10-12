@@ -6,9 +6,11 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from cornerstone.config import Settings
 from cornerstone.ingestion import DocumentIngestor, IngestionJobManager, IngestionResult
-from cornerstone.local_ingest import ingest_directory, load_manifest
+from cornerstone.local_ingest import ingest_directory, load_manifest, resolve_local_path
 from cornerstone.projects import DocumentMetadata
 from cornerstone.scripts import ingest_local
 
@@ -40,6 +42,24 @@ def _setup_directory(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
     source_file.write_text("hello world", encoding="utf-8")
     manifest_path = tmp_path / "manifests" / "proj.json"
     return base_dir, target_dir, source_file, manifest_path
+
+
+def test_resolve_local_path_accepts_descendant(tmp_path: Path) -> None:
+    base_dir = tmp_path / "data"
+    allowed_dir = base_dir / "allowed"
+    allowed_dir.mkdir(parents=True, exist_ok=True)
+
+    result = resolve_local_path(base_dir, "allowed/file.txt")
+
+    assert result == (allowed_dir / "file.txt").resolve()
+
+
+def test_resolve_local_path_rejects_escape(tmp_path: Path) -> None:
+    base_dir = tmp_path / "data"
+    base_dir.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(ValueError):
+        resolve_local_path(base_dir, "../base-evil")
 
 
 def test_ingest_directory_skips_when_embedding_model_matches(tmp_path: Path) -> None:
