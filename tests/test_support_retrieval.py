@@ -197,6 +197,31 @@ def test_support_service_uses_project_glossary_entries():
         shutil.rmtree(tmpdir, ignore_errors=True)
 
 
+def test_prompt_honors_persona_glossary_override():
+    tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-retrieval-"))
+    try:
+        service, ingestion, project, project_store = build_service(tmpdir)
+        project_store.create_glossary_entry(
+            project.id,
+            term="SLA",
+            definition="Service level agreement defining support timelines.",
+            keywords=["uptime", "contract"],
+        )
+        updated = project_store.configure_persona(
+            project.id,
+            persona_id=None,
+            overrides=PersonaOverrides(glossary_top_k=0),
+        )
+        persona = service._resolve_persona(updated)
+        options = service._persona_options(persona)
+        context, _ = service._build_context(project, persona, "uptime SLA", [], options)
+        assert context.definitions == []
+        assert "GLOSSARY:" not in context.prompt
+        assert "Key domain definitions:" not in context.prompt
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
 def test_persona_options_respect_project_overrides():
     tmpdir = Path(tempfile.mkdtemp(prefix="cornerstone-retrieval-"))
     try:
