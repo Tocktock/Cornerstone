@@ -298,6 +298,7 @@ class SupportAgentService:
             fused_chunks,
             history,
             glossary=glossary_resource,
+            options=options,
         )
         context = SupportAgentContext(prompt=prompt, sources=sources, definitions=definitions)
         return context, fused_chunks
@@ -377,6 +378,7 @@ class SupportAgentService:
         conversation: Sequence[str],
         *,
         glossary: Glossary | None = None,
+        options: PersonaRuntimeOptions | None = None,
     ) -> str:
         context_lines = ["Relevant documentation snippets:"]
         for idx, chunk in enumerate(chunks, start=1):
@@ -391,7 +393,13 @@ class SupportAgentService:
 
         conversation_history = "\n".join(conversation)
         glossary_resource = glossary or self._project_glossary(project)
-        glossary_section = glossary_resource.to_prompt_section(query, self._settings.glossary_top_k)
+        persona_options = options or self._persona_options(persona)
+        glossary_top_k = persona_options.glossary_top_k
+        glossary_section = (
+            glossary_resource.to_prompt_section(query, glossary_top_k)
+            if glossary_top_k > 0
+            else ""
+        )
 
         language_instruction = (
             "모든 답변은 한국어로 작성하세요."
