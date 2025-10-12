@@ -128,7 +128,6 @@ def ingest_directory(
 
     pending_files: list[Path] = []
     total_target_bytes = 0
-    manifest_updated = False
     for file_path in all_supported_files:
         stat = file_path.stat()
         rel_path = str(file_path.relative_to(base_dir))
@@ -139,16 +138,8 @@ def ingest_directory(
             recorded_model = entry.get("embedding_model")
             if recorded_model == embedding_model_id:
                 continue
-            if recorded_model is None:
-                entry["embedding_model"] = embedding_model_id
-                manifest[rel_path] = entry
-                manifest_updated = True
-                continue
         pending_files.append(file_path)
         total_target_bytes += stat.st_size
-
-    if manifest_updated:
-        save_manifest(manifest_path, manifest)
 
     processed_files = 0
     processed_bytes = 0
