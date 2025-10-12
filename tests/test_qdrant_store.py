@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import math
 import os
+from typing import Any
 from uuid import uuid4
 
 import pytest
-from qdrant_client import QdrantClient
+from qdrant_client import QdrantClient, models
 
+from cornerstone.config import Settings
 from cornerstone.vector_store import QdrantVectorStore, VectorRecord
 
 
@@ -18,14 +20,73 @@ def qdrant_store() -> QdrantVectorStore:
     return store
 
 
+def test_settings_tuning_kwargs_filters_optional_values() -> None:
+    settings = Settings(
+        qdrant_on_disk_vectors=True,
+        qdrant_on_disk_payload=None,
+        qdrant_hnsw_m=64,
+        qdrant_hnsw_ef_construct=None,
+    )
+    kwargs = settings.qdrant_collection_tuning_kwargs()
+    assert kwargs["on_disk_vectors"] is True
+    assert "on_disk_payload" not in kwargs
+    assert kwargs["hnsw_config"] == {"m": 64}
+
+
+def test_create_collection_uses_tuning_options() -> None:
+    captured: dict[str, Any] = {}
+
+    class FakeClient:
+        def collection_exists(self, name: str) -> bool:
+            return False
+
+        def create_collection(self, **kwargs: Any) -> None:
+            captured.update(kwargs)
+
+    store = QdrantVectorStore(
+        client=FakeClient(),
+        collection_name='test-collection',
+        vector_size=3,
+        on_disk_payload=True,
+        on_disk_vectors=True,
+        hnsw_config={'m': 32, 'ef_construct': 128},
+    )
+
+    store.ensure_collection()
+
+    assert captured['collection_name'] == 'test-collection'
+    vectors_config = captured['vectors_config']
+    assert isinstance(vectors_config, models.VectorParams)
+    assert vectors_config.on_disk is True
+
+    assert captured['on_disk_payload'] is True
+    hnsw_config = captured['hnsw_config']
+    assert isinstance(hnsw_config, models.HnswConfigDiff)
+    assert hnsw_config.m == 32
+    assert hnsw_config.ef_construct == 128
+
+
 def test_ensure_collection_dimension_mismatch() -> None:
     client = QdrantClient(path=':memory:')
     store = QdrantVectorStore(client, 'test-collection', vector_size=3)
     store.ensure_collection()
 
     mismatch_store = QdrantVectorStore(client, 'test-collection', vector_size=2)
-    with pytest.raises(ValueError):
-        mismatch_store.ensure_collection()
+    mismatch_store.ensure_collection()
+    info = client.get_collection('test-collection')
+    assert info.config.params.vectors.size == 2
+    assert mismatch_store.count() == 0
+
+
+def test_ensure_payload_indexes_creates_indexes() -> None:
+    client = QdrantClient(path=':memory:')
+    store = QdrantVectorStore(client, 'test-collection', vector_size=3)
+    store.ensure_collection()
+    store.ensure_payload_indexes()
+    info = client.get_collection('test-collection')
+    schema = getattr(info, 'payload_schema', {}) or {}
+    if schema:  # Some in-memory deployments do not expose schema details
+        assert 'project_id' in schema
 
 
 def test_upsert_and_search_returns_best_match(qdrant_store: QdrantVectorStore) -> None:

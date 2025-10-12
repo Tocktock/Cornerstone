@@ -55,6 +55,13 @@
         margin: 0.25rem 0;
         color: #4b5563;
       }
+      .chat-actions {
+        margin-top: 0.75rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+      }
       .chat-body {
         flex: 1;
         overflow-y: auto;
@@ -125,6 +132,55 @@
         display: block;
         color: #111827;
       }
+      #new-chat {
+        background: #111827;
+        color: #fff;
+        border: none;
+        border-radius: 999px;
+        padding: 0.45rem 1.4rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        box-shadow: 0 12px 28px rgba(17, 24, 39, 0.22);
+        transition: transform 0.15s ease, box-shadow 0.2s ease;
+      }
+      #new-chat:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 34px rgba(17, 24, 39, 0.3);
+      }
+      .persona-banner {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.85rem;
+        align-items: flex-start;
+        background: #f9fafb;
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+      }
+      .persona-banner img {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
+      }
+      .persona-banner strong {
+        display: block;
+        color: #111827;
+        font-size: 1.05rem;
+      }
+      .persona-banner span {
+        display: block;
+        color: #4b5563;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+      }
+      .persona-banner p {
+        margin: 0.45rem 0 0;
+        color: #4b5563;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
       .composer {
         padding: 1.5rem 2rem 1.75rem;
         border-top: 1px solid #e5e7eb;
@@ -132,6 +188,17 @@
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
+      }
+      .alert {
+        padding: 0.65rem 1rem;
+        border-radius: 10px;
+        border: 1px solid #fca5a5;
+        background: #fef2f2;
+        color: #b91c1c;
+        font-size: 0.9rem;
+      }
+      .alert[hidden] {
+        display: none;
       }
       .composer textarea {
         width: 100%;
@@ -199,9 +266,15 @@
       <a href="/support"><strong>Support Agent</strong></a>
       <a href="/knowledge">Knowledge Base</a>
       <a href="/keywords">Keyword Explorer</a>
+      <a href="/admin/analytics">Analytics</a>
+      <a href="/personas">Personas</a>
     </nav>
+    {% set base_name = persona_base.name if persona_base else None %}
+    {% set final_name = persona.name if persona and persona.name else (base_name if base_name else 'Support Agent') %}
+    {% set base_tone = persona_base.tone if persona_base else None %}
+    {% set final_tone = persona.tone if persona and persona.tone else base_tone %}
     <main>
-      <div class="chat-shell">
+      <div class="chat-shell" data-persona-name="{{ final_name }}" data-persona-tone="{{ final_tone or '' }}" data-persona-id="{{ persona.id if persona and persona.id else (persona_base.id if persona_base else '') }}">
         <header>
           <h1>Support Agent</h1>
           <p>Conversational troubleshooting with embedded knowledge and glossary guidance.</p>
@@ -214,11 +287,48 @@
             </select>
             <span>Glossary entries loaded: {{ glossary_count }}</span>
           </div>
+          <div class="chat-actions">
+            <button id="new-chat" type="button">New Chat</button>
+          </div>
+          <div class="persona-banner" aria-live="polite">
+            {% if persona and persona.avatar_url %}
+              <img src="{{ persona.avatar_url }}" alt="{{ final_name }} avatar" />
+            {% elif persona_base and persona_base.avatar_url %}
+              <img src="{{ persona_base.avatar_url }}" alt="{{ persona_base.name }} avatar" />
+            {% endif %}
+            <div>
+              <strong>{{ final_name }}</strong>
+              {% if persona_base %}
+                <span>Catalog persona: {{ persona_base.name }}</span>
+              {% else %}
+                <span>Catalog persona: default system agent</span>
+              {% endif %}
+              {% if final_tone %}
+                <span style="display:block; margin-top:0.35rem;">Tone: {{ final_tone }}{% if persona_base and persona and persona.tone and persona.tone != persona_base.tone %} (override){% elif persona_base and not persona %} (catalog){% endif %}</span>
+              {% else %}
+                <span style="display:block; margin-top:0.35rem;">Tone: default support voice</span>
+              {% endif %}
+              {% if persona and persona.system_prompt %}
+                <p>{{ persona.system_prompt }}</p>
+              {% elif persona_base and persona_base.system_prompt %}
+                <p>{{ persona_base.system_prompt }}</p>
+              {% else %}
+                <p>The agent follows the platform default instructions.</p>
+              {% endif %}
+              {% if persona_base and persona_base.description %}
+                <p style="margin-top:0.45rem; font-size:0.85rem; color:#6b7280;">{{ persona_base.description }}</p>
+              {% endif %}
+              {% if persona_base and persona_base.tags %}
+                <span style="display:block; font-size:0.8rem; color:#6b7280; margin-top:0.25rem;">Tags: {{ persona_base.tags | join(', ') }}</span>
+              {% endif %}
+            </div>
+          </div>
         </header>
         <div class="chat-body">
           <div id="messages" class="messages" aria-live="polite"></div>
         </div>
         <div class="composer">
+          <div id="alert" class="alert" role="alert" hidden tabindex="-1"></div>
           <textarea id="query" placeholder="Describe the issue or ask a question..." required></textarea>
           <div class="composer-tools">
             <span id="status">Press ⌘⏎ / Ctrl⏎ to send</span>
@@ -235,6 +345,9 @@
       const messagesEl = document.getElementById('messages');
       const history = [];
       const projectEl = document.getElementById('project');
+      const chatShell = document.querySelector('.chat-shell');
+      const alertEl = document.getElementById('alert');
+      const newChatButton = document.getElementById('new-chat');
       let activeStreamController = null;
 
       function applyExtras(bubble, extras = {}) {
@@ -257,7 +370,26 @@
           const list = document.createElement('ul');
           definitions.forEach((def) => {
             const item = document.createElement('li');
-            item.textContent = def;
+            if (typeof def === 'string') {
+              const colonIndex = def.indexOf(':');
+              if (colonIndex > 0) {
+                const termText = def.slice(0, colonIndex).trim();
+                const detailText = def.slice(colonIndex + 1).trim();
+                if (termText) {
+                  const termEl = document.createElement('strong');
+                  termEl.textContent = termText;
+                  item.appendChild(termEl);
+                }
+                if (detailText) {
+                  const detailEl = document.createElement('span');
+                  detailEl.textContent = ` - ${detailText}`;
+                  item.appendChild(detailEl);
+                }
+              }
+            }
+            if (!item.childNodes.length) {
+              item.textContent = typeof def === 'string' ? def : JSON.stringify(def);
+            }
             list.appendChild(item);
           });
           footer.appendChild(list);
@@ -319,16 +451,68 @@
 
         messagesEl.appendChild(bubble);
         bubble.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        if (role === 'assistant') {
+          bubble.setAttribute('tabindex', '-1');
+          bubble.focus({ preventScroll: true });
+        }
         return bubble;
+      }
+
+      function showAlert(message) {
+        if (!alertEl) {
+          return;
+        }
+        if (!message) {
+          alertEl.hidden = true;
+          alertEl.textContent = '';
+          return;
+        }
+        alertEl.hidden = false;
+        alertEl.textContent = message;
+        alertEl.focus({ preventScroll: true });
+      }
+
+      function hideAlert() {
+        if (!alertEl) {
+          return;
+        }
+        alertEl.hidden = true;
+        alertEl.textContent = '';
+      }
+
+      function resetConversation() {
+        if (activeStreamController) {
+          activeStreamController.abort();
+          activeStreamController = null;
+        }
+        if (!messagesEl.children.length) {
+          history.length = 0;
+          statusEl.textContent = 'Ready for the next question.';
+          hideAlert();
+          queryEl.focus();
+          return;
+        }
+        const personaName = (chatShell && chatShell.dataset.personaName) ? chatShell.dataset.personaName : 'the agent';
+        const confirmed = window.confirm(`Start a new chat with ${personaName}? This will clear the current conversation.`);
+        if (!confirmed) {
+          return;
+        }
+        history.length = 0;
+        messagesEl.innerHTML = '';
+        hideAlert();
+        statusEl.textContent = 'Chat reset. Ask your next question.';
+        queryEl.focus();
       }
 
       async function submitQuery() {
         const query = queryEl.value.trim();
         if (!query) {
           statusEl.textContent = 'Please enter a question before sending.';
+          showAlert('Enter a question so the agent knows what to help with.');
           return;
         }
 
+        hideAlert();
         history.push(`User: ${query}`);
         appendMessage('user', query);
         queryEl.value = '';
@@ -339,6 +523,7 @@
         const controller = new AbortController();
         activeStreamController = controller;
 
+        statusEl.textContent = 'The assistant is composing a reply...';
         const assistantBubble = appendMessage('assistant', '');
         const contentEl = assistantBubble.querySelector('.content');
         contentEl.textContent = 'Streaming response...';
@@ -389,6 +574,7 @@
                     if (event.data) {
                       accumulated += event.data;
                       contentEl.textContent = accumulated;
+                      statusEl.textContent = 'Streaming response...';
                     }
                   } else if (event.event === 'done') {
                     if (event.message) {
@@ -397,6 +583,7 @@
                     }
                     history.push(`Assistant: ${accumulated}`);
                     statusEl.textContent = 'Ready for the next question.';
+                    hideAlert();
                     return;
                   } else if (event.event === 'error') {
                     throw new Error(event.message || 'Streaming error');
@@ -417,6 +604,7 @@
           contentEl.textContent = `⚠️ ${error.message}`;
           applyExtras(assistantBubble, {});
           statusEl.textContent = 'Encountered an error. Try again.';
+          showAlert(error.message || 'Something went wrong while contacting the assistant.');
         } finally {
           if (activeStreamController === controller) {
             activeStreamController = null;
@@ -433,6 +621,20 @@
           event.preventDefault();
         }
       });
+
+      if (newChatButton) {
+        newChatButton.addEventListener('click', resetConversation);
+      }
+
+      if (projectEl) {
+        projectEl.addEventListener('change', () => {
+          if (activeStreamController) {
+            activeStreamController.abort();
+          }
+          const next = projectEl.value;
+          window.location.href = `/support?project_id=${encodeURIComponent(next)}`;
+        });
+      }
 
       queryEl.focus();
     </script>

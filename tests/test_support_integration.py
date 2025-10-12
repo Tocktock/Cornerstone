@@ -16,6 +16,7 @@ from cornerstone.chat import SupportAgentService
 from cornerstone.embeddings import EmbeddingService
 from cornerstone.glossary import Glossary, GlossaryEntry
 from cornerstone.ingestion import DocumentIngestor, ProjectVectorStoreManager
+from cornerstone.personas import PersonaStore
 from cornerstone.projects import ProjectStore
 
 
@@ -33,6 +34,7 @@ def test_support_chat_with_openai_backend() -> None:
 
     tmpdir = tempfile.mkdtemp(prefix="cornerstone-integration-")
     project_store = ProjectStore(Path(tmpdir), default_project_name=settings.default_project_name)
+    persona_store = PersonaStore(Path(tmpdir))
     project_id = project_store.list_projects()[0].id
 
     embedding = EmbeddingService(settings, validate=False)
@@ -63,6 +65,8 @@ def test_support_chat_with_openai_backend() -> None:
         store_manager=store_manager,
         glossary=glossary,
         retrieval_top_k=1,
+        project_store=project_store,
+        persona_store=persona_store,
     )
 
     ingestion = DocumentIngestor(embedding, store_manager, project_store)
@@ -73,6 +77,7 @@ def test_support_chat_with_openai_backend() -> None:
         glossary=glossary,
         chat_service=chat_service,
         project_store=project_store,
+        persona_store=persona_store,
         store_manager=store_manager,
         ingestion_service=ingestion,
     )

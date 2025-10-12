@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
-from typing import Any, Iterable, List, Sequence
+from typing import Any, Iterable, List, Mapping, Sequence
 
 from qdrant_client import QdrantClient, models
 
 from .config import Settings
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -38,6 +42,9 @@ class QdrantVectorStore:
         *,
         vector_size: int,
         distance: models.Distance = models.Distance.COSINE,
+        on_disk_payload: bool | None = None,
+        on_disk_vectors: bool | None = None,
+        hnsw_config: models.HnswConfigDiff | Mapping[str, int] | None = None,
     ) -> None:
         if vector_size <= 0:
             msg = "vector_size must be a positive integer"
@@ -47,6 +54,9 @@ class QdrantVectorStore:
         self._collection_name = collection_name
         self._vector_size = vector_size
         self._distance = distance
+        self._on_disk_payload = on_disk_payload
+        self._on_disk_vectors = on_disk_vectors
+        self._hnsw_config = self._normalize_hnsw_config(hnsw_config)
 
     def iter_payloads(
         self,
@@ -78,7 +88,13 @@ class QdrantVectorStore:
         """Instantiate the store using application settings."""
 
         client = QdrantClient(**settings.qdrant_client_kwargs())
-        return cls(client, settings.qdrant_collection, vector_size=vector_size)
+        tuning_kwargs = settings.qdrant_collection_tuning_kwargs()
+        return cls(
+            client,
+            settings.qdrant_collection,
+            vector_size=vector_size,
+            **tuning_kwargs,
+        )
 
     @property
     def collection_name(self) -> str:
@@ -110,11 +126,45 @@ class QdrantVectorStore:
         info = self._client.get_collection(self._collection_name)
         existing_size = info.config.params.vectors.size
         if existing_size != self._vector_size:
-            msg = (
-                "Existing collection vector size "
-                f"({existing_size}) does not match expected size {self._vector_size}."
+            logger.warning(
+                (
+                    "Qdrant collection '%s' has vector size %s but %s is expected; "
+                    "dropping existing collection and recreating (stored vectors will be lost)."
+                ),
+                self._collection_name,
+                existing_size,
+                self._vector_size,
             )
-            raise ValueError(msg)
+            self._client.delete_collection(self._collection_name)
+            self._create_collection()
+
+    def ensure_payload_indexes(self) -> None:
+        """Ensure frequently filtered payload fields are indexed."""
+
+        fields: dict[str, models.PayloadSchemaType] = {
+            "project_id": models.PayloadSchemaType.KEYWORD,
+            "doc_id": models.PayloadSchemaType.KEYWORD,
+            "chunk_id": models.PayloadSchemaType.KEYWORD,
+            "source": models.PayloadSchemaType.KEYWORD,
+        }
+
+        for field_name, schema in fields.items():
+            try:
+                self._client.create_payload_index(
+                    collection_name=self._collection_name,
+                    field_name=field_name,
+                    field_schema=schema,
+                )
+            except Exception as exc:  # pragma: no cover - already exists
+                message = str(exc).lower()
+                if "already exists" in message or "exists" in message:
+                    continue
+                logger.warning(
+                    "Failed to create payload index for field '%s' on '%s': %s",
+                    field_name,
+                    self._collection_name,
+                    exc,
+                )
 
     def upsert(self, records: Sequence[VectorRecord], *, wait: bool = True) -> None:
         """Insert or update vectors in the collection."""
@@ -176,10 +226,36 @@ class QdrantVectorStore:
         return results
 
     def _create_collection(self) -> None:
-        self._client.create_collection(
-            collection_name=self._collection_name,
-            vectors_config=models.VectorParams(size=self._vector_size, distance=self._distance),
-        )
+        vector_params_kwargs: dict[str, Any] = {
+            "size": self._vector_size,
+            "distance": self._distance,
+        }
+        if self._on_disk_vectors is not None:
+            vector_params_kwargs["on_disk"] = self._on_disk_vectors
+
+        collection_kwargs: dict[str, Any] = {
+            "collection_name": self._collection_name,
+            "vectors_config": models.VectorParams(**vector_params_kwargs),
+        }
+        if self._on_disk_payload is not None:
+            collection_kwargs["on_disk_payload"] = self._on_disk_payload
+        if self._hnsw_config is not None:
+            collection_kwargs["hnsw_config"] = self._hnsw_config
+
+        self._client.create_collection(**collection_kwargs)
+
+    @staticmethod
+    def _normalize_hnsw_config(
+        config: models.HnswConfigDiff | Mapping[str, int] | None,
+    ) -> models.HnswConfigDiff | None:
+        if config is None:
+            return None
+        if isinstance(config, models.HnswConfigDiff):
+            return config
+        filtered = {key: value for key, value in config.items() if value is not None}
+        if not filtered:
+            return None
+        return models.HnswConfigDiff(**filtered)
 
     def count(self) -> int:
         """Return the number of stored vectors."""
