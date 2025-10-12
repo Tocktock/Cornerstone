@@ -22,12 +22,27 @@ class GlossaryEntry:
     term: str
     definition: str
     synonyms: list[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
 
     def matches(self, text: str) -> bool:
-        lowered = text.lower()
+        return self.match_score(text) > 0
+
+    def match_score(self, text: str) -> int:
+        lowered = text.lower().strip()
+        if not lowered:
+            return 0
+        score = 0
         if self.term.lower() in lowered:
-            return True
-        return any(syn.lower() in lowered for syn in self.synonyms)
+            score = max(score, 3)
+        for synonym in self.synonyms:
+            if synonym.lower() in lowered:
+                score = max(score, 2)
+                break
+        for keyword in self.keywords:
+            if keyword.lower() in lowered:
+                score = max(score, 2)
+                break
+        return score
 
 
 class Glossary:
@@ -42,8 +57,13 @@ class Glossary:
     def top_matches(self, text: str, limit: int) -> List[GlossaryEntry]:
         if not text:
             return []
-        matches = [entry for entry in self._entries if entry.matches(text)]
-        return matches[:limit]
+        scored: list[tuple[int, int, GlossaryEntry]] = []
+        for index, entry in enumerate(self._entries):
+            score = entry.match_score(text)
+            if score:
+                scored.append((score, index, entry))
+        scored.sort(key=lambda item: (-item[0], item[1]))
+        return [entry for _, _, entry in scored[:limit]]
 
     def to_prompt_section(self, text: str, limit: int) -> str:
         entries = self.top_matches(text, limit)
@@ -54,6 +74,14 @@ class Glossary:
             synonym_suffix = f" (synonyms: {', '.join(entry.synonyms)})" if entry.synonyms else ""
             lines.append(f"- {entry.term}{synonym_suffix}: {entry.definition}")
         return "\n".join(lines)
+
+    def entries(self) -> list[GlossaryEntry]:
+        return list(self._entries)
+
+    def extend(self, entries: Iterable[GlossaryEntry]) -> None:
+        for entry in entries:
+            if isinstance(entry, GlossaryEntry):
+                self._entries.append(entry)
 
 
 class GlossaryLoadError(RuntimeError):
@@ -84,14 +112,51 @@ def load_glossary(path: str | Path) -> Glossary:
         synonyms = item.get("synonyms") or []
         if not isinstance(synonyms, list):
             synonyms = [str(synonyms)]
+        keywords = item.get("keywords") or []
+        if not isinstance(keywords, list):
+            keywords = [str(keywords)]
         entries.append(
             GlossaryEntry(
                 term=term,
                 definition=definition,
                 synonyms=[str(value).strip() for value in synonyms if str(value).strip()],
+                keywords=[str(value).strip() for value in keywords if str(value).strip()],
             )
         )
     return Glossary(entries)
+
+
+def load_query_hints(path: str | Path | None) -> dict[str, list[str]]:
+    """Load query expansion hints from YAML; return {} when unavailable."""
+
+    if not path:
+        return {}
+    hint_path = Path(path)
+    if not hint_path.exists():
+        return {}
+    if yaml is None:  # pragma: no cover - requires pyyaml
+        raise GlossaryLoadError(
+            "pyyaml is required to load query hint definitions"
+        ) from YAML_IMPORT_ERROR
+
+    data = yaml.safe_load(hint_path.read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        raise GlossaryLoadError("Query hint file must contain a mapping of tokens to lists")
+
+    hints: dict[str, list[str]] = {}
+    for raw_key, raw_values in data.items():
+        if raw_key is None:
+            continue
+        key = str(raw_key).strip().lower()
+        if not key:
+            continue
+        values: list[str]
+        if isinstance(raw_values, list):
+            values = [str(item).strip() for item in raw_values if str(item).strip()]
+        else:
+            values = [str(raw_values).strip()]
+        hints[key] = values
+    return hints
 
 
 __all__ = [
@@ -99,4 +164,5 @@ __all__ = [
     "GlossaryEntry",
     "GlossaryLoadError",
     "load_glossary",
+    "load_query_hints",
 ]

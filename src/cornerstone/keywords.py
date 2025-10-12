@@ -162,6 +162,7 @@ class KeywordLLMFilter:
         self._ollama_base_url: str | None = None
         self._ollama_model: str | None = None
         self._ollama_timeout: float = max(settings.ollama_request_timeout, 300.0)
+        self._max_results: int = max(0, settings.keyword_filter_max_results)
         self._current_prompt: dict[str, str] | None = None
         self._disable_reason: str | None = None
         self._last_debug: dict[str, object] = {}
@@ -230,6 +231,7 @@ class KeywordLLMFilter:
             "disable_reason": self._disable_reason,
             "candidate_count": len(candidates),
             "status": "pending",
+            "max_results": self._max_results,
         }
         if not candidates:
             logger.debug("keyword.llm.skip reason=no-candidates")
@@ -264,8 +266,8 @@ class KeywordLLMFilter:
             self._last_debug["status"] = "error"
             return list(candidates)
 
-        keyword_items = parsed.get("keywords")
-        if not isinstance(keyword_items, list):
+        keyword_items, coerce_note = self._extract_keyword_items(parsed)
+        if keyword_items is None:
             logger.debug(
                 "keyword.llm.malformed_response backend=%s payload=%s",
                 self._backend,
@@ -274,114 +276,333 @@ class KeywordLLMFilter:
             self._last_debug["reason"] = "missing-keywords-array"
             self._last_debug["status"] = "error"
             return list(candidates)
+        if coerce_note:
+            self._last_debug["coerced_source"] = coerce_note
+
+        normalized_entries, rejected_entries, assumed_terms = self._normalize_keyword_items(keyword_items)
+        if not normalized_entries:
+            self._last_debug["reason"] = "no-keywords-retained"
+            self._last_debug["status"] = "error"
+            if rejected_entries:
+                self._last_debug["rejected"] = rejected_entries[:25]
+            if assumed_terms:
+                self._last_debug["assumed_true"] = assumed_terms
+            return list(candidates)
 
         term_to_candidate = {candidate.term.lower(): candidate for candidate in candidates}
         seen_terms: set[str] = set()
+        selected_candidates: list[KeywordCandidate] = []
 
-        def _is_truthy(value: object) -> bool:
-            if isinstance(value, bool):
-                return value
-            if isinstance(value, (int, float)):
-                return value != 0
-            return str(value).strip().lower() in {"true", "yes", "1", "keep", "include"}
-
-        selected_entries: list[dict[str, object]] = []
-        rejected_entries: list[dict[str, object]] = []
-
-        for item in keyword_items:
-            term = str(item.get("term", "")).strip()
+        for entry in normalized_entries:
+            term = str(entry.get("term", "")).strip()
             if not term:
                 continue
-            keep_flag = _is_truthy(item.get("keep", False))
-            reason = str(item.get("reason", "")).strip() or None
-            source = str(item.get("source", "")).strip()
-            source = source or ("candidate" if term.lower() in term_to_candidate else "generated")
-            entry = {
-                "term": term,
-                "keep": keep_flag,
-                "reason": reason,
-                "source": source,
-                "count": item.get("count"),
-            }
-            if keep_flag:
-                selected_entries.append(entry)
-            else:
-                rejected_entries.append(entry)
-
-        if not selected_entries:
-            self._last_debug["reason"] = "no-keywords-retained"
-            self._last_debug["status"] = "error"
-            self._last_debug["rejected"] = rejected_entries
-            return list(candidates)
-
-        filtered: list[KeywordCandidate] = []
-        generated_terms: list[str] = []
-        kept_terms: list[str] = []
-
-        for entry in selected_entries:
-            term = entry["term"].strip()
             key = term.lower()
             if key in seen_terms:
                 continue
             seen_terms.add(key)
-            candidate = term_to_candidate.get(key)
-            if candidate:
-                candidate.reason = entry.get("reason") or candidate.reason
-                candidate.source = entry.get("source") or candidate.source
-                candidate.generated = False
-                candidate.is_core = True if candidate.count >= 1 else candidate.is_core
-                filtered.append(candidate)
-                kept_terms.append(candidate.term)
+
+            source_value = str(entry.get("source") or "").strip()
+            reason_value = entry.get("reason")
+            count_value = entry.get("count")
+            count_int: int | None
+            if count_value is None:
+                count_int = None
             else:
                 try:
-                    count_value = int(entry.get("count") or 1)
+                    count_int = int(count_value)
                 except (TypeError, ValueError):
-                    count_value = 1
-                count_value = max(1, count_value)
+                    count_int = None
+
+            candidate = term_to_candidate.get(key)
+            if candidate:
+                final_source = source_value or "candidate"
+                candidate.reason = reason_value or candidate.reason
+                candidate.source = final_source or candidate.source
+                candidate.generated = False
+                candidate.is_core = True if candidate.count >= 1 else candidate.is_core
+                selected_candidates.append(candidate)
+            else:
+                final_source = source_value or "generated"
+                count_for_new = count_int if count_int and count_int > 0 else 1
                 new_candidate = KeywordCandidate(
                     term=term,
-                    count=count_value,
+                    count=count_for_new,
                     is_core=True,
                     generated=True,
-                    reason=entry.get("reason"),
-                    source=str(entry.get("source") or "generated"),
+                    reason=reason_value,
+                    source=final_source,
                 )
-                filtered.append(new_candidate)
-                generated_terms.append(term)
+                selected_candidates.append(new_candidate)
 
-        if not filtered:
+        if not selected_candidates:
             self._last_debug["reason"] = "no-keywords-retained"
             self._last_debug["status"] = "error"
-            self._last_debug["rejected"] = rejected_entries
+            if rejected_entries:
+                self._last_debug["rejected"] = rejected_entries[:25]
+            if assumed_terms:
+                self._last_debug["assumed_true"] = assumed_terms
             return list(candidates)
 
-        dropped = [candidate.term for candidate in candidates if candidate.term.lower() not in seen_terms]
+        truncated_terms: list[str] = []
+        final_candidates = selected_candidates
+        if self._max_results and len(selected_candidates) > self._max_results:
+            truncated_terms = [item.term for item in selected_candidates[self._max_results:]]
+            final_candidates = selected_candidates[: self._max_results]
+
+        final_keys = {item.term.lower() for item in final_candidates}
+        dropped = [candidate.term for candidate in candidates if candidate.term.lower() not in final_keys]
+        kept_terms = [item.term for item in final_candidates if not item.generated]
+        generated_terms = [item.term for item in final_candidates if item.generated]
+
+        debug_limit = 25
+        selected_debug = [
+            {
+                "term": item.term,
+                "count": item.count,
+                "source": getattr(item, "source", None),
+                "reason": getattr(item, "reason", None),
+                "generated": item.generated,
+            }
+            for item in final_candidates[:debug_limit]
+        ]
+        rejected_debug = rejected_entries[:debug_limit]
+
         self._last_debug.update(
             {
                 "reason": "filtered",
+                "status": "filtered",
                 "kept": kept_terms,
                 "generated": generated_terms,
                 "dropped": dropped,
-                "selected": selected_entries,
-                "rejected": rejected_entries,
-                "status": "filtered",
+                "selected": selected_debug,
+                "selected_total": len(final_candidates),
+                "llm_selected_total": len(normalized_entries),
+                "rejected": rejected_debug,
+                "rejected_total": len(rejected_entries),
             }
         )
+        if truncated_terms:
+            self._last_debug["truncated"] = truncated_terms
+        if assumed_terms:
+            self._last_debug.setdefault("assumed_true", assumed_terms)
+
         logger.info(
-            "keyword.llm.filter_result backend=%s kept=%s dropped=%s",
+            "keyword.llm.filter_result backend=%s kept=%s dropped=%s truncated=%s",
             self._backend,
             kept_terms + generated_terms,
             dropped,
+            truncated_terms,
         )
-        return filtered or list(candidates)
+        return final_candidates or list(candidates)
+
+    def _extract_keyword_items(self, payload: object) -> tuple[list[object] | None, str | None]:
+        """Return keyword entries from the LLM payload, coercing common variants."""
+
+        def _as_list(value: object) -> list[object] | None:
+            if value is None:
+                return None
+            if isinstance(value, list):
+                return list(value)
+            if isinstance(value, (tuple, set)):
+                return list(value)
+            if isinstance(value, dict):
+                return [value]
+            if isinstance(value, str):
+                items = [segment.strip() for segment in re.split(r"[\\n,]", value) if segment.strip()]
+                if items:
+                    return items
+            return None
+
+        note: str | None = None
+        if isinstance(payload, dict):
+            value = payload.get("keywords")
+            if value is None:
+                for key in ("items", "terms", "results", "keywords_list", "values", "data"):
+                    if key in payload:
+                        value = payload[key]
+                        note = f"coerced-from-{key}"
+                        break
+            result = _as_list(value)
+            if result is not None:
+                if note is None and value is not None and not isinstance(value, list):
+                    note = "coerced-from-nonlist"
+                return result, note
+        elif isinstance(payload, list):
+            return list(payload), "coerced-from-root-list"
+        elif isinstance(payload, str):
+            result = _as_list(payload)
+            if result:
+                return result, "coerced-from-string"
+        return None, note
+
+        def _as_list(value: object) -> list[object] | None:
+            if value is None:
+                return None
+            if isinstance(value, list):
+                return list(value)
+            if isinstance(value, (tuple, set)):
+                return list(value)
+            if isinstance(value, dict):
+                return [value]
+            if isinstance(value, str):
+                items = [segment.strip() for segment in re.split(r"(?:\n|,)", value) if segment.strip()]
+                if items:
+                    return items
+            return None
+
+        note: str | None = None
+        if isinstance(payload, dict):
+            value: object | None = payload.get("keywords")
+            if value is None:
+                for key in ("items", "terms", "results", "keywords_list", "values", "data"):
+                    if key in payload:
+                        value = payload[key]
+                        note = f"coerced-from-{key}"
+                        break
+            result = _as_list(value)
+            if result is not None:
+                if note is None and value is not None and not isinstance(value, list):
+                    note = "coerced-from-nonlist"
+                return result, note
+        elif isinstance(payload, list):
+            return list(payload), "coerced-from-root-list"
+        elif isinstance(payload, str):
+            result = _as_list(payload)
+            if result:
+                return result, "coerced-from-string"
+        return None, note
+
+    def _normalize_keyword_items(
+        self, items: Sequence[object]
+    ) -> tuple[list[dict[str, object]], list[dict[str, object]], list[str]]:
+        normalized: list[dict[str, object]] = []
+        rejected: list[dict[str, object]] = []
+        assumed_true: list[str] = []
+
+        for raw in items:
+            entry = self._normalize_keyword_entry(raw)
+            if not entry:
+                continue
+            keep = bool(entry.get("keep", True))
+            if keep:
+                if entry.pop("_assumed_keep", False):
+                    assumed_true.append(str(entry.get("term", "")))
+                normalized.append(entry)
+            else:
+                entry.pop("_assumed_keep", None)
+                rejected.append(entry)
+        return normalized, rejected, [term for term in assumed_true if term]
+
+    def _normalize_keyword_entry(self, raw: object) -> dict[str, object] | None:
+        if isinstance(raw, str):
+            term = raw.strip()
+            if not term:
+                return None
+            return {"term": term, "keep": True, "_assumed_keep": True}
+
+        if isinstance(raw, dict):
+            term: str = ""
+            for key in ("term", "keyword", "value", "text", "name"):
+                value = raw.get(key)
+                if value is not None:
+                    term = str(value).strip()
+                    if term:
+                        break
+            if not term:
+                return None
+
+            keep_flag: bool | None = None
+            keep_source: object | None = None
+            for key in ("keep", "include", "accept", "selected", "retain", "use", "should_keep"):
+                if key in raw:
+                    keep_source = raw.get(key)
+                    keep_flag = self._coerce_keep_flag(keep_source)
+                    if keep_flag is not None:
+                        break
+            assumed = False
+            if keep_flag is None:
+                keep_flag = True
+                assumed = True
+
+            reason: str | None = None
+            for key in ("reason", "note", "explanation", "why"):
+                value = raw.get(key)
+                if value is not None:
+                    text_value = str(value).strip()
+                    if text_value:
+                        reason = text_value
+                        break
+
+            source: str | None = None
+            for key in ("source", "origin"):
+                value = raw.get(key)
+                if value is not None:
+                    text_value = str(value).strip()
+                    if text_value:
+                        source = text_value
+                        break
+
+            count_value = None
+            for key in ("count", "frequency", "freq", "score", "weight"):
+                if key in raw:
+                    count_value = raw.get(key)
+                    break
+            count_int: int | None
+            if count_value is None:
+                count_int = None
+            else:
+                try:
+                    count_int = int(count_value)
+                except (TypeError, ValueError):
+                    count_int = None
+
+            entry: dict[str, object] = {"term": term, "keep": bool(keep_flag)}
+            if reason is not None:
+                entry["reason"] = reason
+            if source is not None:
+                entry["source"] = source
+            if count_int is not None:
+                entry["count"] = count_int
+            if assumed:
+                entry["_assumed_keep"] = True
+            return entry
+
+        if isinstance(raw, (tuple, set)):
+            items = list(raw)
+            if not items:
+                return None
+            return self._normalize_keyword_entry(items[0])
+
+        return None
+
+    @staticmethod
+    def _coerce_keep_flag(value: object) -> bool | None:
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return value != 0
+        text = str(value).strip().lower()
+        if not text:
+            return None
+        if text in {"true", "yes", "keep", "include", "retain", "accept", "1"}:
+            return True
+        if text in {"false", "no", "drop", "reject", "exclude", "remove", "0"}:
+            return False
+        return None
+
 
     def debug_payload(self) -> dict[str, object]:
-        return {
+        payload = {
             "backend": self._backend,
             "enabled": self._enabled,
             "disable_reason": self._disable_reason,
-            **self._last_debug,
+            "max_results": self._max_results,
         }
+        payload.update(self._last_debug)
+        return payload
 
     @staticmethod
     def _parse_response(raw_response: str) -> dict | None:

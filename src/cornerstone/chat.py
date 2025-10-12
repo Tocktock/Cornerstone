@@ -2,17 +2,38 @@
 
 from __future__ import annotations
 
-import logging
-from dataclasses import dataclass
 import json
+import logging
+import re
+import time
+import unicodedata
+from dataclasses import dataclass
 from typing import Iterable, Iterator, List, Sequence, Tuple
 
 from .config import Settings
 from .embeddings import EmbeddingService
-from .glossary import Glossary
+from .glossary import Glossary, GlossaryEntry
+from .projects import Project, ProjectStore
+from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .vector_store import QdrantVectorStore, SearchResult
+from .observability import MetricsRecorder
+from .reranker import Reranker
 
 logger = logging.getLogger(__name__)
+
+
+_FALLBACK_QUERY_HINTS: dict[str, list[str]] = {
+    "business": ["사업", "비즈니스"],
+    "company": ["회사", "기업"],
+    "core": ["핵심", "주요"],
+    "service": ["서비스"],
+    "transport": ["운송", "물류"],
+    "logistics": ["물류"],
+    "delivery": ["배송"],
+    "customer": ["고객"],
+    "shipper": ["화주"],
+    "driver": ["기사"],
+}
 
 
 try:  # pragma: no cover - optional import for Ollama HTTP client
@@ -42,6 +63,14 @@ class SupportAgentContext:
     definitions: list[str]
 
 
+@dataclass(slots=True)
+class PersonaRuntimeOptions:
+    retrieval_top_k: int
+    glossary_top_k: int
+    chat_temperature: float
+    chat_max_tokens: int | None
+
+
 class SupportAgentService:
     """Generate support-oriented answers using retrieval augmented generation."""
 
@@ -52,43 +81,94 @@ class SupportAgentService:
         store_manager,
         glossary: Glossary,
         *,
-        retrieval_top_k: int = 3,
+        retrieval_top_k: int | None = None,
+        project_store: ProjectStore | None = None,
+        persona_store: PersonaStore | None = None,
+        fts_index=None,
+        metrics: MetricsRecorder | None = None,
+        reranker: Reranker | None = None,
+        query_hints: dict[str, list[str]] | None = None,
     ) -> None:
         self._settings = settings
         self._embedding = embedding_service
         self._stores = store_manager
         self._glossary = glossary
-        self._retrieval_top_k = retrieval_top_k
+        self._project_store = project_store
+        default_top_k = retrieval_top_k if retrieval_top_k and retrieval_top_k > 0 else settings.retrieval_top_k
+        self._retrieval_top_k = max(1, default_top_k)
         self._openai_client: OpenAI | None = None
+        self._persona_store = persona_store
+        self._fts = fts_index
+        self._metrics = metrics
+        self._reranker = reranker
+        self._default_chat_temperature = max(0.0, settings.chat_temperature)
+        default_max_tokens = settings.chat_max_tokens
+        if default_max_tokens is not None and default_max_tokens <= 0:
+            default_max_tokens = None
+        self._default_chat_max_tokens = default_max_tokens
+        self._query_hints = self._normalize_query_hints(query_hints)
 
     def generate(
         self,
-        project_id: str,
+        project: Project,
         query: str,
         *,
         conversation: Sequence[str] | None = None,
     ) -> SupportAgentResponse:
-        context, _ = self._build_context(project_id, query, conversation)
-        answer = self._invoke_backend(context.prompt)
+        metrics = self._metrics
+        generate_start = time.perf_counter() if metrics else None
+        persona = self._resolve_persona(project)
+        options = self._persona_options(persona)
+        context, _ = self._build_context(project, persona, query, conversation, options)
+        answer = self._invoke_backend(
+            context.prompt,
+            temperature=options.chat_temperature,
+            max_tokens=options.chat_max_tokens,
+        )
         logger.info(
             "support.generate.completed backend=%s chars=%s sources=%s",
             self._settings.chat_backend,
             len(answer),
             len(context.sources),
         )
+        if metrics and generate_start is not None:
+            metrics.record_timing(
+                "chat.generate_duration",
+                time.perf_counter() - generate_start,
+                project_id=project.id,
+                backend=self._settings.chat_backend,
+                sources=len(context.sources),
+            )
+            metrics.increment(
+                "chat.responses",
+                project_id=project.id,
+                backend=self._settings.chat_backend,
+            )
         return SupportAgentResponse(message=answer, sources=context.sources, definitions=context.definitions)
 
     def stream_generate(
         self,
-        project_id: str,
+        project: Project,
         query: str,
         *,
         conversation: Sequence[str] | None = None,
     ) -> Tuple[SupportAgentContext, Iterable[str]]:
         """Stream a response for the given query, yielding incremental text deltas."""
 
-        context, _ = self._build_context(project_id, query, conversation)
-        stream = self._stream_backend(context.prompt)
+        persona = self._resolve_persona(project)
+        options = self._persona_options(persona)
+        context, _ = self._build_context(project, persona, query, conversation, options)
+        if self._metrics:
+            self._metrics.increment(
+                "chat.stream_requests",
+                project_id=project.id,
+                backend=self._settings.chat_backend,
+            )
+        stream = self._stream_backend(
+            context.prompt,
+            temperature=options.chat_temperature,
+            max_tokens=options.chat_max_tokens,
+        )
         return context, stream
 
     # Internal helpers -------------------------------------------------
@@ -97,53 +177,229 @@ class SupportAgentService:
     def _is_korean(text: str) -> bool:
         return any("\uAC00" <= char <= "\uD7A3" for char in text)
 
+    def _persona_options(self, persona: PersonaSnapshot) -> PersonaRuntimeOptions:
+        retrieval_top_k = persona.retrieval_top_k
+        if retrieval_top_k is None or retrieval_top_k <= 0:
+            retrieval_top_k = self._retrieval_top_k
+        glossary_top_k = persona.glossary_top_k
+        if glossary_top_k is None:
+            glossary_top_k = self._settings.glossary_top_k
+        glossary_top_k = max(0, glossary_top_k)
+        chat_temperature = persona.chat_temperature
+        if chat_temperature is None:
+            chat_temperature = self._default_chat_temperature
+        chat_temperature = max(0.0, chat_temperature)
+        chat_max_tokens = persona.chat_max_tokens
+        if chat_max_tokens is None:
+            chat_max_tokens = self._default_chat_max_tokens
+        if chat_max_tokens is not None and chat_max_tokens <= 0:
+            chat_max_tokens = None
+        return PersonaRuntimeOptions(
+            retrieval_top_k=max(1, retrieval_top_k),
+            glossary_top_k=glossary_top_k,
+            chat_temperature=chat_temperature,
+            chat_max_tokens=chat_max_tokens,
+        )
+
     def _build_context(
         self,
-        project_id: str,
+        project: Project,
+        persona: PersonaSnapshot,
         query: str,
         conversation: Sequence[str] | None,
-    ) -> Tuple[SupportAgentContext, list[SearchResult]]:
+        options: PersonaRuntimeOptions | None = None,
+    ) -> Tuple[SupportAgentContext, list[dict]]:
+        options = options or self._persona_options(persona)
         history = list(conversation or [])
+        metrics = self._metrics
         logger.info(
-            "support.generate.start backend=%s embedding=%s project=%s query=%s",
+            "support.generate.start backend=%s embedding=%s project=%s query=%s retrieval_k=%s glossary_k=%s temperature=%.2f max_tokens=%s",
             self._settings.chat_backend,
             self._settings.embedding_model,
-            project_id,
+            project.id,
             query,
+            options.retrieval_top_k,
+            options.glossary_top_k,
+            options.chat_temperature,
+            options.chat_max_tokens,
         )
-        vector = self._embedding.embed_one(query)
-        store = self._stores.get_store(project_id)
-        search_results = list(store.search(vector, limit=self._retrieval_top_k))
-        top_titles = [(result.payload or {}).get("title") for result in search_results]
+        glossary_resource = self._project_glossary(project)
+        augmented_query = self._augment_query_text(query, glossary_resource)
+        embed_start = time.perf_counter() if metrics else None
+        vector = self._embedding.embed_one(augmented_query)
+        if metrics and embed_start is not None:
+            metrics.record_timing(
+                "retrieval.embedding_duration",
+                time.perf_counter() - embed_start,
+                project_id=project.id,
+            )
+        store = self._stores.get_store(project.id)
+        vector_start = time.perf_counter() if metrics else None
+        vector_results = list(store.search(vector, limit=options.retrieval_top_k))
+        if metrics and vector_start is not None:
+            metrics.record_timing(
+                "retrieval.vector_duration",
+                time.perf_counter() - vector_start,
+                project_id=project.id,
+                hits=len(vector_results),
+            )
+            metrics.increment("retrieval.vector_queries", project_id=project.id)
+        vector_chunks = self._vector_results_to_chunks(vector_results)
+        keyword_chunks: list[dict] = []
+        if self._fts is not None:
+            keyword_start = time.perf_counter() if metrics else None
+            keyword_hits = self._fts.search(project.id, augmented_query, limit=options.retrieval_top_k * 2)
+            if metrics and keyword_start is not None:
+                metrics.record_timing(
+                    "retrieval.keyword_duration",
+                    time.perf_counter() - keyword_start,
+                    project_id=project.id,
+                    hits=len(keyword_hits),
+                )
+                metrics.increment("retrieval.keyword_queries", project_id=project.id)
+            keyword_chunks = self._keyword_hits_to_chunks(keyword_hits)
+        max_chunks = max(options.retrieval_top_k * 2, options.retrieval_top_k)
+        fused_chunks = self._fuse_chunks(vector_chunks, keyword_chunks, limit=max_chunks)
+        reranked_chunks = self._apply_reranker(
+            project,
+            query,
+            query_vector=vector,
+            fused_chunks=fused_chunks,
+            limit=max_chunks,
+        )
+        if reranked_chunks is not None:
+            fused_chunks = reranked_chunks
+        if metrics:
+            metrics.increment(
+                "retrieval.fused_chunks",
+                value=len(fused_chunks),
+                project_id=project.id,
+            )
+        top_titles = [chunk.get("title") for chunk in fused_chunks]
         logger.info(
-            "support.generate.matches project=%s count=%s titles=%s",
-            project_id,
-            len(search_results),
+            "support.generate.matches project=%s vector=%s keyword=%s fused=%s titles=%s",
+            project.id,
+            len(vector_chunks),
+            len(keyword_chunks),
+            len(fused_chunks),
             top_titles,
         )
-        sources = self._format_sources(search_results)
-        definitions = self._collect_definitions(query)
-        prompt = self._build_prompt(query, search_results, history)
+        sources = self._format_sources(fused_chunks)
+        definitions = self._collect_definitions(
+            project,
+            query,
+            top_k=options.glossary_top_k,
+            glossary=glossary_resource,
+        )
+        prompt = self._build_prompt(
+            project,
+            persona,
+            query,
+            fused_chunks,
+            history,
+            glossary=glossary_resource,
+            options=options,
+        )
         context = SupportAgentContext(prompt=prompt, sources=sources, definitions=definitions)
-        return context, search_results
+        return context, fused_chunks
+
+    @staticmethod
+    def _normalize_query_text(query: str) -> str:
+        normalized = unicodedata.normalize("NFKC", query or "")
+        return normalized.strip()
+
+    def _augment_query_text(self, query: str, glossary: Glossary | None) -> str:
+        normalized = self._normalize_query_text(query)
+        if not normalized:
+            return normalized
+        tokens = self._tokenize_for_lookup(normalized)
+        extras: list[str] = []
+        for token in tokens:
+            extras.extend(self._query_hints.get(token, []))
+        if glossary is not None:
+            extras.extend(self._glossary_expansion_terms(tokens, glossary))
+        deduped: list[str] = []
+        for item in extras:
+            cleaned = item.strip()
+            if not cleaned or cleaned in deduped:
+                continue
+            deduped.append(cleaned)
+        if deduped:
+            return f"{normalized} {' '.join(deduped)}"
+        return normalized
+
+    @staticmethod
+    def _tokenize_for_lookup(text: str) -> list[str]:
+        if not text:
+            return []
+        return [token.lower() for token in re.findall(r"[0-9A-Za-z가-힣]+", text)]
+
+    def _glossary_expansion_terms(self, tokens: Sequence[str], glossary: Glossary) -> list[str]:
+        if not tokens:
+            return []
+        lowercase_tokens = set(tokens)
+        supplements: set[str] = set()
+        for entry in glossary.entries():
+            entry_strings = [entry.term, *entry.synonyms, *entry.keywords]
+            entry_tokens: set[str] = set()
+            for value in entry_strings:
+                entry_tokens.update(self._tokenize_for_lookup(value))
+            if lowercase_tokens.intersection(entry_tokens):
+                supplements.update({entry.term, *entry.synonyms, *entry.keywords})
+        return [item for item in supplements if item]
+
+    @staticmethod
+    def _normalize_query_hints(hints: dict[str, list[str]] | None) -> dict[str, list[str]]:
+        source = hints or _FALLBACK_QUERY_HINTS
+        normalized: dict[str, list[str]] = {}
+        for key, values in source.items():
+            if key is None:
+                continue
+            norm_key = str(key).strip().lower()
+            if not norm_key:
+                continue
+            cleaned_values: list[str] = []
+            for value in values:
+                if value is None:
+                    continue
+                cleaned = str(value).strip()
+                if cleaned and cleaned not in cleaned_values:
+                    cleaned_values.append(cleaned)
+            if cleaned_values:
+                normalized[norm_key] = cleaned_values
+        return normalized
 
     def _build_prompt(
         self,
+        project: Project,
+        persona: PersonaSnapshot,
         query: str,
-        search_results: Iterable[SearchResult],
+        chunks: Iterable[dict],
         conversation: Sequence[str],
+        *,
+        glossary: Glossary | None = None,
+        options: PersonaRuntimeOptions | None = None,
     ) -> str:
         context_lines = ["Relevant documentation snippets:"]
-        for idx, result in enumerate(search_results, start=1):
-            payload = result.payload or {}
-            title = payload.get("title") or payload.get("text", "Untitled snippet")[:64]
-            text = payload.get("text") or ""
+        for idx, chunk in enumerate(chunks, start=1):
+            heading_path = chunk.get("heading_path") or []
+            title = chunk.get("title") or "Untitled snippet"
+            if heading_path:
+                title = " · ".join(heading_path)
+            text = chunk.get("text") or ""
             context_lines.append(f"[{idx}] {title}\n{text}\n---")
         if len(context_lines) == 1:
             context_lines = ["No matching documentation was found."]
 
         conversation_history = "\n".join(conversation)
-        glossary_section = self._glossary.to_prompt_section(query, self._settings.glossary_top_k)
+        glossary_resource = glossary or self._project_glossary(project)
+        persona_options = options or self._persona_options(persona)
+        glossary_top_k = persona_options.glossary_top_k
+        glossary_section = (
+            glossary_resource.to_prompt_section(query, glossary_top_k)
+            if glossary_top_k > 0
+            else ""
+        )
 
         language_instruction = (
             "모든 답변은 한국어로 작성하세요."
@@ -151,12 +407,7 @@ class SupportAgentService:
             else "Write the full response in English."
         )
 
-        instructions = (
-            "You are a support agent helping customers diagnose and resolve issues. "
-            "Ask for missing details when necessary, provide step-by-step guidance, and when uncertain, "
-            "suggest escalating to a human agent. "
-            + language_instruction
-        )
+        instructions = self._persona_instructions(project, persona, language_instruction)
 
         prompt_sections = [
             f"INSTRUCTIONS:\n{instructions}",
@@ -170,42 +421,344 @@ class SupportAgentService:
 
         return "\n\n".join(section for section in prompt_sections if section)
 
-    def _collect_definitions(self, query: str) -> List[str]:
-        matches = self._glossary.top_matches(query, self._settings.glossary_top_k)
+    def _collect_definitions(
+        self,
+        project: Project,
+        query: str,
+        top_k: int,
+        *,
+        glossary: Glossary | None = None,
+    ) -> List[str]:
+        if top_k <= 0:
+            return []
+        glossary_resource = glossary or self._project_glossary(project)
+        matches = glossary_resource.top_matches(query, top_k)
         return [f"{entry.term}: {entry.definition}" for entry in matches]
 
-    def _format_sources(self, results: Iterable[SearchResult]) -> list[dict[str, str]]:
+    def _project_glossary(self, project: Project) -> Glossary:
+        base_entries = self._glossary.entries()
+        if not self._project_store:
+            return Glossary(base_entries)
+        extras: list[GlossaryEntry] = []
+        for raw in self._project_store.list_glossary_entries(project.id):
+            term = str(raw.get("term", "")).strip()
+            definition = str(raw.get("definition", "")).strip()
+            if not term or not definition:
+                continue
+            synonyms = self._normalize_terms(raw.get("synonyms"))
+            keywords = self._normalize_terms(raw.get("keywords"))
+            extras.append(
+                GlossaryEntry(
+                    term=term,
+                    definition=definition,
+                    synonyms=synonyms,
+                    keywords=keywords,
+                )
+            )
+        combined = Glossary(base_entries)
+        if extras:
+            combined.extend(extras)
+        return combined
+
+    @staticmethod
+    def _normalize_terms(values) -> list[str]:
+        if not values:
+            return []
+        normalized: list[str] = []
+        for value in values:
+            if value is None:
+                continue
+            cleaned = str(value).strip()
+            if cleaned and cleaned not in normalized:
+                normalized.append(cleaned)
+        return normalized
+
+    def _persona_instructions(
+        self,
+        project: Project,
+        persona: PersonaSnapshot,
+        language_instruction: str,
+    ) -> str:
+        segments: list[str] = []
+
+        if persona.name:
+            name = persona.name.strip()
+            if name:
+                project_name = project.name or "this project"
+                segments.append(f"You are {name}, the designated support agent for {project_name}.")
+
+        base_prompt = persona.system_prompt or (
+            "You are a support agent helping customers diagnose and resolve issues. "
+            "Ask for missing details when necessary, provide step-by-step guidance, and when uncertain, "
+            "suggest escalating to a human agent."
+        )
+        if base_prompt:
+            segments.append(base_prompt.strip())
+
+        if persona.tone:
+            tone = persona.tone.strip()
+            if tone:
+                segments.append(f"Maintain a {tone} tone throughout the conversation.")
+
+        segments.append(language_instruction)
+
+        return " ".join(segment for segment in segments if segment)
+
+    def _resolve_persona(self, project: Project) -> PersonaSnapshot:
+        overrides = getattr(project, "persona_overrides", None)
+        if isinstance(overrides, dict):  # defensive guard during legacy migrations
+            overrides = PersonaOverrides(
+                name=overrides.get("name"),
+                tone=overrides.get("tone"),
+                system_prompt=overrides.get("system_prompt"),
+                avatar_url=overrides.get("avatar_url"),
+                glossary_top_k=overrides.get("glossary_top_k"),
+                retrieval_top_k=overrides.get("retrieval_top_k"),
+                chat_temperature=overrides.get("chat_temperature"),
+                chat_max_tokens=overrides.get("chat_max_tokens"),
+            )
+
+        if self._persona_store is not None:
+            return self._persona_store.resolve_persona(getattr(project, "persona_id", None), overrides)
+
+        legacy_persona = getattr(project, "persona", None)
+        if legacy_persona is not None:
+            overrides = PersonaOverrides(
+                name=getattr(legacy_persona, "name", None),
+                tone=getattr(legacy_persona, "tone", None),
+                system_prompt=getattr(legacy_persona, "system_prompt", None),
+                avatar_url=getattr(legacy_persona, "avatar_url", None),
+                glossary_top_k=getattr(legacy_persona, "glossary_top_k", None),
+                retrieval_top_k=getattr(legacy_persona, "retrieval_top_k", None),
+                chat_temperature=getattr(legacy_persona, "chat_temperature", None),
+                chat_max_tokens=getattr(legacy_persona, "chat_max_tokens", None),
+            )
+        overrides = overrides or PersonaOverrides()
+        return PersonaSnapshot(
+            id=None,
+            name=overrides.name,
+            tone=overrides.tone,
+            system_prompt=overrides.system_prompt,
+            avatar_url=overrides.avatar_url,
+            overrides=overrides,
+            glossary_top_k=overrides.glossary_top_k,
+            retrieval_top_k=overrides.retrieval_top_k,
+            chat_temperature=overrides.chat_temperature,
+            chat_max_tokens=overrides.chat_max_tokens,
+        )
+
+    def _format_sources(self, chunks: Iterable[dict]) -> list[dict[str, str]]:
         formatted: list[dict[str, str]] = []
-        for result in results:
-            payload = result.payload or {}
-            title = payload.get("title") or payload.get("text", "")[:50]
-            text = payload.get("text") or ""
-            formatted.append({"title": title, "snippet": text})
+        for chunk in chunks:
+            title = chunk.get("title") or chunk.get("source") or "Snippet"
+            text = chunk.get("text") or ""
+            snippet = chunk.get("summary") or text[:300]
+            formatted.append(
+                {
+                    "title": title,
+                    "snippet": snippet,
+                    "source": chunk.get("source") or "",
+                    "score": f"{chunk.get('score', 0.0):.3f}",
+                    "origin": ", ".join(chunk.get("origin", [])),
+                }
+            )
         return formatted
 
-    def _stream_backend(self, prompt: str) -> Iterable[str]:
+    def _vector_results_to_chunks(self, results: Sequence[SearchResult]) -> list[dict]:
+        chunks: list[dict] = []
+        for rank, result in enumerate(results, start=1):
+            payload = result.payload or {}
+            text = payload.get("text") or ""
+            if not text:
+                continue
+            chunk_id = payload.get("chunk_id") or f"{payload.get('doc_id')}:{payload.get('chunk_index')}"
+            heading_path = payload.get("heading_path") or []
+            chunks.append(
+                {
+                    "chunk_id": chunk_id,
+                    "text": text,
+                    "title": payload.get("title") or payload.get("source") or "Snippet",
+                    "source": payload.get("source") or "",
+                    "doc_id": payload.get("doc_id"),
+                    "heading_path": heading_path,
+                    "origin": {"vector"},
+                    "rank_vector": rank,
+                    "summary": payload.get("summary"),
+                    "language": payload.get("language"),
+                }
+            )
+        return chunks
+
+    def _keyword_hits_to_chunks(self, hits: Sequence[dict]) -> list[dict]:
+        chunks: list[dict] = []
+        for rank, hit in enumerate(hits, start=1):
+            text = hit.get("text") or ""
+            if not text:
+                continue
+            metadata = hit.get("metadata") or {}
+            heading_path = metadata.get("heading_path") or []
+            source = metadata.get("source") or ""
+            title = hit.get("title") or (heading_path[-1] if heading_path else source) or "Snippet"
+            chunks.append(
+                {
+                    "chunk_id": hit.get("chunk_id"),
+                    "text": text,
+                    "title": title,
+                    "source": source,
+                    "doc_id": hit.get("doc_id"),
+                    "heading_path": heading_path,
+                    "origin": {"keyword"},
+                    "rank_keyword": rank,
+                    "summary": metadata.get("summary"),
+                    "language": metadata.get("language"),
+                }
+            )
+        return chunks
+
+    def _fuse_chunks(
+        self,
+        vector_chunks: Sequence[dict],
+        keyword_chunks: Sequence[dict],
+        *,
+        limit: int,
+    ) -> list[dict]:
+        if limit <= 0:
+            return []
+        fused: dict[str, dict] = {}
+        scores: dict[str, float] = {}
+
+        def add_entry(entry: dict, rank: int) -> None:
+            chunk_id = entry.get("chunk_id")
+            if not chunk_id:
+                return
+            existing = fused.get(chunk_id)
+            if existing is None:
+                existing = entry.copy()
+                existing_origin = set(entry.get("origin", []))
+                existing["origin"] = existing_origin
+                fused[chunk_id] = existing
+            else:
+                existing["origin"].update(entry.get("origin", []))
+                for key, value in entry.items():
+                    if key in {"origin", "rank_vector", "rank_keyword", "chunk_id"}:
+                        continue
+                    if not existing.get(key) and value:
+                        existing[key] = value
+            rr = 1.0 / (rank + 1)
+            scores[chunk_id] = scores.get(chunk_id, 0.0) + rr
+
+        for entry in vector_chunks:
+            add_entry(entry, entry.get("rank_vector", 0))
+
+        for entry in keyword_chunks:
+            add_entry(entry, entry.get("rank_keyword", 0))
+
+        fused_list = list(fused.values())
+        for entry in fused_list:
+            chunk_id = entry.get("chunk_id")
+            entry["score"] = scores.get(chunk_id, 0.0)
+            entry["origin"] = sorted(entry.get("origin", []))
+
+        fused_list.sort(key=lambda item: item.get("score", 0.0), reverse=True)
+        return fused_list[:limit]
+
+    def _apply_reranker(
+        self,
+        project: Project,
+        query: str,
+        *,
+        query_vector: Sequence[float],
+        fused_chunks: Sequence[dict],
+        limit: int,
+    ) -> list[dict] | None:
+        reranker = self._reranker
+        if reranker is None or not fused_chunks:
+            return None
+
+        metrics = self._metrics
+        start = time.perf_counter() if metrics else None
+        try:
+            reranked = reranker.rerank(
+                query,
+                query_embedding=query_vector,
+                chunks=fused_chunks,
+                top_k=limit,
+            )
+        except Exception as exc:  # pragma: no cover - defensive guard
+            logger.warning(
+                "support.generate.rerank.error strategy=%s project=%s error=%s",
+                getattr(reranker, "name", "unknown"),
+                project.id,
+                exc,
+            )
+            if metrics:
+                metrics.increment(
+                    "retrieval.rerank_errors",
+                    project_id=project.id,
+                    strategy=getattr(reranker, "name", "unknown"),
+                )
+            return None
+
+        if metrics and start is not None:
+            metrics.record_timing(
+                "retrieval.rerank_duration",
+                time.perf_counter() - start,
+                project_id=project.id,
+                strategy=getattr(reranker, "name", "unknown"),
+                candidates=len(fused_chunks),
+            )
+            metrics.increment(
+                "retrieval.rerank_applied",
+                project_id=project.id,
+                strategy=getattr(reranker, "name", "unknown"),
+            )
+
+        if reranked:
+            logger.info(
+                "support.generate.rerank strategy=%s project=%s before=%s after=%s",
+                getattr(reranker, "name", "unknown"),
+                project.id,
+                len(fused_chunks),
+                len(reranked),
+            )
+            return list(reranked)
+        return None
+
+    def _stream_backend(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> Iterable[str]:
         if self._settings.is_openai_chat_backend:
             logger.info("support.backend.openai.stream")
-            return self._stream_openai(prompt)
+            return self._stream_openai(prompt, temperature=temperature, max_tokens=max_tokens)
         if self._settings.is_ollama_chat_backend:
             logger.info("support.backend.ollama.stream model=%s", self._settings.ollama_model)
-            return self._stream_ollama(prompt)
+            return self._stream_ollama(prompt, temperature=temperature, max_tokens=max_tokens)
 
         def generator() -> Iterator[str]:
-            yield self._invoke_backend(prompt)
+            yield self._invoke_backend(prompt, temperature=temperature, max_tokens=max_tokens)
 
         return generator()
 
-    def _invoke_backend(self, prompt: str) -> str:
+    def _invoke_backend(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> str:
         if self._settings.is_openai_chat_backend:
             logger.info("support.backend.openai.invoke")
-            return self._invoke_openai(prompt)
+            return self._invoke_openai(prompt, temperature=temperature, max_tokens=max_tokens)
         if self._settings.is_ollama_chat_backend:
             logger.info("support.backend.ollama.invoke model=%s", self._settings.ollama_model)
-            return self._invoke_ollama(prompt)
+            return self._invoke_ollama(prompt, temperature=temperature, max_tokens=max_tokens)
         raise RuntimeError(f"Unsupported chat backend: {self._settings.chat_backend}")
 
-    def _invoke_openai(self, prompt: str) -> str:
+    def _invoke_openai(self, prompt: str, *, temperature: float, max_tokens: int | None) -> str:
         client = self._get_openai_client()
 
         response = client.responses.create(
@@ -214,6 +767,8 @@ class SupportAgentService:
                 {"role": "system", "content": "You are an empathetic technical support agent."},
                 {"role": "user", "content": prompt},
             ],
+            temperature=temperature,
+            max_output_tokens=max_tokens,
         )
         texts: list[str] = []
         for item in response.output:  # type: ignore[attr-defined]
@@ -238,7 +793,13 @@ class SupportAgentService:
             return result
         return "I'm sorry, I could not generate a response at this time."
 
-    def _invoke_ollama(self, prompt: str) -> str:
+    def _invoke_ollama(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> str:
         if httpx is None:  # pragma: no cover
             raise RuntimeError("httpx must be installed for the Ollama chat backend")
 
@@ -256,6 +817,13 @@ class SupportAgentService:
             ],
             "stream": False,
         }
+        options: dict[str, float | int] = {}
+        if temperature > 0.0:
+            options["temperature"] = temperature
+        if max_tokens is not None:
+            options["num_predict"] = max_tokens
+        if options:
+            payload["options"] = options
 
         try:
             response = httpx.post(url, json=payload, timeout=self._settings.ollama_request_timeout)
@@ -283,7 +851,13 @@ class SupportAgentService:
             self._openai_client = OpenAI(api_key=self._settings.openai_api_key)
         return self._openai_client
 
-    def _stream_openai(self, prompt: str) -> Iterable[str]:
+    def _stream_openai(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> Iterable[str]:
         client = self._get_openai_client()
 
         def generator() -> Iterator[str]:
@@ -293,6 +867,8 @@ class SupportAgentService:
                     {"role": "system", "content": "You are an empathetic technical support agent."},
                     {"role": "user", "content": prompt},
                 ],
+                temperature=temperature,
+                max_output_tokens=max_tokens,
             ) as stream:
                 for event in stream:
                     if getattr(event, "type", "") == "response.output_text.delta":
@@ -303,7 +879,13 @@ class SupportAgentService:
 
         return generator()
 
-    def _stream_ollama(self, prompt: str) -> Iterable[str]:
+    def _stream_ollama(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> Iterable[str]:
         if httpx is None:  # pragma: no cover
             raise RuntimeError("httpx must be installed for the Ollama chat backend")
 
@@ -321,6 +903,13 @@ class SupportAgentService:
             ],
             "stream": True,
         }
+        options: dict[str, float | int] = {}
+        if temperature > 0.0:
+            options["temperature"] = temperature
+        if max_tokens is not None:
+            options["num_predict"] = max_tokens
+        if options:
+            payload["options"] = options
 
         def generator() -> Iterator[str]:
             try:
