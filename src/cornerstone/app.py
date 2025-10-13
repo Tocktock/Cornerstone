@@ -29,8 +29,11 @@ from .fts import FTSIndex
 from . import local_ingest
 from .keywords import (
     ChunkPreparationResult,
+    ConceptExtractionResult,
+    KeywordCandidate,
     KeywordLLMFilter,
     build_excerpt,
+    extract_concept_candidates,
     extract_keyword_candidates,
     prepare_keyword_chunks,
 )
@@ -953,6 +956,7 @@ def create_app(
         payloads = list(store_manager.iter_project_payloads(project.id))
         chunk_stage: ChunkPreparationResult = prepare_keyword_chunks(payloads)
         chunks = chunk_stage.chunks
+        concept_stage: ConceptExtractionResult = extract_concept_candidates(chunks)
         texts = [chunk.text for chunk in chunks]
         keywords = extract_keyword_candidates(texts)
 
@@ -996,7 +1000,25 @@ def create_app(
         if sample_excerpts:
             chunk_debug["sample_excerpts"] = sample_excerpts
 
-        debug_payload = {**llm_debug, "chunking": chunk_debug}
+        concept_debug = concept_stage.to_debug_payload(limit=8)
+
+        if not keywords and concept_stage.candidates:
+            fallback_candidates = []
+            for candidate in concept_stage.candidates[: page_size]:
+                score_as_int = max(1, int(round(candidate.score)))
+                fallback_candidates.append(
+                    KeywordCandidate(
+                        term=candidate.phrase,
+                        count=max(candidate.document_count, score_as_int),
+                        is_core=candidate.document_count > 1,
+                        generated=False,
+                        reason="stage2-fallback",
+                        source="stage2",
+                    )
+                )
+            keywords = fallback_candidates
+
+        debug_payload = {**llm_debug, "chunking": chunk_debug, "stage2": concept_debug}
         debug_payload.setdefault("candidate_count", original_count)
 
         logger.info(
