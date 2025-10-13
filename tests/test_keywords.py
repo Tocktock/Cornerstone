@@ -6,6 +6,8 @@ from cornerstone.config import Settings
 from cornerstone.keywords import (
     KeywordCandidate,
     KeywordLLMFilter,
+    KeywordSourceChunk,
+    extract_concept_candidates,
     extract_keyword_candidates,
     prepare_keyword_chunks,
 )
@@ -59,6 +61,60 @@ def test_prepare_keyword_chunks_normalises_and_collects_metadata() -> None:
     assert result.sample_sections() == ["Introduction / Setup", "로그인"]
     excerpts = result.sample_excerpts(limit=1, max_chars=40)
     assert excerpts and "Title" in excerpts[0]
+
+
+def test_extract_concept_candidates_promotes_multiword_phrases() -> None:
+    chunks = [
+        KeywordSourceChunk(
+            text="Login error handling guide for SSO integrations.",
+            normalized_text="login error handling guide for sso integrations",
+            doc_id="doc-1",
+            chunk_id="doc-1:0",
+            source="guide.md",
+            title="Login Troubleshooting",
+            section_path="Login / Errors",
+            summary="Covers login error handling steps.",
+            language="en",
+            token_count=38,
+        ),
+        KeywordSourceChunk(
+            text="SSO login error steps include token refresh and session reset.",
+            normalized_text="sso login error steps include token refresh and session reset",
+            doc_id="doc-2",
+            chunk_id="doc-2:0",
+            source="runbook.md",
+            title="SSO Operations",
+            section_path="SSO / Troubleshooting",
+            summary="Runbook for SSO login error resolution.",
+            language="en",
+            token_count=34,
+        ),
+    ]
+
+    result = extract_concept_candidates(chunks, max_ngram_size=2)
+    phrases = [candidate.phrase for candidate in result.candidates]
+    assert "login error" in phrases
+
+    login_error = next(candidate for candidate in result.candidates if candidate.phrase == "login error")
+    assert login_error.document_count == 2
+    assert login_error.occurrences >= 2
+    assert login_error.score > 0
+    assert login_error.score_breakdown["frequency"] >= 2
+
+
+def test_extract_concept_candidates_filters_stopwords() -> None:
+    chunks = [
+        KeywordSourceChunk(
+            text="and the of the",
+            normalized_text="and the of the",
+            doc_id="doc-3",
+            chunk_id="doc-3:0",
+            language="en",
+        )
+    ]
+
+    result = extract_concept_candidates(chunks)
+    assert not result.candidates
 
 
 def test_extract_keyword_candidates_identifies_core_terms() -> None:

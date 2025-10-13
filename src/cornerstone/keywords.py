@@ -156,6 +156,71 @@ class ChunkPreparationResult:
         return [chunk.excerpt(max_chars=max_chars) for chunk in self.chunks[:limit]]
 
 
+@dataclass(slots=True)
+class ConceptCandidate:
+    """Represents a candidate concept or phrase extracted from Stage 2."""
+
+    phrase: str
+    score: float
+    occurrences: int
+    document_count: int
+    chunk_count: int
+    average_occurrence_per_chunk: float
+    word_count: int
+    languages: List[str]
+    sections: List[str]
+    sources: List[str]
+    sample_snippet: str | None
+    score_breakdown: dict[str, float] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class ConceptExtractionResult:
+    """Container for Stage 2 extraction results and diagnostics."""
+
+    candidates: List[ConceptCandidate]
+    total_chunks: int
+    total_tokens: int
+    parameters: dict[str, Any]
+
+    def summary(self, *, limit: int = 5) -> List[dict[str, Any]]:
+        items: List[dict[str, Any]] = []
+        for candidate in self.candidates[:limit]:
+            items.append(
+                {
+                    "phrase": candidate.phrase,
+                    "score": round(candidate.score, 3),
+                    "occurrences": candidate.occurrences,
+                    "documents": candidate.document_count,
+                    "chunks": candidate.chunk_count,
+                    "sample": candidate.sample_snippet,
+                }
+            )
+        return items
+
+    def to_debug_payload(self, *, limit: int = 10) -> dict[str, Any]:
+        return {
+            "total_candidates": len(self.candidates),
+            "total_chunks": self.total_chunks,
+            "total_tokens": self.total_tokens,
+            "parameters": self.parameters,
+            "top_candidates": self.summary(limit=limit),
+        }
+
+
+@dataclass(slots=True)
+class _CandidateAggregate:
+    occurrences: int = 0
+    chunk_ids: set[str] = field(default_factory=set)
+    doc_ids: set[str] = field(default_factory=set)
+    sources: set[str] = field(default_factory=set)
+    sections: set[str] = field(default_factory=set)
+    sample_snippet: str | None = None
+    languages: Counter[str] = field(default_factory=Counter)
+    score_frequency: float = 0.0
+    score_chunk: float = 0.0
+    word_count: int = 0
+
 def _normalize_language(value: object) -> str | None:
     if isinstance(value, str):
         cleaned = value.strip()
@@ -244,6 +309,196 @@ def prepare_keyword_chunks(payloads: Iterable[Mapping[str, Any]]) -> ChunkPrepar
         total_payloads=total_payloads,
         skipped_empty=skipped_empty,
         skipped_non_text=skipped_non_text,
+    )
+
+
+def _tokenize_chunk_for_candidates(chunk: KeywordSourceChunk) -> List[str]:
+    source = chunk.normalized_text or _WHITESPACE_RE.sub(" ", chunk.text).strip()
+    if not source:
+        return []
+    tokens: List[str] = []
+    for match in _WORD_RE.finditer(source):
+        token = match.group().strip("'-")
+        if not token:
+            continue
+        tokens.append(token)
+    return tokens
+
+
+def _is_valid_unigram(token: str, *, min_char_length: int) -> bool:
+    cleaned = token.strip("'-")
+    if not cleaned:
+        return False
+    if cleaned.isdigit():
+        return False
+    if any(char.isdigit() for char in cleaned) and any(char.isalpha() for char in cleaned):
+        return False
+    length = len(cleaned)
+    if _contains_hangul(cleaned):
+        return length >= max(1, min_char_length - 1)
+    if cleaned.lower() in _STOPWORDS:
+        return False
+    return length >= min_char_length
+
+
+def _is_valid_phrase(tokens: Sequence[str], *, min_char_length: int) -> bool:
+    if not tokens:
+        return False
+    if len(tokens) == 1:
+        return _is_valid_unigram(tokens[0], min_char_length=min_char_length)
+    total_chars = sum(len(token.strip("'-")) for token in tokens)
+    if total_chars < min_char_length:
+        return False
+    ascii_tokens = [token for token in tokens if token.isascii()]
+    if ascii_tokens and all(token.lower() in _STOPWORDS for token in ascii_tokens):
+        return False
+    if not any(_is_valid_unigram(token, min_char_length=min_char_length) for token in tokens):
+        if not any(_contains_hangul(token) for token in tokens):
+            return False
+    return True
+
+
+def extract_concept_candidates(
+    chunks: Sequence[KeywordSourceChunk],
+    *,
+    max_ngram_size: int = 3,
+    max_candidates_per_chunk: int = 8,
+    min_char_length: int = 3,
+    min_occurrences: int = 1,
+) -> ConceptExtractionResult:
+    aggregates: dict[str, _CandidateAggregate] = {}
+    total_tokens = 0
+    parameters = {
+        "max_ngram_size": max_ngram_size,
+        "max_candidates_per_chunk": max_candidates_per_chunk,
+        "min_char_length": min_char_length,
+        "min_occurrences": min_occurrences,
+    }
+
+    for chunk_index, chunk in enumerate(chunks):
+        tokens = _tokenize_chunk_for_candidates(chunk)
+        total_tokens += len(tokens)
+        if not tokens:
+            continue
+
+        chunk_identifier = chunk.chunk_id or f"chunk-{chunk_index}"
+        doc_identifier = chunk.doc_id or f"doc-{chunk_index}"
+
+        ngram_counts: Counter[str] = Counter()
+        token_length = len(tokens)
+        for size in range(1, max_ngram_size + 1):
+            if size > token_length:
+                break
+            for start in range(0, token_length - size + 1):
+                phrase_tokens = tokens[start : start + size]
+                if not _is_valid_phrase(phrase_tokens, min_char_length=min_char_length):
+                    continue
+                phrase = " ".join(phrase_tokens)
+                ngram_counts[phrase] += 1
+
+        if not ngram_counts:
+            continue
+
+        ranked_candidates = sorted(
+            ngram_counts.items(),
+            key=lambda item: (
+                item[1] * (1.0 + 0.15 * max(0, len(item[0].split()) - 1)),
+                len(item[0]),
+            ),
+            reverse=True,
+        )
+
+        for phrase, count in ranked_candidates[:max_candidates_per_chunk]:
+            tokens_for_phrase = phrase.split()
+            word_count = len(tokens_for_phrase)
+            chunk_score = count * (1.0 + 0.15 * max(0, word_count - 1))
+
+            aggregate = aggregates.setdefault(phrase, _CandidateAggregate(word_count=word_count))
+            aggregate.occurrences += count
+            aggregate.score_frequency += float(count)
+            aggregate.word_count = max(aggregate.word_count, word_count)
+
+            if chunk_identifier not in aggregate.chunk_ids:
+                aggregate.chunk_ids.add(chunk_identifier)
+                aggregate.score_chunk += chunk_score
+                if chunk.section_path:
+                    aggregate.sections.add(chunk.section_path)
+                elif chunk.title:
+                    aggregate.sections.add(chunk.title)
+                if chunk.source:
+                    aggregate.sources.add(chunk.source)
+                if chunk.summary and aggregate.sample_snippet is None:
+                    aggregate.sample_snippet = build_excerpt(chunk.summary)
+                elif aggregate.sample_snippet is None:
+                    aggregate.sample_snippet = chunk.excerpt(max_chars=160)
+
+            if doc_identifier not in aggregate.doc_ids:
+                aggregate.doc_ids.add(doc_identifier)
+
+            if chunk.language:
+                aggregate.languages.update([chunk.language])
+
+    candidates: List[ConceptCandidate] = []
+    for phrase, aggregate in aggregates.items():
+        if aggregate.occurrences < min_occurrences:
+            continue
+        doc_count = len(aggregate.doc_ids)
+        chunk_count = len(aggregate.chunk_ids)
+        if doc_count == 0:
+            doc_count = chunk_count
+
+        base_score = aggregate.score_frequency + aggregate.score_chunk + doc_count * 1.5
+        length_bonus = 1.0 + 0.2 * max(0, aggregate.word_count - 1)
+        score = base_score * length_bonus
+
+        score_breakdown = {
+            "frequency": round(aggregate.score_frequency, 3),
+            "chunk_coverage": round(aggregate.score_chunk, 3),
+            "document_coverage": round(doc_count * 1.5, 3),
+            "length_bonus": round(length_bonus, 3),
+        }
+
+        languages = [language for language, _ in aggregate.languages.most_common()]
+        sections = sorted(filter(None, aggregate.sections))[:5]
+        sources = sorted(filter(None, aggregate.sources))[:5]
+        sample_snippet = aggregate.sample_snippet
+
+        if sample_snippet is None and sections:
+            sample_snippet = sections[0]
+
+        avg_occurrence = aggregate.occurrences / max(1, chunk_count)
+
+        candidates.append(
+            ConceptCandidate(
+                phrase=phrase,
+                score=score,
+                occurrences=aggregate.occurrences,
+                document_count=doc_count,
+                chunk_count=chunk_count,
+                average_occurrence_per_chunk=avg_occurrence,
+                word_count=aggregate.word_count or len(phrase.split()),
+                languages=languages,
+                sections=sections,
+                sources=sources,
+                sample_snippet=sample_snippet,
+                score_breakdown=score_breakdown,
+            )
+        )
+
+    candidates.sort(
+        key=lambda item: (
+            -item.score,
+            -item.document_count,
+            -item.occurrences,
+            item.phrase,
+        )
+    )
+
+    return ConceptExtractionResult(
+        candidates=candidates,
+        total_chunks=len(chunks),
+        total_tokens=total_tokens,
+        parameters=parameters,
     )
 
 
@@ -957,10 +1212,13 @@ class KeywordLLMFilter:
 
 
 __all__ = [
+    "ChunkPreparationResult",
+    "ConceptCandidate",
+    "ConceptExtractionResult",
     "KeywordCandidate",
     "KeywordLLMFilter",
     "KeywordSourceChunk",
-    "ChunkPreparationResult",
+    "extract_concept_candidates",
     "extract_keyword_candidates",
     "prepare_keyword_chunks",
 ]
