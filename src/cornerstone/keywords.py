@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import re
 import json
 import logging
+import re
 from collections import Counter
-from dataclasses import dataclass
-from typing import Iterable, List, Sequence
+from dataclasses import dataclass, field
+from typing import Any, Iterable, List, Mapping, Sequence
 
 import httpx
-import re
 
 try:  # pragma: no cover - optional dependency
     from openai import OpenAI
@@ -65,6 +64,8 @@ _STOPWORDS = {
 }
 
 _WORD_RE = re.compile(r"[A-Za-z\uAC00-\uD7A3][A-Za-z0-9\uAC00-\uD7A3'\-]{0,}")
+_NORMALIZED_TEXT_CLEAN_RE = re.compile(r"[^\w\s\uAC00-\uD7A3\-\'\u2013\u2014/]+")
+_WHITESPACE_RE = re.compile(r"\s+")
 
 logger = logging.getLogger(__name__)
 if logger.level == logging.NOTSET:
@@ -99,6 +100,151 @@ def build_excerpt(text: str, *, max_chars: int = 280) -> str:
     if len(collapsed) <= max_chars:
         return collapsed
     return collapsed[: max(0, max_chars - 1)].rstrip() + "…"
+
+
+@dataclass(slots=True)
+class KeywordSourceChunk:
+    """Represents a prepared text chunk ready for concept extraction stages."""
+
+    text: str
+    normalized_text: str
+    doc_id: str | None = None
+    chunk_id: str | None = None
+    source: str | None = None
+    title: str | None = None
+    section_path: str | None = None
+    summary: str | None = None
+    language: str | None = None
+    token_count: int | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def excerpt(self, *, max_chars: int = 200) -> str:
+        return build_excerpt(self.text, max_chars=max_chars)
+
+
+@dataclass(slots=True)
+class ChunkPreparationResult:
+    """Container for chunk preparation output and basic statistics."""
+
+    chunks: List[KeywordSourceChunk]
+    total_payloads: int = 0
+    skipped_empty: int = 0
+    skipped_non_text: int = 0
+
+    @property
+    def processed_count(self) -> int:
+        return len(self.chunks)
+
+    def unique_languages(self) -> List[str]:
+        languages = {chunk.language for chunk in self.chunks if chunk.language}
+        return sorted(languages)
+
+    def total_tokens(self) -> int:
+        return sum(chunk.token_count or 0 for chunk in self.chunks)
+
+    def sample_sections(self, limit: int = 3) -> List[str]:
+        samples: List[str] = []
+        for chunk in self.chunks:
+            label = chunk.section_path or chunk.title or chunk.source
+            if label and label not in samples:
+                samples.append(label)
+            if len(samples) >= limit:
+                break
+        return samples
+
+    def sample_excerpts(self, limit: int = 3, *, max_chars: int = 160) -> List[str]:
+        return [chunk.excerpt(max_chars=max_chars) for chunk in self.chunks[:limit]]
+
+
+def _normalize_language(value: object) -> str | None:
+    if isinstance(value, str):
+        cleaned = value.strip()
+        if cleaned:
+            return cleaned.lower()
+    return None
+
+
+def _coerce_optional_int(value: object) -> int | None:
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _safe_str(value: object) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        stripped = value.strip()
+        return stripped or None
+    return str(value)
+
+
+def _normalize_chunk_text(text: str, *, language: str | None = None) -> str:
+    collapsed = _WHITESPACE_RE.sub(" ", text).strip()
+    if not collapsed:
+        return ""
+    without_punct = _NORMALIZED_TEXT_CLEAN_RE.sub(" ", collapsed)
+    squeezed = _WHITESPACE_RE.sub(" ", without_punct).strip()
+    if language and language.startswith("en"):
+        return squeezed.lower()
+    return squeezed
+
+
+def prepare_keyword_chunks(payloads: Iterable[Mapping[str, Any]]) -> ChunkPreparationResult:
+    chunks: List[KeywordSourceChunk] = []
+    total_payloads = 0
+    skipped_empty = 0
+    skipped_non_text = 0
+
+    for payload in payloads:
+        total_payloads += 1
+        text_value = payload.get("text")
+        if isinstance(text_value, bytes):
+            text_value = text_value.decode("utf-8", errors="ignore")
+        if text_value is None:
+            skipped_empty += 1
+            continue
+        if not isinstance(text_value, str):
+            skipped_non_text += 1
+            continue
+        text = text_value.strip()
+        if not text:
+            skipped_empty += 1
+            continue
+
+        language = _normalize_language(payload.get("language"))
+        normalized_text = _normalize_chunk_text(text, language=language)
+
+        metadata: dict[str, Any] = {}
+        for key in ("heading_path", "content_type", "ingested_at"):
+            value = payload.get(key)
+            if value is not None:
+                metadata[key] = value
+
+        chunk = KeywordSourceChunk(
+            text=text,
+            normalized_text=normalized_text,
+            doc_id=_safe_str(payload.get("doc_id")),
+            chunk_id=_safe_str(payload.get("chunk_id")),
+            source=_safe_str(payload.get("source")),
+            title=_safe_str(payload.get("title")),
+            section_path=_safe_str(payload.get("section_path")),
+            summary=_safe_str(payload.get("summary")),
+            language=language,
+            token_count=_coerce_optional_int(payload.get("token_count")),
+            metadata=metadata,
+        )
+        chunks.append(chunk)
+
+    return ChunkPreparationResult(
+        chunks=chunks,
+        total_payloads=total_payloads,
+        skipped_empty=skipped_empty,
+        skipped_non_text=skipped_non_text,
+    )
 
 
 def extract_keyword_candidates(
@@ -810,4 +956,11 @@ class KeywordLLMFilter:
         raise RuntimeError("LLM backend is not correctly configured")
 
 
-__all__ = ["KeywordCandidate", "extract_keyword_candidates", "KeywordLLMFilter"]
+__all__ = [
+    "KeywordCandidate",
+    "KeywordLLMFilter",
+    "KeywordSourceChunk",
+    "ChunkPreparationResult",
+    "extract_keyword_candidates",
+    "prepare_keyword_chunks",
+]
