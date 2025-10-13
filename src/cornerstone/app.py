@@ -950,6 +950,7 @@ def create_app(
         project_id: str,
         project_store: ProjectStore = Depends(get_project_store),
         store_manager: ProjectVectorStoreManager = Depends(get_store_manager),
+        embedding: EmbeddingService = Depends(get_embedding_service),
         settings: Settings = Depends(get_settings_dependency),
         page: int = Query(1, ge=1),
         page_size: int = Query(50, ge=1, le=500),
@@ -958,13 +959,16 @@ def create_app(
         payloads = list(store_manager.iter_project_payloads(project.id))
         chunk_stage: ChunkPreparationResult = prepare_keyword_chunks(payloads)
         chunks = chunk_stage.chunks
-        concept_stage: ConceptExtractionResult = extract_concept_candidates(chunks)
+        llm_filter = KeywordLLMFilter(settings)
+        concept_stage: ConceptExtractionResult = extract_concept_candidates(
+            chunks,
+            embedding_service=embedding,
+            llm_filter=llm_filter,
+        )
         texts = [chunk.text for chunk in chunks]
         keywords = extract_keyword_candidates(texts)
 
         context_snippets: list[str] = [chunk.excerpt(max_chars=400) for chunk in chunks[:5]]
-
-        llm_filter = KeywordLLMFilter(settings)
 
         if concept_stage.candidates:
             refined_concepts = llm_filter.refine_concepts(concept_stage.candidates, context_snippets)
@@ -1011,6 +1015,9 @@ def create_app(
         concept_llm_debug = llm_filter.concept_debug_payload()
         if concept_llm_debug:
             concept_debug["llm"] = concept_llm_debug
+        summary_debug = llm_filter.summary_debug_payload()
+        if summary_debug:
+            concept_debug["llm_summary"] = summary_debug
         cluster_debug = cluster_stage.to_debug_payload(limit=6)
 
         if not keywords and concept_stage.candidates:

@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import re
 from collections import Counter
 from dataclasses import dataclass, field, replace
-from typing import Any, Iterable, List, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, List, Mapping, Sequence
 
 import httpx
 
@@ -17,6 +18,9 @@ except Exception:  # pragma: no cover
     OpenAI = None  # type: ignore[assignment]
 
 from .config import Settings
+
+if TYPE_CHECKING:
+    from .embeddings import EmbeddingService
 
 # Basic English stop words; extendable if needed.
 _STOPWORDS = {
@@ -234,6 +238,35 @@ class _CandidateAggregate:
     score_frequency: float = 0.0
     score_chunk: float = 0.0
     word_count: int = 0
+    score_statistical: float = 0.0
+    score_embedding: float = 0.0
+    score_llm: float = 0.0
+    reason: str | None = None
+    generated: bool = False
+
+
+@dataclass(slots=True)
+class _ChunkContribution:
+    occurrences: int = 0
+    frequency_score: float = 0.0
+    chunk_score: float = 0.0
+    embedding_score: float = 0.0
+    statistical_score: float = 0.0
+    llm_score: float = 0.0
+    reason: str | None = None
+    generated: bool = False
+    word_count: int = 0
+    sample_snippet: str | None = None
+    sections: set[str] = field(default_factory=set)
+    sources: set[str] = field(default_factory=set)
+    languages: set[str] = field(default_factory=set)
+
+
+@dataclass(slots=True)
+class _ChunkContext:
+    chunk: KeywordSourceChunk
+    chunk_identifier: str
+    doc_identifier: str
 
 
 @dataclass(slots=True)
@@ -513,13 +546,127 @@ def _is_valid_phrase(tokens: Sequence[str], *, min_char_length: int) -> bool:
     return True
 
 
+def _cosine_similarity(vec_a: Sequence[float], vec_b: Sequence[float]) -> float:
+    if not vec_a or not vec_b:
+        return 0.0
+    if len(vec_a) != len(vec_b):
+        logger.debug("keyword.embeddings.dimension_mismatch a=%s b=%s", len(vec_a), len(vec_b))
+        return 0.0
+    dot = sum(float(a) * float(b) for a, b in zip(vec_a, vec_b))
+    norm_a = math.sqrt(sum(float(a) * float(a) for a in vec_a))
+    norm_b = math.sqrt(sum(float(b) * float(b) for b in vec_b))
+    if norm_a == 0.0 or norm_b == 0.0:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
+
+def _extract_rake_scores(
+    tokens: Sequence[str],
+    *,
+    max_ngram_size: int,
+    min_char_length: int,
+) -> dict[str, float]:
+    if not tokens:
+        return {}
+
+    phrases: list[list[str]] = []
+    current: list[str] = []
+    for token in tokens:
+        cleaned = token.strip("'-")
+        if not cleaned:
+            continue
+        if cleaned.isascii() and cleaned.lower() in _STOPWORDS:
+            if current:
+                phrases.append(current)
+                current = []
+            continue
+        current.append(token)
+    if current:
+        phrases.append(current)
+
+    if not phrases:
+        return {}
+
+    word_freq: Counter[str] = Counter()
+    word_degree: Counter[str] = Counter()
+
+    for phrase_tokens in phrases:
+        filtered = [token for token in phrase_tokens if _is_valid_unigram(token, min_char_length=min_char_length)]
+        if not filtered:
+            continue
+        length = len(filtered)
+        degree = max(0, length - 1)
+        for token in filtered:
+            key = token.lower() if token.isascii() else token
+            word_freq[key] += 1
+            word_degree[key] += degree
+
+    if not word_freq:
+        return {}
+
+    for token, freq in word_freq.items():
+        word_degree[token] += freq
+
+    word_score: dict[str, float] = {
+        token: word_degree[token] / float(word_freq[token]) for token in word_freq
+    }
+
+    phrase_scores: dict[str, float] = {}
+    for phrase_tokens in phrases:
+        filtered = [token for token in phrase_tokens if _is_valid_unigram(token, min_char_length=min_char_length)]
+        if not filtered:
+            continue
+        trimmed = filtered[:max_ngram_size]
+        if not trimmed:
+            continue
+        if not _is_valid_phrase(trimmed, min_char_length=min_char_length):
+            continue
+        phrase = " ".join(trimmed)
+        score = sum(word_score.get(token.lower() if token.isascii() else token, 0.0) for token in trimmed)
+        if score <= 0:
+            continue
+        phrase_scores[phrase] = max(phrase_scores.get(phrase, 0.0), score)
+
+    return phrase_scores
+
+
+def _select_summary_contexts(
+    contexts: Sequence[_ChunkContext],
+    *,
+    limit: int,
+) -> list[_ChunkContext]:
+    if not contexts or limit <= 0:
+        return []
+
+    ranked = sorted(
+        contexts,
+        key=lambda ctx: (
+            ctx.chunk.token_count if ctx.chunk.token_count is not None else len(ctx.chunk.text),
+            len(ctx.chunk.text),
+        ),
+        reverse=True,
+    )
+    return ranked[:limit]
+
+
 def extract_concept_candidates(
     chunks: Sequence[KeywordSourceChunk],
     *,
+    embedding_service: "EmbeddingService | None" = None,
+    llm_filter: "KeywordLLMFilter | None" = None,
+    use_llm_summary: bool | None = None,
     max_ngram_size: int = 3,
     max_candidates_per_chunk: int = 8,
+    max_embedding_phrases_per_chunk: int = 6,
+    max_statistical_phrases_per_chunk: int = 6,
+    llm_summary_max_chunks: int = 4,
+    llm_summary_max_results: int = 10,
+    llm_summary_max_chars: int = 320,
     min_char_length: int = 3,
     min_occurrences: int = 1,
+    embedding_weight: float = 1.75,
+    statistical_weight: float = 1.1,
+    llm_weight: float = 2.5,
 ) -> ConceptExtractionResult:
     aggregates: dict[str, _CandidateAggregate] = {}
     total_tokens = 0
@@ -528,16 +675,111 @@ def extract_concept_candidates(
         "max_candidates_per_chunk": max_candidates_per_chunk,
         "min_char_length": min_char_length,
         "min_occurrences": min_occurrences,
+        "max_embedding_phrases_per_chunk": max_embedding_phrases_per_chunk,
+        "max_statistical_phrases_per_chunk": max_statistical_phrases_per_chunk,
+        "llm_summary_max_chunks": llm_summary_max_chunks,
+        "llm_summary_max_results": llm_summary_max_results,
+        "scoring_weights": {
+            "frequency": 1.0,
+            "chunk": 1.0,
+            "statistical": statistical_weight,
+            "embedding": embedding_weight,
+            "llm": llm_weight,
+        },
     }
+
+    chunk_contexts: list[_ChunkContext] = []
+    chunk_lookup: dict[str, _ChunkContext] = {}
+    embedding_cache: dict[str, Sequence[float]] = {}
+    chunk_embedding_cache: dict[str, Sequence[float]] = {}
+    embedding_stats = {"chunks": 0, "phrases": 0, "errors": 0}
+    statistical_stats = {"chunks": 0, "phrases": 0}
+
+    backend = getattr(embedding_service, "backend", None)
+    if backend is not None:
+        parameters["embedding_backend"] = getattr(backend, "name", str(backend))
+    parameters["embedding_enabled"] = embedding_service is not None
+    parameters["statistical_method"] = "rake" if max_statistical_phrases_per_chunk > 0 else "none"
+
+    def apply_contribution(phrase: str, contribution: _ChunkContribution, context: _ChunkContext) -> None:
+        if not phrase:
+            return
+        word_count = contribution.word_count or len(phrase.split())
+        aggregate = aggregates.setdefault(phrase, _CandidateAggregate(word_count=word_count))
+        aggregate.word_count = max(aggregate.word_count, word_count)
+        if contribution.occurrences:
+            aggregate.occurrences += contribution.occurrences
+        aggregate.score_frequency += contribution.frequency_score
+        aggregate.score_statistical += contribution.statistical_score
+        aggregate.score_embedding += contribution.embedding_score
+        aggregate.score_llm += contribution.llm_score
+        if contribution.reason and not aggregate.reason:
+            aggregate.reason = contribution.reason
+        if contribution.generated:
+            aggregate.generated = True
+
+        chunk_identifier = context.chunk_identifier
+        doc_identifier = context.doc_identifier
+
+        if chunk_identifier not in aggregate.chunk_ids:
+            aggregate.chunk_ids.add(chunk_identifier)
+            aggregate.score_chunk += contribution.chunk_score
+            if contribution.sections:
+                aggregate.sections.update(filter(None, contribution.sections))
+            else:
+                if context.chunk.section_path:
+                    aggregate.sections.add(context.chunk.section_path)
+                elif context.chunk.title:
+                    aggregate.sections.add(context.chunk.title)
+            if contribution.sources:
+                aggregate.sources.update(filter(None, contribution.sources))
+            elif context.chunk.source:
+                aggregate.sources.add(context.chunk.source)
+            if aggregate.sample_snippet is None:
+                if contribution.sample_snippet:
+                    aggregate.sample_snippet = build_excerpt(contribution.sample_snippet)
+                elif context.chunk.summary:
+                    aggregate.sample_snippet = build_excerpt(context.chunk.summary)
+                else:
+                    aggregate.sample_snippet = context.chunk.excerpt(max_chars=160)
+
+        if doc_identifier not in aggregate.doc_ids:
+            aggregate.doc_ids.add(doc_identifier)
+
+        if contribution.languages:
+            aggregate.languages.update(filter(None, contribution.languages))
+        elif context.chunk.language:
+            aggregate.languages.update([context.chunk.language])
+
+    def contribution_for(
+        contribution_map: dict[str, _ChunkContribution],
+        phrase: str,
+        word_count: int,
+    ) -> _ChunkContribution:
+        entry = contribution_map.get(phrase)
+        if entry is None:
+            entry = _ChunkContribution(word_count=word_count)
+            contribution_map[phrase] = entry
+        else:
+            entry.word_count = max(entry.word_count, word_count)
+        return entry
 
     for chunk_index, chunk in enumerate(chunks):
         tokens = _tokenize_chunk_for_candidates(chunk)
         total_tokens += len(tokens)
         if not tokens:
+            chunk_identifier = chunk.chunk_id or f"chunk-{chunk_index}"
+            doc_identifier = chunk.doc_id or f"doc-{chunk_index}"
+            context = _ChunkContext(chunk=chunk, chunk_identifier=chunk_identifier, doc_identifier=doc_identifier)
+            chunk_contexts.append(context)
+            chunk_lookup[chunk_identifier] = context
             continue
 
         chunk_identifier = chunk.chunk_id or f"chunk-{chunk_index}"
         doc_identifier = chunk.doc_id or f"doc-{chunk_index}"
+        context = _ChunkContext(chunk=chunk, chunk_identifier=chunk_identifier, doc_identifier=doc_identifier)
+        chunk_contexts.append(context)
+        chunk_lookup[chunk_identifier] = context
 
         ngram_counts: Counter[str] = Counter()
         token_length = len(tokens)
@@ -563,35 +805,194 @@ def extract_concept_candidates(
             reverse=True,
         )
 
+        contribution_map: dict[str, _ChunkContribution] = {}
+
         for phrase, count in ranked_candidates[:max_candidates_per_chunk]:
             tokens_for_phrase = phrase.split()
             word_count = len(tokens_for_phrase)
             chunk_score = count * (1.0 + 0.15 * max(0, word_count - 1))
 
-            aggregate = aggregates.setdefault(phrase, _CandidateAggregate(word_count=word_count))
-            aggregate.occurrences += count
-            aggregate.score_frequency += float(count)
-            aggregate.word_count = max(aggregate.word_count, word_count)
+            contribution = contribution_for(contribution_map, phrase, word_count)
+            contribution.occurrences += count
+            contribution.frequency_score += float(count)
+            contribution.chunk_score += chunk_score
 
-            if chunk_identifier not in aggregate.chunk_ids:
-                aggregate.chunk_ids.add(chunk_identifier)
-                aggregate.score_chunk += chunk_score
-                if chunk.section_path:
-                    aggregate.sections.add(chunk.section_path)
-                elif chunk.title:
-                    aggregate.sections.add(chunk.title)
-                if chunk.source:
-                    aggregate.sources.add(chunk.source)
-                if chunk.summary and aggregate.sample_snippet is None:
-                    aggregate.sample_snippet = build_excerpt(chunk.summary)
-                elif aggregate.sample_snippet is None:
-                    aggregate.sample_snippet = chunk.excerpt(max_chars=160)
+        rake_scores = {}
+        if max_statistical_phrases_per_chunk > 0:
+            rake_scores = _extract_rake_scores(
+                tokens,
+                max_ngram_size=max_ngram_size,
+                min_char_length=min_char_length,
+            )
+            if rake_scores:
+                statistical_stats["chunks"] += 1
+                ranked_rake = sorted(rake_scores.items(), key=lambda item: item[1], reverse=True)
+                if max_statistical_phrases_per_chunk > 0:
+                    ranked_rake = ranked_rake[:max_statistical_phrases_per_chunk]
+                for phrase, score in ranked_rake:
+                    if score <= 0:
+                        continue
+                    word_count = len(phrase.split())
+                    contribution = contribution_for(contribution_map, phrase, word_count)
+                    contribution.statistical_score += float(score)
+                    if contribution.occurrences == 0:
+                        contribution.occurrences = ngram_counts.get(phrase, 0) or 1
+                statistical_stats["phrases"] += len(ranked_rake)
 
-            if doc_identifier not in aggregate.doc_ids:
-                aggregate.doc_ids.add(doc_identifier)
+        if embedding_service and max_embedding_phrases_per_chunk > 0:
+            embedding_candidates: list[str] = []
+            if ranked_candidates:
+                embedding_candidates.extend(
+                    phrase for phrase, _ in ranked_candidates[:max_embedding_phrases_per_chunk]
+                )
+            if rake_scores:
+                embedding_candidates.extend(
+                    phrase
+                    for phrase, _ in sorted(rake_scores.items(), key=lambda item: item[1], reverse=True)[
+                        :max_embedding_phrases_per_chunk
+                    ]
+                )
+            if embedding_candidates:
+                seen: dict[str, None] = {}
+                deduped: list[str] = []
+                for phrase in embedding_candidates:
+                    if phrase not in seen:
+                        seen[phrase] = None
+                        deduped.append(phrase)
+                embedding_candidates = deduped[:max_embedding_phrases_per_chunk]
 
-            if chunk.language:
-                aggregate.languages.update([chunk.language])
+            text_for_embedding = chunk.normalized_text or chunk.text
+            if embedding_candidates and text_for_embedding:
+                chunk_vector = chunk_embedding_cache.get(chunk_identifier)
+                if chunk_vector is None:
+                    try:
+                        chunk_vector = embedding_service.embed_one(text_for_embedding)  # type: ignore[union-attr]
+                        chunk_embedding_cache[chunk_identifier] = chunk_vector
+                    except Exception as exc:  # pragma: no cover - defensive guard
+                        logger.warning(
+                            "keyword.embedding.chunk_failed chunk=%s error=%s",
+                            chunk_identifier,
+                            exc,
+                        )
+                        embedding_stats["errors"] += 1
+                        chunk_vector = None
+                if chunk_vector:
+                    missing = [phrase for phrase in embedding_candidates if phrase not in embedding_cache]
+                    if missing:
+                        try:
+                            vectors = embedding_service.embed(missing)  # type: ignore[union-attr]
+                            for phrase, vector in zip(missing, vectors):
+                                embedding_cache[phrase] = vector
+                        except Exception as exc:  # pragma: no cover - defensive guard
+                            logger.warning("keyword.embedding.phrase_failed error=%s", exc)
+                            embedding_stats["errors"] += 1
+                    embedding_stats["chunks"] += 1
+                    embedding_stats["phrases"] += len(embedding_candidates)
+                    for phrase in embedding_candidates:
+                        vector = embedding_cache.get(phrase)
+                        if vector is None:
+                            continue
+                        similarity = _cosine_similarity(chunk_vector, vector)
+                        if similarity <= 0:
+                            continue
+                        contribution = contribution_for(contribution_map, phrase, len(phrase.split()))
+                        contribution.embedding_score += similarity
+
+        if chunk.language:
+            for contribution in contribution_map.values():
+                contribution.languages.add(chunk.language)
+
+        for phrase, contribution in contribution_map.items():
+            apply_contribution(phrase, contribution, context)
+
+    summary_entries: list[dict[str, object]] = []
+    summary_contexts: list[_ChunkContext] = []
+    summary_debug: dict[str, object] | None = None
+    llm_summary_used = False
+
+    summary_callable = getattr(llm_filter, "extract_summary_concepts", None)
+    should_use_summary = use_llm_summary if use_llm_summary is not None else True
+    if (
+        callable(summary_callable)
+        and should_use_summary
+        and chunk_contexts
+        and getattr(llm_filter, "enabled", False)
+        and llm_summary_max_chunks > 0
+    ):
+        summary_contexts = _select_summary_contexts(chunk_contexts, limit=min(llm_summary_max_chunks, len(chunk_contexts)))
+        if summary_contexts:
+            chunks_for_summary = [ctx.chunk for ctx in summary_contexts]
+            try:
+                summary_entries = summary_callable(
+                    chunks_for_summary,
+                    max_results=llm_summary_max_results,
+                    max_chars=llm_summary_max_chars,
+                )
+            except TypeError:
+                summary_entries = summary_callable(chunks_for_summary)
+            summary_debug_fn = getattr(llm_filter, "summary_debug_payload", None)
+            if callable(summary_debug_fn):
+                summary_debug_payload = summary_debug_fn()
+                if isinstance(summary_debug_payload, dict):
+                    summary_debug = summary_debug_payload
+
+    if summary_entries:
+        llm_summary_used = True
+        for entry in summary_entries:
+            phrase = str(entry.get("phrase", "")).strip()
+            if not phrase:
+                continue
+            try:
+                importance_value = entry.get("importance")
+                llm_score_value = float(importance_value) if importance_value is not None else 1.0
+            except (TypeError, ValueError):
+                llm_score_value = 1.0
+            reason_value = entry.get("reason")
+            reason_text = str(reason_value).strip() if reason_value else None
+            occurrence_value = _coerce_optional_int(entry.get("occurrences")) or 1
+            sample_value = entry.get("sample") or entry.get("snippet") or entry.get("summary")
+            sections_value = set(_coerce_str_list(entry.get("sections")))
+            sources_value = set(_coerce_str_list(entry.get("sources")))
+            languages_value = set(_coerce_str_list(entry.get("languages")))
+            chunk_id_refs = set(_coerce_str_list(entry.get("chunk_ids")) or _coerce_str_list(entry.get("chunks")))
+
+            target_contexts = summary_contexts or chunk_contexts[:1]
+            if chunk_id_refs:
+                filtered = [
+                    ctx
+                    for ctx in summary_contexts
+                    if ctx.chunk_identifier in chunk_id_refs
+                    or (ctx.chunk.chunk_id and ctx.chunk.chunk_id in chunk_id_refs)
+                    or (ctx.doc_identifier in chunk_id_refs)
+                ]
+                if filtered:
+                    target_contexts = filtered
+
+            for idx, context in enumerate(target_contexts):
+                contribution = _ChunkContribution(
+                    occurrences=occurrence_value if idx == 0 else 0,
+                    llm_score=float(llm_score_value),
+                    reason=reason_text,
+                    generated=True,
+                    word_count=len(phrase.split()),
+                    sample_snippet=str(sample_value).strip() if sample_value else None,
+                    sections=sections_value.copy(),
+                    sources=sources_value.copy(),
+                    languages=languages_value.copy(),
+                )
+                apply_contribution(phrase, contribution, context)
+
+    if embedding_service:
+        parameters["embedding_stats"] = embedding_stats
+    parameters["statistical_counts"] = statistical_stats
+    parameters["llm_summary"] = {
+        "used": llm_summary_used,
+        "chunks": len(summary_contexts),
+        "candidates": len(summary_entries),
+        "max_chars": llm_summary_max_chars,
+    }
+    if summary_debug:
+        parameters["llm_summary"]["debug"] = summary_debug
 
     candidates: List[ConceptCandidate] = []
     for phrase, aggregate in aggregates.items():
@@ -602,7 +1003,14 @@ def extract_concept_candidates(
         if doc_count == 0:
             doc_count = chunk_count
 
-        base_score = aggregate.score_frequency + aggregate.score_chunk + doc_count * 1.5
+        base_score = (
+            aggregate.score_frequency
+            + aggregate.score_chunk
+            + aggregate.score_statistical * statistical_weight
+            + aggregate.score_embedding * embedding_weight
+            + aggregate.score_llm * llm_weight
+            + doc_count * 1.5
+        )
         length_bonus = 1.0 + 0.2 * max(0, aggregate.word_count - 1)
         score = base_score * length_bonus
 
@@ -612,6 +1020,12 @@ def extract_concept_candidates(
             "document_coverage": round(doc_count * 1.5, 3),
             "length_bonus": round(length_bonus, 3),
         }
+        if aggregate.score_statistical:
+            score_breakdown["statistical"] = round(aggregate.score_statistical, 3)
+        if aggregate.score_embedding:
+            score_breakdown["embedding"] = round(aggregate.score_embedding, 3)
+        if aggregate.score_llm:
+            score_breakdown["llm"] = round(aggregate.score_llm, 3)
 
         languages = [language for language, _ in aggregate.languages.most_common()]
         sections = sorted(filter(None, aggregate.sections))[:5]
@@ -639,6 +1053,8 @@ def extract_concept_candidates(
                 score_breakdown=score_breakdown,
                 document_ids=sorted(aggregate.doc_ids),
                 chunk_ids=sorted(aggregate.chunk_ids),
+                reason=aggregate.reason,
+                generated=aggregate.generated,
             )
         )
 
@@ -822,6 +1238,7 @@ class KeywordLLMFilter:
         self._disable_reason: str | None = None
         self._last_debug: dict[str, object] = {}
         self._last_concept_debug: dict[str, object] = {}
+        self._last_summary_debug: dict[str, object] = {}
         reason: str | None = None
 
         if settings.is_openai_chat_backend:
@@ -1247,6 +1664,130 @@ class KeywordLLMFilter:
 
         return combined
 
+    def extract_summary_concepts(
+        self,
+        chunks: Sequence[KeywordSourceChunk],
+        *,
+        max_results: int = 10,
+        max_chars: int = 320,
+    ) -> List[dict[str, object]]:
+        self._last_summary_debug = {
+            "backend": self._backend,
+            "enabled": self._enabled,
+            "disable_reason": self._disable_reason,
+            "chunk_count": len(chunks),
+            "status": "pending",
+            "max_results": max_results,
+        }
+        if not chunks:
+            self._last_summary_debug.update({"status": "skipped", "reason": "no-chunks"})
+            return []
+        if not self._enabled:
+            self._last_summary_debug.update(
+                {"status": "bypass", "reason": self._disable_reason or "disabled"}
+            )
+            return []
+
+        prompt = self._build_summary_prompt(chunks, max_results=max_results, max_chars=max_chars)
+        try:
+            raw_response = self._invoke_backend(prompt)
+            self._last_summary_debug["response"] = raw_response
+        except Exception as exc:  # pragma: no cover - runtime guard
+            logger.warning("concept.llm.summary_invoke_failed backend=%s error=%s", self._backend, exc)
+            self._last_summary_debug.update({"status": "error", "reason": f"invoke_failed:{exc}"})
+            return []
+
+        parsed = self._parse_response(raw_response)
+        if parsed is None:
+            self._last_summary_debug.update({"status": "error", "reason": "json-parse-error"})
+            return []
+
+        concept_items, note = self._extract_concept_items(parsed)
+        if concept_items is None:
+            self._last_summary_debug.update({"status": "error", "reason": "missing-concepts-key"})
+            return []
+
+        normalized, rejected = self._normalize_concept_items(concept_items)
+        if note:
+            self._last_summary_debug["note"] = note
+        if rejected:
+            self._last_summary_debug["rejected"] = rejected[:20]
+            self._last_summary_debug["rejected_total"] = len(rejected)
+
+        trimmed = normalized[:max_results]
+        results: list[dict[str, object]] = []
+        for entry in trimmed:
+            phrase = str(entry.get("phrase", "")).strip()
+            if not phrase:
+                continue
+            results.append(
+                {
+                    "phrase": phrase,
+                    "importance": entry.get("importance"),
+                    "reason": entry.get("reason"),
+                    "chunk_ids": _coerce_str_list(entry.get("chunks")) or _coerce_str_list(entry.get("chunk_ids")),
+                    "doc_ids": _coerce_str_list(entry.get("documents")) or _coerce_str_list(entry.get("docs")),
+                    "sections": _coerce_str_list(entry.get("sections")),
+                    "sources": _coerce_str_list(entry.get("sources")),
+                    "languages": _coerce_str_list(entry.get("languages")),
+                    "sample": entry.get("sample") or entry.get("snippet") or entry.get("summary"),
+                    "occurrences": entry.get("occurrences"),
+                }
+            )
+
+        if not results:
+            self._last_summary_debug.update({"status": "error", "reason": "no-concepts-retained"})
+            return []
+
+        self._last_summary_debug.update(
+            {
+                "status": "success",
+                "selected_total": len(results),
+            }
+        )
+        return results
+
+    def _build_summary_prompt(
+        self,
+        chunks: Sequence[KeywordSourceChunk],
+        *,
+        max_results: int,
+        max_chars: int,
+    ) -> str:
+        excerpt_lines = []
+        for index, chunk in enumerate(chunks, 1):
+            chunk_id = chunk.chunk_id or f"chunk-{index}"
+            doc_id = chunk.doc_id or f"doc-{index}"
+            section = chunk.section_path or chunk.title or chunk.source or "general"
+            language = chunk.language or "unknown"
+            excerpt_lines.append(
+                f"{index}. chunk_id={chunk_id} | doc_id={doc_id} | section={section} | language={language}\n"
+                f"{chunk.excerpt(max_chars=max_chars)}"
+            )
+        excerpts_formatted = "\n\n".join(excerpt_lines)
+
+        instructions = (
+            "You are an expert knowledge analyst identifying key domain concepts from documentation excerpts. "
+            "Focus on concise noun phrases (2-5 words) that represent product names, features, issues, or procedures. "
+            "Avoid generic words like 'issue' or 'system'. Preserve any Korean phrases exactly as written."
+        )
+
+        prompt = (
+            f"{instructions}\n\n"
+            f"Return at most {max_results} concepts in strict JSON format:\n"
+            '{"concepts": [{"phrase": "...", "reason": "...", "importance": number, "chunks": ["chunk-id"], "sections": ["..."]}]}\n'
+            "Include optional 'importance' (higher is more important) and reference chunk IDs when relevant. "
+            "If multiple chunks mention the same concept, list their chunk IDs. Use short justifications."
+            "\n\nEXCERPTS:\n"
+            f"{excerpts_formatted}"
+        )
+
+        self._current_prompt = {
+            "system": instructions,
+            "user": prompt,
+        }
+        return prompt
+
     def _build_concept_prompt(
         self,
         concepts: Sequence[ConceptCandidate],
@@ -1662,10 +2203,15 @@ class KeywordLLMFilter:
         payload.update(self._last_debug)
         if self._last_concept_debug:
             payload.setdefault("concept_refinement", self._last_concept_debug)
+        if self._last_summary_debug:
+            payload.setdefault("concept_summary", self._last_summary_debug)
         return payload
 
     def concept_debug_payload(self) -> dict[str, object]:
         return dict(self._last_concept_debug)
+
+    def summary_debug_payload(self) -> dict[str, object]:
+        return dict(self._last_summary_debug)
 
     @staticmethod
     def _parse_response(raw_response: str) -> dict | None:
