@@ -29,10 +29,12 @@ from .fts import FTSIndex
 from . import local_ingest
 from .keywords import (
     ChunkPreparationResult,
+    ConceptClusteringResult,
     ConceptExtractionResult,
     KeywordCandidate,
     KeywordLLMFilter,
     build_excerpt,
+    cluster_concepts,
     extract_concept_candidates,
     extract_keyword_candidates,
     prepare_keyword_chunks,
@@ -967,6 +969,7 @@ def create_app(
         if concept_stage.candidates:
             refined_concepts = llm_filter.refine_concepts(concept_stage.candidates, context_snippets)
             concept_stage = concept_stage.replace_candidates(refined_concepts)
+        cluster_stage: ConceptClusteringResult = cluster_concepts(concept_stage.candidates)
         original_count = len(keywords)
         debug_payload: dict[str, object] = {}
         if llm_filter.enabled:
@@ -1008,6 +1011,7 @@ def create_app(
         concept_llm_debug = llm_filter.concept_debug_payload()
         if concept_llm_debug:
             concept_debug["llm"] = concept_llm_debug
+        cluster_debug = cluster_stage.to_debug_payload(limit=6)
 
         if not keywords and concept_stage.candidates:
             fallback_candidates = []
@@ -1025,7 +1029,12 @@ def create_app(
                 )
             keywords = fallback_candidates
 
-        debug_payload = {**llm_debug, "chunking": chunk_debug, "stage2": concept_debug}
+        debug_payload = {
+            **llm_debug,
+            "chunking": chunk_debug,
+            "stage2": concept_debug,
+            "stage3": cluster_debug,
+        }
         debug_payload.setdefault("candidate_count", original_count)
 
         logger.info(

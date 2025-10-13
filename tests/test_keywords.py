@@ -8,6 +8,7 @@ from cornerstone.keywords import (
     KeywordCandidate,
     KeywordLLMFilter,
     KeywordSourceChunk,
+    cluster_concepts,
     extract_concept_candidates,
     extract_keyword_candidates,
     prepare_keyword_chunks,
@@ -101,6 +102,8 @@ def test_extract_concept_candidates_promotes_multiword_phrases() -> None:
     assert login_error.occurrences >= 2
     assert login_error.score > 0
     assert login_error.score_breakdown["frequency"] >= 2
+    assert set(login_error.document_ids) == {"doc-1", "doc-2"}
+    assert set(login_error.chunk_ids) >= {"doc-1:0", "doc-2:0"}
 
 
 def test_extract_concept_candidates_filters_stopwords() -> None:
@@ -369,6 +372,111 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
     assert settings.ollama_model == "llama3.1:test"
     assert settings.keyword_filter_max_results == 7
     assert settings.is_ollama_chat_backend
+
+
+def test_cluster_concepts_groups_similar_phrases() -> None:
+    concepts = [
+        ConceptCandidate(
+            phrase="login error",
+            score=10.0,
+            occurrences=4,
+            document_count=2,
+            chunk_count=3,
+            average_occurrence_per_chunk=1.33,
+            word_count=2,
+            languages=["en"],
+            sections=["Login / Errors"],
+            sources=["guide.md"],
+            sample_snippet="Login error handling steps.",
+            score_breakdown={"frequency": 4.0},
+            document_ids=["doc-1", "doc-2"],
+            chunk_ids=["doc-1:0", "doc-2:0"],
+        ),
+        ConceptCandidate(
+            phrase="login authentication failure",
+            score=8.0,
+            occurrences=3,
+            document_count=2,
+            chunk_count=2,
+            average_occurrence_per_chunk=1.5,
+            word_count=3,
+            languages=["en"],
+            sections=["Login / Failures"],
+            sources=["runbook.md"],
+            sample_snippet="Authentication failures cause login errors.",
+            score_breakdown={"frequency": 3.0},
+            document_ids=["doc-3"],
+            chunk_ids=["doc-3:0"],
+        ),
+        ConceptCandidate(
+            phrase="payment outage",
+            score=6.0,
+            occurrences=2,
+            document_count=1,
+            chunk_count=1,
+            average_occurrence_per_chunk=2.0,
+            word_count=2,
+            languages=["en"],
+            sections=["Payments"],
+            sources=["finance.md"],
+            sample_snippet="Payment outage troubleshooting.",
+            score_breakdown={"frequency": 2.0},
+            document_ids=["doc-4"],
+            chunk_ids=["doc-4:0"],
+        ),
+    ]
+
+    result = cluster_concepts(concepts, similarity_threshold=0.5)
+    assert result.clusters
+    top_labels = {cluster.label for cluster in result.clusters}
+    assert "login error" in top_labels or "login authentication failure" in top_labels
+
+    login_cluster = next(cluster for cluster in result.clusters if "login" in cluster.label)
+    member_phrases = {member.phrase for member in login_cluster.members}
+    assert {
+        "login error",
+        "login authentication failure",
+    } <= member_phrases
+    assert login_cluster.document_count >= 2
+    assert login_cluster.score >= 18.0
+
+
+def test_cluster_concepts_handles_korean() -> None:
+    concepts = [
+        ConceptCandidate(
+            phrase="로그인 오류",
+            score=7.0,
+            occurrences=3,
+            document_count=2,
+            chunk_count=2,
+            average_occurrence_per_chunk=1.5,
+            word_count=3,
+            languages=["ko"],
+            sections=["로그인"],
+            sources=["guide.md"],
+            sample_snippet="로그인 오류 해결 단계.",
+            score_breakdown={"frequency": 3.0},
+        ),
+        ConceptCandidate(
+            phrase="결제 오류",
+            score=5.0,
+            occurrences=2,
+            document_count=1,
+            chunk_count=1,
+            average_occurrence_per_chunk=2.0,
+            word_count=3,
+            languages=["ko"],
+            sections=["결제"],
+            sources=["billing.md"],
+            sample_snippet="결제 오류 처리 절차.",
+            score_breakdown={"frequency": 2.0},
+        ),
+    ]
+
+    result = cluster_concepts(concepts, similarity_threshold=0.6)
+    assert len(result.clusters) == 2
+    labels = {cluster.label for cluster in result.clusters}
+    assert labels == {"로그인 오류", "결제 오류"}
 
 
 def test_filter_keywords_limits_and_normalises(monkeypatch) -> None:

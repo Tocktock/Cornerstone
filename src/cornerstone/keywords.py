@@ -174,6 +174,8 @@ class ConceptCandidate:
     score_breakdown: dict[str, float] = field(default_factory=dict)
     reason: str | None = None
     generated: bool = False
+    document_ids: List[str] = field(default_factory=list)
+    chunk_ids: List[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -232,6 +234,79 @@ class _CandidateAggregate:
     score_frequency: float = 0.0
     score_chunk: float = 0.0
     word_count: int = 0
+
+
+@dataclass(slots=True)
+class ConceptCluster:
+    """Represents a consolidated concept grouping after Stage 3."""
+
+    label: str
+    score: float
+    occurrences: int
+    document_count: int
+    chunk_count: int
+    languages: List[str]
+    sections: List[str]
+    sources: List[str]
+    members: List[ConceptCandidate]
+    score_breakdown: dict[str, float]
+
+
+@dataclass(slots=True)
+class ConceptClusteringResult:
+    clusters: List[ConceptCluster]
+    parameters: dict[str, Any]
+
+    def to_debug_payload(self, *, limit: int = 8) -> dict[str, Any]:
+        top = []
+        for cluster in self.clusters[:limit]:
+            top.append(
+                {
+                    "label": cluster.label,
+                    "score": round(cluster.score, 3),
+                    "occurrences": cluster.occurrences,
+                    "documents": cluster.document_count,
+                    "chunks": cluster.chunk_count,
+                    "members": [member.phrase for member in cluster.members[:5]],
+                }
+            )
+        return {
+            "total_clusters": len(self.clusters),
+            "parameters": self.parameters,
+            "top_clusters": top,
+        }
+
+
+@dataclass(slots=True)
+class _ClusterBuilder:
+    label: str
+    score: float
+    occurrences: int
+    document_ids: set[str]
+    chunk_ids: set[str]
+    languages: Counter[str]
+    sections: set[str]
+    sources: set[str]
+    members: List[ConceptCandidate]
+    tokens: set[str]
+
+    def add(self, candidate: ConceptCandidate, *, tokens: set[str]) -> None:
+        self.members.append(candidate)
+        self.score += candidate.score
+        self.occurrences += candidate.occurrences
+        self.tokens |= tokens
+        self.languages.update(candidate.languages)
+        self.sections.update(candidate.sections)
+        self.sources.update(candidate.sources)
+        if candidate.document_ids:
+            self.document_ids.update(candidate.document_ids)
+        elif candidate.document_count:
+            self.document_ids.update({f"doc-{len(self.document_ids) + i}" for i in range(candidate.document_count)})
+        if candidate.chunk_ids:
+            self.chunk_ids.update(candidate.chunk_ids)
+        elif candidate.chunk_count:
+            self.chunk_ids.update({f"chunk-{len(self.chunk_ids) + i}" for i in range(candidate.chunk_count)})
+        self.label = max(self.members, key=lambda item: item.score).phrase
 
 def _normalize_language(value: object) -> str | None:
     if isinstance(value, str):
@@ -364,6 +439,45 @@ def _tokenize_chunk_for_candidates(chunk: KeywordSourceChunk) -> List[str]:
             continue
         tokens.append(token)
     return tokens
+
+
+def _phrase_tokens_for_clustering(phrase: str) -> set[str]:
+    tokens: list[str] = []
+    for match in _WORD_RE.finditer(phrase):
+        token = match.group().strip("'-")
+        if not token:
+            continue
+        normalized = token.lower() if token.isascii() else token
+        if normalized in _STOPWORDS:
+            continue
+        tokens.append(normalized)
+    if not tokens:
+        normalized_phrase = phrase.strip().lower()
+        if normalized_phrase:
+            tokens.append(normalized_phrase)
+    return set(tokens)
+
+
+def _jaccard_similarity(left: set[str], right: set[str]) -> float:
+    if not left or not right:
+        return 0.0
+    intersection = left & right
+    if not intersection:
+        return 0.0
+    union = left | right
+    return len(intersection) / len(union)
+
+
+def _token_overlap_similarity(left: set[str], right: set[str]) -> float:
+    if not left or not right:
+        return 0.0
+    intersection = left & right
+    if not intersection:
+        return 0.0
+    denominator = min(len(left), len(right))
+    if denominator == 0:
+        return 0.0
+    return len(intersection) / denominator
 
 
 def _is_valid_unigram(token: str, *, min_char_length: int) -> bool:
@@ -523,6 +637,8 @@ def extract_concept_candidates(
                 sources=sources,
                 sample_snippet=sample_snippet,
                 score_breakdown=score_breakdown,
+                document_ids=sorted(aggregate.doc_ids),
+                chunk_ids=sorted(aggregate.chunk_ids),
             )
         )
 
@@ -541,6 +657,103 @@ def extract_concept_candidates(
         total_tokens=total_tokens,
         parameters=parameters,
     )
+
+
+def cluster_concepts(
+    concepts: Sequence[ConceptCandidate],
+    *,
+    similarity_threshold: float = 0.35,
+    max_clusters: int = 200,
+) -> ConceptClusteringResult:
+    if not concepts:
+        return ConceptClusteringResult(clusters=[], parameters={"similarity_threshold": similarity_threshold})
+
+    parameters = {
+        "similarity_threshold": similarity_threshold,
+        "max_clusters": max_clusters,
+    }
+
+    builders: list[_ClusterBuilder] = []
+
+    for concept in concepts:
+        tokens = _phrase_tokens_for_clustering(concept.phrase)
+        if not tokens:
+            tokens = {concept.phrase.lower()}
+
+        best_builder: _ClusterBuilder | None = None
+        best_similarity = 0.0
+
+        for builder in builders:
+            similarity = max(
+                _jaccard_similarity(tokens, builder.tokens),
+                _token_overlap_similarity(tokens, builder.tokens),
+            )
+            if similarity > best_similarity:
+                best_similarity = similarity
+                best_builder = builder
+
+        if best_builder and best_similarity >= similarity_threshold:
+            best_builder.add(concept, tokens=tokens)
+            continue
+
+        if len(builders) >= max_clusters:
+            target = best_builder or max(builders, key=lambda item: item.score)
+            target.add(concept, tokens=tokens)
+            continue
+
+        builder = _ClusterBuilder(
+            label=concept.phrase,
+            score=concept.score,
+            occurrences=concept.occurrences,
+            document_ids=set(concept.document_ids or []),
+            chunk_ids=set(concept.chunk_ids or []),
+            languages=Counter(concept.languages),
+            sections=set(concept.sections),
+            sources=set(concept.sources),
+            members=[concept],
+            tokens=set(tokens),
+        )
+        builders.append(builder)
+
+    clusters: list[ConceptCluster] = []
+    for builder in builders:
+        members = sorted(builder.members, key=lambda item: (-item.score, item.phrase))
+        label = builder.label or members[0].phrase
+        document_count = len(builder.document_ids) or max((member.document_count for member in members), default=0)
+        chunk_count = len(builder.chunk_ids) or max((member.chunk_count for member in members), default=0)
+        languages = [language for language, _ in builder.languages.most_common()]
+        sections = sorted(builder.sections)[:5]
+        sources = sorted(builder.sources)[:5]
+        score_breakdown = {
+            "member_count": len(members),
+            "total_score": round(builder.score, 3),
+            "avg_score": round(builder.score / max(1, len(members)), 3),
+        }
+        clusters.append(
+            ConceptCluster(
+                label=label,
+                score=builder.score,
+                occurrences=builder.occurrences,
+                document_count=document_count,
+                chunk_count=chunk_count,
+                languages=languages,
+                sections=sections,
+                sources=sources,
+                members=members,
+                score_breakdown=score_breakdown,
+            )
+        )
+
+    clusters.sort(
+        key=lambda cluster: (
+            -cluster.score,
+            -cluster.document_count,
+            -cluster.occurrences,
+            cluster.label,
+        )
+    )
+
+    return ConceptClusteringResult(clusters=clusters, parameters=parameters)
 
 
 def extract_keyword_candidates(
@@ -1663,10 +1876,13 @@ class KeywordLLMFilter:
 __all__ = [
     "ChunkPreparationResult",
     "ConceptCandidate",
+    "ConceptCluster",
+    "ConceptClusteringResult",
     "ConceptExtractionResult",
     "KeywordCandidate",
     "KeywordLLMFilter",
     "KeywordSourceChunk",
+    "cluster_concepts",
     "extract_concept_candidates",
     "extract_keyword_candidates",
     "prepare_keyword_chunks",
