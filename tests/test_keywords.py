@@ -4,6 +4,7 @@ import json
 
 from cornerstone.config import Settings
 from cornerstone.keywords import (
+    ConceptCandidate,
     KeywordCandidate,
     KeywordLLMFilter,
     KeywordSourceChunk,
@@ -164,6 +165,210 @@ def _build_enabled_filter(keyword_payload: dict, monkeypatch) -> KeywordLLMFilte
     response = json.dumps(keyword_payload)
     monkeypatch.setattr(KeywordLLMFilter, "_invoke_backend", lambda self, _: response)
     return filter_instance
+
+
+def test_refine_concepts_applies_llm(monkeypatch) -> None:
+    settings = Settings(
+        chat_backend="ollama",
+        ollama_base_url="http://localhost:11434",
+        ollama_model="mock-keywords",
+        keyword_filter_max_results=5,
+    )
+    filter_instance = KeywordLLMFilter(settings)
+
+    concepts = [
+        ConceptCandidate(
+            phrase="login error",
+            score=9.0,
+            occurrences=4,
+            document_count=2,
+            chunk_count=3,
+            average_occurrence_per_chunk=1.33,
+            word_count=2,
+            languages=["en"],
+            sections=["Login / Errors"],
+            sources=["guide.md"],
+            sample_snippet="Login error handling steps.",
+            score_breakdown={"frequency": 4.0},
+        ),
+        ConceptCandidate(
+            phrase="system",
+            score=4.0,
+            occurrences=5,
+            document_count=3,
+            chunk_count=4,
+            average_occurrence_per_chunk=1.25,
+            word_count=1,
+            languages=["en"],
+            sections=["General"],
+            sources=["reference.md"],
+            sample_snippet="General system notes.",
+            score_breakdown={"frequency": 5.0},
+        ),
+    ]
+
+    payload = {
+        "concepts": [
+            {
+                "phrase": "login error",
+                "keep": True,
+                "label": "login authentication error",
+                "importance": 15,
+                "reason": "Critical recurring issue",
+            },
+            {
+                "phrase": "system",
+                "keep": False,
+                "reason": "Too generic",
+            },
+            {
+                "phrase": "SSO session timeout",
+                "keep": True,
+                "generated": True,
+                "importance": 12,
+                "reason": "Appears in context snippets",
+            },
+        ]
+    }
+
+    monkeypatch.setattr(KeywordLLMFilter, "_invoke_backend", lambda self, _: json.dumps(payload))
+
+    refined = filter_instance.refine_concepts(concepts, ["SSO login error occurs after timeout"])
+
+    phrases = [candidate.phrase for candidate in refined]
+    assert "login authentication error" in phrases
+    assert "system" not in phrases
+    generated = next(candidate for candidate in refined if candidate.generated)
+    assert generated.phrase == "SSO session timeout"
+
+    debug = filter_instance.concept_debug_payload()
+    assert debug.get("status") == "refined"
+    assert "login authentication error" in debug.get("kept", [])
+
+
+def test_refine_concepts_openai_backend(monkeypatch) -> None:
+    from cornerstone import keywords as ck
+
+    dummy_output = json.dumps(
+        {
+            "concepts": [
+                {
+                    "phrase": "login error",
+                    "keep": True,
+                    "label": "login authentication failure",
+                    "importance": 18,
+                    "reason": "Dominant incident pattern",
+                },
+                {
+                    "phrase": "system",
+                    "keep": False,
+                },
+                {
+                    "phrase": "SSO handshake timeout",
+                    "keep": True,
+                    "generated": True,
+                    "importance": 11,
+                    "reason": "Appears in troubleshooting steps",
+                },
+            ]
+        }
+    )
+
+    class DummyResponses:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, object]] = []
+
+        def create(self, *, model: str, input):
+            self.calls.append({"model": model, "input": input})
+            return type("Resp", (), {"output": [], "output_text": dummy_output})
+
+    class DummyOpenAI:
+        def __init__(self, *_, **__):
+            self.responses = DummyResponses()
+
+    monkeypatch.setattr(ck, "OpenAI", DummyOpenAI, raising=False)
+
+    settings = Settings(
+        chat_backend="openai",
+        openai_api_key="sk-test",
+        openai_chat_model="gpt-test",
+        keyword_filter_max_results=5,
+    )
+
+    filter_instance = KeywordLLMFilter(settings)
+    assert filter_instance.enabled
+    assert filter_instance.backend == "openai"
+
+    concepts = [
+        ConceptCandidate(
+            phrase="login error",
+            score=8.0,
+            occurrences=3,
+            document_count=2,
+            chunk_count=3,
+            average_occurrence_per_chunk=1.0,
+            word_count=2,
+            languages=["en"],
+            sections=["Login / Errors"],
+            sources=["guide.md"],
+            sample_snippet="Login error handling steps.",
+            score_breakdown={"frequency": 3.0},
+        ),
+        ConceptCandidate(
+            phrase="system",
+            score=5.0,
+            occurrences=5,
+            document_count=3,
+            chunk_count=4,
+            average_occurrence_per_chunk=1.25,
+            word_count=1,
+            languages=["en"],
+            sections=["General"],
+            sources=["reference.md"],
+            sample_snippet="General system notes.",
+            score_breakdown={"frequency": 5.0},
+        ),
+    ]
+
+    refined = filter_instance.refine_concepts(concepts, ["Login errors spike after SSO handshake timing out."])
+
+    phrases = [candidate.phrase for candidate in refined]
+    assert "login authentication failure" in phrases
+    assert "system" not in phrases
+    generated = next(candidate for candidate in refined if candidate.generated)
+    assert generated.phrase == "SSO handshake timeout"
+    assert generated.reason == "Appears in troubleshooting steps"
+
+    responses_stub = filter_instance._openai_client.responses  # type: ignore[attr-defined]
+    assert getattr(responses_stub, "calls", None)
+    call = responses_stub.calls[0]
+    assert call["model"] == "gpt-test"
+    assert isinstance(call["input"], list)
+
+    debug = filter_instance.concept_debug_payload()
+    assert debug.get("backend") == "openai"
+    assert debug.get("status") == "refined"
+
+
+def test_settings_from_env_prefers_env(monkeypatch) -> None:
+    env_vars = {
+        "CHAT_BACKEND": "ollama",
+        "OLLAMA_BASE_URL": "http://localhost:9999",
+        "OLLAMA_MODEL": "llama3.1:test",
+        "KEYWORD_FILTER_MAX_RESULTS": "7",
+    }
+    for key in env_vars:
+        monkeypatch.delenv(key, raising=False)
+    for key, value in env_vars.items():
+        monkeypatch.setenv(key, value)
+
+    settings = Settings.from_env()
+
+    assert settings.chat_backend == "ollama"
+    assert settings.ollama_base_url == "http://localhost:9999"
+    assert settings.ollama_model == "llama3.1:test"
+    assert settings.keyword_filter_max_results == 7
+    assert settings.is_ollama_chat_backend
 
 
 def test_filter_keywords_limits_and_normalises(monkeypatch) -> None:

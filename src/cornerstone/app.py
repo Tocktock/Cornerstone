@@ -963,6 +963,10 @@ def create_app(
         context_snippets: list[str] = [chunk.excerpt(max_chars=400) for chunk in chunks[:5]]
 
         llm_filter = KeywordLLMFilter(settings)
+
+        if concept_stage.candidates:
+            refined_concepts = llm_filter.refine_concepts(concept_stage.candidates, context_snippets)
+            concept_stage = concept_stage.replace_candidates(refined_concepts)
         original_count = len(keywords)
         debug_payload: dict[str, object] = {}
         if llm_filter.enabled:
@@ -1001,6 +1005,9 @@ def create_app(
             chunk_debug["sample_excerpts"] = sample_excerpts
 
         concept_debug = concept_stage.to_debug_payload(limit=8)
+        concept_llm_debug = llm_filter.concept_debug_payload()
+        if concept_llm_debug:
+            concept_debug["llm"] = concept_llm_debug
 
         if not keywords and concept_stage.candidates:
             fallback_candidates = []
