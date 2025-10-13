@@ -6,7 +6,7 @@ import json
 import logging
 import re
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Iterable, List, Mapping, Sequence
 
 import httpx
@@ -172,6 +172,8 @@ class ConceptCandidate:
     sources: List[str]
     sample_snippet: str | None
     score_breakdown: dict[str, float] = field(default_factory=dict)
+    reason: str | None = None
+    generated: bool = False
 
 
 @dataclass(slots=True)
@@ -186,16 +188,18 @@ class ConceptExtractionResult:
     def summary(self, *, limit: int = 5) -> List[dict[str, Any]]:
         items: List[dict[str, Any]] = []
         for candidate in self.candidates[:limit]:
-            items.append(
-                {
-                    "phrase": candidate.phrase,
-                    "score": round(candidate.score, 3),
-                    "occurrences": candidate.occurrences,
-                    "documents": candidate.document_count,
-                    "chunks": candidate.chunk_count,
-                    "sample": candidate.sample_snippet,
-                }
-            )
+            entry = {
+                "phrase": candidate.phrase,
+                "score": round(candidate.score, 3),
+                "occurrences": candidate.occurrences,
+                "documents": candidate.document_count,
+                "chunks": candidate.chunk_count,
+                "sample": candidate.sample_snippet,
+                "generated": candidate.generated,
+            }
+            if candidate.reason:
+                entry["reason"] = candidate.reason
+            items.append(entry)
         return items
 
     def to_debug_payload(self, *, limit: int = 10) -> dict[str, Any]:
@@ -206,6 +210,14 @@ class ConceptExtractionResult:
             "parameters": self.parameters,
             "top_candidates": self.summary(limit=limit),
         }
+
+    def replace_candidates(self, candidates: Sequence[ConceptCandidate]) -> ConceptExtractionResult:
+        return ConceptExtractionResult(
+            candidates=list(candidates),
+            total_chunks=self.total_chunks,
+            total_tokens=self.total_tokens,
+            parameters=dict(self.parameters),
+        )
 
 
 @dataclass(slots=True)
@@ -236,6 +248,35 @@ def _coerce_optional_int(value: object) -> int | None:
         return int(value)
     except (TypeError, ValueError):
         return None
+
+
+def _coerce_float(value: object) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    try:
+        return float(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def _coerce_str_list(value: object) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        parts = re.split(r"[,\n;]+", value)
+        return [part.strip() for part in parts if part.strip()]
+    if isinstance(value, (list, tuple, set)):
+        result: list[str] = []
+        for item in value:
+            if item is None:
+                continue
+            text = str(item).strip()
+            if text:
+                result.append(text)
+        return result
+    return []
 
 
 def _safe_str(value: object) -> str | None:
@@ -567,6 +608,7 @@ class KeywordLLMFilter:
         self._current_prompt: dict[str, str] | None = None
         self._disable_reason: str | None = None
         self._last_debug: dict[str, object] = {}
+        self._last_concept_debug: dict[str, object] = {}
         reason: str | None = None
 
         if settings.is_openai_chat_backend:
@@ -797,6 +839,408 @@ class KeywordLLMFilter:
         )
         return final_candidates or list(candidates)
 
+    def refine_concepts(
+        self,
+        concepts: Sequence[ConceptCandidate],
+        context_snippets: Sequence[str],
+        *,
+        limit: int = 15,
+    ) -> List[ConceptCandidate]:
+        self._last_concept_debug = {
+            "backend": self._backend,
+            "enabled": self._enabled,
+            "disable_reason": self._disable_reason,
+            "candidate_count": len(concepts),
+            "limit": limit,
+            "status": "pending",
+        }
+        if not concepts:
+            self._last_concept_debug.update({"status": "skipped", "reason": "no-concepts"})
+            return list(concepts)
+        if not self._enabled:
+            self._last_concept_debug.update(
+                {"status": "bypass", "reason": self._disable_reason or "disabled"}
+            )
+            return list(concepts)
+
+        limited_concepts = list(concepts[:limit])
+        evaluated_keys = {concept.phrase.lower(): concept for concept in limited_concepts}
+
+        prompt = self._build_concept_prompt(limited_concepts, context_snippets)
+        try:
+            raw_response = self._invoke_backend(prompt)
+            self._last_concept_debug["response"] = raw_response
+        except Exception as exc:  # pragma: no cover - runtime guard
+            logger.warning("concept.llm.invoke_failed backend=%s error=%s", self._backend, exc)
+            self._last_concept_debug.update({"status": "error", "reason": f"invoke_failed:{exc}"})
+            return list(concepts)
+
+        parsed = self._parse_response(raw_response)
+        if parsed is None:
+            self._last_concept_debug.update({"status": "error", "reason": "json-parse-error"})
+            return list(concepts)
+
+        concept_items, note = self._extract_concept_items(parsed)
+        if concept_items is None:
+            self._last_concept_debug.update({"status": "error", "reason": "missing-concepts-key"})
+            return list(concepts)
+
+        normalized_items, rejected_items = self._normalize_concept_items(concept_items)
+        if note:
+            self._last_concept_debug["note"] = note
+        self._last_concept_debug["llm_entries_total"] = len(normalized_items)
+
+        concept_map = {concept.phrase.lower(): concept for concept in limited_concepts}
+        refined: list[ConceptCandidate] = []
+        dropped: list[str] = []
+        kept: list[str] = []
+        renamed: list[dict[str, str]] = []
+        generated: list[str] = []
+        seen: set[str] = set()
+
+        for entry in normalized_items:
+            phrase = str(entry.get("phrase", "")).strip()
+            if not phrase:
+                continue
+            keep_flag = bool(entry.get("keep", True))
+            label = str(entry.get("label", "")).strip()
+            new_phrase = label or phrase
+            importance = _coerce_float(entry.get("importance"))
+            reason = str(entry.get("reason", "")).strip() or None
+            generated_flag = bool(entry.get("generated", False))
+            sections = _coerce_str_list(entry.get("sections"))
+            languages = _coerce_str_list(entry.get("languages"))
+            sources = _coerce_str_list(entry.get("sources"))
+            occurrences = _coerce_optional_int(entry.get("occurrences")) or 1
+            document_count = _coerce_optional_int(entry.get("documents")) or _coerce_optional_int(
+                entry.get("docs")
+            )
+            chunk_count = _coerce_optional_int(entry.get("chunks")) or _coerce_optional_int(
+                entry.get("chunk_count")
+            )
+            if chunk_count is None:
+                chunk_count = occurrences
+            if document_count is None:
+                document_count = max(1, min(occurrences, chunk_count))
+
+            phrase_key = phrase.lower()
+            base_candidate = concept_map.get(phrase_key)
+
+            if not keep_flag:
+                dropped.append(phrase)
+                continue
+
+            if base_candidate is None and phrase_key in concept_map:
+                base_candidate = concept_map[phrase_key]
+
+            if base_candidate is not None:
+                updated_phrase = new_phrase or base_candidate.phrase
+                breakdown = dict(base_candidate.score_breakdown)
+                new_score = base_candidate.score
+                if importance is not None:
+                    breakdown["llm_importance"] = round(importance, 3)
+                    new_score = max(new_score, float(importance))
+                updated_candidate = replace(
+                    base_candidate,
+                    phrase=updated_phrase,
+                    score=new_score,
+                    score_breakdown=breakdown,
+                    reason=reason or base_candidate.reason,
+                    generated=False,
+                )
+                if sections:
+                    updated_candidate.sections = sections
+                if languages:
+                    updated_candidate.languages = languages
+                if sources:
+                    updated_candidate.sources = sources
+                kept.append(updated_phrase)
+                if updated_phrase.lower() != base_candidate.phrase.lower():
+                    renamed.append({"from": base_candidate.phrase, "to": updated_phrase})
+                normalized_key = updated_candidate.phrase.lower()
+                if normalized_key not in seen:
+                    refined.append(updated_candidate)
+                    seen.add(normalized_key)
+                continue
+
+            # New concept suggested by the LLM.
+            word_count = max(1, len(new_phrase.split()))
+            new_score = importance if importance is not None else float(occurrences)
+            avg_per_chunk = occurrences / max(1, chunk_count)
+            breakdown = {"llm_importance": round(new_score, 3)}
+            candidate = ConceptCandidate(
+                phrase=new_phrase,
+                score=new_score,
+                occurrences=max(1, occurrences),
+                document_count=max(1, document_count),
+                chunk_count=max(1, chunk_count),
+                average_occurrence_per_chunk=avg_per_chunk,
+                word_count=word_count,
+                languages=languages or ["unknown"],
+                sections=sections[:5],
+                sources=sources[:5],
+                sample_snippet=None,
+                score_breakdown=breakdown,
+                reason=reason,
+                generated=True,
+            )
+            normalized_key = candidate.phrase.lower()
+            if normalized_key not in seen:
+                refined.append(candidate)
+                seen.add(normalized_key)
+                generated.append(candidate.phrase)
+
+        if not refined:
+            self._last_concept_debug.update(
+                {
+                    "status": "error",
+                    "reason": "no-concepts-retained",
+                    "rejected": rejected_items[:20],
+                    "note": note,
+                }
+            )
+            return list(concepts)
+
+        unreviewed = [
+            concept
+            for concept in concepts
+            if concept.phrase.lower() not in evaluated_keys or concept.phrase.lower() in seen
+        ]
+
+        combined = refined + [candidate for candidate in unreviewed if candidate.phrase.lower() not in seen]
+        combined.sort(
+            key=lambda item: (
+                -item.score,
+                -item.document_count,
+                -item.occurrences,
+                item.phrase,
+            )
+        )
+
+        self._last_concept_debug.update(
+            {
+                "status": "refined",
+                "kept": kept,
+                "generated": generated,
+                "dropped": dropped,
+                "renamed": renamed,
+                "note": note,
+                "rejected": rejected_items[:20],
+                "rejected_total": len(rejected_items),
+                "selected_total": len(refined),
+                "final_total": len(combined),
+            }
+        )
+
+        return combined
+
+    def _build_concept_prompt(
+        self,
+        concepts: Sequence[ConceptCandidate],
+        context_snippets: Sequence[str],
+    ) -> str:
+        concept_lines = []
+        for index, concept in enumerate(concepts, 1):
+            sections = ", ".join(concept.sections[:2]) if concept.sections else "n/a"
+            languages = ", ".join(concept.languages[:3]) if concept.languages else "unknown"
+            concept_lines.append(
+                f"{index}. '{concept.phrase}' | score={concept.score:.2f} | occurrences={concept.occurrences} | docs={concept.document_count} | chunks={concept.chunk_count} | sections={sections} | languages={languages}"
+            )
+        formatted_concepts = "\n".join(concept_lines) if concept_lines else "(no candidates)"
+
+        if context_snippets:
+            formatted_context = "\n".join(
+                f"{idx + 1}. {snippet[:400]}" for idx, snippet in enumerate(context_snippets)
+            )
+        else:
+            formatted_context = "(No additional context provided)"
+
+        instructions = (
+            "You are an expert knowledge analyst reviewing candidate domain concepts extracted from a bilingual corpus. "
+            "Decide which concepts are most meaningful, optionally rewrite names for clarity, and drop overly generic items. "
+            "Preserve Hangul when provided; do not transliterate Korean terms."
+        )
+
+        prompt = (
+            f"PROJECT CONTEXT:\n{formatted_context}\n\n"
+            f"CANDIDATE CONCEPTS:\n{formatted_concepts}\n\n"
+            "Respond with strict JSON: {\"concepts\": [...]} where each item includes: \n"
+            "  - phrase: the original concept phrase you are evaluating\n"
+            "  - keep: true or false\n"
+            "  - label: optional improved name (same language)\n"
+            "  - reason: short justification\n"
+            "  - importance: optional numeric score (higher means more important)\n"
+            "  - generated: true if you introduce a new concept that was missing\n"
+            "You may add a few important missing concepts. Do not return more than 12 total items."
+        )
+
+        system_instructions = (
+            "You are a helpful assistant that curates domain concepts. " + instructions
+        )
+
+        self._current_prompt = {
+            "system": system_instructions,
+            "user": prompt,
+        }
+        return prompt
+
+    def _extract_concept_items(self, payload: object) -> tuple[list[object] | None, str | None]:
+        def _as_list(value: object) -> list[object] | None:
+            if value is None:
+                return None
+            if isinstance(value, list):
+                return list(value)
+            if isinstance(value, (tuple, set)):
+                return list(value)
+            if isinstance(value, dict):
+                return [value]
+            if isinstance(value, str):
+                items = [segment.strip() for segment in re.split(r"(?:\n|,)", value) if segment.strip()]
+                if items:
+                    return items
+            return None
+
+        note: str | None = None
+        if isinstance(payload, dict):
+            value: object | None = None
+            for key in ("concepts", "items", "keywords", "results", "data"):
+                if key in payload:
+                    value = payload[key]
+                    if key != "concepts":
+                        note = f"coerced-from-{key}"
+                    break
+            result = _as_list(value)
+            if result is not None:
+                if note is None and value is not None and not isinstance(value, list):
+                    note = "coerced-from-nonlist"
+                return result, note
+        elif isinstance(payload, list):
+            return list(payload), "coerced-from-root-list"
+        elif isinstance(payload, str):
+            result = _as_list(payload)
+            if result:
+                return result, "coerced-from-string"
+        return None, note
+
+    def _normalize_concept_items(self, items: Sequence[object]) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+        normalized: list[dict[str, object]] = []
+        rejected: list[dict[str, object]] = []
+
+        for raw in items:
+            entry = self._normalize_concept_entry(raw)
+            if not entry:
+                continue
+            keep = bool(entry.get("keep", True))
+            if keep:
+                normalized.append(entry)
+            else:
+                rejected.append(entry)
+        return normalized, rejected
+
+    def _normalize_concept_entry(self, raw: object) -> dict[str, object] | None:
+        if isinstance(raw, str):
+            phrase = raw.strip()
+            if not phrase:
+                return None
+            return {
+                "phrase": phrase,
+                "keep": True,
+            }
+
+        if isinstance(raw, dict):
+            phrase: str = ""
+            for key in ("phrase", "concept", "term", "keyword", "value", "name"):
+                value = raw.get(key)
+                if value is not None:
+                    phrase = str(value).strip()
+                    if phrase:
+                        break
+            if not phrase:
+                label_value = raw.get("label") or raw.get("title") or raw.get("display")
+                if label_value:
+                    phrase = str(label_value).strip()
+            if not phrase:
+                return None
+
+            keep_flag: bool | None = None
+            for key in ("keep", "include", "retain", "use", "selected", "accept", "should_keep"):
+                if key in raw:
+                    keep_flag = self._coerce_keep_flag(raw[key])
+                    break
+            if keep_flag is None:
+                keep_flag = True
+
+            label: str | None = None
+            for key in ("label", "display", "title", "canonical"):
+                value = raw.get(key)
+                if value is not None:
+                    text_value = str(value).strip()
+                    if text_value:
+                        label = text_value
+                        break
+
+            reason: str | None = None
+            for key in ("reason", "note", "explanation", "why"):
+                value = raw.get(key)
+                if value is not None:
+                    text_value = str(value).strip()
+                    if text_value:
+                        reason = text_value
+                        break
+
+            importance = None
+            for key in ("importance", "score", "weight", "priority"):
+                if key in raw:
+                    importance = _coerce_float(raw[key])
+                    if importance is not None:
+                        break
+
+            generated_flag = False
+            for key in ("generated", "new", "added", "suggested"):
+                if key in raw:
+                    generated_flag = bool(raw[key])
+                    break
+
+            sections = raw.get("sections") or raw.get("section")
+            languages = raw.get("languages") or raw.get("language")
+            sources = raw.get("sources") or raw.get("source")
+            occurrences = raw.get("occurrences") or raw.get("count")
+            documents = raw.get("documents") or raw.get("docs")
+            chunks = raw.get("chunks") or raw.get("chunk_count")
+
+            entry: dict[str, object] = {
+                "phrase": phrase,
+                "keep": bool(keep_flag),
+                "generated": generated_flag,
+            }
+            if label:
+                entry["label"] = label
+            if reason:
+                entry["reason"] = reason
+            if importance is not None:
+                entry["importance"] = importance
+            if sections is not None:
+                entry["sections"] = sections
+            if languages is not None:
+                entry["languages"] = languages
+            if sources is not None:
+                entry["sources"] = sources
+            if occurrences is not None:
+                entry["occurrences"] = occurrences
+            if documents is not None:
+                entry["documents"] = documents
+            if chunks is not None:
+                entry["chunks"] = chunks
+            return entry
+
+        if isinstance(raw, (tuple, set)):
+            items = list(raw)
+            if not items:
+                return None
+            return self._normalize_concept_entry(items[0])
+
+        return None
+
     def _extract_keyword_items(self, payload: object) -> tuple[list[object] | None, str | None]:
         """Return keyword entries from the LLM payload, coercing common variants."""
 
@@ -1003,7 +1447,12 @@ class KeywordLLMFilter:
             "max_results": self._max_results,
         }
         payload.update(self._last_debug)
+        if self._last_concept_debug:
+            payload.setdefault("concept_refinement", self._last_concept_debug)
         return payload
+
+    def concept_debug_payload(self) -> dict[str, object]:
+        return dict(self._last_concept_debug)
 
     @staticmethod
     def _parse_response(raw_response: str) -> dict | None:
