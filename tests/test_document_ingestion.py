@@ -535,6 +535,42 @@ def test_local_directories_response_includes_stats(tmp_path: Path):
     assert alpha["total_bytes"] >= len("Hello world".encode("utf-8"))
 
 
+def test_local_directories_supports_prefix_queries(tmp_path: Path):
+    settings = Settings(
+        data_dir=str(tmp_path),
+        default_project_name="Project One",
+        local_data_dir=str(tmp_path / "local"),
+    )
+    client = build_app(settings)
+
+    local_root = Path(client.app.state.services.settings.local_data_dir)
+    (local_root / "alpha" / "beta").mkdir(parents=True)
+    (local_root / "alpha" / "briefs").mkdir(parents=True)
+    (local_root / "alpha" / "beta" / "guide.md").write_text("content", encoding="utf-8")
+    (local_root / "alpha" / "briefs" / "notes.txt").write_text("content", encoding="utf-8")
+    (local_root / "alpine").mkdir(parents=True)
+    (local_root / "bravo").mkdir(parents=True)
+
+    response = client.get("/knowledge/local-directories", params={"path": "al"})
+    assert response.status_code == 200
+    root_matches = {entry["path"] for entry in response.json()["directories"]}
+    assert "alpha" in root_matches
+    assert "alpine" in root_matches
+    assert "bravo" not in root_matches
+
+    response = client.get("/knowledge/local-directories", params={"path": "alpha/b"})
+    assert response.status_code == 200
+    nested_matches = {entry["path"] for entry in response.json()["directories"]}
+    assert "alpha/beta" in nested_matches
+    assert "alpha/briefs" in nested_matches
+
+    response = client.get("/knowledge/local-directories", params={"path": "alpha/"})
+    assert response.status_code == 200
+    trailing_matches = {entry["path"] for entry in response.json()["directories"]}
+    assert "alpha/beta" in trailing_matches
+    assert "alpha/briefs" in trailing_matches
+
+
 def test_job_manager_throttles_when_project_over_limit():
     manager = IngestionJobManager(
         max_active_per_project=1,

@@ -31,6 +31,11 @@
       .keyword-pill.active:hover { color: #fff; }
       .keyword-count { font-size: 0.8rem; opacity: 0.75; }
       .status-line { color: #6b7280; font-size: 0.9rem; margin-top: 0.65rem; }
+      .progress-track { display: none; position: relative; height: 4px; border-radius: 999px; background: #e5e7eb; overflow: hidden; margin-top: 0.5rem; max-width: 280px; }
+      .progress-track.active { display: block; }
+      .progress-indicator { position: relative; height: 100%; width: 100%; overflow: hidden; border-radius: inherit; }
+      .progress-indicator::after { content: ""; position: absolute; inset: 0; width: 45%; background: linear-gradient(90deg, rgba(59,130,246,0.1), rgba(59,130,246,0.7), rgba(59,130,246,0.1)); animation: slide 1.2s ease-in-out infinite; border-radius: inherit; }
+      @keyframes slide { 0% { transform: translateX(-60%); } 50% { transform: translateX(140%); } 100% { transform: translateX(-60%); } }
       .detail-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
       .detail-header h2 { margin: 0; font-size: 1.4rem; }
       .detail-actions { display: flex; align-items: center; gap: 0.75rem; }
@@ -71,6 +76,7 @@
             {% endfor %}
           </select>
           <button id="keyword-search" class="primary" type="button">Search keywords</button>
+          <div id="keyword-progress" class="progress-track"><div class="progress-indicator"></div></div>
           <p id="keyword-status" class="status-line">Select a project and click search to generate keyword candidates.</p>
         </div>
         <div id="keyword-list" class="keyword-list" aria-live="polite"></div>
@@ -109,6 +115,7 @@
         const prevButton = document.getElementById('keyword-prev');
         const nextButton = document.getElementById('keyword-next');
         const paginationLabel = document.getElementById('keyword-page-label');
+        const keywordProgress = document.getElementById('keyword-progress');
         const keywordStatus = document.getElementById('keyword-status');
         const searchButton = document.getElementById('keyword-search');
         const detailTitle = document.getElementById('detail-title');
@@ -179,12 +186,20 @@
           return `Showing ${start}–${end} of ${total} keyword${total === 1 ? '' : 's'} (page ${pageNumber} of ${pages}).`;
         }
 
+        function setProgressActive(isActive) {
+          if (!keywordProgress) {
+            return;
+          }
+          keywordProgress.classList.toggle('active', Boolean(isActive));
+        }
+
         async function loadKeywords(page = 1) {
           const projectId = projectSelect.value;
           if (!projectId) {
             keywordStatus.textContent = 'Select a project first.';
             keywordStatus.style.color = '#b91c1c';
             keywordStatus.dataset.status = 'error';
+            setProgressActive(false);
             return;
           }
 
@@ -193,6 +208,7 @@
           keywordStatus.dataset.status = 'loading';
           keywordStatus.style.color = '#1f2937';
           keywordStatus.textContent = 'Scanning project documents for keywords...';
+          setProgressActive(true);
           clearKeywordList();
           clearDetail();
           selectedTerm = null;
@@ -277,6 +293,7 @@
             resetPaginationControls();
           } finally {
             searchButton.disabled = false;
+            setProgressActive(false);
           }
         }
 

@@ -5,7 +5,9 @@ from __future__ import annotations
 import json
 import logging
 import math
+import os
 import re
+import time
 from collections import Counter
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any, Iterable, List, Mapping, Sequence
@@ -72,7 +74,14 @@ _NORMALIZED_TEXT_CLEAN_RE = re.compile(r"[^\w\s\uAC00-\uD7A3\-\'\u2013\u2014/]+"
 _WHITESPACE_RE = re.compile(r"\s+")
 
 logger = logging.getLogger(__name__)
-if logger.level == logging.NOTSET:
+_configured_level = os.getenv("KEYWORD_LOG_LEVEL")
+if _configured_level:
+    level_value = getattr(logging, _configured_level.upper(), None)
+    if isinstance(level_value, int):
+        logger.setLevel(level_value)
+    elif logger.level == logging.NOTSET:
+        logger.setLevel(logging.INFO)
+elif logger.level == logging.NOTSET:
     logger.setLevel(logging.INFO)
 if not logger.handlers:
     handler = logging.StreamHandler()
@@ -695,12 +704,6 @@ def extract_concept_candidates(
     embedding_stats = {"chunks": 0, "phrases": 0, "errors": 0}
     statistical_stats = {"chunks": 0, "phrases": 0}
 
-    backend = getattr(embedding_service, "backend", None)
-    if backend is not None:
-        parameters["embedding_backend"] = getattr(backend, "name", str(backend))
-    parameters["embedding_enabled"] = embedding_service is not None
-    parameters["statistical_method"] = "rake" if max_statistical_phrases_per_chunk > 0 else "none"
-
     def apply_contribution(phrase: str, contribution: _ChunkContribution, context: _ChunkContext) -> None:
         if not phrase:
             return
@@ -764,22 +767,48 @@ def extract_concept_candidates(
             entry.word_count = max(entry.word_count, word_count)
         return entry
 
-    for chunk_index, chunk in enumerate(chunks):
-        tokens = _tokenize_chunk_for_candidates(chunk)
-        total_tokens += len(tokens)
-        if not tokens:
-            chunk_identifier = chunk.chunk_id or f"chunk-{chunk_index}"
-            doc_identifier = chunk.doc_id or f"doc-{chunk_index}"
-            context = _ChunkContext(chunk=chunk, chunk_identifier=chunk_identifier, doc_identifier=doc_identifier)
-            chunk_contexts.append(context)
-            chunk_lookup[chunk_identifier] = context
-            continue
+    total_start = time.perf_counter()
+    timing_stats = {
+        "total": 0.0,
+        "chunk_processing": 0.0,
+        "statistical": 0.0,
+        "embedding": 0.0,
+        "llm_summary": 0.0,
+    }
 
+    embedding_enabled = embedding_service is not None
+    backend = getattr(embedding_service, "backend", None)
+    if backend is not None:
+        parameters["embedding_backend"] = getattr(backend, "name", str(backend))
+    parameters["embedding_enabled"] = embedding_enabled
+    parameters["statistical_method"] = "rake" if max_statistical_phrases_per_chunk > 0 else "none"
+
+    summary_requested = bool(use_llm_summary if use_llm_summary is not None else True)
+    if logger.isEnabledFor(logging.INFO):
+        logger.info(
+            "keyword.stage2.start chunks=%s embedding_enabled=%s embedding_backend=%s summary_requested=%s",
+            len(chunks),
+            embedding_enabled,
+            parameters.get("embedding_backend"),
+            summary_requested,
+        )
+
+    for chunk_index, chunk in enumerate(chunks):
         chunk_identifier = chunk.chunk_id or f"chunk-{chunk_index}"
         doc_identifier = chunk.doc_id or f"doc-{chunk_index}"
         context = _ChunkContext(chunk=chunk, chunk_identifier=chunk_identifier, doc_identifier=doc_identifier)
         chunk_contexts.append(context)
         chunk_lookup[chunk_identifier] = context
+
+        chunk_timer = time.perf_counter()
+        tokens = _tokenize_chunk_for_candidates(chunk)
+        total_tokens += len(tokens)
+        if not tokens:
+            chunk_elapsed = time.perf_counter() - chunk_timer
+            timing_stats["chunk_processing"] += chunk_elapsed
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("keyword.stage2.chunk empty chunk=%s elapsed=%.3fs", chunk_identifier, chunk_elapsed)
+            continue
 
         ngram_counts: Counter[str] = Counter()
         token_length = len(tokens)
@@ -807,7 +836,8 @@ def extract_concept_candidates(
 
         contribution_map: dict[str, _ChunkContribution] = {}
 
-        for phrase, count in ranked_candidates[:max_candidates_per_chunk]:
+        top_candidates = ranked_candidates[:max_candidates_per_chunk]
+        for phrase, count in top_candidates:
             tokens_for_phrase = phrase.split()
             word_count = len(tokens_for_phrase)
             chunk_score = count * (1.0 + 0.15 * max(0, word_count - 1))
@@ -818,12 +848,15 @@ def extract_concept_candidates(
             contribution.chunk_score += chunk_score
 
         rake_scores = {}
+        rake_selected = 0
         if max_statistical_phrases_per_chunk > 0:
+            stat_start = time.perf_counter()
             rake_scores = _extract_rake_scores(
                 tokens,
                 max_ngram_size=max_ngram_size,
                 min_char_length=min_char_length,
             )
+            timing_stats["statistical"] += time.perf_counter() - stat_start
             if rake_scores:
                 statistical_stats["chunks"] += 1
                 ranked_rake = sorted(rake_scores.items(), key=lambda item: item[1], reverse=True)
@@ -837,10 +870,11 @@ def extract_concept_candidates(
                     contribution.statistical_score += float(score)
                     if contribution.occurrences == 0:
                         contribution.occurrences = ngram_counts.get(phrase, 0) or 1
+                rake_selected = len(ranked_rake)
                 statistical_stats["phrases"] += len(ranked_rake)
 
+        embedding_candidates: list[str] = []
         if embedding_service and max_embedding_phrases_per_chunk > 0:
-            embedding_candidates: list[str] = []
             if ranked_candidates:
                 embedding_candidates.extend(
                     phrase for phrase, _ in ranked_candidates[:max_embedding_phrases_per_chunk]
@@ -863,6 +897,7 @@ def extract_concept_candidates(
 
             text_for_embedding = chunk.normalized_text or chunk.text
             if embedding_candidates and text_for_embedding:
+                embed_block_start = time.perf_counter()
                 chunk_vector = chunk_embedding_cache.get(chunk_identifier)
                 if chunk_vector is None:
                     try:
@@ -897,6 +932,7 @@ def extract_concept_candidates(
                             continue
                         contribution = contribution_for(contribution_map, phrase, len(phrase.split()))
                         contribution.embedding_score += similarity
+                timing_stats["embedding"] += time.perf_counter() - embed_block_start
 
         if chunk.language:
             for contribution in contribution_map.values():
@@ -904,6 +940,20 @@ def extract_concept_candidates(
 
         for phrase, contribution in contribution_map.items():
             apply_contribution(phrase, contribution, context)
+
+        chunk_elapsed = time.perf_counter() - chunk_timer
+        timing_stats["chunk_processing"] += chunk_elapsed
+        if logger.isEnabledFor(logging.INFO):
+            logger.info(
+                "keyword.stage2.chunk done chunk=%s tokens=%s phrases=%s selected=%s rake=%s embed=%s elapsed=%.3fs",
+                chunk_identifier,
+                len(tokens),
+                len(ngram_counts),
+                len(top_candidates),
+                rake_selected,
+                len(embedding_candidates),
+                chunk_elapsed,
+            )
 
     summary_entries: list[dict[str, object]] = []
     summary_contexts: list[_ChunkContext] = []
@@ -922,6 +972,7 @@ def extract_concept_candidates(
         summary_contexts = _select_summary_contexts(chunk_contexts, limit=min(llm_summary_max_chunks, len(chunk_contexts)))
         if summary_contexts:
             chunks_for_summary = [ctx.chunk for ctx in summary_contexts]
+            summary_start = time.perf_counter()
             try:
                 summary_entries = summary_callable(
                     chunks_for_summary,
@@ -930,11 +981,30 @@ def extract_concept_candidates(
                 )
             except TypeError:
                 summary_entries = summary_callable(chunks_for_summary)
+            summary_elapsed = time.perf_counter() - summary_start
+            timing_stats["llm_summary"] += summary_elapsed
+            if logger.isEnabledFor(logging.INFO):
+                logger.info(
+                    "keyword.stage2.summary invoked chunks=%s suggestions=%s elapsed=%.3fs",
+                    len(chunks_for_summary),
+                    len(summary_entries),
+                    summary_elapsed,
+                )
             summary_debug_fn = getattr(llm_filter, "summary_debug_payload", None)
             if callable(summary_debug_fn):
                 summary_debug_payload = summary_debug_fn()
                 if isinstance(summary_debug_payload, dict):
                     summary_debug = summary_debug_payload
+        elif logger.isEnabledFor(logging.INFO):
+            logger.info("keyword.stage2.summary skipped reason=no-context")
+    elif logger.isEnabledFor(logging.DEBUG):
+        logger.debug(
+            "keyword.stage2.summary bypassed enabled=%s requested=%s contexts=%s chunks_limit=%s",
+            getattr(llm_filter, "enabled", False),
+            should_use_summary,
+            bool(chunk_contexts),
+            llm_summary_max_chunks,
+        )
 
     if summary_entries:
         llm_summary_used = True
@@ -1066,6 +1136,20 @@ def extract_concept_candidates(
             item.phrase,
         )
     )
+
+    total_elapsed = time.perf_counter() - total_start
+    timing_stats["total"] = total_elapsed
+    parameters["timing"] = {key: round(value, 4) for key, value in timing_stats.items()}
+
+    if logger.isEnabledFor(logging.INFO):
+        logger.info(
+            "keyword.stage2.complete chunks=%s candidates=%s elapsed=%.3fs embedding_phrases=%s summary_used=%s",
+            len(chunk_contexts),
+            len(candidates),
+            total_elapsed,
+            embedding_stats.get("phrases") if embedding_service else 0,
+            llm_summary_used,
+        )
 
     return ConceptExtractionResult(
         candidates=candidates,
