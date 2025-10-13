@@ -121,6 +121,144 @@ def test_extract_concept_candidates_filters_stopwords() -> None:
     assert not result.candidates
 
 
+def test_extract_concept_candidates_includes_embedding_scores() -> None:
+    class FakeBackend:
+        name = "fake"
+
+    class FakeEmbeddingService:
+        def __init__(self) -> None:
+            self.backend = FakeBackend()
+            base_vector = [1.0, 0.0]
+            self._vectors = {
+                "quantum gateway optimizer improves flux alignment gateway diagnostics calibrate quantum gateway": base_vector,
+                "quantum gateway": [0.95, 0.0],
+                "flux alignment": [0.2, 0.9],
+                "gateway diagnostics": [0.9, 0.1],
+                "quantum gateway optimizer": [0.85, 0.1],
+            }
+
+        def embed_one(self, text: str) -> list[float]:
+            return list(self._vectors.get(text, [0.0, 0.0]))
+
+        def embed(self, texts: list[str]) -> list[list[float]]:
+            return [list(self._vectors.get(text, [0.0, 0.0])) for text in texts]
+
+    chunk = KeywordSourceChunk(
+        text="Quantum gateway optimizer improves flux alignment. Gateway diagnostics calibrate quantum gateway.",
+        normalized_text="quantum gateway optimizer improves flux alignment gateway diagnostics calibrate quantum gateway",
+        doc_id="doc-emb",
+        chunk_id="doc-emb:0",
+        section_path="Quantum / Gateway",
+        language="en",
+    )
+
+    embedding_service = FakeEmbeddingService()
+    result = extract_concept_candidates(
+        [chunk],
+        embedding_service=embedding_service,
+        max_ngram_size=2,
+        max_candidates_per_chunk=4,
+        max_embedding_phrases_per_chunk=3,
+        min_char_length=2,
+    )
+
+    embedding_stats = result.parameters.get("embedding_stats")
+    assert embedding_stats and embedding_stats["chunks"] >= 1
+
+    candidate = next(item for item in result.candidates if item.phrase == "quantum gateway")
+    assert candidate.score_breakdown["embedding"] > 0
+
+
+def test_extract_concept_candidates_includes_statistical_scores() -> None:
+    chunk = KeywordSourceChunk(
+        text="Escalation runbook outlines SLA breach protocol and customer escalation workflow.",
+        normalized_text="escalation runbook outlines sla breach protocol and customer escalation workflow",
+        doc_id="doc-stat",
+        chunk_id="doc-stat:0",
+        section_path="Operations / Escalation",
+        language="en",
+    )
+
+    result = extract_concept_candidates(
+        [chunk],
+        max_ngram_size=3,
+        max_candidates_per_chunk=5,
+        max_statistical_phrases_per_chunk=4,
+        min_char_length=2,
+    )
+
+    assert any(
+        candidate.score_breakdown.get("statistical", 0) > 0 for candidate in result.candidates
+    )
+
+
+def test_extract_concept_candidates_uses_llm_summary() -> None:
+    class StubSummaryFilter:
+        enabled = True
+        backend = "stub"
+
+        def __init__(self) -> None:
+            self._debug: dict[str, object] = {}
+
+        def extract_summary_concepts(
+            self,
+            chunks: list[KeywordSourceChunk],
+            *,
+            max_results: int = 10,
+            max_chars: int = 320,
+        ) -> list[dict[str, object]]:
+            self._debug = {"chunks": [chunk.chunk_id for chunk in chunks]}
+            chunk_ids = [
+                chunk.chunk_id or f"chunk-{index}"
+                for index, chunk in enumerate(chunks, start=1)
+            ]
+            sections = [chunk.section_path for chunk in chunks if chunk.section_path]
+            sources = [chunk.source for chunk in chunks if chunk.source]
+            return [
+                {
+                    "phrase": "customer escalation policy",
+                    "importance": 2.5,
+                    "reason": "summarized",
+                    "chunk_ids": chunk_ids,
+                    "sections": sections,
+                    "sources": sources,
+                    "languages": ["en"],
+                    "occurrences": 1,
+                }
+            ]
+
+        def summary_debug_payload(self) -> dict[str, object]:
+            return dict(self._debug)
+
+    chunk = KeywordSourceChunk(
+        text="Customer escalation policy ensures high-priority issues trigger leadership alerts.",
+        normalized_text="customer escalation policy ensures high priority issues trigger leadership alerts",
+        doc_id="doc-llm",
+        chunk_id="doc-llm:0",
+        section_path="Support / Policies",
+        source="policy.md",
+        language="en",
+    )
+
+    stub_filter = StubSummaryFilter()
+    result = extract_concept_candidates(
+        [chunk],
+        llm_filter=stub_filter,  # type: ignore[arg-type]
+        use_llm_summary=True,
+        max_ngram_size=2,
+        max_candidates_per_chunk=2,
+        max_embedding_phrases_per_chunk=0,
+    )
+
+    summary_info = result.parameters.get("llm_summary")
+    assert summary_info and summary_info["used"] is True
+
+    candidate = next(item for item in result.candidates if item.phrase == "customer escalation policy")
+    assert candidate.generated is True
+    assert candidate.reason == "summarized"
+    assert candidate.score_breakdown.get("llm", 0) > 0
+
+
 def test_extract_keyword_candidates_identifies_core_terms() -> None:
     texts = [
         "Alpha Beta alpha",
