@@ -27,7 +27,13 @@ from .ingestion import (
 )
 from .fts import FTSIndex
 from . import local_ingest
-from .keywords import KeywordLLMFilter, build_excerpt, extract_keyword_candidates
+from .keywords import (
+    ChunkPreparationResult,
+    KeywordLLMFilter,
+    build_excerpt,
+    extract_keyword_candidates,
+    prepare_keyword_chunks,
+)
 from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .projects import Project, ProjectStore
 from .vector_store import QdrantVectorStore, SearchResult
@@ -945,17 +951,12 @@ def create_app(
     ) -> JSONResponse:
         project = _resolve_project(project_store, project_id)
         payloads = list(store_manager.iter_project_payloads(project.id))
-        texts = [payload.get("text", "") for payload in payloads if payload.get("text")]
+        chunk_stage: ChunkPreparationResult = prepare_keyword_chunks(payloads)
+        chunks = chunk_stage.chunks
+        texts = [chunk.text for chunk in chunks]
         keywords = extract_keyword_candidates(texts)
 
-        context_snippets: list[str] = []
-        for payload in payloads:
-            snippet = str(payload.get("text", "")).strip()
-            if not snippet:
-                continue
-            context_snippets.append(snippet[:400])
-            if len(context_snippets) >= 5:
-                break
+        context_snippets: list[str] = [chunk.excerpt(max_chars=400) for chunk in chunks[:5]]
 
         llm_filter = KeywordLLMFilter(settings)
         original_count = len(keywords)
@@ -969,7 +970,6 @@ def create_app(
                 original_count,
                 len(keywords),
             )
-            debug_payload = llm_filter.debug_payload()
         else:
             logger.info(
                 "keyword.llm.bypass backend=%s project=%s candidate_count=%s",
@@ -977,8 +977,27 @@ def create_app(
                 project.id,
                 original_count,
             )
-            debug_payload = llm_filter.debug_payload()
-            debug_payload.setdefault("candidate_count", original_count)
+        llm_debug = llm_filter.debug_payload()
+
+        chunk_debug: dict[str, object] = {
+            "payloads_total": chunk_stage.total_payloads,
+            "processed": chunk_stage.processed_count,
+            "skipped_empty": chunk_stage.skipped_empty,
+            "skipped_non_text": chunk_stage.skipped_non_text,
+            "languages": chunk_stage.unique_languages(),
+        }
+        total_tokens = chunk_stage.total_tokens()
+        if total_tokens:
+            chunk_debug["total_tokens"] = total_tokens
+        sample_sections = chunk_stage.sample_sections()
+        if sample_sections:
+            chunk_debug["sample_sections"] = sample_sections
+        sample_excerpts = chunk_stage.sample_excerpts(limit=2, max_chars=160)
+        if sample_excerpts:
+            chunk_debug["sample_excerpts"] = sample_excerpts
+
+        debug_payload = {**llm_debug, "chunking": chunk_debug}
+        debug_payload.setdefault("candidate_count", original_count)
 
         logger.info(
             "keyword.llm.summary project=%s backend=%s details=%s",

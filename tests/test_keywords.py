@@ -3,7 +3,62 @@ from __future__ import annotations
 import json
 
 from cornerstone.config import Settings
-from cornerstone.keywords import KeywordCandidate, KeywordLLMFilter, extract_keyword_candidates
+from cornerstone.keywords import (
+    KeywordCandidate,
+    KeywordLLMFilter,
+    extract_keyword_candidates,
+    prepare_keyword_chunks,
+)
+
+
+def test_prepare_keyword_chunks_normalises_and_collects_metadata() -> None:
+    payloads = [
+        {
+            "text": "  Title: Hello\nParagraph for testing.  ",
+            "language": "en",
+            "doc_id": "doc-1",
+            "chunk_id": "doc-1:0",
+            "source": "guide.md",
+            "title": "Introduction",
+            "section_path": "Introduction / Setup",
+            "summary": "Overview of the setup process.",
+            "token_count": 42,
+            "heading_path": ["Introduction"],
+            "content_type": "text/markdown",
+            "ingested_at": "2024-05-01T00:00:00Z",
+        },
+        {
+            "text": "로그인 오류 처리 절차",
+            "language": "ko",
+            "chunk_id": "doc-1:1",
+            "section_path": "로그인",
+            "token_count": 30,
+        },
+        {
+            "text": "   ",
+            "chunk_id": "doc-1:2",
+        },
+    ]
+
+    result = prepare_keyword_chunks(payloads)
+
+    assert result.total_payloads == 3
+    assert result.processed_count == 2
+    assert result.skipped_empty == 1
+    assert result.skipped_non_text == 0
+
+    first, second = result.chunks
+    assert first.normalized_text == "title hello paragraph for testing"
+    assert first.section_path == "Introduction / Setup"
+    assert first.metadata["heading_path"] == ["Introduction"]
+    assert second.normalized_text == "로그인 오류 처리 절차"
+    assert second.language == "ko"
+
+    assert result.unique_languages() == ["en", "ko"]
+    assert result.total_tokens() == 72
+    assert result.sample_sections() == ["Introduction / Setup", "로그인"]
+    excerpts = result.sample_excerpts(limit=1, max_chars=40)
+    assert excerpts and "Title" in excerpts[0]
 
 
 def test_extract_keyword_candidates_identifies_core_terms() -> None:
