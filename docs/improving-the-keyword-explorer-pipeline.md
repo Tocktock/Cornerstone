@@ -4,7 +4,7 @@
 
 Following the first wave of improvements, the Keyword Explorer now performs the Stage 1 chunk preparation and Stage 2 concept extraction described in this document. Incoming payloads are normalised into `KeywordSourceChunk` objects, and each chunk is analysed with a hybrid pipeline (n‑gram scoring, RAKE-style statistics, embedding similarity, and optional LLM summaries) that produces rich `ConceptCandidate` entries complete with coverage metrics and score breakdowns. Stage 2 has extensive instrumentation (`keyword.stage2.*` logs, debug payloads, and per-component timing) and is fully configurable through the new `KEYWORD_STAGE2_*` environment variables.
 
-With Stage 3 clustering, optional LLM labelling, and Stage 4 re-ranking now wired into the API, the Explorer returns semantic concepts by default. Stage 5 (LLM verification of the ranked list) is the remaining major milestone. Until that final check is in place, malformed LLM responses can still trigger the frequency fallback, but day-to-day searches now surface multi-word concepts ranked by document coverage and embedding relevance.
+With Stage 3 clustering, optional LLM labelling, Stage 4 re-ranking, Stage 5 harmonisation, and Stage 6 verification all wired into the API, the Explorer now returns harmonised, LLM-reviewed semantic concepts by default. Remaining work focuses on polish (caching Stage 2 embeddings, expanding automated tests, guarding malformed LLM outputs) and on defining the next evolution of the pipeline.
 
 ## Goals for an Improved Pipeline
 
@@ -26,8 +26,8 @@ Instead of a single pass of “count words, then maybe filter by LLM,” the new
 2. Candidate concept extraction (using hybrid methods such as embeddings and statistical phrases)
 3. Concept consolidation and clustering
 4. Re-ranking and core concept selection
-5. LLM-based refinement (optional)
-6. Canonical label harmonisation (post-process)
+5. Canonical label harmonisation (post-process)
+6. LLM-based refinement (optional)
 
 Each stage is described in detail in the following subsections.
 
@@ -82,6 +82,8 @@ Using a combination of these signals, we now compute a composite importance scor
 
 ### Stage 5: Canonical Label Harmonisation (New)
 
+✅ **Status:** implemented.
+
 Even with LLM-assisted cluster labelling, some outputs still include sentiment qualifiers or project-specific suffixes (예: “화주 부정 리뷰”, “화주 긍정 리뷰”). After Stage 4 has ranked the concepts, we introduce a lightweight post-processing pass that asks the chat backend to suggest a single canonical name and brief description for each top-ranked concept. This layer:
 
 - Receives the Stage 4 ranked list with associated aliases/members and prompts the model to produce neutral, semantically representative labels.
@@ -91,6 +93,8 @@ Even with LLM-assisted cluster labelling, some outputs still include sentiment q
 This harmonisation step ensures the UI presents concise, domain-appropriate concept names while keeping traceability via aliases and debug payloads.
 
 ### Stage 6: LLM-Based Refinement (Optional)
+
+✅ **Status:** implemented.
 
 Finally, we run a lightweight LLM verification (the existing `KeywordLLMFilter`) over the Stage 5 harmonised list. In verification mode (`KEYWORD_FILTER_ALLOW_GENERATED=false`, the default), the filter can only re-rank or drop items—no new keywords are introduced. This gives stakeholders an interpretable chance to veto noise while preventing the model from hallucinating extra terms. If the flag is enabled, the LLM may append additional concepts, but this should be limited to well-understood scenarios. Deployments without a chat backend simply skip this pass and trust the deterministic ranking from Stages 4–5.
 
@@ -113,20 +117,20 @@ All of these techniques are supported by the current Cornerstone tech stack; the
 
 Implementing this pipeline in Cornerstone involves enhancing or adding a few modules:
 
-- **Extend `extract_keyword_candidates` or add a new extraction function:** Create an `extract_concept_candidates` function in `keywords.py` that performs Stage 2. Iterate over documents or chunks, call the embedding service for vectors, compute cosine similarities, run RAKE (or similar), and return candidates with additional metrics such as scores and originating document IDs.
+- **Extend `extract_keyword_candidates` or add a new extraction function:** (✅ done) `extract_concept_candidates` in `keywords.py` performs Stage 2 by blending embeddings, statistical scoring, and optional LLM summaries while emitting rich diagnostics.
 - **Aggregate and cluster candidates:** (✅ done) `cluster_concepts` merges candidates using lexical overlap plus cosine similarity from the embedding service, averaging vectors per cluster. Optional LLM labeling (driven by `KEYWORD_STAGE3_LABEL_CLUSTERS`) rewrites cluster names and adds descriptions for the top groups.
-- **Implement re-ranking logic:** Add a function to score each consolidated concept, leveraging document frequency, relevance metrics, and optional topic weights. Output a sorted list of `KeywordCandidate` objects, marking `is_core=True` for the top results and redefining the `count` field to store a meaningful metric (such as document frequency).
-- **Update the API and UI:** Adjust `/keywords/{project_id}/candidates` in `app.py` to call the new pipeline and optionally run the existing `KeywordLLMFilter` as a final review. Keep the JSON schema compatible with the frontend, including fields like `term`, `count`, `core`, `generated`, `reason`, and `source`. Extend the debug payload with information about the new stages.
-- **Reuse `KeywordLLMFilter`:** Retune its prompt for the verification role, passing synthesized context rather than raw snippets. Use the new `KEYWORD_FILTER_ALLOW_GENERATED` flag to control whether the model may invent fresh keywords (default: review-only).
+- **Implement re-ranking logic:** (✅ done) `rank_concept_clusters` scores each consolidated concept with document/chunk coverage, Stage 2 scores, occurrence bonuses, and label provenance, marking the top results as “core.”
+- **Update the API and UI:** (✅ done) `/keywords/{project_id}/candidates` now invokes the multi-stage pipeline and surfaces debug payloads, while the UI consumes harmonised concept lists with progress indicators.
+- **Reuse `KeywordLLMFilter`:** (✅ done) Verification prompts review harmonised concepts, respecting `KEYWORD_FILTER_ALLOW_GENERATED` to control whether the model may invent fresh keywords.
 - **Testing and iteration:** Exercise the new pipeline on projects of varying sizes to ensure the algorithm alone produces reasonable concepts (especially when the LLM is disabled). Use configuration options for parameters such as max n-gram length, top phrases per document, and cluster thresholds to support easy tuning.
 
 Throughout implementation, maintainability remains a focus by modularizing steps, enabling unit tests for each subroutine, and leveraging existing frameworks. If clustering becomes expensive in real time, it can be offloaded to a background task that updates a cached keyword index on ingestion. Documentation should be updated so future contributors understand how the improved Keyword Explorer operates and where to find each stage’s logic.
 
 ## Conclusion
 
-This redesign shifts the Keyword Explorer from a rudimentary word count tool into a robust concept mining pipeline. By integrating embedding-based keyphrase extraction, topic modeling, and selective LLM reasoning, the system will surface the core ideas and themes in a knowledge base—not just the frequent words. The pipeline remains compatible with Cornerstone’s existing OpenAI/Ollama stack and leverages those AI capabilities more effectively. The outcome for users will be a more meaningful set of keywords: fewer noisy one-word tokens and more informative phrases that echo the business domain. Internally, the modular design and use of proven algorithms make the system easier to maintain and adapt, fulfilling the goals of resilience and ease of use.
+This redesign shifts the Keyword Explorer from a rudimentary word count tool into a robust concept mining pipeline. By integrating embedding-based keyphrase extraction, topic modeling, and selective LLM reasoning, the system now surfaces the core ideas and themes in a knowledge base—not just the frequent words. The pipeline remains compatible with Cornerstone’s existing OpenAI/Ollama stack and leverages those AI capabilities more effectively. The outcome for users is a more meaningful set of keywords: fewer noisy one-word tokens and more informative phrases that echo the business domain. Internally, the modular design and use of proven algorithms make the system easier to maintain and adapt, fulfilling the goals of resilience and ease of use.
 
-By addressing the identified weaknesses—chiefly, moving beyond shallow frequency counts—the new pipeline ensures that Cornerstone’s Keyword Explorer captures deeper domain-level concepts and provides high-level insights that were previously missing. The next steps involve implementing these changes in the codebase, iterating with real data, and delivering a far richer keyword exploration experience.
+With the six-stage flow implemented end-to-end, upcoming work centres on hardening and expanding its insight surface area: caching Stage 2 embeddings for reuse, broadening automated tests (including malformed LLM responses), stress-testing Ollama-driven runs, and exploring a Stage 7 “insight summarisation” layer that can cluster concepts into higher-order themes for dashboards. These refinements will keep the Explorer fast, reliable, and explainable as project datasets grow.
 
 ## Sources
 
