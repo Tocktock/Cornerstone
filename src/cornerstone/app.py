@@ -989,6 +989,8 @@ def create_app(
         cluster_stage: ConceptClusteringResult = cluster_concepts(
             concept_stage.candidates,
             embedding_service=embedding,
+            llm_filter=llm_filter if settings.keyword_stage3_label_clusters else None,
+            llm_label_max_clusters=settings.keyword_stage3_label_max_clusters,
         )
         original_count = len(keywords)
         debug_payload: dict[str, object] = {}
@@ -1035,6 +1037,9 @@ def create_app(
         if summary_debug:
             concept_debug["llm_summary"] = summary_debug
         cluster_debug = cluster_stage.to_debug_payload(limit=6)
+        cluster_llm_debug = llm_filter.cluster_debug_payload()
+        if cluster_llm_debug:
+            cluster_debug["llm"] = cluster_llm_debug
 
         if not keywords and concept_stage.candidates:
             fallback_candidates = []

@@ -63,11 +63,13 @@ Remaining Stage 2 follow-ups:
 
 ### Stage 3: Concept Consolidation and Clustering
 
+✅ **Status:** implemented (embedding-aware clustering with optional LLM labeling).
+
 After gathering candidates, we often end up with semantically overlapping terms (e.g., “login issue,” “sign-in problem”) or different granularities (specific error codes vs. broader categories). This stage groups and condenses the candidate list into core concepts:
 
 - **Clustering by semantic similarity:** Compute embeddings for each candidate phrase (we may reuse those from the KeyBERT step) and cluster them (e.g., with K-means, HDBSCAN, or a simple similarity threshold). This groups near-duplicates or synonyms, ensuring we do not present multiple variants of the same concept.
 - **Topic modeling:** Run a topic modeling approach (such as LDA, NMF, or BERTopic) across all documents to discover themes. Topic representatives like “Payment Issues” or “Account Management” provide high-level context. This step can be run offline to guide clustering.
-- **Consolidation into representative concepts:** For each cluster of similar candidates, choose a representative term or phrase. A heuristic is to pick the candidate with the highest average score or the one appearing in the most documents. Alternatively, use the LLM to label the cluster with an overarching concept name. The result is a set of distinct, high-level concepts.
+- **Consolidation into representative concepts:** For each cluster of similar candidates, choose a representative term or phrase. In the current implementation we pick the highest-scoring member by default and, when `KEYWORD_STAGE3_LABEL_CLUSTERS=true`, ask the configured chat backend to suggest a concise cluster label and optional description via `KeywordLLMFilter.label_clusters`. Results surface aliases, label provenance, and debug payloads for traceability. Disable or cap labeling with `KEYWORD_STAGE3_LABEL_MAX_CLUSTERS`.
 
 At the end of Stage 3, we have pruned the raw list into a smaller set of unique concepts or themes, along with information about which original terms each concept subsumed and how many documents or chunks refer to it.
 
@@ -105,7 +107,7 @@ All of these techniques are supported by the current Cornerstone tech stack; the
 Implementing this pipeline in Cornerstone involves enhancing or adding a few modules:
 
 - **Extend `extract_keyword_candidates` or add a new extraction function:** Create an `extract_concept_candidates` function in `keywords.py` that performs Stage 2. Iterate over documents or chunks, call the embedding service for vectors, compute cosine similarities, run RAKE (or similar), and return candidates with additional metrics such as scores and originating document IDs.
-- **Aggregate and cluster candidates:** Compute embeddings for each candidate phrase and cluster them using either simple similarity thresholds or libraries such as scikit-learn or BERTopic. This step could run on-demand or be moved to ingestion to cache results for faster responses.
+- **Aggregate and cluster candidates:** (✅ done) `cluster_concepts` merges candidates using lexical overlap plus cosine similarity from the embedding service, averaging vectors per cluster. Optional LLM labeling (driven by `KEYWORD_STAGE3_LABEL_CLUSTERS`) rewrites cluster names and adds descriptions for the top groups.
 - **Implement re-ranking logic:** Add a function to score each consolidated concept, leveraging document frequency, relevance metrics, and optional topic weights. Output a sorted list of `KeywordCandidate` objects, marking `is_core=True` for the top results and redefining the `count` field to store a meaningful metric (such as document frequency).
 - **Update the API and UI:** Adjust `/keywords/{project_id}/candidates` in `app.py` to call the new pipeline and optionally run the existing `KeywordLLMFilter` as a final review. Keep the JSON schema compatible with the frontend, including fields like `term`, `count`, `core`, `generated`, `reason`, and `source`. Extend the debug payload with information about the new stages.
 - **Reuse `KeywordLLMFilter`:** Retune its prompt for the verification role, passing synthesized context rather than raw snippets. Minimal code changes are required aside from prompt adjustments and parsing any new flags.
