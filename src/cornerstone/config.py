@@ -45,6 +45,7 @@ _DEFAULT_RERANKER_STRATEGY: Final[str] = "none"
 _DEFAULT_RERANKER_MODEL: Final[str] = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 _DEFAULT_RERANKER_MAX_CANDIDATES: Final[int] = 8
 _DEFAULT_KEYWORD_FILTER_MAX_RESULTS: Final[int] = 10
+_DEFAULT_KEYWORD_FILTER_ALLOW_GENERATED: Final[bool] = False
 _DEFAULT_CONVERSATION_RETENTION_DAYS: Final[int] = 30
 _DEFAULT_KEYWORD_STAGE2_MAX_NGRAM: Final[int] = 3
 _DEFAULT_KEYWORD_STAGE2_MAX_CANDIDATES_PER_CHUNK: Final[int] = 8
@@ -68,6 +69,8 @@ _DEFAULT_KEYWORD_STAGE4_DOCUMENT_WEIGHT: Final[float] = 2.0
 _DEFAULT_KEYWORD_STAGE4_CHUNK_WEIGHT: Final[float] = 0.5
 _DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT: Final[float] = 0.3
 _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS: Final[float] = 0.5
+_DEFAULT_KEYWORD_STAGE5_HARMONIZE_ENABLED: Final[bool] = True
+_DEFAULT_KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS: Final[int] = 12
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -163,6 +166,7 @@ class Settings:
     reranker_model: str | None = None
     reranker_max_candidates: int = _DEFAULT_RERANKER_MAX_CANDIDATES
     keyword_filter_max_results: int = _DEFAULT_KEYWORD_FILTER_MAX_RESULTS
+    keyword_filter_allow_generated: bool = _DEFAULT_KEYWORD_FILTER_ALLOW_GENERATED
     query_hint_batch_size: int = _DEFAULT_QUERY_HINT_BATCH_SIZE
     query_hint_cron: str = _DEFAULT_QUERY_HINT_CRON
     conversation_logging_enabled: bool = True
@@ -190,6 +194,8 @@ class Settings:
     keyword_stage4_chunk_weight: float = _DEFAULT_KEYWORD_STAGE4_CHUNK_WEIGHT
     keyword_stage4_occurrence_weight: float = _DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT
     keyword_stage4_label_bonus: float = _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS
+    keyword_stage5_harmonize_enabled: bool = _DEFAULT_KEYWORD_STAGE5_HARMONIZE_ENABLED
+    keyword_stage5_harmonize_max_results: int = _DEFAULT_KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -243,6 +249,9 @@ class Settings:
             ),
             keyword_filter_max_results=int(
                 os.getenv("KEYWORD_FILTER_MAX_RESULTS", str(_DEFAULT_KEYWORD_FILTER_MAX_RESULTS))
+            ),
+            keyword_filter_allow_generated=_env_bool(
+                "KEYWORD_FILTER_ALLOW_GENERATED", _DEFAULT_KEYWORD_FILTER_ALLOW_GENERATED
             ),
             query_hint_batch_size=int(
                 os.getenv("QUERY_HINT_BATCH_SIZE", str(_DEFAULT_QUERY_HINT_BATCH_SIZE))
@@ -345,6 +354,15 @@ class Settings:
             or _DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT,
             keyword_stage4_label_bonus=_env_optional_float("KEYWORD_STAGE4_LABEL_BONUS")
             or _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS,
+            keyword_stage5_harmonize_enabled=_env_bool(
+                "KEYWORD_STAGE5_HARMONIZE_ENABLED", _DEFAULT_KEYWORD_STAGE5_HARMONIZE_ENABLED
+            ),
+            keyword_stage5_harmonize_max_results=int(
+                os.getenv(
+                    "KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS",
+                    str(_DEFAULT_KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS),
+                )
+            ),
         )
 
     @property
