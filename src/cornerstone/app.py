@@ -31,10 +31,12 @@ from .keywords import (
     ChunkPreparationResult,
     ConceptClusteringResult,
     ConceptExtractionResult,
+    ConceptRankingResult,
     KeywordCandidate,
     KeywordLLMFilter,
     build_excerpt,
     cluster_concepts,
+    rank_concept_clusters,
     extract_concept_candidates,
     extract_keyword_candidates,
     prepare_keyword_chunks,
@@ -979,7 +981,7 @@ def create_app(
             llm_weight=settings.keyword_stage2_llm_weight,
         )
         texts = [chunk.text for chunk in chunks]
-        keywords = extract_keyword_candidates(texts)
+        frequency_keywords = extract_keyword_candidates(texts)
 
         context_snippets: list[str] = [chunk.excerpt(max_chars=400) for chunk in chunks[:5]]
 
@@ -992,6 +994,35 @@ def create_app(
             llm_filter=llm_filter if settings.keyword_stage3_label_clusters else None,
             llm_label_max_clusters=settings.keyword_stage3_label_max_clusters,
         )
+        ranking_stage: ConceptRankingResult = rank_concept_clusters(
+            cluster_stage.clusters,
+            core_limit=settings.keyword_stage4_core_limit,
+            max_results=settings.keyword_stage4_max_results,
+            score_weight=settings.keyword_stage4_score_weight,
+            document_weight=settings.keyword_stage4_document_weight,
+            chunk_weight=settings.keyword_stage4_chunk_weight,
+            occurrence_weight=settings.keyword_stage4_occurrence_weight,
+            label_bonus=settings.keyword_stage4_label_bonus,
+        )
+
+        if ranking_stage.ranked:
+            keywords_origin = "stage4"
+            keywords = [
+                KeywordCandidate(
+                    term=item.label,
+                    count=max(item.document_count, int(round(item.score))) or 1,
+                    is_core=item.is_core,
+                    generated=item.label_source == "llm",
+                    reason=item.description
+                    or f"{item.document_count} docs | score {item.score:.2f}",
+                    source=f"stage4:{item.label_source}",
+                )
+                for item in ranking_stage.ranked
+            ]
+        else:
+            keywords_origin = "frequency"
+            keywords = frequency_keywords
+
         original_count = len(keywords)
         debug_payload: dict[str, object] = {}
         if llm_filter.enabled:
@@ -1056,12 +1087,17 @@ def create_app(
                     )
                 )
             keywords = fallback_candidates
+            keywords_origin = "stage2-fallback"
+
+        ranking_debug = ranking_stage.to_debug_payload(limit=6)
+        ranking_debug["origin"] = keywords_origin
 
         debug_payload = {
             **llm_debug,
             "chunking": chunk_debug,
             "stage2": concept_debug,
             "stage3": cluster_debug,
+            "stage4": ranking_debug,
         }
         debug_payload.setdefault("candidate_count", original_count)
 

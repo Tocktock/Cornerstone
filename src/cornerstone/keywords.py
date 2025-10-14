@@ -374,6 +374,88 @@ class _ClusterBuilder:
             if self.vector is None:
                 self.vector = list(vector)
                 self.vector_count = 1
+            elif len(self.vector) == len(vector):
+                total = self.vector_count + 1
+                self.vector = [
+                    (existing * self.vector_count + float(new)) / total
+                    for existing, new in zip(self.vector, vector)
+                ]
+                self.vector_count = total
+
+@dataclass(slots=True)
+class RankedConcept:
+    label: str
+    score: float
+    rank: int
+    is_core: bool
+    document_count: int
+    chunk_count: int
+    occurrences: int
+    label_source: str
+    description: str | None
+    aliases: List[str]
+    member_phrases: List[str]
+    score_breakdown: dict[str, float]
+
+
+@dataclass(slots=True)
+class ConceptRankingResult:
+    ranked: List[RankedConcept]
+    parameters: dict[str, Any]
+
+    def to_debug_payload(self, *, limit: int = 10) -> dict[str, Any]:
+        top = []
+        for concept in self.ranked[:limit]:
+            top.append(
+                {
+                    "label": concept.label,
+                    "score": round(concept.score, 3),
+                    "rank": concept.rank,
+                    "core": concept.is_core,
+                    "documents": concept.document_count,
+                    "chunks": concept.chunk_count,
+                    "occurrences": concept.occurrences,
+                    "label_source": concept.label_source,
+                    "aliases": concept.aliases[:4],
+                }
+            )
+        return {
+            "total_ranked": len(self.ranked),
+            "parameters": self.parameters,
+            "top_ranked": top,
+        }
+
+    def add(
+        self,
+        candidate: ConceptCandidate,
+        *,
+        tokens: set[str],
+        vector: Sequence[float] | None = None,
+    ) -> None:
+        self.members.append(candidate)
+        self.score += candidate.score
+        self.occurrences += candidate.occurrences
+        self.tokens |= tokens
+        self.languages.update(candidate.languages)
+        self.sections.update(candidate.sections)
+        self.sources.update(candidate.sources)
+        if candidate.document_ids:
+            self.document_ids.update(candidate.document_ids)
+        elif candidate.document_count:
+            self.document_ids.update({f"doc-{len(self.document_ids) + i}" for i in range(candidate.document_count)})
+        if candidate.chunk_ids:
+            self.chunk_ids.update(candidate.chunk_ids)
+        elif candidate.chunk_count:
+            self.chunk_ids.update({f"chunk-{len(self.chunk_ids) + i}" for i in range(candidate.chunk_count)})
+        top_member = max(self.members, key=lambda item: item.score)
+        self.label = top_member.phrase
+        if top_member.phrase not in self.aliases:
+            self.aliases.append(top_member.phrase)
+
+        if vector:
+            if self.vector is None:
+                self.vector = list(vector)
+                self.vector_count = 1
             else:
                 if len(self.vector) == len(vector):
                     total = self.vector_count + 1
@@ -1390,6 +1472,94 @@ def cluster_concepts(
             llm_label_info.setdefault("status", "no-labels")
 
     return ConceptClusteringResult(clusters=clusters, parameters=parameters)
+
+
+def rank_concept_clusters(
+    clusters: Sequence[ConceptCluster],
+    *,
+    core_limit: int = 12,
+    max_results: int = 50,
+    score_weight: float = 1.0,
+    document_weight: float = 2.0,
+    chunk_weight: float = 0.5,
+    occurrence_weight: float = 0.3,
+    label_bonus: float = 0.5,
+) -> ConceptRankingResult:
+    if not clusters:
+        return ConceptRankingResult(
+            ranked=[],
+            parameters={
+                "core_limit": core_limit,
+                "max_results": max_results,
+                "weights": {
+                    "score": score_weight,
+                    "document": document_weight,
+                    "chunk": chunk_weight,
+                    "occurrence": occurrence_weight,
+                    "label_bonus": label_bonus,
+                },
+            },
+        )
+
+    parameters = {
+        "core_limit": core_limit,
+        "max_results": max_results,
+        "weights": {
+            "score": score_weight,
+            "document": document_weight,
+            "chunk": chunk_weight,
+            "occurrence": occurrence_weight,
+            "label_bonus": label_bonus,
+        },
+    }
+
+    ranked: list[RankedConcept] = []
+
+    for cluster in clusters:
+        component_scores: dict[str, float] = {}
+        base_score = max(cluster.score, 0.0)
+        component_scores["stage2_score"] = base_score * score_weight
+        component_scores["document_coverage"] = cluster.document_count * document_weight
+        component_scores["chunk_coverage"] = min(cluster.chunk_count, 12) * chunk_weight
+        component_scores["occurrence"] = math.log1p(max(cluster.occurrences, 0)) * occurrence_weight
+        if cluster.label_source == "llm":
+            component_scores["label_bonus"] = label_bonus
+        total_score = sum(component_scores.values())
+
+        ranked.append(
+            RankedConcept(
+                label=cluster.label,
+                score=total_score,
+                rank=0,
+                is_core=False,
+                document_count=cluster.document_count,
+                chunk_count=cluster.chunk_count,
+                occurrences=cluster.occurrences,
+                label_source=cluster.label_source,
+                description=cluster.description,
+                aliases=list(cluster.aliases),
+                member_phrases=[member.phrase for member in cluster.members],
+                score_breakdown={key: round(value, 3) for key, value in component_scores.items()},
+            )
+        )
+
+    ranked.sort(
+        key=lambda item: (
+            -item.score,
+            -item.document_count,
+            -item.occurrences,
+            item.label,
+        )
+    )
+
+    max_core = max(0, core_limit)
+    max_items = max(1, max_results)
+    trimmed = ranked[:max_items]
+    for index, concept in enumerate(trimmed, start=1):
+        concept.rank = index
+        concept.is_core = index <= max_core
+
+    return ConceptRankingResult(ranked=trimmed, parameters=parameters)
 
 
 def extract_keyword_candidates(
@@ -2850,11 +3020,14 @@ __all__ = [
     "ConceptCluster",
     "ConceptClusteringResult",
     "ConceptExtractionResult",
+    "ConceptRankingResult",
     "KeywordCandidate",
     "KeywordLLMFilter",
     "KeywordSourceChunk",
     "cluster_concepts",
+    "rank_concept_clusters",
     "extract_concept_candidates",
     "extract_keyword_candidates",
     "prepare_keyword_chunks",
+    "RankedConcept",
 ]

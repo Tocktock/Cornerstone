@@ -61,6 +61,13 @@ _DEFAULT_KEYWORD_STAGE2_STATISTICAL_WEIGHT: Final[float] = 1.1
 _DEFAULT_KEYWORD_STAGE2_LLM_WEIGHT: Final[float] = 2.5
 _DEFAULT_KEYWORD_STAGE3_LABEL_CLUSTERS: Final[bool] = True
 _DEFAULT_KEYWORD_STAGE3_LABEL_MAX_CLUSTERS: Final[int] = 6
+_DEFAULT_KEYWORD_STAGE4_CORE_LIMIT: Final[int] = 12
+_DEFAULT_KEYWORD_STAGE4_MAX_RESULTS: Final[int] = 60
+_DEFAULT_KEYWORD_STAGE4_SCORE_WEIGHT: Final[float] = 1.0
+_DEFAULT_KEYWORD_STAGE4_DOCUMENT_WEIGHT: Final[float] = 2.0
+_DEFAULT_KEYWORD_STAGE4_CHUNK_WEIGHT: Final[float] = 0.5
+_DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT: Final[float] = 0.3
+_DEFAULT_KEYWORD_STAGE4_LABEL_BONUS: Final[float] = 0.5
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -176,6 +183,13 @@ class Settings:
     keyword_stage2_llm_weight: float = _DEFAULT_KEYWORD_STAGE2_LLM_WEIGHT
     keyword_stage3_label_clusters: bool = _DEFAULT_KEYWORD_STAGE3_LABEL_CLUSTERS
     keyword_stage3_label_max_clusters: int = _DEFAULT_KEYWORD_STAGE3_LABEL_MAX_CLUSTERS
+    keyword_stage4_core_limit: int = _DEFAULT_KEYWORD_STAGE4_CORE_LIMIT
+    keyword_stage4_max_results: int = _DEFAULT_KEYWORD_STAGE4_MAX_RESULTS
+    keyword_stage4_score_weight: float = _DEFAULT_KEYWORD_STAGE4_SCORE_WEIGHT
+    keyword_stage4_document_weight: float = _DEFAULT_KEYWORD_STAGE4_DOCUMENT_WEIGHT
+    keyword_stage4_chunk_weight: float = _DEFAULT_KEYWORD_STAGE4_CHUNK_WEIGHT
+    keyword_stage4_occurrence_weight: float = _DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT
+    keyword_stage4_label_bonus: float = _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -309,6 +323,28 @@ class Settings:
                     str(_DEFAULT_KEYWORD_STAGE3_LABEL_MAX_CLUSTERS),
                 )
             ),
+            keyword_stage4_core_limit=int(
+                os.getenv(
+                    "KEYWORD_STAGE4_CORE_LIMIT",
+                    str(_DEFAULT_KEYWORD_STAGE4_CORE_LIMIT),
+                )
+            ),
+            keyword_stage4_max_results=int(
+                os.getenv(
+                    "KEYWORD_STAGE4_MAX_RESULTS",
+                    str(_DEFAULT_KEYWORD_STAGE4_MAX_RESULTS),
+                )
+            ),
+            keyword_stage4_score_weight=_env_optional_float("KEYWORD_STAGE4_SCORE_WEIGHT")
+            or _DEFAULT_KEYWORD_STAGE4_SCORE_WEIGHT,
+            keyword_stage4_document_weight=_env_optional_float("KEYWORD_STAGE4_DOCUMENT_WEIGHT")
+            or _DEFAULT_KEYWORD_STAGE4_DOCUMENT_WEIGHT,
+            keyword_stage4_chunk_weight=_env_optional_float("KEYWORD_STAGE4_CHUNK_WEIGHT")
+            or _DEFAULT_KEYWORD_STAGE4_CHUNK_WEIGHT,
+            keyword_stage4_occurrence_weight=_env_optional_float("KEYWORD_STAGE4_OCCURRENCE_WEIGHT")
+            or _DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT,
+            keyword_stage4_label_bonus=_env_optional_float("KEYWORD_STAGE4_LABEL_BONUS")
+            or _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS,
         )
 
     @property
