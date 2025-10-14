@@ -5,6 +5,7 @@ import json
 from cornerstone.config import Settings
 from cornerstone.keywords import (
     ConceptCandidate,
+    ConceptCluster,
     KeywordCandidate,
     KeywordLLMFilter,
     KeywordSourceChunk,
@@ -12,6 +13,7 @@ from cornerstone.keywords import (
     extract_concept_candidates,
     extract_keyword_candidates,
     prepare_keyword_chunks,
+    rank_concept_clusters,
 )
 
 
@@ -551,6 +553,13 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
         "KEYWORD_STAGE2_LLM_WEIGHT": "3.1",
         "KEYWORD_STAGE3_LABEL_CLUSTERS": "false",
         "KEYWORD_STAGE3_LABEL_MAX_CLUSTERS": "4",
+        "KEYWORD_STAGE4_CORE_LIMIT": "8",
+        "KEYWORD_STAGE4_MAX_RESULTS": "25",
+        "KEYWORD_STAGE4_SCORE_WEIGHT": "1.4",
+        "KEYWORD_STAGE4_DOCUMENT_WEIGHT": "3.5",
+        "KEYWORD_STAGE4_CHUNK_WEIGHT": "0.8",
+        "KEYWORD_STAGE4_OCCURRENCE_WEIGHT": "0.45",
+        "KEYWORD_STAGE4_LABEL_BONUS": "0.9",
     }
     for key in env_vars:
         monkeypatch.delenv(key, raising=False)
@@ -579,6 +588,13 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
     assert settings.keyword_stage2_llm_weight == 3.1
     assert settings.keyword_stage3_label_clusters is False
     assert settings.keyword_stage3_label_max_clusters == 4
+    assert settings.keyword_stage4_core_limit == 8
+    assert settings.keyword_stage4_max_results == 25
+    assert settings.keyword_stage4_score_weight == 1.4
+    assert settings.keyword_stage4_document_weight == 3.5
+    assert settings.keyword_stage4_chunk_weight == 0.8
+    assert settings.keyword_stage4_occurrence_weight == 0.45
+    assert settings.keyword_stage4_label_bonus == 0.9
 
 
 def test_cluster_concepts_groups_similar_phrases() -> None:
@@ -839,6 +855,93 @@ def test_cluster_concepts_handles_korean() -> None:
     assert len(result.clusters) == 2
     labels = {cluster.label for cluster in result.clusters}
     assert labels == {"로그인 오류", "결제 오류"}
+
+
+def test_rank_concept_clusters_prioritises_document_coverage() -> None:
+    base_members = [
+        ConceptCandidate(
+            phrase="login issue",
+            score=10.0,
+            occurrences=4,
+            document_count=2,
+            chunk_count=3,
+            average_occurrence_per_chunk=1.33,
+            word_count=2,
+            languages=["en"],
+            sections=["Login"],
+            sources=["guide.md"],
+            sample_snippet="Login issue troubleshooting steps.",
+            score_breakdown={"frequency": 4.0},
+        )
+    ]
+    cluster_login = ConceptCluster(
+        label="Login Issues",
+        label_source="top-member",
+        score=18.0,
+        occurrences=5,
+        document_count=3,
+        chunk_count=4,
+        languages=["en"],
+        sections=["Login"],
+        sources=["guide.md"],
+        members=base_members,
+        score_breakdown={"member_count": 1},
+        description=None,
+        aliases=["login issue"],
+    )
+
+    cluster_payment = ConceptCluster(
+        label="Payment Errors",
+        label_source="top-member",
+        score=22.0,
+        occurrences=3,
+        document_count=1,
+        chunk_count=2,
+        languages=["en"],
+        sections=["Payments"],
+        sources=["billing.md"],
+        members=[
+            ConceptCandidate(
+                phrase="payment error",
+                score=22.0,
+                occurrences=3,
+                document_count=1,
+                chunk_count=2,
+                average_occurrence_per_chunk=1.5,
+                word_count=2,
+                languages=["en"],
+                sections=["Payments"],
+                sources=["billing.md"],
+                sample_snippet="Payment error handling.",
+                score_breakdown={"frequency": 3.0},
+            )
+        ],
+        score_breakdown={"member_count": 1},
+        description=None,
+        aliases=["payment error"],
+    )
+
+    result = rank_concept_clusters(
+        [cluster_payment, cluster_login],
+        core_limit=1,
+        max_results=5,
+        score_weight=0.8,
+        document_weight=3.0,
+        chunk_weight=0.6,
+        occurrence_weight=0.2,
+    )
+
+    assert result.ranked
+    top = result.ranked[0]
+    assert top.label == "Login Issues"
+    assert top.is_core is True
+    assert top.document_count == 3
+    second = result.ranked[1]
+    assert second.label == "Payment Errors"
+    assert second.is_core is False
+    debug = result.to_debug_payload(limit=2)
+    assert debug["total_ranked"] == 2
+    assert debug["top_ranked"][0]["label"] == "Login Issues"
 
 
 def test_filter_keywords_limits_and_normalises(monkeypatch) -> None:

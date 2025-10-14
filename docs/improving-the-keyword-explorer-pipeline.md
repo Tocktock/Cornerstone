@@ -4,13 +4,7 @@
 
 Following the first wave of improvements, the Keyword Explorer now performs the Stage 1 chunk preparation and Stage 2 concept extraction described in this document. Incoming payloads are normalised into `KeywordSourceChunk` objects, and each chunk is analysed with a hybrid pipeline (n‑gram scoring, RAKE-style statistics, embedding similarity, and optional LLM summaries) that produces rich `ConceptCandidate` entries complete with coverage metrics and score breakdowns. Stage 2 has extensive instrumentation (`keyword.stage2.*` logs, debug payloads, and per-component timing) and is fully configurable through the new `KEYWORD_STAGE2_*` environment variables.
 
-Despite these upgrades, the UI still displays the legacy frequency list because Stage 3 (concept consolidation), Stage 4 (re-ranking), and the revised Stage 5 LLM review are not implemented yet. As a result:
-
-- We continue to show single-token keywords by default, even though multi-word concepts are now detected in Stage 2.
-- The LLM refine step currently targets the frequency list; malformed responses still trigger fallback warnings (“missing-keywords-array”).
-- Concept clustering relies on a lightweight token-overlap heuristic and is only surfaced in debug output.
-
-The remaining stages in this document describe the work required to replace that frequency fallback with the new semantic concepts.
+With Stage 3 clustering, optional LLM labelling, and Stage 4 re-ranking now wired into the API, the Explorer returns semantic concepts by default. Stage 5 (LLM verification of the ranked list) is the remaining major milestone. Until that final check is in place, malformed LLM responses can still trigger the frequency fallback, but day-to-day searches now surface multi-word concepts ranked by document coverage and embedding relevance.
 
 ## Goals for an Improved Pipeline
 
@@ -75,13 +69,15 @@ At the end of Stage 3, we have pruned the raw list into a smaller set of unique 
 
 ### Stage 4: Re-Ranking and Core Concept Selection
 
+✅ **Status:** implemented.
+
 We rank the consolidated concepts to decide which are the “core” ones to highlight. Rather than using a simple frequency count, we consider richer metrics:
 
 - **Document frequency / coverage:** Count how many distinct documents or chunks mention the concept. Concepts appearing across many documents indicate broad themes and should rank highly.
 - **Relevance score:** Incorporate scores from Stage 2. For example, combine KeyBERT similarity scores across occurrences or leverage topic modeling strength to measure how central a concept is within relevant documents.
 - **Manual boosts / domain knowledge:** Boost concepts that match glossary entries or known domain terms. This injects domain knowledge into the ranking.
 
-Using a combination of these signals, compute a composite importance score for each concept, sort, and select the top concepts as the final core keywords to present. This multi-factor ranking is more robust than raw token frequency and naturally highlights higher-level themes.
+Using a combination of these signals, we now compute a composite importance score for each cluster via `rank_concept_clusters`. The ranking engine blends Stage 2 scores with document/chunk coverage and occurrence bonuses (`KEYWORD_STAGE4_*` weights) and flags the top `core_limit` results as “core” concepts. The FastAPI endpoint converts those ranked concepts into the JSON payload consumed by the UI, marking the source as `stage4`. If the chat backend is enabled, the list still flows through Stage 5’s keyword filter; otherwise, the Stage 4 output is returned directly. Frequency keywords remain only as a safety fallback.
 
 ### Stage 5: LLM-Based Refinement (Optional)
 
