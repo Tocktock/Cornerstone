@@ -331,8 +331,16 @@ class _ClusterBuilder:
     sources: set[str]
     members: List[ConceptCandidate]
     tokens: set[str]
+    vector: list[float] | None
+    vector_count: int
 
-    def add(self, candidate: ConceptCandidate, *, tokens: set[str]) -> None:
+    def add(
+        self,
+        candidate: ConceptCandidate,
+        *,
+        tokens: set[str],
+        vector: Sequence[float] | None = None,
+    ) -> None:
         self.members.append(candidate)
         self.score += candidate.score
         self.occurrences += candidate.occurrences
@@ -349,6 +357,19 @@ class _ClusterBuilder:
         elif candidate.chunk_count:
             self.chunk_ids.update({f"chunk-{len(self.chunk_ids) + i}" for i in range(candidate.chunk_count)})
         self.label = max(self.members, key=lambda item: item.score).phrase
+
+        if vector:
+            if self.vector is None:
+                self.vector = list(vector)
+                self.vector_count = 1
+            else:
+                if len(self.vector) == len(vector):
+                    total = self.vector_count + 1
+                    self.vector = [
+                        (existing * self.vector_count + float(new)) / total
+                        for existing, new in zip(self.vector, vector)
+                    ]
+                    self.vector_count = total
 
 def _normalize_language(value: object) -> str | None:
     if isinstance(value, str):
@@ -1164,14 +1185,56 @@ def cluster_concepts(
     *,
     similarity_threshold: float = 0.35,
     max_clusters: int = 200,
+    embedding_service: "EmbeddingService | None" = None,
+    embedding_batch_size: int = 32,
 ) -> ConceptClusteringResult:
     if not concepts:
-        return ConceptClusteringResult(clusters=[], parameters={"similarity_threshold": similarity_threshold})
+        return ConceptClusteringResult(
+            clusters=[],
+            parameters={
+                "similarity_threshold": similarity_threshold,
+                "max_clusters": max_clusters,
+                "embedding": {"enabled": False, "reason": "no-concepts"},
+            },
+        )
 
     parameters = {
         "similarity_threshold": similarity_threshold,
         "max_clusters": max_clusters,
     }
+
+    concept_vectors: dict[str, Sequence[float]] = {}
+    embedding_info: dict[str, Any] = {"enabled": False}
+    if embedding_service:
+        phrases = sorted({concept.phrase for concept in concepts if concept.phrase})
+        if phrases:
+            backend = getattr(embedding_service, "backend", None)
+            embedding_info["enabled"] = True
+            embedding_info["backend"] = getattr(backend, "name", str(backend)) if backend else None
+            successes = 0
+            failures = 0
+            try:
+                for start in range(0, len(phrases), max(1, embedding_batch_size)):
+                    batch = phrases[start : start + max(1, embedding_batch_size)]
+                    try:
+                        vectors = embedding_service.embed(batch)  # type: ignore[union-attr]
+                    except AttributeError:
+                        vectors = [embedding_service.embed_one(text) for text in batch]  # type: ignore[union-attr]
+                    for item, vector in zip(batch, vectors):
+                        if vector and any(vector):
+                            concept_vectors[item] = vector
+                            successes += 1
+                        else:
+                            failures += 1
+            except Exception as exc:  # pragma: no cover - defensive guard
+                logger.warning("keyword.stage3.embedding_failed error=%s", exc)
+                embedding_info.update({"enabled": False, "error": str(exc)})
+                concept_vectors.clear()
+            else:
+                embedding_info["phrases"] = successes
+                if failures:
+                    embedding_info["failures"] = failures
+    parameters["embedding"] = embedding_info
 
     builders: list[_ClusterBuilder] = []
 
@@ -1182,23 +1245,30 @@ def cluster_concepts(
 
         best_builder: _ClusterBuilder | None = None
         best_similarity = 0.0
+        concept_vector = concept_vectors.get(concept.phrase)
 
         for builder in builders:
-            similarity = max(
+            lexical_similarity = max(
                 _jaccard_similarity(tokens, builder.tokens),
                 _token_overlap_similarity(tokens, builder.tokens),
             )
+            embedding_similarity = (
+                _cosine_similarity(concept_vector, builder.vector)  # type: ignore[arg-type]
+                if concept_vector is not None and builder.vector is not None
+                else 0.0
+            )
+            similarity = max(embedding_similarity, lexical_similarity)
             if similarity > best_similarity:
                 best_similarity = similarity
                 best_builder = builder
 
         if best_builder and best_similarity >= similarity_threshold:
-            best_builder.add(concept, tokens=tokens)
+            best_builder.add(concept, tokens=tokens, vector=concept_vector)
             continue
 
         if len(builders) >= max_clusters:
             target = best_builder or max(builders, key=lambda item: item.score)
-            target.add(concept, tokens=tokens)
+            target.add(concept, tokens=tokens, vector=concept_vector)
             continue
 
         builder = _ClusterBuilder(
@@ -1212,6 +1282,8 @@ def cluster_concepts(
             sources=set(concept.sources),
             members=[concept],
             tokens=set(tokens),
+            vector=list(concept_vector) if concept_vector is not None else None,
+            vector_count=1 if concept_vector is not None else 0,
         )
         builders.append(builder)
 

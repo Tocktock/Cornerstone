@@ -986,7 +986,10 @@ def create_app(
         if concept_stage.candidates:
             refined_concepts = llm_filter.refine_concepts(concept_stage.candidates, context_snippets)
             concept_stage = concept_stage.replace_candidates(refined_concepts)
-        cluster_stage: ConceptClusteringResult = cluster_concepts(concept_stage.candidates)
+        cluster_stage: ConceptClusteringResult = cluster_concepts(
+            concept_stage.candidates,
+            embedding_service=embedding,
+        )
         original_count = len(keywords)
         debug_payload: dict[str, object] = {}
         if llm_filter.enabled:

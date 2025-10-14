@@ -644,6 +644,89 @@ def test_cluster_concepts_groups_similar_phrases() -> None:
     assert login_cluster.score >= 18.0
 
 
+def test_cluster_concepts_uses_embedding_similarity() -> None:
+    class StubEmbeddingService:
+        def __init__(self) -> None:
+            self.backend = type("Backend", (), {"name": "stub"})()
+
+        def embed(self, texts: list[str]) -> list[list[float]]:
+            vectors = {
+                "sunrise metrics dashboard": [0.9, 0.1, 0.0],
+                "dawn analytics console": [0.88, 0.12, 0.01],
+                "authentication timeout": [0.1, 0.9, 0.2],
+            }
+            return [vectors.get(text, [0.0, 0.0, 0.0]) for text in texts]
+
+    embedding_service = StubEmbeddingService()
+
+    concepts = [
+        ConceptCandidate(
+            phrase="sunrise metrics dashboard",
+            score=8.0,
+            occurrences=3,
+            document_count=2,
+            chunk_count=2,
+            average_occurrence_per_chunk=1.5,
+            word_count=3,
+            languages=["en"],
+            sections=["Analytics"],
+            sources=["metrics.md"],
+            sample_snippet="Sunrise metrics dashboard overview.",
+            score_breakdown={"embedding": 2.0},
+        ),
+        ConceptCandidate(
+            phrase="dawn analytics console",
+            score=7.5,
+            occurrences=2,
+            document_count=1,
+            chunk_count=1,
+            average_occurrence_per_chunk=2.0,
+            word_count=3,
+            languages=["en"],
+            sections=["Analytics"],
+            sources=["console.md"],
+            sample_snippet="Dawn analytics console quickstart.",
+            score_breakdown={"embedding": 1.8},
+        ),
+        ConceptCandidate(
+            phrase="authentication timeout",
+            score=4.0,
+            occurrences=2,
+            document_count=1,
+            chunk_count=1,
+            average_occurrence_per_chunk=2.0,
+            word_count=2,
+            languages=["en"],
+            sections=["Auth"],
+            sources=["auth.md"],
+            sample_snippet="Authentication timeout troubleshooting.",
+            score_breakdown={"frequency": 2.0},
+        ),
+    ]
+
+    result = cluster_concepts(
+        concepts,
+        similarity_threshold=0.6,
+        embedding_service=embedding_service,  # type: ignore[arg-type]
+    )
+
+    assert result.clusters
+    parameters = result.parameters.get("embedding", {})
+    assert parameters.get("enabled") is True
+    analytics_cluster = next(
+        cluster for cluster in result.clusters if "analytics" in cluster.label or "sunrise" in cluster.label
+    )
+    phrases = {member.phrase for member in analytics_cluster.members}
+    assert "sunrise metrics dashboard" in phrases
+    assert "dawn analytics console" in phrases
+    timeout_cluster = next(
+        cluster
+        for cluster in result.clusters
+        if any(member.phrase == "authentication timeout" for member in cluster.members)
+    )
+    assert timeout_cluster is not analytics_cluster
+
+
 def test_cluster_concepts_handles_korean() -> None:
     concepts = [
         ConceptCandidate(
