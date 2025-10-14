@@ -160,6 +160,7 @@ def test_extract_concept_candidates_includes_embedding_scores() -> None:
         max_candidates_per_chunk=4,
         max_embedding_phrases_per_chunk=3,
         min_char_length=2,
+        embedding_weight=3.0,
     )
 
     embedding_stats = result.parameters.get("embedding_stats")
@@ -167,6 +168,8 @@ def test_extract_concept_candidates_includes_embedding_scores() -> None:
 
     candidate = next(item for item in result.candidates if item.phrase == "quantum gateway")
     assert candidate.score_breakdown["embedding"] > 0
+    scoring_weights = result.parameters.get("scoring_weights", {})
+    assert scoring_weights.get("embedding") == 3.0
 
 
 def test_extract_concept_candidates_includes_statistical_scores() -> None:
@@ -257,6 +260,42 @@ def test_extract_concept_candidates_uses_llm_summary() -> None:
     assert candidate.generated is True
     assert candidate.reason == "summarized"
     assert candidate.score_breakdown.get("llm", 0) > 0
+
+
+def test_extract_concept_candidates_respects_summary_toggle() -> None:
+    class GuardFilter:
+        enabled = True
+        backend = "stub"
+
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def extract_summary_concepts(self, chunks: list[KeywordSourceChunk], **_) -> list[dict[str, object]]:
+            self.calls += 1
+            return [{"phrase": "placeholder concept"}]
+
+    chunk = KeywordSourceChunk(
+        text="Incident response guide for paging processes.",
+        normalized_text="incident response guide for paging processes",
+        doc_id="doc-toggle",
+        chunk_id="doc-toggle:0",
+        section_path="Operations / Incident Response",
+        language="en",
+    )
+
+    guard_filter = GuardFilter()
+    result = extract_concept_candidates(
+        [chunk],
+        llm_filter=guard_filter,  # type: ignore[arg-type]
+        use_llm_summary=False,
+        max_ngram_size=2,
+        max_candidates_per_chunk=2,
+        max_embedding_phrases_per_chunk=0,
+    )
+
+    assert guard_filter.calls == 0
+    summary_info = result.parameters.get("llm_summary")
+    assert summary_info and summary_info["used"] is False
 
 
 def test_extract_keyword_candidates_identifies_core_terms() -> None:
@@ -497,6 +536,19 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
         "OLLAMA_BASE_URL": "http://localhost:9999",
         "OLLAMA_MODEL": "llama3.1:test",
         "KEYWORD_FILTER_MAX_RESULTS": "7",
+        "KEYWORD_STAGE2_MAX_NGRAM": "4",
+        "KEYWORD_STAGE2_MAX_CANDIDATES_PER_CHUNK": "12",
+        "KEYWORD_STAGE2_MAX_EMBEDDING_PHRASES": "5",
+        "KEYWORD_STAGE2_MAX_STATISTICAL_PHRASES": "3",
+        "KEYWORD_STAGE2_USE_LLM_SUMMARY": "false",
+        "KEYWORD_STAGE2_LLM_SUMMARY_MAX_CHUNKS": "6",
+        "KEYWORD_STAGE2_LLM_SUMMARY_MAX_RESULTS": "4",
+        "KEYWORD_STAGE2_LLM_SUMMARY_MAX_CHARS": "256",
+        "KEYWORD_STAGE2_MIN_CHAR_LENGTH": "4",
+        "KEYWORD_STAGE2_MIN_OCCURRENCES": "2",
+        "KEYWORD_STAGE2_EMBEDDING_WEIGHT": "2.25",
+        "KEYWORD_STAGE2_STATISTICAL_WEIGHT": "1.6",
+        "KEYWORD_STAGE2_LLM_WEIGHT": "3.1",
     }
     for key in env_vars:
         monkeypatch.delenv(key, raising=False)
@@ -510,6 +562,19 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
     assert settings.ollama_model == "llama3.1:test"
     assert settings.keyword_filter_max_results == 7
     assert settings.is_ollama_chat_backend
+    assert settings.keyword_stage2_max_ngram == 4
+    assert settings.keyword_stage2_max_candidates_per_chunk == 12
+    assert settings.keyword_stage2_max_embedding_phrases_per_chunk == 5
+    assert settings.keyword_stage2_max_statistical_phrases_per_chunk == 3
+    assert settings.keyword_stage2_use_llm_summary is False
+    assert settings.keyword_stage2_llm_summary_max_chunks == 6
+    assert settings.keyword_stage2_llm_summary_max_results == 4
+    assert settings.keyword_stage2_llm_summary_max_chars == 256
+    assert settings.keyword_stage2_min_char_length == 4
+    assert settings.keyword_stage2_min_occurrences == 2
+    assert settings.keyword_stage2_embedding_weight == 2.25
+    assert settings.keyword_stage2_statistical_weight == 1.6
+    assert settings.keyword_stage2_llm_weight == 3.1
 
 
 def test_cluster_concepts_groups_similar_phrases() -> None:
