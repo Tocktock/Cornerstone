@@ -964,6 +964,19 @@ def create_app(
             chunks,
             embedding_service=embedding,
             llm_filter=llm_filter,
+            use_llm_summary=settings.keyword_stage2_use_llm_summary,
+            max_ngram_size=settings.keyword_stage2_max_ngram,
+            max_candidates_per_chunk=settings.keyword_stage2_max_candidates_per_chunk,
+            max_embedding_phrases_per_chunk=settings.keyword_stage2_max_embedding_phrases_per_chunk,
+            max_statistical_phrases_per_chunk=settings.keyword_stage2_max_statistical_phrases_per_chunk,
+            llm_summary_max_chunks=settings.keyword_stage2_llm_summary_max_chunks,
+            llm_summary_max_results=settings.keyword_stage2_llm_summary_max_results,
+            llm_summary_max_chars=settings.keyword_stage2_llm_summary_max_chars,
+            min_char_length=settings.keyword_stage2_min_char_length,
+            min_occurrences=settings.keyword_stage2_min_occurrences,
+            embedding_weight=settings.keyword_stage2_embedding_weight,
+            statistical_weight=settings.keyword_stage2_statistical_weight,
+            llm_weight=settings.keyword_stage2_llm_weight,
         )
         texts = [chunk.text for chunk in chunks]
         keywords = extract_keyword_candidates(texts)
