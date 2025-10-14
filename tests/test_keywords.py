@@ -9,6 +9,7 @@ from cornerstone.keywords import (
     KeywordCandidate,
     KeywordLLMFilter,
     KeywordSourceChunk,
+    RankedConcept,
     cluster_concepts,
     extract_concept_candidates,
     extract_keyword_candidates,
@@ -336,12 +337,13 @@ def test_parse_response_handles_leading_text_without_fence() -> None:
     assert parsed["keywords"][0]["term"] == "beta"
 
 
-def _build_enabled_filter(keyword_payload: dict, monkeypatch) -> KeywordLLMFilter:
+def _build_enabled_filter(keyword_payload: dict, monkeypatch, *, allow_generated: bool = False) -> KeywordLLMFilter:
     settings = Settings(
         chat_backend="ollama",
         ollama_base_url="http://localhost:11434",
         ollama_model="mock-keywords",
         keyword_filter_max_results=3,
+        keyword_filter_allow_generated=allow_generated,
     )
     filter_instance = KeywordLLMFilter(settings)
     response = json.dumps(keyword_payload)
@@ -560,6 +562,8 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
         "KEYWORD_STAGE4_CHUNK_WEIGHT": "0.8",
         "KEYWORD_STAGE4_OCCURRENCE_WEIGHT": "0.45",
         "KEYWORD_STAGE4_LABEL_BONUS": "0.9",
+        "KEYWORD_STAGE5_HARMONIZE_ENABLED": "true",
+        "KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS": "15",
     }
     for key in env_vars:
         monkeypatch.delenv(key, raising=False)
@@ -595,6 +599,8 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
     assert settings.keyword_stage4_chunk_weight == 0.8
     assert settings.keyword_stage4_occurrence_weight == 0.45
     assert settings.keyword_stage4_label_bonus == 0.9
+    assert settings.keyword_stage5_harmonize_enabled is True
+    assert settings.keyword_stage5_harmonize_max_results == 15
 
 
 def test_cluster_concepts_groups_similar_phrases() -> None:
@@ -999,6 +1005,56 @@ def test_rank_concept_clusters_generalizes_sentiment_labels() -> None:
     assert "화주 긍정 리뷰" in top.aliases
 
 
+def test_harmonize_ranked_concepts_uses_llm(monkeypatch) -> None:
+    settings = Settings(
+        chat_backend="ollama",
+        ollama_base_url="http://localhost:11434",
+        ollama_model="mock-keywords",
+    )
+    filter_instance = KeywordLLMFilter(settings)
+
+    payload = {
+        "concepts": [
+            {
+                "index": 1,
+                "label": "화주 리뷰",
+                "description": "화주 피드백 전반",
+                "aliases": ["화주 리뷰", "화주 피드백"],
+            }
+        ]
+    }
+    monkeypatch.setattr(
+        KeywordLLMFilter,
+        "_invoke_backend",
+        lambda self, prompt: json.dumps(payload),
+    )
+
+    ranked = [
+        RankedConcept(
+            label="화주 부정 리뷰",
+            score=120.0,
+            rank=1,
+            is_core=True,
+            document_count=20,
+            chunk_count=25,
+            occurrences=80,
+            label_source="llm",
+            description=None,
+            aliases=["화주 부정 리뷰", "화주 긍정 리뷰"],
+            member_phrases=["화주 부정 리뷰", "화주 긍정 리뷰"],
+            score_breakdown={"stage2_score": 100.0},
+        )
+    ]
+
+    updated = filter_instance.harmonize_ranked_concepts(ranked, max_results=5)
+    assert updated[0].label == "화주 리뷰"
+    assert "harmonized" in (updated[0].label_source or "")
+    assert "화주 리뷰" in updated[0].aliases
+
+    debug = filter_instance.harmonize_debug_payload()
+    assert debug.get("status") == "harmonized"
+
+
 def test_filter_keywords_limits_and_normalises(monkeypatch) -> None:
     filter_instance = _build_enabled_filter(
         {
@@ -1019,16 +1075,17 @@ def test_filter_keywords_limits_and_normalises(monkeypatch) -> None:
 
     results = filter_instance.filter_keywords(candidates, context_snippets=[])
 
-    assert [item.term for item in results] == ["Alpha", "Beta", "Delta"]
-    assert [item.generated for item in results] == [False, False, True]
+    assert [item.term for item in results] == ["Alpha", "Beta"]
+    assert [item.generated for item in results] == [False, False]
 
     info = filter_instance.debug_payload()
     assert info["status"] == "filtered"
-    assert info["truncated"] == ["epsilon"]
+    assert info.get("truncated", []) == []
     assert info["kept"] == ["Alpha", "Beta"]
-    assert info["generated"] == ["Delta"]
-    assert info["selected_total"] == 3
-    assert info["llm_selected_total"] == 4
+    assert info.get("generated", []) == []
+    assert info.get("generated_blocked") == ["Delta", "epsilon"]
+    assert info.get("selected_total") == 2
+    assert info.get("llm_selected_total") == 4
     assert set(info.get("assumed_true", [])) >= {"Beta", "Delta", "epsilon"}
 
 
@@ -1049,17 +1106,44 @@ def test_filter_keywords_handles_items_payload(monkeypatch) -> None:
     ]
 
     results = filter_instance.filter_keywords(candidates, context_snippets=[])
-    assert [item.term for item in results] == ["Beta", "Delta"]
-    assert [item.generated for item in results] == [False, True]
+    assert [item.term for item in results] == ["Beta"]
+    assert [item.generated for item in results] == [False]
     assert results[0].source == "candidate"
     assert results[0].reason == "Core concept"
-    assert results[1].source == "generated"
-    assert results[1].reason == "LLM added"
+
+    info = filter_instance.debug_payload()
+    assert info.get("generated_blocked") == ["Delta"]
+
+
+def test_filter_keywords_allows_generated_when_enabled(monkeypatch) -> None:
+    filter_instance = _build_enabled_filter(
+        {
+            "keywords": [
+                {"term": "Alpha", "keep": True},
+                {"term": "Beta", "keep": True},
+            ]
+        },
+        monkeypatch,
+        allow_generated=True,
+    )
+    candidates = [
+        KeywordCandidate(term="Alpha", count=5, is_core=True),
+        KeywordCandidate(term="Beta", count=3, is_core=True),
+    ]
+
+    payload = {
+        "keywords": [
+            {"term": "Alpha", "keep": True},
+            {"term": "New Concept", "keep": True, "source": "generated"},
+        ]
+    }
+
+    monkeypatch.setattr(KeywordLLMFilter, "_invoke_backend", lambda self, _: json.dumps(payload))
+
+    results = filter_instance.filter_keywords(candidates, context_snippets=[])
+    assert [item.term for item in results] == ["Alpha", "New Concept"]
+    assert results[1].generated is True
 
     info = filter_instance.debug_payload()
     assert info["status"] == "filtered"
-    assert info["coerced_source"] == "coerced-from-items"
-    assert info["rejected_total"] == 1
-    assert info["rejected"][0]["term"] == "Gamma"
-    assert info["generated"] == ["Delta"]
-    assert info["kept"] == ["Beta"]
+    assert "New Concept" in info.get("generated", [])

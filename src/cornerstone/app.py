@@ -1005,8 +1005,22 @@ def create_app(
             label_bonus=settings.keyword_stage4_label_bonus,
         )
 
+        keywords_origin = "frequency"
         if ranking_stage.ranked:
             keywords_origin = "stage4"
+
+            if (
+                settings.keyword_stage5_harmonize_enabled
+                and llm_filter.enabled
+            ):
+                harmonized = llm_filter.harmonize_ranked_concepts(
+                    ranking_stage.ranked,
+                    max_results=settings.keyword_stage5_harmonize_max_results,
+                )
+                if harmonized and harmonized != list(ranking_stage.ranked):
+                    ranking_stage = ranking_stage.replace_ranked(harmonized)
+                    keywords_origin = "stage5"
+
             keywords = [
                 KeywordCandidate(
                     term=item.label,
@@ -1015,12 +1029,11 @@ def create_app(
                     generated="llm" in item.label_source if item.label_source else False,
                     reason=item.description
                     or f"{item.document_count} docs | score {item.score:.2f}",
-                    source=f"stage4:{item.label_source}",
+                    source=f"{keywords_origin}:{item.label_source}",
                 )
                 for item in ranking_stage.ranked
             ]
         else:
-            keywords_origin = "frequency"
             keywords = frequency_keywords
 
         original_count = len(keywords)
@@ -1091,6 +1104,9 @@ def create_app(
 
         ranking_debug = ranking_stage.to_debug_payload(limit=6)
         ranking_debug["origin"] = keywords_origin
+        harmonize_debug = llm_filter.harmonize_debug_payload()
+        if harmonize_debug:
+            ranking_debug.setdefault("llm", harmonize_debug)
 
         debug_payload = {
             **llm_debug,

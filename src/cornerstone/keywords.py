@@ -427,6 +427,9 @@ class ConceptRankingResult:
             "top_ranked": top,
         }
 
+    def replace_ranked(self, ranked: Sequence[RankedConcept]) -> ConceptRankingResult:
+        return ConceptRankingResult(ranked=list(ranked), parameters=dict(self.parameters))
+
     def add(
         self,
         candidate: ConceptCandidate,
@@ -1689,12 +1692,14 @@ class KeywordLLMFilter:
         self._ollama_model: str | None = None
         self._ollama_timeout: float = max(settings.ollama_request_timeout, 300.0)
         self._max_results: int = max(0, settings.keyword_filter_max_results)
+        self._allow_generated: bool = settings.keyword_filter_allow_generated
         self._current_prompt: dict[str, str] | None = None
         self._disable_reason: str | None = None
         self._last_debug: dict[str, object] = {}
         self._last_concept_debug: dict[str, object] = {}
         self._last_summary_debug: dict[str, object] = {}
         self._last_cluster_debug: dict[str, object] = {}
+        self._last_harmonize_debug: dict[str, object] = {}
         reason: str | None = None
 
         if settings.is_openai_chat_backend:
@@ -1761,6 +1766,7 @@ class KeywordLLMFilter:
             "candidate_count": len(candidates),
             "status": "pending",
             "max_results": self._max_results,
+            "allow_generated": self._allow_generated,
         }
         if not candidates:
             logger.debug("keyword.llm.skip reason=no-candidates")
@@ -1821,6 +1827,7 @@ class KeywordLLMFilter:
         term_to_candidate = {candidate.term.lower(): candidate for candidate in candidates}
         seen_terms: set[str] = set()
         selected_candidates: list[KeywordCandidate] = []
+        dropped_generated: list[str] = []
 
         for entry in normalized_entries:
             term = str(entry.get("term", "")).strip()
@@ -1852,6 +1859,9 @@ class KeywordLLMFilter:
                 candidate.is_core = True if candidate.count >= 1 else candidate.is_core
                 selected_candidates.append(candidate)
             else:
+                if not self._allow_generated:
+                    dropped_generated.append(term)
+                    continue
                 final_source = source_value or "generated"
                 count_for_new = count_int if count_int and count_int > 0 else 1
                 new_candidate = KeywordCandidate(
@@ -1911,6 +1921,8 @@ class KeywordLLMFilter:
                 "rejected_total": len(rejected_entries),
             }
         )
+        if dropped_generated:
+            self._last_debug["generated_blocked"] = dropped_generated[:20]
         if truncated_terms:
             self._last_debug["truncated"] = truncated_terms
         if assumed_terms:
@@ -2190,6 +2202,406 @@ class KeywordLLMFilter:
         ]
         return normalized_items
 
+    def harmonize_ranked_concepts(
+        self,
+        concepts: Sequence[RankedConcept],
+        *,
+        max_results: int = 10,
+    ) -> list[RankedConcept]:
+        self._last_harmonize_debug = {
+            "backend": self._backend,
+            "enabled": self._enabled,
+            "disable_reason": self._disable_reason,
+            "concept_count": len(concepts),
+            "max_results": max_results,
+            "status": "pending",
+        }
+        if not concepts:
+            self._last_harmonize_debug.update({"status": "skipped", "reason": "no-concepts"})
+            return list(concepts)
+        if not self._enabled:
+            self._last_harmonize_debug.update(
+                {"status": "bypass", "reason": self._disable_reason or "disabled"}
+            )
+            return list(concepts)
+
+        limited_concepts = list(concepts[: max(1, max_results)])
+        prompt = self._build_harmonize_prompt(limited_concepts)
+        try:
+            raw_response = self._invoke_backend(prompt)
+            self._last_harmonize_debug["response"] = raw_response
+        except Exception as exc:  # pragma: no cover - runtime guard
+            logger.warning("concept.llm.harmonize_failed backend=%s error=%s", self._backend, exc)
+            self._last_harmonize_debug.update({"status": "error", "reason": f"invoke_failed:{exc}"})
+            return list(concepts)
+
+        parsed = self._parse_response(raw_response)
+        if parsed is None:
+            self._last_harmonize_debug.update({"status": "error", "reason": "json-parse-error"})
+            return list(concepts)
+
+        items, note = self._extract_harmonize_items(parsed)
+        if items is None:
+            self._last_harmonize_debug.update({"status": "error", "reason": "missing-concepts-key"})
+            return list(concepts)
+
+        normalized_items, rejected_items = self._normalize_harmonize_items(items)
+        if note:
+            self._last_harmonize_debug["note"] = note
+        if rejected_items:
+            self._last_harmonize_debug["rejected"] = rejected_items[:20]
+            self._last_harmonize_debug["rejected_total"] = len(rejected_items)
+
+        if not normalized_items:
+            self._last_harmonize_debug.update({"status": "empty"})
+            return list(concepts)
+
+        updated: list[RankedConcept] = list(concepts)
+        applied = 0
+        for entry in normalized_items:
+            index = _coerce_optional_int(entry.get("index"))
+            if index is None or index <= 0 or index > len(updated):
+                continue
+            base = updated[index - 1]
+            if not entry.get("keep", True):
+                continue
+            new_label = str(entry.get("label", "")).strip() or base.label
+            description = str(entry.get("description", "")).strip() or base.description
+            alias_candidates = _coerce_str_list(entry.get("aliases"))
+            merged_aliases = list(
+                dict.fromkeys([new_label, base.label, *alias_candidates, *base.aliases])
+            )
+            label_source = (
+                f"{base.label_source}+harmonized"
+                if new_label != base.label
+                else base.label_source
+            )
+            updated[index - 1] = replace(
+                base,
+                label=new_label,
+                description=description,
+                aliases=merged_aliases,
+                label_source=label_source,
+            )
+            applied += 1
+
+        if applied == 0:
+            self._last_harmonize_debug.update({"status": "no-changes"})
+            return list(concepts)
+
+        self._last_harmonize_debug.update(
+            {
+                "status": "harmonized",
+                "selected_total": applied,
+            }
+        )
+        preview = [
+            {
+                "index": concept.rank,
+                "label": concept.label,
+                "label_source": concept.label_source,
+            }
+            for concept in updated[: min(applied, 10)]
+        ]
+        self._last_harmonize_debug["labels"] = preview
+        return updated
+
+    def debug_payload(self) -> dict[str, object]:
+        payload = {
+            "backend": self._backend,
+            "enabled": self._enabled,
+            "disable_reason": self._disable_reason,
+            "max_results": self._max_results,
+            "allow_generated": self._allow_generated,
+        }
+        payload.update(self._last_debug)
+        if self._last_concept_debug:
+            payload.setdefault("concept_refinement", self._last_concept_debug)
+        if self._last_summary_debug:
+            payload.setdefault("concept_summary", self._last_summary_debug)
+        if getattr(self, "_last_cluster_debug", None):
+            payload.setdefault("cluster_labeling", self._last_cluster_debug)
+        if getattr(self, "_last_harmonize_debug", None):
+            payload.setdefault("label_harmonization", self._last_harmonize_debug)
+        return payload
+
+    def concept_debug_payload(self) -> dict[str, object]:
+        return dict(self._last_concept_debug)
+
+    def summary_debug_payload(self) -> dict[str, object]:
+        return dict(self._last_summary_debug)
+
+    def cluster_debug_payload(self) -> dict[str, object]:
+        return dict(self._last_cluster_debug)
+
+    def harmonize_debug_payload(self) -> dict[str, object]:
+        return dict(self._last_harmonize_debug)
+
+    @staticmethod
+    def _parse_response(raw_response: str) -> dict | None:
+        decoder = json.JSONDecoder()
+
+        def _attempt(candidate: str) -> dict | None:
+            candidate = candidate.strip()
+            if not candidate:
+                return None
+            try:
+                return json.loads(candidate)
+            except json.JSONDecodeError:
+                pass
+
+            for token in ("{", "["):
+                idx = candidate.find(token)
+                while idx != -1:
+                    try:
+                        parsed, _ = decoder.raw_decode(candidate[idx:])
+                        return parsed
+                    except json.JSONDecodeError:
+                        idx = candidate.find(token, idx + 1)
+            return None
+
+        primary = _attempt(raw_response)
+        if primary is not None:
+            return primary
+
+        fenced_match = re.search(r"```(?:json)?\s*(.*?)```", raw_response, re.DOTALL)
+        if fenced_match:
+            fenced_content = fenced_match.group(1)
+            return _attempt(fenced_content) or None
+
+        return None
+
+    def _extract_keyword_items(self, payload: object) -> tuple[list[object] | None, str | None]:
+        """Return keyword entries from the LLM payload, coercing common variants."""
+
+        def _as_list(value: object) -> list[object] | None:
+            if value is None:
+                return None
+            if isinstance(value, list):
+                return list(value)
+            if isinstance(value, (tuple, set)):
+                return list(value)
+            if isinstance(value, dict):
+                return [value]
+            if isinstance(value, str):
+                items = [segment.strip() for segment in re.split(r"[\n,]", value) if segment.strip()]
+                if items:
+                    return items
+            return None
+
+        note: str | None = None
+        if isinstance(payload, dict):
+            value: object | None = payload.get("keywords")
+            if value is None:
+                for key in ("items", "terms", "results", "keywords_list", "values", "data"):
+                    if key in payload:
+                        value = payload[key]
+                        note = f"coerced-from-{key}"
+                        break
+            result = _as_list(value)
+            if result is not None:
+                if note is None and value is not None and not isinstance(value, list):
+                    note = "coerced-from-nonlist"
+                return result, note
+        elif isinstance(payload, list):
+            return list(payload), "coerced-from-root-list"
+        elif isinstance(payload, str):
+            result = _as_list(payload)
+            if result:
+                return result, "coerced-from-string"
+        return None, note
+
+    def _normalize_keyword_items(
+        self, items: Sequence[object]
+    ) -> tuple[list[dict[str, object]], list[dict[str, object]], list[str]]:
+        normalized: list[dict[str, object]] = []
+        rejected: list[dict[str, object]] = []
+        assumed_true: list[str] = []
+
+        for raw in items:
+            entry = self._normalize_keyword_entry(raw)
+            if not entry:
+                continue
+            keep = bool(entry.get("keep", True))
+            if keep:
+                if entry.pop("_assumed_keep", False):
+                    assumed_true.append(str(entry.get("term", "")))
+                normalized.append(entry)
+            else:
+                entry.pop("_assumed_keep", None)
+                rejected.append(entry)
+        return normalized, rejected, [term for term in assumed_true if term]
+
+    def _normalize_keyword_entry(self, raw: object) -> dict[str, object] | None:
+        if isinstance(raw, str):
+            term = raw.strip()
+            if not term:
+                return None
+            return {"term": term, "keep": True, "_assumed_keep": True}
+
+        if isinstance(raw, dict):
+            term: str = ""
+            for key in ("term", "keyword", "value", "text", "name"):
+                value = raw.get(key)
+                if value is not None:
+                    term = str(value).strip()
+                    if term:
+                        break
+            if not term:
+                return None
+
+            keep_flag: bool | None = None
+            for key in ("keep", "include", "accept", "selected", "retain", "use", "should_keep"):
+                if key in raw:
+                    keep_flag = self._coerce_keep_flag(raw.get(key))
+                    if keep_flag is not None:
+                        break
+            assumed = False
+            if keep_flag is None:
+                keep_flag = True
+                assumed = True
+
+            reason: str | None = None
+            for key in ("reason", "note", "explanation", "why"):
+                value = raw.get(key)
+                if value is not None:
+                    text_value = str(value).strip()
+                    if text_value:
+                        reason = text_value
+                        break
+
+            source: str | None = None
+            for key in ("source", "origin"):
+                value = raw.get(key)
+                if value is not None:
+                    text_value = str(value).strip()
+                    if text_value:
+                        source = text_value
+                        break
+
+            count_value = None
+            for key in ("count", "frequency", "freq", "score", "weight"):
+                if key in raw:
+                    count_value = raw.get(key)
+                    break
+            count_int: int | None
+            if count_value is None:
+                count_int = None
+            else:
+                try:
+                    count_int = int(count_value)
+                except (TypeError, ValueError):
+                    count_int = None
+
+            entry: dict[str, object] = {"term": term, "keep": bool(keep_flag)}
+            if reason is not None:
+                entry["reason"] = reason
+            if source is not None:
+                entry["source"] = source
+            if count_int is not None:
+                entry["count"] = count_int
+            if assumed:
+                entry["_assumed_keep"] = True
+            return entry
+
+        if isinstance(raw, (tuple, set)):
+            items = list(raw)
+            if not items:
+                return None
+            return self._normalize_keyword_entry(items[0])
+
+        return None
+
+    @staticmethod
+    def _coerce_keep_flag(value: object) -> bool | None:
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return value != 0
+        text = str(value).strip().lower()
+        if not text:
+            return None
+        if text in {"true", "yes", "keep", "include", "retain", "accept", "1"}:
+            return True
+        if text in {"false", "no", "drop", "reject", "exclude", "remove", "0"}:
+            return False
+        return None
+
+    def _extract_harmonize_items(self, payload: object) -> tuple[list[object] | None, str | None]:
+        def _as_list(value: object) -> list[object] | None:
+            if value is None:
+                return None
+            if isinstance(value, list):
+                return list(value)
+            if isinstance(value, (tuple, set)):
+                return list(value)
+            if isinstance(value, dict):
+                return [value]
+            if isinstance(value, str):
+                items = [segment.strip() for segment in re.split(r"(?:\n|,)", value) if segment.strip()]
+                if items:
+                    return items
+            return None
+
+        note: str | None = None
+        if isinstance(payload, dict):
+            value: object | None = None
+            for key in ("concepts", "items", "results", "labels"):
+                if key in payload:
+                    value = payload[key]
+                    if key != "concepts":
+                        note = f"coerced-from-{key}"
+                    break
+            result = _as_list(value)
+            if result is not None:
+                if note is None and value is not None and not isinstance(value, list):
+                    note = "coerced-from-nonlist"
+                return result, note
+        elif isinstance(payload, list):
+            return list(payload), "coerced-from-root-list"
+        elif isinstance(payload, str):
+            result = _as_list(payload)
+            if result:
+                return result, "coerced-from-string"
+        return None, note
+
+    def _normalize_harmonize_items(self, items: Sequence[object]) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+        normalized: list[dict[str, object]] = []
+        rejected: list[dict[str, object]] = []
+
+        for raw in items:
+            if isinstance(raw, dict):
+                index = _coerce_optional_int(raw.get("index") or raw.get("rank"))
+                if index is None or index <= 0:
+                    rejected.append({"reason": "invalid-index", "raw": raw})
+                    continue
+                label_value = raw.get("label")
+                label = str(label_value).strip() if label_value is not None else ""
+                description_value = raw.get("description") or raw.get("reason")
+                description = str(description_value).strip() if description_value else ""
+                aliases = _coerce_str_list(raw.get("aliases") or raw.get("alternate") or raw.get("synonyms"))
+                keep_value = raw.get("keep")
+                keep = True if keep_value is None else bool(keep_value)
+                entry: dict[str, object] = {
+                    "index": index,
+                    "label": label,
+                    "description": description,
+                    "aliases": aliases,
+                    "keep": keep,
+                }
+                normalized.append(entry)
+            elif isinstance(raw, str):
+                label = raw.strip()
+                if not label:
+                    continue
+                normalized.append({"index": None, "label": label, "description": "", "aliases": [], "keep": False})
+            else:
+                rejected.append({"reason": "unsupported-entry", "raw": raw})
+
+        return normalized, rejected
+
     def extract_summary_concepts(
         self,
         chunks: Sequence[KeywordSourceChunk],
@@ -2314,6 +2726,44 @@ class KeywordLLMFilter:
         }
         return prompt
 
+    def _build_harmonize_prompt(
+        self,
+        concepts: Sequence[RankedConcept],
+    ) -> str:
+        lines: list[str] = []
+        for index, concept in enumerate(concepts, 1):
+            alias_preview = ", ".join(concept.aliases[:5]) if concept.aliases else "n/a"
+            member_preview = ", ".join(concept.member_phrases[:4]) if concept.member_phrases else "n/a"
+            lines.append(
+                f"{index}. label='{concept.label}' | docs={concept.document_count} | "
+                f"chunks={concept.chunk_count} | occurrences={concept.occurrences}\n"
+                f"   aliases: {alias_preview}\n"
+                f"   members: {member_preview}"
+            )
+        formatted = "\n\n".join(lines)
+
+        instructions = (
+            "You are an expert knowledge taxonomist. For each concept, produce a concise, neutral label that "
+            "captures the shared meaning of its aliases. Prefer short noun phrases (2-4 words) and keep Korean text "
+            "in Hangul. Remove sentiment qualifiers like 'positive' or 'negative' unless they are the core idea."
+        )
+
+        prompt = (
+            f"{instructions}\n\n"
+            "Return strict JSON:\n"
+            '{"concepts": [{"index": 1, "label": "...", "description": "...", "aliases": ["..."], "keep": true}]}\n'
+            "Use the provided index to reference each concept. Include 'description' only when it adds clarity. "
+            "List alternative aliases if they help clarify the theme. Set keep=false only if a concept label should be ignored."
+            "\n\nCONCEPTS:\n"
+            f"{formatted}"
+        )
+
+        self._current_prompt = {
+            "system": instructions,
+            "user": prompt,
+        }
+        return prompt
+
     def _build_concept_prompt(
         self,
         concepts: Sequence[ConceptCandidate],
@@ -2407,6 +2857,91 @@ class KeywordLLMFilter:
             "user": prompt,
         }
         return prompt
+
+    def _extract_cluster_items(self, payload: object) -> tuple[list[object] | None, str | None]:
+        def _as_list(value: object) -> list[object] | None:
+            if value is None:
+                return None
+            if isinstance(value, list):
+                return list(value)
+            if isinstance(value, (tuple, set)):
+                return list(value)
+            if isinstance(value, dict):
+                return [value]
+            if isinstance(value, str):
+                items = [segment.strip() for segment in re.split(r"(?:\n|,)", value) if segment.strip()]
+                if items:
+                    return items
+            return None
+
+        note: str | None = None
+        if isinstance(payload, dict):
+            value: object | None = None
+            for key in ("clusters", "labels", "topics", "results", "items"):
+                if key in payload:
+                    value = payload[key]
+                    if key != "clusters":
+                        note = f"coerced-from-{key}"
+                    break
+            result = _as_list(value)
+            if result is not None:
+                if note is None and value is not None and not isinstance(value, list):
+                    note = "coerced-from-nonlist"
+                return result, note
+        elif isinstance(payload, list):
+            return list(payload), "coerced-from-root-list"
+        elif isinstance(payload, str):
+            result = _as_list(payload)
+            if result:
+                return result, "coerced-from-string"
+        return None, note
+
+    def _normalize_cluster_items(self, items: Sequence[object]) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+        normalized: list[dict[str, object]] = []
+        rejected: list[dict[str, object]] = []
+
+        for raw in items:
+            entry = self._normalize_cluster_entry(raw)
+            if not entry:
+                continue
+            keep = bool(entry.get("keep", True))
+            if keep and entry.get("label"):
+                normalized.append(entry)
+            else:
+                rejected.append(entry)
+        return normalized, rejected
+
+    def _normalize_cluster_entry(self, raw: object) -> dict[str, object] | None:
+        if isinstance(raw, dict):
+            index_value = raw.get("index") or raw.get("cluster") or raw.get("id")
+            index = _coerce_optional_int(index_value)
+            if index is None or index <= 0:
+                return None
+
+            label_value = raw.get("label") or raw.get("title") or raw.get("name")
+            label = str(label_value).strip() if label_value is not None else ""
+            description_value = raw.get("description") or raw.get("reason") or raw.get("summary")
+            description = str(description_value).strip() if description_value else ""
+            aliases = _coerce_str_list(raw.get("aliases") or raw.get("alternate") or raw.get("synonyms"))
+            keep_flag = raw.get("keep")
+            keep = True if keep_flag is None else bool(keep_flag)
+
+            entry: dict[str, object] = {
+                "index": index,
+                "label": label,
+                "description": description,
+                "aliases": aliases,
+                "keep": keep,
+            }
+            return entry
+
+        if isinstance(raw, str):
+            label = raw.strip()
+            if not label:
+                return None
+            return {"index": None, "label": label, "description": "", "aliases": [], "keep": True}
+
+        return None
 
     def _extract_concept_items(self, payload: object) -> tuple[list[object] | None, str | None]:
         def _as_list(value: object) -> list[object] | None:
@@ -2565,350 +3100,6 @@ class KeywordLLMFilter:
 
         return None
 
-    def _extract_cluster_items(self, payload: object) -> tuple[list[object] | None, str | None]:
-        def _as_list(value: object) -> list[object] | None:
-            if value is None:
-                return None
-            if isinstance(value, list):
-                return list(value)
-            if isinstance(value, (tuple, set)):
-                return list(value)
-            if isinstance(value, dict):
-                return [value]
-            if isinstance(value, str):
-                items = [segment.strip() for segment in re.split(r"(?:\n|,)", value) if segment.strip()]
-                if items:
-                    return items
-            return None
-
-        note: str | None = None
-        if isinstance(payload, dict):
-            value: object | None = None
-            for key in ("clusters", "labels", "topics", "results", "items"):
-                if key in payload:
-                    value = payload[key]
-                    if key != "clusters":
-                        note = f"coerced-from-{key}"
-                    break
-            result = _as_list(value)
-            if result is not None:
-                if note is None and value is not None and not isinstance(value, list):
-                    note = "coerced-from-nonlist"
-                return result, note
-        elif isinstance(payload, list):
-            return list(payload), "coerced-from-root-list"
-        elif isinstance(payload, str):
-            result = _as_list(payload)
-            if result:
-                return result, "coerced-from-string"
-        return None, note
-
-    def _normalize_cluster_items(self, items: Sequence[object]) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
-        normalized: list[dict[str, object]] = []
-        rejected: list[dict[str, object]] = []
-
-        for raw in items:
-            entry = self._normalize_cluster_entry(raw)
-            if not entry:
-                continue
-            keep = bool(entry.get("keep", True))
-            if keep and entry.get("label"):
-                normalized.append(entry)
-            else:
-                rejected.append(entry)
-        return normalized, rejected
-
-    def _normalize_cluster_entry(self, raw: object) -> dict[str, object] | None:
-        if isinstance(raw, dict):
-            index_value = raw.get("index") or raw.get("cluster") or raw.get("id")
-            index = _coerce_optional_int(index_value)
-            if index is None or index <= 0:
-                return None
-
-            label_value = raw.get("label") or raw.get("title") or raw.get("name")
-            label = str(label_value).strip() if label_value is not None else ""
-            description_value = raw.get("description") or raw.get("reason") or raw.get("summary")
-            description = str(description_value).strip() if description_value else ""
-            aliases = _coerce_str_list(raw.get("aliases") or raw.get("alternate") or raw.get("synonyms"))
-            keep_flag = raw.get("keep")
-            keep = True if keep_flag is None else bool(keep_flag)
-
-            entry: dict[str, object] = {
-                "index": index,
-                "label": label,
-                "description": description,
-                "aliases": aliases,
-                "keep": keep,
-            }
-            return entry
-
-        if isinstance(raw, str):
-            label = raw.strip()
-            if not label:
-                return None
-            return {"index": None, "label": label, "keep": False}
-
-        return None
-
-    def _extract_keyword_items(self, payload: object) -> tuple[list[object] | None, str | None]:
-        """Return keyword entries from the LLM payload, coercing common variants."""
-
-        def _as_list(value: object) -> list[object] | None:
-            if value is None:
-                return None
-            if isinstance(value, list):
-                return list(value)
-            if isinstance(value, (tuple, set)):
-                return list(value)
-            if isinstance(value, dict):
-                return [value]
-            if isinstance(value, str):
-                items = [segment.strip() for segment in re.split(r"[\\n,]", value) if segment.strip()]
-                if items:
-                    return items
-            return None
-
-        note: str | None = None
-        if isinstance(payload, dict):
-            value = payload.get("keywords")
-            if value is None:
-                for key in ("items", "terms", "results", "keywords_list", "values", "data"):
-                    if key in payload:
-                        value = payload[key]
-                        note = f"coerced-from-{key}"
-                        break
-            result = _as_list(value)
-            if result is not None:
-                if note is None and value is not None and not isinstance(value, list):
-                    note = "coerced-from-nonlist"
-                return result, note
-        elif isinstance(payload, list):
-            return list(payload), "coerced-from-root-list"
-        elif isinstance(payload, str):
-            result = _as_list(payload)
-            if result:
-                return result, "coerced-from-string"
-        return None, note
-
-        def _as_list(value: object) -> list[object] | None:
-            if value is None:
-                return None
-            if isinstance(value, list):
-                return list(value)
-            if isinstance(value, (tuple, set)):
-                return list(value)
-            if isinstance(value, dict):
-                return [value]
-            if isinstance(value, str):
-                items = [segment.strip() for segment in re.split(r"(?:\n|,)", value) if segment.strip()]
-                if items:
-                    return items
-            return None
-
-        note: str | None = None
-        if isinstance(payload, dict):
-            value: object | None = payload.get("keywords")
-            if value is None:
-                for key in ("items", "terms", "results", "keywords_list", "values", "data"):
-                    if key in payload:
-                        value = payload[key]
-                        note = f"coerced-from-{key}"
-                        break
-            result = _as_list(value)
-            if result is not None:
-                if note is None and value is not None and not isinstance(value, list):
-                    note = "coerced-from-nonlist"
-                return result, note
-        elif isinstance(payload, list):
-            return list(payload), "coerced-from-root-list"
-        elif isinstance(payload, str):
-            result = _as_list(payload)
-            if result:
-                return result, "coerced-from-string"
-        return None, note
-
-    def _normalize_keyword_items(
-        self, items: Sequence[object]
-    ) -> tuple[list[dict[str, object]], list[dict[str, object]], list[str]]:
-        normalized: list[dict[str, object]] = []
-        rejected: list[dict[str, object]] = []
-        assumed_true: list[str] = []
-
-        for raw in items:
-            entry = self._normalize_keyword_entry(raw)
-            if not entry:
-                continue
-            keep = bool(entry.get("keep", True))
-            if keep:
-                if entry.pop("_assumed_keep", False):
-                    assumed_true.append(str(entry.get("term", "")))
-                normalized.append(entry)
-            else:
-                entry.pop("_assumed_keep", None)
-                rejected.append(entry)
-        return normalized, rejected, [term for term in assumed_true if term]
-
-    def _normalize_keyword_entry(self, raw: object) -> dict[str, object] | None:
-        if isinstance(raw, str):
-            term = raw.strip()
-            if not term:
-                return None
-            return {"term": term, "keep": True, "_assumed_keep": True}
-
-        if isinstance(raw, dict):
-            term: str = ""
-            for key in ("term", "keyword", "value", "text", "name"):
-                value = raw.get(key)
-                if value is not None:
-                    term = str(value).strip()
-                    if term:
-                        break
-            if not term:
-                return None
-
-            keep_flag: bool | None = None
-            keep_source: object | None = None
-            for key in ("keep", "include", "accept", "selected", "retain", "use", "should_keep"):
-                if key in raw:
-                    keep_source = raw.get(key)
-                    keep_flag = self._coerce_keep_flag(keep_source)
-                    if keep_flag is not None:
-                        break
-            assumed = False
-            if keep_flag is None:
-                keep_flag = True
-                assumed = True
-
-            reason: str | None = None
-            for key in ("reason", "note", "explanation", "why"):
-                value = raw.get(key)
-                if value is not None:
-                    text_value = str(value).strip()
-                    if text_value:
-                        reason = text_value
-                        break
-
-            source: str | None = None
-            for key in ("source", "origin"):
-                value = raw.get(key)
-                if value is not None:
-                    text_value = str(value).strip()
-                    if text_value:
-                        source = text_value
-                        break
-
-            count_value = None
-            for key in ("count", "frequency", "freq", "score", "weight"):
-                if key in raw:
-                    count_value = raw.get(key)
-                    break
-            count_int: int | None
-            if count_value is None:
-                count_int = None
-            else:
-                try:
-                    count_int = int(count_value)
-                except (TypeError, ValueError):
-                    count_int = None
-
-            entry: dict[str, object] = {"term": term, "keep": bool(keep_flag)}
-            if reason is not None:
-                entry["reason"] = reason
-            if source is not None:
-                entry["source"] = source
-            if count_int is not None:
-                entry["count"] = count_int
-            if assumed:
-                entry["_assumed_keep"] = True
-            return entry
-
-        if isinstance(raw, (tuple, set)):
-            items = list(raw)
-            if not items:
-                return None
-            return self._normalize_keyword_entry(items[0])
-
-        return None
-
-    @staticmethod
-    def _coerce_keep_flag(value: object) -> bool | None:
-        if value is None:
-            return None
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, (int, float)):
-            return value != 0
-        text = str(value).strip().lower()
-        if not text:
-            return None
-        if text in {"true", "yes", "keep", "include", "retain", "accept", "1"}:
-            return True
-        if text in {"false", "no", "drop", "reject", "exclude", "remove", "0"}:
-            return False
-        return None
-
-
-    def debug_payload(self) -> dict[str, object]:
-        payload = {
-            "backend": self._backend,
-            "enabled": self._enabled,
-            "disable_reason": self._disable_reason,
-            "max_results": self._max_results,
-        }
-        payload.update(self._last_debug)
-        if self._last_concept_debug:
-            payload.setdefault("concept_refinement", self._last_concept_debug)
-        if self._last_summary_debug:
-            payload.setdefault("concept_summary", self._last_summary_debug)
-        if self._last_cluster_debug:
-            payload.setdefault("cluster_labeling", self._last_cluster_debug)
-        return payload
-
-    def concept_debug_payload(self) -> dict[str, object]:
-        return dict(self._last_concept_debug)
-
-    def summary_debug_payload(self) -> dict[str, object]:
-        return dict(self._last_summary_debug)
-
-    def cluster_debug_payload(self) -> dict[str, object]:
-        return dict(self._last_cluster_debug)
-
-    @staticmethod
-    def _parse_response(raw_response: str) -> dict | None:
-        decoder = json.JSONDecoder()
-
-        def _attempt(candidate: str) -> dict | None:
-            candidate = candidate.strip()
-            if not candidate:
-                return None
-            try:
-                return json.loads(candidate)
-            except json.JSONDecodeError:
-                pass
-
-            for token in ("{", "["):
-                idx = candidate.find(token)
-                while idx != -1:
-                    try:
-                        parsed, _ = decoder.raw_decode(candidate[idx:])
-                        return parsed
-                    except json.JSONDecodeError:
-                        idx = candidate.find(token, idx + 1)
-            return None
-
-        primary = _attempt(raw_response)
-        if primary is not None:
-            return primary
-
-        fenced_match = re.search(r"```(?:json)?\s*(.*?)```", raw_response, re.DOTALL)
-        if fenced_match:
-            fenced_content = fenced_match.group(1)
-            fenced_result = _attempt(fenced_content)
-            if fenced_result is not None:
-                return fenced_result
-
-        return None
-
     def _build_prompt(
         self,
         candidates: Sequence[KeywordCandidate],
@@ -2924,13 +3115,26 @@ class KeywordLLMFilter:
         else:
             formatted_context = "(No additional context provided)"
 
+        if self._allow_generated:
+            generation_guidance = (
+                "If the context reveals important concepts that are missing from the candidate list, you may add them."
+            )
+        else:
+            generation_guidance = (
+                "Do not invent new keywords. Only review the provided candidates and mark whether they should be kept."
+            )
+
         instructions = (
             "You are a bilingual domain keyword analyst for a customer-support knowledge base. "
             "Identify meaningful product names, process steps, issue categories, and other high-value concepts. "
             "Treat both Korean and English as first-class; preserve Hangul without transliteration. "
             "Remove generic tokens such as file extensions, random identifiers, or UI boilerplate. "
-            "If the context reveals important concepts that are missing from the candidate list, you may add them."
+            f"{generation_guidance}"
         )
+
+        source_line = "  - source: 'candidate' for provided terms"
+        if self._allow_generated:
+            source_line += "\n  - source: 'generated' when you introduce a new keyword."
 
         prompt = (
             f"PROJECT CONTEXT:\n{formatted_context}\n\n"
@@ -2939,7 +3143,7 @@ class KeywordLLMFilter:
             "  - term: the keyword (keep original Korean/English script)\n"
             "  - keep: true or false\n"
             "  - reason: brief explanation (Korean or English)\n"
-            "  - source: 'candidate' when reviewing provided tokens, or 'generated' when you introduce a new keyword.\n"
+            f"{source_line}\n"
             "Return at most 10 entries and avoid duplicates or near-identical synonyms."
         )
 

@@ -90,9 +90,9 @@ Even with LLM-assisted cluster labelling, some outputs still include sentiment q
 
 This harmonisation step ensures the UI presents concise, domain-appropriate concept names while keeping traceability via aliases and debug payloads.
 
-### Stage 5: LLM-Based Refinement (Optional)
+### Stage 6: LLM-Based Refinement (Optional)
 
-Finally, we can include a lighter LLM review similar to the current system’s `KeywordLLMFilter`, but with a different role. At this point, we have a curated list of top concepts. We can prompt the LLM to verify that the concepts are correct, distinct, and meaningful. The model might flag generic entries or suggest missing concepts. Any adjustments are applied to finalize the list. If no LLM is available, we simply skip this step; the Stage 4 output already offers high-quality results.
+Finally, we run a lightweight LLM verification (the existing `KeywordLLMFilter`) over the Stage 5 harmonised list. In verification mode (`KEYWORD_FILTER_ALLOW_GENERATED=false`, the default), the filter can only re-rank or drop items—no new keywords are introduced. This gives stakeholders an interpretable chance to veto noise while preventing the model from hallucinating extra terms. If the flag is enabled, the LLM may append additional concepts, but this should be limited to well-understood scenarios. Deployments without a chat backend simply skip this pass and trust the deterministic ranking from Stages 4–5.
 
 This refinement uses the same OpenAI or Ollama backend and prompting framework already in place. The LLM’s job becomes easier—rather than sifting through dozens of raw tokens, it reviews a handful of refined concepts—which should improve precision.
 
@@ -117,7 +117,7 @@ Implementing this pipeline in Cornerstone involves enhancing or adding a few mod
 - **Aggregate and cluster candidates:** (✅ done) `cluster_concepts` merges candidates using lexical overlap plus cosine similarity from the embedding service, averaging vectors per cluster. Optional LLM labeling (driven by `KEYWORD_STAGE3_LABEL_CLUSTERS`) rewrites cluster names and adds descriptions for the top groups.
 - **Implement re-ranking logic:** Add a function to score each consolidated concept, leveraging document frequency, relevance metrics, and optional topic weights. Output a sorted list of `KeywordCandidate` objects, marking `is_core=True` for the top results and redefining the `count` field to store a meaningful metric (such as document frequency).
 - **Update the API and UI:** Adjust `/keywords/{project_id}/candidates` in `app.py` to call the new pipeline and optionally run the existing `KeywordLLMFilter` as a final review. Keep the JSON schema compatible with the frontend, including fields like `term`, `count`, `core`, `generated`, `reason`, and `source`. Extend the debug payload with information about the new stages.
-- **Reuse `KeywordLLMFilter`:** Retune its prompt for the verification role, passing synthesized context rather than raw snippets. Minimal code changes are required aside from prompt adjustments and parsing any new flags.
+- **Reuse `KeywordLLMFilter`:** Retune its prompt for the verification role, passing synthesized context rather than raw snippets. Use the new `KEYWORD_FILTER_ALLOW_GENERATED` flag to control whether the model may invent fresh keywords (default: review-only).
 - **Testing and iteration:** Exercise the new pipeline on projects of varying sizes to ensure the algorithm alone produces reasonable concepts (especially when the LLM is disabled). Use configuration options for parameters such as max n-gram length, top phrases per document, and cluster thresholds to support easy tuning.
 
 Throughout implementation, maintainability remains a focus by modularizing steps, enabling unit tests for each subroutine, and leveraging existing frameworks. If clustering becomes expensive in real time, it can be offloaded to a background task that updates a cached keyword index on ingestion. Documentation should be updated so future contributors understand how the improved Keyword Explorer operates and where to find each stage’s logic.
