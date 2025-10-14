@@ -549,6 +549,8 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
         "KEYWORD_STAGE2_EMBEDDING_WEIGHT": "2.25",
         "KEYWORD_STAGE2_STATISTICAL_WEIGHT": "1.6",
         "KEYWORD_STAGE2_LLM_WEIGHT": "3.1",
+        "KEYWORD_STAGE3_LABEL_CLUSTERS": "false",
+        "KEYWORD_STAGE3_LABEL_MAX_CLUSTERS": "4",
     }
     for key in env_vars:
         monkeypatch.delenv(key, raising=False)
@@ -575,6 +577,8 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
     assert settings.keyword_stage2_embedding_weight == 2.25
     assert settings.keyword_stage2_statistical_weight == 1.6
     assert settings.keyword_stage2_llm_weight == 3.1
+    assert settings.keyword_stage3_label_clusters is False
+    assert settings.keyword_stage3_label_max_clusters == 4
 
 
 def test_cluster_concepts_groups_similar_phrases() -> None:
@@ -725,6 +729,78 @@ def test_cluster_concepts_uses_embedding_similarity() -> None:
         if any(member.phrase == "authentication timeout" for member in cluster.members)
     )
     assert timeout_cluster is not analytics_cluster
+
+
+def test_cluster_concepts_applies_llm_labels(monkeypatch) -> None:
+    settings = Settings(
+        chat_backend="ollama",
+        ollama_base_url="http://localhost:11434",
+        ollama_model="mock-keywords",
+    )
+    llm_filter = KeywordLLMFilter(settings)
+
+    payload = {
+        "clusters": [
+            {
+                "index": 1,
+                "label": "Login Authentication Issues",
+                "description": "Repeated sign-in failures impacting multiple services.",
+                "aliases": ["login errors"],
+            }
+        ]
+    }
+    monkeypatch.setattr(
+        KeywordLLMFilter,
+        "_invoke_backend",
+        lambda self, prompt: json.dumps(payload),
+    )
+
+    concepts = [
+        ConceptCandidate(
+            phrase="login error",
+            score=9.0,
+            occurrences=4,
+            document_count=2,
+            chunk_count=3,
+            average_occurrence_per_chunk=1.33,
+            word_count=2,
+            languages=["en"],
+            sections=["Login / Errors"],
+            sources=["guide.md"],
+            sample_snippet="Login error handling steps.",
+            score_breakdown={"frequency": 4.0},
+        ),
+        ConceptCandidate(
+            phrase="authentication failure",
+            score=8.0,
+            occurrences=3,
+            document_count=2,
+            chunk_count=2,
+            average_occurrence_per_chunk=1.5,
+            word_count=2,
+            languages=["en"],
+            sections=["Login / Failures"],
+            sources=["runbook.md"],
+            sample_snippet="Authentication failures cause login issues.",
+            score_breakdown={"frequency": 3.0},
+        ),
+    ]
+
+    result = cluster_concepts(
+        concepts,
+        llm_filter=llm_filter,  # type: ignore[arg-type]
+        llm_label_max_clusters=2,
+    )
+
+    assert result.parameters["llm_labeling"]["used"] is True
+    cluster = result.clusters[0]
+    assert cluster.label == "Login Authentication Issues"
+    assert cluster.label_source == "llm"
+    assert "login error" in cluster.aliases
+    assert cluster.description
+    cluster_debug = llm_filter.cluster_debug_payload()
+    assert cluster_debug.get("status") == "labeled"
+    assert cluster_debug.get("selected_total") == 1
 
 
 def test_cluster_concepts_handles_korean() -> None:

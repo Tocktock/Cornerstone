@@ -283,6 +283,7 @@ class ConceptCluster:
     """Represents a consolidated concept grouping after Stage 3."""
 
     label: str
+    label_source: str
     score: float
     occurrences: int
     document_count: int
@@ -292,6 +293,8 @@ class ConceptCluster:
     sources: List[str]
     members: List[ConceptCandidate]
     score_breakdown: dict[str, float]
+    description: str | None = None
+    aliases: List[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -305,6 +308,9 @@ class ConceptClusteringResult:
             top.append(
                 {
                     "label": cluster.label,
+                    "label_source": cluster.label_source,
+                    "description": cluster.description,
+                    "aliases": cluster.aliases[:4],
                     "score": round(cluster.score, 3),
                     "occurrences": cluster.occurrences,
                     "documents": cluster.document_count,
@@ -333,6 +339,9 @@ class _ClusterBuilder:
     tokens: set[str]
     vector: list[float] | None
     vector_count: int
+    label_source: str = "top-member"
+    description: str | None = None
+    aliases: List[str] = field(default_factory=list)
 
     def add(
         self,
@@ -356,7 +365,10 @@ class _ClusterBuilder:
             self.chunk_ids.update(candidate.chunk_ids)
         elif candidate.chunk_count:
             self.chunk_ids.update({f"chunk-{len(self.chunk_ids) + i}" for i in range(candidate.chunk_count)})
-        self.label = max(self.members, key=lambda item: item.score).phrase
+        top_member = max(self.members, key=lambda item: item.score)
+        self.label = top_member.phrase
+        if top_member.phrase not in self.aliases:
+            self.aliases.append(top_member.phrase)
 
         if vector:
             if self.vector is None:
@@ -1187,6 +1199,8 @@ def cluster_concepts(
     max_clusters: int = 200,
     embedding_service: "EmbeddingService | None" = None,
     embedding_batch_size: int = 32,
+    llm_filter: "KeywordLLMFilter | None" = None,
+    llm_label_max_clusters: int = 6,
 ) -> ConceptClusteringResult:
     if not concepts:
         return ConceptClusteringResult(
@@ -1195,6 +1209,7 @@ def cluster_concepts(
                 "similarity_threshold": similarity_threshold,
                 "max_clusters": max_clusters,
                 "embedding": {"enabled": False, "reason": "no-concepts"},
+                "llm_labeling": {"enabled": bool(llm_filter and getattr(llm_filter, "enabled", False)), "used": False},
             },
         )
 
@@ -1235,6 +1250,15 @@ def cluster_concepts(
                 if failures:
                     embedding_info["failures"] = failures
     parameters["embedding"] = embedding_info
+    llm_label_info: dict[str, Any] = {
+        "enabled": bool(llm_filter and getattr(llm_filter, "enabled", False)),
+        "requested": bool(
+            llm_filter and getattr(llm_filter, "enabled", False) and llm_label_max_clusters > 0
+        ),
+        "used": False,
+        "max_clusters": max(0, llm_label_max_clusters),
+    }
+    parameters["llm_labeling"] = llm_label_info
 
     builders: list[_ClusterBuilder] = []
 
@@ -1273,6 +1297,7 @@ def cluster_concepts(
 
         builder = _ClusterBuilder(
             label=concept.phrase,
+            label_source="top-member",
             score=concept.score,
             occurrences=concept.occurrences,
             document_ids=set(concept.document_ids or []),
@@ -1284,6 +1309,7 @@ def cluster_concepts(
             tokens=set(tokens),
             vector=list(concept_vector) if concept_vector is not None else None,
             vector_count=1 if concept_vector is not None else 0,
+            aliases=[concept.phrase],
         )
         builders.append(builder)
 
@@ -1304,6 +1330,7 @@ def cluster_concepts(
         clusters.append(
             ConceptCluster(
                 label=label,
+                label_source=builder.label_source,
                 score=builder.score,
                 occurrences=builder.occurrences,
                 document_count=document_count,
@@ -1313,6 +1340,8 @@ def cluster_concepts(
                 sources=sources,
                 members=members,
                 score_breakdown=score_breakdown,
+                description=builder.description,
+                aliases=list(dict.fromkeys(builder.aliases or [label])),
             )
         )
 
@@ -1324,6 +1353,41 @@ def cluster_concepts(
             cluster.label,
         )
     )
+
+    if llm_filter and getattr(llm_filter, "enabled", False) and llm_label_max_clusters > 0 and clusters:
+        target_clusters = clusters[: min(llm_label_max_clusters, len(clusters))]
+        try:
+            label_payload = llm_filter.label_clusters(target_clusters)  # type: ignore[arg-type]
+        except TypeError:
+            label_payload = llm_filter.label_clusters(target_clusters, max_clusters=llm_label_max_clusters)  # type: ignore[arg-type]
+        except Exception as exc:  # pragma: no cover - runtime guard
+            logger.warning("keyword.stage3.label_failed error=%s", exc)
+            label_payload = []
+            llm_label_info["error"] = str(exc)
+        if label_payload:
+            llm_label_info["used"] = True
+            llm_label_info["labeled"] = len(label_payload)
+            for entry in label_payload:
+                index = _coerce_optional_int(entry.get("index"))
+                if index is None or index <= 0 or index > len(target_clusters):
+                    continue
+                cluster = target_clusters[index - 1]
+                label = str(entry.get("label", "")).strip()
+                if label:
+                    if cluster.label not in cluster.aliases:
+                        cluster.aliases.append(cluster.label)
+                    cluster.label = label
+                    cluster.label_source = "llm"
+                description = str(entry.get("description") or entry.get("reason") or "").strip() or None
+                if description:
+                    cluster.description = description
+                aliases = _coerce_str_list(entry.get("aliases"))
+                if aliases:
+                    for alias in aliases:
+                        if alias and alias not in cluster.aliases:
+                            cluster.aliases.append(alias)
+        elif llm_label_info["requested"]:
+            llm_label_info.setdefault("status", "no-labels")
 
     return ConceptClusteringResult(clusters=clusters, parameters=parameters)
 
@@ -1395,6 +1459,7 @@ class KeywordLLMFilter:
         self._last_debug: dict[str, object] = {}
         self._last_concept_debug: dict[str, object] = {}
         self._last_summary_debug: dict[str, object] = {}
+        self._last_cluster_debug: dict[str, object] = {}
         reason: str | None = None
 
         if settings.is_openai_chat_backend:
@@ -1820,6 +1885,76 @@ class KeywordLLMFilter:
 
         return combined
 
+    def label_clusters(
+        self,
+        clusters: Sequence[ConceptCluster],
+        *,
+        max_clusters: int = 6,
+    ) -> list[dict[str, object]]:
+        self._last_cluster_debug = {
+            "backend": self._backend,
+            "enabled": self._enabled,
+            "disable_reason": self._disable_reason,
+            "cluster_count": len(clusters),
+            "max_clusters": max_clusters,
+            "status": "pending",
+        }
+        if not clusters:
+            self._last_cluster_debug.update({"status": "skipped", "reason": "no-clusters"})
+            return []
+        if not self._enabled:
+            self._last_cluster_debug.update(
+                {"status": "bypass", "reason": self._disable_reason or "disabled"}
+            )
+            return []
+
+        limited_clusters = list(clusters[: max(1, max_clusters)])
+        prompt = self._build_cluster_prompt(limited_clusters)
+        try:
+            raw_response = self._invoke_backend(prompt)
+            self._last_cluster_debug["response"] = raw_response
+        except Exception as exc:  # pragma: no cover - runtime guard
+            logger.warning("concept.llm.cluster_label_failed backend=%s error=%s", self._backend, exc)
+            self._last_cluster_debug.update({"status": "error", "reason": f"invoke_failed:{exc}"})
+            return []
+
+        parsed = self._parse_response(raw_response)
+        if parsed is None:
+            self._last_cluster_debug.update({"status": "error", "reason": "json-parse-error"})
+            return []
+
+        cluster_items, note = self._extract_cluster_items(parsed)
+        if cluster_items is None:
+            self._last_cluster_debug.update({"status": "error", "reason": "missing-clusters-key"})
+            return []
+
+        normalized_items, rejected_items = self._normalize_cluster_items(cluster_items)
+        if note:
+            self._last_cluster_debug["note"] = note
+        if rejected_items:
+            self._last_cluster_debug["rejected"] = rejected_items[:20]
+            self._last_cluster_debug["rejected_total"] = len(rejected_items)
+
+        if not normalized_items:
+            self._last_cluster_debug.update({"status": "empty"})
+            return []
+
+        self._last_cluster_debug.update(
+            {
+                "status": "labeled",
+                "selected_total": len(normalized_items),
+            }
+        )
+        self._last_cluster_debug["labels"] = [
+            {
+                "index": item.get("index"),
+                "label": item.get("label"),
+                "description": item.get("description"),
+            }
+            for item in normalized_items[:20]
+        ]
+        return normalized_items
+
     def extract_summary_concepts(
         self,
         chunks: Sequence[KeywordSourceChunk],
@@ -1994,6 +2129,50 @@ class KeywordLLMFilter:
         }
         return prompt
 
+    def _build_cluster_prompt(
+        self,
+        clusters: Sequence[ConceptCluster],
+    ) -> str:
+        lines: list[str] = []
+        for index, cluster in enumerate(clusters, 1):
+            top_members = ", ".join(member.phrase for member in cluster.members[:5])
+            sections = ", ".join(cluster.sections[:3]) if cluster.sections else "n/a"
+            languages = ", ".join(cluster.languages[:3]) if cluster.languages else "unknown"
+            sample = ""
+            for member in cluster.members:
+                if member.sample_snippet:
+                    sample = build_excerpt(member.sample_snippet, max_chars=180)
+                    break
+            lines.append(
+                f"{index}. label='{cluster.label}' | score={cluster.score:.2f} | docs={cluster.document_count} | "
+                f"chunks={cluster.chunk_count} | sections={sections} | languages={languages}\n"
+                f"   members: {top_members}"
+                + (f"\n   sample: {sample}" if sample else "")
+            )
+        formatted_clusters = "\n\n".join(lines)
+
+        instructions = (
+            "You are an expert taxonomy curator. Provide concise, human readable labels for related keyword clusters. "
+            "Keep labels short (2-5 words), descriptive, and maintain original language (do not translate Hangul). "
+            "Optionally include a one-sentence description explaining the theme."
+        )
+
+        prompt = (
+            f"{instructions}\n\n"
+            "Return strict JSON:\n"
+            '{"clusters": [{"index": 1, "label": "...", "description": "...", "aliases": ["..."]}]}\n'
+            "The 'index' refers to the cluster number below. Include 'description' only if it adds clarity. "
+            "Add optional 'aliases' for notable alternate phrasings."
+            "\n\nCLUSTERS:\n"
+            f"{formatted_clusters}"
+        )
+
+        self._current_prompt = {
+            "system": instructions,
+            "user": prompt,
+        }
+        return prompt
+
     def _extract_concept_items(self, payload: object) -> tuple[list[object] | None, str | None]:
         def _as_list(value: object) -> list[object] | None:
             if value is None:
@@ -2148,6 +2327,91 @@ class KeywordLLMFilter:
             if not items:
                 return None
             return self._normalize_concept_entry(items[0])
+
+        return None
+
+    def _extract_cluster_items(self, payload: object) -> tuple[list[object] | None, str | None]:
+        def _as_list(value: object) -> list[object] | None:
+            if value is None:
+                return None
+            if isinstance(value, list):
+                return list(value)
+            if isinstance(value, (tuple, set)):
+                return list(value)
+            if isinstance(value, dict):
+                return [value]
+            if isinstance(value, str):
+                items = [segment.strip() for segment in re.split(r"(?:\n|,)", value) if segment.strip()]
+                if items:
+                    return items
+            return None
+
+        note: str | None = None
+        if isinstance(payload, dict):
+            value: object | None = None
+            for key in ("clusters", "labels", "topics", "results", "items"):
+                if key in payload:
+                    value = payload[key]
+                    if key != "clusters":
+                        note = f"coerced-from-{key}"
+                    break
+            result = _as_list(value)
+            if result is not None:
+                if note is None and value is not None and not isinstance(value, list):
+                    note = "coerced-from-nonlist"
+                return result, note
+        elif isinstance(payload, list):
+            return list(payload), "coerced-from-root-list"
+        elif isinstance(payload, str):
+            result = _as_list(payload)
+            if result:
+                return result, "coerced-from-string"
+        return None, note
+
+    def _normalize_cluster_items(self, items: Sequence[object]) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+        normalized: list[dict[str, object]] = []
+        rejected: list[dict[str, object]] = []
+
+        for raw in items:
+            entry = self._normalize_cluster_entry(raw)
+            if not entry:
+                continue
+            keep = bool(entry.get("keep", True))
+            if keep and entry.get("label"):
+                normalized.append(entry)
+            else:
+                rejected.append(entry)
+        return normalized, rejected
+
+    def _normalize_cluster_entry(self, raw: object) -> dict[str, object] | None:
+        if isinstance(raw, dict):
+            index_value = raw.get("index") or raw.get("cluster") or raw.get("id")
+            index = _coerce_optional_int(index_value)
+            if index is None or index <= 0:
+                return None
+
+            label_value = raw.get("label") or raw.get("title") or raw.get("name")
+            label = str(label_value).strip() if label_value is not None else ""
+            description_value = raw.get("description") or raw.get("reason") or raw.get("summary")
+            description = str(description_value).strip() if description_value else ""
+            aliases = _coerce_str_list(raw.get("aliases") or raw.get("alternate") or raw.get("synonyms"))
+            keep_flag = raw.get("keep")
+            keep = True if keep_flag is None else bool(keep_flag)
+
+            entry: dict[str, object] = {
+                "index": index,
+                "label": label,
+                "description": description,
+                "aliases": aliases,
+                "keep": keep,
+            }
+            return entry
+
+        if isinstance(raw, str):
+            label = raw.strip()
+            if not label:
+                return None
+            return {"index": None, "label": label, "keep": False}
 
         return None
 
@@ -2361,6 +2625,8 @@ class KeywordLLMFilter:
             payload.setdefault("concept_refinement", self._last_concept_debug)
         if self._last_summary_debug:
             payload.setdefault("concept_summary", self._last_summary_debug)
+        if self._last_cluster_debug:
+            payload.setdefault("cluster_labeling", self._last_cluster_debug)
         return payload
 
     def concept_debug_payload(self) -> dict[str, object]:
@@ -2368,6 +2634,9 @@ class KeywordLLMFilter:
 
     def summary_debug_payload(self) -> dict[str, object]:
         return dict(self._last_summary_debug)
+
+    def cluster_debug_payload(self) -> dict[str, object]:
+        return dict(self._last_cluster_debug)
 
     @staticmethod
     def _parse_response(raw_response: str) -> dict | None:

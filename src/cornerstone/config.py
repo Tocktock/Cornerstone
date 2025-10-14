@@ -59,6 +59,8 @@ _DEFAULT_KEYWORD_STAGE2_MIN_OCCURRENCES: Final[int] = 1
 _DEFAULT_KEYWORD_STAGE2_EMBEDDING_WEIGHT: Final[float] = 1.75
 _DEFAULT_KEYWORD_STAGE2_STATISTICAL_WEIGHT: Final[float] = 1.1
 _DEFAULT_KEYWORD_STAGE2_LLM_WEIGHT: Final[float] = 2.5
+_DEFAULT_KEYWORD_STAGE3_LABEL_CLUSTERS: Final[bool] = True
+_DEFAULT_KEYWORD_STAGE3_LABEL_MAX_CLUSTERS: Final[int] = 6
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -172,6 +174,8 @@ class Settings:
     keyword_stage2_embedding_weight: float = _DEFAULT_KEYWORD_STAGE2_EMBEDDING_WEIGHT
     keyword_stage2_statistical_weight: float = _DEFAULT_KEYWORD_STAGE2_STATISTICAL_WEIGHT
     keyword_stage2_llm_weight: float = _DEFAULT_KEYWORD_STAGE2_LLM_WEIGHT
+    keyword_stage3_label_clusters: bool = _DEFAULT_KEYWORD_STAGE3_LABEL_CLUSTERS
+    keyword_stage3_label_max_clusters: int = _DEFAULT_KEYWORD_STAGE3_LABEL_MAX_CLUSTERS
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -296,6 +300,15 @@ class Settings:
             or _DEFAULT_KEYWORD_STAGE2_STATISTICAL_WEIGHT,
             keyword_stage2_llm_weight=_env_optional_float("KEYWORD_STAGE2_LLM_WEIGHT")
             or _DEFAULT_KEYWORD_STAGE2_LLM_WEIGHT,
+            keyword_stage3_label_clusters=_env_bool(
+                "KEYWORD_STAGE3_LABEL_CLUSTERS", _DEFAULT_KEYWORD_STAGE3_LABEL_CLUSTERS
+            ),
+            keyword_stage3_label_max_clusters=int(
+                os.getenv(
+                    "KEYWORD_STAGE3_LABEL_MAX_CLUSTERS",
+                    str(_DEFAULT_KEYWORD_STAGE3_LABEL_MAX_CLUSTERS),
+                )
+            ),
         )
 
     @property
