@@ -27,6 +27,7 @@ Instead of a single pass of “count words, then maybe filter by LLM,” the new
 3. Concept consolidation and clustering
 4. Re-ranking and core concept selection
 5. LLM-based refinement (optional)
+6. Canonical label harmonisation (post-process)
 
 Each stage is described in detail in the following subsections.
 
@@ -78,6 +79,16 @@ We rank the consolidated concepts to decide which are the “core” ones to hig
 - **Manual boosts / domain knowledge:** Boost concepts that match glossary entries or known domain terms. This injects domain knowledge into the ranking.
 
 Using a combination of these signals, we now compute a composite importance score for each cluster via `rank_concept_clusters`. The ranking engine blends Stage 2 scores with document/chunk coverage and occurrence bonuses (`KEYWORD_STAGE4_*` weights) and flags the top `core_limit` results as “core” concepts. The FastAPI endpoint converts those ranked concepts into the JSON payload consumed by the UI, marking the source as `stage4`. If the chat backend is enabled, the list still flows through Stage 5’s keyword filter; otherwise, the Stage 4 output is returned directly. Frequency keywords remain only as a safety fallback.
+
+### Stage 5: Canonical Label Harmonisation (New)
+
+Even with LLM-assisted cluster labelling, some outputs still include sentiment qualifiers or project-specific suffixes (예: “화주 부정 리뷰”, “화주 긍정 리뷰”). After Stage 4 has ranked the concepts, we introduce a lightweight post-processing pass that asks the chat backend to suggest a single canonical name and brief description for each top-ranked concept. This layer:
+
+- Receives the Stage 4 ranked list with associated aliases/members and prompts the model to produce neutral, semantically representative labels.
+- Preserves the original aliases so users can still search or filter by the earlier terms.
+- Only runs when an LLM backend is enabled; otherwise, Stage 4 names are returned as-is.
+
+This harmonisation step ensures the UI presents concise, domain-appropriate concept names while keeping traceability via aliases and debug payloads.
 
 ### Stage 5: LLM-Based Refinement (Optional)
 
