@@ -357,6 +357,8 @@ class _ClusterBuilder:
         self.languages.update(candidate.languages)
         self.sections.update(candidate.sections)
         self.sources.update(candidate.sources)
+        if candidate.phrase not in self.aliases:
+            self.aliases.append(candidate.phrase)
         if candidate.document_ids:
             self.document_ids.update(candidate.document_ids)
         elif candidate.document_count:
@@ -635,6 +637,66 @@ def _token_overlap_similarity(left: set[str], right: set[str]) -> float:
     if denominator == 0:
         return 0.0
     return len(intersection) / denominator
+
+
+_SENTIMENT_POSITIVE = ("긍정", "positive")
+_SENTIMENT_NEGATIVE = ("부정", "불만", "negative")
+
+
+def _normalize_whitespace(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip(" -_/," )
+
+
+def _strip_sentiment_terms(text: str) -> str:
+    result = text
+    for term in _SENTIMENT_POSITIVE + _SENTIMENT_NEGATIVE:
+        result = result.replace(term, "")
+        result = result.replace(term.upper(), "")
+    result = re.sub(r"\s+", " ", result)
+    return result.strip(" -_/," )
+
+
+def _choose_cluster_display_label(cluster: ConceptCluster) -> tuple[str, str, list[str]]:
+    aliases: list[str] = list(dict.fromkeys(cluster.aliases or []))
+    member_phrases = [member.phrase for member in cluster.members]
+    for phrase in member_phrases:
+        if phrase not in aliases:
+            aliases.append(phrase)
+
+    has_positive = any(any(term in alias for term in _SENTIMENT_POSITIVE) for alias in aliases)
+    has_negative = any(any(term in alias for term in _SENTIMENT_NEGATIVE) for alias in aliases)
+
+    new_label = cluster.label
+    new_label_source = cluster.label_source
+
+    if has_positive and has_negative:
+        stripped_candidates = []
+        for alias in aliases + [cluster.label]:
+            stripped = _strip_sentiment_terms(alias)
+            stripped = _normalize_whitespace(stripped)
+            if stripped and stripped != alias:
+                stripped_candidates.append(stripped)
+        if stripped_candidates:
+            stripped_candidates = list(dict.fromkeys(stripped_candidates))
+            stripped_candidates.sort(
+                key=lambda name: (
+                    0 if ("리뷰" in name or "review" in name.lower()) else 1,
+                    len(name),
+                )
+            )
+            chosen = stripped_candidates[0]
+            if chosen:
+                new_label = chosen
+                new_label_source = (
+                    f"{cluster.label_source}+generalized"
+                    if cluster.label_source != "generalized"
+                    else cluster.label_source
+                )
+                if new_label not in aliases:
+                    aliases.insert(0, new_label)
+
+    aliases = list(dict.fromkeys(aliases))
+    return new_label, new_label_source, aliases
 
 
 def _is_valid_unigram(token: str, *, min_char_length: int) -> bool:
@@ -1526,18 +1588,21 @@ def rank_concept_clusters(
             component_scores["label_bonus"] = label_bonus
         total_score = sum(component_scores.values())
 
+        display_label, display_label_source, alias_candidates = _choose_cluster_display_label(cluster)
+        alias_out = list(dict.fromkeys(alias_candidates + [cluster.label, display_label]))
+
         ranked.append(
             RankedConcept(
-                label=cluster.label,
+                label=display_label,
                 score=total_score,
                 rank=0,
                 is_core=False,
                 document_count=cluster.document_count,
                 chunk_count=cluster.chunk_count,
                 occurrences=cluster.occurrences,
-                label_source=cluster.label_source,
+                label_source=display_label_source,
                 description=cluster.description,
-                aliases=list(cluster.aliases),
+                aliases=alias_out,
                 member_phrases=[member.phrase for member in cluster.members],
                 score_breakdown={key: round(value, 3) for key, value in component_scores.items()},
             )
