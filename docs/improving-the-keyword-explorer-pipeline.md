@@ -2,13 +2,15 @@
 
 ## Current Implementation and Its Limitations
 
-The Cornerstone project’s “Keyword Explorer” currently uses a straightforward frequency-based approach to extract keywords from documents. All text chunks in a project are scanned, and every token (continuous sequence of letters or Hangul characters) is lowercased and counted. Common stopwords, very short tokens, and purely numeric strings are filtered out. The result is a list of single-word `KeywordCandidate` entries, each with a raw frequency count. The top frequent terms are marked as “core” keywords if they appear more than once. This method is simple but shallow—it treats individual tokens as keywords and relies on raw occurrence counts for importance.
+Following the first wave of improvements, the Keyword Explorer now performs the Stage 1 chunk preparation and Stage 2 concept extraction described in this document. Incoming payloads are normalised into `KeywordSourceChunk` objects, and each chunk is analysed with a hybrid pipeline (n‑gram scoring, RAKE-style statistics, embedding similarity, and optional LLM summaries) that produces rich `ConceptCandidate` entries complete with coverage metrics and score breakdowns. Stage 2 has extensive instrumentation (`keyword.stage2.*` logs, debug payloads, and per-component timing) and is fully configurable through the new `KEYWORD_STAGE2_*` environment variables.
 
-Such a frequency-driven technique has clear weaknesses. Multi-word concepts are split up and lost—for example, a domain term like “login issue” would be counted as “login” and “issue” separately, missing the combined concept. The approach also tends to surface generic frequent words rather than true domain themes. A common word like “error” or “system” might rank high by frequency but conveys little about the specific domain or business context. Conversely, an important concept that appears only once or twice, such as the name of a product feature or a rare technical term, would be ignored entirely by a frequency cutoff. In short, raw counts do not always correlate with semantic importance, especially in a specialized corpus.
+Despite these upgrades, the UI still displays the legacy frequency list because Stage 3 (concept consolidation), Stage 4 (re-ranking), and the revised Stage 5 LLM review are not implemented yet. As a result:
 
-Currently, an LLM-based filter is layered on top to mitigate noise. If an OpenAI or Ollama backend is configured, the code passes the frequency candidates through a `KeywordLLMFilter`. This filter prompts a language model with the list of candidate words and a few text snippets as context, asking it to identify meaningful product names, process steps, issue categories, and other high-value concepts. The LLM returns a JSON list of keywords to keep (or new ones to add) along with brief reasons. The system then marks kept terms as core and may include a few generated keywords that the LLM introduced (`source="generated"`). This adds a semantic layer, filtering out trivial tokens like file names or IDs and occasionally adding missing concepts from the context.
+- We continue to show single-token keywords by default, even though multi-word concepts are now detected in Stage 2.
+- The LLM refine step currently targets the frequency list; malformed responses still trigger fallback warnings (“missing-keywords-array”).
+- Concept clustering relies on a lightweight token-overlap heuristic and is only surfaced in debug output.
 
-However, this LLM refinement stage has its own limitations. It only sees a limited window of context (by default the first five snippets up to 400 characters each), which might not cover all topics in the corpus. It also returns at most ten keywords to avoid long outputs, potentially omitting additional relevant concepts if the knowledge base is broad. If the LLM is disabled or fails, the system falls back to the raw frequency list—which, as noted, may be noisy or incomplete. The current pipeline often fails to capture deeper domain-level concepts. It leans heavily on counting words, which misses multi-word phrases and nuance, and it relies on a single LLM prompt to retroactively inject semantics, which is a fragile solution.
+The remaining stages in this document describe the work required to replace that frequency fallback with the new semantic concepts.
 
 ## Goals for an Improved Pipeline
 
@@ -36,31 +38,28 @@ Each stage is described in detail in the following subsections.
 
 ### Stage 1: Document Chunking & Preparation
 
-In this stage, we ensure the documents are segmented in a way that preserves context for concept extraction. Cornerstone already splits files into chunks during ingestion (with plans for hierarchical splitting by headings). We will leverage these embedded chunks as the unit of analysis. Each chunk or document is a moderate-sized text (for example, 200–500 tokens) that can be processed for keywords. Using chunks rather than the entire concatenated corpus prevents extremely long text from diluting important concepts and allows capturing context-specific phrases.
+✅ **Status:** implemented.
 
-For each chunk, we retrieve the raw text (already stored in the Qdrant payloads). We may optionally normalize the text (removing punctuation, lowercasing for English, etc.), but we will preserve multi-word sequences. Instead of splitting on every whitespace, we can keep potential phrases intact for analysis. For example, we might use a phrase tokenizer or consider sequences of words (up to two or three words) as candidates in the next stage. The existing regex in `extract_keyword_candidates` can be extended or replaced to capture n-grams. Currently it only captures single tokens; we could post-process the token list to join frequent adjacent tokens or use an external phrase extraction algorithm. The chunking stage also allows capturing document-level metadata (titles, headings) that might hint at key concepts, which we can feed into later stages.
+Cornerstone now normalises ingestion payloads into `KeywordSourceChunk` objects during Stage 1. Each chunk keeps the raw text, a language-aware normalised version, metadata (document IDs, section paths, headings), and token counts for later heuristics. The helper functions added to `keywords.py` collapse whitespace, strip punctuation for English, and preserve Hangul phrases so multi-word candidates survive into Stage 2. The stage also tracks per-project diagnostics (total payloads processed, skipped empty entries, language mix) that surface in the debug payload.
+
+Future refinements (post Stage 3) could introduce hierarchical chunking or richer metadata, but the base preparation work is in place.
 
 ### Stage 2: Candidate Concept Extraction
 
-This is a critical new stage where we generate an initial pool of candidate keywords and key phrases from each chunk. We will combine multiple techniques to gather a rich candidate set:
+✅ **Status:** implemented.
 
-- **Embedding-based key phrase extraction (KeyBERT-like):**
-  - Compute the chunk’s embedding vector using the existing `EmbeddingService`, which supports OpenAI or local models.
-  - Generate candidate n-grams from the chunk text (e.g., all one- to three-word sequences, perhaps filtered by part-of-speech to focus on noun phrases).
-  - Compute embeddings for each candidate phrase.
-  - Rank phrases by cosine similarity to the chunk embedding and take the top phrases from each chunk as candidates (for example, the top three phrases). This ensures even if a concept appears only in one document, it can still surface via that document’s top phrases.
+The extraction function (`extract_concept_candidates`) now orchestrates the hybrid approach envisioned here:
 
-- **Statistical keyword extraction (RAKE, YAKE, or TF-IDF):**
-  - Run a traditional algorithm such as Rapid Automatic Keyword Extraction (RAKE) or YAKE on each chunk to get a different perspective.
-  - These methods highlight phrases that appear several times within the chunk or contain rare informative words, catching domain-specific collocations (e.g., “SLA breach,” “OAuth token”) that might not rank highest by embedding similarity.
-  - Alternatively, a TF-IDF scoring across the corpus can flag terms that are frequent in one document but not others, surfacing distinctive concepts.
+- **Embedding-based keyphrase scoring:** For each chunk the existing `EmbeddingService` computes a chunk vector (OpenAI or Ollama) and reuses it to rank top n‑gram phrases by cosine similarity. Phrase vectors are cached so later stages can reuse them.
+- **Statistical phrase scoring:** We run RAKE-like scoring over the token stream to surface domain-specific collocations and blend the results into the candidate aggregate. We can adjust how many statistical phrases to keep per chunk.
+- **LLM summaries:** When enabled, the `KeywordLLMFilter` can request short concept summaries from representative chunks, seeding additional generated candidates. This can be toggled per deployment.
 
-- **LLM-based extraction (summarization):**
-  - For particularly large or complex documents, optionally use the LLM in a summarization role by prompting it to list key points or concepts.
-  - The LLM’s answers, expressed in sentences or phrases, reveal important domain concepts in natural language. Parsing those answers yields concept phrases.
-  - This method captures high-level business themes that might not be repeated as literal keywords. It can be toggled on or off to control cost.
+All of these knobs are exposed via environment variables—for example `KEYWORD_STAGE2_MAX_NGRAM`, `KEYWORD_STAGE2_MAX_EMBEDDING_PHRASES`, `KEYWORD_STAGE2_USE_LLM_SUMMARY`, and the weighting trio (`KEYWORD_STAGE2_EMBEDDING_WEIGHT`, `…_STATISTICAL_WEIGHT`, `…_LLM_WEIGHT`). Stage 2 captures per-component timings, backend identifiers, and top candidates in the debug payload, making it easier to diagnose which backend (OpenAI vs. Ollama) was used.
 
-Each of these techniques produces a list of candidate keywords or phrases (likely with an importance score). We merge the candidates from all chunks; the union represents a broad superset of potential domain concepts. Some redundancy is acceptable at this stage—the next step consolidates the list.
+Remaining Stage 2 follow-ups:
+
+- Surface the stored phrase embeddings and contribution metadata so Stage 3 can perform true embedding-based clustering without recomputing vectors.
+- Expand automated tests to cover malformed LLM responses (currently handled defensively but not asserted).
 
 ### Stage 3: Concept Consolidation and Clustering
 
@@ -133,4 +132,3 @@ By addressing the identified weaknesses—chiefly, moving beyond shallow frequen
 - `embeddings.py`: https://github.com/Tocktock/Cornerstone/blob/c62f2e3b1ba37df775d8f37d8289a41fb68a8cad/src/cornerstone/embeddings.py
 - `glossary.py`: https://github.com/Tocktock/Cornerstone/blob/c62f2e3b1ba37df775d8f37d8289a41fb68a8cad/src/cornerstone/glossary.py
 - `keywords.html`: https://github.com/Tocktock/Cornerstone/blob/c62f2e3b1ba37df775d8f37d8289a41fb68a8cad/templates/keywords.html
-
