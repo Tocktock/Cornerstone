@@ -1010,9 +1010,9 @@ def create_app(
             keywords = [
                 KeywordCandidate(
                     term=item.label,
-                    count=max(item.document_count, int(round(item.score))) or 1,
+                    count=max(item.document_count, item.chunk_count, 1),
                     is_core=item.is_core,
-                    generated=item.label_source == "llm",
+                    generated="llm" in item.label_source if item.label_source else False,
                     reason=item.description
                     or f"{item.document_count} docs | score {item.score:.2f}",
                     source=f"stage4:{item.label_source}",

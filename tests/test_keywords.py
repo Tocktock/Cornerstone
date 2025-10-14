@@ -944,6 +944,61 @@ def test_rank_concept_clusters_prioritises_document_coverage() -> None:
     assert debug["top_ranked"][0]["label"] == "Login Issues"
 
 
+def test_rank_concept_clusters_generalizes_sentiment_labels() -> None:
+    cluster = ConceptCluster(
+        label="화주 부정 리뷰",
+        label_source="llm",
+        score=500.0,
+        occurrences=30,
+        document_count=10,
+        chunk_count=12,
+        languages=["ko"],
+        sections=["리뷰"],
+        sources=["reviews.csv"],
+        members=[
+            ConceptCandidate(
+                phrase="화주 부정 리뷰",
+                score=250.0,
+                occurrences=15,
+                document_count=8,
+                chunk_count=10,
+                average_occurrence_per_chunk=1.5,
+                word_count=3,
+                languages=["ko"],
+                sections=["리뷰"],
+                sources=["reviews.csv"],
+                sample_snippet="화주가 서비스에 대해 불만을 제기했습니다.",
+                score_breakdown={"frequency": 10.0},
+            ),
+            ConceptCandidate(
+                phrase="화주 긍정 리뷰",
+                score=200.0,
+                occurrences=10,
+                document_count=6,
+                chunk_count=8,
+                average_occurrence_per_chunk=1.25,
+                word_count=3,
+                languages=["ko"],
+                sections=["리뷰"],
+                sources=["reviews.csv"],
+                sample_snippet="화주가 서비스에 만족했습니다.",
+                score_breakdown={"frequency": 8.0},
+            ),
+        ],
+        score_breakdown={"member_count": 2},
+        description="화주 리뷰 전반",
+        aliases=["화주 부정 리뷰", "화주 긍정 리뷰"],
+    )
+
+    result = rank_concept_clusters([cluster])
+    assert result.ranked
+    top = result.ranked[0]
+    assert top.label == "화주 리뷰"
+    assert "generalized" in top.label_source
+    assert "화주 부정 리뷰" in top.aliases
+    assert "화주 긍정 리뷰" in top.aliases
+
+
 def test_filter_keywords_limits_and_normalises(monkeypatch) -> None:
     filter_instance = _build_enabled_filter(
         {
