@@ -51,9 +51,10 @@ The extraction function (`extract_concept_candidates`) now orchestrates the hybr
 
 All of these knobs are exposed via environment variables—for example `KEYWORD_STAGE2_MAX_NGRAM`, `KEYWORD_STAGE2_MAX_EMBEDDING_PHRASES`, `KEYWORD_STAGE2_USE_LLM_SUMMARY`, and the weighting trio (`KEYWORD_STAGE2_EMBEDDING_WEIGHT`, `…_STATISTICAL_WEIGHT`, `…_LLM_WEIGHT`). Stage 2 captures per-component timings, backend identifiers, and top candidates in the debug payload, making it easier to diagnose which backend (OpenAI vs. Ollama) was used.
 
+Candidates now retain their averaged embedding vectors (plus backend identifiers), letting Stage 3 reuse the cached embeddings rather than re-querying the LLM backend on the next hop.
+
 Remaining Stage 2 follow-ups:
 
-- Surface the stored phrase embeddings and contribution metadata so Stage 3 can perform true embedding-based clustering without recomputing vectors.
 - Expand automated tests to cover malformed LLM responses (currently handled defensively but not asserted).
 
 ### Stage 3: Concept Consolidation and Clustering
@@ -65,6 +66,8 @@ After gathering candidates, we often end up with semantically overlapping terms 
 - **Clustering by semantic similarity:** Compute embeddings for each candidate phrase (we may reuse those from the KeyBERT step) and cluster them (e.g., with K-means, HDBSCAN, or a simple similarity threshold). This groups near-duplicates or synonyms, ensuring we do not present multiple variants of the same concept.
 - **Topic modeling:** Run a topic modeling approach (such as LDA, NMF, or BERTopic) across all documents to discover themes. Topic representatives like “Payment Issues” or “Account Management” provide high-level context. This step can be run offline to guide clustering.
 - **Consolidation into representative concepts:** For each cluster of similar candidates, choose a representative term or phrase. In the current implementation we pick the highest-scoring member by default and, when `KEYWORD_STAGE3_LABEL_CLUSTERS=true`, ask the configured chat backend to suggest a concise cluster label and optional description via `KeywordLLMFilter.label_clusters`. Results surface aliases, label provenance, and debug payloads for traceability. Disable or cap labeling with `KEYWORD_STAGE3_LABEL_MAX_CLUSTERS`.
+
+Stage 3 now reuses the embedding vectors attached to each candidate, so when Ollama (or OpenAI) already processed the phrase during Stage 2 we skip the redundant embed call. Only concepts missing vectors trigger additional requests, cutting per-search latency.
 
 At the end of Stage 3, we have pruned the raw list into a smaller set of unique concepts or themes, along with information about which original terms each concept subsumed and how many documents or chunks refer to it.
 
@@ -79,6 +82,8 @@ We rank the consolidated concepts to decide which are the “core” ones to hig
 - **Manual boosts / domain knowledge:** Boost concepts that match glossary entries or known domain terms. This injects domain knowledge into the ranking.
 
 Using a combination of these signals, we now compute a composite importance score for each cluster via `rank_concept_clusters`. The ranking engine blends Stage 2 scores with document/chunk coverage and occurrence bonuses (`KEYWORD_STAGE4_*` weights) and flags the top `core_limit` results as “core” concepts. The FastAPI endpoint converts those ranked concepts into the JSON payload consumed by the UI, marking the source as `stage4`. If the chat backend is enabled, the list still flows through Stage 5’s keyword filter; otherwise, the Stage 4 output is returned directly. Frequency keywords remain only as a safety fallback.
+
+Ranked concepts also carry a `generated` flag derived from their member phrases, so the UI can indicate when an item ultimately came from the LLM rather than just inspecting the label source.
 
 ### Stage 5: Canonical Label Harmonisation (New)
 

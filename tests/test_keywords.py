@@ -173,6 +173,34 @@ def test_extract_concept_candidates_includes_embedding_scores() -> None:
     assert candidate.score_breakdown["embedding"] > 0
     scoring_weights = result.parameters.get("scoring_weights", {})
     assert scoring_weights.get("embedding") == 3.0
+    assert candidate.embedding_vector and len(candidate.embedding_vector) == 2
+    assert candidate.embedding_backend == "fake"
+    assert result.parameters.get("embedding_backend") == "fake"
+
+
+def test_cluster_concepts_reuses_precomputed_vectors() -> None:
+    candidate = ConceptCandidate(
+        phrase="login issues",
+        score=12.0,
+        occurrences=4,
+        document_count=2,
+        chunk_count=3,
+        average_occurrence_per_chunk=1.33,
+        word_count=2,
+        languages=["en"],
+        sections=["Support"],
+        sources=["support.md"],
+        sample_snippet="Users report login issues.",
+        score_breakdown={"frequency": 4.0},
+        embedding_vector=[0.1, 0.9],
+        embedding_backend="fake",
+    )
+
+    result = cluster_concepts([candidate], embedding_service=None)
+    embed_info = result.parameters.get("embedding", {})
+    assert embed_info.get("enabled") is True
+    assert embed_info.get("backend") == "fake"
+    assert embed_info.get("phrases") == 1
 
 
 def test_extract_concept_candidates_includes_statistical_scores() -> None:
@@ -1088,6 +1116,28 @@ def test_filter_keywords_limits_and_normalises(monkeypatch) -> None:
     assert info.get("llm_selected_total") == 4
     assert set(info.get("assumed_true", [])) >= {"Beta", "Delta", "epsilon"}
 
+
+def test_filter_keywords_preserves_core_flags(monkeypatch) -> None:
+    filter_instance = _build_enabled_filter(
+        {
+            "keywords": [
+                {"term": "Alpha", "keep": True},
+                {"term": "Beta", "keep": True},
+            ]
+        },
+        monkeypatch,
+    )
+    candidates = [
+        KeywordCandidate(term="Alpha", count=5, is_core=True),
+        KeywordCandidate(term="Beta", count=1, is_core=False),
+    ]
+
+    results = filter_instance.filter_keywords(candidates, context_snippets=[])
+
+    assert len(results) == 2
+    alpha, beta = results
+    assert alpha.is_core is True
+    assert beta.is_core is False
 
 def test_filter_keywords_handles_items_payload(monkeypatch) -> None:
     filter_instance = _build_enabled_filter(
