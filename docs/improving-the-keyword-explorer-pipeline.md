@@ -52,6 +52,8 @@ The extraction function (`extract_concept_candidates`) now orchestrates the hybr
 
 All of these knobs are exposed via environment variables—for example `KEYWORD_STAGE2_MAX_NGRAM`, `KEYWORD_STAGE2_MAX_EMBEDDING_PHRASES`, `KEYWORD_STAGE2_USE_LLM_SUMMARY`, and the weighting trio (`KEYWORD_STAGE2_EMBEDDING_WEIGHT`, `…_STATISTICAL_WEIGHT`, `…_LLM_WEIGHT`). Stage 2 captures per-component timings, backend identifiers, and top candidates in the debug payload, making it easier to diagnose which backend (OpenAI vs. Ollama) was used.
 
+To keep rare-but-important concepts from being drowned out, the defaults now lean semantic: `KEYWORD_STAGE2_EMBEDDING_WEIGHT=2.25` and `KEYWORD_STAGE2_LLM_WEIGHT=3.1`. Lower those values if you prefer frequency-first scoring.
+
 Candidates now retain their averaged embedding vectors (plus backend identifiers), letting Stage 3 reuse the cached embeddings rather than re-querying the LLM backend on the next hop.
 
 Remaining Stage 2 follow-ups: none—defensive tests now cover malformed LLM responses and embedding reuse is cached.
@@ -84,6 +86,8 @@ Using a combination of these signals, we now compute a composite importance scor
 
 Ranked concepts also carry a `generated` flag derived from their member phrases, so the UI can indicate when an item ultimately came from the LLM rather than just inspecting the label source.
 
+Because we increased `KEYWORD_STAGE4_SCORE_WEIGHT` to 1.4, Stage 2’s semantic score has more influence—helpful when a concept appears in only a handful of documents.
+
 ### Stage 5: Canonical Label Harmonisation (New)
 
 ✅ **Status:** implemented.
@@ -108,13 +112,13 @@ This refinement uses the same OpenAI or Ollama backend and prompting framework a
 
 ✅ **Status:** implemented.
 
-After Stage 6 confirms the final keyword list, an optional reporting layer now distils the highest-priority concepts (default: top 8) into up to three analyst-ready insights. The `KeywordLLMFilter.summarize_keywords` prompt captures:
+After Stage 6 confirms the final keyword list, an optional reporting layer now distils the highest-priority concepts (default: top 12) into up to three analyst-ready insights. The `KeywordLLMFilter.summarize_keywords` prompt captures:
 
 - Concise titles and summaries that explain why the concept cluster matters.
 - Optional recommended actions, priority tags, and evidence snippets referencing the contributing keywords.
 - Debug instrumentation (`insight_summary`) for every call (status, rejected entries, raw response) so malformed payloads remain debuggable.
 
-The FastAPI route surfaces these insights via a new `insights` field in the JSON payload and records the LLM diagnostics under `stage7` inside the debug block. Operators can toggle the behaviour with `KEYWORD_STAGE7_SUMMARY_ENABLED`, while `KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS` and `KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS` govern prompt size and output length.
+The FastAPI route surfaces these insights via a new `insights` field in the JSON payload and records the LLM diagnostics under `stage7` inside the debug block. Operators can toggle the behaviour with `KEYWORD_STAGE7_SUMMARY_ENABLED`, while `KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS` (defaults to 12) and `KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS` govern prompt size and output length. Raise `…_MAX_CONCEPTS` if you want the summary to consider more of the long-tail concepts.
 
 ## Techniques and Algorithms Utilized
 
