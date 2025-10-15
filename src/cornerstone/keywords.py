@@ -2385,6 +2385,7 @@ class KeywordLLMFilter:
 
         limit_concepts = max(1, max_concepts)
         limited_keywords = list(keywords[:limit_concepts])
+        self._last_insight_debug["concept_count"] = len(limited_keywords)
         prompt = self._build_insight_prompt(
             limited_keywords,
             context_snippets or [],
