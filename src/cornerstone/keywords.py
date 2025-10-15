@@ -189,6 +189,8 @@ class ConceptCandidate:
     generated: bool = False
     document_ids: List[str] = field(default_factory=list)
     chunk_ids: List[str] = field(default_factory=list)
+    embedding_vector: List[float] | None = None
+    embedding_backend: str | None = None
 
 
 @dataclass(slots=True)
@@ -252,6 +254,9 @@ class _CandidateAggregate:
     score_llm: float = 0.0
     reason: str | None = None
     generated: bool = False
+    embedding_vector: list[float] | None = None
+    embedding_vector_count: int = 0
+    embedding_backend: str | None = None
 
 
 @dataclass(slots=True)
@@ -269,6 +274,8 @@ class _ChunkContribution:
     sections: set[str] = field(default_factory=set)
     sources: set[str] = field(default_factory=set)
     languages: set[str] = field(default_factory=set)
+    embedding_vector: list[float] | None = None
+    embedding_backend: str | None = None
 
 
 @dataclass(slots=True)
@@ -398,6 +405,7 @@ class RankedConcept:
     aliases: List[str]
     member_phrases: List[str]
     score_breakdown: dict[str, float]
+    generated: bool = False
 
 
 @dataclass(slots=True)
@@ -419,6 +427,7 @@ class ConceptRankingResult:
                     "occurrences": concept.occurrences,
                     "label_source": concept.label_source,
                     "aliases": concept.aliases[:4],
+                    "generated": concept.generated,
                 }
             )
         return {
@@ -900,6 +909,20 @@ def extract_concept_candidates(
             aggregate.reason = contribution.reason
         if contribution.generated:
             aggregate.generated = True
+        if contribution.embedding_vector is not None:
+            vector = list(contribution.embedding_vector)
+            if aggregate.embedding_vector is None or len(aggregate.embedding_vector) != len(vector):
+                aggregate.embedding_vector = vector
+                aggregate.embedding_vector_count = 1
+            else:
+                total = aggregate.embedding_vector_count + 1
+                aggregate.embedding_vector = [
+                    (existing * aggregate.embedding_vector_count + float(new)) / total
+                    for existing, new in zip(aggregate.embedding_vector, vector)
+                ]
+                aggregate.embedding_vector_count = total
+        if contribution.embedding_backend and not aggregate.embedding_backend:
+            aggregate.embedding_backend = contribution.embedding_backend
 
         chunk_identifier = context.chunk_identifier
         doc_identifier = context.doc_identifier
@@ -958,8 +981,13 @@ def extract_concept_candidates(
 
     embedding_enabled = embedding_service is not None
     backend = getattr(embedding_service, "backend", None)
+    embedding_backend_name: str | None = None
     if backend is not None:
-        parameters["embedding_backend"] = getattr(backend, "name", str(backend))
+        embedding_backend_name = getattr(backend, "name", None) or str(backend)
+    elif embedding_service is not None:
+        embedding_backend_name = getattr(embedding_service, "name", None) or str(type(embedding_service).__name__)
+    if embedding_backend_name:
+        parameters["embedding_backend"] = embedding_backend_name
     parameters["embedding_enabled"] = embedding_enabled
     parameters["statistical_method"] = "rake" if max_statistical_phrases_per_chunk > 0 else "none"
 
@@ -1111,6 +1139,9 @@ def extract_concept_candidates(
                         if similarity <= 0:
                             continue
                         contribution = contribution_for(contribution_map, phrase, len(phrase.split()))
+                        contribution.embedding_vector = list(vector)
+                        if embedding_backend_name:
+                            contribution.embedding_backend = embedding_backend_name
                         contribution.embedding_score += similarity
                 timing_stats["embedding"] += time.perf_counter() - embed_block_start
 
@@ -1305,6 +1336,8 @@ def extract_concept_candidates(
                 chunk_ids=sorted(aggregate.chunk_ids),
                 reason=aggregate.reason,
                 generated=aggregate.generated,
+                embedding_vector=list(aggregate.embedding_vector) if aggregate.embedding_vector is not None else None,
+                embedding_backend=aggregate.embedding_backend or embedding_backend_name,
             )
         )
 
@@ -1367,14 +1400,24 @@ def cluster_concepts(
 
     concept_vectors: dict[str, Sequence[float]] = {}
     embedding_info: dict[str, Any] = {"enabled": False}
+    precomputed_backend: str | None = None
+    successes = 0
+    failures = 0
+
+    for concept in concepts:
+        vector = getattr(concept, "embedding_vector", None)
+        if vector:
+            concept_vectors[concept.phrase] = vector
+            successes += 1
+            if not precomputed_backend:
+                precomputed_backend = getattr(concept, "embedding_backend", None)
+
+    service_backend_name: str | None = None
     if embedding_service:
-        phrases = sorted({concept.phrase for concept in concepts if concept.phrase})
+        phrases = sorted({concept.phrase for concept in concepts if concept.phrase and concept.phrase not in concept_vectors})
         if phrases:
             backend = getattr(embedding_service, "backend", None)
-            embedding_info["enabled"] = True
-            embedding_info["backend"] = getattr(backend, "name", str(backend)) if backend else None
-            successes = 0
-            failures = 0
+            service_backend_name = getattr(backend, "name", None) or str(backend) if backend else None
             try:
                 for start in range(0, len(phrases), max(1, embedding_batch_size)):
                     batch = phrases[start : start + max(1, embedding_batch_size)]
@@ -1392,10 +1435,17 @@ def cluster_concepts(
                 logger.warning("keyword.stage3.embedding_failed error=%s", exc)
                 embedding_info.update({"enabled": False, "error": str(exc)})
                 concept_vectors.clear()
+                successes = 0
             else:
-                embedding_info["phrases"] = successes
                 if failures:
                     embedding_info["failures"] = failures
+
+    embedding_backend_name = service_backend_name or precomputed_backend
+    if successes:
+        embedding_info["enabled"] = True
+        embedding_info["phrases"] = successes
+    if embedding_backend_name:
+        embedding_info["backend"] = embedding_backend_name
     parameters["embedding"] = embedding_info
     llm_label_info: dict[str, Any] = {
         "enabled": bool(llm_filter and getattr(llm_filter, "enabled", False)),
@@ -1593,6 +1643,7 @@ def rank_concept_clusters(
 
         display_label, display_label_source, alias_candidates = _choose_cluster_display_label(cluster)
         alias_out = list(dict.fromkeys(alias_candidates + [cluster.label, display_label]))
+        generated_flag = any(member.generated for member in cluster.members)
 
         ranked.append(
             RankedConcept(
@@ -1608,6 +1659,7 @@ def rank_concept_clusters(
                 aliases=alias_out,
                 member_phrases=[member.phrase for member in cluster.members],
                 score_breakdown={key: round(value, 3) for key, value in component_scores.items()},
+                generated=generated_flag,
             )
         )
 
@@ -1856,7 +1908,6 @@ class KeywordLLMFilter:
                 candidate.reason = reason_value or candidate.reason
                 candidate.source = final_source or candidate.source
                 candidate.generated = False
-                candidate.is_core = True if candidate.count >= 1 else candidate.is_core
                 selected_candidates.append(candidate)
             else:
                 if not self._allow_generated:

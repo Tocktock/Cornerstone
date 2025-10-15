@@ -1026,7 +1026,7 @@ def create_app(
                     term=item.label,
                     count=max(item.document_count, item.chunk_count, 1),
                     is_core=item.is_core,
-                    generated="llm" in item.label_source if item.label_source else False,
+                    generated=item.generated,
                     reason=item.description
                     or f"{item.document_count} docs | score {item.score:.2f}",
                     source=f"{keywords_origin}:{item.label_source}",
