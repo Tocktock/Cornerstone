@@ -71,6 +71,9 @@ _DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT: Final[float] = 0.3
 _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS: Final[float] = 0.5
 _DEFAULT_KEYWORD_STAGE5_HARMONIZE_ENABLED: Final[bool] = True
 _DEFAULT_KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS: Final[int] = 12
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_ENABLED: Final[bool] = True
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS: Final[int] = 3
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS: Final[int] = 8
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -196,6 +199,9 @@ class Settings:
     keyword_stage4_label_bonus: float = _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS
     keyword_stage5_harmonize_enabled: bool = _DEFAULT_KEYWORD_STAGE5_HARMONIZE_ENABLED
     keyword_stage5_harmonize_max_results: int = _DEFAULT_KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS
+    keyword_stage7_summary_enabled: bool = _DEFAULT_KEYWORD_STAGE7_SUMMARY_ENABLED
+    keyword_stage7_summary_max_insights: int = _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS
+    keyword_stage7_summary_max_concepts: int = _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -361,6 +367,21 @@ class Settings:
                 os.getenv(
                     "KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS",
                     str(_DEFAULT_KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS),
+                )
+            ),
+            keyword_stage7_summary_enabled=_env_bool(
+                "KEYWORD_STAGE7_SUMMARY_ENABLED", _DEFAULT_KEYWORD_STAGE7_SUMMARY_ENABLED
+            ),
+            keyword_stage7_summary_max_insights=int(
+                os.getenv(
+                    "KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS",
+                    str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS),
+                )
+            ),
+            keyword_stage7_summary_max_concepts=int(
+                os.getenv(
+                    "KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS",
+                    str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS),
                 )
             ),
         )
