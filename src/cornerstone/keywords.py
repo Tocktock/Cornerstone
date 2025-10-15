@@ -1752,6 +1752,7 @@ class KeywordLLMFilter:
         self._last_summary_debug: dict[str, object] = {}
         self._last_cluster_debug: dict[str, object] = {}
         self._last_harmonize_debug: dict[str, object] = {}
+        self._last_insight_debug: dict[str, object] = {}
         reason: str | None = None
 
         if settings.is_openai_chat_backend:
@@ -2357,6 +2358,77 @@ class KeywordLLMFilter:
         self._last_harmonize_debug["labels"] = preview
         return updated
 
+    def summarize_keywords(
+        self,
+        keywords: Sequence[KeywordCandidate],
+        *,
+        max_insights: int = 3,
+        max_concepts: int = 8,
+        context_snippets: Sequence[str] | None = None,
+    ) -> list[dict[str, object]]:
+        self._last_insight_debug = {
+            "backend": self._backend,
+            "enabled": self._enabled,
+            "disable_reason": self._disable_reason,
+            "max_insights": max(0, max_insights),
+            "max_concepts": max(0, max_concepts),
+            "status": "pending",
+        }
+        if not keywords:
+            self._last_insight_debug.update({"status": "skipped", "reason": "no-keywords"})
+            return []
+        if not self._enabled:
+            self._last_insight_debug.update(
+                {"status": "bypass", "reason": self._disable_reason or "disabled"}
+            )
+            return []
+
+        limit_concepts = max(1, max_concepts)
+        limited_keywords = list(keywords[:limit_concepts])
+        prompt = self._build_insight_prompt(
+            limited_keywords,
+            context_snippets or [],
+            max_insights=max_insights,
+        )
+        try:
+            raw_response = self._invoke_backend(prompt)
+            self._last_insight_debug["response"] = raw_response
+        except Exception as exc:  # pragma: no cover - runtime guard
+            logger.warning("concept.llm.insight_failed backend=%s error=%s", self._backend, exc)
+            self._last_insight_debug.update({"status": "error", "reason": f"invoke_failed:{exc}"})
+            return []
+
+        parsed = self._parse_response(raw_response)
+        if parsed is None:
+            self._last_insight_debug.update({"status": "error", "reason": "json-parse-error"})
+            return []
+
+        items, note = self._extract_insight_items(parsed)
+        if items is None:
+            self._last_insight_debug.update({"status": "error", "reason": "missing-insights-key"})
+            return []
+
+        normalized_items, rejected_items = self._normalize_insight_items(items, max_items=max_insights)
+        if note:
+            self._last_insight_debug["note"] = note
+        if rejected_items:
+            self._last_insight_debug["rejected"] = rejected_items[:10]
+            self._last_insight_debug["rejected_total"] = len(rejected_items)
+
+        if not normalized_items:
+            self._last_insight_debug.update({"status": "empty"})
+            return []
+
+        insights = normalized_items[: max(1, max_insights)] if max_insights else normalized_items
+        self._last_insight_debug.update(
+            {
+                "status": "success",
+                "selected_total": len(insights),
+                "insights": insights[:5],
+            }
+        )
+        return insights
+
     def debug_payload(self) -> dict[str, object]:
         payload = {
             "backend": self._backend,
@@ -2374,6 +2446,8 @@ class KeywordLLMFilter:
             payload.setdefault("cluster_labeling", self._last_cluster_debug)
         if getattr(self, "_last_harmonize_debug", None):
             payload.setdefault("label_harmonization", self._last_harmonize_debug)
+        if getattr(self, "_last_insight_debug", None):
+            payload.setdefault("insight_summary", self._last_insight_debug)
         return payload
 
     def concept_debug_payload(self) -> dict[str, object]:
@@ -2387,6 +2461,155 @@ class KeywordLLMFilter:
 
     def harmonize_debug_payload(self) -> dict[str, object]:
         return dict(self._last_harmonize_debug)
+
+    def insight_debug_payload(self) -> dict[str, object]:
+        return dict(self._last_insight_debug)
+
+    def _extract_insight_items(self, payload: object) -> tuple[list[object] | None, str | None]:
+        def _as_list(value: object) -> list[object] | None:
+            if value is None:
+                return None
+            if isinstance(value, list):
+                return list(value)
+            if isinstance(value, (tuple, set)):
+                return list(value)
+            if isinstance(value, dict):
+                return [value]
+            if isinstance(value, str):
+                items = [segment.strip() for segment in re.split(r"(?:\n|;)", value) if segment.strip()]
+                if items:
+                    return items
+            return None
+
+        note: str | None = None
+        if isinstance(payload, dict):
+            value: object | None = None
+            for key in ("insights", "summary", "findings", "highlights"):
+                if key in payload:
+                    value = payload[key]
+                    if key != "insights":
+                        note = f"coerced-from-{key}"
+                    break
+            result = _as_list(value)
+            if result is not None:
+                if note is None and value is not None and not isinstance(value, list):
+                    note = "coerced-from-nonlist"
+                return result, note
+        elif isinstance(payload, list):
+            return list(payload), "coerced-from-root-list"
+        elif isinstance(payload, str):
+            result = _as_list(payload)
+            if result:
+                return result, "coerced-from-string"
+        return None, note
+
+    def _normalize_insight_items(
+        self, items: Sequence[object], *, max_items: int
+    ) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+        normalized: list[dict[str, object]] = []
+        rejected: list[dict[str, object]] = []
+
+        for raw in items:
+            if isinstance(raw, dict):
+                title_raw = raw.get("title") or raw.get("theme") or raw.get("headline")
+                summary_raw = raw.get("summary") or raw.get("insight") or raw.get("description")
+                keywords_raw = raw.get("keywords") or raw.get("concepts") or raw.get("terms")
+                evidence_raw = raw.get("evidence") or raw.get("support") or raw.get("examples")
+                action_raw = raw.get("action") or raw.get("recommendation") or raw.get("next_step")
+                priority_raw = raw.get("priority") or raw.get("impact") or raw.get("severity")
+
+                title = str(title_raw).strip() if title_raw is not None else ""
+                summary = str(summary_raw).strip() if summary_raw is not None else ""
+                keywords = _coerce_str_list(keywords_raw)
+                evidence = _coerce_str_list(evidence_raw)
+                action = str(action_raw).strip() if action_raw else ""
+                priority = str(priority_raw).strip() if priority_raw else ""
+
+                if not title and summary:
+                    title = summary.split(". ", 1)[0][:120]
+                if not summary and title:
+                    summary = title
+                if not (title and summary):
+                    rejected.append({"reason": "missing-title-or-summary", "raw": raw})
+                    continue
+
+                entry: dict[str, object] = {
+                    "title": title,
+                    "summary": summary,
+                    "keywords": keywords,
+                }
+                if action:
+                    entry["action"] = action
+                if priority:
+                    entry["priority"] = priority
+                if evidence:
+                    entry["evidence"] = evidence
+                normalized.append(entry)
+            elif isinstance(raw, str):
+                text = raw.strip()
+                if not text:
+                    continue
+                entry = {
+                    "title": text[:80],
+                    "summary": text,
+                    "keywords": [],
+                }
+                normalized.append(entry)
+            else:
+                rejected.append({"reason": "unsupported-entry", "raw": raw})
+
+        if max_items > 0:
+            normalized = normalized[:max_items]
+        return normalized, rejected
+
+    def _build_insight_prompt(
+        self,
+        keywords: Sequence[KeywordCandidate],
+        context_snippets: Sequence[str],
+        *,
+        max_insights: int,
+    ) -> str:
+        keyword_lines = []
+        for index, keyword in enumerate(keywords, 1):
+            detail_parts = [
+                f"core={'yes' if keyword.is_core else 'no'}",
+                f"generated={'yes' if keyword.generated else 'no'}",
+                f"count={keyword.count}",
+            ]
+            if keyword.reason:
+                detail_parts.append(f"reason={keyword.reason}")
+            keyword_lines.append(f"{index}. term='{keyword.term}' | " + " | ".join(detail_parts))
+        formatted_keywords = "\n".join(keyword_lines) if keyword_lines else "(no keywords)"
+
+        context_lines = []
+        for idx, snippet in enumerate(context_snippets[: max(0, 4)], 1):
+            context_lines.append(f"{idx}. {snippet[:320]}")
+        formatted_context = "\n".join(context_lines) if context_lines else "(context optional)"
+
+        instructions = (
+            "You are a knowledge analyst. Using the ranked keywords and context excerpts, synthesize "
+            f"up to {max(1, max_insights)} high-level insights. Each insight should capture the business meaning, "
+            "note why it matters, and optionally suggest an action or follow-up question."
+        )
+
+        schema = (
+            "Return strict JSON with an 'insights' array: "
+            '{"insights": [{"title": "...", "summary": "...", "keywords": ["..."], '
+            '"action": "...", "priority": "high|medium|low", "evidence": ["..."]}]}. '
+            "Omit optional fields if they are not relevant."
+        )
+
+        prompt = (
+            f"{instructions}\n{schema}\n\nKEYWORDS:\n{formatted_keywords}\n\nCONTEXT SNIPPETS:\n{formatted_context}"
+        )
+
+        self._current_prompt = {
+            "system": (
+                "You are an expert insights analyst who writes concise, neutral summaries."
+            ),
+            "user": prompt,
+        }
+        return prompt
 
     @staticmethod
     def _parse_response(raw_response: str) -> dict | None:

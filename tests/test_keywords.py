@@ -641,6 +641,9 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
         "KEYWORD_STAGE4_LABEL_BONUS": "0.9",
         "KEYWORD_STAGE5_HARMONIZE_ENABLED": "true",
         "KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS": "15",
+        "KEYWORD_STAGE7_SUMMARY_ENABLED": "false",
+        "KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS": "5",
+        "KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS": "9",
     }
     for key in env_vars:
         monkeypatch.delenv(key, raising=False)
@@ -678,6 +681,9 @@ def test_settings_from_env_prefers_env(monkeypatch) -> None:
     assert settings.keyword_stage4_label_bonus == 0.9
     assert settings.keyword_stage5_harmonize_enabled is True
     assert settings.keyword_stage5_harmonize_max_results == 15
+    assert settings.keyword_stage7_summary_enabled is False
+    assert settings.keyword_stage7_summary_max_insights == 5
+    assert settings.keyword_stage7_summary_max_concepts == 9
 
 
 def test_cluster_concepts_groups_similar_phrases() -> None:
@@ -1120,6 +1126,68 @@ def test_rank_concept_clusters_marks_generated() -> None:
     assert ranked.generated is True
     debug = result.to_debug_payload(limit=1)
     assert debug["top_ranked"][0]["generated"] is True
+
+
+def test_summarize_keywords_returns_insights(monkeypatch) -> None:
+    settings = Settings(
+        chat_backend="ollama",
+        ollama_base_url="http://localhost:11434",
+        ollama_model="mock-keywords",
+    )
+    filter_instance = KeywordLLMFilter(settings)
+
+    payload = {
+        "insights": [
+            {
+                "title": "Customer Pricing Pressure",
+                "summary": "Pricing concerns dominate the negative feedback.",
+                "keywords": ["운송가격", "화주 부정 리뷰"],
+                "priority": "high",
+                "action": "Review pricing strategy",
+                "evidence": ["Multiple core keywords point to price dissatisfaction."],
+            }
+        ]
+    }
+    monkeypatch.setattr(
+        KeywordLLMFilter,
+        "_invoke_backend",
+        lambda self, prompt: json.dumps(payload),
+    )
+
+    keywords = [
+        KeywordCandidate(term="운송가격", count=10, is_core=True, generated=False, reason="Price feedback"),
+        KeywordCandidate(term="화주 부정 리뷰", count=8, is_core=True, generated=True, reason="Negative shipper reviews"),
+    ]
+
+    result = filter_instance.summarize_keywords(
+        keywords,
+        max_insights=2,
+        max_concepts=2,
+        context_snippets=["고객이 운송가격에 불만을 제기했습니다."],
+    )
+
+    assert result and result[0]["title"] == "Customer Pricing Pressure"
+    debug = filter_instance.insight_debug_payload()
+    assert debug.get("status") == "success"
+    assert debug.get("selected_total") == 1
+
+
+def test_summarize_keywords_handles_missing_insights(monkeypatch) -> None:
+    settings = Settings(
+        chat_backend="ollama",
+        ollama_base_url="http://localhost:11434",
+        ollama_model="mock-keywords",
+    )
+    filter_instance = KeywordLLMFilter(settings)
+    monkeypatch.setattr(KeywordLLMFilter, "_invoke_backend", lambda self, prompt: "{}")
+
+    keywords = [KeywordCandidate(term="Alpha", count=3, is_core=True)]
+
+    result = filter_instance.summarize_keywords(keywords, max_insights=2, max_concepts=1)
+    assert result == []
+    debug = filter_instance.insight_debug_payload()
+    assert debug.get("status") == "error"
+    assert debug.get("reason") == "missing-insights-key"
 
 
 def test_harmonize_ranked_concepts_uses_llm(monkeypatch) -> None:

@@ -28,6 +28,7 @@ Instead of a single pass of “count words, then maybe filter by LLM,” the new
 4. Re-ranking and core concept selection
 5. Canonical label harmonisation (post-process)
 6. LLM-based refinement (optional)
+7. Insight summarisation and reporting (optional)
 
 Each stage is described in detail in the following subsections.
 
@@ -103,6 +104,18 @@ Finally, we run a lightweight LLM verification (the existing `KeywordLLMFilter`)
 
 This refinement uses the same OpenAI or Ollama backend and prompting framework already in place. The LLM’s job becomes easier—rather than sifting through dozens of raw tokens, it reviews a handful of refined concepts—which should improve precision.
 
+### Stage 7: Insight Summarisation & Reporting (New)
+
+✅ **Status:** implemented.
+
+After Stage 6 confirms the final keyword list, an optional reporting layer now distils the highest-priority concepts (default: top 8) into up to three analyst-ready insights. The `KeywordLLMFilter.summarize_keywords` prompt captures:
+
+- Concise titles and summaries that explain why the concept cluster matters.
+- Optional recommended actions, priority tags, and evidence snippets referencing the contributing keywords.
+- Debug instrumentation (`insight_summary`) for every call (status, rejected entries, raw response) so malformed payloads remain debuggable.
+
+The FastAPI route surfaces these insights via a new `insights` field in the JSON payload and records the LLM diagnostics under `stage7` inside the debug block. Operators can toggle the behaviour with `KEYWORD_STAGE7_SUMMARY_ENABLED`, while `KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS` and `KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS` govern prompt size and output length.
+
 ## Techniques and Algorithms Utilized
 
 The improved pipeline mixes statistical methods, embedding-based methods, and LLM reasoning, playing to each of their strengths. Key techniques include:
@@ -133,7 +146,7 @@ Throughout implementation, maintainability remains a focus by modularizing steps
 
 This redesign shifts the Keyword Explorer from a rudimentary word count tool into a robust concept mining pipeline. By integrating embedding-based keyphrase extraction, topic modeling, and selective LLM reasoning, the system now surfaces the core ideas and themes in a knowledge base—not just the frequent words. The pipeline remains compatible with Cornerstone’s existing OpenAI/Ollama stack and leverages those AI capabilities more effectively. The outcome for users is a more meaningful set of keywords: fewer noisy one-word tokens and more informative phrases that echo the business domain. Internally, the modular design and use of proven algorithms make the system easier to maintain and adapt, fulfilling the goals of resilience and ease of use.
 
-With the six-stage flow implemented end-to-end, upcoming work centres on hardening and expanding its insight surface area: caching Stage 2 embeddings for reuse, broadening automated tests (including malformed LLM responses), stress-testing Ollama-driven runs, and exploring a Stage 7 “insight summarisation” layer that can cluster concepts into higher-order themes for dashboards. These refinements will keep the Explorer fast, reliable, and explainable as project datasets grow.
+With the seven-stage flow implemented end-to-end, upcoming work centres on hardening the reporting layer (stress-testing Ollama-driven runs, tuning prompt length limits) and exploring richer dashboards that combine keyword insights with quantitative metrics. These refinements will keep the Explorer fast, reliable, and explainable as project datasets grow.
 
 ## Sources
 

@@ -1054,7 +1054,6 @@ def create_app(
                 project.id,
                 original_count,
             )
-        llm_debug = llm_filter.debug_payload()
 
         chunk_debug: dict[str, object] = {
             "payloads_total": chunk_stage.total_payloads,
@@ -1108,6 +1107,29 @@ def create_app(
         if harmonize_debug:
             ranking_debug.setdefault("llm", harmonize_debug)
 
+        insights: list[dict[str, object]] = []
+        if (
+            keywords
+            and settings.keyword_stage7_summary_enabled
+            and llm_filter.enabled
+        ):
+            insights = llm_filter.summarize_keywords(
+                keywords,
+                max_insights=settings.keyword_stage7_summary_max_insights,
+                max_concepts=settings.keyword_stage7_summary_max_concepts,
+                context_snippets=context_snippets,
+            )
+
+        insight_debug = llm_filter.insight_debug_payload()
+        stage7_debug: dict[str, object] | None = None
+        if insight_debug:
+            stage7_debug = {"llm": insight_debug}
+        if insights:
+            stage7_debug = stage7_debug or {}
+            stage7_debug.setdefault("insights", insights[: min(len(insights), 5)])
+
+        llm_debug = llm_filter.debug_payload()
+
         debug_payload = {
             **llm_debug,
             "chunking": chunk_debug,
@@ -1116,6 +1138,8 @@ def create_app(
             "stage4": ranking_debug,
         }
         debug_payload.setdefault("candidate_count", original_count)
+        if stage7_debug:
+            debug_payload["stage7"] = stage7_debug
 
         logger.info(
             "keyword.llm.summary project=%s backend=%s details=%s",
@@ -1170,6 +1194,7 @@ def create_app(
             "keywords": page_items,
             "filter": debug_payload,
             "pagination": pagination,
+            "insights": insights,
         }
         return JSONResponse(data)
 
