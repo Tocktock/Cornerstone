@@ -53,9 +53,7 @@ All of these knobs are exposed via environment variables—for example `KEYWORD_
 
 Candidates now retain their averaged embedding vectors (plus backend identifiers), letting Stage 3 reuse the cached embeddings rather than re-querying the LLM backend on the next hop.
 
-Remaining Stage 2 follow-ups:
-
-- Expand automated tests to cover malformed LLM responses (currently handled defensively but not asserted).
+Remaining Stage 2 follow-ups: none—defensive tests now cover malformed LLM responses and embedding reuse is cached.
 
 ### Stage 3: Concept Consolidation and Clustering
 
