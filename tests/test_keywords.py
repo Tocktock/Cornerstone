@@ -203,6 +203,55 @@ def test_cluster_concepts_reuses_precomputed_vectors() -> None:
     assert embed_info.get("phrases") == 1
 
 
+def test_cluster_concepts_only_embeds_missing_vectors() -> None:
+    class CountingEmbeddingService:
+        def __init__(self) -> None:
+            self.embed_calls: list[list[str]] = []
+
+        def embed(self, texts: list[str]) -> list[list[float]]:  # type: ignore[override]
+            self.embed_calls.append(list(texts))
+            return [[0.4, 0.6] for _ in texts]
+
+    with_vector = ConceptCandidate(
+        phrase="existing vector",
+        score=5.0,
+        occurrences=2,
+        document_count=1,
+        chunk_count=1,
+        average_occurrence_per_chunk=2.0,
+        word_count=2,
+        languages=["en"],
+        sections=["Docs"],
+        sources=["guide.md"],
+        sample_snippet=None,
+        score_breakdown={"frequency": 2.0},
+        embedding_vector=[0.9, 0.1],
+        embedding_backend="precomputed",
+    )
+    missing_vector = ConceptCandidate(
+        phrase="needs embedding",
+        score=4.0,
+        occurrences=1,
+        document_count=1,
+        chunk_count=1,
+        average_occurrence_per_chunk=1.0,
+        word_count=2,
+        languages=["en"],
+        sections=["Docs"],
+        sources=["guide.md"],
+        sample_snippet=None,
+        score_breakdown={"frequency": 1.0},
+    )
+
+    service = CountingEmbeddingService()
+    result = cluster_concepts([with_vector, missing_vector], embedding_service=service)
+
+    assert service.embed_calls == [["needs embedding"]]
+    embed_info = result.parameters.get("embedding", {})
+    assert embed_info.get("enabled") is True
+    assert embed_info.get("phrases") == 2
+
+
 def test_extract_concept_candidates_includes_statistical_scores() -> None:
     chunk = KeywordSourceChunk(
         text="Escalation runbook outlines SLA breach protocol and customer escalation workflow.",
@@ -1033,6 +1082,46 @@ def test_rank_concept_clusters_generalizes_sentiment_labels() -> None:
     assert "화주 긍정 리뷰" in top.aliases
 
 
+def test_rank_concept_clusters_marks_generated() -> None:
+    cluster = ConceptCluster(
+        label="LLM Concept",
+        label_source="llm",
+        score=30.0,
+        occurrences=5,
+        document_count=2,
+        chunk_count=3,
+        languages=["en"],
+        sections=["Docs"],
+        sources=["guide.md"],
+        members=[
+            ConceptCandidate(
+                phrase="llm suggestion",
+                score=15.0,
+                occurrences=2,
+                document_count=1,
+                chunk_count=1,
+                average_occurrence_per_chunk=2.0,
+                word_count=2,
+                languages=["en"],
+                sections=["Docs"],
+                sources=["guide.md"],
+                sample_snippet=None,
+                score_breakdown={"frequency": 2.0},
+                generated=True,
+            )
+        ],
+        score_breakdown={"member_count": 1},
+        description=None,
+        aliases=["llm suggestion"],
+    )
+
+    result = rank_concept_clusters([cluster], core_limit=1)
+    ranked = result.ranked[0]
+    assert ranked.generated is True
+    debug = result.to_debug_payload(limit=1)
+    assert debug["top_ranked"][0]["generated"] is True
+
+
 def test_harmonize_ranked_concepts_uses_llm(monkeypatch) -> None:
     settings = Settings(
         chat_backend="ollama",
@@ -1138,6 +1227,54 @@ def test_filter_keywords_preserves_core_flags(monkeypatch) -> None:
     alpha, beta = results
     assert alpha.is_core is True
     assert beta.is_core is False
+
+
+def test_filter_keywords_handles_missing_keywords_key(monkeypatch) -> None:
+    candidates = [
+        KeywordCandidate(term="Alpha", count=5, is_core=True),
+        KeywordCandidate(term="Beta", count=2, is_core=False),
+    ]
+
+    filter_instance = _build_enabled_filter({}, monkeypatch)
+    results = filter_instance.filter_keywords(candidates, context_snippets=["context"])
+
+    assert results == candidates
+    debug = filter_instance.debug_payload()
+    assert debug.get("status") == "error"
+    assert debug.get("reason") == "missing-keywords-array"
+
+
+def test_refine_concepts_handles_missing_concepts_key(monkeypatch) -> None:
+    settings = Settings(
+        chat_backend="ollama",
+        ollama_base_url="http://localhost:11434",
+        ollama_model="mock-keywords",
+    )
+    filter_instance = KeywordLLMFilter(settings)
+    monkeypatch.setattr(KeywordLLMFilter, "_invoke_backend", lambda self, _: "{}")
+
+    concepts = [
+        ConceptCandidate(
+            phrase="login error",
+            score=9.0,
+            occurrences=4,
+            document_count=2,
+            chunk_count=3,
+            average_occurrence_per_chunk=1.33,
+            word_count=2,
+            languages=["en"],
+            sections=["Login"],
+            sources=["guide.md"],
+            sample_snippet="Login error handling steps.",
+            score_breakdown={"frequency": 4.0},
+        )
+    ]
+
+    refined = filter_instance.refine_concepts(concepts, [])
+    assert refined == concepts
+    debug = filter_instance.concept_debug_payload()
+    assert debug.get("status") == "error"
+    assert debug.get("reason") == "missing-concepts-key"
 
 def test_filter_keywords_handles_items_payload(monkeypatch) -> None:
     filter_instance = _build_enabled_filter(
