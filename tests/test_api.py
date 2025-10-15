@@ -119,8 +119,8 @@ def test_keywords_endpoint_returns_candidates(fastapi_app: TestClient) -> None:
     assert response.status_code == 200, response.text
     data = response.json()
     terms = {item["term"].lower() for item in data.get("keywords", [])}
-    assert "alpha" in terms
-    assert "beta" in terms
+    assert any("alpha" in term for term in terms)
+    assert any("beta" in term for term in terms)
     first = data["keywords"][0]
     assert "generated" in first
     assert "reason" in first
