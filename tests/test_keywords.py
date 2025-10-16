@@ -1240,6 +1240,52 @@ def test_harmonize_ranked_concepts_uses_llm(monkeypatch) -> None:
     assert debug.get("status") == "harmonized"
 
 
+def test_harmonize_ranked_concepts_respects_string_keep_flag(monkeypatch) -> None:
+    settings = Settings(
+        chat_backend="ollama",
+        ollama_base_url="http://localhost:11434",
+        ollama_model="mock-keywords",
+    )
+    filter_instance = KeywordLLMFilter(settings)
+
+    payload = {
+        "concepts": [
+            {
+                "index": 1,
+                "label": "Should Drop",
+                "keep": "false",
+            }
+        ]
+    }
+    monkeypatch.setattr(
+        KeywordLLMFilter,
+        "_invoke_backend",
+        lambda self, prompt: json.dumps(payload),
+    )
+
+    ranked = [
+        RankedConcept(
+            label="Original",
+            score=50.0,
+            rank=1,
+            is_core=True,
+            document_count=5,
+            chunk_count=6,
+            occurrences=12,
+            label_source="top-member",
+            description=None,
+            aliases=["Original"],
+            member_phrases=["Original"],
+            score_breakdown={"stage2_score": 40.0},
+        )
+    ]
+
+    updated = filter_instance.harmonize_ranked_concepts(ranked, max_results=3)
+    assert updated == ranked  # concept not rewritten
+    debug = filter_instance.harmonize_debug_payload()
+    assert debug.get("status") == "no-changes"
+
+
 def test_filter_keywords_limits_and_normalises(monkeypatch) -> None:
     filter_instance = _build_enabled_filter(
         {

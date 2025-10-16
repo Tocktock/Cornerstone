@@ -2818,7 +2818,8 @@ class KeywordLLMFilter:
                 description = str(description_value).strip() if description_value else ""
                 aliases = _coerce_str_list(raw.get("aliases") or raw.get("alternate") or raw.get("synonyms"))
                 keep_value = raw.get("keep")
-                keep = True if keep_value is None else bool(keep_value)
+                keep_flag = self._coerce_keep_flag(keep_value)
+                keep = True if keep_flag is None else keep_flag
                 entry: dict[str, object] = {
                     "index": index,
                     "label": label,
