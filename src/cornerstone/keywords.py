@@ -439,46 +439,6 @@ class ConceptRankingResult:
     def replace_ranked(self, ranked: Sequence[RankedConcept]) -> ConceptRankingResult:
         return ConceptRankingResult(ranked=list(ranked), parameters=dict(self.parameters))
 
-    def add(
-        self,
-        candidate: ConceptCandidate,
-        *,
-        tokens: set[str],
-        vector: Sequence[float] | None = None,
-    ) -> None:
-        self.members.append(candidate)
-        self.score += candidate.score
-        self.occurrences += candidate.occurrences
-        self.tokens |= tokens
-        self.languages.update(candidate.languages)
-        self.sections.update(candidate.sections)
-        self.sources.update(candidate.sources)
-        if candidate.document_ids:
-            self.document_ids.update(candidate.document_ids)
-        elif candidate.document_count:
-            self.document_ids.update({f"doc-{len(self.document_ids) + i}" for i in range(candidate.document_count)})
-        if candidate.chunk_ids:
-            self.chunk_ids.update(candidate.chunk_ids)
-        elif candidate.chunk_count:
-            self.chunk_ids.update({f"chunk-{len(self.chunk_ids) + i}" for i in range(candidate.chunk_count)})
-        top_member = max(self.members, key=lambda item: item.score)
-        self.label = top_member.phrase
-        if top_member.phrase not in self.aliases:
-            self.aliases.append(top_member.phrase)
-
-        if vector:
-            if self.vector is None:
-                self.vector = list(vector)
-                self.vector_count = 1
-            else:
-                if len(self.vector) == len(vector):
-                    total = self.vector_count + 1
-                    self.vector = [
-                        (existing * self.vector_count + float(new)) / total
-                        for existing, new in zip(self.vector, vector)
-                    ]
-                    self.vector_count = total
-
 def _normalize_language(value: object) -> str | None:
     if isinstance(value, str):
         cleaned = value.strip()
