@@ -120,6 +120,8 @@ After Stage 6 confirms the final keyword list, an optional reporting layer now
 
 The FastAPI route surfaces these insights via a new `insights` field in the JSON payload and records the LLM diagnostics under `stage7` inside the debug block. Operators can toggle the behaviour with `KEYWORD_STAGE7_SUMMARY_ENABLED`, while `KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS` (defaults to 12) and `KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS` govern prompt size and output length. Raise `…_MAX_CONCEPTS` if you want the summary to consider more of the long-tail concepts.
 
+If either limit is set to `0`, or the keyword list exceeds `KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS * 4`, Stage 7 is skipped automatically and the debug payload records the reason (`filter.stage7.reason`).
+
 ## Techniques and Algorithms Utilized
 
 The improved pipeline mixes statistical methods, embedding-based methods, and LLM reasoning, playing to each of their strengths. Key techniques include:

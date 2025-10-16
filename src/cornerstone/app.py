@@ -1108,25 +1108,49 @@ def create_app(
             ranking_debug.setdefault("llm", harmonize_debug)
 
         insights: list[dict[str, object]] = []
-        if (
+        stage7_debug: dict[str, object] | None = None
+        should_summarize = (
             keywords
             and settings.keyword_stage7_summary_enabled
+            and settings.keyword_stage7_summary_max_insights > 0
+            and settings.keyword_stage7_summary_max_concepts > 0
             and llm_filter.enabled
-        ):
+        )
+
+        max_summary_keywords = settings.keyword_stage7_summary_max_concepts * 4
+        if should_summarize and max_summary_keywords > 0 and len(keywords) > max_summary_keywords:
+            should_summarize = False
+            stage7_debug = {
+                "reason": "skipped",
+                "cause": "keyword-limit-exceeded",
+                "total_keywords": len(keywords),
+                "limit": max_summary_keywords,
+            }
+
+        if should_summarize:
             insights = llm_filter.summarize_keywords(
                 keywords,
                 max_insights=settings.keyword_stage7_summary_max_insights,
                 max_concepts=settings.keyword_stage7_summary_max_concepts,
                 context_snippets=context_snippets,
             )
-
-        insight_debug = llm_filter.insight_debug_payload()
-        stage7_debug: dict[str, object] | None = None
-        if insight_debug:
-            stage7_debug = {"llm": insight_debug}
-        if insights:
+            insight_debug = llm_filter.insight_debug_payload()
+            if insight_debug:
+                stage7_debug = stage7_debug or {}
+                stage7_debug.setdefault("llm", insight_debug)
+            if insights:
+                stage7_debug = stage7_debug or {}
+                stage7_debug.setdefault("insights", insights[: min(len(insights), 5)])
             stage7_debug = stage7_debug or {}
-            stage7_debug.setdefault("insights", insights[: min(len(insights), 5)])
+            stage7_debug.setdefault("reason", "summarized")
+        elif stage7_debug is None:
+            stage7_debug = {
+                "reason": "disabled",
+                "enabled": settings.keyword_stage7_summary_enabled,
+                "max_insights": settings.keyword_stage7_summary_max_insights,
+                "max_concepts": settings.keyword_stage7_summary_max_concepts,
+                "llm_enabled": llm_filter.enabled,
+            }
 
         llm_debug = llm_filter.debug_payload()
 
@@ -1274,6 +1298,15 @@ def create_app(
         }
         saved = project_store.save_keyword_insight(project.id, insight)
         return JSONResponse(saved, status_code=201)
+
+    @app.get("/keywords/{project_id}/insights", response_class=JSONResponse)
+    async def list_keyword_insights(
+        project_id: str,
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        insights = project_store.list_keyword_insights(project.id)
+        return JSONResponse({"projectId": project.id, "insights": insights})
 
     @app.post("/knowledge/projects", response_class=RedirectResponse)
     async def create_project(
