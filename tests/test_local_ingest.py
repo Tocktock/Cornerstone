@@ -10,7 +10,7 @@ import pytest
 
 from cornerstone.config import Settings
 from cornerstone.ingestion import DocumentIngestor, IngestionJobManager, IngestionResult
-from cornerstone.local_ingest import ingest_directory, load_manifest, resolve_local_path
+from cornerstone.local_ingest import ingest_directory, list_directories, load_manifest, resolve_local_path
 from cornerstone.projects import DocumentMetadata
 from cornerstone.scripts import ingest_local
 
@@ -170,6 +170,17 @@ def test_reingest_after_manifest_removed_processes_again(tmp_path: Path) -> None
         manifest_path=manifest_path,
     )
     assert ingestor_again.calls == ["docs/sample.txt"]
+
+
+def test_list_directories_treats_dot_as_root(tmp_path: Path) -> None:
+    base_dir = tmp_path / "data"
+    (base_dir / "alpha").mkdir(parents=True, exist_ok=True)
+    (base_dir / "beta").mkdir()
+
+    root_entries = list_directories(base_dir)
+    dot_entries = list_directories(base_dir, ".")
+
+    assert dot_entries == root_entries
 
 
 def test_cli_ingest_waits_for_throttled_slot(monkeypatch, tmp_path: Path, capsys) -> None:
