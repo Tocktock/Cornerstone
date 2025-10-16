@@ -74,6 +74,9 @@ _DEFAULT_KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS: Final[int] = 12
 _DEFAULT_KEYWORD_STAGE7_SUMMARY_ENABLED: Final[bool] = True
 _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS: Final[int] = 3
 _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS: Final[int] = 12
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT: Final[float] = 1.0
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL: Final[float] = 1.5
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS: Final[int] = 64
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -202,6 +205,9 @@ class Settings:
     keyword_stage7_summary_enabled: bool = _DEFAULT_KEYWORD_STAGE7_SUMMARY_ENABLED
     keyword_stage7_summary_max_insights: int = _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS
     keyword_stage7_summary_max_concepts: int = _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS
+    keyword_stage7_summary_inline_timeout: float = _DEFAULT_KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT
+    keyword_stage7_summary_poll_interval: float = _DEFAULT_KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL
+    keyword_stage7_summary_max_jobs: int = _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -382,6 +388,24 @@ class Settings:
                 os.getenv(
                     "KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS",
                     str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS),
+                )
+            ),
+            keyword_stage7_summary_inline_timeout=float(
+                os.getenv(
+                    "KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT",
+                    str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT),
+                )
+            ),
+            keyword_stage7_summary_poll_interval=float(
+                os.getenv(
+                    "KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL",
+                    str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL),
+                )
+            ),
+            keyword_stage7_summary_max_jobs=int(
+                os.getenv(
+                    "KEYWORD_STAGE7_SUMMARY_MAX_JOBS",
+                    str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS),
                 )
             ),
         )

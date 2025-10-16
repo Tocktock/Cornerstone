@@ -186,9 +186,11 @@ class ProjectStore:
             with path.open("r", encoding="utf-8") as handle:
                 insights = json.load(handle)
 
+        timestamp = self._now()
         insight_with_meta = {
             "id": uuid4().hex,
-            "created_at": self._now(),
+            "created_at": timestamp,
+            "updated_at": timestamp,
             **insight,
         }
         insights.append(insight_with_meta)
@@ -218,6 +220,73 @@ class ProjectStore:
             )
         except TypeError:
             return insights
+
+    def update_keyword_insight(self, project_id: str, insight_id: str, updates: dict) -> dict:
+        path = self._keywords_dir / f"{project_id}.json"
+        if not path.exists():
+            raise ValueError("Insight not found")
+
+        with path.open("r", encoding="utf-8") as handle:
+            insights: list[dict] = json.load(handle)
+
+        updated_item: dict | None = None
+        timestamp = self._now()
+        normalized_updates = {}
+        if "term" in updates:
+            term = str(updates.get("term", "")).strip()
+            if term:
+                normalized_updates["term"] = term
+        if "candidates" in updates:
+            normalized_updates["candidates"] = list(updates.get("candidates") or [])
+        if "definitions" in updates:
+            normalized_updates["definitions"] = list(updates.get("definitions") or [])
+        if "filter" in updates:
+            normal_filter = updates.get("filter") or {}
+            if isinstance(normal_filter, dict):
+                normalized_updates["filter"] = normal_filter
+
+        new_items: list[dict] = []
+        for item in insights:
+            if item.get("id") != insight_id:
+                new_items.append(item)
+                continue
+            updated = dict(item)
+            updated.update(normalized_updates)
+            updated["updated_at"] = timestamp
+            updated_item = updated
+            new_items.append(updated)
+
+        if updated_item is None:
+            raise ValueError("Insight not found")
+
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(new_items, handle, indent=2)
+
+        logger.info(
+            "project.keyword.updated project=%s insight_id=%s fields=%s",
+            project_id,
+            insight_id,
+            list(normalized_updates.keys()),
+        )
+        return updated_item
+
+    def delete_keyword_insight(self, project_id: str, insight_id: str) -> bool:
+        path = self._keywords_dir / f"{project_id}.json"
+        if not path.exists():
+            return False
+
+        with path.open("r", encoding="utf-8") as handle:
+            insights: list[dict] = json.load(handle)
+
+        remaining = [item for item in insights if item.get("id") != insight_id]
+        if len(remaining) == len(insights):
+            return False
+
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(remaining, handle, indent=2)
+
+        logger.info("project.keyword.deleted project=%s insight_id=%s", project_id, insight_id)
+        return True
 
     # Glossary entry persistence -------------------------------------------------
 

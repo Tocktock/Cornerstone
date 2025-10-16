@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from cornerstone.config import Settings
 from cornerstone.keywords import (
     ConceptCandidate,
@@ -16,6 +18,7 @@ from cornerstone.keywords import (
     prepare_keyword_chunks,
     rank_concept_clusters,
 )
+from cornerstone.insights import KeywordInsightQueue
 
 
 def test_prepare_keyword_chunks_normalises_and_collects_metadata() -> None:
@@ -1448,3 +1451,51 @@ def test_filter_keywords_allows_generated_when_enabled(monkeypatch) -> None:
     info = filter_instance.debug_payload()
     assert info["status"] == "filtered"
     assert "New Concept" in info.get("generated", [])
+
+
+@pytest.mark.asyncio
+async def test_keyword_insight_queue_generates_insights(monkeypatch) -> None:
+    settings = Settings(
+        chat_backend="ollama",
+        ollama_base_url="http://localhost:11434",
+        ollama_model="mock-keywords",
+    )
+    queue = KeywordInsightQueue()
+    payload = {
+        "insights": [
+            {
+                "title": "Pricing pressure",
+                "summary": "Customers frequently mention price concerns.",
+                "keywords": ["pricing", "feedback"],
+                "priority": "high",
+                "action": "Review pricing strategy",
+                "evidence": ["Top concepts cluster around pricing complaints."],
+            }
+        ]
+    }
+    monkeypatch.setattr(
+        KeywordLLMFilter,
+        "_invoke_backend",
+        lambda self, prompt: json.dumps(payload),
+    )
+
+    keywords = [
+        KeywordCandidate(term="pricing", count=4, is_core=True),
+        KeywordCandidate(term="feedback", count=3, is_core=True),
+    ]
+
+    job = await queue.enqueue(
+        project_id="demo",
+        settings=settings,
+        keywords=keywords,
+        max_insights=2,
+        max_concepts=2,
+        context_snippets=[],
+    )
+
+    assert await job.wait(timeout=2.0)
+    assert job.status == "success"
+    assert job.insights and job.insights[0]["title"].startswith("Pricing")
+
+    fetched = await queue.get(job.id)
+    assert fetched is job
