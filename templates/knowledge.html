@@ -73,13 +73,6 @@
       .local-input-group input { flex:1; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
       .local-input-group button { padding:0.65rem 1.5rem; border-radius:999px; border:none; background:#1f2937; color:#fff; font-size:0.95rem; box-shadow:0 12px 28px rgba(17,24,39,0.18); cursor:pointer; }
       .local-input-wrapper { position:relative; flex:1; }
-      .local-suggestions { position:absolute; top:calc(100% + 0.25rem); left:0; right:0; background:#fff; border:1px solid #d1d5db; border-radius:8px; box-shadow:none; padding:0; max-height:220px; overflow-y:auto; display:none; z-index:10; }
-      .local-suggestions.visible { display:block; }
-      .local-suggestion { width:100%; padding:0.5rem 0.75rem; text-align:left; background:transparent; border:none; border-bottom:1px solid #e5e7eb; font-size:0.9rem; color:#1f2937; cursor:pointer; display:flex; flex-direction:column; align-items:flex-start; gap:0.18rem; }
-      .local-suggestion:last-child { border-bottom:none; }
-      .local-suggestion:hover, .local-suggestion:focus { background:#f3f4f6; outline:none; }
-      .local-suggestion .suggestion-meta { font-size:0.78rem; color:#6b7280; }
-      .local-suggestion.empty { cursor:default; color:#6b7280; background:#f9fafb; border-bottom:none; }
       .url-upload { margin-top:1.1rem; display:flex; flex-direction:column; gap:0.5rem; }
       .url-input-group { display:flex; gap:0.65rem; align-items:center; }
       .url-input-group input { flex:1; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
@@ -113,7 +106,6 @@
         .local-input-group, .url-input-group { flex-direction:column; align-items:stretch; }
         .local-input-group button, .url-input-group button { width:100%; }
         .local-input-wrapper { width:100%; }
-        .local-suggestions { max-height:200px; }
       }
       @media (max-width: 640px) {
         section, aside { padding: 1.25rem 1.35rem; }
@@ -274,9 +266,8 @@
             <label for="local-path" style="font-weight:600; color:#1f2937;">Import local directory</label>
             <div class="local-input-group">
               <div class="local-input-wrapper">
-                <input id="local-path" placeholder="e.g. team-notes/2024-q2" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="local-directory-suggestions" aria-expanded="false" />
-                <datalist id="local-directories" style="display:none;"></datalist>
-                <div id="local-directory-suggestions" class="local-suggestions" role="listbox" aria-label="Local directory suggestions" aria-hidden="true"></div>
+                <input id="local-path" placeholder="e.g. team-notes/2024-q2" autocomplete="off" spellcheck="false" list="local-directories" />
+                <datalist id="local-directories"></datalist>
               </div>
               <button type="button" id="import-local">Import</button>
             </div>
@@ -454,10 +445,8 @@
       const localDataList = document.getElementById('local-directories');
       const directoryMeta = document.getElementById('local-directory-meta');
       const importLocalBtn = document.getElementById('import-local');
-      const localSuggestions = document.getElementById('local-directory-suggestions');
       const localDirectoryCache = new Map();
       const LOCAL_DIRECTORY_ROOT_KEY = '__root__';
-      const MAX_LOCAL_SUGGESTIONS = 12;
       let localDirectoryRequestId = 0;
       let localDirectoryFetchTimer = null;
       let localDirectoryActiveQuery = '';
@@ -1309,7 +1298,7 @@
           ]);
         } finally {
           if (localPathInput) {
-            scheduleLocalDirectoryRefresh(localPathInput.value, true);
+            scheduleLocalDirectoryRefresh(localPathInput.value);
             updateDirectoryMeta(localPathInput.value);
             focusLocalDirectoryInput();
           }
@@ -1344,99 +1333,6 @@
         });
       }
 
-      function hideLocalDirectorySuggestions() {
-        if (!localSuggestions) {
-          return;
-        }
-        localSuggestions.classList.remove('visible');
-        localSuggestions.setAttribute('aria-hidden', 'true');
-        if (localPathInput) {
-          localPathInput.setAttribute('aria-expanded', 'false');
-        }
-      }
-
-      function updateLocalDirectorySuggestions(entries, query, reveal = false) {
-        if (!localSuggestions) {
-          return;
-        }
-        const normalizedQuery = normalizeLocalDirectoryPath(query);
-        const isFocused = document.activeElement === localPathInput;
-        if (localPathInput) {
-          localPathInput.setAttribute('aria-expanded', 'false');
-        }
-        localSuggestions.innerHTML = '';
-        if (!entries || entries.length === 0) {
-          if (normalizedQuery && (reveal || isFocused)) {
-            const emptyMessage = document.createElement('div');
-            emptyMessage.className = 'local-suggestion empty';
-            emptyMessage.textContent = 'No directories found';
-            localSuggestions.appendChild(emptyMessage);
-            localSuggestions.classList.add('visible');
-            localSuggestions.setAttribute('aria-hidden', 'false');
-            if (localPathInput) {
-              localPathInput.setAttribute('aria-expanded', 'true');
-            }
-          } else {
-            hideLocalDirectorySuggestions();
-          }
-          return;
-        }
-
-        const fragment = document.createDocumentFragment();
-        entries.slice(0, MAX_LOCAL_SUGGESTIONS).forEach((dir) => {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = 'local-suggestion';
-          button.setAttribute('data-value', dir.path);
-          button.setAttribute('role', 'option');
-          button.textContent = dir.path;
-          button.addEventListener('pointerdown', (event) => {
-            event.preventDefault();
-          });
-          button.addEventListener('click', () => {
-            if (!localPathInput) {
-              return;
-            }
-            localPathInput.value = dir.path;
-            updateDirectoryMeta(dir.path);
-            localDirectoryActiveQuery = normalizeLocalDirectoryPath(dir.path);
-            scheduleLocalDirectoryRefresh(dir.path, true);
-            focusLocalDirectoryInput(false);
-          });
-
-          const files = Number(dir.file_count || 0);
-          const bytes = Number(dir.total_bytes || 0);
-          if (files || bytes) {
-            const meta = document.createElement('span');
-            meta.className = 'suggestion-meta';
-            const parts = [];
-            if (files) {
-              parts.push(`${files} file${files === 1 ? '' : 's'}`);
-            }
-            if (bytes) {
-              parts.push(formatBytes(bytes));
-            }
-            meta.textContent = parts.join(' · ');
-            button.appendChild(meta);
-          }
-
-          fragment.appendChild(button);
-        });
-
-        localSuggestions.appendChild(fragment);
-        const shouldShow = reveal || Boolean(normalizedQuery) || isFocused;
-        if (shouldShow) {
-          localSuggestions.classList.add('visible');
-          localSuggestions.setAttribute('aria-hidden', 'false');
-          if (localPathInput) {
-            localPathInput.setAttribute('aria-expanded', 'true');
-          }
-        } else {
-          localSuggestions.classList.remove('visible');
-          localSuggestions.setAttribute('aria-hidden', 'true');
-        }
-      }
-
       function normalizeLocalDirectoryPath(value) {
         if (!value) {
           return '';
@@ -1450,11 +1346,10 @@
         return collapsed.replace(/^\//, '');
       }
 
-      async function loadLocalDirectories(path = '', options = {}) {
+      async function loadLocalDirectories(path = '') {
         if (!localDataList) {
           return [];
         }
-        const { reveal = false } = options;
         const normalized = normalizeLocalDirectoryPath(path);
         const cacheKey = normalized || LOCAL_DIRECTORY_ROOT_KEY;
         const requestId = ++localDirectoryRequestId;
@@ -1465,9 +1360,6 @@
           }
           const response = await fetch(endpoint);
           if (!response.ok) {
-            if (requestId === localDirectoryRequestId && localDirectoryActiveQuery === normalized && reveal) {
-              updateLocalDirectorySuggestions([], normalized, reveal);
-            }
             return localDirectoryCache.get(cacheKey) || [];
           }
           const data = await response.json();
@@ -1475,19 +1367,15 @@
           localDirectoryCache.set(cacheKey, directories);
           if (requestId === localDirectoryRequestId && localDirectoryActiveQuery === normalized) {
             renderLocalDirectoryOptions(directories);
-            updateLocalDirectorySuggestions(directories, normalized, reveal);
           }
           return directories;
         } catch (error) {
           console.error('Failed to load local directories', error);
-          if (requestId === localDirectoryRequestId && localDirectoryActiveQuery === normalized && reveal) {
-            updateLocalDirectorySuggestions([], normalized, reveal);
-          }
           return localDirectoryCache.get(cacheKey) || [];
         }
       }
 
-      function scheduleLocalDirectoryRefresh(value, reveal = false) {
+      function scheduleLocalDirectoryRefresh(value) {
         if (!localDataList) {
           return;
         }
@@ -1524,17 +1412,14 @@
         }
         if (displayEntries.length) {
           renderLocalDirectoryOptions(displayEntries);
-          updateLocalDirectorySuggestions(displayEntries, normalized, reveal);
-        } else if (reveal) {
-          updateLocalDirectorySuggestions([], normalized, reveal);
         } else {
-          hideLocalDirectorySuggestions();
+          renderLocalDirectoryOptions([]);
         }
         if (localDirectoryFetchTimer) {
           window.clearTimeout(localDirectoryFetchTimer);
         }
         localDirectoryFetchTimer = window.setTimeout(() => {
-          loadLocalDirectories(normalized, { reveal }).catch(() => {});
+          loadLocalDirectories(normalized).catch(() => {});
         }, 150);
       }
 
@@ -1598,28 +1483,12 @@
         const handleLocalDirectoryChange = (event) => {
           const nextValue = event.target.value;
           updateDirectoryMeta(nextValue);
-          scheduleLocalDirectoryRefresh(nextValue, true);
+          scheduleLocalDirectoryRefresh(nextValue);
         };
         localPathInput.addEventListener('input', handleLocalDirectoryChange);
         localPathInput.addEventListener('change', handleLocalDirectoryChange);
         localPathInput.addEventListener('focus', (event) => {
-          scheduleLocalDirectoryRefresh(event.target.value, true);
-        });
-        localPathInput.addEventListener('blur', () => {
-          window.setTimeout(() => {
-            hideLocalDirectorySuggestions();
-          }, 120);
-        });
-        localPathInput.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape') {
-            hideLocalDirectorySuggestions();
-          }
-        });
-      }
-
-      if (localSuggestions) {
-        localSuggestions.addEventListener('pointerdown', (event) => {
-          event.preventDefault();
+          scheduleLocalDirectoryRefresh(event.target.value);
         });
       }
 

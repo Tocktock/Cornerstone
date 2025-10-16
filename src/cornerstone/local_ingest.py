@@ -68,7 +68,13 @@ def _normalize_directory_query(relative_path: str | None) -> tuple[str, bool]:
         return "", False
     cleaned = cleaned.replace("\\", "/")
     cleaned = re.sub(r"/{2,}", "/", cleaned)
+
+    while cleaned.startswith("./"):
+        cleaned = cleaned[2:]
+
     cleaned = cleaned.lstrip("/")
+    if cleaned == ".":
+        return "", False
     if not cleaned:
         return "", False
     trailing_slash = cleaned.endswith("/")
