@@ -135,6 +135,49 @@ def test_keywords_endpoint_returns_candidates(fastapi_app: TestClient) -> None:
     assert pagination.get("total") >= len(data.get("keywords", []))
     assert pagination.get("page_size") >= len(data.get("keywords", []))
 
+
+def test_keyword_insights_roundtrip(fastapi_app: TestClient) -> None:
+    project_id = fastapi_app.default_project_id  # type: ignore[attr-defined]
+    payload = {
+        "term": "Alpha",
+        "candidates": ["Alpha document"],
+        "definitions": ["Alpha: sample definition"],
+        "filter": {"status": "filtered"},
+    }
+    response = fastapi_app.post(
+        f"/keywords/{project_id}/insights",
+        json=payload,
+    )
+    assert response.status_code == 201, response.text
+
+    get_response = fastapi_app.get(f"/keywords/{project_id}/insights")
+    assert get_response.status_code == 200
+    insights_payload = get_response.json()
+    insights = insights_payload.get("insights", [])
+    assert len(insights) >= 1
+    latest = insights[0]
+    assert latest["term"].lower() == "alpha"
+    assert latest.get("candidates")
+
+
+def test_stage7_summary_skips_when_disabled(fastapi_app: TestClient, monkeypatch) -> None:
+    project_id = fastapi_app.default_project_id  # type: ignore[attr-defined]
+    services = fastapi_app.app.state.services
+    services.settings.keyword_stage7_summary_max_insights = 0
+
+    from cornerstone.keywords import KeywordLLMFilter
+
+    def _raise(*_, **__):  # pragma: no cover - defensive guard
+        raise AssertionError("summarize_keywords should not be called when disabled")
+
+    monkeypatch.setattr(KeywordLLMFilter, "summarize_keywords", _raise)
+
+    response = fastapi_app.get(f"/keywords/{project_id}/candidates")
+    assert response.status_code == 200
+    data = response.json()
+    stage7 = (data.get("filter") or {}).get("stage7", {})
+    assert stage7.get("reason") == "disabled"
+
 def test_keywords_endpoint_respects_pagination(fastapi_app: TestClient) -> None:
     first_page = fastapi_app.get(
         f"/keywords/{fastapi_app.default_project_id}/candidates",

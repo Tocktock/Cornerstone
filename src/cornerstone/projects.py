@@ -204,6 +204,21 @@ class ProjectStore:
         )
         return insight_with_meta
 
+    def list_keyword_insights(self, project_id: str) -> list[dict]:
+        path = self._keywords_dir / f"{project_id}.json"
+        if not path.exists():
+            return []
+        with path.open("r", encoding="utf-8") as handle:
+            insights = json.load(handle)
+        try:
+            return sorted(
+                insights,
+                key=lambda item: item.get("created_at") or "",
+                reverse=True,
+            )
+        except TypeError:
+            return insights
+
     # Glossary entry persistence -------------------------------------------------
 
     def list_glossary_entries(self, project_id: str) -> list[dict]:
