@@ -124,6 +124,13 @@ def _env_optional_float(name: str) -> float | None:
         raise ValueError(f"Environment variable {name} must be a float") from exc
 
 
+def _env_float(name: str, default: float) -> float:
+    """Read a float environment variable with a fallback (preserving zero)."""
+
+    value = _env_optional_float(name)
+    return default if value is None else value
+
+
 def _env_bool(name: str, default: bool) -> bool:
     """Read a boolean environment variable with a fallback."""
 
@@ -329,12 +336,18 @@ class Settings:
                     str(_DEFAULT_KEYWORD_STAGE2_MIN_OCCURRENCES),
                 )
             ),
-            keyword_stage2_embedding_weight=_env_optional_float("KEYWORD_STAGE2_EMBEDDING_WEIGHT")
-            or _DEFAULT_KEYWORD_STAGE2_EMBEDDING_WEIGHT,
-            keyword_stage2_statistical_weight=_env_optional_float("KEYWORD_STAGE2_STATISTICAL_WEIGHT")
-            or _DEFAULT_KEYWORD_STAGE2_STATISTICAL_WEIGHT,
-            keyword_stage2_llm_weight=_env_optional_float("KEYWORD_STAGE2_LLM_WEIGHT")
-            or _DEFAULT_KEYWORD_STAGE2_LLM_WEIGHT,
+            keyword_stage2_embedding_weight=_env_float(
+                "KEYWORD_STAGE2_EMBEDDING_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE2_EMBEDDING_WEIGHT,
+            ),
+            keyword_stage2_statistical_weight=_env_float(
+                "KEYWORD_STAGE2_STATISTICAL_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE2_STATISTICAL_WEIGHT,
+            ),
+            keyword_stage2_llm_weight=_env_float(
+                "KEYWORD_STAGE2_LLM_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE2_LLM_WEIGHT,
+            ),
             keyword_stage3_label_clusters=_env_bool(
                 "KEYWORD_STAGE3_LABEL_CLUSTERS", _DEFAULT_KEYWORD_STAGE3_LABEL_CLUSTERS
             ),
@@ -356,16 +369,26 @@ class Settings:
                     str(_DEFAULT_KEYWORD_STAGE4_MAX_RESULTS),
                 )
             ),
-            keyword_stage4_score_weight=_env_optional_float("KEYWORD_STAGE4_SCORE_WEIGHT")
-            or _DEFAULT_KEYWORD_STAGE4_SCORE_WEIGHT,
-            keyword_stage4_document_weight=_env_optional_float("KEYWORD_STAGE4_DOCUMENT_WEIGHT")
-            or _DEFAULT_KEYWORD_STAGE4_DOCUMENT_WEIGHT,
-            keyword_stage4_chunk_weight=_env_optional_float("KEYWORD_STAGE4_CHUNK_WEIGHT")
-            or _DEFAULT_KEYWORD_STAGE4_CHUNK_WEIGHT,
-            keyword_stage4_occurrence_weight=_env_optional_float("KEYWORD_STAGE4_OCCURRENCE_WEIGHT")
-            or _DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT,
-            keyword_stage4_label_bonus=_env_optional_float("KEYWORD_STAGE4_LABEL_BONUS")
-            or _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS,
+            keyword_stage4_score_weight=_env_float(
+                "KEYWORD_STAGE4_SCORE_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE4_SCORE_WEIGHT,
+            ),
+            keyword_stage4_document_weight=_env_float(
+                "KEYWORD_STAGE4_DOCUMENT_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE4_DOCUMENT_WEIGHT,
+            ),
+            keyword_stage4_chunk_weight=_env_float(
+                "KEYWORD_STAGE4_CHUNK_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE4_CHUNK_WEIGHT,
+            ),
+            keyword_stage4_occurrence_weight=_env_float(
+                "KEYWORD_STAGE4_OCCURRENCE_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT,
+            ),
+            keyword_stage4_label_bonus=_env_float(
+                "KEYWORD_STAGE4_LABEL_BONUS",
+                _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS,
+            ),
             keyword_stage5_harmonize_enabled=_env_bool(
                 "KEYWORD_STAGE5_HARMONIZE_ENABLED", _DEFAULT_KEYWORD_STAGE5_HARMONIZE_ENABLED
             ),
