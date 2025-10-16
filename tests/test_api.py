@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+import json
 from pathlib import Path
 from typing import Iterable
 
@@ -14,6 +15,7 @@ from cornerstone.embeddings import EmbeddingBackend, EmbeddingService
 from cornerstone.ingestion import DocumentIngestor, ProjectVectorStoreManager
 from cornerstone.projects import DocumentMetadata, ProjectStore
 from cornerstone.vector_store import QdrantVectorStore, VectorRecord
+from cornerstone.keywords import KeywordCandidate, KeywordLLMFilter
 
 
 class FakeEmbeddingService:
@@ -119,8 +121,8 @@ def test_keywords_endpoint_returns_candidates(fastapi_app: TestClient) -> None:
     assert response.status_code == 200, response.text
     data = response.json()
     terms = {item["term"].lower() for item in data.get("keywords", [])}
-    assert "alpha" in terms
-    assert "beta" in terms
+    assert any("alpha" in term for term in terms)
+    assert any("beta" in term for term in terms)
     first = data["keywords"][0]
     assert "generated" in first
     assert "reason" in first
@@ -134,6 +136,138 @@ def test_keywords_endpoint_returns_candidates(fastapi_app: TestClient) -> None:
     assert pagination.get("page") == 1
     assert pagination.get("total") >= len(data.get("keywords", []))
     assert pagination.get("page_size") >= len(data.get("keywords", []))
+
+
+def test_keyword_insights_roundtrip(fastapi_app: TestClient) -> None:
+    project_id = fastapi_app.default_project_id  # type: ignore[attr-defined]
+    payload = {
+        "term": "Alpha",
+        "candidates": ["Alpha document"],
+        "definitions": ["Alpha: sample definition"],
+        "filter": {"status": "filtered"},
+    }
+    response = fastapi_app.post(
+        f"/keywords/{project_id}/insights",
+        json=payload,
+    )
+    assert response.status_code == 201, response.text
+
+    get_response = fastapi_app.get(f"/keywords/{project_id}/insights")
+    assert get_response.status_code == 200
+    insights_payload = get_response.json()
+    insights = insights_payload.get("insights", [])
+    assert len(insights) >= 1
+    latest = insights[0]
+    assert latest["term"].lower() == "alpha"
+    assert latest.get("candidates")
+    assert "updated_at" in latest
+
+
+def test_keyword_insight_update_and_delete(fastapi_app: TestClient) -> None:
+    project_id = fastapi_app.default_project_id  # type: ignore[attr-defined]
+    payload = {
+        "term": "Beta",
+        "candidates": ["Beta entry"],
+        "definitions": [],
+        "filter": {"status": "filtered"},
+    }
+    create_response = fastapi_app.post(
+        f"/keywords/{project_id}/insights",
+        json=payload,
+    )
+    assert create_response.status_code == 201, create_response.text
+    created = create_response.json()
+    insight_id = created["id"]
+
+    update_response = fastapi_app.patch(
+        f"/keywords/{project_id}/insights/{insight_id}",
+        json={"term": "Beta Updated"},
+    )
+    assert update_response.status_code == 200, update_response.text
+    updated = update_response.json()
+    assert updated["term"] == "Beta Updated"
+    assert updated["id"] == insight_id
+
+    delete_response = fastapi_app.delete(
+        f"/keywords/{project_id}/insights/{insight_id}"
+    )
+    assert delete_response.status_code == 204
+
+    refreshed = fastapi_app.get(f"/keywords/{project_id}/insights").json()
+    terms = [item["term"] for item in refreshed.get("insights", [])]
+    assert "Beta Updated" not in terms
+
+
+def test_stage7_summary_skips_when_disabled(fastapi_app: TestClient, monkeypatch) -> None:
+    project_id = fastapi_app.default_project_id  # type: ignore[attr-defined]
+    services = fastapi_app.app.state.services
+    services.settings.keyword_stage7_summary_max_insights = 0
+
+    from cornerstone.keywords import KeywordLLMFilter
+
+    def _raise(*_, **__):  # pragma: no cover - defensive guard
+        raise AssertionError("summarize_keywords should not be called when disabled")
+
+    monkeypatch.setattr(KeywordLLMFilter, "summarize_keywords", _raise)
+
+    response = fastapi_app.get(f"/keywords/{project_id}/candidates")
+    assert response.status_code == 200
+    data = response.json()
+    stage7 = (data.get("filter") or {}).get("stage7", {})
+    assert stage7.get("reason") == "disabled"
+
+
+@pytest.mark.asyncio
+async def test_keyword_insight_job_status_endpoint(fastapi_app: TestClient, monkeypatch) -> None:
+    project_id = fastapi_app.default_project_id  # type: ignore[attr-defined]
+    services = fastapi_app.app.state.services
+    original_backend = services.settings.chat_backend
+    original_url = services.settings.ollama_base_url
+    original_model = services.settings.ollama_model
+    services.settings.chat_backend = "ollama"
+    services.settings.ollama_base_url = "http://localhost:11434"
+    services.settings.ollama_model = "mock-keywords"
+
+    payload = {
+        "insights": [
+            {
+                "title": "Queued insight",
+                "summary": "Mock summary ready.",
+                "keywords": ["alpha"],
+            }
+        ]
+    }
+    monkeypatch.setattr(
+        KeywordLLMFilter,
+        "_invoke_backend",
+        lambda self, prompt: json.dumps(payload),
+    )
+
+    try:
+        queue = services.insight_queue
+        keywords = [KeywordCandidate(term="alpha", count=2, is_core=True)]
+        job = await queue.enqueue(
+            project_id=project_id,
+            settings=services.settings,
+            keywords=keywords,
+            max_insights=1,
+            max_concepts=1,
+            context_snippets=[],
+        )
+        await job.wait(timeout=2.0)
+
+        response = fastapi_app.get(f"/keywords/{project_id}/insight-jobs/{job.id}")
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data["status"] == "success"
+        assert data["insights"] and data["insights"][0]["title"] == "Queued insight"
+
+        missing = fastapi_app.get(f"/keywords/{project_id}/insight-jobs/missing")
+        assert missing.status_code == 404
+    finally:
+        services.settings.chat_backend = original_backend
+        services.settings.ollama_base_url = original_url
+        services.settings.ollama_model = original_model
 
 def test_keywords_endpoint_respects_pagination(fastapi_app: TestClient) -> None:
     first_page = fastapi_app.get(

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import mimetypes
+import re
 import time
 from pathlib import Path
 from typing import Dict, Iterable
@@ -57,24 +58,73 @@ def _directory_stats(path: Path) -> dict[str, int]:
     return {"file_count": file_count, "total_bytes": total_bytes}
 
 
-def list_directories(base_dir: Path, relative_path: str | None = None) -> list[dict[str, str]]:
-    """Return immediate subdirectories with aggregate stats."""
+def _normalize_directory_query(relative_path: str | None) -> tuple[str, bool]:
+    """Normalize a user-supplied path for directory suggestions."""
 
-    target = resolve_local_path(base_dir, relative_path or "")
-    if not target.exists():
-        return []
+    if relative_path is None:
+        return "", False
+    cleaned = relative_path.strip()
+    if not cleaned:
+        return "", False
+    cleaned = cleaned.replace("\\", "/")
+    cleaned = re.sub(r"/{2,}", "/", cleaned)
+
+    while cleaned.startswith("./"):
+        cleaned = cleaned[2:]
+
+    cleaned = cleaned.lstrip("/")
+    if cleaned == ".":
+        return "", False
+    if not cleaned:
+        return "", False
+    trailing_slash = cleaned.endswith("/")
+    normalized = cleaned[:-1] if trailing_slash else cleaned
+    return normalized, trailing_slash
+
+
+def list_directories(base_dir: Path, relative_path: str | None = None) -> list[dict[str, str]]:
+    """Return subdirectory suggestions with aggregate stats.
+
+    The call supports lightweight auto-complete semantics. When *relative_path*
+    points to an existing directory (or ends with a trailing slash), immediate
+    children of that directory are returned. Otherwise we treat the final path
+    segment as a prefix filter and return matching entries from the deepest
+    existing parent.
+    """
+
+    normalized, trailing_slash = _normalize_directory_query(relative_path)
+    target = resolve_local_path(base_dir, normalized)
+
+    if normalized:
+        if trailing_slash:
+            directory_root = target
+            if not directory_root.exists() or not directory_root.is_dir():
+                return []
+            prefix = None
+        else:
+            directory_root = target.parent
+            prefix = target.name or None
+            if not directory_root.exists() or not directory_root.is_dir():
+                return []
+    else:
+        directory_root = target
+        prefix = None
+
     directories: list[dict[str, str]] = []
-    for entry in sorted(target.iterdir()):
-        if entry.is_dir():
-            stats = _directory_stats(entry)
-            directories.append(
-                {
-                    "name": entry.name,
-                    "path": str(entry.relative_to(base_dir)),
-                    "file_count": stats["file_count"],
-                    "total_bytes": stats["total_bytes"],
-                }
-            )
+    for entry in sorted(directory_root.iterdir()):
+        if not entry.is_dir():
+            continue
+        if prefix and not entry.name.startswith(prefix):
+            continue
+        stats = _directory_stats(entry)
+        directories.append(
+            {
+                "name": entry.name,
+                "path": str(entry.relative_to(base_dir)),
+                "file_count": stats["file_count"],
+                "total_bytes": stats["total_bytes"],
+            }
+        )
     return directories
 
 

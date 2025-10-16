@@ -70,8 +70,9 @@
       .upload-hint { font-size:0.85rem; color:#6b7280; margin-top:0.45rem; }
       .local-import { margin-top:1.1rem; display:flex; flex-direction:column; gap:0.5rem; }
       .local-input-group { display:flex; gap:0.65rem; align-items:center; }
-      .local-input-group input { flex:1; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
+      .local-input-group input { flex:0 1 22rem; width:100%; max-width:22rem; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
       .local-input-group button { padding:0.65rem 1.5rem; border-radius:999px; border:none; background:#1f2937; color:#fff; font-size:0.95rem; box-shadow:0 12px 28px rgba(17,24,39,0.18); cursor:pointer; }
+      .local-input-wrapper { position:relative; flex:1; }
       .url-upload { margin-top:1.1rem; display:flex; flex-direction:column; gap:0.5rem; }
       .url-input-group { display:flex; gap:0.65rem; align-items:center; }
       .url-input-group input { flex:1; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
@@ -104,6 +105,7 @@
         main { grid-template-columns: 1fr; padding: 0 1rem; }
         .local-input-group, .url-input-group { flex-direction:column; align-items:stretch; }
         .local-input-group button, .url-input-group button { width:100%; }
+        .local-input-wrapper { width:100%; }
       }
       @media (max-width: 640px) {
         section, aside { padding: 1.25rem 1.35rem; }
@@ -262,12 +264,14 @@
           </div>
           <div class="local-import">
             <label for="local-path" style="font-weight:600; color:#1f2937;">Import local directory</label>
-          <div class="local-input-group">
-            <input id="local-path" list="local-directories" placeholder="e.g. team-notes/2024-q2" />
-            <datalist id="local-directories"></datalist>
-            <button type="button" id="import-local">Import</button>
-          </div>
-          <div id="local-directory-meta" class="directory-meta"></div>
+            <div class="local-input-group">
+              <div class="local-input-wrapper">
+                <input id="local-path" placeholder="e.g. team-notes/2024-q2" autocomplete="off" spellcheck="false" list="local-directories" />
+                <datalist id="local-directories"></datalist>
+              </div>
+              <button type="button" id="import-local">Import</button>
+            </div>
+            <div id="local-directory-meta" class="directory-meta"></div>
           <span class="upload-hint">Directories are resolved relative to <code>data/local/</code>.</span>
         </div>
           <div class="url-upload">
@@ -441,7 +445,12 @@
       const localDataList = document.getElementById('local-directories');
       const directoryMeta = document.getElementById('local-directory-meta');
       const importLocalBtn = document.getElementById('import-local');
-      if (!dropZone || !fileInput || !selectBtn || !statusList || !projectSection || !projectSelect) {
+      const localDirectoryCache = new Map();
+      const LOCAL_DIRECTORY_ROOT_KEY = '__root__';
+      let localDirectoryRequestId = 0;
+      let localDirectoryFetchTimer = null;
+      let localDirectoryActiveQuery = '';
+      if (!dropZone || !fileInput || !selectBtn || !statusList || !projectSection) {
         return;
       }
 
@@ -1287,6 +1296,12 @@
               updated_at: new Date().toISOString(),
             },
           ]);
+        } finally {
+          if (localPathInput) {
+            scheduleLocalDirectoryRefresh(localPathInput.value);
+            updateDirectoryMeta(localPathInput.value);
+            focusLocalDirectoryInput();
+          }
         }
       }
 
@@ -1303,27 +1318,132 @@
         });
       }
 
-      async function loadLocalDirectories() {
+      function renderLocalDirectoryOptions(entries) {
         if (!localDataList) {
           return;
         }
+        localDataList.innerHTML = '';
+        entries.forEach((dir) => {
+          const option = document.createElement('option');
+          option.value = dir.path;
+          option.label = dir.path;
+          option.dataset.fileCount = dir.file_count;
+          option.dataset.totalBytes = dir.total_bytes;
+          localDataList.appendChild(option);
+        });
+      }
+
+      function normalizeLocalDirectoryPath(value) {
+        if (!value) {
+          return '';
+        }
+        const trimmed = String(value).trim();
+        if (!trimmed) {
+          return '';
+        }
+        const slashAdjusted = trimmed.replace(/\\/g, '/');
+        const collapsed = slashAdjusted.replace(/\/{2,}/g, '/');
+        return collapsed.replace(/^\//, '');
+      }
+
+      async function loadLocalDirectories(path = '') {
+        if (!localDataList) {
+          return [];
+        }
+        const normalized = normalizeLocalDirectoryPath(path);
+        const cacheKey = normalized || LOCAL_DIRECTORY_ROOT_KEY;
+        const requestId = ++localDirectoryRequestId;
         try {
-          const response = await fetch('/knowledge/local-directories');
+          let endpoint = '/knowledge/local-directories';
+          if (normalized) {
+            endpoint = `${endpoint}?path=${encodeURIComponent(normalized)}`;
+          }
+          const response = await fetch(endpoint);
           if (!response.ok) {
-            return;
+            return localDirectoryCache.get(cacheKey) || [];
           }
           const data = await response.json();
-          localDataList.innerHTML = '';
-          (data.directories || []).forEach((dir) => {
-            const option = document.createElement('option');
-            option.value = dir.path;
-            option.label = dir.path;
-            option.dataset.fileCount = dir.file_count;
-            option.dataset.totalBytes = dir.total_bytes;
-            localDataList.appendChild(option);
-          });
+          const directories = data.directories || [];
+          localDirectoryCache.set(cacheKey, directories);
+          if (requestId === localDirectoryRequestId && localDirectoryActiveQuery === normalized) {
+            renderLocalDirectoryOptions(directories);
+          }
+          return directories;
         } catch (error) {
           console.error('Failed to load local directories', error);
+          return localDirectoryCache.get(cacheKey) || [];
+        }
+      }
+
+      function scheduleLocalDirectoryRefresh(value) {
+        if (!localDataList) {
+          return;
+        }
+        const normalized = normalizeLocalDirectoryPath(value);
+        localDirectoryActiveQuery = normalized;
+        const cacheKey = normalized || LOCAL_DIRECTORY_ROOT_KEY;
+        let immediateEntries = localDirectoryCache.get(cacheKey);
+        if (!immediateEntries && normalized && !normalized.endsWith('/')) {
+          immediateEntries = localDirectoryCache.get(`${normalized}/`);
+        }
+        if (!immediateEntries && normalized) {
+          let parentKey = normalized;
+          while (!immediateEntries && parentKey.includes('/')) {
+            parentKey = parentKey.slice(0, parentKey.lastIndexOf('/'));
+            if (!parentKey) {
+              break;
+            }
+            const possibleKeys = [parentKey, `${parentKey}/`];
+            for (const key of possibleKeys) {
+              const candidate = localDirectoryCache.get(key);
+              if (candidate) {
+                immediateEntries = candidate;
+                break;
+              }
+            }
+          }
+          if (!immediateEntries) {
+            immediateEntries = localDirectoryCache.get(LOCAL_DIRECTORY_ROOT_KEY);
+          }
+        }
+        let displayEntries = immediateEntries || [];
+        if (normalized && displayEntries.length) {
+          displayEntries = displayEntries.filter((entry) => entry.path.startsWith(normalized));
+        }
+        if (displayEntries.length) {
+          renderLocalDirectoryOptions(displayEntries);
+        } else {
+          renderLocalDirectoryOptions([]);
+        }
+        if (localDirectoryFetchTimer) {
+          window.clearTimeout(localDirectoryFetchTimer);
+        }
+        localDirectoryFetchTimer = window.setTimeout(() => {
+          loadLocalDirectories(normalized).catch(() => {});
+        }, 150);
+      }
+
+      function focusLocalDirectoryInput(selectText = true) {
+        if (!localPathInput) {
+          return;
+        }
+        const runner = () => {
+          if (!localPathInput) {
+            return;
+          }
+          try {
+            localPathInput.focus({ preventScroll: true });
+          } catch (focusError) {
+            localPathInput.focus();
+          }
+          if (selectText && localPathInput.value) {
+            localPathInput.select();
+          }
+        };
+        if (typeof window.requestAnimationFrame === 'function') {
+          window.requestAnimationFrame(runner);
+        } else {
+          window.setTimeout(runner, 0);
         }
       }
 
@@ -1360,11 +1480,15 @@
       }
 
       if (localPathInput) {
-        localPathInput.addEventListener('input', (event) => {
-          updateDirectoryMeta(event.target.value);
-        });
-        localPathInput.addEventListener('change', (event) => {
-          updateDirectoryMeta(event.target.value);
+        const handleLocalDirectoryChange = (event) => {
+          const nextValue = event.target.value;
+          updateDirectoryMeta(nextValue);
+          scheduleLocalDirectoryRefresh(nextValue);
+        };
+        localPathInput.addEventListener('input', handleLocalDirectoryChange);
+        localPathInput.addEventListener('change', handleLocalDirectoryChange);
+        localPathInput.addEventListener('focus', (event) => {
+          scheduleLocalDirectoryRefresh(event.target.value);
         });
       }
 
@@ -1399,6 +1523,7 @@
       loadGlossaryEntries();
       loadQueryHints();
       loadLocalDirectories();
+      focusLocalDirectoryInput();
     })();
   </script>
   </body>

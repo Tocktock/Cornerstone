@@ -31,6 +31,11 @@
       .keyword-pill.active:hover { color: #fff; }
       .keyword-count { font-size: 0.8rem; opacity: 0.75; }
       .status-line { color: #6b7280; font-size: 0.9rem; margin-top: 0.65rem; }
+      .progress-track { display: none; position: relative; height: 4px; border-radius: 999px; background: #e5e7eb; overflow: hidden; margin-top: 0.5rem; max-width: 280px; }
+      .progress-track.active { display: block; }
+      .progress-indicator { position: relative; height: 100%; width: 100%; overflow: hidden; border-radius: inherit; }
+      .progress-indicator::after { content: ""; position: absolute; inset: 0; width: 45%; background: linear-gradient(90deg, rgba(59,130,246,0.1), rgba(59,130,246,0.7), rgba(59,130,246,0.1)); animation: slide 1.2s ease-in-out infinite; border-radius: inherit; }
+      @keyframes slide { 0% { transform: translateX(-60%); } 50% { transform: translateX(140%); } 100% { transform: translateX(-60%); } }
       .detail-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
       .detail-header h2 { margin: 0; font-size: 1.4rem; }
       .detail-actions { display: flex; align-items: center; gap: 0.75rem; }
@@ -45,6 +50,22 @@
       .candidate-meta { font-size: 0.85rem; color: #4b5563; margin-bottom: 0.35rem; }
       .candidate-snippet { white-space: pre-wrap; font-size: 0.95rem; margin: 0; line-height: 1.45; }
       .definition-item { margin-bottom: 0.65rem; padding: 0.6rem 0.7rem; border-radius: 10px; background: #fff; border: 1px solid #e5e7eb; box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05); }
+      .insight-list { display: grid; gap: 0.9rem; }
+      .insight-item { border: 1px solid #dbeafe; background: #eef2ff; border-radius: 12px; padding: 0.9rem 1rem; box-shadow: inset 0 1px 2px rgba(59,130,246,0.12); }
+      .insight-item h4 { margin: 0 0 0.45rem; font-size: 1rem; color: #1d4ed8; }
+      .insight-meta { font-size: 0.75rem; color: #4b5563; margin-bottom: 0.4rem; letter-spacing: 0.04em; text-transform: uppercase; }
+      .insight-summary { font-size: 0.9rem; color: #1f2937; margin: 0 0 0.45rem; }
+      .insight-keywords { font-size: 0.8rem; color: #2563eb; }
+      .insight-actions { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
+      .insight-action { padding: 0.35rem 0.8rem; border-radius: 999px; border: 1px solid #d1d5db; background: #fff; font-size: 0.8rem; cursor: pointer; transition: background 0.2s ease, color 0.2s ease; }
+      .insight-action:hover { background: #eff6ff; color: #1d4ed8; }
+      .insight-action.destructive { border-color: #fca5a5; color: #b91c1c; }
+      .insight-action.destructive:hover { background: #fee2e2; color: #b91c1c; }
+      .ai-insight-list { display: grid; gap: 0.75rem; margin-top: 0.6rem; }
+      .ai-insight { border: 1px solid #e5e7eb; background: #fefefe; border-radius: 12px; padding: 0.8rem 1rem; box-shadow: inset 0 1px 2px rgba(15,23,42,0.06); }
+      .ai-insight h4 { margin: 0 0 0.35rem; font-size: 1rem; color: #111827; }
+      .ai-insight-summary { margin: 0; font-size: 0.95rem; color: #1f2937; }
+      .ai-insight-meta { font-size: 0.8rem; color: #4b5563; margin-top: 0.35rem; }
       @media (max-width: 960px) {
         main { grid-template-columns: 1fr; }
       }
@@ -71,6 +92,7 @@
             {% endfor %}
           </select>
           <button id="keyword-search" class="primary" type="button">Search keywords</button>
+          <div id="keyword-progress" class="progress-track"><div class="progress-indicator"></div></div>
           <p id="keyword-status" class="status-line">Select a project and click search to generate keyword candidates.</p>
         </div>
         <div id="keyword-list" class="keyword-list" aria-live="polite"></div>
@@ -98,6 +120,19 @@
             <h3>Definitions</h3>
             <div id="definition-list" aria-live="polite"></div>
           </div>
+          <div class="detail-card" id="stage7-card">
+            <h3>LLM insights</h3>
+            <p id="stage7-status" class="status-line">Search to generate summarised insights.</p>
+            <div id="stage7-insight-list" class="ai-insight-list">
+              <p class="status-line">No insights yet.</p>
+            </div>
+          </div>
+          <div class="detail-card" id="insights-card">
+            <h3>Saved insights</h3>
+            <div id="insight-list">
+              <p class="status-line">No insights saved yet.</p>
+            </div>
+          </div>
         </div>
       </section>
     </main>
@@ -109,6 +144,7 @@
         const prevButton = document.getElementById('keyword-prev');
         const nextButton = document.getElementById('keyword-next');
         const paginationLabel = document.getElementById('keyword-page-label');
+        const keywordProgress = document.getElementById('keyword-progress');
         const keywordStatus = document.getElementById('keyword-status');
         const searchButton = document.getElementById('keyword-search');
         const detailTitle = document.getElementById('detail-title');
@@ -117,6 +153,9 @@
         const saveStatus = document.getElementById('save-status');
         const candidateList = document.getElementById('candidate-list');
         const definitionList = document.getElementById('definition-list');
+        const insightList = document.getElementById('insight-list');
+        const stage7Status = document.getElementById('stage7-status');
+        const stage7List = document.getElementById('stage7-insight-list');
 
         const DEFAULT_PAGE_SIZE = 50;
 
@@ -125,6 +164,10 @@
         let currentInsight = null;
         let currentFilter = {};
         let pageSize = DEFAULT_PAGE_SIZE;
+        let savedInsights = [];
+        let stage7Insights = [];
+        let stage7Job = null;
+        let stage7TimerId = null;
 
         function emptyPaginationState() {
           return {
@@ -179,12 +222,221 @@
           return `Showing ${start}–${end} of ${total} keyword${total === 1 ? '' : 's'} (page ${pageNumber} of ${pages}).`;
         }
 
+        function cancelStage7Polling() {
+          if (stage7TimerId) {
+            window.clearTimeout(stage7TimerId);
+            stage7TimerId = null;
+          }
+        }
+
+        function setStage7Status(message, color = '#4b5563') {
+          if (!stage7Status) {
+            return;
+          }
+          stage7Status.textContent = message;
+          stage7Status.style.color = color;
+        }
+
+        function renderStage7Insights() {
+          if (!stage7List) {
+            return;
+          }
+          if (!stage7Insights.length) {
+            stage7List.innerHTML = '<p class="status-line">No insights yet.</p>';
+            return;
+          }
+          const fragment = document.createDocumentFragment();
+          stage7Insights.forEach((item) => {
+            const card = document.createElement('article');
+            card.className = 'ai-insight';
+
+            const title = document.createElement('h4');
+            title.textContent = item.title || 'Insight';
+            card.appendChild(title);
+
+            if (item.summary) {
+              const summary = document.createElement('p');
+              summary.className = 'ai-insight-summary';
+              summary.textContent = item.summary;
+              card.appendChild(summary);
+            }
+
+            if (Array.isArray(item.keywords) && item.keywords.length) {
+              const keywordsLine = document.createElement('div');
+              keywordsLine.className = 'ai-insight-meta';
+              keywordsLine.textContent = `Keywords: ${item.keywords.slice(0, 5).join(', ')}`;
+              card.appendChild(keywordsLine);
+            }
+
+            if (item.action) {
+              const actionLine = document.createElement('div');
+              actionLine.className = 'ai-insight-meta';
+              actionLine.textContent = `Action: ${item.action}`;
+              card.appendChild(actionLine);
+            }
+
+            if (Array.isArray(item.evidence) && item.evidence.length) {
+              const evidenceLine = document.createElement('div');
+              evidenceLine.className = 'ai-insight-meta';
+              evidenceLine.textContent = `Evidence: ${item.evidence.slice(0, 2).join(' • ')}`;
+              card.appendChild(evidenceLine);
+            }
+
+            if (item.priority) {
+              const priorityLine = document.createElement('div');
+              priorityLine.className = 'ai-insight-meta';
+              priorityLine.textContent = `Priority: ${item.priority}`;
+              card.appendChild(priorityLine);
+            }
+
+            fragment.appendChild(card);
+          });
+          stage7List.innerHTML = '';
+          stage7List.appendChild(fragment);
+        }
+
+        function resetStage7Card(options = {}) {
+          cancelStage7Polling();
+          stage7Insights = [];
+          stage7Job = null;
+          renderStage7Insights();
+          if (options.initial) {
+            setStage7Status('Select a project and run a search to generate summarised insights.', '#6b7280');
+          } else if (options.preparing) {
+            setStage7Status('Preparing summarised insights…', '#1f2937');
+          } else {
+            setStage7Status('No insights yet.', '#6b7280');
+          }
+        }
+
+        function scheduleStage7Poll(jobId, delayMs) {
+          const delay = Math.max(500, toNumber(delayMs, 1500));
+          cancelStage7Polling();
+          stage7TimerId = window.setTimeout(() => {
+            pollStage7Job(jobId).catch((error) => console.error(error));
+          }, delay);
+        }
+
+        async function pollStage7Job(jobId) {
+          const projectId = projectSelect.value;
+          if (!projectId || !jobId) {
+            cancelStage7Polling();
+            return;
+          }
+          try {
+            const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/insight-jobs/${encodeURIComponent(jobId)}`);
+            if (response.status === 404) {
+              cancelStage7Polling();
+              setStage7Status('Insight summary job was not found.', '#b91c1c');
+              return;
+            }
+            if (!response.ok) {
+              throw new Error(`Failed to fetch insight job status (${response.status})`);
+            }
+            const payload = await response.json();
+            if (payload.projectId && payload.projectId !== projectId) {
+              cancelStage7Polling();
+              return;
+            }
+            stage7Job = payload;
+            if (Array.isArray(payload.insights)) {
+              stage7Insights = payload.insights;
+            }
+            renderStage7Insights();
+            const meta = {};
+            updateStage7Status(meta, payload);
+          } catch (error) {
+            console.error(error);
+            scheduleStage7Poll(jobId, 3000);
+            setStage7Status('Retrying insight summary…', '#b45309');
+          }
+        }
+
+        function updateStage7Status(meta, job) {
+          const reason = meta && meta.reason ? meta.reason : '';
+          if (job) {
+            stage7Job = job;
+            if (job.status === 'success') {
+              cancelStage7Polling();
+              if (stage7Insights.length) {
+                setStage7Status(`Generated ${stage7Insights.length} insight${stage7Insights.length === 1 ? '' : 's'}.`, '#047857');
+              } else {
+                setStage7Status('No insights were generated for this run.', '#6b7280');
+              }
+              return;
+            }
+            if (job.status === 'error') {
+              cancelStage7Polling();
+              const suffix = job.error ? `: ${job.error}` : '';
+              setStage7Status(`Insight generation failed${suffix}.`, '#b91c1c');
+              if (stage7List) {
+                stage7List.innerHTML = '<p class="status-line">Insight generation failed.</p>';
+              }
+              return;
+            }
+            if (!job.id) {
+              cancelStage7Polling();
+              setStage7Status('Insight job is missing an identifier.', '#b91c1c');
+              return;
+            }
+            const delay = toNumber(job.poll_after ?? (meta && meta.poll_after), 1500);
+            setStage7Status('Generating summarised insights…', '#1d4ed8');
+            scheduleStage7Poll(job.id, delay);
+            return;
+          }
+
+          cancelStage7Polling();
+          stage7Job = null;
+          if (reason === 'skipped') {
+            const limit = meta && meta.limit ? ` (limit ${meta.limit})` : '';
+            setStage7Status(`Insight summarisation skipped${limit}.`, '#b45309');
+            return;
+          }
+          if (reason === 'disabled') {
+            setStage7Status('Insight summarisation disabled for this configuration.', '#6b7280');
+            return;
+          }
+          if (reason === 'error') {
+            const suffix = meta && meta.error ? `: ${meta.error}` : '';
+            setStage7Status(`Insight summarisation failed${suffix}.`, '#b91c1c');
+            if (stage7List) {
+              stage7List.innerHTML = '<p class="status-line">Insight generation failed.</p>';
+            }
+            return;
+          }
+          if (stage7Insights.length) {
+            setStage7Status(`Generated ${stage7Insights.length} insight${stage7Insights.length === 1 ? '' : 's'}.`, '#047857');
+          } else {
+            setStage7Status('No insights were generated for this run.', '#6b7280');
+          }
+        }
+
+        function handleStage7Response(data) {
+          const stage7Meta = data && data.filter && data.filter.stage7 ? data.filter.stage7 : {};
+          stage7Insights = Array.isArray(data.insights) ? data.insights : [];
+          renderStage7Insights();
+          let job = data.insightJob || null;
+          if (job && stage7Meta && stage7Meta.poll_after && !job.poll_after) {
+            job.poll_after = stage7Meta.poll_after;
+          }
+          updateStage7Status(stage7Meta, job);
+        }
+
+        function setProgressActive(isActive) {
+          if (!keywordProgress) {
+            return;
+          }
+          keywordProgress.classList.toggle('active', Boolean(isActive));
+        }
+
         async function loadKeywords(page = 1) {
           const projectId = projectSelect.value;
           if (!projectId) {
             keywordStatus.textContent = 'Select a project first.';
             keywordStatus.style.color = '#b91c1c';
             keywordStatus.dataset.status = 'error';
+            setProgressActive(false);
+            resetStage7Card({ initial: true });
             return;
           }
 
@@ -193,6 +445,7 @@
           keywordStatus.dataset.status = 'loading';
           keywordStatus.style.color = '#1f2937';
           keywordStatus.textContent = 'Scanning project documents for keywords...';
+          setProgressActive(true);
           clearKeywordList();
           clearDetail();
           selectedTerm = null;
@@ -200,6 +453,7 @@
           currentFilter = {};
           saveButton.disabled = true;
           saveStatus.textContent = '';
+          resetStage7Card({ preparing: true });
 
           const params = new URLSearchParams({
             page: String(page),
@@ -212,6 +466,7 @@
               throw new Error(`Failed to fetch keywords (status ${response.status})`);
             }
             const data = await response.json();
+            handleStage7Response(data);
             const filterInfo = data.filter || {};
             const status = filterInfo.status || 'unknown';
             currentFilter = filterInfo;
@@ -275,8 +530,14 @@
             keywordStatus.style.color = '#b91c1c';
             keywordStatus.dataset.status = 'error';
             resetPaginationControls();
+            cancelStage7Polling();
+            setStage7Status('Unable to generate insights.', '#b91c1c');
+            if (stage7List) {
+              stage7List.innerHTML = '<p class="status-line">Insight generation failed.</p>';
+            }
           } finally {
             searchButton.disabled = false;
+            setProgressActive(false);
           }
         }
 
@@ -423,6 +684,151 @@
           });
         }
 
+        async function loadInsights() {
+          const projectId = projectSelect.value;
+          if (!projectId) {
+            savedInsights = [];
+            renderInsights();
+            return;
+          }
+          try {
+            const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/insights`);
+            if (!response.ok) {
+              throw new Error(`Insight lookup failed (${response.status})`);
+            }
+            const data = await response.json();
+            savedInsights = Array.isArray(data.insights) ? data.insights : [];
+          } catch (error) {
+            console.error(error);
+            savedInsights = [];
+          }
+          renderInsights();
+        }
+
+        async function handleEditInsight(insight) {
+          if (!insight || !insight.id) {
+            return;
+          }
+          const projectId = projectSelect.value;
+          if (!projectId) {
+            return;
+          }
+          const currentTerm = insight.term || '';
+          const nextTerm = window.prompt('Update insight title', currentTerm);
+          if (nextTerm === null) {
+            return;
+          }
+          const trimmed = nextTerm.trim();
+          if (!trimmed || trimmed === currentTerm) {
+            return;
+          }
+          try {
+            const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/insights/${encodeURIComponent(insight.id)}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ term: trimmed }),
+            });
+            if (!response.ok) {
+              throw new Error(`Insight update failed (${response.status})`);
+            }
+            await loadInsights();
+          } catch (error) {
+            console.error(error);
+            window.alert('Failed to update insight.');
+          }
+        }
+
+        async function handleDeleteInsight(insight) {
+          if (!insight || !insight.id) {
+            return;
+          }
+          if (!window.confirm('Delete this insight permanently?')) {
+            return;
+          }
+          const projectId = projectSelect.value;
+          if (!projectId) {
+            return;
+          }
+          try {
+            const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/insights/${encodeURIComponent(insight.id)}`, {
+              method: 'DELETE',
+            });
+            if (response.status !== 204) {
+              throw new Error(`Delete failed (${response.status})`);
+            }
+            await loadInsights();
+          } catch (error) {
+            console.error(error);
+            window.alert('Failed to delete insight.');
+          }
+        }
+
+        function renderInsights() {
+          if (!insightList) {
+            return;
+          }
+          if (!savedInsights.length) {
+            insightList.innerHTML = '<p class="status-line">No insights saved yet.</p>';
+            return;
+          }
+          const fragment = document.createDocumentFragment();
+          savedInsights.slice(0, 6).forEach((insight) => {
+            const container = document.createElement('article');
+            container.className = 'insight-item';
+
+            const meta = document.createElement('div');
+            meta.className = 'insight-meta';
+            const createdAt = insight.created_at ? new Date(insight.created_at).toLocaleString() : 'Unknown';
+            meta.textContent = `${insight.term || 'Keyword insight'} · ${createdAt}`;
+
+            const title = document.createElement('h4');
+            title.textContent = insight.term || 'Keyword insight';
+
+            const summary = document.createElement('p');
+            summary.className = 'insight-summary';
+            const candidateCount = Array.isArray(insight.candidates) ? insight.candidates.length : 0;
+            const definitionCount = Array.isArray(insight.definitions) ? insight.definitions.length : 0;
+            summary.textContent = `${candidateCount} snippet${candidateCount === 1 ? '' : 's'}, ${definitionCount} definition${definitionCount === 1 ? '' : 's'}`;
+
+            const keywordsLine = document.createElement('div');
+            keywordsLine.className = 'insight-keywords';
+            const filterStatus = insight.filter && insight.filter.status ? insight.filter.status : 'n/a';
+            keywordsLine.textContent = `Filter status: ${filterStatus}`;
+
+            let actions = null;
+            if (insight.id) {
+              actions = document.createElement('div');
+              actions.className = 'insight-actions';
+
+              const editButton = document.createElement('button');
+              editButton.type = 'button';
+              editButton.className = 'insight-action';
+              editButton.textContent = 'Edit';
+              editButton.addEventListener('click', () => {
+                handleEditInsight(insight).catch((error) => console.error(error));
+              });
+
+              const deleteButton = document.createElement('button');
+              deleteButton.type = 'button';
+              deleteButton.className = 'insight-action destructive';
+              deleteButton.textContent = 'Delete';
+              deleteButton.addEventListener('click', () => {
+                handleDeleteInsight(insight).catch((error) => console.error(error));
+              });
+
+              actions.append(editButton, deleteButton);
+            }
+
+            container.append(meta, title, summary, keywordsLine);
+            if (actions) {
+              container.appendChild(actions);
+            }
+            fragment.appendChild(container);
+          });
+          insightList.innerHTML = '';
+          insightList.appendChild(fragment);
+        }
+
         searchButton.addEventListener('click', () => loadKeywords(1));
         projectSelect.addEventListener('change', () => {
           keywords = [];
@@ -438,6 +844,10 @@
           currentFilter = {};
           saveButton.disabled = true;
           saveStatus.textContent = '';
+          savedInsights = [];
+          renderInsights();
+          resetStage7Card({ initial: true });
+          loadInsights().catch((error) => console.error(error));
         });
         prevButton.addEventListener('click', () => {
           if (pagination.has_prev) {
@@ -470,6 +880,7 @@
             const data = await response.json();
             saveStatus.style.color = '#047857';
             saveStatus.textContent = `Saved insight (${data.id.slice(0, 6)})`;
+            await loadInsights();
           } catch (error) {
             console.error(error);
             saveStatus.style.color = '#b91c1c';
@@ -481,6 +892,9 @@
 
         resetPaginationControls();
         clearDetail();
+        resetStage7Card({ initial: true });
+        renderInsights();
+        loadInsights().catch((error) => console.error(error));
       });
     </script>
   </body>

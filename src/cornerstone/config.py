@@ -45,7 +45,38 @@ _DEFAULT_RERANKER_STRATEGY: Final[str] = "none"
 _DEFAULT_RERANKER_MODEL: Final[str] = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 _DEFAULT_RERANKER_MAX_CANDIDATES: Final[int] = 8
 _DEFAULT_KEYWORD_FILTER_MAX_RESULTS: Final[int] = 10
+_DEFAULT_KEYWORD_FILTER_ALLOW_GENERATED: Final[bool] = False
 _DEFAULT_CONVERSATION_RETENTION_DAYS: Final[int] = 30
+_DEFAULT_KEYWORD_STAGE2_MAX_NGRAM: Final[int] = 3
+_DEFAULT_KEYWORD_STAGE2_MAX_CANDIDATES_PER_CHUNK: Final[int] = 8
+_DEFAULT_KEYWORD_STAGE2_MAX_EMBEDDING_PHRASES: Final[int] = 6
+_DEFAULT_KEYWORD_STAGE2_MAX_STATISTICAL_PHRASES: Final[int] = 6
+_DEFAULT_KEYWORD_STAGE2_USE_LLM_SUMMARY: Final[bool] = True
+_DEFAULT_KEYWORD_STAGE2_LLM_SUMMARY_MAX_CHUNKS: Final[int] = 4
+_DEFAULT_KEYWORD_STAGE2_LLM_SUMMARY_MAX_RESULTS: Final[int] = 10
+_DEFAULT_KEYWORD_STAGE2_LLM_SUMMARY_MAX_CHARS: Final[int] = 320
+_DEFAULT_KEYWORD_STAGE2_MIN_CHAR_LENGTH: Final[int] = 3
+_DEFAULT_KEYWORD_STAGE2_MIN_OCCURRENCES: Final[int] = 1
+_DEFAULT_KEYWORD_STAGE2_EMBEDDING_WEIGHT: Final[float] = 2.25
+_DEFAULT_KEYWORD_STAGE2_STATISTICAL_WEIGHT: Final[float] = 1.1
+_DEFAULT_KEYWORD_STAGE2_LLM_WEIGHT: Final[float] = 3.1
+_DEFAULT_KEYWORD_STAGE3_LABEL_CLUSTERS: Final[bool] = True
+_DEFAULT_KEYWORD_STAGE3_LABEL_MAX_CLUSTERS: Final[int] = 6
+_DEFAULT_KEYWORD_STAGE4_CORE_LIMIT: Final[int] = 12
+_DEFAULT_KEYWORD_STAGE4_MAX_RESULTS: Final[int] = 60
+_DEFAULT_KEYWORD_STAGE4_SCORE_WEIGHT: Final[float] = 1.4
+_DEFAULT_KEYWORD_STAGE4_DOCUMENT_WEIGHT: Final[float] = 2.0
+_DEFAULT_KEYWORD_STAGE4_CHUNK_WEIGHT: Final[float] = 0.5
+_DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT: Final[float] = 0.3
+_DEFAULT_KEYWORD_STAGE4_LABEL_BONUS: Final[float] = 0.5
+_DEFAULT_KEYWORD_STAGE5_HARMONIZE_ENABLED: Final[bool] = True
+_DEFAULT_KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS: Final[int] = 12
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_ENABLED: Final[bool] = True
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS: Final[int] = 3
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS: Final[int] = 12
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT: Final[float] = 1.0
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL: Final[float] = 1.5
+_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS: Final[int] = 64
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -76,6 +107,28 @@ def _env_optional_int(name: str) -> int | None:
         return int(value)
     except ValueError as exc:  # pragma: no cover - defensive guard
         raise ValueError(f"Environment variable {name} must be an integer") from exc
+
+
+def _env_optional_float(name: str) -> float | None:
+    """Read an optional float environment variable."""
+
+    raw = os.getenv(name)
+    if raw is None:
+        return None
+    value = raw.strip()
+    if not value:
+        return None
+    try:
+        return float(value)
+    except ValueError as exc:  # pragma: no cover - defensive guard
+        raise ValueError(f"Environment variable {name} must be a float") from exc
+
+
+def _env_float(name: str, default: float) -> float:
+    """Read a float environment variable with a fallback (preserving zero)."""
+
+    value = _env_optional_float(name)
+    return default if value is None else value
 
 
 def _env_bool(name: str, default: bool) -> bool:
@@ -126,11 +179,42 @@ class Settings:
     reranker_model: str | None = None
     reranker_max_candidates: int = _DEFAULT_RERANKER_MAX_CANDIDATES
     keyword_filter_max_results: int = _DEFAULT_KEYWORD_FILTER_MAX_RESULTS
+    keyword_filter_allow_generated: bool = _DEFAULT_KEYWORD_FILTER_ALLOW_GENERATED
     query_hint_batch_size: int = _DEFAULT_QUERY_HINT_BATCH_SIZE
     query_hint_cron: str = _DEFAULT_QUERY_HINT_CRON
     conversation_logging_enabled: bool = True
     conversation_retention_days: int = _DEFAULT_CONVERSATION_RETENTION_DAYS
     conversation_log_dir: str | None = None
+    keyword_stage2_max_ngram: int = _DEFAULT_KEYWORD_STAGE2_MAX_NGRAM
+    keyword_stage2_max_candidates_per_chunk: int = _DEFAULT_KEYWORD_STAGE2_MAX_CANDIDATES_PER_CHUNK
+    keyword_stage2_max_embedding_phrases_per_chunk: int = _DEFAULT_KEYWORD_STAGE2_MAX_EMBEDDING_PHRASES
+    keyword_stage2_max_statistical_phrases_per_chunk: int = _DEFAULT_KEYWORD_STAGE2_MAX_STATISTICAL_PHRASES
+    keyword_stage2_use_llm_summary: bool = _DEFAULT_KEYWORD_STAGE2_USE_LLM_SUMMARY
+    keyword_stage2_llm_summary_max_chunks: int = _DEFAULT_KEYWORD_STAGE2_LLM_SUMMARY_MAX_CHUNKS
+    keyword_stage2_llm_summary_max_results: int = _DEFAULT_KEYWORD_STAGE2_LLM_SUMMARY_MAX_RESULTS
+    keyword_stage2_llm_summary_max_chars: int = _DEFAULT_KEYWORD_STAGE2_LLM_SUMMARY_MAX_CHARS
+    keyword_stage2_min_char_length: int = _DEFAULT_KEYWORD_STAGE2_MIN_CHAR_LENGTH
+    keyword_stage2_min_occurrences: int = _DEFAULT_KEYWORD_STAGE2_MIN_OCCURRENCES
+    keyword_stage2_embedding_weight: float = _DEFAULT_KEYWORD_STAGE2_EMBEDDING_WEIGHT
+    keyword_stage2_statistical_weight: float = _DEFAULT_KEYWORD_STAGE2_STATISTICAL_WEIGHT
+    keyword_stage2_llm_weight: float = _DEFAULT_KEYWORD_STAGE2_LLM_WEIGHT
+    keyword_stage3_label_clusters: bool = _DEFAULT_KEYWORD_STAGE3_LABEL_CLUSTERS
+    keyword_stage3_label_max_clusters: int = _DEFAULT_KEYWORD_STAGE3_LABEL_MAX_CLUSTERS
+    keyword_stage4_core_limit: int = _DEFAULT_KEYWORD_STAGE4_CORE_LIMIT
+    keyword_stage4_max_results: int = _DEFAULT_KEYWORD_STAGE4_MAX_RESULTS
+    keyword_stage4_score_weight: float = _DEFAULT_KEYWORD_STAGE4_SCORE_WEIGHT
+    keyword_stage4_document_weight: float = _DEFAULT_KEYWORD_STAGE4_DOCUMENT_WEIGHT
+    keyword_stage4_chunk_weight: float = _DEFAULT_KEYWORD_STAGE4_CHUNK_WEIGHT
+    keyword_stage4_occurrence_weight: float = _DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT
+    keyword_stage4_label_bonus: float = _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS
+    keyword_stage5_harmonize_enabled: bool = _DEFAULT_KEYWORD_STAGE5_HARMONIZE_ENABLED
+    keyword_stage5_harmonize_max_results: int = _DEFAULT_KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS
+    keyword_stage7_summary_enabled: bool = _DEFAULT_KEYWORD_STAGE7_SUMMARY_ENABLED
+    keyword_stage7_summary_max_insights: int = _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS
+    keyword_stage7_summary_max_concepts: int = _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS
+    keyword_stage7_summary_inline_timeout: float = _DEFAULT_KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT
+    keyword_stage7_summary_poll_interval: float = _DEFAULT_KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL
+    keyword_stage7_summary_max_jobs: int = _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -185,6 +269,9 @@ class Settings:
             keyword_filter_max_results=int(
                 os.getenv("KEYWORD_FILTER_MAX_RESULTS", str(_DEFAULT_KEYWORD_FILTER_MAX_RESULTS))
             ),
+            keyword_filter_allow_generated=_env_bool(
+                "KEYWORD_FILTER_ALLOW_GENERATED", _DEFAULT_KEYWORD_FILTER_ALLOW_GENERATED
+            ),
             query_hint_batch_size=int(
                 os.getenv("QUERY_HINT_BATCH_SIZE", str(_DEFAULT_QUERY_HINT_BATCH_SIZE))
             ),
@@ -195,6 +282,155 @@ class Settings:
                 int(os.getenv("CONVERSATION_RETENTION_DAYS", str(_DEFAULT_CONVERSATION_RETENTION_DAYS))),
             ),
             conversation_log_dir=os.getenv("CONVERSATION_LOG_DIR"),
+            keyword_stage2_max_ngram=int(
+                os.getenv("KEYWORD_STAGE2_MAX_NGRAM", str(_DEFAULT_KEYWORD_STAGE2_MAX_NGRAM))
+            ),
+            keyword_stage2_max_candidates_per_chunk=int(
+                os.getenv(
+                    "KEYWORD_STAGE2_MAX_CANDIDATES_PER_CHUNK",
+                    str(_DEFAULT_KEYWORD_STAGE2_MAX_CANDIDATES_PER_CHUNK),
+                )
+            ),
+            keyword_stage2_max_embedding_phrases_per_chunk=int(
+                os.getenv(
+                    "KEYWORD_STAGE2_MAX_EMBEDDING_PHRASES",
+                    str(_DEFAULT_KEYWORD_STAGE2_MAX_EMBEDDING_PHRASES),
+                )
+            ),
+            keyword_stage2_max_statistical_phrases_per_chunk=int(
+                os.getenv(
+                    "KEYWORD_STAGE2_MAX_STATISTICAL_PHRASES",
+                    str(_DEFAULT_KEYWORD_STAGE2_MAX_STATISTICAL_PHRASES),
+                )
+            ),
+            keyword_stage2_use_llm_summary=_env_bool(
+                "KEYWORD_STAGE2_USE_LLM_SUMMARY", _DEFAULT_KEYWORD_STAGE2_USE_LLM_SUMMARY
+            ),
+            keyword_stage2_llm_summary_max_chunks=int(
+                os.getenv(
+                    "KEYWORD_STAGE2_LLM_SUMMARY_MAX_CHUNKS",
+                    str(_DEFAULT_KEYWORD_STAGE2_LLM_SUMMARY_MAX_CHUNKS),
+                )
+            ),
+            keyword_stage2_llm_summary_max_results=int(
+                os.getenv(
+                    "KEYWORD_STAGE2_LLM_SUMMARY_MAX_RESULTS",
+                    str(_DEFAULT_KEYWORD_STAGE2_LLM_SUMMARY_MAX_RESULTS),
+                )
+            ),
+            keyword_stage2_llm_summary_max_chars=int(
+                os.getenv(
+                    "KEYWORD_STAGE2_LLM_SUMMARY_MAX_CHARS",
+                    str(_DEFAULT_KEYWORD_STAGE2_LLM_SUMMARY_MAX_CHARS),
+                )
+            ),
+            keyword_stage2_min_char_length=int(
+                os.getenv(
+                    "KEYWORD_STAGE2_MIN_CHAR_LENGTH",
+                    str(_DEFAULT_KEYWORD_STAGE2_MIN_CHAR_LENGTH),
+                )
+            ),
+            keyword_stage2_min_occurrences=int(
+                os.getenv(
+                    "KEYWORD_STAGE2_MIN_OCCURRENCES",
+                    str(_DEFAULT_KEYWORD_STAGE2_MIN_OCCURRENCES),
+                )
+            ),
+            keyword_stage2_embedding_weight=_env_float(
+                "KEYWORD_STAGE2_EMBEDDING_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE2_EMBEDDING_WEIGHT,
+            ),
+            keyword_stage2_statistical_weight=_env_float(
+                "KEYWORD_STAGE2_STATISTICAL_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE2_STATISTICAL_WEIGHT,
+            ),
+            keyword_stage2_llm_weight=_env_float(
+                "KEYWORD_STAGE2_LLM_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE2_LLM_WEIGHT,
+            ),
+            keyword_stage3_label_clusters=_env_bool(
+                "KEYWORD_STAGE3_LABEL_CLUSTERS", _DEFAULT_KEYWORD_STAGE3_LABEL_CLUSTERS
+            ),
+            keyword_stage3_label_max_clusters=int(
+                os.getenv(
+                    "KEYWORD_STAGE3_LABEL_MAX_CLUSTERS",
+                    str(_DEFAULT_KEYWORD_STAGE3_LABEL_MAX_CLUSTERS),
+                )
+            ),
+            keyword_stage4_core_limit=int(
+                os.getenv(
+                    "KEYWORD_STAGE4_CORE_LIMIT",
+                    str(_DEFAULT_KEYWORD_STAGE4_CORE_LIMIT),
+                )
+            ),
+            keyword_stage4_max_results=int(
+                os.getenv(
+                    "KEYWORD_STAGE4_MAX_RESULTS",
+                    str(_DEFAULT_KEYWORD_STAGE4_MAX_RESULTS),
+                )
+            ),
+            keyword_stage4_score_weight=_env_float(
+                "KEYWORD_STAGE4_SCORE_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE4_SCORE_WEIGHT,
+            ),
+            keyword_stage4_document_weight=_env_float(
+                "KEYWORD_STAGE4_DOCUMENT_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE4_DOCUMENT_WEIGHT,
+            ),
+            keyword_stage4_chunk_weight=_env_float(
+                "KEYWORD_STAGE4_CHUNK_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE4_CHUNK_WEIGHT,
+            ),
+            keyword_stage4_occurrence_weight=_env_float(
+                "KEYWORD_STAGE4_OCCURRENCE_WEIGHT",
+                _DEFAULT_KEYWORD_STAGE4_OCCURRENCE_WEIGHT,
+            ),
+            keyword_stage4_label_bonus=_env_float(
+                "KEYWORD_STAGE4_LABEL_BONUS",
+                _DEFAULT_KEYWORD_STAGE4_LABEL_BONUS,
+            ),
+            keyword_stage5_harmonize_enabled=_env_bool(
+                "KEYWORD_STAGE5_HARMONIZE_ENABLED", _DEFAULT_KEYWORD_STAGE5_HARMONIZE_ENABLED
+            ),
+            keyword_stage5_harmonize_max_results=int(
+                os.getenv(
+                    "KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS",
+                    str(_DEFAULT_KEYWORD_STAGE5_HARMONIZE_MAX_RESULTS),
+                )
+            ),
+            keyword_stage7_summary_enabled=_env_bool(
+                "KEYWORD_STAGE7_SUMMARY_ENABLED", _DEFAULT_KEYWORD_STAGE7_SUMMARY_ENABLED
+            ),
+            keyword_stage7_summary_max_insights=int(
+                os.getenv(
+                    "KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS",
+                    str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS),
+                )
+            ),
+            keyword_stage7_summary_max_concepts=int(
+                os.getenv(
+                    "KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS",
+                    str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS),
+                )
+            ),
+            keyword_stage7_summary_inline_timeout=float(
+                os.getenv(
+                    "KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT",
+                    str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT),
+                )
+            ),
+            keyword_stage7_summary_poll_interval=float(
+                os.getenv(
+                    "KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL",
+                    str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL),
+                )
+            ),
+            keyword_stage7_summary_max_jobs=int(
+                os.getenv(
+                    "KEYWORD_STAGE7_SUMMARY_MAX_JOBS",
+                    str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS),
+                )
+            ),
         )
 
     @property
