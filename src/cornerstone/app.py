@@ -41,6 +41,7 @@ from .keywords import (
     extract_keyword_candidates,
     prepare_keyword_chunks,
 )
+from .insights import KeywordInsightQueue
 from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .projects import Project, ProjectStore
 from .vector_store import QdrantVectorStore, SearchResult
@@ -106,6 +107,7 @@ class ApplicationState:
         query_hint_generator: QueryHintGenerator,
         conversation_logger: ConversationLogger,
         analytics_service: AnalyticsService,
+        insight_queue: KeywordInsightQueue,
     ) -> None:
         self.settings = settings
         self.embedding_service = embedding_service
@@ -124,6 +126,7 @@ class ApplicationState:
         self.hint_scheduler = QueryHintScheduler(settings.query_hint_cron)
         self.conversation_logger = conversation_logger
         self.analytics = analytics_service
+        self.insight_queue = insight_queue
 
 
 def create_app(
@@ -141,6 +144,7 @@ def create_app(
     reranker: Reranker | None = None,
     conversation_logger: ConversationLogger | None = None,
     analytics_service: AnalyticsService | None = None,
+    insight_queue: KeywordInsightQueue | None = None,
 ) -> FastAPI:
     """Create and configure the FastAPI application."""
 
@@ -233,6 +237,10 @@ def create_app(
         max_files_per_minute=settings.ingestion_files_per_minute,
     )
 
+    insight_queue = insight_queue or KeywordInsightQueue(
+        max_jobs=settings.keyword_stage7_summary_max_jobs
+    )
+
     app = FastAPI()
     app.state.services = ApplicationState(
         settings=settings,
@@ -251,6 +259,7 @@ def create_app(
         query_hint_generator=query_hint_generator,
         conversation_logger=conversation_logger,
         analytics_service=analytics_service,
+        insight_queue=insight_queue,
     )
 
     scheduler = app.state.services.hint_scheduler
@@ -316,6 +325,9 @@ def create_app(
 
     def get_analytics_service(request: Request) -> AnalyticsService:
         return get_state(request).analytics
+
+    def get_insight_queue(request: Request) -> KeywordInsightQueue:
+        return get_state(request).insight_queue
 
     def _parse_string_list(value) -> list[str]:
         if not value:
@@ -954,6 +966,7 @@ def create_app(
         store_manager: ProjectVectorStoreManager = Depends(get_store_manager),
         embedding: EmbeddingService = Depends(get_embedding_service),
         settings: Settings = Depends(get_settings_dependency),
+        insight_queue: KeywordInsightQueue = Depends(get_insight_queue),
         page: int = Query(1, ge=1),
         page_size: int = Query(50, ge=1, le=500),
     ) -> JSONResponse:
@@ -1109,6 +1122,7 @@ def create_app(
 
         insights: list[dict[str, object]] = []
         stage7_debug: dict[str, object] | None = None
+        insight_job_payload: dict[str, object] | None = None
         should_summarize = (
             keywords
             and settings.keyword_stage7_summary_enabled
@@ -1125,24 +1139,88 @@ def create_app(
                 "cause": "keyword-limit-exceeded",
                 "total_keywords": len(keywords),
                 "limit": max_summary_keywords,
+                "enabled": settings.keyword_stage7_summary_enabled,
+                "llm_enabled": llm_filter.enabled,
+                "backend": llm_filter.backend,
+                "max_insights": settings.keyword_stage7_summary_max_insights,
+                "max_concepts": settings.keyword_stage7_summary_max_concepts,
             }
 
         if should_summarize:
-            insights = llm_filter.summarize_keywords(
-                keywords,
-                max_insights=settings.keyword_stage7_summary_max_insights,
-                max_concepts=settings.keyword_stage7_summary_max_concepts,
-                context_snippets=context_snippets,
-            )
-            insight_debug = llm_filter.insight_debug_payload()
-            if insight_debug:
-                stage7_debug = stage7_debug or {}
-                stage7_debug.setdefault("llm", insight_debug)
-            if insights:
-                stage7_debug = stage7_debug or {}
-                stage7_debug.setdefault("insights", insights[: min(len(insights), 5)])
-            stage7_debug = stage7_debug or {}
-            stage7_debug.setdefault("reason", "summarized")
+            try:
+                insight_job = await insight_queue.enqueue(
+                    project_id=project.id,
+                    settings=settings,
+                    keywords=keywords,
+                    max_insights=settings.keyword_stage7_summary_max_insights,
+                    max_concepts=settings.keyword_stage7_summary_max_concepts,
+                    context_snippets=context_snippets,
+                )
+            except Exception as exc:  # pragma: no cover - defensive guard
+                logger.warning(
+                    "keyword.stage7.queue_failed project=%s error=%s",
+                    project.id,
+                    exc,
+                )
+                stage7_debug = {
+                    "reason": "error",
+                    "error": str(exc),
+                    "enabled": settings.keyword_stage7_summary_enabled,
+                    "llm_enabled": llm_filter.enabled,
+                    "backend": llm_filter.backend,
+                }
+            else:
+                inline_timeout = max(0.0, settings.keyword_stage7_summary_inline_timeout)
+                completed = await insight_job.wait(timeout=inline_timeout)
+                insight_job_payload = insight_job.to_payload(include_result=False)
+
+                llm_debug = dict(insight_job.debug or {})
+                if not llm_debug:
+                    llm_debug = {
+                        "backend": llm_filter.backend,
+                        "enabled": settings.keyword_stage7_summary_enabled,
+                        "max_insights": settings.keyword_stage7_summary_max_insights,
+                        "max_concepts": settings.keyword_stage7_summary_max_concepts,
+                        "status": "pending",
+                    }
+                else:
+                    llm_debug.setdefault("backend", llm_filter.backend)
+                    llm_debug.setdefault("enabled", settings.keyword_stage7_summary_enabled)
+                    llm_debug.setdefault("max_insights", settings.keyword_stage7_summary_max_insights)
+                    llm_debug.setdefault("max_concepts", settings.keyword_stage7_summary_max_concepts)
+
+                reason: str
+                if insight_job.status == "success":
+                    insights = insight_job.insights or []
+                    llm_debug["status"] = "success"
+                    llm_debug.setdefault("selected_total", len(insights))
+                    reason = "summarized"
+                elif insight_job.status == "error":
+                    llm_debug["status"] = "error"
+                    reason = "error"
+                elif insight_job.status == "running":
+                    llm_debug["status"] = "running"
+                    reason = "running"
+                else:
+                    llm_debug["status"] = insight_job.status
+                    reason = "queued"
+
+                stage7_debug = {
+                    "reason": reason,
+                    "status": insight_job.status,
+                    "job_id": insight_job.id,
+                    "enabled": settings.keyword_stage7_summary_enabled,
+                    "llm_enabled": llm_filter.enabled,
+                    "max_insights": settings.keyword_stage7_summary_max_insights,
+                    "max_concepts": settings.keyword_stage7_summary_max_concepts,
+                    "llm": llm_debug,
+                }
+                if insight_job.status == "success" and insights:
+                    stage7_debug["insights"] = insights[: min(len(insights), 5)]
+                if insight_job.status == "error" and insight_job.error:
+                    stage7_debug["error"] = insight_job.error
+                if insight_job.status in {"pending", "running"} or not completed:
+                    stage7_debug["poll_after"] = settings.keyword_stage7_summary_poll_interval
         elif stage7_debug is None:
             stage7_debug = {
                 "reason": "disabled",
@@ -1150,6 +1228,7 @@ def create_app(
                 "max_insights": settings.keyword_stage7_summary_max_insights,
                 "max_concepts": settings.keyword_stage7_summary_max_concepts,
                 "llm_enabled": llm_filter.enabled,
+                "backend": llm_filter.backend,
             }
 
         llm_debug = llm_filter.debug_payload()
@@ -1164,6 +1243,8 @@ def create_app(
         debug_payload.setdefault("candidate_count", original_count)
         if stage7_debug:
             debug_payload["stage7"] = stage7_debug
+        if insight_job_payload and stage7_debug and "poll_after" in stage7_debug:
+            insight_job_payload.setdefault("poll_after", stage7_debug["poll_after"])
 
         logger.info(
             "keyword.llm.summary project=%s backend=%s details=%s",
@@ -1220,6 +1301,8 @@ def create_app(
             "pagination": pagination,
             "insights": insights,
         }
+        if insight_job_payload:
+            data["insightJob"] = insight_job_payload
         return JSONResponse(data)
 
     @app.get("/keywords/{project_id}/definition", response_class=JSONResponse)
@@ -1307,6 +1390,52 @@ def create_app(
         project = _resolve_project(project_store, project_id)
         insights = project_store.list_keyword_insights(project.id)
         return JSONResponse({"projectId": project.id, "insights": insights})
+
+    @app.patch("/keywords/{project_id}/insights/{insight_id}", response_class=JSONResponse)
+    async def update_keyword_insight(
+        project_id: str,
+        insight_id: str,
+        request: Request,
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        payload = await request.json()
+        if not isinstance(payload, dict):  # pragma: no cover - defensive guard
+            raise HTTPException(status_code=400, detail="Invalid payload")
+        try:
+            updated = project_store.update_keyword_insight(project.id, insight_id, payload)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return JSONResponse(updated)
+
+    @app.delete("/keywords/{project_id}/insights/{insight_id}", response_class=Response)
+    async def delete_keyword_insight(
+        project_id: str,
+        insight_id: str,
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> Response:
+        project = _resolve_project(project_store, project_id)
+        removed = project_store.delete_keyword_insight(project.id, insight_id)
+        if not removed:
+            raise HTTPException(status_code=404, detail="Insight not found")
+        return Response(status_code=204)
+
+    @app.get("/keywords/{project_id}/insight-jobs/{job_id}", response_class=JSONResponse)
+    async def keyword_insight_job_status(
+        project_id: str,
+        job_id: str,
+        project_store: ProjectStore = Depends(get_project_store),
+        insight_queue: KeywordInsightQueue = Depends(get_insight_queue),
+        settings: Settings = Depends(get_settings_dependency),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        job = await insight_queue.get(job_id)
+        if job is None or job.project_id != project.id:
+            raise HTTPException(status_code=404, detail="Insight job not found")
+        payload = job.to_payload(include_result=True)
+        if job.status in {"pending", "running"}:
+            payload.setdefault("poll_after", settings.keyword_stage7_summary_poll_interval)
+        return JSONResponse(payload)
 
     @app.post("/knowledge/projects", response_class=RedirectResponse)
     async def create_project(

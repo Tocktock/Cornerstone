@@ -16,3 +16,6 @@ def test_keywords_template_contains_single_project_select(tmp_path):
     assert html.count('id="project"') == 1
     assert 'id="keyword-progress"' in html
     assert 'id="insight-list"' in html
+    assert 'id="stage7-card"' in html
+    assert 'id="stage7-status"' in html
+    assert 'id="stage7-insight-list"' in html

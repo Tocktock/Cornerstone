@@ -112,15 +112,20 @@ This refinement uses the same OpenAI or Ollama backend and prompting framework a
 
 ✅ **Status:** implemented.
 
-After Stage 6 confirms the final keyword list, an optional reporting layer now distils the highest-priority concepts (default: top 12) into up to three analyst-ready insights. The `KeywordLLMFilter.summarize_keywords` prompt captures:
+After Stage 6 confirms the final keyword list, an optional reporting layer now distils the highest-priority concepts (default: top 12) into up to three analyst-ready insights. The `KeywordLLMFilter.summarize_keywords` prompt still produces:
 
 - Concise titles and summaries that explain why the concept cluster matters.
 - Optional recommended actions, priority tags, and evidence snippets referencing the contributing keywords.
-- Debug instrumentation (`insight_summary`) for every call (status, rejected entries, raw response) so malformed payloads remain debuggable.
+- Debug instrumentation for every call (status, rejected entries, raw response) so malformed payloads remain debuggable.
 
-The FastAPI route surfaces these insights via a new `insights` field in the JSON payload and records the LLM diagnostics under `stage7` inside the debug block. Operators can toggle the behaviour with `KEYWORD_STAGE7_SUMMARY_ENABLED`, while `KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS` (defaults to 12) and `KEYWORD_STAGE7_SUMMARY_MAX_INSIGHTS` govern prompt size and output length. Raise `…_MAX_CONCEPTS` if you want the summary to consider more of the long-tail concepts.
+To keep the keywords endpoint responsive, these summarisation calls now run through a lightweight asynchronous `KeywordInsightQueue`. The `/keywords/{project}/candidates` route enqueues Stage 7 work, waits a short, configurable window (`KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT`) for quick completions, and otherwise returns immediately with:
 
-If either limit is set to `0`, or the keyword list exceeds `KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS * 4`, Stage 7 is skipped automatically and the debug payload records the reason (`filter.stage7.reason`).
+- An `insights` array when the job finishes inline.
+- An `insightJob` payload exposing job metadata (ID, status, poll interval) plus the usual `filter.stage7` debug block when the LLM is still running.
+
+Clients can poll the new `/keywords/{project}/insight-jobs/{job_id}` endpoint—responses carry the latest status, insight payload, and a suggested delay (`poll_after`, sourced from `KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL`). A bounded in-memory queue (`KEYWORD_STAGE7_SUMMARY_MAX_JOBS`) ensures stale work is discarded without unbounded growth.
+
+If either summary limit is set to `0`, or the keyword list exceeds `KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS * 4`, Stage 7 is skipped automatically and the debug payload records `filter.stage7.reason` (e.g., `disabled`, `keyword-limit-exceeded`).
 
 ## Techniques and Algorithms Utilized
 
@@ -142,7 +147,7 @@ Implementing this pipeline in Cornerstone involves enhancing or adding a few mod
 - **Extend `extract_keyword_candidates` or add a new extraction function:** (✅ done) `extract_concept_candidates` in `keywords.py` performs Stage 2 by blending embeddings, statistical scoring, and optional LLM summaries while emitting rich diagnostics.
 - **Aggregate and cluster candidates:** (✅ done) `cluster_concepts` merges candidates using lexical overlap plus cosine similarity from the embedding service, averaging vectors per cluster. Optional LLM labeling (driven by `KEYWORD_STAGE3_LABEL_CLUSTERS`) rewrites cluster names and adds descriptions for the top groups.
 - **Implement re-ranking logic:** (✅ done) `rank_concept_clusters` scores each consolidated concept with document/chunk coverage, Stage 2 scores, occurrence bonuses, and label provenance, marking the top results as “core.”
-- **Update the API and UI:** (✅ done) `/keywords/{project_id}/candidates` now invokes the multi-stage pipeline and surfaces debug payloads, while the UI consumes harmonised concept lists with progress indicators.
+- **Update the API and UI:** (✅ done) `/keywords/{project_id}/candidates` now invokes the multi-stage pipeline, enqueues Stage 7 jobs when required, and exposes both the `insightJob` handle and the `stage7` debug payload. The UI renders harmonised concepts with progress indicators, polls the new `/keywords/{project_id}/insight-jobs/{job_id}` endpoint until the summariser finishes, and lets analysts edit or delete saved insights directly from the dashboard.
 - **Reuse `KeywordLLMFilter`:** (✅ done) Verification prompts review harmonised concepts, respecting `KEYWORD_FILTER_ALLOW_GENERATED` to control whether the model may invent fresh keywords.
 - **Testing and iteration:** Exercise the new pipeline on projects of varying sizes to ensure the algorithm alone produces reasonable concepts (especially when the LLM is disabled). Use configuration options for parameters such as max n-gram length, top phrases per document, and cluster thresholds to support easy tuning.
 
