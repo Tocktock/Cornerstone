@@ -30,6 +30,7 @@ from . import local_ingest
 from .keywords import KeywordLLMFilter, build_excerpt
 from .insights import KeywordInsightQueue
 from .keyword_jobs import KeywordRunQueue, KeywordRunJob
+from .keyword_refresh import KeywordRunAutoRefresher
 from .keyword_runner import execute_keyword_run
 from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .projects import Project, ProjectStore
@@ -98,6 +99,7 @@ class ApplicationState:
         analytics_service: AnalyticsService,
         insight_queue: KeywordInsightQueue,
         keyword_run_queue: KeywordRunQueue,
+        keyword_auto_refresher: KeywordRunAutoRefresher | None,
     ) -> None:
         self.settings = settings
         self.embedding_service = embedding_service
@@ -118,6 +120,7 @@ class ApplicationState:
         self.analytics = analytics_service
         self.insight_queue = insight_queue
         self.keyword_run_queue = keyword_run_queue
+        self.keyword_auto_refresher = keyword_auto_refresher
 
 
 def create_app(
@@ -137,6 +140,7 @@ def create_app(
     analytics_service: AnalyticsService | None = None,
     insight_queue: KeywordInsightQueue | None = None,
     keyword_run_queue: KeywordRunQueue | None = None,
+    keyword_auto_refresher: KeywordRunAutoRefresher | None = None,
 ) -> FastAPI:
     """Create and configure the FastAPI application."""
 
@@ -239,6 +243,13 @@ def create_app(
         max_concurrency=settings.keyword_run_max_concurrency,
     )
 
+    keyword_auto_refresher = keyword_auto_refresher or KeywordRunAutoRefresher(
+        settings=settings,
+        queue=keyword_run_queue,
+    )
+    if hasattr(ingestion_service, "configure_keyword_auto_refresh"):
+        ingestion_service.configure_keyword_auto_refresh(keyword_auto_refresher)
+
     async def _keyword_run_executor(job: KeywordRunJob):
         project = project_store.get_project(job.project_id)
         if project is None:
@@ -314,6 +325,7 @@ def create_app(
         analytics_service=analytics_service,
         insight_queue=insight_queue,
         keyword_run_queue=keyword_run_queue,
+        keyword_auto_refresher=keyword_auto_refresher,
     )
 
     scheduler = app.state.services.hint_scheduler
@@ -335,6 +347,7 @@ def create_app(
     @app.on_event("startup")
     async def _startup_keyword_run_queue() -> None:
         if settings.keyword_run_async_enabled:
+            keyword_auto_refresher.attach_loop(asyncio.get_running_loop())
             keyword_run_queue.start()
 
     @app.on_event("shutdown")
@@ -1140,14 +1153,27 @@ def create_app(
             insights = list(latest.insights or [])
             insight_job_payload = dict(latest.insight_job or {}) if latest.insight_job else None
         else:
-            result = await execute_keyword_run(
-                project,
-                settings=settings,
-                embedding_service=embedding,
-                store_manager=store_manager,
-                insight_queue=insight_queue,
-                metrics=metrics_recorder,
-            )
+            run_start = time.perf_counter() if metrics_recorder else None
+            try:
+                result = await execute_keyword_run(
+                    project,
+                    settings=settings,
+                    embedding_service=embedding,
+                    store_manager=store_manager,
+                    insight_queue=insight_queue,
+                    metrics=metrics_recorder,
+                )
+            except Exception:
+                if metrics_recorder:
+                    metrics_recorder.increment("keyword.run.errors", project_id=project.id)
+                raise
+            else:
+                if metrics_recorder and run_start is not None:
+                    metrics_recorder.record_timing(
+                        "keyword.run.duration",
+                        max(time.perf_counter() - run_start, 0.0),
+                        project_id=project.id,
+                    )
             keyword_dicts = result.keywords
             debug_payload = result.debug
             insights = result.insights

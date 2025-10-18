@@ -68,7 +68,7 @@ Existing `/keywords/{project}/candidates` becomes a compatibility wrapper:
 - `GET` → returns the latest run; when async mode is enabled and no run exists it responds with `409` so the client can enqueue a job.
 - `POST` → proxy to `runs`.
 
-During migration, keep env flag (`KEYWORD_RUN_SYNC_MODE`) to fall back to inline execution if needed.
+During migration, keep the env flag (`KEYWORD_RUN_SYNC_MODE`) to fall back to inline execution if needed.
 
 ### 4. Worker Execution Flow
 
@@ -89,8 +89,8 @@ During migration, keep env flag (`KEYWORD_RUN_SYNC_MODE`) to fall back to inline
 
 ### 6. Integration with Ingestion
 
-- Extend `DocumentIngestor` / `ProjectVectorStoreManager` to notify the keyword system after ingest completes (e.g., publish project ID to a lightweight “dirty projects” queue).
-- If `KEYWORD_RUN_AUTO_REFRESH=1`, enqueue a keyword run automatically when new content arrives, unless a run is already `pending`/`running`.
+- `DocumentIngestor` now calls the `KeywordRunAutoRefresher` after each successful ingest so projects marked “dirty” are queued automatically.
+- With `KEYWORD_RUN_AUTO_REFRESH=1`, the refresher deduplicates in-flight jobs and schedules a follow-up run if more content lands while a scan is running.
 - Maintain TTL (`KEYWORD_RUN_CACHE_TTL`, default 24h) so stale results trigger automatic refresh on next visit.
 
 ### 7. Metrics & Observability
@@ -98,6 +98,7 @@ During migration, keep env flag (`KEYWORD_RUN_SYNC_MODE`) to fall back to inline
 - Emit metrics via `MetricsRecorder`:
   - `keyword.run.enqueued` (counter by project).
   - `keyword.run.duration` (histogram, tags: project, status, bypass_reason, llm_backend).
+  - `keyword.run.errors` (counter for failed runs).
   - `keyword.run.queue_time` (time from request to start).
   - `keyword.run.active` (gauge: number of running jobs).
 - Log transitions with structured metadata for advanced tracing.
@@ -110,7 +111,7 @@ Add to `Settings` and `env.example.local`:
 - `KEYWORD_RUN_MAX_QUEUE` (default `8`).
 - `KEYWORD_RUN_CACHE_TTL` in seconds (default `86400`).
 - `KEYWORD_RUN_AUTO_REFRESH` (`0`/`1`).
-- `KEYWORD_RUN_SYNC_MODE` (temporary escape hatch, default `0`).
+- `KEYWORD_RUN_SYNC_MODE` (escape hatch—set to `0` to enable the async queue).
 
 ### 9. Testing Strategy
 
