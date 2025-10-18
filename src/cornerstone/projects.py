@@ -60,6 +60,7 @@ class KeywordRunRecord:
     insights: list[dict[str, object]] | None = None
     debug: dict[str, object] | None = None
     error: str | None = None
+    insight_job: dict[str, object] | None = None
 
 
 class ProjectStore:
@@ -284,6 +285,7 @@ class ProjectStore:
         insights: Sequence[dict[str, object]] | None = None,
         debug: dict[str, object] | None = None,
         error: str | None = None,
+        insight_job: dict[str, object] | None = None,
     ) -> KeywordRunRecord:
         record = self.get_keyword_run(project_id, run_id)
         if record is None:
@@ -310,6 +312,8 @@ class ProjectStore:
             updated["debug"] = dict(debug)
         if error is not None:
             updated["error"] = error
+        if insight_job is not None:
+            updated["insight_job"] = dict(insight_job)
 
         updated["updated_at"] = self._now()
 
@@ -633,6 +637,10 @@ class ProjectStore:
         payload = asdict(record)
         # Ensure mutable defaults serialise as expected.
         payload.setdefault("stats", {})
+        if record.insight_job:
+            payload["insightJob"] = dict(record.insight_job)
+        else:
+            payload.pop("insight_job", None)
         return payload
 
     def _deserialize_keyword_run(self, data: dict) -> KeywordRunRecord:
@@ -654,6 +662,11 @@ class ProjectStore:
             insights=[dict(item) for item in data.get("insights", [])] if data.get("insights") is not None else None,
             debug=dict(data.get("debug") or {}),
             error=data.get("error"),
+            insight_job=dict(
+                data.get("insight_job")
+                or data.get("insightJob")
+                or {}
+            ) if (data.get("insight_job") or data.get("insightJob")) else None,
         )
 
     def _write_keyword_run(self, record: KeywordRunRecord) -> None:

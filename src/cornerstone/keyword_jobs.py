@@ -77,6 +77,9 @@ class KeywordRunQueue:
     def configure_executor(self, executor: KeywordRunExecutor) -> None:
         self._executor = executor
 
+    def has_executor(self) -> bool:
+        return self._executor is not None
+
     async def enqueue(self, project_id: str, *, requested_by: str | None = None) -> KeywordRunJob:
         if self._shutdown:
             raise RuntimeError("KeywordRunQueue is shut down")

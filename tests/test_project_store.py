@@ -39,9 +39,11 @@ def test_keyword_run_persistence_roundtrip(tmp_path: Path) -> None:
         insights=[{"term": "alpha", "summary": "test"}],
         debug={"candidate_count": 123},
         stats={"token_total": 750000},
+        insight_job={"id": "job-1", "status": "success"},
     )
     assert final.status == "success"
     assert final.stats["token_total"] == 750000
+    assert final.insight_job == {"id": "job-1", "status": "success"}
     latest = store.get_latest_keyword_run(project.id)
     assert latest is not None
     assert latest.id == final.id

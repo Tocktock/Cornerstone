@@ -12,15 +12,16 @@ Cornerstone is a retrieval-augmented support workspace that lets operations team
 - **Full document ingestion pipeline.** `DocumentIngestor` chunks uploads, extracts text (PDF, DOCX, HTML), stores vectors in Qdrant, and syncs metadata to a lightweight SQLite FTS index for lexical fallbacks.
 - **Retrieval-augmented support agent.** `SupportAgentService` blends dense search, optional reranking, glossary snippets, and persona overrides to generate final answers via OpenAI or Ollama chat backends.
 - **Semantic search web experience.** A FastAPI + Jinja UI surfaces global search, support chat, knowledge browsers, persona management, and analytics dashboards out of the box.
-- **Keyword explorer & insights pipeline.** Multi-stage concept extraction (frequency heuristics, embedding similarity, clustering, optional LLM summarization) highlights recurring themes and pushes summaries onto an async insight queue.
+- **Keyword explorer & insights pipeline.** Multi-stage concept extraction (frequency heuristics, embedding similarity, clustering, optional LLM summarization) now runs through a background job system that caches results, exposes run metadata, and pushes insights onto an async queue.
 - **Operational guardrails.** Conversation logging strips emails/phone numbers, retention windows are enforced, and optional Prometheus metrics emit timings and counters for everything from ingestion throughput to chat latency.
 - **Language-aware query hints.** Glossary definitions, manually curated hints, and LLM-generated bridge tokens keep search usable across English/Korean terminology or other mixed-language corpora.
 
 ## Development Goals
 1. **Unified RAG foundation.** One service app orchestrates ingestion, retrieval, chat, analytics, and keyword discovery so new support tools share the same data contracts.
 2. **Config-first flexibility.** Environment-driven `Settings` enable embedding/back-end swaps, tuning retrieval depth, and toggling observability without touching code.
-3. **Privacy by default.** Keep sensitive datasets out of the repo (`data/` is ignored), anonymize transcripts, and make it easy to run fully offline with local embeddings.
-4. **Actionable insights loop.** Feed conversation logs and keyword summaries back into product planning via the analytics endpoints and queued insight jobs.
+3. **Background-managed keyword runs.** Offload heavy keyword scans to asynchronous workers, surface job status, and reuse cached results in the UI.
+4. **Privacy by default.** Keep sensitive datasets out of the repo (`data/` is ignored), anonymize transcripts, and make it easy to run fully offline with local embeddings.
+5. **Actionable insights loop.** Feed conversation logs and keyword summaries back into product planning via the analytics endpoints and queued insight jobs.
 
 ## Architecture at a Glance
 - **FastAPI application (`cornerstone.app`).** Wires together the embedding service, project/persona stores, ingestion pipeline, chat service, analytics, and the scheduled query-hint generator.
@@ -54,7 +55,8 @@ Cornerstone is a retrieval-augmented support workspace that lets operations team
    cp -R samples/* data/
    ```
    The anonymized fixtures will populate the Search, Support, and Analytics views.
-7. **Ingest your own content:** use the UI upload flow or the helper script `python -m cornerstone.scripts.ingest_local <path>` to populate project knowledge bases.
+7. **(Optional) Enable background keyword runs:** set `KEYWORD_RUN_SYNC_MODE=0` to process keyword scans asynchronously, surface job status in the UI, and reuse cached results. The default (`1`) keeps the synchronous pipeline handy for local tests.
+8. **Ingest your own content:** use the UI upload flow or the helper script `python -m cornerstone.scripts.ingest_local <path>` to populate project knowledge bases.
 
 ## Testing & Tooling
 - Run the automated suite with `pytest`. Integration tests that hit a live Qdrant instance are marked with `@pytest.mark.integration`.

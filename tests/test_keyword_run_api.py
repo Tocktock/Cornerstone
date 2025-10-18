@@ -11,7 +11,7 @@ from cornerstone.app import create_app
 from cornerstone.config import Settings
 from cornerstone.keyword_jobs import KeywordRunQueue, KeywordRunJob
 from cornerstone.projects import ProjectStore
-from cornerstone.vector_store import ProjectVectorStoreManager
+from cornerstone.ingestion import ProjectVectorStoreManager
 
 
 class FakeEmbeddingService:
@@ -26,7 +26,7 @@ class FakeEmbeddingService:
         return [length, length / 2.0, 1.0]
 
 
-def _build_async_app(tmp_path: Path) -> tuple[TestClient, str, KeywordRunQueue, ProjectStore]:
+def _build_async_app(tmp_path: Path) -> tuple[TestClient, str]:
     data_dir = tmp_path / "data"
     settings = Settings(
         data_dir=str(data_dir),
@@ -76,9 +76,7 @@ def _build_async_app(tmp_path: Path) -> tuple[TestClient, str, KeywordRunQueue, 
         store_manager=store_manager,
         keyword_run_queue=keyword_queue,
     )
-
-    client = TestClient(app)
-    return client, project_id, keyword_queue, project_store
+    return app, project_id
 
 
 def test_create_keyword_run_disabled(tmp_path: Path) -> None:
@@ -93,23 +91,41 @@ def test_create_keyword_run_disabled(tmp_path: Path) -> None:
 
 
 def test_keyword_run_async_endpoints(tmp_path: Path) -> None:
-    client, project_id, queue, project_store = _build_async_app(tmp_path)
+    app, project_id = _build_async_app(tmp_path)
 
-    response = client.post(f"/keywords/{project_id}/runs")
-    assert response.status_code == 200
-    job_id = response.json()["jobId"]
+    with TestClient(app) as client:
+        response = client.post(f"/keywords/{project_id}/runs")
+        assert response.status_code == 200
+        job_id = response.json()["jobId"]
 
-    time.sleep(0.05)
+        payload = None
+        for _ in range(20):
+            time.sleep(0.05)
+            status = client.get(f"/keywords/{project_id}/runs/{job_id}")
+            assert status.status_code == 200
+            payload = status.json()
+            if payload["status"] == "success":
+                break
 
-    status = client.get(f"/keywords/{project_id}/runs/{job_id}")
-    assert status.status_code == 200
-    payload = status.json()
-    assert payload["status"] == "success"
-    assert payload["run"]["keywords"][0]["term"] == "async-keyword"
+        assert payload is not None
+        assert payload["status"] == "success"
+        assert payload["run"]["keywords"][0]["term"] == "async-keyword"
+        assert payload["run"].get("insightJob") is None or isinstance(payload["run"].get("insightJob"), dict)
 
-    latest = client.get(f"/keywords/{project_id}/runs/latest")
-    assert latest.status_code == 200
-    latest_payload = latest.json()
-    assert latest_payload["run"]["keywords"][0]["term"] == "async-keyword"
+        store = client.app.state.services.project_store
+        record = store.get_latest_keyword_run(project_id)
+        assert record is not None
+        assert record.keywords and record.keywords[0]["term"] == "async-keyword"
 
-    client.close()
+        latest_payload = None
+        for _ in range(10):
+            latest = client.get(f"/keywords/{project_id}/runs/latest")
+            if latest.status_code == 200:
+                latest_payload = latest.json()
+                break
+            last_failed = latest
+            time.sleep(0.05)
+
+        assert latest_payload is not None, f"latest response: {last_failed.status_code} {last_failed.json()}"
+        assert latest_payload["run"]["keywords"][0]["term"] == "async-keyword"
+        assert latest_payload["run"].get("insightJob") is None or isinstance(latest_payload["run"].get("insightJob"), dict)

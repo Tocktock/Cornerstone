@@ -65,7 +65,7 @@ Introduce `KeywordRunQueue` mirroring `KeywordInsightQueue` but handling full St
 
 Existing `/keywords/{project}/candidates` becomes a compatibility wrapper:
 
-- `GET` → proxy to `runs/latest`.
+- `GET` → returns the latest run; when async mode is enabled and no run exists it responds with `409` so the client can enqueue a job.
 - `POST` → proxy to `runs`.
 
 During migration, keep env flag (`KEYWORD_RUN_SYNC_MODE`) to fall back to inline execution if needed.
@@ -81,11 +81,11 @@ During migration, keep env flag (`KEYWORD_RUN_SYNC_MODE`) to fall back to inline
 
 ### 5. Frontend Changes
 
-- On page load, fetch `/keywords/{project}/runs/latest`. Show cached results immediately with “Last updated: …” timestamp.
-- “Run fresh scan” button hits `POST /runs`; display job status banner and poll `/runs/{jobId}` every few seconds. While job runs, keep showing cached result.
-- Update status messages to surface bypass reasons (`candidate-limit`, `token-limit`, etc.).
-- If no cached run exists yet, show progress indicator until job finishes.
-- Optional: show history dropdown to inspect previous runs.
+- Surface a `keywordRunAsyncEnabled` flag so the template swaps between synchronous and async flows.
+- When async mode is on, `/keywords/{project}/candidates` serves cached results (and returns 409 when no run exists) so the UI can show the previous keywords immediately.
+- Replace the legacy “Search keywords” button with “Run Keyword Scan”, which enqueues a job (`POST /keywords/{project}/runs`), disables itself while pending, and polls `/runs/{jobId}` for status updates.
+- Reuse the existing stage-7 insight card: any `insightJob` payload triggers the existing polling logic so summarisation completes asynchronously.
+- Preserve synchronized fallback (when `KEYWORD_RUN_SYNC_MODE=1`) for local tests and lightweight installs.
 
 ### 6. Integration with Ingestion
 
