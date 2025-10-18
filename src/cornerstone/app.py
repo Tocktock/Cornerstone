@@ -42,6 +42,7 @@ from .keywords import (
     prepare_keyword_chunks,
 )
 from .insights import KeywordInsightQueue
+from .keyword_jobs import KeywordRunQueue
 from .personas import PersonaOverrides, PersonaSnapshot, PersonaStore
 from .projects import Project, ProjectStore
 from .vector_store import QdrantVectorStore, SearchResult
@@ -108,6 +109,7 @@ class ApplicationState:
         conversation_logger: ConversationLogger,
         analytics_service: AnalyticsService,
         insight_queue: KeywordInsightQueue,
+        keyword_run_queue: KeywordRunQueue,
     ) -> None:
         self.settings = settings
         self.embedding_service = embedding_service
@@ -127,6 +129,7 @@ class ApplicationState:
         self.conversation_logger = conversation_logger
         self.analytics = analytics_service
         self.insight_queue = insight_queue
+        self.keyword_run_queue = keyword_run_queue
 
 
 def create_app(
@@ -145,6 +148,7 @@ def create_app(
     conversation_logger: ConversationLogger | None = None,
     analytics_service: AnalyticsService | None = None,
     insight_queue: KeywordInsightQueue | None = None,
+    keyword_run_queue: KeywordRunQueue | None = None,
 ) -> FastAPI:
     """Create and configure the FastAPI application."""
 
@@ -241,6 +245,14 @@ def create_app(
         max_jobs=settings.keyword_stage7_summary_max_jobs
     )
 
+    keyword_run_queue = keyword_run_queue or KeywordRunQueue(
+        project_store,
+        max_queue=settings.keyword_run_max_queue,
+        max_concurrency=settings.keyword_run_max_concurrency,
+    )
+    if settings.keyword_run_async_enabled:
+        keyword_run_queue.start()
+
     app = FastAPI()
     app.state.services = ApplicationState(
         settings=settings,
@@ -260,6 +272,7 @@ def create_app(
         conversation_logger=conversation_logger,
         analytics_service=analytics_service,
         insight_queue=insight_queue,
+        keyword_run_queue=keyword_run_queue,
     )
 
     scheduler = app.state.services.hint_scheduler
@@ -277,6 +290,10 @@ def create_app(
 
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
     templates.env.globals["settings"] = settings
+
+    @app.on_event("shutdown")
+    async def _shutdown_keyword_run_queue() -> None:
+        await keyword_run_queue.shutdown()
 
     def get_state(request: Request) -> ApplicationState:
         return request.app.state.services
@@ -329,6 +346,9 @@ def create_app(
     def get_insight_queue(request: Request) -> KeywordInsightQueue:
         return get_state(request).insight_queue
 
+    def get_keyword_run_queue(request: Request) -> KeywordRunQueue:
+        return get_state(request).keyword_run_queue
+
     def _parse_string_list(value) -> list[str]:
         if not value:
             return []
@@ -345,6 +365,96 @@ def create_app(
             if cleaned and cleaned not in items:
                 items.append(cleaned)
         return items
+
+    def _serialize_keyword_run(
+        record,
+        *,
+        include_keywords: bool = True,
+        include_debug: bool = True,
+    ) -> dict | None:
+        if record is None:
+            return None
+        payload = {
+            "id": record.id,
+            "projectId": record.project_id,
+            "status": record.status,
+            "requestedAt": record.requested_at,
+            "updatedAt": record.updated_at,
+            "startedAt": record.started_at,
+            "completedAt": record.completed_at,
+            "requestedBy": record.requested_by,
+            "stats": record.stats or {},
+            "error": record.error,
+        }
+        if include_keywords:
+            payload["keywords"] = list(record.keywords or [])
+            if record.insights is not None:
+                payload["insights"] = list(record.insights)
+        if include_debug and record.debug is not None:
+            payload["debug"] = dict(record.debug)
+        return payload
+
+    @app.post("/keywords/{project_id}/runs", response_class=JSONResponse)
+    async def create_keyword_run_job(
+        project_id: str,
+        project_store: ProjectStore = Depends(get_project_store),
+        keyword_queue: KeywordRunQueue = Depends(get_keyword_run_queue),
+        settings: Settings = Depends(get_settings_dependency),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        if not settings.keyword_run_async_enabled:
+            raise HTTPException(status_code=503, detail="Background keyword jobs are disabled")
+        try:
+            job = await keyword_queue.enqueue(project.id)
+        except RuntimeError as exc:
+            raise HTTPException(status_code=429, detail=str(exc)) from exc
+
+        latest = project_store.get_latest_keyword_run(project.id)
+        payload = {
+            "jobId": job.id,
+            "projectId": project.id,
+            "status": job.status,
+            "latest": _serialize_keyword_run(latest),
+        }
+        return JSONResponse(payload)
+
+    @app.get("/keywords/{project_id}/runs/{run_id}", response_class=JSONResponse)
+    async def get_keyword_run_job(
+        project_id: str,
+        run_id: str,
+        project_store: ProjectStore = Depends(get_project_store),
+        keyword_queue: KeywordRunQueue = Depends(get_keyword_run_queue),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        record = project_store.get_keyword_run(project.id, run_id)
+        if record is None:
+            raise HTTPException(status_code=404, detail="Keyword run not found")
+
+        job = await keyword_queue.get(run_id)
+        source_record = job.record if job else record
+        payload = {
+            "jobId": run_id,
+            "projectId": project.id,
+            "status": source_record.status,
+            "run": _serialize_keyword_run(source_record),
+        }
+        return JSONResponse(payload)
+
+    @app.get("/keywords/{project_id}/runs/latest", response_class=JSONResponse)
+    async def get_latest_keyword_run(
+        project_id: str,
+        project_store: ProjectStore = Depends(get_project_store),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        record = project_store.get_latest_keyword_run(project.id)
+        if record is None:
+            raise HTTPException(status_code=404, detail="No keyword runs recorded")
+        return JSONResponse(
+            {
+                "projectId": project.id,
+                "run": _serialize_keyword_run(record),
+            }
+        )
 
     @app.get("/", response_class=HTMLResponse)
     async def index(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering

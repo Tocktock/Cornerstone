@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 import json
 import re
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Sequence
 from uuid import uuid4
 
 import logging
@@ -43,6 +43,25 @@ class DocumentMetadata:
     content_type: str | None = None
 
 
+@dataclass(slots=True)
+class KeywordRunRecord:
+    """Serialized representation of a keyword pipeline run."""
+
+    id: str
+    project_id: str
+    status: str
+    requested_at: str
+    updated_at: str
+    started_at: str | None = None
+    completed_at: str | None = None
+    requested_by: str | None = None
+    stats: dict[str, object] = field(default_factory=dict)
+    keywords: list[dict[str, object]] | None = None
+    insights: list[dict[str, object]] | None = None
+    debug: dict[str, object] | None = None
+    error: str | None = None
+
+
 class ProjectStore:
     """File-based repository for projects and document metadata."""
 
@@ -51,11 +70,13 @@ class ProjectStore:
         self._projects_file = root / "projects.json"
         self._documents_dir = root / "documents"
         self._keywords_dir = root / "keywords"
+        self._keyword_runs_dir = root / "keyword_runs"
         self._glossary_dir = root / "glossary"
         self._query_hints_dir = root / "query_hints"
         self._root.mkdir(parents=True, exist_ok=True)
         self._documents_dir.mkdir(parents=True, exist_ok=True)
         self._keywords_dir.mkdir(parents=True, exist_ok=True)
+        self._keyword_runs_dir.mkdir(parents=True, exist_ok=True)
         self._glossary_dir.mkdir(parents=True, exist_ok=True)
         self._query_hints_dir.mkdir(parents=True, exist_ok=True)
         self._ensure_default_project(default_project_name)
@@ -220,6 +241,152 @@ class ProjectStore:
             )
         except TypeError:
             return insights
+
+    # Keyword run persistence ---------------------------------------------------
+
+    def create_keyword_run(
+        self,
+        project_id: str,
+        *,
+        requested_by: str | None = None,
+        status: str = "pending",
+        stats: dict[str, object] | None = None,
+    ) -> KeywordRunRecord:
+        project = self.get_project(project_id)
+        if project is None:
+            raise ValueError(f"Project {project_id} not found")
+
+        run_id = uuid4().hex
+        now = self._now()
+        record = KeywordRunRecord(
+            id=run_id,
+            project_id=project.id,
+            status=status,
+            requested_at=now,
+            updated_at=now,
+            requested_by=requested_by,
+            stats=dict(stats or {}),
+        )
+        self._write_keyword_run(record)
+        return record
+
+    def update_keyword_run(
+        self,
+        project_id: str,
+        run_id: str,
+        *,
+        status: str | None = None,
+        started_at: str | None = None,
+        completed_at: str | None = None,
+        requested_by: str | None = None,
+        stats: dict[str, object] | None = None,
+        keywords: Sequence[dict[str, object]] | None = None,
+        insights: Sequence[dict[str, object]] | None = None,
+        debug: dict[str, object] | None = None,
+        error: str | None = None,
+    ) -> KeywordRunRecord:
+        record = self.get_keyword_run(project_id, run_id)
+        if record is None:
+            raise ValueError("Keyword run not found")
+
+        updated = asdict(record)
+        if status is not None:
+            updated["status"] = status
+        if started_at is not None:
+            updated["started_at"] = started_at
+        if completed_at is not None:
+            updated["completed_at"] = completed_at
+        if requested_by is not None:
+            updated["requested_by"] = requested_by
+        if stats:
+            merged_stats = dict(updated.get("stats") or {})
+            merged_stats.update(stats)
+            updated["stats"] = merged_stats
+        if keywords is not None:
+            updated["keywords"] = [dict(item) for item in keywords]
+        if insights is not None:
+            updated["insights"] = [dict(item) for item in insights]
+        if debug is not None:
+            updated["debug"] = dict(debug)
+        if error is not None:
+            updated["error"] = error
+
+        updated["updated_at"] = self._now()
+
+        new_record = self._deserialize_keyword_run(updated)
+        self._write_keyword_run(new_record)
+
+        if new_record.status == "success":
+            self._write_latest_keyword_run_pointer(project_id, new_record.id)
+        else:
+            pointer = self._read_latest_keyword_run_pointer(project_id)
+            if pointer == new_record.id and new_record.status != "success":
+                self._remove_latest_keyword_run_pointer(project_id)
+
+        return new_record
+
+    def get_keyword_run(self, project_id: str, run_id: str) -> KeywordRunRecord | None:
+        path = self._keyword_run_path(project_id, run_id)
+        if not path.exists():
+            return None
+        try:
+            with path.open("r", encoding="utf-8") as handle:
+                data = json.load(handle)
+        except json.JSONDecodeError:
+            logger.warning(
+                "project.keyword_run.decode_failed project=%s run_id=%s path=%s",
+                project_id,
+                run_id,
+                path,
+            )
+            return None
+        return self._deserialize_keyword_run(data)
+
+    def list_keyword_runs(
+        self,
+        project_id: str,
+        *,
+        limit: int | None = None,
+        statuses: Sequence[str] | None = None,
+    ) -> list[KeywordRunRecord]:
+        run_dir = self._keyword_run_dir_for(project_id, ensure=False)
+        if not run_dir.exists():
+            return []
+
+        records: list[KeywordRunRecord] = []
+        for path in sorted(run_dir.glob("*.json")):
+            if path.name.startswith("latest_"):
+                continue
+            try:
+                with path.open("r", encoding="utf-8") as handle:
+                    data = json.load(handle)
+            except json.JSONDecodeError:
+                logger.warning("project.keyword_run.decode_failed project=%s path=%s", project_id, path)
+                continue
+            record = self._deserialize_keyword_run(data)
+            if statuses and record.status not in statuses:
+                continue
+            records.append(record)
+
+        records.sort(key=lambda item: item.requested_at, reverse=True)
+        if limit is not None and limit >= 0:
+            records = records[:limit]
+        return records
+
+    def get_latest_keyword_run(
+        self,
+        project_id: str,
+        *,
+        status: str = "success",
+    ) -> KeywordRunRecord | None:
+        pointer = self._read_latest_keyword_run_pointer(project_id)
+        if pointer:
+            record = self.get_keyword_run(project_id, pointer)
+            if record and record.status == status:
+                return record
+
+        runs = self.list_keyword_runs(project_id, statuses=[status])
+        return runs[0] if runs else None
 
     def update_keyword_insight(self, project_id: str, insight_id: str, updates: dict) -> dict:
         path = self._keywords_dir / f"{project_id}.json"
@@ -452,6 +619,75 @@ class ProjectStore:
     @staticmethod
     def _now() -> str:
         return datetime.now(timezone.utc).isoformat()
+
+    def _keyword_run_dir_for(self, project_id: str, *, ensure: bool = True) -> Path:
+        path = self._keyword_runs_dir / project_id
+        if ensure:
+            path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def _keyword_run_path(self, project_id: str, run_id: str) -> Path:
+        return self._keyword_run_dir_for(project_id) / f"{run_id}.json"
+
+    def _serialize_keyword_run(self, record: KeywordRunRecord) -> dict:
+        payload = asdict(record)
+        # Ensure mutable defaults serialise as expected.
+        payload.setdefault("stats", {})
+        return payload
+
+    def _deserialize_keyword_run(self, data: dict) -> KeywordRunRecord:
+        project_id = data.get("project_id") or data.get("projectId")
+        run_id = data.get("id")
+        if not project_id or not run_id:
+            raise ValueError("Invalid keyword run payload")
+        return KeywordRunRecord(
+            id=str(run_id),
+            project_id=str(project_id),
+            status=str(data.get("status", "pending")),
+            requested_at=str(data.get("requested_at") or data.get("requestedAt") or self._now()),
+            updated_at=str(data.get("updated_at") or data.get("updatedAt") or self._now()),
+            started_at=data.get("started_at") or data.get("startedAt"),
+            completed_at=data.get("completed_at") or data.get("completedAt"),
+            requested_by=data.get("requested_by") or data.get("requestedBy"),
+            stats=dict(data.get("stats") or {}),
+            keywords=[dict(item) for item in data.get("keywords", [])] if data.get("keywords") is not None else None,
+            insights=[dict(item) for item in data.get("insights", [])] if data.get("insights") is not None else None,
+            debug=dict(data.get("debug") or {}),
+            error=data.get("error"),
+        )
+
+    def _write_keyword_run(self, record: KeywordRunRecord) -> None:
+        path = self._keyword_run_path(record.project_id, record.id)
+        payload = self._serialize_keyword_run(record)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2)
+
+    def _latest_keyword_run_pointer_path(self, project_id: str) -> Path:
+        return self._keyword_run_dir_for(project_id) / "latest_success.txt"
+
+    def _write_latest_keyword_run_pointer(self, project_id: str, run_id: str) -> None:
+        path = self._latest_keyword_run_pointer_path(project_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(run_id, encoding="utf-8")
+
+    def _read_latest_keyword_run_pointer(self, project_id: str) -> str | None:
+        path = self._latest_keyword_run_pointer_path(project_id)
+        if not path.exists():
+            return None
+        try:
+            value = path.read_text(encoding="utf-8").strip()
+        except OSError:
+            return None
+        return value or None
+
+    def _remove_latest_keyword_run_pointer(self, project_id: str) -> None:
+        path = self._latest_keyword_run_pointer_path(project_id)
+        if path.exists():
+            try:
+                path.unlink()
+            except OSError:
+                logger.warning("project.keyword_run.pointer_remove_failed project=%s path=%s", project_id, path)
 
     def _glossary_path(self, project_id: str) -> Path:
         return self._glossary_dir / f"{project_id}.json"
