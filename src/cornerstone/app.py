@@ -998,15 +998,60 @@ def create_app(
 
         context_snippets: list[str] = [chunk.excerpt(max_chars=400) for chunk in chunks[:5]]
 
-        if concept_stage.candidates:
+        total_tokens = chunk_stage.total_tokens()
+        processed_chunks = chunk_stage.processed_count
+        total_candidates = len(concept_stage.candidates)
+
+        llm_active = llm_filter.enabled
+        llm_bypass_reason: str | None = None
+        llm_bypass_details: dict[str, object] = {}
+        if llm_active:
+            candidate_limit = max(0, settings.keyword_llm_max_candidates)
+            token_limit = max(0, settings.keyword_llm_max_tokens)
+            chunk_limit = max(0, settings.keyword_llm_max_chunks)
+            bypass_payload: dict[str, object] = {
+                "candidate_count": total_candidates,
+                "token_total": total_tokens,
+                "chunk_total": processed_chunks,
+            }
+            if candidate_limit and total_candidates > candidate_limit:
+                llm_bypass_reason = "candidate-limit"
+                bypass_payload["candidate_limit"] = candidate_limit
+            elif token_limit and total_tokens > token_limit:
+                llm_bypass_reason = "token-limit"
+                bypass_payload["token_limit"] = token_limit
+            elif chunk_limit and processed_chunks > chunk_limit:
+                llm_bypass_reason = "chunk-limit"
+                bypass_payload["chunk_limit"] = chunk_limit
+
+            if llm_bypass_reason is not None:
+                llm_active = False
+                llm_bypass_details = bypass_payload
+                llm_filter.record_bypass("concept", llm_bypass_reason, **llm_bypass_details)
+
+        if llm_active and concept_stage.candidates:
             refined_concepts = llm_filter.refine_concepts(concept_stage.candidates, context_snippets)
             concept_stage = concept_stage.replace_candidates(refined_concepts)
         cluster_stage: ConceptClusteringResult = cluster_concepts(
             concept_stage.candidates,
             embedding_service=embedding,
-            llm_filter=llm_filter if settings.keyword_stage3_label_clusters else None,
+            llm_filter=llm_filter if settings.keyword_stage3_label_clusters and llm_active else None,
             llm_label_max_clusters=settings.keyword_stage3_label_max_clusters,
         )
+        if (
+            settings.keyword_stage3_label_clusters
+            and llm_filter.enabled
+            and not llm_active
+            and llm_bypass_reason
+        ):
+            cluster_payload = dict(llm_bypass_details)
+            cluster_payload["candidate_count"] = len(concept_stage.candidates)
+            cluster_payload["cluster_count"] = len(cluster_stage.clusters)
+            llm_filter.record_bypass(
+                "cluster",
+                llm_bypass_reason,
+                **cluster_payload,
+            )
         ranking_stage: ConceptRankingResult = rank_concept_clusters(
             cluster_stage.clusters,
             core_limit=settings.keyword_stage4_core_limit,
@@ -1024,7 +1069,7 @@ def create_app(
 
             if (
                 settings.keyword_stage5_harmonize_enabled
-                and llm_filter.enabled
+                and llm_active
             ):
                 harmonized = llm_filter.harmonize_ranked_concepts(
                     ranking_stage.ranked,
@@ -1033,6 +1078,14 @@ def create_app(
                 if harmonized and harmonized != list(ranking_stage.ranked):
                     ranking_stage = ranking_stage.replace_ranked(harmonized)
                     keywords_origin = "stage5"
+            elif settings.keyword_stage5_harmonize_enabled and llm_filter.enabled and llm_bypass_reason:
+                harmonize_payload = dict(llm_bypass_details)
+                harmonize_payload["candidate_count"] = len(ranking_stage.ranked)
+                llm_filter.record_bypass(
+                    "harmonize",
+                    llm_bypass_reason,
+                    **harmonize_payload,
+                )
 
             keywords = [
                 KeywordCandidate(
@@ -1051,7 +1104,7 @@ def create_app(
 
         original_count = len(keywords)
         debug_payload: dict[str, object] = {}
-        if llm_filter.enabled:
+        if llm_active:
             keywords = llm_filter.filter_keywords(keywords, context_snippets)
             logger.info(
                 "keyword.llm.apply backend=%s project=%s before=%s after=%s",
@@ -1059,6 +1112,14 @@ def create_app(
                 project.id,
                 original_count,
                 len(keywords),
+            )
+        elif llm_filter.enabled and llm_bypass_reason:
+            filter_payload = dict(llm_bypass_details)
+            filter_payload["candidate_count"] = original_count
+            llm_filter.record_bypass(
+                "filter",
+                llm_bypass_reason,
+                **filter_payload,
             )
         else:
             logger.info(
@@ -1075,7 +1136,6 @@ def create_app(
             "skipped_non_text": chunk_stage.skipped_non_text,
             "languages": chunk_stage.unique_languages(),
         }
-        total_tokens = chunk_stage.total_tokens()
         if total_tokens:
             chunk_debug["total_tokens"] = total_tokens
         sample_sections = chunk_stage.sample_sections()
@@ -1128,7 +1188,7 @@ def create_app(
             and settings.keyword_stage7_summary_enabled
             and settings.keyword_stage7_summary_max_insights > 0
             and settings.keyword_stage7_summary_max_concepts > 0
-            and llm_filter.enabled
+            and llm_active
         )
 
         max_summary_keywords = settings.keyword_stage7_summary_max_concepts * 4
@@ -1222,14 +1282,29 @@ def create_app(
                 if insight_job.status in {"pending", "running"} or not completed:
                     stage7_debug["poll_after"] = settings.keyword_stage7_summary_poll_interval
         elif stage7_debug is None:
+            stage7_reason = "disabled"
+            if llm_filter.enabled and llm_bypass_reason:
+                stage7_reason = "bypass"
             stage7_debug = {
-                "reason": "disabled",
+                "reason": stage7_reason,
                 "enabled": settings.keyword_stage7_summary_enabled,
                 "max_insights": settings.keyword_stage7_summary_max_insights,
                 "max_concepts": settings.keyword_stage7_summary_max_concepts,
                 "llm_enabled": llm_filter.enabled,
                 "backend": llm_filter.backend,
             }
+            if llm_filter.enabled and llm_bypass_reason:
+                stage7_debug["bypass_reason"] = llm_bypass_reason
+                for key, value in llm_bypass_details.items():
+                    stage7_debug.setdefault(key, value)
+        if not should_summarize and llm_filter.enabled and llm_bypass_reason:
+            summary_payload = dict(llm_bypass_details)
+            summary_payload["candidate_count"] = len(keywords)
+            llm_filter.record_bypass(
+                "summary",
+                llm_bypass_reason,
+                **summary_payload,
+            )
 
         llm_debug = llm_filter.debug_payload()
 

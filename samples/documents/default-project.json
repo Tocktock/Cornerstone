@@ -1,0 +1,22 @@
+[
+  {
+    "id": "sample-incident-001",
+    "filename": "incident-handbook.md",
+    "chunk_count": 3,
+    "created_at": "2024-01-05T00:00:00+00:00",
+    "size_bytes": 1428,
+    "title": "Major Incident Handbook",
+    "content_type": "text/markdown",
+    "content": """# Major Incident Handbook\n\n## Severity Levels\n- **SEV1:** Full outage or regulatory impact.\n- **SEV2:** Degraded experience affecting many customers.\n- **SEV3:** Localized incidents with manual workarounds.\n\n## First Hour Checklist\n1. Page the incident commander.\n2. Create a shared timeline in the incident room.\n3. Collect latest customer reports and logs.\n4. Assign a communications owner and rotate every 30 minutes.\n\n## Stabilization Playbook\n- Capture current metrics snapshots (traffic, latency, error rates).\n- Coordinate with regional leads when a localized fix is verified.\n- Document workaround steps for support agents.\n\n## Post-Incident Review\n- Summarize root cause, contributing factors, and mitigation steps.\n- Log action items with owners and due dates.\n- Share the review with Product and Support leadership within 48 hours.\n"""
+  },
+  {
+    "id": "sample-onboarding-002",
+    "filename": "support-onboarding.md",
+    "chunk_count": 2,
+    "created_at": "2024-01-06T00:00:00+00:00",
+    "size_bytes": 1020,
+    "title": "Support Agent Onboarding",
+    "content_type": "text/markdown",
+    "content": """# Support Agent Onboarding\n\nWelcome to Cornerstone Support!\n\n## Tooling Overview\n- **Cornerstone Search:** Find existing resolutions and definitions.\n- **Incident Dashboard:** Track live SEV1/SEV2 incidents.\n- **Keyword Explorer:** Spot emerging topics from conversation logs.\n\n## First Week Goals\n1. Shadow two live chat sessions per day.\n2. Complete the mock incident drill on day four.\n3. Submit at least one documentation improvement PR.\n\n## Escalation Matrix\n- Billing questions → `billing-escalations@cornerstone.dev`.\n- API downtime → Incident Commander via PagerDuty.\n- Feature requests → Tag in Productboard with `support-feedback`.\n"""
+  }
+]

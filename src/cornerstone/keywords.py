@@ -1767,6 +1767,36 @@ class KeywordLLMFilter:
     def backend(self) -> str | None:
         return self._backend
 
+    def record_bypass(self, stage: str, reason: str, **extra: object) -> None:
+        payload: dict[str, object] = {
+            "backend": self._backend,
+            "enabled": self._enabled,
+            "disable_reason": self._disable_reason,
+            "status": "bypass",
+            "reason": reason,
+        }
+        if extra:
+            payload.update(extra)
+
+        if stage == "filter":
+            payload.setdefault("candidate_count", extra.get("candidate_count", 0) if extra else 0)
+            payload.setdefault("max_results", self._max_results)
+            payload.setdefault("allow_generated", self._allow_generated)
+            self._last_debug = payload
+        elif stage == "concept":
+            payload.setdefault("candidate_count", extra.get("candidate_count", 0) if extra else 0)
+            self._last_concept_debug = payload
+        elif stage == "summary":
+            self._last_summary_debug = payload
+        elif stage == "cluster":
+            self._last_cluster_debug = payload
+        elif stage == "harmonize":
+            self._last_harmonize_debug = payload
+        elif stage == "insight":
+            self._last_insight_debug = payload
+        else:
+            self._last_debug = payload
+
     def filter_keywords(
         self,
         candidates: Sequence[KeywordCandidate],

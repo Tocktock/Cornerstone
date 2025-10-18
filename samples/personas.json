@@ -1,0 +1,13 @@
+{
+  "personas": [
+    {
+      "id": "default",
+      "name": "Default Agent",
+      "description": "General-purpose agent tuned for concise troubleshooting.",
+      "chat_temperature": 0.2,
+      "chat_max_tokens": 480,
+      "glossary_top_k": 3,
+      "retrieval_top_k": 3
+    }
+  ]
+}

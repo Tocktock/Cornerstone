@@ -1,0 +1,22 @@
+{
+  "projects": [
+    {
+      "id": "default-project",
+      "name": "Default Project",
+      "description": "Starter workspace populated with synthetic guides and FAQs.",
+      "created_at": "2024-01-01T00:00:00+00:00"
+    },
+    {
+      "id": "logistics",
+      "name": "Logistics Ops",
+      "description": "Transportation runbooks and escalation paths.",
+      "created_at": "2024-01-02T00:00:00+00:00"
+    },
+    {
+      "id": "product-support",
+      "name": "Product Support",
+      "description": "Troubleshooting tips for the fictional Atlas platform.",
+      "created_at": "2024-01-03T00:00:00+00:00"
+    }
+  ]
+}

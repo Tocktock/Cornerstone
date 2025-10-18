@@ -77,6 +77,9 @@ _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_CONCEPTS: Final[int] = 12
 _DEFAULT_KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT: Final[float] = 1.0
 _DEFAULT_KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL: Final[float] = 1.5
 _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS: Final[int] = 64
+_DEFAULT_KEYWORD_LLM_MAX_CANDIDATES: Final[int] = 25000
+_DEFAULT_KEYWORD_LLM_MAX_TOKENS: Final[int] = 750_000
+_DEFAULT_KEYWORD_LLM_MAX_CHUNKS: Final[int] = 10000
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -215,6 +218,9 @@ class Settings:
     keyword_stage7_summary_inline_timeout: float = _DEFAULT_KEYWORD_STAGE7_SUMMARY_INLINE_TIMEOUT
     keyword_stage7_summary_poll_interval: float = _DEFAULT_KEYWORD_STAGE7_SUMMARY_POLL_INTERVAL
     keyword_stage7_summary_max_jobs: int = _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS
+    keyword_llm_max_candidates: int = _DEFAULT_KEYWORD_LLM_MAX_CANDIDATES
+    keyword_llm_max_tokens: int = _DEFAULT_KEYWORD_LLM_MAX_TOKENS
+    keyword_llm_max_chunks: int = _DEFAULT_KEYWORD_LLM_MAX_CHUNKS
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -429,6 +435,24 @@ class Settings:
                 os.getenv(
                     "KEYWORD_STAGE7_SUMMARY_MAX_JOBS",
                     str(_DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS),
+                )
+            ),
+            keyword_llm_max_candidates=int(
+                os.getenv(
+                    "KEYWORD_LLM_MAX_CANDIDATES",
+                    str(_DEFAULT_KEYWORD_LLM_MAX_CANDIDATES),
+                )
+            ),
+            keyword_llm_max_tokens=int(
+                os.getenv(
+                    "KEYWORD_LLM_MAX_TOKENS",
+                    str(_DEFAULT_KEYWORD_LLM_MAX_TOKENS),
+                )
+            ),
+            keyword_llm_max_chunks=int(
+                os.getenv(
+                    "KEYWORD_LLM_MAX_CHUNKS",
+                    str(_DEFAULT_KEYWORD_LLM_MAX_CHUNKS),
                 )
             ),
         )
