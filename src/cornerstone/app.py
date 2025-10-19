@@ -241,7 +241,9 @@ def create_app(
         project_store,
         max_queue=settings.keyword_run_max_queue,
         max_concurrency=settings.keyword_run_max_concurrency,
+        metrics=metrics,
     )
+    keyword_run_queue.configure_metrics(metrics)
 
     keyword_auto_refresher = keyword_auto_refresher or KeywordRunAutoRefresher(
         settings=settings,
@@ -490,6 +492,24 @@ def create_app(
             {
                 "projectId": project.id,
                 "run": _serialize_keyword_run(record),
+            }
+        )
+
+    @app.get("/keywords/{project_id}/runs/history", response_class=JSONResponse)
+    async def list_keyword_run_history(
+        project_id: str,
+        project_store: ProjectStore = Depends(get_project_store),
+        limit: int = Query(20, ge=1, le=200),
+        status: str | None = Query(None),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        statuses = [status] if status else None
+        runs = project_store.list_keyword_runs(project.id, limit=limit, statuses=statuses)
+        history = [_serialize_keyword_run(run) for run in runs]
+        return JSONResponse(
+            {
+                "projectId": project.id,
+                "runs": history,
             }
         )
 

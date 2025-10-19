@@ -129,3 +129,31 @@ def test_keyword_run_async_endpoints(tmp_path: Path) -> None:
         assert latest_payload is not None, f"latest response: {last_failed.status_code} {last_failed.json()}"
         assert latest_payload["run"]["keywords"][0]["term"] == "async-keyword"
         assert latest_payload["run"].get("insightJob") is None or isinstance(latest_payload["run"].get("insightJob"), dict)
+
+
+def test_keyword_run_history_endpoint(tmp_path: Path) -> None:
+    app, project_id = _build_async_app(tmp_path)
+
+    with TestClient(app) as client:
+        # Create two keyword runs to populate history.
+        first = client.post(f"/keywords/{project_id}/runs")
+        assert first.status_code == 200
+        second = client.post(f"/keywords/{project_id}/runs")
+        assert second.status_code == 200
+
+        # wait for latest run success
+        for _ in range(40):
+            history = client.get(f"/keywords/{project_id}/runs/history?limit=5")
+            assert history.status_code == 200
+            runs = history.json()["runs"]
+            if runs and runs[0]["status"] == "success":
+                break
+            time.sleep(0.05)
+        assert runs, "Expected at least one recorded run"
+
+        statuses = {run["status"] for run in runs}
+        assert statuses == {"success"}
+
+        filtered = client.get(f"/keywords/{project_id}/runs/history", params={"status": "error"})
+        assert filtered.status_code == 200
+        assert filtered.json()["runs"] == []

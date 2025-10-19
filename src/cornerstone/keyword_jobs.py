@@ -5,9 +5,10 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Awaitable, Callable, Dict, Iterable, List
+from typing import Awaitable, Callable, Dict, Iterable, List, Optional
 
 from .projects import KeywordRunRecord, ProjectStore
+from .observability import MetricsRecorder
 
 
 KeywordRunExecutor = Callable[["KeywordRunJob"], Awaitable[KeywordRunRecord]]
@@ -15,6 +16,15 @@ KeywordRunExecutor = Callable[["KeywordRunJob"], Awaitable[KeywordRunRecord]]
 
 def _utcnow_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _parse_iso(value: Optional[str]) -> Optional[datetime]:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
 
 
 @dataclass(slots=True)
@@ -63,6 +73,7 @@ class KeywordRunQueue:
         max_queue: int = 8,
         max_concurrency: int = 1,
         executor: KeywordRunExecutor | None = None,
+        metrics: MetricsRecorder | None = None,
     ) -> None:
         self._store = project_store
         self._max_queue = max(1, max_queue)
@@ -73,9 +84,14 @@ class KeywordRunQueue:
         self._workers: List[asyncio.Task] = []
         self._shutdown = False
         self._executor: KeywordRunExecutor | None = executor
+        self._metrics = metrics
+        self._active_jobs = 0
 
     def configure_executor(self, executor: KeywordRunExecutor) -> None:
         self._executor = executor
+
+    def configure_metrics(self, metrics: MetricsRecorder | None) -> None:
+        self._metrics = metrics
 
     def has_executor(self) -> bool:
         return self._executor is not None
@@ -98,6 +114,9 @@ class KeywordRunQueue:
 
         async with self._lock:
             self._jobs[job.id] = job
+
+        if self._metrics:
+            self._metrics.increment("keyword.run.enqueued", project_id=project_id)
 
         await self._queue.put(job.id)
         return job
@@ -140,6 +159,7 @@ class KeywordRunQueue:
                 self._queue.task_done()
                 continue
 
+            job_running = False
             try:
                 record = self._store.update_keyword_run(
                     job.project_id,
@@ -148,6 +168,24 @@ class KeywordRunQueue:
                     started_at=_utcnow_iso(),
                 )
                 job.refresh_from_record(record)
+                job_running = True
+
+                if self._metrics:
+                    requested_at = _parse_iso(record.requested_at)
+                    started_at = _parse_iso(record.started_at)
+                    if requested_at and started_at:
+                        queue_seconds = max((started_at - requested_at).total_seconds(), 0.0)
+                        self._metrics.record_timing(
+                            "keyword.run.queue_time",
+                            queue_seconds,
+                            project_id=job.project_id,
+                        )
+                    self._active_jobs += 1
+                    self._metrics.set_gauge(
+                        "keyword.run.active",
+                        float(self._active_jobs),
+                        project_id=job.project_id,
+                    )
 
                 if self._executor is None:
                     raise RuntimeError("Keyword run executor not configured")
@@ -165,6 +203,13 @@ class KeywordRunQueue:
                 )
                 job.mark_error(message)
             finally:
+                if self._metrics and job_running:
+                    self._active_jobs = max(self._active_jobs - 1, 0)
+                    self._metrics.set_gauge(
+                        "keyword.run.active",
+                        float(self._active_jobs),
+                        project_id=job.project_id,
+                    )
                 self._queue.task_done()
 
     async def update_job_record(self, job: KeywordRunJob, record: KeywordRunRecord) -> None:

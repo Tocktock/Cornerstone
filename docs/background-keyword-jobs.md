@@ -135,11 +135,9 @@ Add to `Settings` and `env.example.local`:
 
 ## Next Steps
 
-1. Add `KeywordRun` storage helpers to `ProjectStore`.
-2. Extract synchronous pipeline into `generate_keyword_run` helper.
-3. Build `KeywordRunQueue`, worker startup, and new API endpoints.
-4. Update UI to use the job API and show cached results.
-5. Wire ingestion notifications and auto-refresh (optional for phase 1).
-6. Write tests, update docs, and remove the old synchronous flow once verified.
+1. Stress-test the queue with large corpora (40 k+ chunks) and tune concurrency/guardrails based on `keyword.run.*` metrics.
+2. Explore multi-worker or out-of-process execution so keyword runs can scale beyond a single FastAPI instance.
+3. Evaluate streaming partial keyword results (e.g., Stage 2 frequency list) for exceptionally large projects.
+4. Consider trimming or externalising very large debug payloads to keep run records lightweight.
 
 This architecture keeps the keyword explorer responsive while scaling to tens of thousands of documents, and provides operators with the observability needed to manage long-running runs.
