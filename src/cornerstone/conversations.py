@@ -11,7 +11,7 @@ from collections import Counter
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Iterable, Iterator, Sequence, TYPE_CHECKING
+from typing import Any, Iterable, Iterator, Sequence, TYPE_CHECKING, Union
 from uuid import uuid4
 
 from .projects import Project
@@ -398,7 +398,7 @@ def _extract_history_text(item: Any) -> str:
         if isinstance(content, str):
             return content
         return json.dumps(content, ensure_ascii=False)
-    if isinstance(item, (list, tuple)):
+    if isinstance(item, Union[list, tuple]):
         joined = " ".join(str(part) for part in item if part is not None)
         return joined
     return str(item)
