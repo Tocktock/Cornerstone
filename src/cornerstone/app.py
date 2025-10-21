@@ -7,6 +7,7 @@ import json
 import logging
 import math
 import time
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Iterable, Optional, AsyncGenerator
@@ -307,7 +308,21 @@ def create_app(
     if not keyword_run_queue.has_executor():
         keyword_run_queue.configure_executor(_keyword_run_executor)
 
-    app = FastAPI()
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        queue_started = False
+        if settings.keyword_run_async_enabled:
+            if keyword_auto_refresher is not None:
+                keyword_auto_refresher.attach_loop(asyncio.get_running_loop())
+            keyword_run_queue.start()
+            queue_started = True
+        try:
+            yield
+        finally:
+            if queue_started:
+                await keyword_run_queue.shutdown()
+
+    app = FastAPI(lifespan=lifespan)
     app.state.services = ApplicationState(
         settings=settings,
         embedding_service=embedding_service,
@@ -345,16 +360,6 @@ def create_app(
 
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
     templates.env.globals["settings"] = settings
-
-    @app.on_event("startup")
-    async def _startup_keyword_run_queue() -> None:
-        if settings.keyword_run_async_enabled:
-            keyword_auto_refresher.attach_loop(asyncio.get_running_loop())
-            keyword_run_queue.start()
-
-    @app.on_event("shutdown")
-    async def _shutdown_keyword_run_queue() -> None:
-        await keyword_run_queue.shutdown()
 
     def get_state(request: Request) -> ApplicationState:
         return request.app.state.services
