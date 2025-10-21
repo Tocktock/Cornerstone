@@ -12,6 +12,7 @@ try:  # pragma: no cover - optional dependency
     from prometheus_client import (
         CollectorRegistry,
         Counter as PromCounter,
+        Gauge as PromGauge,
         Histogram as PromHistogram,
         CONTENT_TYPE_LATEST,
         generate_latest,
@@ -22,6 +23,7 @@ except Exception:  # pragma: no cover - dependency missing
     CollectorRegistry = None  # type: ignore[assignment]
     PromCounter = None  # type: ignore[assignment]
     PromHistogram = None  # type: ignore[assignment]
+    PromGauge = None  # type: ignore[assignment]
     CONTENT_TYPE_LATEST = "text/plain; version=0.0.4; charset=utf-8"
     _PROMETHEUS_AVAILABLE = False
 
@@ -53,6 +55,7 @@ class MetricsRecorder:
         )
         self._prom_counters: dict[Tuple[str, Tuple[str, ...]], PromCounter] = {}
         self._prom_histograms: dict[Tuple[str, Tuple[str, ...]], PromHistogram] = {}
+        self._prom_gauges: dict[Tuple[str, Tuple[str, ...]], PromGauge] = {}
 
     @property
     def enabled(self) -> bool:
@@ -84,6 +87,15 @@ class MetricsRecorder:
         clean_tags = {key: val for key, val in tags.items() if val is not None}
         self._emit(metric, fields={"value": value}, tags=clean_tags)
         self._emit_prom_counter(metric, float(max(value, 0)), clean_tags)
+
+    def set_gauge(self, metric: str, value: float, **tags: Any) -> None:
+        """Set the value of a gauge metric."""
+
+        if not self._enabled:
+            return
+        clean_tags = {key: val for key, val in tags.items() if val is not None}
+        self._emit(metric, fields={"value": value}, tags=clean_tags)
+        self._emit_prom_gauge(metric, float(value), clean_tags)
 
     def record_timing(self, metric: str, duration_seconds: float, **tags: Any) -> None:
         """Emit a timing metric, recording milliseconds to logs."""
@@ -166,6 +178,27 @@ class MetricsRecorder:
             for name, key in zip(label_names, label_keys)
         }
         histogram.labels(**label_values).observe(value)
+
+    def _emit_prom_gauge(self, metric: str, value: float, tags: dict[str, Any]) -> None:
+        if not self.prometheus_enabled or PromGauge is None or self._prom_registry is None:
+            return
+        label_keys = tuple(sorted(tags.keys()))
+        label_names = tuple(self._sanitize_label(name) for name in label_keys)
+        prom_key = (metric, label_names)
+        gauge = self._prom_gauges.get(prom_key)
+        if gauge is None:
+            gauge = PromGauge(  # type: ignore[call-arg]
+                self._prom_metric_name(metric),
+                f"{metric} gauge",
+                labelnames=list(label_names),
+                registry=self._prom_registry,
+            )
+            self._prom_gauges[prom_key] = gauge
+        label_values = {
+            name: self._stringify(tags[key])
+            for name, key in zip(label_names, label_keys)
+        }
+        gauge.labels(**label_values).set(value)
 
     def _prom_metric_name(self, metric: str) -> str:
         cleaned = _PROM_NAME_RE.sub("_", metric)

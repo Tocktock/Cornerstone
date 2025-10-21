@@ -91,9 +91,9 @@
               <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>{{ project.name }}</option>
             {% endfor %}
           </select>
-          <button id="keyword-search" class="primary" type="button">Search keywords</button>
+          <button id="keyword-search" class="primary" type="button">Run Keyword Scan</button>
           <div id="keyword-progress" class="progress-track"><div class="progress-indicator"></div></div>
-          <p id="keyword-status" class="status-line">Select a project and click search to generate keyword candidates.</p>
+          <p id="keyword-status" class="status-line">Select a project and click Run Keyword Scan to generate keyword candidates.</p>
         </div>
         <div id="keyword-list" class="keyword-list" aria-live="polite"></div>
         <div id="keyword-pagination" class="keyword-pagination" aria-live="polite">
@@ -137,6 +137,8 @@
       </section>
     </main>
     <script>
+      const keywordRunAsyncEnabled = {{ (settings.keyword_run_async_enabled if settings is defined else false) | tojson }};
+
       document.addEventListener('DOMContentLoaded', () => {
         const projectSelect = document.getElementById('project');
         const keywordList = document.getElementById('keyword-list');
@@ -168,6 +170,9 @@
         let stage7Insights = [];
         let stage7Job = null;
         let stage7TimerId = null;
+        let activeRunJobId = null;
+        let runPollTimerId = null;
+        let latestRunStatus = null;
 
         function emptyPaginationState() {
           return {
@@ -301,7 +306,7 @@
           stage7Job = null;
           renderStage7Insights();
           if (options.initial) {
-            setStage7Status('Select a project and run a search to generate summarised insights.', '#6b7280');
+            setStage7Status('Select a project and run a keyword scan to generate summarised insights.', '#6b7280');
           } else if (options.preparing) {
             setStage7Status('Preparing summarised insights…', '#1f2937');
           } else {
@@ -427,6 +432,131 @@
             return;
           }
           keywordProgress.classList.toggle('active', Boolean(isActive));
+        }        function cancelRunPolling() {
+          if (runPollTimerId) {
+            window.clearTimeout(runPollTimerId);
+            runPollTimerId = null;
+          }
+        }
+
+        function scheduleRunPoll(jobId, delayMs) {
+          const delay = Math.max(750, toNumber(delayMs, 2000));
+          cancelRunPolling();
+          runPollTimerId = window.setTimeout(() => {
+            pollKeywordRun(jobId).catch((error) => console.error(error));
+          }, delay);
+        }
+
+        async function pollKeywordRun(jobId) {
+          const projectId = projectSelect.value;
+          if (!projectId || !jobId) {
+            cancelRunPolling();
+            return;
+          }
+          try {
+            const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/runs/${encodeURIComponent(jobId)}`);
+            if (response.status === 404) {
+              cancelRunPolling();
+              keywordStatus.dataset.status = 'error';
+              keywordStatus.style.color = '#b91c1c';
+              keywordStatus.textContent = 'Keyword run was not found. Try starting a new scan.';
+              return;
+            }
+            if (!response.ok) {
+              throw new Error(`Failed to fetch keyword run status (${response.status})`);
+            }
+            const payload = await response.json();
+            const status = payload.status || '';
+            const runInfo = payload.run || {};
+            activeRunJobId = jobId;
+            if (status === 'success') {
+              cancelRunPolling();
+              keywordStatus.dataset.status = 'success';
+              keywordStatus.style.color = '#047857';
+              keywordStatus.textContent = 'Keyword run completed. Refreshing…';
+              await loadKeywords(1);
+              return;
+            }
+            if (status === 'error') {
+              cancelRunPolling();
+              keywordStatus.dataset.status = 'error';
+              keywordStatus.style.color = '#b91c1c';
+              const message = runInfo.error ? `Keyword run failed: ${runInfo.error}` : 'Keyword run failed.';
+              keywordStatus.textContent = message;
+              return;
+            }
+            keywordStatus.dataset.status = status || 'running';
+            keywordStatus.style.color = '#1d4ed8';
+            const stage = status === 'running' ? 'Keyword run in progress…' : 'Keyword run queued…';
+            const processed = runInfo.stats && runInfo.stats.chunk_total ? ` (${runInfo.stats.chunk_total} chunks processed)` : '';
+            keywordStatus.textContent = `${stage}${processed}`;
+            const delay = runInfo.poll_after || runInfo.stats && runInfo.stats.poll_after || 2000;
+            scheduleRunPoll(jobId, delay);
+          } catch (error) {
+            console.error(error);
+            keywordStatus.dataset.status = 'retrying';
+            keywordStatus.style.color = '#b45309';
+            keywordStatus.textContent = 'Retrying keyword run status…';
+            scheduleRunPoll(jobId, 3000);
+          }
+        }
+
+        async function startKeywordRun() {
+          const projectId = projectSelect.value;
+          if (!projectId) {
+            keywordStatus.textContent = 'Select a project first.';
+            keywordStatus.style.color = '#b91c1c';
+            keywordStatus.dataset.status = 'error';
+            return;
+          }
+          try {
+            searchButton.disabled = true;
+            cancelRunPolling();
+            keywordStatus.dataset.status = 'queueing';
+            keywordStatus.style.color = '#1d4ed8';
+            keywordStatus.textContent = 'Submitting keyword run…';
+            setProgressActive(true);
+            resetStage7Card({ preparing: true });
+            const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/runs`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+            });
+            if (response.status === 503) {
+              keywordStatus.dataset.status = 'error';
+              keywordStatus.style.color = '#b91c1c';
+              keywordStatus.textContent = 'Background keyword jobs are disabled on this deployment.';
+              await loadKeywords(1);
+              return;
+            }
+            if (response.status === 429) {
+              keywordStatus.dataset.status = 'error';
+              keywordStatus.style.color = '#b91c1c';
+              keywordStatus.textContent = 'Keyword run queue is full. Please retry in a moment.';
+              return;
+            }
+            if (!response.ok) {
+              throw new Error(`Failed to enqueue keyword run (status ${response.status})`);
+            }
+            const payload = await response.json();
+            const jobId = payload.jobId;
+            activeRunJobId = jobId;
+            keywordStatus.dataset.status = 'running';
+            keywordStatus.style.color = '#1d4ed8';
+            keywordStatus.textContent = 'Keyword run queued…';
+            if (payload.latest) {
+              latestRunStatus = payload.latest;
+              await loadKeywords(1);
+            }
+            scheduleRunPoll(jobId, 1500);
+          } catch (error) {
+            console.error(error);
+            keywordStatus.dataset.status = 'error';
+            keywordStatus.style.color = '#b91c1c';
+            keywordStatus.textContent = 'Unable to enqueue keyword run. Please try again later.';
+          } finally {
+            searchButton.disabled = false;
+            setProgressActive(false);
+          }
         }
 
         async function loadKeywords(page = 1) {
@@ -441,10 +571,14 @@
           }
 
           pagination = emptyPaginationState();
-          searchButton.disabled = true;
+          if (!keywordRunAsyncEnabled) {
+            searchButton.disabled = true;
+          }
           keywordStatus.dataset.status = 'loading';
           keywordStatus.style.color = '#1f2937';
-          keywordStatus.textContent = 'Scanning project documents for keywords...';
+          keywordStatus.textContent = keywordRunAsyncEnabled
+            ? 'Loading keywords from the latest run…'
+            : 'Scanning project documents for keywords…';
           setProgressActive(true);
           clearKeywordList();
           clearDetail();
@@ -462,6 +596,13 @@
 
           try {
             const response = await fetch(`/keywords/${encodeURIComponent(projectId)}/candidates?${params.toString()}`);
+            if (keywordRunAsyncEnabled && (response.status === 409 || response.status === 404)) {
+              keywordStatus.dataset.status = response.status === 404 ? 'missing' : 'pending';
+              keywordStatus.style.color = '#1f2937';
+              keywordStatus.textContent = 'No keyword run available yet. Click “Run Keyword Scan” to generate results.';
+              resetStage7Card({ initial: true });
+              return;
+            }
             if (!response.ok) {
               throw new Error(`Failed to fetch keywords (status ${response.status})`);
             }
@@ -536,7 +677,9 @@
               stage7List.innerHTML = '<p class="status-line">Insight generation failed.</p>';
             }
           } finally {
-            searchButton.disabled = false;
+            if (!keywordRunAsyncEnabled) {
+              searchButton.disabled = false;
+            }
             setProgressActive(false);
           }
         }
@@ -829,17 +972,26 @@
           insightList.appendChild(fragment);
         }
 
-        searchButton.addEventListener('click', () => loadKeywords(1));
+        searchButton.addEventListener('click', () => {
+          if (keywordRunAsyncEnabled) {
+            startKeywordRun().catch((error) => console.error(error));
+          } else {
+            loadKeywords(1);
+          }
+        });
         projectSelect.addEventListener('change', () => {
+          cancelRunPolling();
           keywords = [];
           selectedTerm = null;
           pageSize = DEFAULT_PAGE_SIZE;
           pagination = emptyPaginationState();
           clearKeywordList();
           clearDetail();
-          keywordStatus.textContent = 'Select a project and click search to generate keyword candidates.';
           keywordStatus.style.color = '#1f2937';
           keywordStatus.dataset.status = '';
+          keywordStatus.textContent = keywordRunAsyncEnabled
+            ? 'Select “Run Keyword Scan” to refresh keywords or load the latest run.'
+            : 'Select a project and click run to generate keyword candidates.';
           currentInsight = null;
           currentFilter = {};
           saveButton.disabled = true;
@@ -847,7 +999,13 @@
           savedInsights = [];
           renderInsights();
           resetStage7Card({ initial: true });
+          if (keywordRunAsyncEnabled) {
+            loadKeywords(1).catch((error) => console.error(error));
+          }
           loadInsights().catch((error) => console.error(error));
+        if (keywordRunAsyncEnabled) {
+          loadKeywords(1).catch((error) => console.error(error));
+        }
         });
         prevButton.addEventListener('click', () => {
           if (pagination.has_prev) {
@@ -895,6 +1053,9 @@
         resetStage7Card({ initial: true });
         renderInsights();
         loadInsights().catch((error) => console.error(error));
+        if (keywordRunAsyncEnabled) {
+          loadKeywords(1).catch((error) => console.error(error));
+        }
       });
     </script>
   </body>

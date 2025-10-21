@@ -80,6 +80,11 @@ _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS: Final[int] = 64
 _DEFAULT_KEYWORD_LLM_MAX_CANDIDATES: Final[int] = 25000
 _DEFAULT_KEYWORD_LLM_MAX_TOKENS: Final[int] = 750_000
 _DEFAULT_KEYWORD_LLM_MAX_CHUNKS: Final[int] = 10000
+_DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY: Final[int] = 1
+_DEFAULT_KEYWORD_RUN_MAX_QUEUE: Final[int] = 8
+_DEFAULT_KEYWORD_RUN_CACHE_TTL: Final[int] = 86_400
+_DEFAULT_KEYWORD_RUN_AUTO_REFRESH: Final[bool] = False
+_DEFAULT_KEYWORD_RUN_SYNC_MODE: Final[bool] = True
 
 
 def _env_optional_bool(name: str) -> bool | None:
@@ -221,6 +226,11 @@ class Settings:
     keyword_llm_max_candidates: int = _DEFAULT_KEYWORD_LLM_MAX_CANDIDATES
     keyword_llm_max_tokens: int = _DEFAULT_KEYWORD_LLM_MAX_TOKENS
     keyword_llm_max_chunks: int = _DEFAULT_KEYWORD_LLM_MAX_CHUNKS
+    keyword_run_max_concurrency: int = _DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY
+    keyword_run_max_queue: int = _DEFAULT_KEYWORD_RUN_MAX_QUEUE
+    keyword_run_cache_ttl: int = _DEFAULT_KEYWORD_RUN_CACHE_TTL
+    keyword_run_auto_refresh: bool = _DEFAULT_KEYWORD_RUN_AUTO_REFRESH
+    keyword_run_sync_mode: bool = _DEFAULT_KEYWORD_RUN_SYNC_MODE
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -455,6 +465,32 @@ class Settings:
                     str(_DEFAULT_KEYWORD_LLM_MAX_CHUNKS),
                 )
             ),
+            keyword_run_max_concurrency=int(
+                os.getenv(
+                    "KEYWORD_RUN_MAX_CONCURRENCY",
+                    str(_DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY),
+                )
+            ),
+            keyword_run_max_queue=int(
+                os.getenv(
+                    "KEYWORD_RUN_MAX_QUEUE",
+                    str(_DEFAULT_KEYWORD_RUN_MAX_QUEUE),
+                )
+            ),
+            keyword_run_cache_ttl=int(
+                os.getenv(
+                    "KEYWORD_RUN_CACHE_TTL",
+                    str(_DEFAULT_KEYWORD_RUN_CACHE_TTL),
+                )
+            ),
+            keyword_run_auto_refresh=_env_bool(
+                "KEYWORD_RUN_AUTO_REFRESH",
+                _DEFAULT_KEYWORD_RUN_AUTO_REFRESH,
+            ),
+            keyword_run_sync_mode=_env_bool(
+                "KEYWORD_RUN_SYNC_MODE",
+                _DEFAULT_KEYWORD_RUN_SYNC_MODE,
+            ),
         )
 
     @property
@@ -519,6 +555,10 @@ class Settings:
 
         safe_project = project_id.replace(" ", "-")
         return f"{self.qdrant_collection}_{safe_project}"
+
+    @property
+    def keyword_run_async_enabled(self) -> bool:
+        return not self.keyword_run_sync_mode
 
     def qdrant_hnsw_config(self) -> dict[str, int]:
         """Return HNSW tuning parameters, omitting unset values."""

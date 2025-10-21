@@ -8,7 +8,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable, Sequence, TYPE_CHECKING
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -42,6 +42,8 @@ from .fts import FTSIndex
 from .observability import MetricsRecorder
 from qdrant_client import models
 
+if TYPE_CHECKING:
+    from .keyword_refresh import KeywordRunAutoRefresher
 
 logger = logging.getLogger(__name__)
 
@@ -353,12 +355,19 @@ class DocumentIngestor:
         project_store: ProjectStore,
         fts_index: FTSIndex | None = None,
         metrics: MetricsRecorder | None = None,
+        keyword_auto_refresh: "KeywordRunAutoRefresher | None" = None,
     ) -> None:
         self._embedding = embedding_service
         self._stores = store_manager
         self._projects = project_store
         self._fts = fts_index
         self._metrics = metrics
+        self._keyword_auto_refresh = keyword_auto_refresh
+
+    def configure_keyword_auto_refresh(self, refresher: "KeywordRunAutoRefresher | None") -> None:
+        """Attach or replace the keyword auto-refresh helper."""
+
+        self._keyword_auto_refresh = refresher
 
     @property
     def embedding_model_id(self) -> str | None:
@@ -477,6 +486,7 @@ class DocumentIngestor:
                 value=len(records),
                 project_id=project_id,
             )
+        self._trigger_keyword_refresh(project_id)
         return IngestionResult(document=metadata, chunks_ingested=len(records))
 
     def ingest_url(
@@ -515,6 +525,14 @@ class DocumentIngestor:
             data=content,
             content_type=content_type,
         )
+
+    def _trigger_keyword_refresh(self, project_id: str) -> None:
+        if self._keyword_auto_refresh is None:
+            return
+        try:
+            self._keyword_auto_refresh.mark_project_dirty(project_id)
+        except Exception:  # pragma: no cover - defensive guard
+            logger.exception("keyword.auto_refresh.trigger_failed project=%s", project_id)
 
     def _build_records(
         self,
