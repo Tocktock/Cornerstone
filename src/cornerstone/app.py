@@ -7,12 +7,13 @@ import json
 import logging
 import math
 import time
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Iterable, Optional, AsyncGenerator
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse, Response, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from qdrant_client import QdrantClient, models
 
@@ -307,7 +308,21 @@ def create_app(
     if not keyword_run_queue.has_executor():
         keyword_run_queue.configure_executor(_keyword_run_executor)
 
-    app = FastAPI()
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        queue_started = False
+        if settings.keyword_run_async_enabled:
+            if keyword_auto_refresher is not None:
+                keyword_auto_refresher.attach_loop(asyncio.get_running_loop())
+            keyword_run_queue.start()
+            queue_started = True
+        try:
+            yield
+        finally:
+            if queue_started:
+                await keyword_run_queue.shutdown()
+
+    app = FastAPI(lifespan=lifespan)
     app.state.services = ApplicationState(
         settings=settings,
         embedding_service=embedding_service,
@@ -345,16 +360,6 @@ def create_app(
 
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
     templates.env.globals["settings"] = settings
-
-    @app.on_event("startup")
-    async def _startup_keyword_run_queue() -> None:
-        if settings.keyword_run_async_enabled:
-            keyword_auto_refresher.attach_loop(asyncio.get_running_loop())
-            keyword_run_queue.start()
-
-    @app.on_event("shutdown")
-    async def _shutdown_keyword_run_queue() -> None:
-        await keyword_run_queue.shutdown()
 
     def get_state(request: Request) -> ApplicationState:
         return request.app.state.services
@@ -545,7 +550,7 @@ def create_app(
             "projects": projects,
             "selected_project": selected_project,
         }
-        return templates.TemplateResponse("index.html", context)
+        return templates.TemplateResponse(request, "index.html", context)
 
     @app.post("/search", response_class=HTMLResponse)
     async def search(  # pragma: no cover - template rendering
@@ -569,7 +574,7 @@ def create_app(
             "selected_project": project.id,
             "results": _format_results(hits),
         }
-        return templates.TemplateResponse("index.html", context)
+        return templates.TemplateResponse(request, "index.html", context)
 
     @app.get("/support", response_class=HTMLResponse)
     async def support_page(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
@@ -589,7 +594,7 @@ def create_app(
             "persona": persona_snapshot,
             "persona_base": persona_snapshot.base_persona if persona_snapshot else None,
         }
-        return templates.TemplateResponse("support.html", context)
+        return templates.TemplateResponse(request, "support.html", context)
 
     @app.post("/support/chat", response_class=JSONResponse)
     async def support_chat(
@@ -848,7 +853,7 @@ def create_app(
                 "chat_max_tokens": settings_inst.chat_max_tokens,
             },
         }
-        return templates.TemplateResponse("knowledge.html", context)
+        return templates.TemplateResponse(request, "knowledge.html", context)
 
     @app.get("/admin/analytics", response_class=HTMLResponse)
     async def analytics_dashboard(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
@@ -875,7 +880,42 @@ def create_app(
             "project_label": project.name if project else "All Projects",
             "days": days,
         }
-        return templates.TemplateResponse("analytics.html", context)
+        return templates.TemplateResponse(request, "analytics.html", context)
+
+    @app.get("/admin/asyncio", response_class=PlainTextResponse)
+    async def asyncio_call_graph(
+        limit: int = Query(20, ge=0, le=200),
+        include_completed: bool = Query(
+            False, description="Include tasks that have already finished execution."
+        ),
+        name: str | None = Query(None, description="Filter tasks by substring match in their name."),
+    ) -> PlainTextResponse:
+        """Expose Python 3.14 asyncio call graph introspection for debugging."""
+
+        loop = asyncio.get_running_loop()
+        tasks = list(asyncio.all_tasks(loop))
+
+        if name:
+            lowered = name.lower()
+            tasks = [task for task in tasks if lowered in task.get_name().lower()]
+
+        if not include_completed:
+            tasks = [task for task in tasks if not task.done()]
+
+        if not tasks:
+            return PlainTextResponse("No asyncio tasks captured.\n")
+
+        tasks.sort(key=lambda task: (task.done(), task.get_name()))
+
+        sections: list[str] = []
+        for task in tasks:
+            graph_text = asyncio.format_call_graph(task, limit=limit)
+            sections.append(graph_text)
+
+        body = "\n\n".join(sections)
+        if not body.endswith("\n"):
+            body += "\n"
+        return PlainTextResponse(body)
 
     @app.get("/api/analytics/summary", response_class=JSONResponse)
     async def analytics_summary(
@@ -972,7 +1012,7 @@ def create_app(
             "personas": personas,
             "assignments": assignments,
         }
-        return templates.TemplateResponse("personas.html", context)
+        return templates.TemplateResponse(request, "personas.html", context)
 
     @app.post("/personas", response_class=RedirectResponse)
     async def create_persona(
@@ -1145,7 +1185,7 @@ def create_app(
             "projects": projects,
             "selected_project": selected_project,
         }
-        return templates.TemplateResponse("keywords.html", context)
+        return templates.TemplateResponse(request, "keywords.html", context)
 
     @app.get("/keywords/{project_id}/candidates", response_class=JSONResponse)
     async def project_keywords(

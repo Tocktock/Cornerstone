@@ -198,6 +198,12 @@ def test_keyword_insight_update_and_delete(fastapi_app: TestClient) -> None:
     assert "Beta Updated" not in terms
 
 
+def test_asyncio_call_graph_endpoint(fastapi_app: TestClient) -> None:
+    response = fastapi_app.get("/admin/asyncio?limit=5")
+    assert response.status_code == 200, response.text
+    assert "Task(" in response.text
+
+
 def test_stage7_summary_skips_when_disabled(fastapi_app: TestClient, monkeypatch) -> None:
     project_id = fastapi_app.default_project_id  # type: ignore[attr-defined]
     services = fastapi_app.app.state.services

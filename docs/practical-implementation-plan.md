@@ -1,8 +1,8 @@
 # Practical Implementation Plan: Embedding Model Switch, Qdrant, FastAPI UI, and Testing
 
-## Python 3.13+ Environment
+## Python 3.14+ Environment
 
-We will use Python 3.13 or above as the runtime, to leverage its latest optimizations and features. Python 3.13.0 (released October 2024) is the newest major release with many new features and performance improvements compared to 3.12.[^1] Notably, it introduced an experimental no-GIL mode and a preliminary JIT compiler for better concurrency and speed. Using Python ≥3.13 ensures our application is future-proof and can benefit from these enhancements. All required libraries (FastAPI, Qdrant client, OpenAI SDK, HuggingFace Transformers/SentenceTransformers) are compatible with Python 3.13.[^2] Before development, we should confirm our environment is running 3.13+ (e.g. `python --version`) and upgrade if needed.
+We will use Python 3.14 or above as the runtime, taking advantage of the finalized no-GIL experiments, per-module import optimizations, and the refreshed standard-library toolchain shipped in 3.14.[^1] Keeping the stack on ≥3.14 aligns with current support statements from FastAPI, Starlette, Pydantic, and Uvicorn, which all publish wheels for this interpreter.[^2] Before development, we should confirm our environment is running 3.14+ (e.g. `python --version`) and upgrade if needed.
 
 This gives us a solid, up-to-date foundation for building the embedding-based system.
 
@@ -180,9 +180,13 @@ To keep the implementation robust and maintainable, we will write unit tests and
 
 By having a solid test suite, we ensure that the final system is reliable despite the rapid development approach. The tests act as a safety net when refactoring or switching out components (for instance, if we upgrade the embedding model, we can rerun tests to confirm nothing breaks). In summary, each major component (embedding service, vector store, and web interface) will be covered by tests, fulfilling the requirement for function-level testing at each step. This not only increases code quality but also confidence when making changes.
 
+## Async Diagnostics with Python 3.14
+
+Python 3.14 ships a built-in asyncio call-graph API (`asyncio.capture_call_graph`, `asyncio.format_call_graph`) and companion CLI tools (`python -m asyncio ps`/`pstree`) for live task inspection.[^21] We expose these capabilities publicly through a new `/admin/asyncio` endpoint that returns the formatted call graph for all active tasks, letting operators inspect hung ingestion jobs or streaming responses in real time. When direct HTTP access is unavailable (e.g. production shell access only), the same information can be harvested with `python -m asyncio ps <pid>`, giving us a consistent debugging workflow across environments.
+
 ## Conclusion
 
-In this refined plan, we focused on practical and efficient implementation strategies for the desired system. We will use Python 3.13+ to stay current and efficient, and implement a flexible embedding module that can switch between OpenAI’s state-of-the-art `text-embedding-3-large` model and a local HuggingFace model for development flexibility. We chose Qdrant as the vector database for its ease of use and performance, allowing us to store embeddings and perform semantic searches quickly (with simple Python client calls to create collections, upsert data, and query by similarity).[^10][^16] For the user interface, we avoid unnecessary complexity by using FastAPI with Jinja2 templates to render a basic web page that lets users input queries and see results – this is straightforward to build and iterate on, without involving a front-end framework. Finally, we emphasize testing throughout development to ensure each piece works correctly in isolation and together. By following this plan, we should be able to implement a working prototype of an embedding-based search/Q&A system that is both practical for quick development and grounded in solid engineering practices. The result will be a simple yet effective application, where one can enter a query, have it embedded by either OpenAI or a local model, find similar content via Qdrant, and see the results on a web page – all built in a clean and maintainable way.
+In this refined plan, we focused on practical and efficient implementation strategies for the desired system. We will use Python 3.14+ to stay current with the latest interpreter improvements, and implement a flexible embedding module that can switch between OpenAI’s state-of-the-art `text-embedding-3-large` model and a local HuggingFace model for development flexibility. We chose Qdrant as the vector database for its ease of use and performance, allowing us to store embeddings and perform semantic searches quickly (with simple Python client calls to create collections, upsert data, and query by similarity).[^10][^16] For the user interface, we avoid unnecessary complexity by using FastAPI with Jinja2 templates to render a basic web page that lets users input queries and see results – this is straightforward to build and iterate on, without involving a front-end framework. Finally, we emphasize testing throughout development to ensure each piece works correctly in isolation and together. By following this plan, we should be able to implement a working prototype of an embedding-based search/Q&A system that is both practical for quick development and grounded in solid engineering practices. The result will be a simple yet effective application, where one can enter a query, have it embedded by either OpenAI or a local model, find similar content via Qdrant, and see the results on a web page – all built in a clean and maintainable way.
 
 ## Sources
 
@@ -190,12 +194,12 @@ In this refined plan, we focused on practical and efficient implementation strat
 - HuggingFace SentenceTransformers `all-MiniLM-L6-v2` – lightweight local embedding model (~384 dims) suitable for quick, local embedding generation.[^5]
 - Qdrant vector DB usage – creating collections, upserting embeddings in batches, and querying by vector similarity via Python client.[^20][^16][^10]
 - FastAPI with Jinja2 templates – rendering HTML responses using `Jinja2Templates` (server-side templating for simple UI).[^18]
-- Python 3.13 release – latest Python version with new features and optimizations (e.g. optional no-GIL mode for better concurrency).[^2][^1]
+- Python 3.14 release – latest stable Python version with continued performance and no-GIL experimentation improvements.[^2][^1]
 
 ## Footnotes
 
-[^1]: Python Release Python 3.13.0 | Python.org — https://www.python.org/downloads/release/python-3130/
-[^2]: Python Release Python 3.13.0 | Python.org — https://www.python.org/downloads/release/python-3130/
+[^1]: Python Release Python 3.14.0 | Python.org — https://www.python.org/downloads/release/python-3140/
+[^2]: Python Release Python 3.14.0 | Python.org — https://www.python.org/downloads/release/python-3140/
 [^3]: OpenAI’s Text Embeddings v3 | Pinecone — https://www.pinecone.io/learn/openai-embeddings-v3/
 [^4]: OpenAI’s Text Embeddings v3 | Pinecone — https://www.pinecone.io/learn/openai-embeddings-v3/
 [^5]: From HuggingFace dataset to Qdrant vector database in 12 minutes flat — https://www.gptechblog.com/from-huggingface-dataset-to-qdrant-vector-database-in-12-minutes-flat/
@@ -214,3 +218,4 @@ In this refined plan, we focused on practical and efficient implementation strat
 [^18]: Templates - FastAPI — https://fastapi.tiangolo.com/advanced/templates/
 [^19]: Templates - FastAPI — https://fastapi.tiangolo.com/advanced/templates/
 [^20]: From HuggingFace dataset to Qdrant vector database in 12 minutes flat — https://www.gptechblog.com/from-huggingface-dataset-to-qdrant-vector-database-in-12-minutes-flat/
+[^21]: Asyncio introspection tools in Python 3.14 — https://docs.python.org/3.14/whatsnew/3.14.html#asyncio-introspection-capabilities
