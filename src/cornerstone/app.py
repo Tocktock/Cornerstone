@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Iterable, Optional, AsyncGenerator
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse, Response, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from qdrant_client import QdrantClient, models
 
@@ -876,6 +876,41 @@ def create_app(
             "days": days,
         }
         return templates.TemplateResponse(request, "analytics.html", context)
+
+    @app.get("/admin/asyncio", response_class=PlainTextResponse)
+    async def asyncio_call_graph(
+        limit: int = Query(20, ge=0, le=200),
+        include_completed: bool = Query(
+            False, description="Include tasks that have already finished execution."
+        ),
+        name: str | None = Query(None, description="Filter tasks by substring match in their name."),
+    ) -> PlainTextResponse:
+        """Expose Python 3.14 asyncio call graph introspection for debugging."""
+
+        loop = asyncio.get_running_loop()
+        tasks = list(asyncio.all_tasks(loop))
+
+        if name:
+            lowered = name.lower()
+            tasks = [task for task in tasks if lowered in task.get_name().lower()]
+
+        if not include_completed:
+            tasks = [task for task in tasks if not task.done()]
+
+        if not tasks:
+            return PlainTextResponse("No asyncio tasks captured.\n")
+
+        tasks.sort(key=lambda task: (task.done(), task.get_name()))
+
+        sections: list[str] = []
+        for task in tasks:
+            graph_text = asyncio.format_call_graph(task, limit=limit)
+            sections.append(graph_text)
+
+        body = "\n\n".join(sections)
+        if not body.endswith("\n"):
+            body += "\n"
+        return PlainTextResponse(body)
 
     @app.get("/api/analytics/summary", response_class=JSONResponse)
     async def analytics_summary(
