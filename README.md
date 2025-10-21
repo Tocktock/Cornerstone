@@ -32,7 +32,7 @@ Cornerstone is a retrieval-augmented support workspace that lets operations team
 - **UI templates (`templates/`).** Semantic search, support chat, knowledge browsers, persona editors, analytics dashboards, and keyword explorer pages share the same backend services.
 
 ## Getting Started
-1. **Prerequisites:** Python 3.13+, Docker (for Qdrant), and optionally access to OpenAI or an Ollama instance.
+1. **Prerequisites:** Python 3.14+, Docker (for Qdrant), and optionally access to OpenAI or an Ollama instance.
 2. **Install dependencies:**
    ```bash
    python -m venv .venv

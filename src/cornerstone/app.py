@@ -545,7 +545,7 @@ def create_app(
             "projects": projects,
             "selected_project": selected_project,
         }
-        return templates.TemplateResponse("index.html", context)
+        return templates.TemplateResponse(request, "index.html", context)
 
     @app.post("/search", response_class=HTMLResponse)
     async def search(  # pragma: no cover - template rendering
@@ -569,7 +569,7 @@ def create_app(
             "selected_project": project.id,
             "results": _format_results(hits),
         }
-        return templates.TemplateResponse("index.html", context)
+        return templates.TemplateResponse(request, "index.html", context)
 
     @app.get("/support", response_class=HTMLResponse)
     async def support_page(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
@@ -589,7 +589,7 @@ def create_app(
             "persona": persona_snapshot,
             "persona_base": persona_snapshot.base_persona if persona_snapshot else None,
         }
-        return templates.TemplateResponse("support.html", context)
+        return templates.TemplateResponse(request, "support.html", context)
 
     @app.post("/support/chat", response_class=JSONResponse)
     async def support_chat(
@@ -848,7 +848,7 @@ def create_app(
                 "chat_max_tokens": settings_inst.chat_max_tokens,
             },
         }
-        return templates.TemplateResponse("knowledge.html", context)
+        return templates.TemplateResponse(request, "knowledge.html", context)
 
     @app.get("/admin/analytics", response_class=HTMLResponse)
     async def analytics_dashboard(request: Request) -> HTMLResponse:  # pragma: no cover - template rendering
@@ -875,7 +875,7 @@ def create_app(
             "project_label": project.name if project else "All Projects",
             "days": days,
         }
-        return templates.TemplateResponse("analytics.html", context)
+        return templates.TemplateResponse(request, "analytics.html", context)
 
     @app.get("/api/analytics/summary", response_class=JSONResponse)
     async def analytics_summary(
@@ -972,7 +972,7 @@ def create_app(
             "personas": personas,
             "assignments": assignments,
         }
-        return templates.TemplateResponse("personas.html", context)
+        return templates.TemplateResponse(request, "personas.html", context)
 
     @app.post("/personas", response_class=RedirectResponse)
     async def create_persona(
@@ -1145,7 +1145,7 @@ def create_app(
             "projects": projects,
             "selected_project": selected_project,
         }
-        return templates.TemplateResponse("keywords.html", context)
+        return templates.TemplateResponse(request, "keywords.html", context)
 
     @app.get("/keywords/{project_id}/candidates", response_class=JSONResponse)
     async def project_keywords(
