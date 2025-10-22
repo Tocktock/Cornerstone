@@ -57,6 +57,7 @@ class QdrantVectorStore:
         self._on_disk_payload = on_disk_payload
         self._on_disk_vectors = on_disk_vectors
         self._hnsw_config = self._normalize_hnsw_config(hnsw_config)
+        self._payload_indexes_initialized = False
 
     def iter_payloads(
         self,
@@ -141,6 +142,9 @@ class QdrantVectorStore:
     def ensure_payload_indexes(self) -> None:
         """Ensure frequently filtered payload fields are indexed."""
 
+        if self._payload_indexes_initialized:
+            return
+
         fields: dict[str, models.PayloadSchemaType] = {
             "project_id": models.PayloadSchemaType.KEYWORD,
             "doc_id": models.PayloadSchemaType.KEYWORD,
@@ -148,6 +152,7 @@ class QdrantVectorStore:
             "source": models.PayloadSchemaType.KEYWORD,
         }
 
+        had_unexpected_error = False
         for field_name, schema in fields.items():
             try:
                 self._client.create_payload_index(
@@ -159,12 +164,15 @@ class QdrantVectorStore:
                 message = str(exc).lower()
                 if "already exists" in message or "exists" in message:
                     continue
+                had_unexpected_error = True
                 logger.warning(
                     "Failed to create payload index for field '%s' on '%s': %s",
                     field_name,
                     self._collection_name,
                     exc,
                 )
+        if not had_unexpected_error:
+            self._payload_indexes_initialized = True
 
     def upsert(self, records: Sequence[VectorRecord], *, wait: bool = True) -> None:
         """Insert or update vectors in the collection."""
@@ -243,6 +251,7 @@ class QdrantVectorStore:
             collection_kwargs["hnsw_config"] = self._hnsw_config
 
         self._client.create_collection(**collection_kwargs)
+        self._payload_indexes_initialized = False
 
     @staticmethod
     def _normalize_hnsw_config(
