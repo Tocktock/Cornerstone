@@ -6,6 +6,7 @@ import json
 import logging
 import re
 import sqlite3
+import threading
 from pathlib import Path
 from typing import Iterable, List, Sequence
 
@@ -18,6 +19,7 @@ class FTSIndex:
     def __init__(self, db_path: Path) -> None:
         self._db_path = Path(db_path)
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._lock = threading.Lock()
         self._ensure_schema()
 
     def _connect(self) -> sqlite3.Connection:
@@ -61,35 +63,37 @@ class FTSIndex:
     ) -> None:
         if not entries:
             return
-        with self._connect() as conn:
-            conn.execute("BEGIN")
-            chunk_ids = [(entry["chunk_id"],) for entry in entries]
-            conn.executemany("DELETE FROM chunk_search WHERE chunk_id = ?", chunk_ids)
-            conn.executemany(
-                """
-                INSERT INTO chunk_search (chunk_id, project_id, doc_id, title, body, metadata)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                [
-                    (
-                        entry["chunk_id"],
-                        project_id,
-                        doc_id,
-                        entry.get("title") or "",
-                        entry.get("text") or "",
-                        json.dumps(entry.get("metadata") or {}),
-                    )
-                    for entry in entries
-                ],
-            )
-            conn.commit()
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute("BEGIN")
+                chunk_ids = [(entry["chunk_id"],) for entry in entries]
+                conn.executemany("DELETE FROM chunk_search WHERE chunk_id = ?", chunk_ids)
+                conn.executemany(
+                    """
+                    INSERT INTO chunk_search (chunk_id, project_id, doc_id, title, body, metadata)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    [
+                        (
+                            entry["chunk_id"],
+                            project_id,
+                            doc_id,
+                            entry.get("title") or "",
+                            entry.get("text") or "",
+                            json.dumps(entry.get("metadata") or {}),
+                        )
+                        for entry in entries
+                    ],
+                )
+                conn.commit()
 
     def delete_document(self, project_id: str, doc_id: str) -> None:
-        with self._connect() as conn:
-            conn.execute(
-                "DELETE FROM chunk_search WHERE project_id = ? AND doc_id = ?",
-                (project_id, doc_id),
-            )
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(
+                    "DELETE FROM chunk_search WHERE project_id = ? AND doc_id = ?",
+                    (project_id, doc_id),
+                )
 
     def search(self, project_id: str, query: str, *, limit: int = 10) -> List[dict[str, str]]:
         query = (query or "").strip()

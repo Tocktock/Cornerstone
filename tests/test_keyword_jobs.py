@@ -143,3 +143,63 @@ async def test_keyword_auto_refresher_enqueue_and_rerun(tmp_path: Path) -> None:
     assert execution_count >= 2
 
     await queue.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_keyword_run_queue_parallel_projects_with_per_project_limit(tmp_path: Path) -> None:
+    store = _make_store(tmp_path)
+    project_a = store.find_by_name("Demo Project")
+    assert project_a is not None
+    project_b = store.create_project("Parallel Project")
+
+    start_events: dict[str, asyncio.Event] = {}
+    finish_events: dict[str, asyncio.Event] = {}
+
+    def ensure_events(job_id: str) -> tuple[asyncio.Event, asyncio.Event]:
+        start_event = start_events.setdefault(job_id, asyncio.Event())
+        finish_event = finish_events.setdefault(job_id, asyncio.Event())
+        return start_event, finish_event
+
+    async def executor(job: KeywordRunJob):
+        start_event, finish_event = ensure_events(job.id)
+        start_event.set()
+        await finish_event.wait()
+        return store.update_keyword_run(job.project_id, job.id, status="success")
+
+    queue = KeywordRunQueue(
+        store,
+        max_queue=6,
+        max_concurrency=3,
+        max_concurrency_per_project=1,
+        executor=executor,
+    )
+    queue.start()
+
+    job1 = await queue.enqueue(project_a.id)
+    start1, finish1 = ensure_events(job1.id)
+    job2 = await queue.enqueue(project_b.id)
+    start2, finish2 = ensure_events(job2.id)
+    job3 = await queue.enqueue(project_a.id)
+    start3, finish3 = ensure_events(job3.id)
+
+    await asyncio.sleep(0.05)
+    assert start1.is_set(), "First project job should start immediately"
+    assert start2.is_set(), "Second project job should run in parallel"
+    assert not start3.is_set(), "Second job for same project must wait"
+
+    finish1.set()
+    await asyncio.wait_for(start3.wait(), timeout=1.0)
+    assert job3.status in {"running", "success"}
+
+    finish2.set()
+    finish3.set()
+
+    await asyncio.wait_for(job1.wait(1.0), timeout=1.0)
+    await asyncio.wait_for(job2.wait(1.0), timeout=1.0)
+    await asyncio.wait_for(job3.wait(1.0), timeout=1.0)
+
+    assert job1.status == "success"
+    assert job2.status == "success"
+    assert job3.status == "success"
+
+    await queue.shutdown()

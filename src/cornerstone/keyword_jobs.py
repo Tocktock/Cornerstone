@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Awaitable, Callable, Dict, Iterable, List, Optional
+from typing import Awaitable, Callable, Dict, List, Optional
 
 from .projects import KeywordRunRecord, ProjectStore
 from .observability import MetricsRecorder
@@ -72,20 +73,28 @@ class KeywordRunQueue:
         *,
         max_queue: int = 8,
         max_concurrency: int = 1,
+        max_concurrency_per_project: int | None = 1,
         executor: KeywordRunExecutor | None = None,
         metrics: MetricsRecorder | None = None,
     ) -> None:
         self._store = project_store
         self._max_queue = max(1, max_queue)
         self._max_concurrency = max(1, max_concurrency)
+        if max_concurrency_per_project is None or max_concurrency_per_project <= 0:
+            self._max_concurrency_per_project: int | None = None
+        else:
+            self._max_concurrency_per_project = max(1, max_concurrency_per_project)
         self._queue: asyncio.Queue[str] = asyncio.Queue(maxsize=self._max_queue)
         self._jobs: Dict[str, KeywordRunJob] = {}
         self._lock = asyncio.Lock()
+        self._project_semaphore_lock = asyncio.Lock()
+        self._project_semaphores: Dict[str, asyncio.Semaphore] = {}
         self._workers: List[asyncio.Task] = []
         self._shutdown = False
         self._executor: KeywordRunExecutor | None = executor
         self._metrics = metrics
         self._active_jobs = 0
+        self._project_active_counts: defaultdict[str, int] = defaultdict(int)
 
     def configure_executor(self, executor: KeywordRunExecutor) -> None:
         self._executor = executor
@@ -159,8 +168,12 @@ class KeywordRunQueue:
                 self._queue.task_done()
                 continue
 
+            project_semaphore: asyncio.Semaphore | None = None
             job_running = False
             try:
+                if self._max_concurrency_per_project is not None:
+                    project_semaphore = await self._acquire_project_slot(job.project_id)
+
                 record = self._store.update_keyword_run(
                     job.project_id,
                     job.id,
@@ -180,10 +193,18 @@ class KeywordRunQueue:
                             queue_seconds,
                             project_id=job.project_id,
                         )
-                    self._active_jobs += 1
+                    async with self._lock:
+                        self._active_jobs += 1
+                        project_active = self._project_active_counts[job.project_id] + 1
+                        self._project_active_counts[job.project_id] = project_active
                     self._metrics.set_gauge(
                         "keyword.run.active",
                         float(self._active_jobs),
+                        project_id=job.project_id,
+                    )
+                    self._metrics.set_gauge(
+                        "keyword.run.active_per_project",
+                        float(self._project_active_counts[job.project_id]),
                         project_id=job.project_id,
                     )
 
@@ -204,16 +225,39 @@ class KeywordRunQueue:
                 job.mark_error(message)
             finally:
                 if self._metrics and job_running:
-                    self._active_jobs = max(self._active_jobs - 1, 0)
+                    async with self._lock:
+                        self._active_jobs = max(self._active_jobs - 1, 0)
+                        current_project_active = max(self._project_active_counts.get(job.project_id, 0) - 1, 0)
+                        if current_project_active:
+                            self._project_active_counts[job.project_id] = current_project_active
+                        else:
+                            self._project_active_counts.pop(job.project_id, None)
+                        active_total = self._active_jobs
                     self._metrics.set_gauge(
                         "keyword.run.active",
-                        float(self._active_jobs),
+                        float(active_total),
+                        project_id=job.project_id,
+                    )
+                    self._metrics.set_gauge(
+                        "keyword.run.active_per_project",
+                        float(current_project_active),
                         project_id=job.project_id,
                     )
                 self._queue.task_done()
+                if project_semaphore is not None:
+                    project_semaphore.release()
 
     async def update_job_record(self, job: KeywordRunJob, record: KeywordRunRecord) -> None:
         job.refresh_from_record(record)
+
+    async def _acquire_project_slot(self, project_id: str) -> asyncio.Semaphore:
+        async with self._project_semaphore_lock:
+            semaphore = self._project_semaphores.get(project_id)
+            if semaphore is None:
+                semaphore = asyncio.Semaphore(self._max_concurrency_per_project)
+                self._project_semaphores[project_id] = semaphore
+        await semaphore.acquire()
+        return semaphore
 
 
 __all__ = ["KeywordRunQueue", "KeywordRunJob", "KeywordRunExecutor"]

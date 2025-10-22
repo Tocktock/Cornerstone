@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import time
 from collections import defaultdict, deque
+from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -104,6 +105,36 @@ class IngestionJob:
             "total_bytes": self.total_bytes,
             "processed_bytes": self.processed_bytes,
         }
+
+
+class IngestionWorkerPool:
+    """Thread pool for executing ingestion jobs concurrently."""
+
+    def __init__(self, *, max_workers: int = 4) -> None:
+        self._max_workers = max(1, max_workers)
+        self._executor = ThreadPoolExecutor(
+            max_workers=self._max_workers,
+            thread_name_prefix="cornerstone-ingest",
+        )
+        self._lock = threading.Lock()
+        self._shutdown = False
+
+    @property
+    def max_workers(self) -> int:
+        return self._max_workers
+
+    def submit(self, func, *args, **kwargs) -> Future:
+        with self._lock:
+            if self._shutdown:
+                raise RuntimeError("IngestionWorkerPool is shut down")
+            return self._executor.submit(func, *args, **kwargs)
+
+    def shutdown(self, *, wait: bool = False) -> None:
+        with self._lock:
+            if self._shutdown:
+                return
+            self._shutdown = True
+        self._executor.shutdown(wait=wait)
 
 
 class IngestionJobManager:
@@ -713,4 +744,5 @@ __all__ = [
     "IngestionResult",
     "IngestionJob",
     "IngestionJobManager",
+    "IngestionWorkerPool",
 ]

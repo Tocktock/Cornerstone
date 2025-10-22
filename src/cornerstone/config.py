@@ -37,6 +37,7 @@ _DEFAULT_LOCAL_DATA_DIR: Final[str] = "data/local"
 _DEFAULT_FTS_DB: Final[str] = "data/fts.sqlite"
 _DEFAULT_PROJECT_NAME: Final[str] = "Default Project"
 _DEFAULT_INGESTION_CONCURRENCY: Final[int] = 3
+_DEFAULT_INGESTION_WORKER_CONCURRENCY: Final[int] = 4
 _DEFAULT_INGESTION_FILES_PER_MINUTE: Final[int] = 180
 _DEFAULT_RETRIEVAL_TOP_K: Final[int] = 3
 _DEFAULT_CHAT_TEMPERATURE: Final[float] = 0.2
@@ -80,7 +81,8 @@ _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS: Final[int] = 64
 _DEFAULT_KEYWORD_LLM_MAX_CANDIDATES: Final[int] = 25000
 _DEFAULT_KEYWORD_LLM_MAX_TOKENS: Final[int] = 750_000
 _DEFAULT_KEYWORD_LLM_MAX_CHUNKS: Final[int] = 10000
-_DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY: Final[int] = 1
+_DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY: Final[int] = 3
+_DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY_PER_PROJECT: Final[int] = 1
 _DEFAULT_KEYWORD_RUN_MAX_QUEUE: Final[int] = 8
 _DEFAULT_KEYWORD_RUN_CACHE_TTL: Final[int] = 86_400
 _DEFAULT_KEYWORD_RUN_AUTO_REFRESH: Final[bool] = False
@@ -171,6 +173,7 @@ class Settings:
     fts_db_path: str = _DEFAULT_FTS_DB
     default_project_name: str = _DEFAULT_PROJECT_NAME
     ingestion_project_concurrency_limit: int = _DEFAULT_INGESTION_CONCURRENCY
+    ingestion_worker_concurrency: int = _DEFAULT_INGESTION_WORKER_CONCURRENCY
     ingestion_files_per_minute: int = _DEFAULT_INGESTION_FILES_PER_MINUTE
     retrieval_top_k: int = _DEFAULT_RETRIEVAL_TOP_K
     chat_temperature: float = _DEFAULT_CHAT_TEMPERATURE
@@ -227,6 +230,7 @@ class Settings:
     keyword_llm_max_tokens: int = _DEFAULT_KEYWORD_LLM_MAX_TOKENS
     keyword_llm_max_chunks: int = _DEFAULT_KEYWORD_LLM_MAX_CHUNKS
     keyword_run_max_concurrency: int = _DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY
+    keyword_run_max_concurrency_per_project: int | None = _DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY_PER_PROJECT
     keyword_run_max_queue: int = _DEFAULT_KEYWORD_RUN_MAX_QUEUE
     keyword_run_cache_ttl: int = _DEFAULT_KEYWORD_RUN_CACHE_TTL
     keyword_run_auto_refresh: bool = _DEFAULT_KEYWORD_RUN_AUTO_REFRESH
@@ -261,6 +265,12 @@ class Settings:
             default_project_name=os.getenv("DEFAULT_PROJECT_NAME", _DEFAULT_PROJECT_NAME),
             ingestion_project_concurrency_limit=int(
                 os.getenv("INGESTION_PROJECT_CONCURRENCY_LIMIT", _DEFAULT_INGESTION_CONCURRENCY)
+            ),
+            ingestion_worker_concurrency=int(
+                os.getenv(
+                    "INGESTION_WORKER_CONCURRENCY",
+                    str(_DEFAULT_INGESTION_WORKER_CONCURRENCY),
+                )
             ),
             ingestion_files_per_minute=int(
                 os.getenv("INGESTION_FILES_PER_MINUTE", _DEFAULT_INGESTION_FILES_PER_MINUTE)
@@ -470,6 +480,11 @@ class Settings:
                     "KEYWORD_RUN_MAX_CONCURRENCY",
                     str(_DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY),
                 )
+            ),
+            keyword_run_max_concurrency_per_project=(
+                value
+                if (value := _env_optional_int("KEYWORD_RUN_MAX_CONCURRENCY_PER_PROJECT")) is not None
+                else _DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY_PER_PROJECT
             ),
             keyword_run_max_queue=int(
                 os.getenv(

@@ -24,6 +24,7 @@ from .glossary import Glossary, GlossaryEntry, load_glossary, load_query_hints
 from .ingestion import (
     DocumentIngestor,
     IngestionJobManager,
+    IngestionWorkerPool,
     ProjectVectorStoreManager,
 )
 from .fts import FTSIndex
@@ -91,6 +92,7 @@ class ApplicationState:
         chat_service: SupportAgentService,
         ingestion_service: DocumentIngestor,
         ingestion_jobs: IngestionJobManager,
+        ingestion_pool: IngestionWorkerPool,
         fts_index,
         metrics: MetricsRecorder | None,
         reranker: Reranker | None,
@@ -111,6 +113,7 @@ class ApplicationState:
         self.chat_service = chat_service
         self.ingestion_service = ingestion_service
         self.ingestion_jobs = ingestion_jobs
+        self.ingestion_pool = ingestion_pool
         self.fts_index = fts_index
         self.metrics = metrics
         self.reranker = reranker
@@ -135,6 +138,7 @@ def create_app(
     chat_service: SupportAgentService | None = None,
     ingestion_service: DocumentIngestor | None = None,
     ingestion_jobs: IngestionJobManager | None = None,
+    ingestion_pool: IngestionWorkerPool | None = None,
     metrics: MetricsRecorder | None = None,
     reranker: Reranker | None = None,
     conversation_logger: ConversationLogger | None = None,
@@ -234,6 +238,10 @@ def create_app(
         max_files_per_minute=settings.ingestion_files_per_minute,
     )
 
+    ingestion_pool = ingestion_pool or IngestionWorkerPool(
+        max_workers=settings.ingestion_worker_concurrency,
+    )
+
     insight_queue = insight_queue or KeywordInsightQueue(
         max_jobs=settings.keyword_stage7_summary_max_jobs
     )
@@ -242,6 +250,7 @@ def create_app(
         project_store,
         max_queue=settings.keyword_run_max_queue,
         max_concurrency=settings.keyword_run_max_concurrency,
+        max_concurrency_per_project=settings.keyword_run_max_concurrency_per_project,
         metrics=metrics,
     )
     keyword_run_queue.configure_metrics(metrics)
@@ -321,6 +330,7 @@ def create_app(
         finally:
             if queue_started:
                 await keyword_run_queue.shutdown()
+            ingestion_pool.shutdown(wait=False)
 
     app = FastAPI(lifespan=lifespan)
     app.state.services = ApplicationState(
@@ -333,6 +343,7 @@ def create_app(
         chat_service=chat_service,
         ingestion_service=ingestion_service,
         ingestion_jobs=ingestion_jobs,
+        ingestion_pool=ingestion_pool,
         fts_index=fts_index,
         metrics=metrics,
         reranker=reranker,
@@ -390,6 +401,9 @@ def create_app(
 
     def get_ingestion_jobs(request: Request) -> IngestionJobManager:
         return get_state(request).ingestion_jobs
+
+    def get_ingestion_pool(request: Request) -> IngestionWorkerPool:
+        return get_state(request).ingestion_pool
 
     def get_fts_index(request: Request) -> FTSIndex:
         return get_state(request).fts_index
@@ -1453,6 +1467,7 @@ def create_app(
         project_store: ProjectStore = Depends(get_project_store),
         ingestion: DocumentIngestor = Depends(get_ingestion_service),
         job_manager: IngestionJobManager = Depends(get_ingestion_jobs),
+        ingestion_pool: IngestionWorkerPool = Depends(get_ingestion_pool),
     ) -> JSONResponse:
         project = _resolve_project(project_store, project_id)
         if not files:
@@ -1477,7 +1492,8 @@ def create_app(
                 continue
 
             background_tasks.add_task(
-                _process_ingestion_job,
+                _enqueue_ingestion_job,
+                ingestion_pool,
                 job_manager,
                 ingestion,
                 job.id,
@@ -1511,6 +1527,7 @@ def create_app(
         project_store: ProjectStore = Depends(get_project_store),
         ingestion: DocumentIngestor = Depends(get_ingestion_service),
         job_manager: IngestionJobManager = Depends(get_ingestion_jobs),
+        ingestion_pool: IngestionWorkerPool = Depends(get_ingestion_pool),
     ) -> JSONResponse:
         project = _resolve_project(project_store, project_id)
         base_dir = Path(settings.local_data_dir).resolve()
@@ -1525,14 +1542,15 @@ def create_app(
         manifest_path = Path(settings.data_dir).resolve() / "manifests" / f"{project.id}.json"
         job = job_manager.create_job(project.id, f"{display_name}/")
         background_tasks.add_task(
-            local_ingest.ingest_directory,
-            project_id=project.id,
-            target_dir=target_dir,
-            base_dir=base_dir,
-            ingestion_service=ingestion,
-            manifest_path=manifest_path,
-            job_manager=job_manager,
-            job_id=job.id,
+            _enqueue_local_directory_job,
+            ingestion_pool,
+            job_manager,
+            job.id,
+            project.id,
+            target_dir,
+            base_dir,
+            ingestion,
+            manifest_path,
         )
         return JSONResponse({"job": job.to_dict()}, status_code=202)
 
@@ -1544,6 +1562,7 @@ def create_app(
         project_store: ProjectStore = Depends(get_project_store),
         ingestion: DocumentIngestor = Depends(get_ingestion_service),
         job_manager: IngestionJobManager = Depends(get_ingestion_jobs),
+        ingestion_pool: IngestionWorkerPool = Depends(get_ingestion_pool),
     ) -> JSONResponse:
         project = _resolve_project(project_store, project_id)
         sanitized_url = url.strip()
@@ -1552,7 +1571,8 @@ def create_app(
 
         job = job_manager.create_job(project.id, sanitized_url)
         background_tasks.add_task(
-            _process_ingestion_job,
+            _enqueue_ingestion_job,
+            ingestion_pool,
             job_manager,
             ingestion,
             job.id,
@@ -1886,6 +1906,75 @@ def _format_results(results: Iterable[SearchResult]) -> list[dict[str, object]]:
 
 
 __all__ = ["create_app", "ApplicationState"]
+
+
+def _enqueue_ingestion_job(
+    ingestion_pool: IngestionWorkerPool,
+    job_manager: IngestionJobManager,
+    ingestion_service: DocumentIngestor,
+    job_id: str,
+    project_id: str,
+    filename: str,
+    content_type: str | None,
+    data: bytes | None = None,
+    source_url: str | None = None,
+) -> None:
+    try:
+        ingestion_pool.submit(
+            _process_ingestion_job,
+            job_manager,
+            ingestion_service,
+            job_id,
+            project_id,
+            filename,
+            content_type,
+            data,
+            source_url,
+        )
+    except RuntimeError as exc:
+        logger.error(
+            "ingest.job.submit_failed job_id=%s project=%s error=%s",
+            job_id,
+            project_id,
+            exc,
+        )
+        job_manager.mark_failed(
+            job_id,
+            f"Failed to schedule ingestion: {exc}",
+            processed_files=0,
+            total_files=1,
+        )
+
+
+def _enqueue_local_directory_job(
+    ingestion_pool: IngestionWorkerPool,
+    job_manager: IngestionJobManager,
+    job_id: str,
+    project_id: str,
+    target_dir: Path,
+    base_dir: Path,
+    ingestion_service: DocumentIngestor,
+    manifest_path: Path,
+) -> None:
+    try:
+        ingestion_pool.submit(
+            local_ingest.ingest_directory,
+            project_id=project_id,
+            target_dir=target_dir,
+            base_dir=base_dir,
+            ingestion_service=ingestion_service,
+            manifest_path=manifest_path,
+            job_manager=job_manager,
+            job_id=job_id,
+        )
+    except RuntimeError as exc:
+        logger.error(
+            "ingest.directory.submit_failed job_id=%s project=%s error=%s",
+            job_id,
+            project_id,
+            exc,
+        )
+        job_manager.mark_failed(job_id, f"Failed to schedule ingestion: {exc}")
 
 
 def _process_ingestion_job(
