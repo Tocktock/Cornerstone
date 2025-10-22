@@ -1794,10 +1794,8 @@ def create_app(
         settings: Settings = Depends(get_settings_dependency),
     ) -> RedirectResponse:
         project = _resolve_project(project_store, project_id)
-        documents = project_store.list_documents(project.id)
         cleared = store_manager.purge_project(project.id)
-        for doc in documents:
-            fts_index.delete_document(project.id, doc.id)
+        fts_index.delete_project(project.id)
         project_store.clear_documents(project.id)
         manifest_path = Path(settings.data_dir).resolve() / "manifests" / f"{project.id}.json"
         if manifest_path.exists():
