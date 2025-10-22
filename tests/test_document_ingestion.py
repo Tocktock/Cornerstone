@@ -472,6 +472,7 @@ def test_cleanup_endpoint_purges_project_vectors():
     assert documents
     store = state.store_manager.get_store(project.id)
     assert store.count() > 0
+    assert state.fts_index.search(project.id, "Troubleshooting")
 
     response = client.post(
         "/knowledge/cleanup",
@@ -481,6 +482,7 @@ def test_cleanup_endpoint_purges_project_vectors():
     assert response.status_code == 303
     assert project_store.list_documents(project.id) == []
     assert store.count() == 0
+    assert state.fts_index.search(project.id, "Troubleshooting") == []
 
 
 def test_ingested_chunks_include_metadata_summary_and_language():
