@@ -56,6 +56,10 @@ class QueryHintGenerator:
         self._ollama_url: str | None = None
         self._ollama_model: str | None = None
         self._ollama_timeout: float = max(settings.ollama_request_timeout, 300.0)
+        self._vllm_base_url: str | None = None
+        self._vllm_model: str | None = None
+        self._vllm_timeout: float = max(settings.vllm_request_timeout, 300.0)
+        self._vllm_api_key: str | None = (settings.vllm_api_key or None)
         self._openai_client: OpenAI | None = None
         self._llm_call = llm_call
 
@@ -93,6 +97,18 @@ class QueryHintGenerator:
                 )
             else:
                 self._disabled_reason = "missing-ollama-config"
+        elif settings.is_vllm_chat_backend:
+            self._vllm_base_url = settings.vllm_base_url.rstrip("/")
+            self._vllm_model = settings.vllm_model
+            if self._vllm_base_url and self._vllm_model:
+                self._backend = "vllm"
+                logger.info(
+                    "query_hints.llm.backend_ready backend=vllm model=%s url=%s",
+                    self._vllm_model,
+                    self._vllm_base_url,
+                )
+            else:
+                self._disabled_reason = "missing-vllm-config"
         else:
             self._disabled_reason = "unsupported-backend"
 
@@ -238,7 +254,39 @@ class QueryHintGenerator:
             if not text:
                 raise RuntimeError("Ollama response was empty")
             return text
+        if self._backend == "vllm":
+            url, headers, payload = self._prepare_vllm_request(prompt)
+            response = httpx.post(url, json=payload, headers=headers, timeout=self._vllm_timeout)
+            response.raise_for_status()
+            data = response.json()
+            for choice in data.get("choices") or []:
+                message = choice.get("message") or {}
+                content = message.get("content")
+                if content:
+                    text = str(content).strip()
+                    if text:
+                        return text
+            raise RuntimeError("vLLM response was empty")
         raise RuntimeError("LLM backend not configured")
+
+    def _prepare_vllm_request(self, prompt: str) -> tuple[str, dict[str, str], dict[str, object]]:
+        if not self._vllm_base_url or not self._vllm_model:
+            raise RuntimeError("VLLM backend not configured for query hint generation")
+        url = f"{self._vllm_base_url}/v1/chat/completions"
+        headers: dict[str, str] = {"Content-Type": "application/json"}
+        if self._vllm_api_key:
+            headers["Authorization"] = f"Bearer {self._vllm_api_key}"
+        payload: dict[str, object] = {
+            "model": self._vllm_model,
+            "messages": [
+                {"role": "system", "content": "Return only valid JSON."},
+                {"role": "user", "content": prompt},
+            ],
+            "stream": False,
+            "temperature": 0.0,
+            "max_tokens": 600,
+        }
+        return url, headers, payload
 
     @staticmethod
     def _normalize_token(value: str) -> str:

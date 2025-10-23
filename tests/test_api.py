@@ -129,7 +129,7 @@ def test_keywords_endpoint_returns_candidates(fastapi_app: TestClient) -> None:
     assert "source" in first
     filter_info = data.get("filter")
     assert filter_info is not None
-    assert filter_info.get("backend") in {None, "openai", "ollama"}
+    assert filter_info.get("backend") in {None, "openai", "ollama", "vllm"}
     assert "status" in filter_info
     pagination = data.get("pagination")
     assert pagination is not None

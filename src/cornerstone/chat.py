@@ -737,6 +737,9 @@ class SupportAgentService:
         if self._settings.is_ollama_chat_backend:
             logger.info("support.backend.ollama.stream model=%s", self._settings.ollama_model)
             return self._stream_ollama(prompt, temperature=temperature, max_tokens=max_tokens)
+        if self._settings.is_vllm_chat_backend:
+            logger.info("support.backend.vllm.stream model=%s", self._settings.vllm_model)
+            return self._stream_vllm(prompt, temperature=temperature, max_tokens=max_tokens)
 
         def generator() -> Iterator[str]:
             yield self._invoke_backend(prompt, temperature=temperature, max_tokens=max_tokens)
@@ -756,6 +759,9 @@ class SupportAgentService:
         if self._settings.is_ollama_chat_backend:
             logger.info("support.backend.ollama.invoke model=%s", self._settings.ollama_model)
             return self._invoke_ollama(prompt, temperature=temperature, max_tokens=max_tokens)
+        if self._settings.is_vllm_chat_backend:
+            logger.info("support.backend.vllm.invoke model=%s", self._settings.vllm_model)
+            return self._invoke_vllm(prompt, temperature=temperature, max_tokens=max_tokens)
         raise RuntimeError(f"Unsupported chat backend: {self._settings.chat_backend}")
 
     def _invoke_openai(self, prompt: str, *, temperature: float, max_tokens: int | None) -> str:
@@ -841,6 +847,56 @@ class SupportAgentService:
             return "I'm sorry, I could not generate a response at this time."
         logger.info("support.backend.ollama.success model=%s chars=%s", model, len(text))
         return text
+
+    def _invoke_vllm(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> str:
+        if httpx is None:  # pragma: no cover
+            raise RuntimeError("httpx must be installed for the vLLM chat backend")
+
+        url, headers, payload = self._prepare_vllm_request(
+            prompt,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stream=False,
+        )
+
+        model = str(payload.get("model", "")).strip()
+
+        try:
+            response = httpx.post(
+                url,
+                json=payload,
+                headers=headers,
+                timeout=self._settings.vllm_request_timeout,
+            )
+            response.raise_for_status()
+        except Exception as exc:  # pragma: no cover - network errors
+            logger.error("support.backend.vllm.error model=%s error=%s", model, exc)
+            raise RuntimeError(f"vLLM request failed: {exc}") from exc
+
+        data = response.json()
+        choices = data.get("choices") or []
+        for choice in choices:
+            message = choice.get("message") or {}
+            content = message.get("content")
+            if content:
+                text = str(content).strip()
+                if text:
+                    logger.info("support.backend.vllm.success model=%s chars=%s", model, len(text))
+                    return text
+        content = data.get("choices", [{}])[0].get("text") if choices else None
+        if content:
+            text = str(content).strip()
+            if text:
+                logger.info("support.backend.vllm.success model=%s chars=%s", model, len(text))
+                return text
+        logger.warning("support.backend.vllm.empty_response model=%s", model)
+        return "I'm sorry, I could not generate a response at this time."
 
     def _get_openai_client(self) -> OpenAI:
         if OpenAI is None:  # pragma: no cover
@@ -932,6 +988,93 @@ class SupportAgentService:
                 raise RuntimeError(f"Ollama streaming request failed: {exc}") from exc
 
         return generator()
+
+    def _stream_vllm(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+    ) -> Iterable[str]:
+        if httpx is None:  # pragma: no cover
+            raise RuntimeError("httpx must be installed for the vLLM chat backend")
+
+        url, headers, payload = self._prepare_vllm_request(
+            prompt,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stream=True,
+        )
+
+        def generator() -> Iterator[str]:
+            model_name = str(payload.get("model", "")).strip()
+
+            try:
+                with httpx.stream(
+                    "POST",
+                    url,
+                    json=payload,
+                    headers=headers,
+                    timeout=self._settings.vllm_request_timeout,
+                ) as response:
+                    response.raise_for_status()
+                    for raw_line in response.iter_lines():
+                        if not raw_line:
+                            continue
+                        line = raw_line.strip()
+                        if not line:
+                            continue
+                        if line.startswith("data:"):
+                            line = line[5:].strip()
+                        if line == "[DONE]":
+                            break
+                        try:
+                            data = json.loads(line)
+                        except json.JSONDecodeError:  # pragma: no cover - malformed chunk
+                            logger.debug("support.backend.vllm.stream.decode_error line=%s", raw_line)
+                            continue
+                        for choice in data.get("choices", []):
+                            delta = choice.get("delta") or {}
+                            content = delta.get("content")
+                            if content:
+                                yield str(content)
+            except Exception as exc:  # pragma: no cover - network errors
+                logger.error("support.backend.vllm.stream.error model=%s error=%s", model_name, exc)
+                raise RuntimeError(f"vLLM streaming request failed: {exc}") from exc
+
+        return generator()
+
+    def _prepare_vllm_request(
+        self,
+        prompt: str,
+        *,
+        temperature: float,
+        max_tokens: int | None,
+        stream: bool,
+    ) -> tuple[str, dict[str, str], dict[str, object]]:
+        model = (self._settings.vllm_model or "").strip()
+        base_url = (self._settings.vllm_base_url or "").strip()
+        if not model:
+            raise RuntimeError("VLLM_MODEL must be set when using the vLLM chat backend")
+        if not base_url:
+            raise RuntimeError("VLLM_BASE_URL must be set when using the vLLM chat backend")
+        url = f"{base_url.rstrip('/')}/v1/chat/completions"
+        headers: dict[str, str] = {"Content-Type": "application/json"}
+        api_key = (self._settings.vllm_api_key or "").strip()
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+        payload: dict[str, object] = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": "You are an empathetic technical support agent."},
+                {"role": "user", "content": prompt},
+            ],
+            "stream": stream,
+            "temperature": max(0.0, temperature),
+        }
+        if max_tokens is not None:
+            payload["max_tokens"] = max_tokens
+        return url, headers, payload
 
 
 __all__ = ["SupportAgentService", "SupportAgentResponse", "SupportAgentContext"]

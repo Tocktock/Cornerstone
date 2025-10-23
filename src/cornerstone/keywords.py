@@ -1703,6 +1703,10 @@ class KeywordLLMFilter:
         self._ollama_base_url: str | None = None
         self._ollama_model: str | None = None
         self._ollama_timeout: float = max(settings.ollama_request_timeout, 300.0)
+        self._vllm_base_url: str | None = None
+        self._vllm_model: str | None = None
+        self._vllm_timeout: float = max(settings.vllm_request_timeout, 300.0)
+        self._vllm_api_key: str | None = (settings.vllm_api_key or None)
         self._max_results: int = max(0, settings.keyword_filter_max_results)
         self._allow_generated: bool = settings.keyword_filter_allow_generated
         self._current_prompt: dict[str, str] | None = None
@@ -1744,6 +1748,19 @@ class KeywordLLMFilter:
                 )
             else:
                 reason = "missing-ollama-config"
+        elif settings.is_vllm_chat_backend:
+            self._vllm_base_url = settings.vllm_base_url.rstrip("/")
+            self._vllm_model = settings.vllm_model
+            if self._vllm_base_url and self._vllm_model:
+                self._backend = "vllm"
+                self._enabled = True
+                logger.info(
+                    "keyword.llm.backend_ready backend=vllm model=%s url=%s",
+                    self._vllm_model,
+                    self._vllm_base_url,
+                )
+            else:
+                reason = "missing-vllm-config"
         else:
             reason = "chat-backend-disabled"
 
@@ -3546,7 +3563,38 @@ class KeywordLLMFilter:
                 raise RuntimeError("Ollama response did not include content")
             return str(content).strip()
 
+        if self._backend == "vllm" and self._vllm_base_url and self._vllm_model:
+            url, headers, payload = self._prepare_vllm_request()
+            response = httpx.post(url, json=payload, headers=headers, timeout=self._vllm_timeout)
+            response.raise_for_status()
+            data = response.json()
+            for choice in data.get("choices") or []:
+                message = choice.get("message") or {}
+                content = message.get("content")
+                if content:
+                    return str(content).strip()
+            raise RuntimeError("vLLM response did not include content")
+
         raise RuntimeError("LLM backend is not correctly configured")
+
+    def _prepare_vllm_request(self) -> tuple[str, dict[str, str], dict[str, object]]:
+        if not self._current_prompt:
+            raise RuntimeError("Prompt context was not initialised")
+        if not self._vllm_base_url or not self._vllm_model:
+            raise RuntimeError("vLLM backend is not correctly configured")
+        url = f"{self._vllm_base_url}/v1/chat/completions"
+        headers: dict[str, str] = {"Content-Type": "application/json"}
+        if self._vllm_api_key:
+            headers["Authorization"] = f"Bearer {self._vllm_api_key}"
+        payload: dict[str, object] = {
+            "model": self._vllm_model,
+            "messages": [
+                {"role": "system", "content": self._current_prompt["system"]},
+                {"role": "user", "content": self._current_prompt["user"]},
+            ],
+            "stream": False,
+        }
+        return url, headers, payload
 
 
 __all__ = [

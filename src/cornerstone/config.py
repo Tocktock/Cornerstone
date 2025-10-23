@@ -31,6 +31,9 @@ _DEFAULT_GLOSSARY_TOP_K: Final[int] = 3
 _DEFAULT_OLLAMA_URL: Final[str] = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL: Final[str] = "llama3.1:8b"
 _DEFAULT_OLLAMA_TIMEOUT: Final[float] = 60.0
+_DEFAULT_VLLM_URL: Final[str] = "http://localhost:8000"
+_DEFAULT_VLLM_MODEL: Final[str] = "meta-llama/Meta-Llama-3-8B-Instruct"
+_DEFAULT_VLLM_TIMEOUT: Final[float] = 60.0
 _DEFAULT_OLLAMA_EMBED_CONCURRENCY: Final[int] = 2
 _DEFAULT_DATA_DIR: Final[str] = "data"
 _DEFAULT_LOCAL_DATA_DIR: Final[str] = "data/local"
@@ -162,6 +165,10 @@ class Settings:
     ollama_base_url: str = _DEFAULT_OLLAMA_URL
     ollama_model: str = _DEFAULT_OLLAMA_MODEL
     ollama_request_timeout: float = _DEFAULT_OLLAMA_TIMEOUT
+    vllm_base_url: str = _DEFAULT_VLLM_URL
+    vllm_model: str = _DEFAULT_VLLM_MODEL
+    vllm_api_key: str | None = None
+    vllm_request_timeout: float = _DEFAULT_VLLM_TIMEOUT
     ollama_embedding_concurrency: int = _DEFAULT_OLLAMA_EMBED_CONCURRENCY
     glossary_path: str = _DEFAULT_GLOSSARY_PATH
     query_hint_path: str | None = _DEFAULT_QUERY_HINTS_PATH
@@ -249,6 +256,10 @@ class Settings:
             ollama_base_url=os.getenv("OLLAMA_BASE_URL", _DEFAULT_OLLAMA_URL),
             ollama_model=os.getenv("OLLAMA_MODEL", _DEFAULT_OLLAMA_MODEL),
             ollama_request_timeout=float(os.getenv("OLLAMA_TIMEOUT", _DEFAULT_OLLAMA_TIMEOUT)),
+            vllm_base_url=os.getenv("VLLM_BASE_URL", _DEFAULT_VLLM_URL),
+            vllm_model=os.getenv("VLLM_MODEL", _DEFAULT_VLLM_MODEL),
+            vllm_api_key=os.getenv("VLLM_API_KEY"),
+            vllm_request_timeout=float(os.getenv("VLLM_TIMEOUT", _DEFAULT_VLLM_TIMEOUT)),
             ollama_embedding_concurrency=int(
                 os.getenv("OLLAMA_EMBEDDING_CONCURRENCY", _DEFAULT_OLLAMA_EMBED_CONCURRENCY)
             ),
@@ -503,7 +514,11 @@ class Settings:
     def is_huggingface_backend(self) -> bool:
         """Return True when the configured embedding backend is a local HuggingFace model."""
 
-        return not self.is_openai_backend and not self.is_ollama_embedding_backend
+        return (
+            not self.is_openai_backend
+            and not self.is_ollama_embedding_backend
+            and not self.is_vllm_embedding_backend
+        )
 
     @property
     def is_ollama_embedding_backend(self) -> bool:
@@ -516,6 +531,22 @@ class Settings:
         """Return the Ollama embedding model name without the prefix when configured."""
 
         if not self.is_ollama_embedding_backend:
+            return None
+        _, _, name = self.embedding_model.partition(":")
+        model = name.strip()
+        return model or None
+
+    @property
+    def is_vllm_embedding_backend(self) -> bool:
+        """Return True when embeddings should be generated via a vLLM-hosted model."""
+
+        return self.embedding_model.strip().lower().startswith("vllm:")
+
+    @property
+    def vllm_embedding_model(self) -> str | None:
+        """Return the vLLM embedding model name without the prefix when configured."""
+
+        if not self.is_vllm_embedding_backend:
             return None
         _, _, name = self.embedding_model.partition(":")
         model = name.strip()
@@ -541,6 +572,12 @@ class Settings:
         """Return True when the chat backend is configured for an Ollama-hosted model."""
 
         return self.chat_backend.lower() == "ollama"
+
+    @property
+    def is_vllm_chat_backend(self) -> bool:
+        """Return True when the chat backend is configured for a vLLM-hosted model."""
+
+        return self.chat_backend.lower() == "vllm"
 
     def qdrant_client_kwargs(self) -> dict[str, Any]:
         """Configuration arguments for instantiating a Qdrant client."""

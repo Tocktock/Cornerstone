@@ -417,18 +417,50 @@ def test_parse_response_handles_leading_text_without_fence() -> None:
     assert parsed["keywords"][0]["term"] == "beta"
 
 
-def _build_enabled_filter(keyword_payload: dict, monkeypatch, *, allow_generated: bool = False) -> KeywordLLMFilter:
-    settings = Settings(
-        chat_backend="ollama",
-        ollama_base_url="http://localhost:11434",
-        ollama_model="mock-keywords",
-        keyword_filter_max_results=3,
-        keyword_filter_allow_generated=allow_generated,
-    )
+def _build_enabled_filter(
+    keyword_payload: dict,
+    monkeypatch,
+    *,
+    allow_generated: bool = False,
+    backend: str = "ollama",
+) -> KeywordLLMFilter:
+    if backend == "ollama":
+        settings = Settings(
+            chat_backend="ollama",
+            ollama_base_url="http://localhost:11434",
+            ollama_model="mock-keywords",
+            keyword_filter_max_results=3,
+            keyword_filter_allow_generated=allow_generated,
+        )
+    elif backend == "vllm":
+        settings = Settings(
+            chat_backend="vllm",
+            vllm_base_url="http://localhost:8000",
+            vllm_model="mock-keywords",
+            keyword_filter_max_results=3,
+            keyword_filter_allow_generated=allow_generated,
+        )
+    else:  # pragma: no cover - defensive guard
+        raise AssertionError(f"Unsupported backend: {backend}")
     filter_instance = KeywordLLMFilter(settings)
     response = json.dumps(keyword_payload)
     monkeypatch.setattr(KeywordLLMFilter, "_invoke_backend", lambda self, _: response)
     return filter_instance
+
+
+def test_keyword_llm_filter_supports_vllm_backend(monkeypatch) -> None:
+    filter_instance = _build_enabled_filter(
+        {"keywords": [{"term": "Alpha", "keep": True, "reason": "test"}]},
+        monkeypatch,
+        backend="vllm",
+    )
+    assert filter_instance.enabled is True
+    assert filter_instance.backend == "vllm"
+    candidates = [KeywordCandidate(term="Alpha", count=1, is_core=True)]
+    results = filter_instance.filter_keywords(candidates, context_snippets=[])
+    assert [item.term for item in results] == ["Alpha"]
+    info = filter_instance.debug_payload()
+    assert info.get("backend") == "vllm"
 
 
 def test_refine_concepts_applies_llm(monkeypatch) -> None:

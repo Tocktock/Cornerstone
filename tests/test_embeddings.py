@@ -90,6 +90,44 @@ class _StubHttpxModule:
         return client
 
 
+class _StubVLLMResponse:
+    def __init__(self, vectors: list[list[float]]) -> None:
+        self._vectors = vectors
+
+    def raise_for_status(self) -> None:
+        return None
+
+    def json(self) -> dict[str, Any]:
+        return {"data": [{"embedding": vector} for vector in self._vectors]}
+
+
+class _StubVLLMClient:
+    def __init__(self, base_url: str, timeout: float, headers: dict[str, str] | None = None) -> None:
+        self.base_url = base_url
+        self.timeout = timeout
+        self.headers = headers or {}
+        self.requests: list[dict[str, Any]] = []
+
+    def post(self, url: str, json: dict[str, Any]) -> _StubVLLMResponse:
+        self.requests.append({"url": url, "json": json})
+        inputs = json.get("input", [])
+        vectors = [[float(len(text)), 0.0, 0.0] for text in inputs] or [[0.0, 0.0, 0.0]]
+        return _StubVLLMResponse(vectors)
+
+    def close(self) -> None:
+        return None
+
+
+class _StubVLLMModule:
+    def __init__(self) -> None:
+        self.created: list[_StubVLLMClient] = []
+
+    def Client(self, *args: Any, **kwargs: Any) -> _StubVLLMClient:  # noqa: N802
+        client = _StubVLLMClient(*args, **kwargs)
+        self.created.append(client)
+        return client
+
+
 def test_huggingface_backend_uses_sentence_transformer(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         "cornerstone.embeddings.SentenceTransformer", lambda name: _StubModel(name=name)
@@ -142,3 +180,31 @@ def test_ollama_backend_calls_local_api(monkeypatch: pytest.MonkeyPatch) -> None
     assert len(stub_httpx.created) == 1
     client = stub_httpx.created[0]
     assert len(client.requests) == 1 + 2  # dimension probe + two embedding calls
+
+
+def test_vllm_backend_calls_openai_compatible_api(monkeypatch: pytest.MonkeyPatch) -> None:
+    stub_httpx = _StubVLLMModule()
+    monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
+
+    settings = Settings(
+        embedding_model="vllm:mock-embed",
+        vllm_base_url="http://localhost:8000",
+        vllm_api_key="secret",
+        vllm_request_timeout=12.5,
+    )
+    service = EmbeddingService(settings, validate=False)
+
+    assert service.backend is EmbeddingBackend.VLLM
+    assert service.dimension == 3
+
+    vectors = service.embed(["hi", "team"])
+    assert vectors == [[2.0, 0.0, 0.0], [4.0, 0.0, 0.0]]
+
+    assert len(stub_httpx.created) == 1
+    client = stub_httpx.created[0]
+    assert client.base_url == "http://localhost:8000"
+    assert client.timeout == pytest.approx(12.5)
+    assert client.headers.get("Authorization") == "Bearer secret"
+    assert len(client.requests) == 2  # dimension probe + batch
+    assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
+    assert client.requests[1]["json"]["input"] == ["hi", "team"]

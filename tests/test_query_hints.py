@@ -47,3 +47,53 @@ def test_merge_hint_sources_deduplicates():
         {"Business": ["물류", "사업"]},
     )
     assert merged["business"] == ["사업", "비즈니스", "물류"]
+
+
+def test_query_hint_generator_vllm_backend(monkeypatch: pytest.MonkeyPatch) -> None:
+    class _StubResponse:
+        def __init__(self, payload):
+            self._payload = payload
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return self._payload
+
+    captured = {}
+
+    def fake_post(url, *, json, headers, timeout):
+        captured["url"] = url
+        captured["json"] = json
+        captured["headers"] = headers
+        captured["timeout"] = timeout
+        return _StubResponse(
+            {
+                "choices": [
+                    {"message": {"content": '{"alpha": ["hint-a", "hint-b"]}'}}
+                ]
+            }
+        )
+
+    monkeypatch.setattr("cornerstone.query_hints.httpx.post", fake_post)
+
+    settings = Settings(
+        chat_backend="vllm",
+        vllm_base_url="http://localhost:8000",
+        vllm_model="mock-hints",
+        vllm_api_key="secret",
+    )
+    generator = QueryHintGenerator(settings, max_terms_per_prompt=1)
+    entries = [GlossaryEntry(term="Alpha", definition="First")]
+
+    report = generator.generate(entries)
+
+    assert report.backend == "vllm"
+    assert report.prompts_sent == 1
+    assert report.hints["alpha"] == ["hint-a", "hint-b"]
+    assert captured["url"] == "http://localhost:8000/v1/chat/completions"
+    assert captured["json"]["model"] == "mock-hints"
+    assert captured["json"]["stream"] is False
+    assert captured["json"]["temperature"] == 0.0
+    assert captured["json"]["max_tokens"] == 600
+    assert captured["headers"]["Authorization"] == "Bearer secret"

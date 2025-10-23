@@ -22,6 +22,7 @@ class EmbeddingBackend(Enum):
     OPENAI = auto()
     HUGGINGFACE = auto()
     OLLAMA = auto()
+    VLLM = auto()
 
 
 class EmbeddingService:
@@ -33,6 +34,8 @@ class EmbeddingService:
             backend = EmbeddingBackend.OPENAI
         elif settings.is_ollama_embedding_backend:
             backend = EmbeddingBackend.OLLAMA
+        elif settings.is_vllm_embedding_backend:
+            backend = EmbeddingBackend.VLLM
         else:
             backend = EmbeddingBackend.HUGGINGFACE
 
@@ -45,11 +48,21 @@ class EmbeddingService:
         self._ollama_timeout: float = settings.ollama_request_timeout
         self._ollama_concurrency: int = max(1, settings.ollama_embedding_concurrency)
         self._ollama_client: httpx.Client | None = None
+        self._vllm_model: str | None = None
+        self._vllm_base_url: str | None = None
+        self._vllm_timeout: float = settings.vllm_request_timeout
+        api_key = settings.vllm_api_key or None
+        if isinstance(api_key, str):
+            api_key = api_key.strip()
+        self._vllm_api_key = api_key or None
+        self._vllm_client: httpx.Client | None = None
 
         if self._backend is EmbeddingBackend.OPENAI:
             self._setup_openai(validate)
         elif self._backend is EmbeddingBackend.OLLAMA:
             self._setup_ollama(validate)
+        elif self._backend is EmbeddingBackend.VLLM:
+            self._setup_vllm(validate)
         else:
             self._setup_huggingface(validate)
 
@@ -97,6 +110,9 @@ class EmbeddingService:
         if self._backend is EmbeddingBackend.OLLAMA:
             return self._ollama_batch_embed(texts)
 
+        if self._backend is EmbeddingBackend.VLLM:
+            return self._vllm_embed_batch(texts)
+
         assert self._hf_model is not None
         vectors = self._hf_model.encode(list(texts), show_progress_bar=False)
         if hasattr(vectors, "tolist"):
@@ -119,6 +135,13 @@ class EmbeddingService:
                 pass
             finally:
                 self._ollama_client = None
+        if self._vllm_client is not None:
+            try:
+                self._vllm_client.close()
+            except Exception:  # pragma: no cover - best effort cleanup
+                pass
+            finally:
+                self._vllm_client = None
 
     def __del__(self):  # pragma: no cover - defensive cleanup
         self.close()
@@ -227,3 +250,80 @@ class EmbeddingService:
             results.extend([vector if vector is not None else [] for vector in vectors])
 
         return results
+
+    def _setup_vllm(self, validate: bool) -> None:
+        if httpx is None:  # pragma: no cover - should not happen when dependencies installed
+            raise RuntimeError("httpx must be installed to use vLLM embeddings")
+
+        model = self._settings.vllm_embedding_model
+        if not model:
+            msg = "EMBEDDING_MODEL must be set to a vLLM model when using the vLLM embedding backend."
+            raise ValueError(msg)
+
+        base_url = (self._settings.vllm_base_url or "").strip().rstrip("/")
+        if not base_url:
+            msg = "VLLM_BASE_URL must be configured when using the vLLM embedding backend."
+            raise ValueError(msg)
+
+        self._vllm_model = model
+        self._vllm_base_url = base_url
+
+        headers = {}
+        if self._vllm_api_key:
+            headers["Authorization"] = f"Bearer {self._vllm_api_key}"
+
+        self._vllm_client = httpx.Client(
+            base_url=self._vllm_base_url,
+            timeout=self._vllm_timeout,
+            headers=headers or None,
+        )
+
+        vectors = self._vllm_embed_batch(["__dimension_probe__"])
+        if not vectors or not vectors[0]:
+            msg = f"vLLM embedding backend '{model}' returned no data."
+            raise ValueError(msg)
+
+        self._dimension = len(vectors[0])
+        if validate and self._dimension <= 0:
+            msg = f"Unexpected embedding dimension ({self._dimension}) for vLLM model '{model}'."
+            raise ValueError(msg)
+
+    def _vllm_embed_batch(self, texts: Sequence[str]) -> List[List[float]]:
+        if not texts:
+            return []
+
+        if self._vllm_client is None or not self._vllm_model:
+            msg = "vLLM embedding backend is not configured."
+            raise RuntimeError(msg)
+
+        payload = {"model": self._vllm_model, "input": list(texts)}
+
+        try:
+            response = self._vllm_client.post("/v1/embeddings", json=payload)
+            response.raise_for_status()
+        except Exception as exc:  # pragma: no cover - network errors
+            raise RuntimeError(f"vLLM embedding request failed: {exc}") from exc
+
+        data = response.json()
+        items = data.get("data")
+        if not isinstance(items, list) or not items:
+            msg = "vLLM embedding response did not include embedding data."
+            raise RuntimeError(msg)
+
+        vectors: list[list[float]] = []
+        for item in items:
+            embedding = item.get("embedding")
+            if embedding is None:
+                msg = "vLLM embedding response item missing 'embedding'."
+                raise RuntimeError(msg)
+            vector = [float(value) for value in embedding]
+            if self._dimension is not None and self._dimension > 0 and len(vector) != self._dimension:
+                msg = f"vLLM embedding dimension changed from {self._dimension} to {len(vector)}."
+                raise RuntimeError(msg)
+            vectors.append(vector)
+
+        if len(vectors) != len(texts):
+            msg = "vLLM embedding response did not return the expected number of vectors."
+            raise RuntimeError(msg)
+
+        return vectors
