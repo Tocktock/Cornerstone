@@ -35,6 +35,7 @@ _DEFAULT_VLLM_URL: Final[str] = "http://localhost:8000"
 _DEFAULT_VLLM_MODEL: Final[str] = "meta-llama/Meta-Llama-3-8B-Instruct"
 _DEFAULT_VLLM_TIMEOUT: Final[float] = 60.0
 _DEFAULT_OLLAMA_EMBED_CONCURRENCY: Final[int] = 2
+_DEFAULT_VLLM_EMBED_CONCURRENCY: Final[int] = 4
 _DEFAULT_DATA_DIR: Final[str] = "data"
 _DEFAULT_LOCAL_DATA_DIR: Final[str] = "data/local"
 _DEFAULT_FTS_DB: Final[str] = "data/fts.sqlite"
@@ -198,6 +199,7 @@ class Settings:
     vllm_model: str = _DEFAULT_VLLM_MODEL
     vllm_api_key: str | None = None
     vllm_request_timeout: float = _DEFAULT_VLLM_TIMEOUT
+    vllm_embedding_concurrency: int = _DEFAULT_VLLM_EMBED_CONCURRENCY
     ollama_embedding_concurrency: int = _DEFAULT_OLLAMA_EMBED_CONCURRENCY
     glossary_path: str = _DEFAULT_GLOSSARY_PATH
     query_hint_path: str | None = _DEFAULT_QUERY_HINTS_PATH
@@ -290,6 +292,9 @@ class Settings:
             vllm_model=os.getenv("VLLM_MODEL", _DEFAULT_VLLM_MODEL),
             vllm_api_key=os.getenv("VLLM_API_KEY"),
             vllm_request_timeout=float(os.getenv("VLLM_TIMEOUT", _DEFAULT_VLLM_TIMEOUT)),
+            vllm_embedding_concurrency=int(
+                os.getenv("VLLM_EMBEDDING_CONCURRENCY", _DEFAULT_VLLM_EMBED_CONCURRENCY)
+            ),
             ollama_embedding_concurrency=int(
                 os.getenv("OLLAMA_EMBEDDING_CONCURRENCY", _DEFAULT_OLLAMA_EMBED_CONCURRENCY)
             ),

@@ -224,9 +224,10 @@ def test_vllm_backend_calls_openai_compatible_api(monkeypatch: pytest.MonkeyPatc
     assert client.base_url == "http://localhost:8000"
     assert client.timeout == pytest.approx(12.5)
     assert client.headers.get("Authorization") == "Bearer secret"
-    assert len(client.requests) == 2  # dimension probe + batch
+    assert len(client.requests) == 3  # dimension probe + two concurrent singles
     assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
-    assert client.requests[1]["json"]["input"] == ["hi", "team"]
+    requested_batches = [req["json"]["input"] for req in client.requests[1:]]
+    assert sorted(requested_batches) == [["hi"], ["team"]]
 
 
 def test_vllm_backend_supports_explicit_base_url(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -51,6 +51,7 @@ class EmbeddingService:
         self._vllm_model: str | None = None
         self._vllm_base_url: str | None = None
         self._vllm_timeout: float = settings.vllm_request_timeout
+        self._vllm_concurrency: int = max(1, settings.vllm_embedding_concurrency)
         api_key = settings.vllm_api_key or None
         if isinstance(api_key, str):
             api_key = api_key.strip()
@@ -291,7 +292,33 @@ class EmbeddingService:
             msg = "vLLM embedding backend is not configured."
             raise RuntimeError(msg)
 
-        payload = {"model": self._vllm_model, "input": list(texts)}
+        inputs = list(texts)
+        batch_size = max(self._vllm_concurrency * 4, self._vllm_concurrency)
+        overall_results: list[list[float] | None] = []
+
+        for offset in range(0, len(inputs), batch_size):
+            chunk = inputs[offset : offset + batch_size]
+            vectors: list[list[float] | None] = [None] * len(chunk)
+            concurrency = min(self._vllm_concurrency, len(chunk))
+
+            with ThreadPoolExecutor(max_workers=concurrency) as executor:
+                futures = {
+                    executor.submit(self._vllm_embed_single, text): idx for idx, text in enumerate(chunk)
+                }
+                for future in as_completed(futures):
+                    idx = futures[future]
+                    vectors[idx] = future.result()
+
+            overall_results.extend(vectors)
+
+        return [vector if vector is not None else [] for vector in overall_results]
+
+    def _vllm_embed_single(self, text: str) -> List[float]:
+        if self._vllm_client is None or not self._vllm_model:
+            msg = "vLLM embedding backend is not configured."
+            raise RuntimeError(msg)
+
+        payload = {"model": self._vllm_model, "input": [text]}
 
         try:
             response = self._vllm_client.post("/v1/embeddings", json=payload)
@@ -305,20 +332,13 @@ class EmbeddingService:
             msg = "vLLM embedding response did not include embedding data."
             raise RuntimeError(msg)
 
-        vectors: list[list[float]] = []
-        for item in items:
-            embedding = item.get("embedding")
-            if embedding is None:
-                msg = "vLLM embedding response item missing 'embedding'."
-                raise RuntimeError(msg)
-            vector = [float(value) for value in embedding]
-            if self._dimension is not None and self._dimension > 0 and len(vector) != self._dimension:
-                msg = f"vLLM embedding dimension changed from {self._dimension} to {len(vector)}."
-                raise RuntimeError(msg)
-            vectors.append(vector)
-
-        if len(vectors) != len(texts):
-            msg = "vLLM embedding response did not return the expected number of vectors."
+        embedding = items[0].get("embedding")
+        if embedding is None:
+            msg = "vLLM embedding response item missing 'embedding'."
             raise RuntimeError(msg)
 
-        return vectors
+        vector = [float(value) for value in embedding]
+        if self._dimension is not None and self._dimension > 0 and len(vector) != self._dimension:
+            msg = f"vLLM embedding dimension changed from {self._dimension} to {len(vector)}."
+            raise RuntimeError(msg)
+        return vector
