@@ -246,3 +246,31 @@ def test_vllm_backend_supports_explicit_base_url(monkeypatch: pytest.MonkeyPatch
     assert client.base_url == "https://llm.example.com"
     assert client.headers.get("Authorization") == "Bearer secret"
     assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
+
+
+def test_vllm_backend_allows_base_url_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    stub_httpx = _StubVLLMModule()
+    monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
+
+    settings = Settings(
+        embedding_model="vllm:qwen3-embeddings",
+        vllm_embedding_base_url="http://192.168.0.251:8001",
+        vllm_api_key="secret",
+    )
+    service = EmbeddingService(settings, validate=False)
+
+    vectors = service.embed(["override"])
+    assert vectors == [[8.0, 0.0, 0.0]]
+
+    client = stub_httpx.created[0]
+    assert client.base_url == "http://192.168.0.251:8001"
+    assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
+
+
+def test_vllm_backend_rejects_endpoint_without_model(monkeypatch: pytest.MonkeyPatch) -> None:
+    stub_httpx = _StubVLLMModule()
+    monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
+
+    settings = Settings(embedding_model="vllm:http://localhost:8000/v1/embeddings")
+    with pytest.raises(ValueError, match="must include the vLLM model identifier"):
+        EmbeddingService(settings, validate=False)

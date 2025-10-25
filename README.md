@@ -44,7 +44,7 @@ Cornerstone is a retrieval-augmented support workspace that lets operations team
    ```bash
    docker compose up -d qdrant
    ```
-4. **Configure environment:** copy `env.example.local` to `.env` (or export variables) and set your embedding/chat backend (`EMBEDDING_MODEL`, `OPENAI_API_KEY` or Ollama options, `QDRANT_URL`, etc.). When targeting Ollama or vLLM embeddings, specify the host directly in `EMBEDDING_MODEL` (e.g. `ollama:http://localhost:11434/qwen3-embedding`). Keep real secrets out of version control.
+4. **Configure environment:** copy `env.example.local` to `.env` (or export variables) and set your embedding/chat backend (`EMBEDDING_MODEL`, `OPENAI_API_KEY` or Ollama options, `QDRANT_URL`, etc.). For remote vLLM embeddings point `VLLM_EMBEDDING_BASE_URL` at your server (e.g. `https://llm.example.com:8000`) and set `EMBEDDING_MODEL=vllm:<alias>`. Keep real secrets out of version control.
 5. **Run the app:**
    ```bash
    uvicorn cornerstone.app:create_app --factory --reload

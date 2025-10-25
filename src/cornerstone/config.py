@@ -157,6 +157,8 @@ def _split_remote_model_spec(spec: str) -> tuple[str, str | None]:
 
     Accepts either a bare model name or a full URL ending with the model name.
     When a URL is provided, the final path segment is treated as the model name.
+    If the URL points directly to /v1/embeddings, the model identifier is not
+    present and an empty string is returned so callers can raise a clearer error.
     """
 
     value = spec.strip()
@@ -167,9 +169,11 @@ def _split_remote_model_spec(spec: str) -> tuple[str, str | None]:
     if lowered.startswith("http://") or lowered.startswith("https://"):
         base, sep, model = value.rpartition("/")
         model = model.strip()
-        if not sep or not base.strip() or not model:
+        if not sep or not base.strip():
             msg = f"Embedding model spec '{spec}' must include a URL ending with the model name."
             raise ValueError(msg)
+        if not model or model.lower() == "embeddings":
+            return "", base.strip()
         return model, base.strip()
 
     return value, None
@@ -190,6 +194,7 @@ class Settings:
     ollama_model: str = _DEFAULT_OLLAMA_MODEL
     ollama_request_timeout: float = _DEFAULT_OLLAMA_TIMEOUT
     vllm_base_url: str = _DEFAULT_VLLM_URL
+    vllm_embedding_base_url: str | None = None
     vllm_model: str = _DEFAULT_VLLM_MODEL
     vllm_api_key: str | None = None
     vllm_request_timeout: float = _DEFAULT_VLLM_TIMEOUT
@@ -281,6 +286,7 @@ class Settings:
             ollama_model=os.getenv("OLLAMA_MODEL", _DEFAULT_OLLAMA_MODEL),
             ollama_request_timeout=float(os.getenv("OLLAMA_TIMEOUT", _DEFAULT_OLLAMA_TIMEOUT)),
             vllm_base_url=os.getenv("VLLM_BASE_URL", _DEFAULT_VLLM_URL),
+            vllm_embedding_base_url=os.getenv("VLLM_EMBEDDING_BASE_URL"),
             vllm_model=os.getenv("VLLM_MODEL", _DEFAULT_VLLM_MODEL),
             vllm_api_key=os.getenv("VLLM_API_KEY"),
             vllm_request_timeout=float(os.getenv("VLLM_TIMEOUT", _DEFAULT_VLLM_TIMEOUT)),
@@ -602,11 +608,24 @@ class Settings:
             msg = "vLLM embedding endpoint requested but EMBEDDING_MODEL is not a vLLM model."
             raise ValueError(msg)
         _, _, name = self.embedding_model.partition(":")
-        model, base = _split_remote_model_spec(name)
+        model, parsed_base = _split_remote_model_spec(name)
+        base_override = (self.vllm_embedding_base_url or "").strip()
+        base_url = (base_override or parsed_base or _DEFAULT_VLLM_URL).strip()
+        base_url = base_url.rstrip("/")
+        if base_url.endswith("/v1/embeddings"):
+            base_url = base_url[: -len("/v1/embeddings")]
+        elif base_url.endswith("/embeddings"):
+            base_url = base_url[: -len("/embeddings")]
+        if base_url.endswith("/v1"):
+            base_url = base_url[: -len("/v1")]
+        base_url = base_url.rstrip("/")
         if not model:
-            msg = "EMBEDDING_MODEL must include a vLLM model identifier."
+            msg = (
+                "EMBEDDING_MODEL must include the vLLM model identifier "
+                "(e.g. 'vllm:qwen3-embeddings'). Set VLLM_EMBEDDING_BASE_URL to "
+                "override the endpoint host when needed."
+            )
             raise ValueError(msg)
-        base_url = (base or _DEFAULT_VLLM_URL).rstrip("/")
         if not base_url:
             msg = "Resolved vLLM embedding base URL is empty."
             raise ValueError(msg)
