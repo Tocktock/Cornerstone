@@ -174,13 +174,13 @@ class EmbeddingService:
         if httpx is None:  # pragma: no cover - should not happen when dependencies installed
             raise RuntimeError("httpx must be installed to use Ollama embeddings")
 
-        model = self._settings.ollama_embedding_model
-        if not model:
-            msg = "EMBEDDING_MODEL must be set to an Ollama model when using the Ollama embedding backend."
-            raise ValueError(msg)
+        try:
+            model, base_url = self._settings.ollama_embedding_endpoint
+        except ValueError as exc:
+            raise ValueError(str(exc)) from exc
 
         self._ollama_model = model
-        self._ollama_base_url = self._settings.ollama_base_url.rstrip("/")
+        self._ollama_base_url = base_url
         self._ollama_client = httpx.Client(
             base_url=self._ollama_base_url,
             timeout=self._ollama_timeout,
@@ -255,15 +255,10 @@ class EmbeddingService:
         if httpx is None:  # pragma: no cover - should not happen when dependencies installed
             raise RuntimeError("httpx must be installed to use vLLM embeddings")
 
-        model = self._settings.vllm_embedding_model
-        if not model:
-            msg = "EMBEDDING_MODEL must be set to a vLLM model when using the vLLM embedding backend."
-            raise ValueError(msg)
-
-        base_url = (self._settings.vllm_base_url or "").strip().rstrip("/")
-        if not base_url:
-            msg = "VLLM_BASE_URL must be configured when using the vLLM embedding backend."
-            raise ValueError(msg)
+        try:
+            model, base_url = self._settings.vllm_embedding_endpoint
+        except ValueError as exc:
+            raise ValueError(str(exc)) from exc
 
         self._vllm_model = model
         self._vllm_base_url = base_url

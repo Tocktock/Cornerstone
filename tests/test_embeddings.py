@@ -179,7 +179,26 @@ def test_ollama_backend_calls_local_api(monkeypatch: pytest.MonkeyPatch) -> None
     assert vectors == [[2.0, 1.0, 0.0], [4.0, 1.0, 0.0]]
     assert len(stub_httpx.created) == 1
     client = stub_httpx.created[0]
+    assert client.base_url == "http://localhost:11434"
     assert len(client.requests) == 1 + 2  # dimension probe + two embedding calls
+
+
+def test_ollama_backend_supports_explicit_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    stub_httpx = _StubHttpxModule()
+    monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
+
+    settings = Settings(
+        embedding_model="ollama:http://remote-host:9999/qwen3-embedding",
+        ollama_embedding_concurrency=1,
+    )
+    service = EmbeddingService(settings, validate=False)
+
+    vectors = service.embed(["hi"])
+    assert vectors == [[2.0, 1.0, 0.0]]
+
+    client = stub_httpx.created[0]
+    assert client.base_url == "http://remote-host:9999"
+    assert len(client.requests) == 2  # dimension probe + embedding
 
 
 def test_vllm_backend_calls_openai_compatible_api(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -208,3 +227,22 @@ def test_vllm_backend_calls_openai_compatible_api(monkeypatch: pytest.MonkeyPatc
     assert len(client.requests) == 2  # dimension probe + batch
     assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
     assert client.requests[1]["json"]["input"] == ["hi", "team"]
+
+
+def test_vllm_backend_supports_explicit_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    stub_httpx = _StubVLLMModule()
+    monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
+
+    settings = Settings(
+        embedding_model="vllm:https://llm.example.com/custom-embed",
+        vllm_api_key="secret",
+    )
+    service = EmbeddingService(settings, validate=False)
+
+    vectors = service.embed(["hello"])
+    assert vectors == [[5.0, 0.0, 0.0]]
+
+    client = stub_httpx.created[0]
+    assert client.base_url == "https://llm.example.com"
+    assert client.headers.get("Authorization") == "Bearer secret"
+    assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]

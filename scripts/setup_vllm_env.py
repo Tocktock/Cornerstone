@@ -54,7 +54,7 @@ ENV_TEMPLATE = {
     "CHAT_BACKEND": "vllm",
     "VLLM_BASE_URL": "http://localhost:{port}",
     "VLLM_MODEL": DEFAULT_CHAT_ALIAS,
-    "EMBEDDING_MODEL": f"vllm:{DEFAULT_EMBED_ALIAS}",
+    "EMBEDDING_MODEL": f"vllm:http://localhost:{port}/{DEFAULT_EMBED_ALIAS}",
 }
 
 # --------------------------------------------------------------------------- #
@@ -381,7 +381,7 @@ def start(args: argparse.Namespace) -> None:
         "CHAT_BACKEND": "vllm",
         "VLLM_BASE_URL": f"http://localhost:{port}",
         "VLLM_MODEL": chat_alias,
-        "EMBEDDING_MODEL": f"vllm:{embed_alias}",
+        "EMBEDDING_MODEL": f"vllm:http://localhost:{port}/{embed_alias}",
     }
 
     if have_local_vllm():
@@ -442,7 +442,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "CHAT_BACKEND": "vllm",
         "VLLM_BASE_URL": f"http://localhost:{args.port}",
         "VLLM_MODEL": args.chat_alias or DEFAULT_CHAT_ALIAS,
-        "EMBEDDING_MODEL": f"vllm:{args.embed_alias or DEFAULT_EMBED_ALIAS}",
+        "EMBEDDING_MODEL": f"vllm:http://localhost:{args.port}/{args.embed_alias or DEFAULT_EMBED_ALIAS}",
     }
 
     try:

@@ -151,6 +151,30 @@ def _env_bool(name: str, default: bool) -> bool:
     return value
 
 
+def _split_remote_model_spec(spec: str) -> tuple[str, str | None]:
+    """
+    Split an embedding model spec into (model, base_url).
+
+    Accepts either a bare model name or a full URL ending with the model name.
+    When a URL is provided, the final path segment is treated as the model name.
+    """
+
+    value = spec.strip()
+    if not value:
+        return "", None
+
+    lowered = value.lower()
+    if lowered.startswith("http://") or lowered.startswith("https://"):
+        base, sep, model = value.rpartition("/")
+        model = model.strip()
+        if not sep or not base.strip() or not model:
+            msg = f"Embedding model spec '{spec}' must include a URL ending with the model name."
+            raise ValueError(msg)
+        return model, base.strip()
+
+    return value, None
+
+
 @dataclass(slots=True)
 class Settings:
     """Runtime settings loaded from environment variables."""
@@ -533,8 +557,26 @@ class Settings:
         if not self.is_ollama_embedding_backend:
             return None
         _, _, name = self.embedding_model.partition(":")
-        model = name.strip()
+        model, _ = _split_remote_model_spec(name)
         return model or None
+
+    @property
+    def ollama_embedding_endpoint(self) -> tuple[str, str]:
+        """Return the Ollama embedding model and resolved base URL for embeddings."""
+
+        if not self.is_ollama_embedding_backend:
+            msg = "Ollama embedding endpoint requested but EMBEDDING_MODEL is not an Ollama model."
+            raise ValueError(msg)
+        _, _, name = self.embedding_model.partition(":")
+        model, base = _split_remote_model_spec(name)
+        if not model:
+            msg = "EMBEDDING_MODEL must include an Ollama model identifier."
+            raise ValueError(msg)
+        base_url = (base or _DEFAULT_OLLAMA_URL).rstrip("/")
+        if not base_url:
+            msg = "Resolved Ollama embedding base URL is empty."
+            raise ValueError(msg)
+        return model, base_url
 
     @property
     def is_vllm_embedding_backend(self) -> bool:
@@ -549,8 +591,26 @@ class Settings:
         if not self.is_vllm_embedding_backend:
             return None
         _, _, name = self.embedding_model.partition(":")
-        model = name.strip()
+        model, _ = _split_remote_model_spec(name)
         return model or None
+
+    @property
+    def vllm_embedding_endpoint(self) -> tuple[str, str]:
+        """Return the vLLM embedding model and resolved base URL for embeddings."""
+
+        if not self.is_vllm_embedding_backend:
+            msg = "vLLM embedding endpoint requested but EMBEDDING_MODEL is not a vLLM model."
+            raise ValueError(msg)
+        _, _, name = self.embedding_model.partition(":")
+        model, base = _split_remote_model_spec(name)
+        if not model:
+            msg = "EMBEDDING_MODEL must include a vLLM model identifier."
+            raise ValueError(msg)
+        base_url = (base or _DEFAULT_VLLM_URL).rstrip("/")
+        if not base_url:
+            msg = "Resolved vLLM embedding base URL is empty."
+            raise ValueError(msg)
+        return model, base_url
 
     @property
     def required_openai_model(self) -> OpenAIModelName:
