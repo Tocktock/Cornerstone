@@ -552,30 +552,10 @@ class Settings:
         return self.embedding_model.strip().lower() == "text-embedding-3-large"
 
     @property
-    def is_huggingface_backend(self) -> bool:
-        """Return True when the configured embedding backend is a local HuggingFace model."""
-
-        return (
-            not self.is_openai_backend
-            and not self.is_ollama_embedding_backend
-            and not self.is_vllm_embedding_backend
-        )
-
-    @property
     def is_ollama_embedding_backend(self) -> bool:
         """Return True when embeddings should be generated via an Ollama-hosted model."""
 
         return self.embedding_model.strip().lower().startswith("ollama:")
-
-    @property
-    def ollama_embedding_model(self) -> str | None:
-        """Return the Ollama embedding model name without the prefix when configured."""
-
-        if not self.is_ollama_embedding_backend:
-            return None
-        _, _, name = self.embedding_model.partition(":")
-        model, _ = _split_remote_model_spec(name)
-        return model or None
 
     @property
     def ollama_embedding_endpoint(self) -> tuple[str, str]:
@@ -600,16 +580,6 @@ class Settings:
         """Return True when embeddings should be generated via a vLLM-hosted model."""
 
         return self.embedding_model.strip().lower().startswith("vllm:")
-
-    @property
-    def vllm_embedding_model(self) -> str | None:
-        """Return the vLLM embedding model name without the prefix when configured."""
-
-        if not self.is_vllm_embedding_backend:
-            return None
-        _, _, name = self.embedding_model.partition(":")
-        model, _ = _split_remote_model_spec(name)
-        return model or None
 
     @property
     def vllm_embedding_endpoint(self) -> tuple[str, str]:
