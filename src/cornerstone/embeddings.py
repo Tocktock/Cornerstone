@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import queue
+import threading
+import time
 from collections.abc import Sequence
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from enum import Enum, auto
-from typing import Final, List
+from typing import Callable, Final, List
 
 import httpx
 from openai import OpenAI
@@ -53,11 +56,13 @@ class EmbeddingService:
         self._vllm_timeout: float = settings.vllm_request_timeout
         self._vllm_concurrency: int = max(1, settings.vllm_embedding_concurrency)
         self._vllm_batch_size: int = max(1, settings.vllm_embedding_batch_size)
+        self._vllm_batch_wait: float = max(0.0, settings.vllm_embedding_batch_wait_ms / 1000.0)
         api_key = settings.vllm_api_key or None
         if isinstance(api_key, str):
             api_key = api_key.strip()
         self._vllm_api_key = api_key or None
         self._vllm_client: httpx.Client | None = None
+        self._vllm_batcher: _VLLMMicroBatcher | None = None
 
         if self._backend is EmbeddingBackend.OPENAI:
             self._setup_openai(validate)
@@ -144,6 +149,13 @@ class EmbeddingService:
                 pass
             finally:
                 self._vllm_client = None
+        if self._vllm_batcher is not None:
+            try:
+                self._vllm_batcher.close()
+            except Exception:  # pragma: no cover - best effort cleanup
+                pass
+            finally:
+                self._vllm_batcher = None
 
     def __del__(self):  # pragma: no cover - defensive cleanup
         self.close()
@@ -275,6 +287,13 @@ class EmbeddingService:
             headers=headers or None,
         )
 
+        self._vllm_batcher = _VLLMMicroBatcher(
+            request_fn=self._vllm_embed_request,
+            batch_size=self._vllm_batch_size,
+            max_concurrency=self._vllm_concurrency,
+            batch_wait=self._vllm_batch_wait,
+        )
+
         vectors = self._vllm_embed_batch(["__dimension_probe__"])
         if not vectors or not vectors[0]:
             msg = f"vLLM embedding backend '{model}' returned no data."
@@ -289,42 +308,19 @@ class EmbeddingService:
         if not texts:
             return []
 
-        if self._vllm_client is None or not self._vllm_model:
+        if self._vllm_batcher is None:
             msg = "vLLM embedding backend is not configured."
             raise RuntimeError(msg)
 
-        indexed_inputs = list(enumerate(texts))
-        if not indexed_inputs:
-            return []
-
-        batch_size = self._vllm_batch_size
-        batches: list[list[tuple[int, str]]] = [
-            indexed_inputs[offset : offset + batch_size]
-            for offset in range(0, len(indexed_inputs), batch_size)
-        ]
-
-        max_workers = min(self._vllm_concurrency, len(batches)) or 1
-        results: list[list[float] | None] = [None] * len(texts)
-
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = {
-                executor.submit(self._vllm_embed_request, [text for _, text in batch]): batch
-                for batch in batches
-            }
-            for future in as_completed(futures):
-                batch = futures[future]
-                vectors = future.result()
-                if len(vectors) != len(batch):
-                    msg = "vLLM embedding response size mismatch."
-                    raise RuntimeError(msg)
-                for (idx, _), vector in zip(batch, vectors):
-                    results[idx] = vector
-
-        if any(vector is None for vector in results):
-            msg = "vLLM embedding response missing vectors for some inputs."
-            raise RuntimeError(msg)
-
-        return [vector if vector is not None else [] for vector in results]
+        futures = [self._vllm_batcher.submit(text) for text in texts]
+        vectors: list[List[float]] = []
+        for future in futures:
+            vector = future.result()
+            if self._dimension is not None and self._dimension > 0 and len(vector) != self._dimension:
+                msg = f"vLLM embedding dimension changed from {self._dimension} to {len(vector)}."
+                raise RuntimeError(msg)
+            vectors.append(vector)
+        return vectors
 
     def _vllm_embed_request(self, inputs: Sequence[str]) -> List[List[float]]:
         if self._vllm_client is None or not self._vllm_model:
@@ -352,9 +348,6 @@ class EmbeddingService:
                 msg = "vLLM embedding response item missing 'embedding'."
                 raise RuntimeError(msg)
             vector = [float(value) for value in embedding]
-            if self._dimension is not None and self._dimension > 0 and len(vector) != self._dimension:
-                msg = f"vLLM embedding dimension changed from {self._dimension} to {len(vector)}."
-                raise RuntimeError(msg)
             vectors.append(vector)
 
         if len(vectors) != len(inputs):
@@ -362,3 +355,128 @@ class EmbeddingService:
             raise RuntimeError(msg)
 
         return vectors
+
+
+class _VLLMMicroBatcher:
+    """Aggregate embedding requests into batches for concurrent execution."""
+
+    _SENTINEL = object()
+
+    def __init__(
+        self,
+        *,
+        request_fn: Callable[[Sequence[str]], List[List[float]]],
+        batch_size: int,
+        max_concurrency: int,
+        batch_wait: float,
+    ) -> None:
+        self._request_fn = request_fn
+        self._batch_size = max(1, batch_size)
+        self._batch_wait = max(0.0, batch_wait)
+        self._queue: "queue.Queue[object]" = queue.Queue()
+        self._executor = ThreadPoolExecutor(max_workers=max(1, max_concurrency))
+        self._closed = threading.Event()
+        self._worker = threading.Thread(target=self._run, name="vllm-embed-batcher", daemon=True)
+        self._worker.start()
+
+    def submit(self, text: str) -> Future:
+        future: Future = Future()
+        if self._closed.is_set():
+            future.set_exception(RuntimeError("vLLM micro-batcher is closed"))
+            return future
+        item = _BatchItem(text=text, future=future)
+        self._queue.put(item)
+        return future
+
+    def close(self) -> None:
+        if self._closed.is_set():
+            return
+        self._closed.set()
+        self._queue.put(self._SENTINEL)
+        self._worker.join(timeout=1.0)
+        self._executor.shutdown(wait=True)
+
+    # Internal helpers -------------------------------------------------
+
+    def _run(self) -> None:
+        while True:
+            item = self._queue.get()
+            try:
+                if item is self._SENTINEL:
+                    self._queue.task_done()
+                    break
+                batch: list[_BatchItem] = []
+                if isinstance(item, _BatchItem):
+                    batch.append(item)
+                    self._queue.task_done()
+                else:  # pragma: no cover - defensive guard
+                    self._queue.task_done()
+                    continue
+
+                self._drain_nowait(batch)
+                if self._batch_wait > 0 and len(batch) < self._batch_size:
+                    deadline = time.monotonic() + self._batch_wait
+                    while len(batch) < self._batch_size:
+                        timeout = deadline - time.monotonic()
+                        if timeout <= 0:
+                            break
+                        try:
+                            next_item = self._queue.get(timeout=timeout)
+                        except queue.Empty:
+                            break
+                        if next_item is self._SENTINEL:
+                            self._queue.task_done()
+                            # Ensure sentinel processed by loop termination.
+                            self._queue.put(self._SENTINEL)
+                            break
+                        if isinstance(next_item, _BatchItem):
+                            batch.append(next_item)
+                        self._queue.task_done()
+                        if len(batch) >= self._batch_size:
+                            break
+                        self._drain_nowait(batch)
+
+                self._submit_batch(batch)
+            finally:
+                # Ensure queued tasks are decremented even on exception.
+                pass
+
+    def _drain_nowait(self, batch: list["_BatchItem"]) -> None:
+        while len(batch) < self._batch_size:
+            try:
+                next_item = self._queue.get_nowait()
+            except queue.Empty:
+                break
+            if next_item is self._SENTINEL:
+                self._queue.task_done()
+                self._queue.put(self._SENTINEL)
+                break
+            if isinstance(next_item, _BatchItem):
+                batch.append(next_item)
+            self._queue.task_done()
+
+    def _submit_batch(self, batch: list["_BatchItem"]) -> None:
+        texts = [item.text for item in batch]
+
+        def _deliver(future: Future) -> None:
+            try:
+                vectors = future.result()
+                if len(vectors) != len(batch):
+                    raise RuntimeError("vLLM embedding response size mismatch.")
+                for data, vector in zip(batch, vectors):
+                    data.future.set_result(vector)
+            except Exception as exc:  # pragma: no cover - defensive guard
+                for data in batch:
+                    if not data.future.done():
+                        data.future.set_exception(exc)
+
+        request_future = self._executor.submit(self._request_fn, texts)
+        request_future.add_done_callback(_deliver)
+
+
+class _BatchItem:
+    __slots__ = ("text", "future")
+
+    def __init__(self, *, text: str, future: Future) -> None:
+        self.text = text
+        self.future = future

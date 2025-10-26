@@ -46,6 +46,7 @@ DEFAULT_EMBED_ALIAS = "qwen3-embedding-4b"
 DEFAULT_EMBED_QUANT = "gptq"
 DEFAULT_EMBED_CONCURRENCY = 4
 DEFAULT_EMBED_BATCH_SIZE = 16
+DEFAULT_EMBED_BATCH_WAIT_MS = 10
 
 DEFAULT_PORT = 8000
 CONTAINER_NAME = "cornerstone-vllm"
@@ -60,6 +61,7 @@ ENV_TEMPLATE = {
     "VLLM_EMBEDDING_BASE_URL": "http://localhost:{port}",
     "VLLM_EMBEDDING_CONCURRENCY": str(DEFAULT_EMBED_CONCURRENCY),
     "VLLM_EMBEDDING_BATCH_SIZE": str(DEFAULT_EMBED_BATCH_SIZE),
+    "VLLM_EMBEDDING_BATCH_WAIT_MS": str(DEFAULT_EMBED_BATCH_WAIT_MS),
 }
 
 # --------------------------------------------------------------------------- #
@@ -390,6 +392,7 @@ def start(args: argparse.Namespace) -> None:
         "VLLM_EMBEDDING_BASE_URL": f"http://localhost:{port}",
         "VLLM_EMBEDDING_CONCURRENCY": str(DEFAULT_EMBED_CONCURRENCY),
         "VLLM_EMBEDDING_BATCH_SIZE": str(DEFAULT_EMBED_BATCH_SIZE),
+        "VLLM_EMBEDDING_BATCH_WAIT_MS": str(DEFAULT_EMBED_BATCH_WAIT_MS),
     }
 
     if have_local_vllm():
@@ -454,6 +457,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "VLLM_EMBEDDING_BASE_URL": f"http://localhost:{args.port}",
         "VLLM_EMBEDDING_CONCURRENCY": str(DEFAULT_EMBED_CONCURRENCY),
         "VLLM_EMBEDDING_BATCH_SIZE": str(DEFAULT_EMBED_BATCH_SIZE),
+        "VLLM_EMBEDDING_BATCH_WAIT_MS": str(DEFAULT_EMBED_BATCH_WAIT_MS),
     }
 
     try:

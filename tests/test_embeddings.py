@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import threading
 from typing import Any
 
 import pytest
@@ -107,9 +108,11 @@ class _StubVLLMClient:
         self.timeout = timeout
         self.headers = headers or {}
         self.requests: list[dict[str, Any]] = []
+        self._lock = threading.Lock()
 
     def post(self, url: str, json: dict[str, Any]) -> _StubVLLMResponse:
-        self.requests.append({"url": url, "json": json})
+        with self._lock:
+            self.requests.append({"url": url, "json": json})
         inputs = json.get("input", [])
         vectors = [[float(len(text)), 0.0, 0.0] for text in inputs] or [[0.0, 0.0, 0.0]]
         return _StubVLLMResponse(vectors)
@@ -210,6 +213,7 @@ def test_vllm_backend_calls_openai_compatible_api(monkeypatch: pytest.MonkeyPatc
         vllm_base_url="http://localhost:8000",
         vllm_api_key="secret",
         vllm_request_timeout=12.5,
+        vllm_embedding_batch_wait_ms=0,
     )
     service = EmbeddingService(settings, validate=False)
 
@@ -227,6 +231,7 @@ def test_vllm_backend_calls_openai_compatible_api(monkeypatch: pytest.MonkeyPatc
     assert len(client.requests) == 2  # dimension probe + batch
     assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
     assert client.requests[1]["json"]["input"] == ["hi", "team"]
+    service.close()
 
 
 def test_vllm_backend_supports_explicit_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -236,6 +241,7 @@ def test_vllm_backend_supports_explicit_base_url(monkeypatch: pytest.MonkeyPatch
     settings = Settings(
         embedding_model="vllm:https://llm.example.com/custom-embed",
         vllm_api_key="secret",
+        vllm_embedding_batch_wait_ms=0,
     )
     service = EmbeddingService(settings, validate=False)
 
@@ -247,6 +253,7 @@ def test_vllm_backend_supports_explicit_base_url(monkeypatch: pytest.MonkeyPatch
     assert client.headers.get("Authorization") == "Bearer secret"
     assert len(client.requests) == 2
     assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
+    service.close()
     assert client.requests[1]["json"]["input"] == ["hello"]
 
 
@@ -258,6 +265,7 @@ def test_vllm_backend_allows_base_url_override(monkeypatch: pytest.MonkeyPatch) 
         embedding_model="vllm:qwen3-embeddings",
         vllm_embedding_base_url="http://192.168.0.251:8001",
         vllm_api_key="secret",
+        vllm_embedding_batch_wait_ms=0,
     )
     service = EmbeddingService(settings, validate=False)
 
@@ -269,6 +277,7 @@ def test_vllm_backend_allows_base_url_override(monkeypatch: pytest.MonkeyPatch) 
     assert len(client.requests) == 2
     assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
     assert client.requests[1]["json"]["input"] == ["override"]
+    service.close()
 
 
 def test_vllm_backend_respects_batch_size_override(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -279,6 +288,7 @@ def test_vllm_backend_respects_batch_size_override(monkeypatch: pytest.MonkeyPat
         embedding_model="vllm:mock-embed",
         vllm_embedding_batch_size=1,
         vllm_embedding_concurrency=2,
+        vllm_embedding_batch_wait_ms=0,
     )
     service = EmbeddingService(settings, validate=False)
 
@@ -289,6 +299,7 @@ def test_vllm_backend_respects_batch_size_override(monkeypatch: pytest.MonkeyPat
     assert len(client.requests) == 3  # probe + two single-item batches
     batches = [req["json"]["input"] for req in client.requests[1:]]
     assert sorted(batches) == [["a"], ["bb"]]
+    service.close()
 
 
 def test_vllm_backend_rejects_endpoint_without_model(monkeypatch: pytest.MonkeyPatch) -> None:
