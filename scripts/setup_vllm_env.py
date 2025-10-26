@@ -44,6 +44,8 @@ DEFAULT_CHAT_QUANT = "gptq"
 DEFAULT_EMBED_MODEL = "Qwen/Qwen2-7B-Embedding-GPTQ-Int4"
 DEFAULT_EMBED_ALIAS = "qwen3-embedding-4b"
 DEFAULT_EMBED_QUANT = "gptq"
+DEFAULT_EMBED_CONCURRENCY = 4
+DEFAULT_EMBED_BATCH_SIZE = 16
 
 DEFAULT_PORT = 8000
 CONTAINER_NAME = "cornerstone-vllm"
@@ -56,6 +58,8 @@ ENV_TEMPLATE = {
     "VLLM_MODEL": DEFAULT_CHAT_ALIAS,
     "EMBEDDING_MODEL": f"vllm:{DEFAULT_EMBED_ALIAS}",
     "VLLM_EMBEDDING_BASE_URL": "http://localhost:{port}",
+    "VLLM_EMBEDDING_CONCURRENCY": str(DEFAULT_EMBED_CONCURRENCY),
+    "VLLM_EMBEDDING_BATCH_SIZE": str(DEFAULT_EMBED_BATCH_SIZE),
 }
 
 # --------------------------------------------------------------------------- #
@@ -384,6 +388,8 @@ def start(args: argparse.Namespace) -> None:
         "VLLM_MODEL": chat_alias,
         "EMBEDDING_MODEL": f"vllm:{embed_alias}",
         "VLLM_EMBEDDING_BASE_URL": f"http://localhost:{port}",
+        "VLLM_EMBEDDING_CONCURRENCY": str(DEFAULT_EMBED_CONCURRENCY),
+        "VLLM_EMBEDDING_BATCH_SIZE": str(DEFAULT_EMBED_BATCH_SIZE),
     }
 
     if have_local_vllm():
@@ -446,6 +452,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "VLLM_MODEL": args.chat_alias or DEFAULT_CHAT_ALIAS,
         "EMBEDDING_MODEL": f"vllm:{args.embed_alias or DEFAULT_EMBED_ALIAS}",
         "VLLM_EMBEDDING_BASE_URL": f"http://localhost:{args.port}",
+        "VLLM_EMBEDDING_CONCURRENCY": str(DEFAULT_EMBED_CONCURRENCY),
+        "VLLM_EMBEDDING_BATCH_SIZE": str(DEFAULT_EMBED_BATCH_SIZE),
     }
 
     try:

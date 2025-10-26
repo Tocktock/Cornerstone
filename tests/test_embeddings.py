@@ -224,10 +224,9 @@ def test_vllm_backend_calls_openai_compatible_api(monkeypatch: pytest.MonkeyPatc
     assert client.base_url == "http://localhost:8000"
     assert client.timeout == pytest.approx(12.5)
     assert client.headers.get("Authorization") == "Bearer secret"
-    assert len(client.requests) == 3  # dimension probe + two concurrent singles
+    assert len(client.requests) == 2  # dimension probe + batch
     assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
-    requested_batches = [req["json"]["input"] for req in client.requests[1:]]
-    assert sorted(requested_batches) == [["hi"], ["team"]]
+    assert client.requests[1]["json"]["input"] == ["hi", "team"]
 
 
 def test_vllm_backend_supports_explicit_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -246,7 +245,9 @@ def test_vllm_backend_supports_explicit_base_url(monkeypatch: pytest.MonkeyPatch
     client = stub_httpx.created[0]
     assert client.base_url == "https://llm.example.com"
     assert client.headers.get("Authorization") == "Bearer secret"
+    assert len(client.requests) == 2
     assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
+    assert client.requests[1]["json"]["input"] == ["hello"]
 
 
 def test_vllm_backend_allows_base_url_override(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -265,7 +266,29 @@ def test_vllm_backend_allows_base_url_override(monkeypatch: pytest.MonkeyPatch) 
 
     client = stub_httpx.created[0]
     assert client.base_url == "http://192.168.0.251:8001"
+    assert len(client.requests) == 2
     assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
+    assert client.requests[1]["json"]["input"] == ["override"]
+
+
+def test_vllm_backend_respects_batch_size_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    stub_httpx = _StubVLLMModule()
+    monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
+
+    settings = Settings(
+        embedding_model="vllm:mock-embed",
+        vllm_embedding_batch_size=1,
+        vllm_embedding_concurrency=2,
+    )
+    service = EmbeddingService(settings, validate=False)
+
+    vectors = service.embed(["a", "bb"])
+    assert vectors == [[1.0, 0.0, 0.0], [2.0, 0.0, 0.0]]
+
+    client = stub_httpx.created[0]
+    assert len(client.requests) == 3  # probe + two single-item batches
+    batches = [req["json"]["input"] for req in client.requests[1:]]
+    assert sorted(batches) == [["a"], ["bb"]]
 
 
 def test_vllm_backend_rejects_endpoint_without_model(monkeypatch: pytest.MonkeyPatch) -> None:
