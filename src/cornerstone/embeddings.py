@@ -330,7 +330,7 @@ class EmbeddingService:
         payload = {"model": self._vllm_model, "input": list(inputs)}
 
         try:
-            response = self._vllm_client.post("/v1/embeddings", json=payload)
+            response = self._vllm_client.post("v1/embeddings", json=payload)
             response.raise_for_status()
         except Exception as exc:  # pragma: no cover - network errors
             raise RuntimeError(f"vLLM embedding request failed: {exc}") from exc
