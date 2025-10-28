@@ -24,6 +24,7 @@ Cornerstone is a retrieval-augmented support workspace that lets operations team
 5. **Actionable insights loop.** Feed conversation logs and keyword summaries back into product planning via the analytics endpoints and queued insight jobs.
 
 ## Architecture at a Glance
+For a deeper dive, see [docs/architecture.md](docs/architecture.md).
 - **FastAPI application (`cornerstone.app`).** Wires together the embedding service, project/persona stores, ingestion pipeline, chat service, analytics, and the scheduled query-hint generator.
 - **Embedding backends (`cornerstone.embeddings`).** Supports OpenAI, SentenceTransformers, or Ollama models with consistent APIs and validation of dimensionality.
 - **Storage layer.** Qdrant collections per project hold dense vectors; SQLite powers FTS fallbacks; JSONL logs persist conversations; YAML files maintain glossary and hint catalogs.
