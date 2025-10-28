@@ -95,3 +95,7 @@ For a deeper dive, see [docs/architecture.md](docs/architecture.md).
 - Expand multilingual coverage by extending glossary YAML files or swapping in locale-specific embedding models.
 
 Cornerstone is now ready to be shared publicly—just remember to keep real customer data and API keys in private storage and use this repository as the blueprint for building compliant, high-signal support intelligence systems.
+
+## Documentation
+- Agent guidelines: `AGENTS.md`
+- Architecture overview: `docs/architecture.md`
