@@ -204,6 +204,25 @@ def test_ollama_backend_supports_explicit_base_url(monkeypatch: pytest.MonkeyPat
     assert len(client.requests) == 2  # dimension probe + embedding
 
 
+def test_ollama_backend_respects_configured_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    stub_httpx = _StubHttpxModule()
+    monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
+
+    settings = Settings(
+        embedding_model="ollama:nomic-embed-text",
+        ollama_base_url="https://ollama.company.internal",
+        ollama_embedding_concurrency=1,
+    )
+    service = EmbeddingService(settings, validate=False)
+
+    vectors = service.embed(["hello"])
+    assert vectors == [[5.0, 1.0, 0.0]]
+
+    client = stub_httpx.created[0]
+    assert client.base_url == "https://ollama.company.internal"
+    assert len(client.requests) == 2  # probe + embedding
+
+
 def test_vllm_backend_calls_openai_compatible_api(monkeypatch: pytest.MonkeyPatch) -> None:
     stub_httpx = _StubVLLMModule()
     monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
@@ -277,6 +296,27 @@ def test_vllm_backend_allows_base_url_override(monkeypatch: pytest.MonkeyPatch) 
     assert len(client.requests) == 2
     assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
     assert client.requests[1]["json"]["input"] == ["override"]
+    service.close()
+
+
+def test_vllm_backend_defaults_to_chat_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    stub_httpx = _StubVLLMModule()
+    monkeypatch.setattr("cornerstone.embeddings.httpx", stub_httpx)
+
+    settings = Settings(
+        embedding_model="vllm:mock-embed",
+        vllm_base_url="https://llm.example.com/v1",
+        vllm_embedding_batch_wait_ms=0,
+    )
+    service = EmbeddingService(settings, validate=False)
+
+    vectors = service.embed(["ping"])
+    assert vectors == [[4.0, 0.0, 0.0]]
+
+    client = stub_httpx.created[0]
+    assert client.base_url == "https://llm.example.com"
+    assert len(client.requests) == 2
+    assert client.requests[0]["json"]["input"] == ["__dimension_probe__"]
     service.close()
 
 

@@ -593,7 +593,8 @@ class Settings:
         if not model:
             msg = "EMBEDDING_MODEL must include an Ollama model identifier."
             raise ValueError(msg)
-        base_url = (base or _DEFAULT_OLLAMA_URL).rstrip("/")
+        configured_base = (self.ollama_base_url or "").strip()
+        base_url = (base or configured_base or _DEFAULT_OLLAMA_URL).rstrip("/")
         if not base_url:
             msg = "Resolved Ollama embedding base URL is empty."
             raise ValueError(msg)
@@ -615,7 +616,8 @@ class Settings:
         _, _, name = self.embedding_model.partition(":")
         model, parsed_base = _split_remote_model_spec(name)
         base_override = (self.vllm_embedding_base_url or "").strip()
-        base_url = (base_override or parsed_base or _DEFAULT_VLLM_URL).strip()
+        chat_base = normalize_vllm_base_url(self.vllm_base_url)
+        base_url = (base_override or parsed_base or chat_base or _DEFAULT_VLLM_URL).strip()
         base_url = base_url.rstrip("/")
         if base_url.endswith("/v1/embeddings"):
             base_url = base_url[: -len("/v1/embeddings")]
