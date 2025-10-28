@@ -49,7 +49,16 @@ def test_merge_hint_sources_deduplicates():
     assert merged["business"] == ["사업", "비즈니스", "물류"]
 
 
-def test_query_hint_generator_vllm_backend(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize(
+    ("base_url", "expected_url"),
+    [
+        ("http://localhost:8000", "http://localhost:8000/v1/chat/completions"),
+        ("http://localhost:8000/v1", "http://localhost:8000/v1/chat/completions"),
+    ],
+)
+def test_query_hint_generator_vllm_backend(
+    monkeypatch: pytest.MonkeyPatch, base_url: str, expected_url: str
+) -> None:
     class _StubResponse:
         def __init__(self, payload):
             self._payload = payload
@@ -79,7 +88,7 @@ def test_query_hint_generator_vllm_backend(monkeypatch: pytest.MonkeyPatch) -> N
 
     settings = Settings(
         chat_backend="vllm",
-        vllm_base_url="http://localhost:8000",
+        vllm_base_url=base_url,
         vllm_model="mock-hints",
         vllm_api_key="secret",
     )
@@ -91,7 +100,7 @@ def test_query_hint_generator_vllm_backend(monkeypatch: pytest.MonkeyPatch) -> N
     assert report.backend == "vllm"
     assert report.prompts_sent == 1
     assert report.hints["alpha"] == ["hint-a", "hint-b"]
-    assert captured["url"] == "http://localhost:8000/v1/chat/completions"
+    assert captured["url"] == expected_url
     assert captured["json"]["model"] == "mock-hints"
     assert captured["json"]["stream"] is False
     assert captured["json"]["temperature"] == 0.0

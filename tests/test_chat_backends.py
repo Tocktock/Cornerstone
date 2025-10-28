@@ -54,7 +54,17 @@ def _build_service(settings: Settings) -> SupportAgentService:
     )
 
 
-def test_support_agent_vllm_invoke(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize(
+    ("base_url", "expected_url"),
+    [
+        ("http://localhost:8000", "http://localhost:8000/v1/chat/completions"),
+        ("http://localhost:8000/v1", "http://localhost:8000/v1/chat/completions"),
+        ("http://localhost:8000/v1/", "http://localhost:8000/v1/chat/completions"),
+    ],
+)
+def test_support_agent_vllm_invoke(
+    monkeypatch: pytest.MonkeyPatch, base_url: str, expected_url: str
+) -> None:
     captured: Dict[str, Any] = {}
 
     def fake_post(url: str, *, json: Dict[str, Any], headers: Dict[str, str], timeout: float) -> _StubResponse:
@@ -68,7 +78,7 @@ def test_support_agent_vllm_invoke(monkeypatch: pytest.MonkeyPatch) -> None:
 
     settings = Settings(
         chat_backend="vllm",
-        vllm_base_url="http://localhost:8000",
+        vllm_base_url=base_url,
         vllm_model="mock-chat",
         vllm_api_key="secret",
         vllm_request_timeout=12.5,
@@ -78,7 +88,7 @@ def test_support_agent_vllm_invoke(monkeypatch: pytest.MonkeyPatch) -> None:
     result = service._invoke_vllm("Hi?", temperature=0.42, max_tokens=256)
 
     assert result == "Hello world"
-    assert captured["url"] == "http://localhost:8000/v1/chat/completions"
+    assert captured["url"] == expected_url
     assert captured["json"]["model"] == "mock-chat"
     assert captured["json"]["stream"] is False
     assert captured["json"]["temperature"] == pytest.approx(0.42)
@@ -89,7 +99,16 @@ def test_support_agent_vllm_invoke(monkeypatch: pytest.MonkeyPatch) -> None:
     assert captured["timeout"] == pytest.approx(12.5)
 
 
-def test_support_agent_vllm_stream(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize(
+    ("base_url", "expected_url"),
+    [
+        ("http://localhost:8000", "http://localhost:8000/v1/chat/completions"),
+        ("http://localhost:8000/v1", "http://localhost:8000/v1/chat/completions"),
+    ],
+)
+def test_support_agent_vllm_stream(
+    monkeypatch: pytest.MonkeyPatch, base_url: str, expected_url: str
+) -> None:
     captured: Dict[str, Any] = {}
 
     def fake_stream(
@@ -117,7 +136,7 @@ def test_support_agent_vllm_stream(monkeypatch: pytest.MonkeyPatch) -> None:
 
     settings = Settings(
         chat_backend="vllm",
-        vllm_base_url="http://localhost:8000",
+        vllm_base_url=base_url,
         vllm_model="mock-chat",
         vllm_api_key="secret",
         vllm_request_timeout=8.0,
@@ -128,7 +147,7 @@ def test_support_agent_vllm_stream(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert chunks == ["Hel", "lo"]
     assert captured["method"] == "POST"
-    assert captured["url"] == "http://localhost:8000/v1/chat/completions"
+    assert captured["url"] == expected_url
     assert captured["json"]["stream"] is True
     assert captured["json"]["messages"][1]["content"] == "Hi?"
     assert captured["headers"]["Authorization"] == "Bearer secret"

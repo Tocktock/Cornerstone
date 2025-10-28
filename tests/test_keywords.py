@@ -423,6 +423,7 @@ def _build_enabled_filter(
     *,
     allow_generated: bool = False,
     backend: str = "ollama",
+    vllm_base_url: str = "http://localhost:8000",
 ) -> KeywordLLMFilter:
     if backend == "ollama":
         settings = Settings(
@@ -435,7 +436,7 @@ def _build_enabled_filter(
     elif backend == "vllm":
         settings = Settings(
             chat_backend="vllm",
-            vllm_base_url="http://localhost:8000",
+            vllm_base_url=vllm_base_url,
             vllm_model="mock-keywords",
             keyword_filter_max_results=3,
             keyword_filter_allow_generated=allow_generated,
@@ -461,6 +462,22 @@ def test_keyword_llm_filter_supports_vllm_backend(monkeypatch) -> None:
     assert [item.term for item in results] == ["Alpha"]
     info = filter_instance.debug_payload()
     assert info.get("backend") == "vllm"
+
+
+def test_keyword_llm_filter_normalizes_vllm_base_url(monkeypatch) -> None:
+    # ensure helper normalizes '/v1' suffix before request construction
+    filter_instance = _build_enabled_filter(
+        {"keywords": [{"term": "Alpha", "keep": True, "reason": "test"}]},
+        monkeypatch,
+        backend="vllm",
+        vllm_base_url="http://localhost:8000/v1/",
+    )
+    filter_instance._current_prompt = {"system": "sys", "user": "prompt"}
+    url, headers, payload = filter_instance._prepare_vllm_request()
+
+    assert url == "http://localhost:8000/v1/chat/completions"
+    assert payload["model"] == "mock-keywords"
+    assert headers["Content-Type"] == "application/json"
 
 
 def test_refine_concepts_applies_llm(monkeypatch) -> None:

@@ -10,7 +10,7 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Iterable, Iterator, List, Sequence, Tuple
 
-from .config import Settings
+from .config import Settings, normalize_vllm_base_url
 from .embeddings import EmbeddingService
 from .glossary import Glossary, GlossaryEntry
 from .projects import Project, ProjectStore
@@ -1053,12 +1053,12 @@ class SupportAgentService:
         stream: bool,
     ) -> tuple[str, dict[str, str], dict[str, object]]:
         model = (self._settings.vllm_model or "").strip()
-        base_url = (self._settings.vllm_base_url or "").strip()
+        base_url = normalize_vllm_base_url(self._settings.vllm_base_url)
         if not model:
             raise RuntimeError("VLLM_MODEL must be set when using the vLLM chat backend")
         if not base_url:
             raise RuntimeError("VLLM_BASE_URL must be set when using the vLLM chat backend")
-        url = f"{base_url.rstrip('/')}/v1/chat/completions"
+        url = f"{base_url}/v1/chat/completions"
         headers: dict[str, str] = {"Content-Type": "application/json"}
         api_key = (self._settings.vllm_api_key or "").strip()
         if api_key:

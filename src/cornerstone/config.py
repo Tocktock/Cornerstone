@@ -182,6 +182,22 @@ def _split_remote_model_spec(spec: str) -> tuple[str, str | None]:
     return value, None
 
 
+def normalize_vllm_base_url(value: str) -> str:
+    """Normalize vLLM chat base URLs by removing trailing '/v1' segments."""
+
+    normalized = (value or "").strip()
+    if not normalized:
+        return ""
+
+    normalized = normalized.rstrip("/")
+    lowered = normalized.lower()
+    if lowered.endswith("/v1"):
+        normalized = normalized[: -len("/v1")]
+        normalized = normalized.rstrip("/")
+
+    return normalized
+
+
 @dataclass(slots=True)
 class Settings:
     """Runtime settings loaded from environment variables."""
@@ -273,6 +289,9 @@ class Settings:
     keyword_run_cache_ttl: int = _DEFAULT_KEYWORD_RUN_CACHE_TTL
     keyword_run_auto_refresh: bool = _DEFAULT_KEYWORD_RUN_AUTO_REFRESH
     keyword_run_sync_mode: bool = _DEFAULT_KEYWORD_RUN_SYNC_MODE
+
+    def __post_init__(self) -> None:
+        self.vllm_base_url = normalize_vllm_base_url(self.vllm_base_url)
 
     @classmethod
     def from_env(cls) -> "Settings":

@@ -19,7 +19,7 @@ try:  # pragma: no cover - optional dependency
 except Exception:  # pragma: no cover
     OpenAI = None  # type: ignore[assignment]
 
-from .config import Settings
+from .config import Settings, normalize_vllm_base_url
 
 if TYPE_CHECKING:
     from .embeddings import EmbeddingService
@@ -1749,7 +1749,7 @@ class KeywordLLMFilter:
             else:
                 reason = "missing-ollama-config"
         elif settings.is_vllm_chat_backend:
-            self._vllm_base_url = settings.vllm_base_url.rstrip("/")
+            self._vllm_base_url = normalize_vllm_base_url(settings.vllm_base_url)
             self._vllm_model = settings.vllm_model
             if self._vllm_base_url and self._vllm_model:
                 self._backend = "vllm"
