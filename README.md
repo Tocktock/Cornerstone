@@ -24,6 +24,7 @@ Cornerstone is a retrieval-augmented support workspace that lets operations team
 5. **Actionable insights loop.** Feed conversation logs and keyword summaries back into product planning via the analytics endpoints and queued insight jobs.
 
 ## Architecture at a Glance
+For a deeper dive, see [docs/architecture.md](docs/architecture.md).
 - **FastAPI application (`cornerstone.app`).** Wires together the embedding service, project/persona stores, ingestion pipeline, chat service, analytics, and the scheduled query-hint generator.
 - **Embedding backends (`cornerstone.embeddings`).** Supports OpenAI, SentenceTransformers, or Ollama models with consistent APIs and validation of dimensionality.
 - **Storage layer.** Qdrant collections per project hold dense vectors; SQLite powers FTS fallbacks; JSONL logs persist conversations; YAML files maintain glossary and hint catalogs.
@@ -44,7 +45,7 @@ Cornerstone is a retrieval-augmented support workspace that lets operations team
    ```bash
    docker compose up -d qdrant
    ```
-4. **Configure environment:** copy `env.example.local` to `.env` (or export variables) and set your embedding/chat backend (`EMBEDDING_MODEL`, `OPENAI_API_KEY` or Ollama options, `QDRANT_URL`, etc.). Keep real secrets out of version control.
+4. **Configure environment:** copy `env.example.local` to `.env` (or export variables) and set your embedding/chat backend (`EMBEDDING_MODEL`, `OPENAI_API_KEY` or Ollama options, `QDRANT_URL`, etc.). For remote vLLM embeddings point `VLLM_EMBEDDING_BASE_URL` at your server (e.g. `https://llm.example.com:8000`), set `EMBEDDING_MODEL=vllm:<alias>`, and tune `VLLM_EMBEDDING_CONCURRENCY`, `VLLM_EMBEDDING_BATCH_SIZE`, and `VLLM_EMBEDDING_BATCH_WAIT_MS` to match your GPU capacity. Keep real secrets out of version control.
 5. **Run the app:**
    ```bash
    uvicorn cornerstone.app:create_app --factory --reload
@@ -94,3 +95,7 @@ Cornerstone is a retrieval-augmented support workspace that lets operations team
 - Expand multilingual coverage by extending glossary YAML files or swapping in locale-specific embedding models.
 
 Cornerstone is now ready to be shared publicly—just remember to keep real customer data and API keys in private storage and use this repository as the blueprint for building compliant, high-signal support intelligence systems.
+
+## Documentation
+- Agent guidelines: `AGENTS.md`
+- Architecture overview: `docs/architecture.md`
