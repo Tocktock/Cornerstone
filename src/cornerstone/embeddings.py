@@ -219,7 +219,9 @@ class EmbeddingService:
             msg = "Ollama embedding backend is not initialised."
             raise RuntimeError(msg)
 
-        url = "/api/embeddings"
+        # Build a fully-qualified URL to preserve any base path prefix.
+        assert self._ollama_base_url is not None  # for type checkers
+        url = f"{self._ollama_base_url.rstrip('/')}/api/embeddings"
         payload = {"model": self._ollama_model, "prompt": text}
 
         try:
@@ -330,7 +332,11 @@ class EmbeddingService:
         payload = {"model": self._vllm_model, "input": list(inputs)}
 
         try:
-            response = self._vllm_client.post("v1/embeddings", json=payload)
+            # Build a fully-qualified URL to preserve any base path prefix even
+            # when the client's base_url lacks a trailing slash.
+            assert self._vllm_base_url is not None  # for type checkers
+            url = f"{self._vllm_base_url.rstrip('/')}/v1/embeddings"
+            response = self._vllm_client.post(url, json=payload)
             response.raise_for_status()
         except Exception as exc:  # pragma: no cover - network errors
             raise RuntimeError(f"vLLM embedding request failed: {exc}") from exc
