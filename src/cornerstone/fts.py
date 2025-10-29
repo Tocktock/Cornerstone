@@ -95,6 +95,15 @@ class FTSIndex:
                     (project_id, doc_id),
                 )
 
+    def delete_project(self, project_id: str) -> None:
+        """Remove all indexed chunks for the provided project."""
+
+        with self._connect() as conn:
+            conn.execute(
+                "DELETE FROM chunk_search WHERE project_id = ?",
+                (project_id,),
+            )
+
     def search(self, project_id: str, query: str, *, limit: int = 10) -> List[dict[str, str]]:
         query = (query or "").strip()
         if not query:

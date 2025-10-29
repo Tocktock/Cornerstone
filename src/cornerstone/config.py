@@ -31,7 +31,13 @@ _DEFAULT_GLOSSARY_TOP_K: Final[int] = 3
 _DEFAULT_OLLAMA_URL: Final[str] = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL: Final[str] = "llama3.1:8b"
 _DEFAULT_OLLAMA_TIMEOUT: Final[float] = 60.0
+_DEFAULT_VLLM_URL: Final[str] = "http://localhost:8000"
+_DEFAULT_VLLM_MODEL: Final[str] = "meta-llama/Meta-Llama-3-8B-Instruct"
+_DEFAULT_VLLM_TIMEOUT: Final[float] = 60.0
 _DEFAULT_OLLAMA_EMBED_CONCURRENCY: Final[int] = 2
+_DEFAULT_VLLM_EMBED_CONCURRENCY: Final[int] = 4
+_DEFAULT_VLLM_EMBED_BATCH_SIZE: Final[int] = 16
+_DEFAULT_VLLM_EMBED_BATCH_WAIT_MS: Final[float] = 10.0
 _DEFAULT_DATA_DIR: Final[str] = "data"
 _DEFAULT_LOCAL_DATA_DIR: Final[str] = "data/local"
 _DEFAULT_FTS_DB: Final[str] = "data/fts.sqlite"
@@ -150,6 +156,50 @@ def _env_bool(name: str, default: bool) -> bool:
     return value
 
 
+def _split_remote_model_spec(spec: str) -> tuple[str, str | None]:
+    """
+    Split an embedding model spec into (model, base_url).
+
+    Accepts either a bare model name or a full URL ending with the model name.
+    When a URL is provided, the final path segment is treated as the model name.
+    If the URL points directly to /v1/embeddings, the model identifier is not
+    present and an empty string is returned so callers can raise a clearer error.
+    """
+
+    value = spec.strip()
+    if not value:
+        return "", None
+
+    lowered = value.lower()
+    if lowered.startswith("http://") or lowered.startswith("https://"):
+        base, sep, model = value.rpartition("/")
+        model = model.strip()
+        if not sep or not base.strip():
+            msg = f"Embedding model spec '{spec}' must include a URL ending with the model name."
+            raise ValueError(msg)
+        if not model or model.lower() == "embeddings":
+            return "", base.strip()
+        return model, base.strip()
+
+    return value, None
+
+
+def normalize_vllm_base_url(value: str) -> str:
+    """Normalize vLLM chat base URLs by removing trailing '/v1' segments."""
+
+    normalized = (value or "").strip()
+    if not normalized:
+        return ""
+
+    normalized = normalized.rstrip("/")
+    lowered = normalized.lower()
+    if lowered.endswith("/v1"):
+        normalized = normalized[: -len("/v1")]
+        normalized = normalized.rstrip("/")
+
+    return normalized
+
+
 @dataclass(slots=True)
 class Settings:
     """Runtime settings loaded from environment variables."""
@@ -164,6 +214,14 @@ class Settings:
     ollama_base_url: str = _DEFAULT_OLLAMA_URL
     ollama_model: str = _DEFAULT_OLLAMA_MODEL
     ollama_request_timeout: float = _DEFAULT_OLLAMA_TIMEOUT
+    vllm_base_url: str = _DEFAULT_VLLM_URL
+    vllm_embedding_base_url: str | None = None
+    vllm_model: str = _DEFAULT_VLLM_MODEL
+    vllm_api_key: str | None = None
+    vllm_request_timeout: float = _DEFAULT_VLLM_TIMEOUT
+    vllm_embedding_concurrency: int = _DEFAULT_VLLM_EMBED_CONCURRENCY
+    vllm_embedding_batch_size: int = _DEFAULT_VLLM_EMBED_BATCH_SIZE
+    vllm_embedding_batch_wait_ms: float = _DEFAULT_VLLM_EMBED_BATCH_WAIT_MS
     ollama_embedding_concurrency: int = _DEFAULT_OLLAMA_EMBED_CONCURRENCY
     glossary_path: str = _DEFAULT_GLOSSARY_PATH
     query_hint_path: str | None = _DEFAULT_QUERY_HINTS_PATH
@@ -236,6 +294,9 @@ class Settings:
     keyword_run_auto_refresh: bool = _DEFAULT_KEYWORD_RUN_AUTO_REFRESH
     keyword_run_sync_mode: bool = _DEFAULT_KEYWORD_RUN_SYNC_MODE
 
+    def __post_init__(self) -> None:
+        self.vllm_base_url = normalize_vllm_base_url(self.vllm_base_url)
+
     @classmethod
     def from_env(cls) -> "Settings":
         """Create settings by reading environment variables."""
@@ -253,6 +314,21 @@ class Settings:
             ollama_base_url=os.getenv("OLLAMA_BASE_URL", _DEFAULT_OLLAMA_URL),
             ollama_model=os.getenv("OLLAMA_MODEL", _DEFAULT_OLLAMA_MODEL),
             ollama_request_timeout=float(os.getenv("OLLAMA_TIMEOUT", _DEFAULT_OLLAMA_TIMEOUT)),
+            vllm_base_url=os.getenv("VLLM_BASE_URL", _DEFAULT_VLLM_URL),
+            vllm_embedding_base_url=os.getenv("VLLM_EMBEDDING_BASE_URL"),
+            vllm_model=os.getenv("VLLM_MODEL", _DEFAULT_VLLM_MODEL),
+            vllm_api_key=os.getenv("VLLM_API_KEY"),
+            vllm_request_timeout=float(os.getenv("VLLM_TIMEOUT", _DEFAULT_VLLM_TIMEOUT)),
+            vllm_embedding_concurrency=int(
+                os.getenv("VLLM_EMBEDDING_CONCURRENCY", _DEFAULT_VLLM_EMBED_CONCURRENCY)
+            ),
+            vllm_embedding_batch_size=max(
+                1,
+                int(os.getenv("VLLM_EMBEDDING_BATCH_SIZE", _DEFAULT_VLLM_EMBED_BATCH_SIZE)),
+            ),
+            vllm_embedding_batch_wait_ms=float(
+                os.getenv("VLLM_EMBEDDING_BATCH_WAIT_MS", _DEFAULT_VLLM_EMBED_BATCH_WAIT_MS)
+            ),
             ollama_embedding_concurrency=int(
                 os.getenv("OLLAMA_EMBEDDING_CONCURRENCY", _DEFAULT_OLLAMA_EMBED_CONCURRENCY)
             ),
@@ -515,26 +591,67 @@ class Settings:
         return self.embedding_model.strip().lower() == "text-embedding-3-large"
 
     @property
-    def is_huggingface_backend(self) -> bool:
-        """Return True when the configured embedding backend is a local HuggingFace model."""
-
-        return not self.is_openai_backend and not self.is_ollama_embedding_backend
-
-    @property
     def is_ollama_embedding_backend(self) -> bool:
         """Return True when embeddings should be generated via an Ollama-hosted model."""
 
         return self.embedding_model.strip().lower().startswith("ollama:")
 
     @property
-    def ollama_embedding_model(self) -> str | None:
-        """Return the Ollama embedding model name without the prefix when configured."""
+    def ollama_embedding_endpoint(self) -> tuple[str, str]:
+        """Return the Ollama embedding model and resolved base URL for embeddings."""
 
         if not self.is_ollama_embedding_backend:
-            return None
+            msg = "Ollama embedding endpoint requested but EMBEDDING_MODEL is not an Ollama model."
+            raise ValueError(msg)
         _, _, name = self.embedding_model.partition(":")
-        model = name.strip()
-        return model or None
+        model, base = _split_remote_model_spec(name)
+        if not model:
+            msg = "EMBEDDING_MODEL must include an Ollama model identifier."
+            raise ValueError(msg)
+        configured_base = (self.ollama_base_url or "").strip()
+        base_url = (base or configured_base or _DEFAULT_OLLAMA_URL).rstrip("/")
+        if not base_url:
+            msg = "Resolved Ollama embedding base URL is empty."
+            raise ValueError(msg)
+        return model, base_url
+
+    @property
+    def is_vllm_embedding_backend(self) -> bool:
+        """Return True when embeddings should be generated via a vLLM-hosted model."""
+
+        return self.embedding_model.strip().lower().startswith("vllm:")
+
+    @property
+    def vllm_embedding_endpoint(self) -> tuple[str, str]:
+        """Return the vLLM embedding model and resolved base URL for embeddings."""
+
+        if not self.is_vllm_embedding_backend:
+            msg = "vLLM embedding endpoint requested but EMBEDDING_MODEL is not a vLLM model."
+            raise ValueError(msg)
+        _, _, name = self.embedding_model.partition(":")
+        model, parsed_base = _split_remote_model_spec(name)
+        base_override = (self.vllm_embedding_base_url or "").strip()
+        chat_base = normalize_vllm_base_url(self.vllm_base_url)
+        base_url = (base_override or parsed_base or chat_base or _DEFAULT_VLLM_URL).strip()
+        base_url = base_url.rstrip("/")
+        if base_url.endswith("/v1/embeddings"):
+            base_url = base_url[: -len("/v1/embeddings")]
+        elif base_url.endswith("/embeddings"):
+            base_url = base_url[: -len("/embeddings")]
+        if base_url.endswith("/v1"):
+            base_url = base_url[: -len("/v1")]
+        base_url = base_url.rstrip("/")
+        if not model:
+            msg = (
+                "EMBEDDING_MODEL must include the vLLM model identifier "
+                "(e.g. 'vllm:qwen3-embeddings'). Set VLLM_EMBEDDING_BASE_URL to "
+                "override the endpoint host when needed."
+            )
+            raise ValueError(msg)
+        if not base_url:
+            msg = "Resolved vLLM embedding base URL is empty."
+            raise ValueError(msg)
+        return model, base_url
 
     @property
     def required_openai_model(self) -> OpenAIModelName:
@@ -556,6 +673,12 @@ class Settings:
         """Return True when the chat backend is configured for an Ollama-hosted model."""
 
         return self.chat_backend.lower() == "ollama"
+
+    @property
+    def is_vllm_chat_backend(self) -> bool:
+        """Return True when the chat backend is configured for a vLLM-hosted model."""
+
+        return self.chat_backend.lower() == "vllm"
 
     def qdrant_client_kwargs(self) -> dict[str, Any]:
         """Configuration arguments for instantiating a Qdrant client."""

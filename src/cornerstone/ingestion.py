@@ -360,11 +360,9 @@ class ProjectVectorStoreManager:
         """Remove all vectors associated with a project."""
 
         store = self.get_store(project_id)
-        flt = models.Filter(
-            must=[models.FieldCondition(key="project_id", match=models.MatchValue(value=project_id))]
-        )
-        result = store.delete_by_filter(flt)
-        return result.status == models.UpdateStatus.COMPLETED
+        store.ensure_collection(force_recreate=True)
+        store.ensure_payload_indexes()
+        return True
 
     def iter_project_payloads(self, project_id: str, *, batch_size: int = 256):
         """Yield payload dictionaries for all vectors stored for a project."""
