@@ -1,2 +1,35 @@
 project_name: Cornerstone
 language: python
+summary: |
+  Cornerstone is a FastAPI-based retrieval-augmented support workspace. The service
+  orchestrates ingestion, hybrid retrieval, chat generation, keyword discovery, and
+  analytics across a shared data layer (Qdrant vectors, SQLite FTS, JSON manifests).
+primary_modules:
+  app: src/cornerstone/app.py
+  ingestion: src/cornerstone/ingestion.py
+  chat: src/cornerstone/chat.py
+  keywords: src/cornerstone/keywords.py
+  projects_store: src/cornerstone/projects.py
+  personas: src/cornerstone/personas.py
+  observability: src/cornerstone/observability.py
+data_dirs:
+  runtime_state: data/
+  samples: samples/
+  docs: docs/
+dev_commands:
+  run_app: uvicorn cornerstone.app:create_app --factory --reload
+  tests: pytest
+  generate_hints: python scripts/run_hints.py
+  seed_ag_news: python scripts/seed_ag_news.py --limit 200
+key_integrations:
+  vector_store: Qdrant (qdrant-client)
+  embeddings: OpenAI, HuggingFace, Ollama, vLLM via EmbeddingService
+  templates: FastAPI + Jinja2 in templates/
+  background_jobs:
+    keyword_runs: KeywordRunQueue (src/cornerstone/keyword_jobs.py)
+    insight_jobs: KeywordInsightQueue (src/cornerstone/insights.py)
+testing_focus:
+  - Hybrid retrieval and support endpoints (tests/test_support_api.py, tests/test_support_retrieval.py)
+  - Ingestion + chunking (tests/test_document_ingestion.py, tests/test_chunker.py)
+  - Keyword pipeline and job queue (tests/test_keywords.py, tests/test_keyword_jobs.py)
+  - Analytics and logging (tests/test_analytics.py, tests/test_conversations.py)
