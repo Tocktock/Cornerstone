@@ -487,11 +487,46 @@
             }
             keywordStatus.dataset.status = status || 'running';
             keywordStatus.style.color = '#1d4ed8';
-            const stage = status === 'running' ? 'Keyword run in progress…' : 'Keyword run queued…';
-            const processed = runInfo.stats && runInfo.stats.chunk_total ? ` (${runInfo.stats.chunk_total} chunks processed)` : '';
-            keywordStatus.textContent = `${stage}${processed}`;
-            const delay = runInfo.poll_after || runInfo.stats && runInfo.stats.poll_after || 2000;
-            scheduleRunPoll(jobId, delay);
+            const stats = runInfo.stats || {};
+            let statusText = status === 'running' ? 'Keyword run in progress…' : 'Keyword run queued…';
+            if (status === 'running' && stats.batch_total && stats.batch_total > 0) {
+              const totalBatches = toNumber(stats.batch_total, 0);
+              const completedBatches = Math.min(
+                totalBatches,
+                Math.max(0, toNumber(stats.batches_completed, 0)),
+              );
+              const totalCandidates = toNumber(
+                stats.candidate_total ?? stats.stage2_candidate_total,
+                0,
+              );
+              const processedCandidates = Math.min(
+                totalCandidates || Number.POSITIVE_INFINITY,
+                Math.max(0, toNumber(stats.candidates_processed, 0)),
+              );
+              let progressDetail = '';
+              if (totalBatches > 0) {
+                progressDetail = `batch ${completedBatches}/${totalBatches}`;
+              }
+              if (totalCandidates > 0) {
+                progressDetail += progressDetail
+                  ? ` • ${processedCandidates.toLocaleString()} of ${totalCandidates.toLocaleString()} candidates`
+                  : `${processedCandidates.toLocaleString()} of ${totalCandidates.toLocaleString()} candidates`;
+              }
+              statusText = progressDetail
+                ? `Keyword run in progress – ${progressDetail}`
+                : 'Keyword run in progress…';
+            } else if (status === 'running' && stats.chunk_total) {
+              statusText = `Keyword run in progress… (${stats.chunk_total} chunks processed)`;
+            }
+            keywordStatus.textContent = statusText;
+            const delayMsRaw = runInfo.poll_after_ms ?? stats.poll_after_ms;
+            const delaySecondsRaw = runInfo.poll_after ?? stats.poll_after;
+            let delayMs = toNumber(delayMsRaw, NaN);
+            if (!Number.isFinite(delayMs)) {
+              const delaySeconds = toNumber(delaySecondsRaw, NaN);
+              delayMs = Number.isFinite(delaySeconds) ? delaySeconds * 1000 : 2000;
+            }
+            scheduleRunPoll(jobId, delayMs);
           } catch (error) {
             console.error(error);
             keywordStatus.dataset.status = 'retrying';

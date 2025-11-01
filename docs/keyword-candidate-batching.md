@@ -33,28 +33,21 @@
 ### 2. Batch Orchestration
 
 - Introduce `iter_candidate_batches(candidates, batch_size, overlap)` in `keywords.py`.
-- Ensure deterministic ordering:
-  1. Sort candidates by Stage 2 score + document fingerprint (existing order).
-  2. Slice contiguous windows with optional overlap.
-- Track `batch_index`, `batch_total`, `candidates_processed` during iteration.
+- Maintain existing Stage 2 ordering; slicing is deterministic to keep results reproducible.
+- Track `batch_index`, `batch_total`, and `candidates_processed` while iterating.
+- Accumulate refined candidates from each batch into a single list used by the downstream clustering/ranking stages. This keeps Stage 3/4 behaviour aligned with the current single-pass pipeline while still respecting LLM limits.
 
-### 3. Candidate Accumulator
+### 3. LLM Integration
 
-- New helper class (e.g., `_CandidateAccumulator`) keyed by normalized concept ID.
-- Aggregates:
-  - Occurrence counts (chunks, documents).
-  - Score components (frequency, chunk, embedding, LLM, etc.).
-  - Representative aliases/sections (bounded list, e.g., top 5).
-- After each batch, merge into accumulator and drop per-batch structures to limit memory usage.
-- After all batches, run existing Stage 4 ranking logic on the merged concepts to preserve deterministic ordering.
+- Update `KeywordLLMFilter.refine_concepts` usage so refinement happens per batch rather than in one large call.
+- Include `batch_index`, `batch_size`, and `candidate_count` in logs/metrics.
+- Clamp the per-request batch size so it never exceeds `KEYWORD_LLM_MAX_CANDIDATES`, avoiding the historical `candidate-limit` bypass.
+- When LLM support is disabled or bypassed (e.g., token/chunk limit), the pipeline falls back to the unrefined candidates but still reports batch stats.
 
-### 4. LLM Integration
+### 4. Candidate Aggregation
 
-- Wrap `KeywordLLMFilter.filter_candidates` with batch context:
-  - Include `batch_index`, `batch_size`, `candidates_in_batch` in logs/metrics.
-  - On `candidate-limit`, halve the batch (down to `MIN_SIZE`) and retry.
-  - If minimum size still fails, mark batch with `filter-stage2.candidate-limit` and continue (preserving today’s bypass messaging).
-- Reuse `LLMFilter` prompts/client to avoid reconnect cost.
+- Accumulate refined candidates from each batch and feed the combined list to `cluster_concepts` and `rank_concept_clusters` exactly once.
+- This keeps scoring deterministic relative to the single-batch pipeline while allowing full refinement coverage.
 
 ### 5. Progress Reporting & Metrics
 
@@ -78,11 +71,9 @@
 
 - Unit tests:
   - Batch iterator deterministic slicing (with/without overlap).
-  - Accumulator merges produce identical results as single-batch baseline.
-  - LLM retry path reduces batch size and flags bypass correctly.
+  - Progress callback and stats wiring for batched execution.
 - Integration tests:
-  - Multi-batch run on synthetic dataset verifying API stats.
-  - UI polling rendering progress JSON (JS unit test or Playwright scenario).
+  - UI polling rendering batched progress from `/keywords/{project}/runs`.
 - Regression: confirm existing small dataset runs remain unchanged.
 
 ## Open Questions

@@ -86,6 +86,9 @@ _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS: Final[int] = 64
 _DEFAULT_KEYWORD_LLM_MAX_CANDIDATES: Final[int] = 25000
 _DEFAULT_KEYWORD_LLM_MAX_TOKENS: Final[int] = 750_000
 _DEFAULT_KEYWORD_LLM_MAX_CHUNKS: Final[int] = 10000
+_DEFAULT_KEYWORD_CANDIDATE_BATCH_SIZE: Final[int] = 5000
+_DEFAULT_KEYWORD_CANDIDATE_BATCH_MIN_SIZE: Final[int] = 500
+_DEFAULT_KEYWORD_CANDIDATE_BATCH_OVERLAP: Final[int] = 0
 _DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY: Final[int] = 1
 _DEFAULT_KEYWORD_RUN_MAX_QUEUE: Final[int] = 8
 _DEFAULT_KEYWORD_RUN_CACHE_TTL: Final[int] = 86_400
@@ -246,6 +249,9 @@ class Settings:
     reranker_max_candidates: int = _DEFAULT_RERANKER_MAX_CANDIDATES
     keyword_filter_max_results: int = _DEFAULT_KEYWORD_FILTER_MAX_RESULTS
     keyword_filter_allow_generated: bool = _DEFAULT_KEYWORD_FILTER_ALLOW_GENERATED
+    keyword_candidate_batch_size: int = _DEFAULT_KEYWORD_CANDIDATE_BATCH_SIZE
+    keyword_candidate_min_batch_size: int = _DEFAULT_KEYWORD_CANDIDATE_BATCH_MIN_SIZE
+    keyword_candidate_batch_overlap: int = _DEFAULT_KEYWORD_CANDIDATE_BATCH_OVERLAP
     query_hint_batch_size: int = _DEFAULT_QUERY_HINT_BATCH_SIZE
     query_hint_cron: str = _DEFAULT_QUERY_HINT_CRON
     conversation_logging_enabled: bool = True
@@ -363,6 +369,30 @@ class Settings:
             ),
             keyword_filter_allow_generated=_env_bool(
                 "KEYWORD_FILTER_ALLOW_GENERATED", _DEFAULT_KEYWORD_FILTER_ALLOW_GENERATED
+            ),
+            keyword_candidate_batch_size=int(
+                os.getenv(
+                    "KEYWORD_CANDIDATE_BATCH_SIZE",
+                    str(_DEFAULT_KEYWORD_CANDIDATE_BATCH_SIZE),
+                )
+            ),
+            keyword_candidate_min_batch_size=max(
+                1,
+                int(
+                    os.getenv(
+                        "KEYWORD_CANDIDATE_MIN_BATCH_SIZE",
+                        str(_DEFAULT_KEYWORD_CANDIDATE_BATCH_MIN_SIZE),
+                    )
+                ),
+            ),
+            keyword_candidate_batch_overlap=max(
+                0,
+                int(
+                    os.getenv(
+                        "KEYWORD_CANDIDATE_BATCH_OVERLAP",
+                        str(_DEFAULT_KEYWORD_CANDIDATE_BATCH_OVERLAP),
+                    )
+                ),
             ),
             query_hint_batch_size=int(
                 os.getenv("QUERY_HINT_BATCH_SIZE", str(_DEFAULT_QUERY_HINT_BATCH_SIZE))

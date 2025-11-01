@@ -237,6 +237,41 @@ class ConceptExtractionResult:
         )
 
 
+def iter_candidate_batches(
+    candidates: Sequence[ConceptCandidate],
+    *,
+    batch_size: int,
+    overlap: int = 0,
+) -> Iterable[List[ConceptCandidate]]:
+    """Yield deterministic slices of concept candidates for batching.
+
+    Args:
+        candidates: Ordered sequence of concept candidates (Stage 2 output).
+        batch_size: Maximum number of candidates per batch (<= 0 means single batch).
+        overlap: Number of candidates to repeat between consecutive batches (helps
+            retain top-ranked concepts across boundaries).
+    """
+
+    total = len(candidates)
+    if total == 0:
+        yield []
+        return
+    if batch_size <= 0 or batch_size >= total:
+        yield list(candidates)
+        return
+
+    effective_overlap = max(0, min(overlap, batch_size - 1))
+    step = max(1, batch_size - effective_overlap)
+
+    start = 0
+    while start < total:
+        end = min(total, start + batch_size)
+        yield list(candidates[start:end])
+        if end >= total:
+            break
+        start += step
+
+
 @dataclass(slots=True)
 class _CandidateAggregate:
     occurrences: int = 0
@@ -3607,6 +3642,7 @@ __all__ = [
     "KeywordCandidate",
     "KeywordLLMFilter",
     "KeywordSourceChunk",
+    "iter_candidate_batches",
     "cluster_concepts",
     "rank_concept_clusters",
     "extract_concept_candidates",

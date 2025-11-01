@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import logging
 import math
+import time
 from dataclasses import dataclass
-from typing import Iterable, Sequence
+from typing import Callable, Iterable, Sequence
 
 from .config import Settings
 from .embeddings import EmbeddingService
@@ -22,6 +23,7 @@ from .keywords import (
     cluster_concepts,
     extract_concept_candidates,
     extract_keyword_candidates,
+    iter_candidate_batches,
     rank_concept_clusters,
     prepare_keyword_chunks,
 )
@@ -50,6 +52,7 @@ async def execute_keyword_run(
     store_manager: ProjectVectorStoreManager,
     insight_queue: KeywordInsightQueue,
     metrics: MetricsRecorder | None = None,
+    progress_callback: Callable[[dict[str, object]], None] | None = None,
 ) -> KeywordRunResult:
     payloads = list(store_manager.iter_project_payloads(project.id))
     chunk_stage: ChunkPreparationResult = prepare_keyword_chunks(payloads)
@@ -80,22 +83,45 @@ async def execute_keyword_run(
 
     total_tokens = chunk_stage.total_tokens()
     processed_chunks = chunk_stage.processed_count
-    total_candidates = len(concept_stage.candidates)
+    stage2_candidate_total = len(concept_stage.candidates)
 
-    llm_active = llm_filter.enabled
+    batch_size_config = max(0, settings.keyword_candidate_batch_size)
+    batch_overlap = max(0, settings.keyword_candidate_batch_overlap)
+    min_batch_size = max(1, settings.keyword_candidate_min_batch_size)
+    candidate_limit = max(0, settings.keyword_llm_max_candidates)
+
+    if candidate_limit:
+        if batch_size_config <= 0 or batch_size_config > candidate_limit:
+            batch_size_config = candidate_limit
+        min_batch_size = min(min_batch_size, batch_size_config)
+        batch_overlap = min(batch_overlap, max(0, batch_size_config - 1))
+
+    if stage2_candidate_total >= min_batch_size and batch_size_config < min_batch_size:
+        max_allowed = candidate_limit or stage2_candidate_total
+        batch_size_config = min(min_batch_size, max_allowed)
+
+    if batch_size_config <= 0:
+        batch_size_config = stage2_candidate_total or 1
+    if batch_size_config < 1:
+        batch_size_config = 1
+    if batch_overlap >= batch_size_config:
+        batch_overlap = max(0, batch_size_config - 1)
+
+    if stage2_candidate_total <= batch_size_config:
+        batch_total = 1 if stage2_candidate_total else 0
+    else:
+        step = max(1, batch_size_config - batch_overlap)
+        batch_total = math.ceil(max(0, stage2_candidate_total - batch_size_config) / step) + 1
+    if stage2_candidate_total and batch_total == 0:
+        batch_total = 1
+
+    llm_active = llm_filter.enabled and stage2_candidate_total > 0
     llm_bypass_reason: str | None = None
     llm_bypass_details: dict[str, object] = {}
     if llm_active:
-        candidate_limit = max(0, settings.keyword_llm_max_candidates)
         token_limit = max(0, settings.keyword_llm_max_tokens)
         chunk_limit = max(0, settings.keyword_llm_max_chunks)
-        if candidate_limit and total_candidates > candidate_limit:
-            llm_bypass_reason = "candidate-limit"
-            llm_bypass_details = {
-                "candidate_limit": candidate_limit,
-                "candidate_count": total_candidates,
-            }
-        elif token_limit and total_tokens > token_limit:
+        if token_limit and total_tokens > token_limit:
             llm_bypass_reason = "token-limit"
             llm_bypass_details = {
                 "token_limit": token_limit,
@@ -111,16 +137,108 @@ async def execute_keyword_run(
         if llm_bypass_reason is not None:
             llm_active = False
             details = {
-                "candidate_count": total_candidates,
+                "candidate_count": stage2_candidate_total,
                 "token_total": total_tokens,
                 "chunk_total": processed_chunks,
             }
             details.update(llm_bypass_details)
             llm_filter.record_bypass("concept", llm_bypass_reason, **details)
 
-    if llm_active and concept_stage.candidates:
-        refined_concepts = llm_filter.refine_concepts(concept_stage.candidates, context_snippets)
-        concept_stage = concept_stage.replace_candidates(refined_concepts)
+    refined_candidates: list[ConceptCandidate] = []
+    candidates_processed = 0
+    batches_completed = 0
+    last_batch_duration = 0.0
+    poll_after_ms: int | None = None
+
+    if stage2_candidate_total:
+        if batch_total <= 1:
+            batch_iterable: Iterable[list[ConceptCandidate]] = [list(concept_stage.candidates)]
+        else:
+            batch_iterable = iter_candidate_batches(
+                concept_stage.candidates,
+                batch_size=batch_size_config,
+                overlap=batch_overlap,
+            )
+    else:
+        batch_iterable = []
+
+    if llm_active:
+        for idx, batch in enumerate(batch_iterable, start=1):
+            if not batch:
+                continue
+            batch_start = time.perf_counter()
+            refined_batch = llm_filter.refine_concepts(batch, context_snippets)
+            if refined_batch:
+                refined_candidates.extend(refined_batch)
+            else:
+                refined_candidates.extend(batch)
+            candidates_processed = min(stage2_candidate_total, candidates_processed + len(batch))
+            batches_completed = idx
+            batch_duration = max(time.perf_counter() - batch_start, 0.0)
+            last_batch_duration = batch_duration
+            poll_after_ms = min(5000, max(1500, int(batch_duration * 1500 + 500)))
+            progress_payload = {
+                "batch_total": batch_total or 1,
+                "batches_completed": batches_completed,
+                "candidates_processed": candidates_processed,
+                "candidate_total": stage2_candidate_total,
+            }
+            if poll_after_ms is not None:
+                progress_payload["poll_after"] = round(poll_after_ms / 1000.0, 2)
+                progress_payload["poll_after_ms"] = poll_after_ms
+            if batch_duration:
+                progress_payload["last_batch_duration_ms"] = round(batch_duration * 1000.0, 2)
+            if progress_callback:
+                progress_callback(progress_payload)
+            if metrics:
+                metrics.increment(
+                    "keyword.batch.processed",
+                    project_id=project.id,
+                    batch_index=idx,
+                    batch_total=batch_total or 1,
+                )
+                metrics.record_timing(
+                    "keyword.batch.duration",
+                    batch_duration,
+                    project_id=project.id,
+                    batch_index=idx,
+                )
+        if batches_completed == 0 and stage2_candidate_total:
+            candidates_processed = stage2_candidate_total
+            batches_completed = batch_total or 1
+        if refined_candidates:
+            concept_stage = concept_stage.replace_candidates(refined_candidates)
+        else:
+            refined_candidates = list(concept_stage.candidates)
+    else:
+        refined_candidates = list(concept_stage.candidates)
+        if stage2_candidate_total:
+            candidates_processed = stage2_candidate_total
+            batches_completed = batch_total or 1
+            if progress_callback:
+                progress_callback(
+                    {
+                        "batch_total": batch_total or 1,
+                        "batches_completed": batches_completed,
+                        "candidates_processed": candidates_processed,
+                        "candidate_total": stage2_candidate_total,
+                    }
+                )
+    batching_debug: dict[str, object] = {
+        "enabled": bool(llm_active and batch_total and batch_total > 1),
+        "batch_size": batch_size_config,
+        "batch_overlap": batch_overlap,
+        "batch_total": batch_total,
+        "batches_completed": batches_completed,
+        "candidates_processed": candidates_processed,
+        "candidate_total": stage2_candidate_total,
+        "llm_active": llm_active,
+    }
+    if poll_after_ms is not None:
+        batching_debug["poll_after_ms"] = poll_after_ms
+    if last_batch_duration:
+        batching_debug["last_batch_duration_ms"] = round(last_batch_duration * 1000.0, 2)
+
     cluster_stage: ConceptClusteringResult = cluster_concepts(
         concept_stage.candidates,
         embedding_service=embedding_service,
@@ -240,6 +358,7 @@ async def execute_keyword_run(
         chunk_debug["sample_excerpts"] = sample_excerpts
 
     concept_debug = concept_stage.to_debug_payload(limit=8)
+    concept_debug["batching"] = batching_debug
     concept_llm_debug = llm_filter.concept_debug_payload()
     if concept_llm_debug:
         concept_debug["llm"] = concept_llm_debug
@@ -390,7 +509,7 @@ async def execute_keyword_run(
         "stage3": cluster_debug,
         "stage4": ranking_debug,
     }
-    debug_payload.setdefault("candidate_count", original_count)
+    debug_payload.setdefault("candidate_count", stage2_candidate_total)
     if stage7_debug:
         debug_payload["stage7"] = stage7_debug
     if insight_job_payload and stage7_debug and "poll_after" in stage7_debug:
@@ -415,12 +534,26 @@ async def execute_keyword_run(
         for item in keywords
     ]
 
+    final_keyword_total = len(keyword_dicts)
     stats = {
-        "candidate_total": original_count,
+        "candidate_total": stage2_candidate_total,
+        "stage2_candidate_total": stage2_candidate_total,
+        "keywords_total": final_keyword_total,
         "chunk_total": processed_chunks,
         "token_total": total_tokens,
         "llm_backend": llm_filter.backend,
+        "batch_total": batch_total,
+        "batches_completed": batches_completed,
+        "candidates_processed": candidates_processed,
+        "batch_size": batch_size_config,
+        "batch_overlap": batch_overlap,
+        "llm_active": llm_active,
     }
+    if poll_after_ms is not None:
+        stats["poll_after_ms"] = poll_after_ms
+        stats["poll_after"] = round(poll_after_ms / 1000.0, 2)
+    if last_batch_duration:
+        stats["last_batch_duration_ms"] = round(last_batch_duration * 1000.0, 2)
     if llm_bypass_reason:
         stats["bypass_reason"] = llm_bypass_reason
         stats.update(llm_bypass_details)
