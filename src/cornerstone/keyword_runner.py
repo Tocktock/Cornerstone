@@ -6,7 +6,7 @@ import logging
 import math
 import time
 from dataclasses import dataclass
-from typing import Callable, Iterable, Sequence
+from typing import Callable, Iterable, Sequence, Tuple
 
 from .config import Settings
 from .embeddings import EmbeddingService
@@ -43,6 +43,42 @@ class KeywordRunResult:
     insights: list[dict[str, object]]
     stats: dict[str, object]
     insight_job: dict[str, object] | None = None
+
+
+def _resolve_batch_config(total_candidates: int, settings: Settings) -> Tuple[int, int]:
+    """Return `(batch_size, overlap)` for Stage 2 batching."""
+
+    raw_size = max(0, settings.keyword_candidate_batch_size)
+    min_size = max(1, settings.keyword_candidate_min_batch_size)
+    overlap = max(0, settings.keyword_candidate_batch_overlap)
+    candidate_limit = max(0, settings.keyword_llm_max_candidates)
+
+    if raw_size == 0:
+        return (total_candidates or 1, 0)
+
+    batch_size = max(1, raw_size)
+    if candidate_limit:
+        batch_size = min(batch_size, candidate_limit)
+
+    if total_candidates >= min_size:
+        floor = min_size if not candidate_limit else min(min_size, candidate_limit)
+        batch_size = max(batch_size, floor)
+
+    overlap = min(overlap, batch_size - 1)
+    return (batch_size, overlap)
+
+
+def _estimate_batch_total(total_candidates: int, batch_size: int, overlap: int) -> int:
+    """Return the number of batches needed for the given configuration."""
+
+    if total_candidates <= 0:
+        return 0
+    if batch_size <= 0 or total_candidates <= batch_size:
+        return 1
+
+    step = max(1, batch_size - overlap)
+    remaining = max(0, total_candidates - batch_size)
+    return math.ceil(remaining / step) + 1
 
 
 async def execute_keyword_run(
@@ -86,33 +122,8 @@ async def execute_keyword_run(
     processed_chunks = chunk_stage.processed_count
     stage2_candidate_total = len(concept_stage.candidates)
 
-    raw_batch_size = settings.keyword_candidate_batch_size
-    if raw_batch_size < 0:
-        raw_batch_size = 0
-    batch_overlap = max(0, settings.keyword_candidate_batch_overlap)
-    min_batch_size = max(1, settings.keyword_candidate_min_batch_size)
-    candidate_limit = max(0, settings.keyword_llm_max_candidates)
-
-    if raw_batch_size <= 0:
-        batch_size_config = stage2_candidate_total or 1
-        batch_overlap = 0
-    else:
-        batch_size_config = max(1, raw_batch_size)
-        if candidate_limit:
-            batch_size_config = min(batch_size_config, candidate_limit)
-        if stage2_candidate_total >= min_batch_size:
-            desired_min = min_batch_size
-            if candidate_limit:
-                desired_min = min(desired_min, candidate_limit)
-            batch_size_config = max(batch_size_config, desired_min)
-        batch_overlap = min(batch_overlap, batch_size_config - 1)
-
-    if stage2_candidate_total <= batch_size_config:
-        batch_total = 1 if stage2_candidate_total else 0
-    else:
-        step = max(1, batch_size_config - batch_overlap)
-        batches_needed = max(0, stage2_candidate_total - batch_size_config)
-        batch_total = math.ceil(batches_needed / step) + 1
+    batch_size_config, batch_overlap = _resolve_batch_config(stage2_candidate_total, settings)
+    batch_total = _estimate_batch_total(stage2_candidate_total, batch_size_config, batch_overlap)
 
     llm_active = llm_filter.enabled and stage2_candidate_total > 0
     llm_bypass_reason: str | None = None
@@ -161,21 +172,16 @@ async def execute_keyword_run(
         )
 
     if llm_active:
-        seen_stage2_signatures: set[tuple[str, tuple[str, ...]]] = set()
+        seen_stage2_ids: set[int] = set()
         for idx, batch in enumerate(batch_iterable, start=1):
             if not batch:
                 continue
             batch_start = time.perf_counter()
             refined_batch = llm_filter.refine_concepts(batch, context_snippets)
-            if refined_batch:
-                refined_candidates.extend(refined_batch)
-            else:
-                refined_candidates.extend(batch)
-            for candidate in batch:
-                signature = (candidate.phrase.lower(), tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ())
-                if signature not in seen_stage2_signatures:
-                    seen_stage2_signatures.add(signature)
-                    candidates_processed = min(stage2_candidate_total, candidates_processed + 1)
+            refined_candidates.extend(refined_batch or batch)
+
+            seen_stage2_ids.update(id(candidate) for candidate in batch)
+            candidates_processed = min(stage2_candidate_total, len(seen_stage2_ids))
 
             batches_completed = idx
             batch_duration = max(time.perf_counter() - batch_start, 0.0)
@@ -225,10 +231,7 @@ async def execute_keyword_run(
                     }
                 )
 
-    if refined_candidates:
-        candidates_for_stage3 = dedupe_concept_candidates(refined_candidates)
-    else:
-        candidates_for_stage3 = dedupe_concept_candidates(concept_stage.candidates)
+    candidates_for_stage3 = dedupe_concept_candidates(refined_candidates or concept_stage.candidates)
     concept_stage = concept_stage.replace_candidates(candidates_for_stage3)
 
     batching_debug: dict[str, object] = {

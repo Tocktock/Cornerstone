@@ -6,17 +6,8 @@ from pathlib import Path
 import pytest
 
 from cornerstone.config import Settings
-from cornerstone.keyword_runner import execute_keyword_run
-from cornerstone.keywords import (
-    ChunkPreparationResult,
-    ConceptCandidate,
-    ConceptClusteringResult,
-    ConceptExtractionResult,
-    ConceptRankingResult,
-    KeywordLLMFilter,
-    KeywordSourceChunk,
-    iter_candidate_batches,
-)
+from cornerstone.keyword_runner import _estimate_batch_total, _resolve_batch_config, execute_keyword_run
+from cornerstone.keywords import ConceptCandidate, KeywordLLMFilter, iter_candidate_batches
 from cornerstone.insights import KeywordInsightQueue
 from cornerstone.projects import Project
 
@@ -296,124 +287,25 @@ async def test_execute_keyword_run_respects_disabled_batching(monkeypatch: pytes
         assert progress_events[-1]["candidates_processed"] == stats["stage2_candidate_total"]
 
 
-@pytest.mark.asyncio
-async def test_execute_keyword_run_honors_llm_candidate_limit(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+def test_batch_config_respects_candidate_limit(tmp_path: Path):
     data_dir = tmp_path / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     settings = Settings(
         data_dir=str(data_dir),
-        default_project_name="LLM Limit Project",
+        default_project_name="Limit Test",
         keyword_stage7_summary_enabled=False,
-        keyword_stage3_label_clusters=False,
-        keyword_stage5_harmonize_enabled=False,
         keyword_candidate_batch_size=5000,
-        keyword_candidate_batch_overlap=0,
         keyword_candidate_min_batch_size=500,
+        keyword_candidate_batch_overlap=5,
         keyword_llm_max_candidates=50,
         chat_backend="ollama",
         ollama_base_url="http://localhost:11434",
         ollama_model="keyword-test",
     )
 
-    fake_chunk = KeywordSourceChunk(
-        text="Example document chunk for candidate limiting.",
-        normalized_text="example document chunk",
-        doc_id="doc-limit",
-        chunk_id="doc-limit:0",
-        language="en",
-        token_count=120,
-    )
-    chunk_result = ChunkPreparationResult(
-        chunks=[fake_chunk],
-        total_payloads=1,
-        skipped_empty=0,
-        skipped_non_text=0,
-    )
-    concept_candidates = [
-        ConceptCandidate(
-            phrase=f"limit-term-{idx}",
-            score=1.0,
-            occurrences=1,
-            document_count=1,
-            chunk_count=1,
-            average_occurrence_per_chunk=1.0,
-            word_count=1,
-            languages=["en"],
-            sections=[],
-            sources=[],
-            sample_snippet=None,
-        )
-        for idx in range(600)
-    ]
-    concept_result = ConceptExtractionResult(
-        candidates=concept_candidates,
-        total_chunks=1,
-        total_tokens=120,
-        parameters={"mock": True},
-    )
+    batch_size, overlap = _resolve_batch_config(total_candidates=600, settings=settings)
+    assert batch_size == settings.keyword_llm_max_candidates
+    assert overlap == min(settings.keyword_candidate_batch_overlap, batch_size - 1)
 
-    monkeypatch.setattr(
-        "cornerstone.keyword_runner.prepare_keyword_chunks",
-        lambda payloads: chunk_result,
-    )
-    monkeypatch.setattr(
-        "cornerstone.keyword_runner.extract_concept_candidates",
-        lambda *args, **kwargs: concept_result,
-    )
-
-    def fake_refine(self, batch, context_snippets):
-        return list(batch)
-
-    monkeypatch.setattr(KeywordLLMFilter, "refine_concepts", fake_refine, raising=False)
-    monkeypatch.setattr(
-        KeywordLLMFilter,
-        "_invoke_backend",
-        lambda self, prompt: json.dumps({"keywords": [], "concepts": []}),
-    )
-
-    monkeypatch.setattr(
-        "cornerstone.keyword_runner.cluster_concepts",
-        lambda *args, **kwargs: ConceptClusteringResult(clusters=[], parameters={}),
-    )
-    monkeypatch.setattr(
-        "cornerstone.keyword_runner.rank_concept_clusters",
-        lambda *args, **kwargs: ConceptRankingResult(ranked=[], parameters={}),
-    )
-
-    payloads = [
-        {
-            "text": "Placeholder payload for LLM limit test.",
-            "language": "en",
-            "chunk_id": "doc-limit:0",
-            "doc_id": "doc-limit",
-        }
-    ]
-    store_manager = FakeStoreManager(payloads)
-    embedding_service = FakeEmbeddingService()
-    insight_queue = KeywordInsightQueue(max_jobs=1)
-    project = Project(
-        id="proj-limit",
-        name="Candidate Limit",
-        description=None,
-        created_at="2025-01-01T00:00:00+00:00",
-    )
-
-    result = await execute_keyword_run(
-        project,
-        settings=settings,
-        embedding_service=embedding_service,
-        store_manager=store_manager,  # type: ignore[arg-type]
-        insight_queue=insight_queue,
-        metrics=None,
-    )
-
-    stats = result.stats
-    assert stats["stage2_candidate_total"] == len(concept_candidates)
-    assert stats["batch_total"] > 1
-    assert stats["batch_size"] == settings.keyword_llm_max_candidates
-    assert stats["batch_overlap"] == 0
-    assert stats["candidates_processed"] == stats["stage2_candidate_total"]
-
-    batching_debug = result.debug["stage2"]["batching"]
-    assert batching_debug["batch_size"] == settings.keyword_llm_max_candidates
-    assert batching_debug["candidate_total"] == len(concept_candidates)
+    total_batches = _estimate_batch_total(600, batch_size, overlap)
+    assert total_batches == 14

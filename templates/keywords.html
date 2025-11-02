@@ -489,44 +489,35 @@
             keywordStatus.style.color = '#1d4ed8';
             const stats = runInfo.stats || {};
             let statusText = status === 'running' ? 'Keyword run in progress…' : 'Keyword run queued…';
-            if (status === 'running' && stats.batch_total && stats.batch_total > 0) {
+            if (status === 'running') {
+              const totalCandidates = toNumber(stats.candidate_total ?? stats.stage2_candidate_total, 0);
+              const processedCandidates = toNumber(stats.candidates_processed, NaN);
               const totalBatches = toNumber(stats.batch_total, 0);
-              const completedBatches = Math.min(
-                totalBatches,
-                Math.max(0, toNumber(stats.batches_completed, 0)),
-              );
-              const totalCandidates = toNumber(
-                stats.candidate_total ?? stats.stage2_candidate_total,
-                0,
-              );
-              const processedCandidates = Math.min(
-                totalCandidates || Number.POSITIVE_INFINITY,
-                Math.max(0, toNumber(stats.candidates_processed, 0)),
-              );
-              let progressDetail = '';
-              if (totalBatches > 0) {
-                progressDetail = `batch ${completedBatches}/${totalBatches}`;
+              const completedBatches = toNumber(stats.batches_completed, 0);
+
+              if (totalCandidates > 0 && Number.isFinite(processedCandidates)) {
+                const safeCandidates = Math.min(totalCandidates, Math.max(0, processedCandidates));
+                const parts = [];
+                if (totalBatches > 0) {
+                  const safeBatches = Math.min(totalBatches, Math.max(0, completedBatches));
+                  parts.push(`batch ${safeBatches}/${totalBatches}`);
+                }
+                parts.push(`${safeCandidates.toLocaleString()} of ${totalCandidates.toLocaleString()} candidates`);
+                statusText = `Keyword run in progress – ${parts.join(' • ')}`;
+              } else if (stats.chunk_total) {
+                statusText = `Keyword run in progress… (${stats.chunk_total} chunks processed)`;
               }
-              if (totalCandidates > 0) {
-                progressDetail += progressDetail
-                  ? ` • ${processedCandidates.toLocaleString()} of ${totalCandidates.toLocaleString()} candidates`
-                  : `${processedCandidates.toLocaleString()} of ${totalCandidates.toLocaleString()} candidates`;
-              }
-              statusText = progressDetail
-                ? `Keyword run in progress – ${progressDetail}`
-                : 'Keyword run in progress…';
-            } else if (status === 'running' && stats.chunk_total) {
-              statusText = `Keyword run in progress… (${stats.chunk_total} chunks processed)`;
             }
             keywordStatus.textContent = statusText;
-            const delayMsRaw = runInfo.poll_after_ms ?? stats.poll_after_ms;
-            const delaySecondsRaw = runInfo.poll_after ?? stats.poll_after;
-            let delayMs = toNumber(delayMsRaw, NaN);
-            if (!Number.isFinite(delayMs)) {
-              const delaySeconds = toNumber(delaySecondsRaw, NaN);
-              delayMs = Number.isFinite(delaySeconds) ? delaySeconds * 1000 : 2000;
+
+            const pollAfterMs = toNumber(stats.poll_after_ms ?? runInfo.poll_after_ms, NaN);
+            let delay = Number.isFinite(pollAfterMs)
+              ? pollAfterMs
+              : toNumber(stats.poll_after ?? runInfo.poll_after, NaN) * 1000;
+            if (!Number.isFinite(delay)) {
+              delay = 2000;
             }
-            scheduleRunPoll(jobId, delayMs);
+            scheduleRunPoll(jobId, delay);
           } catch (error) {
             console.error(error);
             keywordStatus.dataset.status = 'retrying';

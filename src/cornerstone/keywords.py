@@ -8,7 +8,7 @@ import math
 import os
 import re
 import time
-from collections import Counter, OrderedDict
+from collections import Counter
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any, Iterable, List, Mapping, Sequence
 
@@ -275,13 +275,16 @@ def iter_candidate_batches(
 def dedupe_concept_candidates(candidates: Sequence[ConceptCandidate]) -> List[ConceptCandidate]:
     """Collapse duplicate candidates introduced by batching overlap while preserving order."""
 
-    unique: "OrderedDict[tuple[str, tuple[str, ...]], ConceptCandidate]" = OrderedDict()
+    result: List[ConceptCandidate] = []
+    seen: set[tuple[str, tuple[str, ...]]] = set()
     for candidate in candidates:
         chunk_ids = tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ()
         key = (candidate.phrase.lower(), chunk_ids)
-        if key not in unique:
-            unique[key] = candidate
-    return list(unique.values())
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(candidate)
+    return result
 
 
 @dataclass(slots=True)
