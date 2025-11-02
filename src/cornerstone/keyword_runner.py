@@ -86,23 +86,28 @@ async def execute_keyword_run(
     processed_chunks = chunk_stage.processed_count
     stage2_candidate_total = len(concept_stage.candidates)
 
-    batch_size_config = max(0, settings.keyword_candidate_batch_size)
+    batch_size_config = settings.keyword_candidate_batch_size
+    if batch_size_config < 0:
+        batch_size_config = 0
     batch_overlap = max(0, settings.keyword_candidate_batch_overlap)
     min_batch_size = max(1, settings.keyword_candidate_min_batch_size)
     candidate_limit = max(0, settings.keyword_llm_max_candidates)
 
     if candidate_limit:
-        if batch_size_config <= 0 or batch_size_config > candidate_limit:
+        if batch_size_config == 0:
+            batch_size_config = 0
+        elif batch_size_config > candidate_limit:
             batch_size_config = candidate_limit
         min_batch_size = min(min_batch_size, batch_size_config)
         batch_overlap = min(batch_overlap, max(0, batch_size_config - 1))
 
-    if stage2_candidate_total >= min_batch_size and batch_size_config < min_batch_size:
+    if batch_size_config <= 0:
+        batch_size_config = stage2_candidate_total or 1
+        min_batch_size = min(min_batch_size, batch_size_config)
+    elif stage2_candidate_total >= min_batch_size and batch_size_config < min_batch_size:
         max_allowed = candidate_limit or stage2_candidate_total
         batch_size_config = min(min_batch_size, max_allowed)
 
-    if batch_size_config <= 0:
-        batch_size_config = stage2_candidate_total or 1
     if batch_size_config < 1:
         batch_size_config = 1
     if batch_overlap >= batch_size_config:
