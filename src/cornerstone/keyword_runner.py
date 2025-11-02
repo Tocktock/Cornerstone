@@ -164,6 +164,7 @@ async def execute_keyword_run(
         batch_iterable = []
 
     if llm_active:
+        seen_candidate_signature: set[tuple[str, tuple[str, ...]]] = set()
         for idx, batch in enumerate(batch_iterable, start=1):
             if not batch:
                 continue
@@ -171,9 +172,17 @@ async def execute_keyword_run(
             refined_batch = llm_filter.refine_concepts(batch, context_snippets)
             if refined_batch:
                 refined_candidates.extend(refined_batch)
+                current_batch = refined_batch
             else:
                 refined_candidates.extend(batch)
-            candidates_processed = min(stage2_candidate_total, candidates_processed + len(batch))
+                current_batch = batch
+
+            for candidate in current_batch:
+                signature = (candidate.phrase.lower(), tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ())
+                if signature not in seen_candidate_signature:
+                    seen_candidate_signature.add(signature)
+                    candidates_processed = min(stage2_candidate_total, candidates_processed + 1)
+
             batches_completed = idx
             batch_duration = max(time.perf_counter() - batch_start, 0.0)
             last_batch_duration = batch_duration
