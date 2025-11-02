@@ -209,3 +209,79 @@ async def test_execute_keyword_run_deduplicates_overlap(monkeypatch: pytest.Monk
     assert len(top_phrases) == len(set(top_phrases)), "Overlapped candidates should be deduplicated"
     keyword_terms = [item["term"] for item in result.keywords]
     assert len(keyword_terms) == len(set(keyword_terms)), "Final keywords should remain unique"
+
+
+@pytest.mark.asyncio
+async def test_execute_keyword_run_respects_disabled_batching(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    settings = Settings(
+        data_dir=str(data_dir),
+        default_project_name="Test Project",
+        keyword_stage7_summary_enabled=False,
+        keyword_candidate_batch_size=0,
+        keyword_candidate_batch_overlap=1,
+        keyword_candidate_min_batch_size=500,
+        chat_backend="ollama",
+        ollama_base_url="http://localhost:11434",
+        ollama_model="keyword-test",
+    )
+
+    def fake_invoke_backend(self, prompt: str) -> str:
+        return json.dumps({"keywords": [], "concepts": []})
+
+    monkeypatch.setattr(KeywordLLMFilter, "_invoke_backend", fake_invoke_backend)
+
+    payloads = [
+        {
+            "text": "Login troubleshooting guide covering retries, dashboards, and escalation steps.",
+            "language": "en",
+            "chunk_id": "doc-1:0",
+            "doc_id": "doc-1",
+        },
+        {
+            "text": "Latency runbook documenting alert workflows, capacity planning, and regression analysis.",
+            "language": "en",
+            "chunk_id": "doc-2:0",
+            "doc_id": "doc-2",
+        },
+        {
+            "text": "Incident communication template with customer messaging and recovery criteria.",
+            "language": "en",
+            "chunk_id": "doc-3:0",
+            "doc_id": "doc-3",
+        },
+    ]
+
+    store_manager = FakeStoreManager(payloads)
+    embedding_service = FakeEmbeddingService()
+    insight_queue = KeywordInsightQueue(max_jobs=1)
+    project = Project(
+        id="proj-3",
+        name="Disabled Batching",
+        description=None,
+        created_at="2025-01-01T00:00:00+00:00",
+    )
+
+    progress_events: list[dict[str, object]] = []
+
+    def capture_progress(payload: dict[str, object]) -> None:
+        progress_events.append(dict(payload))
+
+    result = await execute_keyword_run(
+        project,
+        settings=settings,
+        embedding_service=embedding_service,
+        store_manager=store_manager,  # type: ignore[arg-type]
+        insight_queue=insight_queue,
+        metrics=None,
+        progress_callback=capture_progress,
+    )
+
+    stats = result.stats
+    assert stats["batch_total"] in (0, 1)
+    if stats["batch_total"]:
+        assert stats["batch_size"] >= stats["stage2_candidate_total"]
+    assert stats["candidates_processed"] == stats["stage2_candidate_total"]
+    if progress_events:
+        assert progress_events[-1]["candidates_processed"] == stats["stage2_candidate_total"]

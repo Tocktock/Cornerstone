@@ -86,40 +86,31 @@ async def execute_keyword_run(
     processed_chunks = chunk_stage.processed_count
     stage2_candidate_total = len(concept_stage.candidates)
 
-    batch_size_config = settings.keyword_candidate_batch_size
-    if batch_size_config < 0:
-        batch_size_config = 0
+    raw_batch_size = settings.keyword_candidate_batch_size
+    if raw_batch_size < 0:
+        raw_batch_size = 0
     batch_overlap = max(0, settings.keyword_candidate_batch_overlap)
     min_batch_size = max(1, settings.keyword_candidate_min_batch_size)
     candidate_limit = max(0, settings.keyword_llm_max_candidates)
 
-    if candidate_limit:
-        if batch_size_config == 0:
-            batch_size_config = 0
-        elif batch_size_config > candidate_limit:
-            batch_size_config = candidate_limit
-        min_batch_size = min(min_batch_size, batch_size_config)
-        batch_overlap = min(batch_overlap, max(0, batch_size_config - 1))
-
-    if batch_size_config <= 0:
+    if raw_batch_size <= 0:
         batch_size_config = stage2_candidate_total or 1
-        min_batch_size = min(min_batch_size, batch_size_config)
-    elif stage2_candidate_total >= min_batch_size and batch_size_config < min_batch_size:
-        max_allowed = candidate_limit or stage2_candidate_total
-        batch_size_config = min(min_batch_size, max_allowed)
-
-    if batch_size_config < 1:
-        batch_size_config = 1
-    if batch_overlap >= batch_size_config:
-        batch_overlap = max(0, batch_size_config - 1)
+        batch_overlap = 0
+    else:
+        batch_size_config = raw_batch_size
+        if candidate_limit:
+            batch_size_config = min(batch_size_config, candidate_limit)
+        batch_size_config = max(1, batch_size_config)
+        if stage2_candidate_total >= min_batch_size:
+            batch_size_config = max(batch_size_config, min_batch_size)
+        batch_overlap = min(batch_overlap, batch_size_config - 1)
 
     if stage2_candidate_total <= batch_size_config:
         batch_total = 1 if stage2_candidate_total else 0
     else:
         step = max(1, batch_size_config - batch_overlap)
-        batch_total = math.ceil(max(0, stage2_candidate_total - batch_size_config) / step) + 1
-    if stage2_candidate_total and batch_total == 0:
-        batch_total = 1
+        batches_needed = max(0, stage2_candidate_total - batch_size_config)
+        batch_total = math.ceil(batches_needed / step) + 1
 
     llm_active = llm_filter.enabled and stage2_candidate_total > 0
     llm_bypass_reason: str | None = None
@@ -156,21 +147,19 @@ async def execute_keyword_run(
     last_batch_duration = 0.0
     poll_after_ms: int | None = None
 
-    if stage2_candidate_total:
-        if batch_total <= 1:
-            batch_iterable: Iterable[list[ConceptCandidate]] = [list(concept_stage.candidates)]
-        else:
-            batch_iterable = iter_candidate_batches(
-                concept_stage.candidates,
-                batch_size=batch_size_config,
-                overlap=batch_overlap,
-            )
+    if stage2_candidate_total <= 0:
+        batch_iterable: Iterable[list[ConceptCandidate]] = ()
+    elif batch_total <= 1:
+        batch_iterable = (list(concept_stage.candidates),)
     else:
-        batch_iterable = []
+        batch_iterable = iter_candidate_batches(
+            concept_stage.candidates,
+            batch_size=batch_size_config,
+            overlap=batch_overlap,
+        )
 
     if llm_active:
         seen_stage2_signatures: set[tuple[str, tuple[str, ...]]] = set()
-        seen_refined_signatures: set[tuple[str, tuple[str, ...]]] = set()
         for idx, batch in enumerate(batch_iterable, start=1):
             if not batch:
                 continue
@@ -178,30 +167,10 @@ async def execute_keyword_run(
             refined_batch = llm_filter.refine_concepts(batch, context_snippets)
             if refined_batch:
                 refined_candidates.extend(refined_batch)
-                current_batch = refined_batch
             else:
                 refined_candidates.extend(batch)
-                current_batch = batch
-
-            stage_signatures = {
-                (candidate.phrase.lower(), tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ())
-                for candidate in batch
-            }
-            refined_signatures = {
-                (candidate.phrase.lower(), tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ())
-                for candidate in current_batch
-            }
-
-            missing_signatures = stage_signatures - refined_signatures
-
-            for candidate in current_batch:
+            for candidate in batch:
                 signature = (candidate.phrase.lower(), tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ())
-                if signature not in seen_refined_signatures:
-                    seen_refined_signatures.add(signature)
-                    seen_stage2_signatures.add(signature)
-                    candidates_processed = min(stage2_candidate_total, candidates_processed + 1)
-
-            for signature in missing_signatures:
                 if signature not in seen_stage2_signatures:
                     seen_stage2_signatures.add(signature)
                     candidates_processed = min(stage2_candidate_total, candidates_processed + 1)
@@ -210,19 +179,19 @@ async def execute_keyword_run(
             batch_duration = max(time.perf_counter() - batch_start, 0.0)
             last_batch_duration = batch_duration
             poll_after_ms = min(5000, max(1500, int(batch_duration * 1500 + 500)))
-            progress_payload = {
-                "batch_total": batch_total or 1,
-                "batches_completed": batches_completed,
-                "candidates_processed": candidates_processed,
-                "candidate_total": stage2_candidate_total,
-            }
-            if poll_after_ms is not None:
-                progress_payload["poll_after"] = round(poll_after_ms / 1000.0, 2)
-                progress_payload["poll_after_ms"] = poll_after_ms
-            if batch_duration:
-                progress_payload["last_batch_duration_ms"] = round(batch_duration * 1000.0, 2)
             if progress_callback:
-                progress_callback(progress_payload)
+                payload = {
+                    "batch_total": batch_total or 1,
+                    "batches_completed": batches_completed,
+                    "candidates_processed": candidates_processed,
+                    "candidate_total": stage2_candidate_total,
+                }
+                if poll_after_ms is not None:
+                    payload["poll_after"] = round(poll_after_ms / 1000.0, 2)
+                    payload["poll_after_ms"] = poll_after_ms
+                if batch_duration:
+                    payload["last_batch_duration_ms"] = round(batch_duration * 1000.0, 2)
+                progress_callback(payload)
             if metrics:
                 metrics.increment(
                     "keyword.batch.processed",
