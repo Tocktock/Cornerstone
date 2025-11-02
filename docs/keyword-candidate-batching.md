@@ -25,8 +25,8 @@
 ### 1. Configuration
 
 - Add to `Settings`:
-  - `KEYWORD_CANDIDATE_BATCH_SIZE` (default: 5000).
-  - `KEYWORD_CANDIDATE_BATCH_MIN_SIZE` (default: 500) for adaptive retry.
+  - `KEYWORD_CANDIDATE_BATCH_SIZE` (default: 160).
+  - `KEYWORD_CANDIDATE_BATCH_MIN_SIZE` (default: 80) for adaptive retry.
   - Optional `KEYWORD_CANDIDATE_BATCH_OVERLAP` to carry the top N across batches (default: 0).
 - Surface env vars in `.env`, `env.example.local`, and docs.
 
