@@ -21,6 +21,7 @@ from .keywords import (
     KeywordLLMFilter,
     build_excerpt,
     cluster_concepts,
+    concept_signature,
     concept_sort_key,
     dedupe_concept_candidates,
     extract_concept_candidates,
@@ -173,7 +174,7 @@ async def execute_keyword_run(
         )
 
     if llm_active:
-        seen_stage2_ids: set[int] = set()
+        seen_stage2_keys: set[tuple[str, tuple[str, ...]]] = set()
         for idx, batch in enumerate(batch_iterable, start=1):
             if not batch:
                 continue
@@ -181,8 +182,8 @@ async def execute_keyword_run(
             refined_batch = llm_filter.refine_concepts(batch, context_snippets)
             refined_candidates.extend(refined_batch or batch)
 
-            seen_stage2_ids.update(id(candidate) for candidate in batch)
-            candidates_processed = min(stage2_candidate_total, len(seen_stage2_ids))
+            seen_stage2_keys.update(concept_signature(candidate) for candidate in batch)
+            candidates_processed = min(stage2_candidate_total, len(seen_stage2_keys))
 
             batches_completed = idx
             batch_duration = max(time.perf_counter() - batch_start, 0.0)

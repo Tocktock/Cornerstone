@@ -283,14 +283,20 @@ def concept_sort_key(candidate: ConceptCandidate) -> Tuple[float, int, int, str]
     )
 
 
+def concept_signature(candidate: ConceptCandidate) -> Tuple[str, Tuple[str, ...]]:
+    """Return a stable identifier for dedupe/progress tracking."""
+
+    chunk_ids = tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ()
+    return (candidate.phrase.lower(), chunk_ids)
+
+
 def dedupe_concept_candidates(candidates: Sequence[ConceptCandidate]) -> List[ConceptCandidate]:
     """Collapse duplicate candidates introduced by batching overlap while preserving order."""
 
     result: List[ConceptCandidate] = []
-    seen: set[tuple[str, tuple[str, ...]]] = set()
+    seen: set[Tuple[str, Tuple[str, ...]]] = set()
     for candidate in candidates:
-        chunk_ids = tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ()
-        key = (candidate.phrase.lower(), chunk_ids)
+        key = concept_signature(candidate)
         if key in seen:
             continue
         seen.add(key)
@@ -3655,6 +3661,7 @@ __all__ = [
     "KeywordLLMFilter",
     "KeywordSourceChunk",
     "concept_sort_key",
+    "concept_signature",
     "dedupe_concept_candidates",
     "iter_candidate_batches",
     "cluster_concepts",

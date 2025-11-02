@@ -269,13 +269,14 @@ def create_app(
 
         def _report_progress(stats: dict[str, object]) -> None:
             try:
-                record = project_store.update_keyword_run(
+                record = project_store.update_keyword_run(project.id, job.id, stats=stats)
+            except Exception as exc:  # pragma: no cover - defensive guard
+                logger.warning(
+                    "keyword.run.progress_update_failed project=%s job=%s error=%s",
                     project.id,
                     job.id,
-                    stats=stats,
+                    exc,
                 )
-            except Exception as exc:  # pragma: no cover - defensive guard
-                logger.warning("keyword.run.progress_update_failed project=%s job=%s error=%s", project.id, job.id, exc)
                 return
             job.refresh_from_record(record)
 
@@ -922,16 +923,15 @@ def create_app(
         tasks.sort(key=lambda task: (task.done(), task.get_name()))
 
         sections: list[str] = []
-        has_call_graph = hasattr(asyncio, "format_call_graph")
+        format_call_graph = getattr(asyncio, "format_call_graph", None)
         for task in tasks:
-            if has_call_graph:
-                graph_text = asyncio.format_call_graph(task, limit=limit)  # type: ignore[attr-defined]
+            if format_call_graph:
+                graph_text = format_call_graph(task, limit=limit)  # type: ignore[misc]
             else:
-                stack_lines: list[str] = []
-                for frame in task.get_stack(limit=limit):
-                    stack_lines.append(
-                        f'  File "{frame.f_code.co_filename}", line {frame.f_lineno}, in {frame.f_code.co_name}',
-                    )
+                stack_lines = [
+                    f'  File "{frame.f_code.co_filename}", line {frame.f_lineno}, in {frame.f_code.co_name}'
+                    for frame in task.get_stack(limit=limit)
+                ]
                 stack_text = "\n".join(stack_lines) if stack_lines else "  <no stack available>"
                 graph_text = f"Task({task.get_name()}) done={task.done()}\n{stack_text}"
             sections.append(graph_text)
