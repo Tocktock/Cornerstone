@@ -31,10 +31,11 @@ _DEFAULT_GLOSSARY_TOP_K: Final[int] = 3
 _DEFAULT_OLLAMA_URL: Final[str] = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL: Final[str] = "llama3.1:8b"
 _DEFAULT_OLLAMA_TIMEOUT: Final[float] = 60.0
+_DEFAULT_EMBEDDING_CACHE_MAX_ENTRIES: Final[int] = 2048
 _DEFAULT_VLLM_URL: Final[str] = "http://localhost:8000"
 _DEFAULT_VLLM_MODEL: Final[str] = "meta-llama/Meta-Llama-3-8B-Instruct"
 _DEFAULT_VLLM_TIMEOUT: Final[float] = 60.0
-_DEFAULT_OLLAMA_EMBED_CONCURRENCY: Final[int] = 2
+_DEFAULT_OLLAMA_EMBED_CONCURRENCY: Final[int] = 4
 _DEFAULT_VLLM_EMBED_CONCURRENCY: Final[int] = 4
 _DEFAULT_VLLM_EMBED_BATCH_SIZE: Final[int] = 16
 _DEFAULT_VLLM_EMBED_BATCH_WAIT_MS: Final[float] = 10.0
@@ -224,6 +225,7 @@ class Settings:
     vllm_embedding_batch_size: int = _DEFAULT_VLLM_EMBED_BATCH_SIZE
     vllm_embedding_batch_wait_ms: float = _DEFAULT_VLLM_EMBED_BATCH_WAIT_MS
     ollama_embedding_concurrency: int = _DEFAULT_OLLAMA_EMBED_CONCURRENCY
+    embedding_cache_max_entries: int = _DEFAULT_EMBEDDING_CACHE_MAX_ENTRIES
     glossary_path: str = _DEFAULT_GLOSSARY_PATH
     query_hint_path: str | None = _DEFAULT_QUERY_HINTS_PATH
     glossary_top_k: int = _DEFAULT_GLOSSARY_TOP_K
@@ -333,6 +335,15 @@ class Settings:
             ),
             ollama_embedding_concurrency=int(
                 os.getenv("OLLAMA_EMBEDDING_CONCURRENCY", _DEFAULT_OLLAMA_EMBED_CONCURRENCY)
+            ),
+            embedding_cache_max_entries=max(
+                0,
+                int(
+                    os.getenv(
+                        "EMBEDDING_CACHE_MAX_ENTRIES",
+                        str(_DEFAULT_EMBEDDING_CACHE_MAX_ENTRIES),
+                    )
+                ),
             ),
             glossary_path=os.getenv("GLOSSARY_PATH", _DEFAULT_GLOSSARY_PATH),
             query_hint_path=os.getenv("QUERY_HINTS_PATH", _DEFAULT_QUERY_HINTS_PATH),
