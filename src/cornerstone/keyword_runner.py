@@ -164,7 +164,8 @@ async def execute_keyword_run(
         batch_iterable = []
 
     if llm_active:
-        seen_candidate_signature: set[tuple[str, tuple[str, ...]]] = set()
+        seen_stage2_signatures: set[tuple[str, tuple[str, ...]]] = set()
+        seen_refined_signatures: set[tuple[str, tuple[str, ...]]] = set()
         for idx, batch in enumerate(batch_iterable, start=1):
             if not batch:
                 continue
@@ -177,10 +178,27 @@ async def execute_keyword_run(
                 refined_candidates.extend(batch)
                 current_batch = batch
 
+            stage_signatures = {
+                (candidate.phrase.lower(), tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ())
+                for candidate in batch
+            }
+            refined_signatures = {
+                (candidate.phrase.lower(), tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ())
+                for candidate in current_batch
+            }
+
+            missing_signatures = stage_signatures - refined_signatures
+
             for candidate in current_batch:
                 signature = (candidate.phrase.lower(), tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ())
-                if signature not in seen_candidate_signature:
-                    seen_candidate_signature.add(signature)
+                if signature not in seen_refined_signatures:
+                    seen_refined_signatures.add(signature)
+                    seen_stage2_signatures.add(signature)
+                    candidates_processed = min(stage2_candidate_total, candidates_processed + 1)
+
+            for signature in missing_signatures:
+                if signature not in seen_stage2_signatures:
+                    seen_stage2_signatures.add(signature)
                     candidates_processed = min(stage2_candidate_total, candidates_processed + 1)
 
             batches_completed = idx
