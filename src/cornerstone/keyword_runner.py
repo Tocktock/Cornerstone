@@ -97,12 +97,14 @@ async def execute_keyword_run(
         batch_size_config = stage2_candidate_total or 1
         batch_overlap = 0
     else:
-        batch_size_config = raw_batch_size
+        batch_size_config = max(1, raw_batch_size)
         if candidate_limit:
             batch_size_config = min(batch_size_config, candidate_limit)
-        batch_size_config = max(1, batch_size_config)
         if stage2_candidate_total >= min_batch_size:
-            batch_size_config = max(batch_size_config, min_batch_size)
+            desired_min = min_batch_size
+            if candidate_limit:
+                desired_min = min(desired_min, candidate_limit)
+            batch_size_config = max(batch_size_config, desired_min)
         batch_overlap = min(batch_overlap, batch_size_config - 1)
 
     if stage2_candidate_total <= batch_size_config:
