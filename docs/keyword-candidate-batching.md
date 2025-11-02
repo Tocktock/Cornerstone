@@ -48,6 +48,7 @@
 
 - Accumulate refined candidates from each batch and feed the combined list to `cluster_concepts` and `rank_concept_clusters` exactly once.
 - This keeps scoring deterministic relative to the single-batch pipeline while allowing full refinement coverage.
+- Deduplicate overlapped entries (same phrase + chunk/document ids) prior to Stage 3 so collisions from overlap do not inflate scores.
 
 ### 5. Progress Reporting & Metrics
 

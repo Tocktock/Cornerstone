@@ -8,7 +8,7 @@ import math
 import os
 import re
 import time
-from collections import Counter
+from collections import Counter, OrderedDict
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any, Iterable, List, Mapping, Sequence
 
@@ -270,6 +270,18 @@ def iter_candidate_batches(
         if end >= total:
             break
         start += step
+
+
+def dedupe_concept_candidates(candidates: Sequence[ConceptCandidate]) -> List[ConceptCandidate]:
+    """Collapse duplicate candidates introduced by batching overlap while preserving order."""
+
+    unique: "OrderedDict[tuple[str, tuple[str, ...]], ConceptCandidate]" = OrderedDict()
+    for candidate in candidates:
+        chunk_ids = tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ()
+        key = (candidate.phrase.lower(), chunk_ids)
+        if key not in unique:
+            unique[key] = candidate
+    return list(unique.values())
 
 
 @dataclass(slots=True)
@@ -3642,6 +3654,7 @@ __all__ = [
     "KeywordCandidate",
     "KeywordLLMFilter",
     "KeywordSourceChunk",
+    "dedupe_concept_candidates",
     "iter_candidate_batches",
     "cluster_concepts",
     "rank_concept_clusters",

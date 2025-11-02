@@ -131,3 +131,81 @@ async def test_execute_keyword_run_batches_and_reports_progress(monkeypatch: pyt
     assert final_progress["candidates_processed"] == stats["stage2_candidate_total"]
     assert final_progress["batches_completed"] == stats["batches_completed"]
     assert stats["keywords_total"] == len(result.keywords)
+
+
+@pytest.mark.asyncio
+async def test_execute_keyword_run_deduplicates_overlap(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    settings = Settings(
+        data_dir=str(data_dir),
+        default_project_name="Test Project",
+        keyword_stage7_summary_enabled=False,
+        keyword_candidate_batch_size=2,
+        keyword_candidate_batch_overlap=1,
+        keyword_candidate_min_batch_size=1,
+        chat_backend="ollama",
+        ollama_base_url="http://localhost:11434",
+        ollama_model="keyword-test",
+    )
+
+    def fake_invoke_backend(self, prompt: str) -> str:
+        return json.dumps({"keywords": [], "concepts": []})
+
+    monkeypatch.setattr(KeywordLLMFilter, "_invoke_backend", fake_invoke_backend)
+
+    payloads = [
+        {
+            "text": (
+                "Login retries handbook covers login handling, login analytics dashboards, and login failure remediation."
+                " Authentication runbook documents MFA reset workflows and login escalation paths."
+            ),
+            "language": "en",
+            "chunk_id": "doc-1:0",
+            "doc_id": "doc-1",
+        },
+        {
+            "text": (
+                "API latency regression guide details latency dashboards, latency postmortems, and latency playbooks."
+                " Scaling guide explains autoscaling policies, pod expansion, and service tuning."
+            ),
+            "language": "en",
+            "chunk_id": "doc-2:0",
+            "doc_id": "doc-2",
+        },
+        {
+            "text": (
+                "Incident communication plan outlines communication cadences, customer updates, and recovery criteria."
+                " Post-incident checklist includes lessons learned, action item tracking, and follow-up reviews."
+            ),
+            "language": "en",
+            "chunk_id": "doc-3:0",
+            "doc_id": "doc-3",
+        },
+    ]
+
+    store_manager = FakeStoreManager(payloads)
+    embedding_service = FakeEmbeddingService()
+    insight_queue = KeywordInsightQueue(max_jobs=1)
+    project = Project(
+        id="proj-2",
+        name="Overlap Project",
+        description=None,
+        created_at="2025-01-01T00:00:00+00:00",
+    )
+
+    result = await execute_keyword_run(
+        project,
+        settings=settings,
+        embedding_service=embedding_service,
+        store_manager=store_manager,  # type: ignore[arg-type]
+        insight_queue=insight_queue,
+        metrics=None,
+    )
+
+    batching_meta = result.debug["stage2"]["batching"]
+    assert batching_meta["enabled"] is True
+    top_phrases = [entry["phrase"] for entry in result.debug["stage2"]["top_candidates"]]
+    assert len(top_phrases) == len(set(top_phrases)), "Overlapped candidates should be deduplicated"
+    keyword_terms = [item["term"] for item in result.keywords]
+    assert len(keyword_terms) == len(set(keyword_terms)), "Final keywords should remain unique"

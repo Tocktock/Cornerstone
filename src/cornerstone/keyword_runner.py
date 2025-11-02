@@ -23,6 +23,7 @@ from .keywords import (
     cluster_concepts,
     extract_concept_candidates,
     extract_keyword_candidates,
+    dedupe_concept_candidates,
     iter_candidate_batches,
     rank_concept_clusters,
     prepare_keyword_chunks,
@@ -206,10 +207,6 @@ async def execute_keyword_run(
         if batches_completed == 0 and stage2_candidate_total:
             candidates_processed = stage2_candidate_total
             batches_completed = batch_total or 1
-        if refined_candidates:
-            concept_stage = concept_stage.replace_candidates(refined_candidates)
-        else:
-            refined_candidates = list(concept_stage.candidates)
     else:
         refined_candidates = list(concept_stage.candidates)
         if stage2_candidate_total:
@@ -224,6 +221,13 @@ async def execute_keyword_run(
                         "candidate_total": stage2_candidate_total,
                     }
                 )
+
+    if refined_candidates:
+        candidates_for_stage3 = dedupe_concept_candidates(refined_candidates)
+    else:
+        candidates_for_stage3 = dedupe_concept_candidates(concept_stage.candidates)
+    concept_stage = concept_stage.replace_candidates(candidates_for_stage3)
+
     batching_debug: dict[str, object] = {
         "enabled": bool(llm_active and batch_total and batch_total > 1),
         "batch_size": batch_size_config,
