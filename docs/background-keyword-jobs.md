@@ -101,6 +101,7 @@ During migration, keep the env flag (`KEYWORD_RUN_SYNC_MODE`) to fall back to in
   - `keyword.run.errors` (counter for failed runs).
   - `keyword.run.queue_time` (time from request to start).
   - `keyword.run.active` (gauge: number of running jobs).
+- Keyword run stats include `batch_total`, `batches_completed`, `candidates_processed`, `poll_after_ms`, and `keywords_total`, enabling the UI and operators to surface mid-run progress and tune polling cadence.
 - Log transitions with structured metadata for advanced tracing.
 
 ### 8. Configuration

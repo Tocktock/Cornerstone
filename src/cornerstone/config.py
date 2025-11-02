@@ -31,10 +31,11 @@ _DEFAULT_GLOSSARY_TOP_K: Final[int] = 3
 _DEFAULT_OLLAMA_URL: Final[str] = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL: Final[str] = "llama3.1:8b"
 _DEFAULT_OLLAMA_TIMEOUT: Final[float] = 60.0
+_DEFAULT_EMBEDDING_CACHE_MAX_ENTRIES: Final[int] = 2048
 _DEFAULT_VLLM_URL: Final[str] = "http://localhost:8000"
 _DEFAULT_VLLM_MODEL: Final[str] = "meta-llama/Meta-Llama-3-8B-Instruct"
 _DEFAULT_VLLM_TIMEOUT: Final[float] = 60.0
-_DEFAULT_OLLAMA_EMBED_CONCURRENCY: Final[int] = 2
+_DEFAULT_OLLAMA_EMBED_CONCURRENCY: Final[int] = 4
 _DEFAULT_VLLM_EMBED_CONCURRENCY: Final[int] = 4
 _DEFAULT_VLLM_EMBED_BATCH_SIZE: Final[int] = 16
 _DEFAULT_VLLM_EMBED_BATCH_WAIT_MS: Final[float] = 10.0
@@ -86,6 +87,9 @@ _DEFAULT_KEYWORD_STAGE7_SUMMARY_MAX_JOBS: Final[int] = 64
 _DEFAULT_KEYWORD_LLM_MAX_CANDIDATES: Final[int] = 25000
 _DEFAULT_KEYWORD_LLM_MAX_TOKENS: Final[int] = 750_000
 _DEFAULT_KEYWORD_LLM_MAX_CHUNKS: Final[int] = 10000
+_DEFAULT_KEYWORD_CANDIDATE_BATCH_SIZE: Final[int] = 160
+_DEFAULT_KEYWORD_CANDIDATE_BATCH_MIN_SIZE: Final[int] = 80
+_DEFAULT_KEYWORD_CANDIDATE_BATCH_OVERLAP: Final[int] = 0
 _DEFAULT_KEYWORD_RUN_MAX_CONCURRENCY: Final[int] = 1
 _DEFAULT_KEYWORD_RUN_MAX_QUEUE: Final[int] = 8
 _DEFAULT_KEYWORD_RUN_CACHE_TTL: Final[int] = 86_400
@@ -221,6 +225,7 @@ class Settings:
     vllm_embedding_batch_size: int = _DEFAULT_VLLM_EMBED_BATCH_SIZE
     vllm_embedding_batch_wait_ms: float = _DEFAULT_VLLM_EMBED_BATCH_WAIT_MS
     ollama_embedding_concurrency: int = _DEFAULT_OLLAMA_EMBED_CONCURRENCY
+    embedding_cache_max_entries: int = _DEFAULT_EMBEDDING_CACHE_MAX_ENTRIES
     glossary_path: str = _DEFAULT_GLOSSARY_PATH
     query_hint_path: str | None = _DEFAULT_QUERY_HINTS_PATH
     glossary_top_k: int = _DEFAULT_GLOSSARY_TOP_K
@@ -246,6 +251,9 @@ class Settings:
     reranker_max_candidates: int = _DEFAULT_RERANKER_MAX_CANDIDATES
     keyword_filter_max_results: int = _DEFAULT_KEYWORD_FILTER_MAX_RESULTS
     keyword_filter_allow_generated: bool = _DEFAULT_KEYWORD_FILTER_ALLOW_GENERATED
+    keyword_candidate_batch_size: int = _DEFAULT_KEYWORD_CANDIDATE_BATCH_SIZE
+    keyword_candidate_min_batch_size: int = _DEFAULT_KEYWORD_CANDIDATE_BATCH_MIN_SIZE
+    keyword_candidate_batch_overlap: int = _DEFAULT_KEYWORD_CANDIDATE_BATCH_OVERLAP
     query_hint_batch_size: int = _DEFAULT_QUERY_HINT_BATCH_SIZE
     query_hint_cron: str = _DEFAULT_QUERY_HINT_CRON
     conversation_logging_enabled: bool = True
@@ -328,6 +336,15 @@ class Settings:
             ollama_embedding_concurrency=int(
                 os.getenv("OLLAMA_EMBEDDING_CONCURRENCY", _DEFAULT_OLLAMA_EMBED_CONCURRENCY)
             ),
+            embedding_cache_max_entries=max(
+                0,
+                int(
+                    os.getenv(
+                        "EMBEDDING_CACHE_MAX_ENTRIES",
+                        str(_DEFAULT_EMBEDDING_CACHE_MAX_ENTRIES),
+                    )
+                ),
+            ),
             glossary_path=os.getenv("GLOSSARY_PATH", _DEFAULT_GLOSSARY_PATH),
             query_hint_path=os.getenv("QUERY_HINTS_PATH", _DEFAULT_QUERY_HINTS_PATH),
             glossary_top_k=int(os.getenv("GLOSSARY_TOP_K", _DEFAULT_GLOSSARY_TOP_K)),
@@ -363,6 +380,30 @@ class Settings:
             ),
             keyword_filter_allow_generated=_env_bool(
                 "KEYWORD_FILTER_ALLOW_GENERATED", _DEFAULT_KEYWORD_FILTER_ALLOW_GENERATED
+            ),
+            keyword_candidate_batch_size=int(
+                os.getenv(
+                    "KEYWORD_CANDIDATE_BATCH_SIZE",
+                    str(_DEFAULT_KEYWORD_CANDIDATE_BATCH_SIZE),
+                )
+            ),
+            keyword_candidate_min_batch_size=max(
+                1,
+                int(
+                    os.getenv(
+                        "KEYWORD_CANDIDATE_MIN_BATCH_SIZE",
+                        str(_DEFAULT_KEYWORD_CANDIDATE_BATCH_MIN_SIZE),
+                    )
+                ),
+            ),
+            keyword_candidate_batch_overlap=max(
+                0,
+                int(
+                    os.getenv(
+                        "KEYWORD_CANDIDATE_BATCH_OVERLAP",
+                        str(_DEFAULT_KEYWORD_CANDIDATE_BATCH_OVERLAP),
+                    )
+                ),
             ),
             query_hint_batch_size=int(
                 os.getenv("QUERY_HINT_BATCH_SIZE", str(_DEFAULT_QUERY_HINT_BATCH_SIZE))

@@ -266,6 +266,20 @@ def create_app(
             )
 
         run_start = time.perf_counter()
+
+        def _report_progress(stats: dict[str, object]) -> None:
+            try:
+                record = project_store.update_keyword_run(project.id, job.id, stats=stats)
+            except Exception as exc:  # pragma: no cover - defensive guard
+                logger.warning(
+                    "keyword.run.progress_update_failed project=%s job=%s error=%s",
+                    project.id,
+                    job.id,
+                    exc,
+                )
+                return
+            job.refresh_from_record(record)
+
         try:
             result = await execute_keyword_run(
                 project,
@@ -274,6 +288,7 @@ def create_app(
                 store_manager=store_manager,
                 insight_queue=insight_queue,
                 metrics=metrics,
+                progress_callback=_report_progress,
             )
         except Exception as exc:  # pragma: no cover - defensive guard
             logger.exception("keyword.run.failed project=%s job_id=%s", project.id, job.id)
@@ -908,8 +923,17 @@ def create_app(
         tasks.sort(key=lambda task: (task.done(), task.get_name()))
 
         sections: list[str] = []
+        format_call_graph = getattr(asyncio, "format_call_graph", None)
         for task in tasks:
-            graph_text = asyncio.format_call_graph(task, limit=limit)
+            if format_call_graph:
+                graph_text = format_call_graph(task, limit=limit)  # type: ignore[misc]
+            else:
+                stack_lines = [
+                    f'  File "{frame.f_code.co_filename}", line {frame.f_lineno}, in {frame.f_code.co_name}'
+                    for frame in task.get_stack(limit=limit)
+                ]
+                stack_text = "\n".join(stack_lines) if stack_lines else "  <no stack available>"
+                graph_text = f"Task({task.get_name()}) done={task.done()}\n{stack_text}"
             sections.append(graph_text)
 
         body = "\n\n".join(sections)

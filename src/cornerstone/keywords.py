@@ -9,8 +9,9 @@ import os
 import re
 import time
 from collections import Counter
+from concurrent.futures import Future
 from dataclasses import dataclass, field, replace
-from typing import TYPE_CHECKING, Any, Iterable, List, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, List, Mapping, Sequence, Tuple
 
 import httpx
 
@@ -235,6 +236,73 @@ class ConceptExtractionResult:
             total_tokens=self.total_tokens,
             parameters=dict(self.parameters),
         )
+
+
+def iter_candidate_batches(
+    candidates: Sequence[ConceptCandidate],
+    *,
+    batch_size: int,
+    overlap: int = 0,
+) -> Iterable[List[ConceptCandidate]]:
+    """Yield deterministic slices of concept candidates for batching.
+
+    Args:
+        candidates: Ordered sequence of concept candidates (Stage 2 output).
+        batch_size: Maximum number of candidates per batch (<= 0 means single batch).
+        overlap: Number of candidates to repeat between consecutive batches (helps
+            retain top-ranked concepts across boundaries).
+    """
+
+    total = len(candidates)
+    if total == 0:
+        yield []
+        return
+    if batch_size <= 0 or batch_size >= total:
+        yield list(candidates)
+        return
+
+    effective_overlap = max(0, min(overlap, batch_size - 1))
+    step = max(1, batch_size - effective_overlap)
+
+    start = 0
+    while start < total:
+        end = min(total, start + batch_size)
+        yield list(candidates[start:end])
+        if end >= total:
+            break
+        start += step
+
+
+def concept_sort_key(candidate: ConceptCandidate) -> Tuple[float, int, int, str]:
+    """Sort key matching Stage 2/LMM refinement ordering."""
+
+    return (
+        -candidate.score,
+        -candidate.document_count,
+        -candidate.occurrences,
+        candidate.phrase,
+    )
+
+
+def concept_signature(candidate: ConceptCandidate) -> Tuple[str, Tuple[str, ...]]:
+    """Return a stable identifier for dedupe/progress tracking."""
+
+    chunk_ids = tuple(sorted(candidate.chunk_ids)) if candidate.chunk_ids else ()
+    return (candidate.phrase.lower(), chunk_ids)
+
+
+def dedupe_concept_candidates(candidates: Sequence[ConceptCandidate]) -> List[ConceptCandidate]:
+    """Collapse duplicate candidates introduced by batching overlap while preserving order."""
+
+    result: List[ConceptCandidate] = []
+    seen: set[Tuple[str, Tuple[str, ...]]] = set()
+    for candidate in candidates:
+        key = concept_signature(candidate)
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(candidate)
+    return result
 
 
 @dataclass(slots=True)
@@ -968,6 +1036,21 @@ def extract_concept_candidates(
         chunk_contexts.append(context)
         chunk_lookup[chunk_identifier] = context
 
+        text_for_embedding = chunk.normalized_text or chunk.text
+        chunk_vector_future: Future[List[float]] | None = None
+        if (
+            embedding_service
+            and max_embedding_phrases_per_chunk > 0
+            and text_for_embedding
+            and chunk_identifier not in chunk_embedding_cache
+        ):
+            async_embed_one = getattr(embedding_service, "embed_one_async", None)
+            if callable(async_embed_one):
+                try:
+                    chunk_vector_future = async_embed_one(text_for_embedding)  # type: ignore[misc]
+                except Exception:
+                    chunk_vector_future = None
+
         chunk_timer = time.perf_counter()
         tokens = _tokenize_chunk_for_candidates(chunk)
         total_tokens += len(tokens)
@@ -1063,14 +1146,18 @@ def extract_concept_candidates(
                         deduped.append(phrase)
                 embedding_candidates = deduped[:max_embedding_phrases_per_chunk]
 
-            text_for_embedding = chunk.normalized_text or chunk.text
             if embedding_candidates and text_for_embedding:
                 embed_block_start = time.perf_counter()
                 chunk_vector = chunk_embedding_cache.get(chunk_identifier)
                 if chunk_vector is None:
                     try:
-                        chunk_vector = embedding_service.embed_one(text_for_embedding)  # type: ignore[union-attr]
-                        chunk_embedding_cache[chunk_identifier] = chunk_vector
+                        if chunk_vector_future is not None:
+                            chunk_vector = chunk_vector_future.result()
+                        else:
+                            chunk_vector = embedding_service.embed_one(text_for_embedding)  # type: ignore[union-attr]
+                        if chunk_vector:
+                            chunk_vector = list(chunk_vector)
+                            chunk_embedding_cache[chunk_identifier] = chunk_vector
                     except Exception as exc:  # pragma: no cover - defensive guard
                         logger.warning(
                             "keyword.embedding.chunk_failed chunk=%s error=%s",
@@ -1083,9 +1170,23 @@ def extract_concept_candidates(
                     missing = [phrase for phrase in embedding_candidates if phrase not in embedding_cache]
                     if missing:
                         try:
-                            vectors = embedding_service.embed(missing)  # type: ignore[union-attr]
-                            for phrase, vector in zip(missing, vectors):
-                                embedding_cache[phrase] = vector
+                            async_batch = getattr(embedding_service, "embed_async", None)
+                            backend_name = getattr(getattr(embedding_service, "backend", None), "name", "")
+                            if callable(async_batch) and backend_name == "OLLAMA":
+                                futures = async_batch(missing)  # type: ignore[misc]
+                                for phrase, future in zip(missing, futures):
+                                    try:
+                                        vector = future.result()
+                                    except Exception as exc:
+                                        logger.warning("keyword.embedding.phrase_failed error=%s", exc)
+                                        embedding_stats["errors"] += 1
+                                        vector = None
+                                    if vector is not None:
+                                        embedding_cache[phrase] = list(vector)
+                            else:
+                                vectors = embedding_service.embed(missing)  # type: ignore[union-attr]
+                                for phrase, vector in zip(missing, vectors):
+                                    embedding_cache[phrase] = list(vector)
                         except Exception as exc:  # pragma: no cover - defensive guard
                             logger.warning("keyword.embedding.phrase_failed error=%s", exc)
                             embedding_stats["errors"] += 1
@@ -1301,14 +1402,7 @@ def extract_concept_candidates(
             )
         )
 
-    candidates.sort(
-        key=lambda item: (
-            -item.score,
-            -item.document_count,
-            -item.occurrences,
-            item.phrase,
-        )
-    )
+    candidates.sort(key=concept_sort_key)
 
     total_elapsed = time.perf_counter() - total_start
     timing_stats["total"] = total_elapsed
@@ -2165,14 +2259,7 @@ class KeywordLLMFilter:
         ]
 
         combined = refined + [candidate for candidate in unreviewed if candidate.phrase.lower() not in seen]
-        combined.sort(
-            key=lambda item: (
-                -item.score,
-                -item.document_count,
-                -item.occurrences,
-                item.phrase,
-            )
-        )
+        combined.sort(key=concept_sort_key)
 
         self._last_concept_debug.update(
             {
@@ -3607,6 +3694,10 @@ __all__ = [
     "KeywordCandidate",
     "KeywordLLMFilter",
     "KeywordSourceChunk",
+    "concept_sort_key",
+    "concept_signature",
+    "dedupe_concept_candidates",
+    "iter_candidate_batches",
     "cluster_concepts",
     "rank_concept_clusters",
     "extract_concept_candidates",

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import queue
 import threading
 import time
+from collections import OrderedDict
 from collections.abc import Sequence
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from enum import Enum, auto
@@ -51,6 +53,7 @@ class EmbeddingService:
         self._ollama_timeout: float = settings.ollama_request_timeout
         self._ollama_concurrency: int = max(1, settings.ollama_embedding_concurrency)
         self._ollama_client: httpx.Client | None = None
+        self._ollama_executor: ThreadPoolExecutor | None = None
         self._vllm_model: str | None = None
         self._vllm_base_url: str | None = None
         self._vllm_timeout: float = settings.vllm_request_timeout
@@ -63,6 +66,10 @@ class EmbeddingService:
         self._vllm_api_key = api_key or None
         self._vllm_client: httpx.Client | None = None
         self._vllm_batcher: _VLLMMicroBatcher | None = None
+        self._embedding_cache_limit = max(0, settings.embedding_cache_max_entries)
+        self._embedding_cache: OrderedDict[str, List[float]] = OrderedDict()
+        self._embedding_cache_lock = threading.Lock()
+        self._async_executor: ThreadPoolExecutor | None = None
 
         if self._backend is EmbeddingBackend.OPENAI:
             self._setup_openai(validate)
@@ -100,22 +107,89 @@ class EmbeddingService:
 
         return self._settings.embedding_model
 
+    def _cache_key(self, text: str) -> str:
+        digest = hashlib.sha1(text.encode("utf-8")).hexdigest()
+        return f"{self._settings.embedding_model}:{digest}"
+
+    def _cache_lookup(self, text: str) -> List[float] | None:
+        if self._embedding_cache_limit <= 0:
+            return None
+        key = self._cache_key(text)
+        with self._embedding_cache_lock:
+            vector = self._embedding_cache.get(key)
+            if vector is None:
+                return None
+            self._embedding_cache.move_to_end(key)
+            return list(vector)
+
+    def _cache_store(self, text: str, vector: Sequence[float]) -> None:
+        if self._embedding_cache_limit <= 0:
+            return
+        key = self._cache_key(text)
+        copy = [float(value) for value in vector]
+        with self._embedding_cache_lock:
+            self._embedding_cache[key] = copy
+            self._embedding_cache.move_to_end(key)
+            while len(self._embedding_cache) > self._embedding_cache_limit:
+                self._embedding_cache.popitem(last=False)
+
+    @staticmethod
+    def _completed_future(value: Sequence[float]) -> Future[List[float]]:
+        future: Future[List[float]] = Future()
+        future.set_result([float(item) for item in value])
+        return future
+
+    def _ensure_async_executor(self) -> ThreadPoolExecutor:
+        if self._backend is EmbeddingBackend.OLLAMA:
+            if self._ollama_executor is None:
+                self._ollama_executor = ThreadPoolExecutor(max_workers=self._ollama_concurrency)
+            return self._ollama_executor
+        if self._async_executor is None:
+            self._async_executor = ThreadPoolExecutor(max_workers=max(2, self._ollama_concurrency))
+        return self._async_executor
+
     def embed(self, texts: Sequence[str]) -> List[List[float]]:
         """Generate embeddings for a sequence of texts."""
 
         if not texts:
             return []
 
+        cached: list[List[float] | None] = []
+        missing_indices: list[int] = []
+        missing_texts: list[str] = []
+        for index, text in enumerate(texts):
+            hit = self._cache_lookup(text)
+            cached.append(hit)
+            if hit is None:
+                missing_indices.append(index)
+                missing_texts.append(text)
+
+        results: list[List[float]] = [vector if vector is not None else [] for vector in cached]
+
+        if missing_texts:
+            computed = self._compute_embeddings(missing_texts)
+            for offset, index in enumerate(missing_indices):
+                vector = computed[offset]
+                text = missing_texts[offset]
+                self._cache_store(text, vector)
+                results[index] = [float(value) for value in vector]
+
+        return results
+
+    def _compute_embeddings(self, texts: Sequence[str]) -> List[List[float]]:
+        if not texts:
+            return []
+
         if self._backend is EmbeddingBackend.OPENAI:
-            assert self._openai_client is not None  # for mypy
+            assert self._openai_client is not None
             result = self._openai_client.embeddings.create(
                 model=self._settings.required_openai_model,
                 input=list(texts),
             )
-            return [item.embedding for item in result.data]
+            return [[float(value) for value in item.embedding] for item in result.data]
 
         if self._backend is EmbeddingBackend.OLLAMA:
-            return self._ollama_batch_embed(texts)
+            return [list(vector) for vector in self._ollama_batch_embed(texts)]
 
         if self._backend is EmbeddingBackend.VLLM:
             return self._vllm_embed_batch(texts)
@@ -123,14 +197,40 @@ class EmbeddingService:
         assert self._hf_model is not None
         vectors = self._hf_model.encode(list(texts), show_progress_bar=False)
         if hasattr(vectors, "tolist"):
-            return vectors.tolist()
+            return [list(vector) for vector in vectors.tolist()]
         return [list(vector) for vector in vectors]
+
+    def _embed_and_cache_single(self, text: str) -> List[float]:
+        vector: List[float]
+        if self._backend is EmbeddingBackend.OLLAMA:
+            vector = self._ollama_embed(text)
+        else:
+            computed = self._compute_embeddings([text])
+            vector = computed[0] if computed else []
+        self._cache_store(text, vector)
+        return [float(value) for value in vector]
+
+    def embed_one_async(self, text: str) -> Future[List[float]]:
+        cached = self._cache_lookup(text)
+        if cached is not None:
+            return self._completed_future(cached)
+        executor = self._ensure_async_executor()
+        return executor.submit(self._embed_and_cache_single, text)
+
+    def embed_async(self, texts: Sequence[str]) -> List[Future[List[float]]]:
+        futures: list[Future[List[float]]] = []
+        for text in texts:
+            futures.append(self.embed_one_async(text))
+        return futures
 
     def embed_one(self, text: str) -> List[float]:
         """Generate an embedding for a single piece of text."""
 
-        vectors = self.embed([text])
-        return vectors[0]
+        cached = self._cache_lookup(text)
+        if cached is not None:
+            return cached
+        vector = self._embed_and_cache_single(text)
+        return [float(value) for value in vector]
 
     def close(self) -> None:
         """Release any underlying client resources."""
@@ -142,6 +242,9 @@ class EmbeddingService:
                 pass
             finally:
                 self._ollama_client = None
+        if self._ollama_executor is not None:
+            self._ollama_executor.shutdown(wait=False)
+            self._ollama_executor = None
         if self._vllm_client is not None:
             try:
                 self._vllm_client.close()
@@ -156,6 +259,9 @@ class EmbeddingService:
                 pass
             finally:
                 self._vllm_batcher = None
+        if self._async_executor is not None:
+            self._async_executor.shutdown(wait=False)
+            self._async_executor = None
 
     def __del__(self):  # pragma: no cover - defensive cleanup
         self.close()
@@ -199,6 +305,8 @@ class EmbeddingService:
             base_url=self._ollama_base_url,
             timeout=self._ollama_timeout,
         )
+        if self._ollama_executor is None:
+            self._ollama_executor = ThreadPoolExecutor(max_workers=self._ollama_concurrency)
 
         vector = self._ollama_embed("__dimension_probe__")
         if not vector:
@@ -250,20 +358,17 @@ class EmbeddingService:
             return []
 
         results: list[list[float]] = []
-        batch_size = max(self._ollama_concurrency * 4, self._ollama_concurrency)
+        executor = self._ensure_async_executor()
+        batch_size = max(self._ollama_concurrency * 8, self._ollama_concurrency)
 
         for offset in range(0, len(texts), batch_size):
             chunk = list(texts[offset : offset + batch_size])
-            vectors: list[list[float] | None] = [None] * len(chunk)
-            concurrency = min(self._ollama_concurrency, len(chunk))
-
-            with ThreadPoolExecutor(max_workers=concurrency) as executor:
-                futures = {executor.submit(self._ollama_embed, text): idx for idx, text in enumerate(chunk)}
-                for future in as_completed(futures):
-                    idx = futures[future]
-                    vectors[idx] = future.result()
-
-            results.extend([vector if vector is not None else [] for vector in vectors])
+            futures = {executor.submit(self._ollama_embed, text): idx for idx, text in enumerate(chunk)}
+            vectors: list[list[float]] = [[] for _ in chunk]
+            for future in as_completed(futures):
+                idx = futures[future]
+                vectors[idx] = [float(value) for value in future.result()]
+            results.extend(vectors)
 
         return results
 
