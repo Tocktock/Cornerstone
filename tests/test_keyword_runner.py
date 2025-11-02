@@ -207,6 +207,8 @@ async def test_execute_keyword_run_deduplicates_overlap(monkeypatch: pytest.Monk
     assert batching_meta["enabled"] is True
     top_phrases = [entry["phrase"] for entry in result.debug["stage2"]["top_candidates"]]
     assert len(top_phrases) == len(set(top_phrases)), "Overlapped candidates should be deduplicated"
+    scores = [entry["score"] for entry in result.debug["stage2"]["top_candidates"]]
+    assert scores == sorted(scores, reverse=True), "Candidates should remain globally sorted"
     keyword_terms = [item["term"] for item in result.keywords]
     assert len(keyword_terms) == len(set(keyword_terms)), "Final keywords should remain unique"
 

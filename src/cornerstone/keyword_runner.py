@@ -21,12 +21,13 @@ from .keywords import (
     KeywordLLMFilter,
     build_excerpt,
     cluster_concepts,
+    concept_sort_key,
+    dedupe_concept_candidates,
     extract_concept_candidates,
     extract_keyword_candidates,
-    dedupe_concept_candidates,
     iter_candidate_batches,
-    rank_concept_clusters,
     prepare_keyword_chunks,
+    rank_concept_clusters,
 )
 from .observability import MetricsRecorder
 from .projects import Project
@@ -232,6 +233,7 @@ async def execute_keyword_run(
                 )
 
     candidates_for_stage3 = dedupe_concept_candidates(refined_candidates or concept_stage.candidates)
+    candidates_for_stage3.sort(key=concept_sort_key)
     concept_stage = concept_stage.replace_candidates(candidates_for_stage3)
 
     batching_debug: dict[str, object] = {

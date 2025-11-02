@@ -10,7 +10,7 @@ import re
 import time
 from collections import Counter
 from dataclasses import dataclass, field, replace
-from typing import TYPE_CHECKING, Any, Iterable, List, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, List, Mapping, Sequence, Tuple
 
 import httpx
 
@@ -270,6 +270,17 @@ def iter_candidate_batches(
         if end >= total:
             break
         start += step
+
+
+def concept_sort_key(candidate: ConceptCandidate) -> Tuple[float, int, int, str]:
+    """Sort key matching Stage 2/LMM refinement ordering."""
+
+    return (
+        -candidate.score,
+        -candidate.document_count,
+        -candidate.occurrences,
+        candidate.phrase,
+    )
 
 
 def dedupe_concept_candidates(candidates: Sequence[ConceptCandidate]) -> List[ConceptCandidate]:
@@ -1351,14 +1362,7 @@ def extract_concept_candidates(
             )
         )
 
-    candidates.sort(
-        key=lambda item: (
-            -item.score,
-            -item.document_count,
-            -item.occurrences,
-            item.phrase,
-        )
-    )
+    candidates.sort(key=concept_sort_key)
 
     total_elapsed = time.perf_counter() - total_start
     timing_stats["total"] = total_elapsed
@@ -2215,14 +2219,7 @@ class KeywordLLMFilter:
         ]
 
         combined = refined + [candidate for candidate in unreviewed if candidate.phrase.lower() not in seen]
-        combined.sort(
-            key=lambda item: (
-                -item.score,
-                -item.document_count,
-                -item.occurrences,
-                item.phrase,
-            )
-        )
+        combined.sort(key=concept_sort_key)
 
         self._last_concept_debug.update(
             {
@@ -3657,6 +3654,7 @@ __all__ = [
     "KeywordCandidate",
     "KeywordLLMFilter",
     "KeywordSourceChunk",
+    "concept_sort_key",
     "dedupe_concept_candidates",
     "iter_candidate_batches",
     "cluster_concepts",
