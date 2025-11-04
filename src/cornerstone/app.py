@@ -21,6 +21,7 @@ from .chat import SupportAgentService
 from .config import Settings
 from .embeddings import EmbeddingService
 from .glossary import Glossary, GlossaryEntry, load_glossary, load_query_hints
+from .cleanup import CleanupJobManager, run_cleanup_job
 from .ingestion import (
     DocumentIngestor,
     IngestionJobManager,
@@ -91,6 +92,7 @@ class ApplicationState:
         chat_service: SupportAgentService,
         ingestion_service: DocumentIngestor,
         ingestion_jobs: IngestionJobManager,
+        cleanup_jobs: CleanupJobManager,
         fts_index,
         metrics: MetricsRecorder | None,
         reranker: Reranker | None,
@@ -111,6 +113,7 @@ class ApplicationState:
         self.chat_service = chat_service
         self.ingestion_service = ingestion_service
         self.ingestion_jobs = ingestion_jobs
+        self.cleanup_jobs = cleanup_jobs
         self.fts_index = fts_index
         self.metrics = metrics
         self.reranker = reranker
@@ -135,6 +138,7 @@ def create_app(
     chat_service: SupportAgentService | None = None,
     ingestion_service: DocumentIngestor | None = None,
     ingestion_jobs: IngestionJobManager | None = None,
+    cleanup_jobs: CleanupJobManager | None = None,
     metrics: MetricsRecorder | None = None,
     reranker: Reranker | None = None,
     conversation_logger: ConversationLogger | None = None,
@@ -233,6 +237,7 @@ def create_app(
         max_active_per_project=settings.ingestion_project_concurrency_limit,
         max_files_per_minute=settings.ingestion_files_per_minute,
     )
+    cleanup_jobs = cleanup_jobs or CleanupJobManager()
 
     insight_queue = insight_queue or KeywordInsightQueue(
         max_jobs=settings.keyword_stage7_summary_max_jobs
@@ -348,6 +353,7 @@ def create_app(
         chat_service=chat_service,
         ingestion_service=ingestion_service,
         ingestion_jobs=ingestion_jobs,
+        cleanup_jobs=cleanup_jobs,
         fts_index=fts_index,
         metrics=metrics,
         reranker=reranker,
@@ -405,6 +411,9 @@ def create_app(
 
     def get_ingestion_jobs(request: Request) -> IngestionJobManager:
         return get_state(request).ingestion_jobs
+
+    def get_cleanup_jobs(request: Request) -> CleanupJobManager:
+        return get_state(request).cleanup_jobs
 
     def get_fts_index(request: Request) -> FTSIndex:
         return get_state(request).fts_index
@@ -848,6 +857,18 @@ def create_app(
             pagination = None
         personas = persona_store.list_personas()
         persona_snapshot = persona_store.resolve_persona(project.persona_id, project.persona_overrides)
+        cleanup_manager = get_cleanup_jobs(request)
+        requested_cleanup_id = request.query_params.get("cleanup_job")
+        cleanup_job_obj = None
+        if requested_cleanup_id:
+            candidate = cleanup_manager.get(requested_cleanup_id)
+            if candidate and candidate.project_id == project.id:
+                cleanup_job_obj = candidate
+        if cleanup_job_obj is None:
+            cleanup_job_obj = cleanup_manager.latest_for_project(project.id)
+        cleanup_job_payload = cleanup_job_obj.to_dict() if cleanup_job_obj else None
+        cleanup_job_json = json.dumps(cleanup_job_payload) if cleanup_job_payload else "null"
+        cleanup_job_id = cleanup_job_payload["id"] if cleanup_job_payload else ""
         context = {
             "request": request,
             "projects": projects,
@@ -861,6 +882,9 @@ def create_app(
             "personas": personas,
             "project_persona_id": project.persona_id,
             "persona_overrides": project.persona_overrides,
+            "cleanup_job": cleanup_job_payload,
+            "cleanup_job_json": cleanup_job_json,
+            "cleanup_job_id": cleanup_job_id,
             "defaults": {
                 "glossary_top_k": settings_inst.glossary_top_k,
                 "retrieval_top_k": settings_inst.retrieval_top_k,
@@ -1808,42 +1832,73 @@ def create_app(
             raise HTTPException(status_code=404, detail="Glossary entry not found")
         return JSONResponse({"status": "deleted"})
 
-    @app.post("/knowledge/cleanup", response_class=RedirectResponse)
+    @app.post("/knowledge/cleanup")
     async def cleanup_project(
         request: Request,
+        background_tasks: BackgroundTasks,
         project_id: str = Form(...),
         project_store: ProjectStore = Depends(get_project_store),
         store_manager: ProjectVectorStoreManager = Depends(get_store_manager),
         fts_index: FTSIndex = Depends(get_fts_index),
         settings: Settings = Depends(get_settings_dependency),
-    ) -> RedirectResponse:
+        job_manager: CleanupJobManager = Depends(get_cleanup_jobs),
+    ) -> Response:
         project = _resolve_project(project_store, project_id)
-        cleared = store_manager.purge_project(project.id)
-        fts_index.delete_project(project.id)
-        project_store.clear_documents(project.id)
-        manifest_path = Path(settings.data_dir).resolve() / "manifests" / f"{project.id}.json"
-        if manifest_path.exists():
-            try:
-                manifest_path.unlink()
-                logger.info(
-                    "knowledge.cleanup.manifest_removed project=%s path=%s",
-                    project.id,
-                    manifest_path,
-                )
-            except OSError as exc:  # pragma: no cover - filesystem failure
-                logger.warning(
-                    "knowledge.cleanup.manifest_remove_failed project=%s path=%s error=%s",
-                    project.id,
-                    manifest_path,
-                    exc,
-                )
-        logger.info(
-            "knowledge.cleanup.completed project=%s cleared=%s",
-            project.id,
-            cleared,
+        existing_job = job_manager.get_active_job(project.id)
+        created_new = False
+        if existing_job:
+            job = existing_job
+            logger.info("knowledge.cleanup.job_existing project=%s job=%s", project.id, job.id)
+        else:
+            job = job_manager.create_job(project.id)
+            created_new = True
+            logger.info("knowledge.cleanup.job_enqueued project=%s job=%s", project.id, job.id)
+            background_tasks.add_task(
+                run_cleanup_job,
+                job_manager,
+                job.id,
+                project.id,
+                store_manager,
+                fts_index,
+                project_store,
+                Path(settings.data_dir).resolve(),
+            )
+
+        accept_header = (request.headers.get("accept") or "").lower()
+        wants_json = "application/json" in accept_header or request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+        job_payload = job.to_dict()
+        if wants_json:
+            status_code = 202 if created_new else 200
+            return JSONResponse({"job": job_payload, "existing": not created_new}, status_code=status_code)
+
+        url = request.url_for("knowledge_dashboard").include_query_params(
+            project_id=project.id,
+            cleanup_job=job.id,
         )
-        url = request.url_for("knowledge_dashboard").include_query_params(project_id=project.id)
+        if not created_new:
+            url = url.include_query_params(cleanup_existing="1")
         return RedirectResponse(url=str(url), status_code=303)
+
+    @app.get("/knowledge/cleanup/jobs/{job_id}", response_class=JSONResponse)
+    async def get_cleanup_job(
+        job_id: str,
+        job_manager: CleanupJobManager = Depends(get_cleanup_jobs),
+    ) -> JSONResponse:
+        job = job_manager.get(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Cleanup job not found")
+        return JSONResponse({"job": job.to_dict()})
+
+    @app.get("/knowledge/cleanup/jobs", response_class=JSONResponse)
+    async def list_cleanup_jobs(
+        project_id: str = Query(...),
+        project_store: ProjectStore = Depends(get_project_store),
+        job_manager: CleanupJobManager = Depends(get_cleanup_jobs),
+    ) -> JSONResponse:
+        project = _resolve_project(project_store, project_id)
+        jobs = [job.to_dict() for job in job_manager.list_for_project(project.id)]
+        return JSONResponse({"jobs": jobs})
 
     @app.post("/knowledge/delete", response_class=RedirectResponse)
     async def delete_document(
