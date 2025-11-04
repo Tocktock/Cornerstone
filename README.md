@@ -10,6 +10,7 @@ Cornerstone is a retrieval-augmented support workspace that lets operations team
 
 ## What Cornerstone Delivers
 - **Full document ingestion pipeline.** `DocumentIngestor` chunks uploads, extracts text (PDF, DOCX, HTML), stores vectors in Qdrant, and syncs metadata to a lightweight SQLite FTS index for lexical fallbacks.
+- **Reliable project cleanup.** The Knowledge Base “Clear Embedded Data” action now runs as a background job, recreates vector collections, wipes FTS rows, and reports step-by-step status so partial failures are surfaced instead of hidden behind hung requests.
 - **Retrieval-augmented support agent.** `SupportAgentService` blends dense search, optional reranking, glossary snippets, and persona overrides to generate final answers via OpenAI or Ollama chat backends.
 - **Semantic search web experience.** A FastAPI + Jinja UI surfaces global search, support chat, knowledge browsers, persona management, and analytics dashboards out of the box.
 - **Keyword explorer & insights pipeline.** Multi-stage concept extraction (frequency heuristics, embedding similarity, clustering, optional LLM summarization) now runs through a background job system that caches results, exposes run metadata, and pushes insights onto an async queue.

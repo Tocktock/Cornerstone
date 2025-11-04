@@ -66,6 +66,22 @@
       .upload-status li.processing span.status { color:#2563eb; }
       .upload-status li.throttled span.status { color:#f59e0b; }
       .job-throttled-note { font-size:0.82rem; color:#92400e; background:#fffbeb; border-radius:8px; padding:0.45rem 0.65rem; line-height:1.35; }
+      .cleanup-status { display:none; margin-top:0.65rem; font-size:0.9rem; color:#4b5563; }
+      .cleanup-status.active { display:block; }
+      .cleanup-status .cleanup-summary { font-weight:600; color:#1f2937; }
+      .cleanup-status .step-list { list-style:none; margin:0.75rem 0 0; padding:0; display:flex; flex-direction:column; gap:0.45rem; }
+      .cleanup-status .step-item { border:1px solid #e5e7eb; border-radius:10px; padding:0.55rem 0.75rem; background:#f9fafb; display:flex; justify-content:space-between; align-items:flex-start; gap:0.75rem; }
+      .cleanup-status .step-column { display:flex; flex-direction:column; gap:0.2rem; }
+      .cleanup-status .step-label { font-weight:600; color:#1f2937; }
+      .cleanup-status .step-state { text-transform:capitalize; font-weight:600; }
+      .cleanup-status .step-state.pending { color:#6b7280; }
+      .cleanup-status .step-state.queued { color:#6b7280; }
+      .cleanup-status .step-state.running { color:#2563eb; }
+      .cleanup-status .step-state.completed { color:#047857; }
+      .cleanup-status .step-state.failed { color:#dc2626; }
+      .cleanup-status .step-detail { font-size:0.82rem; color:#6b7280; margin-top:0.25rem; }
+      .cleanup-status .step-error { font-size:0.82rem; color:#dc2626; margin-top:0.25rem; }
+      .cleanup-status .job-error { margin-top:0.75rem; color:#dc2626; font-size:0.85rem; }
       .directory-meta { color:#6b7280; font-size:0.85rem; margin-left:0.35rem; }
       .upload-hint { font-size:0.85rem; color:#6b7280; margin-top:0.45rem; }
       .local-import { margin-top:1.1rem; display:flex; flex-direction:column; gap:0.5rem; }
@@ -250,7 +266,7 @@
         </div>
       </aside>
 
-      <section data-project-id="{{ selected_project }}" data-default-hint-batch="{{ settings.query_hint_batch_size }}">
+      <section data-project-id="{{ selected_project }}" data-default-hint-batch="{{ settings.query_hint_batch_size }}" data-cleanup-job="{{ cleanup_job_id }}">
         <h1>Documents</h1>
         <p>Upload documents to enrich <strong>{{ project_name }}</strong>.</p>
         <div class="upload-panel">
@@ -293,11 +309,12 @@
           </noscript>
         </div>
 
-        <form method="post" action="/knowledge/cleanup" style="margin-top: 0.75rem;">
+        <form id="cleanup-form" method="post" action="/knowledge/cleanup" style="margin-top: 0.75rem;">
           <input type="hidden" name="project_id" value="{{ selected_project }}" />
-          <button type="submit" style="background:#1f2937; color:#fff; border:none; padding:0.55rem 1.4rem; border-radius:999px; cursor:pointer; box-shadow:0 10px 22px rgba(17,24,39,0.18);">Clear Embedded Data</button>
+          <button id="cleanup-button" type="submit" style="background:#1f2937; color:#fff; border:none; padding:0.55rem 1.4rem; border-radius:999px; cursor:pointer; box-shadow:0 10px 22px rgba(17,24,39,0.18);">Clear Embedded Data</button>
         </form>
         <p style="color:#6b7280; font-size:0.85rem; margin-top:0.35rem;">Removes all vectors and document records for this project.</p>
+        <div id="cleanup-status" class="cleanup-status" aria-live="polite"></div>
 
         {% if documents %}
           {% if pagination %}
@@ -439,6 +456,10 @@
       const statusList = document.getElementById('upload-status');
       const projectSelect = document.getElementById('project');
       const projectSection = document.querySelector('section[data-project-id]');
+      const initialCleanupJob = {{ cleanup_job_json | safe }};
+      const cleanupForm = document.getElementById('cleanup-form');
+      const cleanupButton = document.getElementById('cleanup-button');
+      const cleanupStatus = document.getElementById('cleanup-status');
       const urlInput = document.getElementById('url-input');
       const submitUrl = document.getElementById('submit-url');
       const localPathInput = document.getElementById('local-path');
@@ -455,6 +476,17 @@
       }
 
       let projectId = projectSection.dataset.projectId || '';
+      let cleanupJobId = projectSection.dataset.cleanupJob || '';
+      const cleanupButtonDefaultLabel = cleanupButton ? cleanupButton.textContent : 'Clear Embedded Data';
+      let cleanupPollTimer = null;
+      const urlParams = new URLSearchParams(window.location.search);
+      const cleanupExistingNotice = urlParams.has('cleanup_existing');
+      if (cleanupExistingNotice) {
+        urlParams.delete('cleanup_existing');
+        const newSearch = urlParams.toString();
+        const newUrl = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}${window.location.hash}`;
+        window.history.replaceState({}, document.title, newUrl);
+      }
       const activeJobs = new Set();
       let pollTimer = null;
       const STATUS_LABELS = {
@@ -488,6 +520,165 @@
       const DEFAULT_HINT_BATCH_SIZE = Number(projectSection?.dataset.defaultHintBatch || 6);
       if (queryHintsBatchInput && !queryHintsBatchInput.value) {
         queryHintsBatchInput.value = DEFAULT_HINT_BATCH_SIZE;
+      }
+
+      if (initialCleanupJob && typeof initialCleanupJob === 'object') {
+        cleanupJobId = initialCleanupJob.id || cleanupJobId;
+        renderCleanupJob(
+          initialCleanupJob,
+          cleanupExistingNotice ? { notice: 'Cleanup already running. Showing current status.' } : {},
+        );
+        const initialState = (initialCleanupJob.status || '').toLowerCase();
+        if (initialState !== 'completed' && initialState !== 'failed') {
+          startCleanupPolling();
+        }
+      } else if (cleanupJobId) {
+        startCleanupPolling(true);
+      } else {
+        clearCleanupStatus();
+      }
+
+      function clearCleanupStatus() {
+        if (!cleanupStatus) {
+          return;
+        }
+        cleanupStatus.classList.remove('active');
+        cleanupStatus.innerHTML = '';
+      }
+
+      function renderCleanupJob(job, options = {}) {
+        if (!cleanupStatus) {
+          return;
+        }
+        if (!job) {
+          clearCleanupStatus();
+          return;
+        }
+        cleanupStatus.classList.add('active');
+        cleanupStatus.innerHTML = '';
+
+        const summary = document.createElement('div');
+        summary.className = 'cleanup-summary';
+        let summaryText = options.notice || '';
+        if (!summaryText) {
+          switch ((job.status || '').toLowerCase()) {
+            case 'completed':
+              summaryText = 'Embedded data cleanup completed.';
+              break;
+            case 'failed':
+              summaryText = 'Embedded data cleanup failed.';
+              break;
+            case 'running':
+              summaryText = 'Clearing embedded data…';
+              break;
+            case 'queued':
+            case 'pending':
+            default:
+              summaryText = 'Cleanup queued…';
+              break;
+          }
+        }
+        summary.textContent = summaryText;
+        cleanupStatus.appendChild(summary);
+
+        if (Array.isArray(job.steps) && job.steps.length) {
+          const list = document.createElement('ul');
+          list.className = 'step-list';
+          job.steps.forEach((step) => {
+            const item = document.createElement('li');
+            item.className = 'step-item';
+
+            const column = document.createElement('div');
+            column.className = 'step-column';
+
+            const label = document.createElement('div');
+            label.className = 'step-label';
+            label.textContent = step.label || step.name || 'Step';
+            column.appendChild(label);
+
+            if (step.details) {
+              const detail = document.createElement('div');
+              detail.className = 'step-detail';
+              detail.textContent = step.details;
+              column.appendChild(detail);
+            }
+            if (step.error) {
+              const error = document.createElement('div');
+              error.className = 'step-error';
+              error.textContent = step.error;
+              column.appendChild(error);
+            }
+
+            const state = document.createElement('span');
+            const stepStatus = (step.status || 'pending').toLowerCase();
+            state.className = `step-state ${stepStatus}`;
+            state.textContent = stepStatus;
+
+            item.appendChild(column);
+            item.appendChild(state);
+            list.appendChild(item);
+          });
+          cleanupStatus.appendChild(list);
+        }
+
+        if (job.error) {
+          const jobError = document.createElement('div');
+          jobError.className = 'job-error';
+          jobError.textContent = job.error;
+          cleanupStatus.appendChild(jobError);
+        }
+      }
+
+      function stopCleanupPolling() {
+        if (cleanupPollTimer) {
+          window.clearInterval(cleanupPollTimer);
+          cleanupPollTimer = null;
+        }
+      }
+
+      async function pollCleanupJob() {
+        if (!cleanupJobId) {
+          stopCleanupPolling();
+          return;
+        }
+        try {
+          const response = await fetch(`/knowledge/cleanup/jobs/${encodeURIComponent(cleanupJobId)}`);
+          if (!response.ok) {
+            throw new Error(`Status request failed (${response.status})`);
+          }
+          const data = await response.json();
+          if (!data || !data.job) {
+            throw new Error('Malformed cleanup status payload.');
+          }
+          renderCleanupJob(data.job);
+          const state = (data.job.status || '').toLowerCase();
+          if (state === 'completed') {
+            stopCleanupPolling();
+            window.setTimeout(() => window.location.reload(), 800);
+          } else if (state === 'failed') {
+            stopCleanupPolling();
+          }
+        } catch (error) {
+          console.error('Cleanup status polling failed', error);
+          stopCleanupPolling();
+          if (cleanupStatus) {
+            const message = document.createElement('div');
+            message.className = 'job-error';
+            message.textContent = 'Unable to refresh cleanup status.';
+            cleanupStatus.appendChild(message);
+          }
+        }
+      }
+
+      function startCleanupPolling(immediate = false) {
+        stopCleanupPolling();
+        if (!cleanupJobId) {
+          return;
+        }
+        cleanupPollTimer = window.setInterval(pollCleanupJob, 1800);
+        if (immediate) {
+          pollCleanupJob();
+        }
       }
 
       function parseListInput(value) {
@@ -1105,6 +1296,90 @@
           window.clearInterval(pollTimer);
           pollTimer = null;
         }
+      }
+
+      if (cleanupForm) {
+        cleanupForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          if (!projectId) {
+            if (cleanupStatus) {
+              cleanupStatus.classList.add('active');
+              cleanupStatus.innerHTML = '';
+              const summary = document.createElement('div');
+              summary.className = 'cleanup-summary';
+              summary.textContent = 'Select a project before clearing embedded data.';
+              cleanupStatus.appendChild(summary);
+            }
+            return;
+          }
+
+          if (cleanupButton) {
+            cleanupButton.disabled = true;
+            cleanupButton.textContent = 'Clearing…';
+          }
+
+          stopCleanupPolling();
+          clearCleanupStatus();
+
+          const formData = new FormData(cleanupForm);
+          formData.set('project_id', projectId);
+
+          try {
+            const response = await fetch('/knowledge/cleanup', {
+              method: 'POST',
+              headers: { Accept: 'application/json' },
+              body: formData,
+            });
+            if (!response.ok) {
+              const detail = await response.json().catch(() => ({}));
+              const reason = detail.detail || `status ${response.status}`;
+              throw new Error(reason);
+            }
+            const payload = await response.json();
+            if (!payload || !payload.job) {
+              throw new Error('Unexpected cleanup response payload.');
+            }
+
+            cleanupJobId = payload.job.id || '';
+            if (projectSection && cleanupJobId) {
+              projectSection.dataset.cleanupJob = cleanupJobId;
+            }
+
+            if (payload.existing) {
+              renderCleanupJob(payload.job, { notice: 'Cleanup already running. Showing current status.' });
+            } else {
+              renderCleanupJob(payload.job);
+            }
+
+            const state = (payload.job.status || '').toLowerCase();
+            if (state === 'completed') {
+              window.setTimeout(() => window.location.reload(), 800);
+            } else if (state === 'failed') {
+              stopCleanupPolling();
+            } else {
+              startCleanupPolling(true);
+            }
+          } catch (error) {
+            console.error('Cleanup request failed', error);
+            if (cleanupStatus) {
+              cleanupStatus.classList.add('active');
+              cleanupStatus.innerHTML = '';
+              const summary = document.createElement('div');
+              summary.className = 'cleanup-summary';
+              summary.textContent = 'Unable to start cleanup.';
+              cleanupStatus.appendChild(summary);
+              const err = document.createElement('div');
+              err.className = 'job-error';
+              err.textContent = error instanceof Error ? error.message : String(error);
+              cleanupStatus.appendChild(err);
+            }
+          } finally {
+            if (cleanupButton) {
+              cleanupButton.disabled = false;
+              cleanupButton.textContent = cleanupButtonDefaultLabel;
+            }
+          }
+        });
       }
 
       async function uploadFiles(fileList) {

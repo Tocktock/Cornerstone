@@ -454,7 +454,7 @@ def test_single_upload_supported_types(filename, factory, content_type, expected
         assert doc.title is None
 
 
-def test_cleanup_endpoint_purges_project_vectors():
+def test_cleanup_endpoint_runs_async_cleanup():
     client = build_app()
     state = client.app.state.services
     project_store: ProjectStore = state.project_store
@@ -478,13 +478,76 @@ def test_cleanup_endpoint_purges_project_vectors():
     response = client.post(
         "/knowledge/cleanup",
         data={"project_id": project.id},
-        follow_redirects=False,
+        headers={"accept": "application/json"},
     )
-    assert response.status_code == 303
+    assert response.status_code == 202
+    payload = response.json()
+    assert payload["existing"] is False
+    job = payload["job"]
+    assert job["project_id"] == project.id
+    cleanup_job_id = job["id"]
+    assert cleanup_job_id
+
+    job_data = None
+    for _ in range(5):
+        status_resp = client.get(f"/knowledge/cleanup/jobs/{cleanup_job_id}")
+        assert status_resp.status_code == 200
+        job_data = status_resp.json()["job"]
+        if job_data["status"] in {"completed", "failed"}:
+            break
+    assert job_data is not None
+    assert job_data["status"] == "completed"
+    assert all(step["status"] == "completed" for step in job_data["steps"])
+
+    list_resp = client.get(f"/knowledge/cleanup/jobs?project_id={project.id}")
+    assert list_resp.status_code == 200
+    jobs = list_resp.json().get("jobs", [])
+    assert any(entry["id"] == cleanup_job_id for entry in jobs)
+
     assert project_store.list_documents(project.id) == []
     assert store.count() == 0
     assert fts_index.search(project.id, "Troubleshooting") == []
 
+
+def test_cleanup_failure_surfaces_errors(monkeypatch):
+    client = build_app()
+    state = client.app.state.services
+    project_store: ProjectStore = state.project_store
+    project = project_store.list_projects()[0]
+
+    response = client.post(
+        "/knowledge/upload",
+        data={"project_id": project.id},
+        files={"file": ("guide.txt", b"Troubleshooting steps", "text/plain")},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert project_store.list_documents(project.id)
+
+    def failing_purge(project_id: str) -> bool:  # pragma: no cover - test helper
+        raise RuntimeError("simulated failure")
+
+    monkeypatch.setattr(state.store_manager, "purge_project", failing_purge)
+
+    response = client.post(
+        "/knowledge/cleanup",
+        data={"project_id": project.id},
+        headers={"accept": "application/json"},
+    )
+    assert response.status_code == 202
+    payload = response.json()
+    assert payload["existing"] is False
+    job_id = payload["job"]["id"]
+
+    status_resp = client.get(f"/knowledge/cleanup/jobs/{job_id}")
+    assert status_resp.status_code == 200
+    job_data = status_resp.json()["job"]
+    assert job_data["status"] == "failed"
+    assert job_data["error"]
+    first_step = job_data["steps"][0]
+    assert first_step["status"] == "failed"
+    assert "simulated failure" in (first_step.get("error") or "")
+    assert project_store.list_documents(project.id), "Documents should remain when cleanup fails"
 
 def test_ingested_chunks_include_metadata_summary_and_language():
     client = build_app()
