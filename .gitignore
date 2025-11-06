@@ -85,3 +85,7 @@ data/
 
 # Qdrant snapshots
 qdrant_storage/
+
+# Node / frontend tooling
+node_modules/
+*.tsbuildinfo

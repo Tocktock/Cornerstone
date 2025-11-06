@@ -1,322 +1,175 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Knowledge Base Management</title>
-    <style>
-      body { font-family: sans-serif; margin: 0; background: #f3f4f6; color: #111827; }
-      nav { background: #111827; padding: 1rem 2rem; }
-      nav a { color: #d1d5db; margin-right: 1.5rem; text-decoration: none; }
-      nav a strong { color: #fff; }
-      main {
-        width: min(100% - 2rem, 1120px);
-        margin: 2.5rem auto;
-        padding: 0 0.5rem;
-        display: grid;
-        gap: 1.5rem;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-      }
-      section, aside { background: #fff; border-radius: 16px; padding: 1.75rem 2rem; box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12); }
-      h1 { margin-top: 0; }
-      form { display: grid; gap: 0.75rem; margin-top: 1rem; }
-      input[type="text"], textarea, select { padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #d1d5db; font-size: 1rem; }
-      textarea { min-height: 90px; resize: vertical; }
-      button { padding: 0.65rem 1.5rem; border-radius: 999px; border: none; background: #2563eb; color: #fff; font-size: 1rem; box-shadow: 0 12px 28px rgba(37,99,235,0.18); cursor: pointer; justify-self: start; }
-      button:hover { box-shadow: 0 16px 32px rgba(37,99,235,0.24); }
-      .table-toolbar { margin-top: 1.5rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
-      .table-summary { font-size:0.9rem; color:#4b5563; }
-      .pager { display:flex; gap:0.5rem; align-items:center; }
-      .pager-link { padding:0.4rem 0.9rem; border-radius:999px; border:1px solid #d1d5db; font-size:0.85rem; text-decoration:none; color:#2563eb; background:#fff; }
-      .pager-link:hover { background:#eff6ff; }
-      .pager-link.disabled { color:#9ca3af; border-color:#e5e7eb; pointer-events:none; background:#f3f4f6; }
-      .pager-page { font-size:0.85rem; color:#6b7280; }
-      .table-wrapper { width: 100%; overflow-x: auto; }
-      table { width: 100%; min-width: 640px; border-collapse: collapse; }
-      th, td { text-align: left; padding: 0.65rem 0.5rem; border-bottom: 1px solid #e5e7eb; font-size: 0.96rem; }
-      th { color: #4b5563; font-weight: 600; }
-      td { overflow-wrap: anywhere; }
-      td.filename-cell { font-weight: 600; color: #1f2937; }
-      .empty { margin-top: 1.5rem; color: #6b7280; }
-      .project-list { list-style: none; padding: 0; margin: 1rem 0 0; }
-      .project-list li { margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: center; }
-      .project-list a { color: #2563eb; text-decoration: none; font-weight: 600; }
-      .persona-form { display: grid; gap: 0.65rem; margin-top: 1rem; }
-      .persona-form label { font-weight: 600; font-size: 0.9rem; color: #374151; }
-      .persona-form small { color: #6b7280; font-size: 0.8rem; display: block; margin-top: 0.2rem; }
-      .persona-preview { margin-top: 1rem; background: #f9fafb; border-radius: 12px; padding: 0.85rem 1rem; color: #374151; box-shadow: inset 0 1px 2px rgba(15,23,42,0.06); }
-      .persona-preview strong { display: block; font-size: 1rem; color: #111827; }
-      .persona-preview span { display: block; font-size: 0.85rem; color: #4b5563; margin-top: 0.35rem; }
-      .persona-preview p { margin: 0.45rem 0 0; font-size: 0.9rem; line-height: 1.45; }
-      .upload-panel { background:#fff; border:1px dashed #cbd5f5; border-radius:16px; padding:1.25rem 1.5rem; margin:1.5rem 0; box-shadow: inset 0 1px 2px rgba(15,23,42,0.06); }
-      .drop-zone { border:2px dashed #93c5fd; border-radius:14px; padding:1.25rem; text-align:center; color:#2563eb; background:#eff6ff; cursor:pointer; transition: background 0.2s ease, border-color 0.2s ease; }
-      .drop-zone.dragover { background:#dbeafe; border-color:#1d4ed8; }
-      .drop-zone p { margin:0.35rem 0; }
-      .upload-actions { display:flex; gap:0.65rem; margin-top:0.85rem; }
-      .upload-actions button { background:#111827; box-shadow:0 12px 28px rgba(17,24,39,0.18); }
-      .upload-status { list-style:none; padding:0; margin:1rem 0 0; display:flex; flex-direction:column; gap:0.45rem; font-size:0.9rem; color:#4b5563; }
-      .upload-status li { background:#f8fafc; border-radius:10px; padding:0.7rem 0.8rem; border:1px solid #e2e8f0; display:flex; flex-direction:column; align-items:flex-start; gap:0.35rem; }
-      .job-row { width:100%; display:flex; justify-content:space-between; align-items:center; gap:0.75rem; }
-      .job-progress { position:relative; width:100%; height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden; }
-      .job-progress-bar { position:absolute; top:0; bottom:0; left:0; background:#2563eb; width:0%; transition:width 0.25s ease; }
-      .job-progress-label { font-size:0.75rem; color:#6b7280; }
-      .job-error { margin-left:auto; color:#dc2626; font-size:0.82rem; }
-      .upload-status li span.status { font-weight:600; }
-      .upload-status li.completed span.status { color:#047857; }
-      .upload-status li.failed span.status { color:#dc2626; }
-      .upload-status li.processing span.status { color:#2563eb; }
-      .upload-status li.throttled span.status { color:#f59e0b; }
-      .job-throttled-note { font-size:0.82rem; color:#92400e; background:#fffbeb; border-radius:8px; padding:0.45rem 0.65rem; line-height:1.35; }
-      .cleanup-status { display:none; margin-top:0.65rem; font-size:0.9rem; color:#4b5563; }
-      .cleanup-status.active { display:block; }
-      .cleanup-status .cleanup-summary { font-weight:600; color:#1f2937; }
-      .cleanup-status .step-list { list-style:none; margin:0.75rem 0 0; padding:0; display:flex; flex-direction:column; gap:0.45rem; }
-      .cleanup-status .step-item { border:1px solid #e5e7eb; border-radius:10px; padding:0.55rem 0.75rem; background:#f9fafb; display:flex; justify-content:space-between; align-items:flex-start; gap:0.75rem; }
-      .cleanup-status .step-column { display:flex; flex-direction:column; gap:0.2rem; }
-      .cleanup-status .step-label { font-weight:600; color:#1f2937; }
-      .cleanup-status .step-state { text-transform:capitalize; font-weight:600; }
-      .cleanup-status .step-state.pending { color:#6b7280; }
-      .cleanup-status .step-state.queued { color:#6b7280; }
-      .cleanup-status .step-state.running { color:#2563eb; }
-      .cleanup-status .step-state.completed { color:#047857; }
-      .cleanup-status .step-state.failed { color:#dc2626; }
-      .cleanup-status .step-detail { font-size:0.82rem; color:#6b7280; margin-top:0.25rem; }
-      .cleanup-status .step-error { font-size:0.82rem; color:#dc2626; margin-top:0.25rem; }
-      .cleanup-status .job-error { margin-top:0.75rem; color:#dc2626; font-size:0.85rem; }
-      .directory-meta { color:#6b7280; font-size:0.85rem; margin-left:0.35rem; }
-      .upload-hint { font-size:0.85rem; color:#6b7280; margin-top:0.45rem; }
-      .local-import { margin-top:1.1rem; display:flex; flex-direction:column; gap:0.5rem; }
-      .local-input-group { display:flex; gap:0.65rem; align-items:center; }
-      .local-input-group input { flex:0 1 22rem; width:100%; max-width:22rem; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
-      .local-input-group button { padding:0.65rem 1.5rem; border-radius:999px; border:none; background:#1f2937; color:#fff; font-size:0.95rem; box-shadow:0 12px 28px rgba(17,24,39,0.18); cursor:pointer; }
-      .local-input-wrapper { position:relative; flex:1; }
-      .url-upload { margin-top:1.1rem; display:flex; flex-direction:column; gap:0.5rem; }
-      .url-input-group { display:flex; gap:0.65rem; align-items:center; }
-      .url-input-group input { flex:1; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; }
-      .url-input-group button { padding:0.65rem 1.5rem; border-radius:999px; border:none; background:#2563eb; color:#fff; font-size:0.95rem; box-shadow:0 12px 28px rgba(37,99,235,0.2); cursor:pointer; }
-      .glossary-panel { margin-top:2rem; background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; padding:1.5rem 1.75rem; box-shadow:0 16px 32px rgba(15,23,42,0.08); display:flex; flex-direction:column; gap:1rem; }
-      .glossary-header h2 { margin:0; font-size:1.25rem; color:#111827; }
-      .glossary-header p { margin:0.25rem 0 0; color:#6b7280; font-size:0.9rem; }
-      .glossary-form-grid { display:grid; gap:0.75rem; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
-      .glossary-form-grid label { display:flex; flex-direction:column; gap:0.35rem; font-weight:600; color:#1f2937; font-size:0.9rem; }
-      .glossary-form-grid input,
-      .glossary-form-grid textarea { border-radius:10px; border:1px solid #d1d5db; padding:0.6rem 0.75rem; font-size:0.95rem; }
-      .glossary-form-grid textarea { min-height:120px; resize:vertical; grid-column:1 / -1; }
-      .glossary-actions { display:flex; gap:0.6rem; align-items:center; }
-      .button-ghost { background:#fff; border:1px solid #d1d5db; color:#1f2937; box-shadow:none; }
-      .button-ghost:hover { background:#f3f4f6; }
-      .glossary-status { min-height:1em; font-size:0.85rem; color:#6b7280; }
-      .glossary-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.85rem; }
-      .glossary-entry { border:1px solid #e5e7eb; border-radius:14px; padding:0.9rem 1rem; background:#f9fafb; box-shadow:0 6px 18px rgba(15,23,42,0.08); }
-      .glossary-entry header { display:flex; justify-content:space-between; align-items:center; gap:0.75rem; }
-      .glossary-entry header h3 { margin:0; font-size:1rem; color:#111827; }
-      .glossary-entry header span { font-size:0.78rem; color:#6b7280; }
-      .glossary-entry p { margin:0.6rem 0 0; font-size:0.95rem; line-height:1.45; color:#1f2937; }
-      .glossary-tags { margin-top:0.5rem; display:flex; flex-wrap:wrap; gap:0.45rem; font-size:0.78rem; color:#4b5563; }
-      .glossary-tag { background:#eff6ff; color:#1d4ed8; border-radius:999px; padding:0.18rem 0.6rem; }
-      .glossary-chip { background:#fef3c7; color:#92400e; border-radius:999px; padding:0.18rem 0.6rem; }
-      .glossary-entry .entry-actions { display:flex; gap:0.5rem; }
-      .glossary-entry .entry-actions button { background:#fff; border:1px solid #cbd5f5; color:#1d4ed8; font-size:0.8rem; padding:0.35rem 0.65rem; border-radius:999px; box-shadow:none; }
-      .glossary-entry .entry-actions button:hover { background:#eff6ff; }
-      @media (max-width: 900px) {
-        main { grid-template-columns: 1fr; padding: 0 1rem; }
-        .local-input-group, .url-input-group { flex-direction:column; align-items:stretch; }
-        .local-input-group button, .url-input-group button { width:100%; }
-        .local-input-wrapper { width:100%; }
-      }
-      @media (max-width: 640px) {
-        section, aside { padding: 1.25rem 1.35rem; }
-        nav { padding: 1rem; }
-        nav a { display: inline-block; margin-right: 1rem; font-size: 0.95rem; }
-        .pager { width:100%; justify-content:space-between; }
-        .pager-page { flex:1; text-align:center; }
-      }
-    </style>
-  </head>
-  <body>
-    <nav>
-      <a href="/">Search</a>
-      <a href="/support">Support Agent</a>
-      <a href="/knowledge"><strong>Knowledge Base</strong></a>
-      <a href="/keywords">Keyword Explorer</a>
-      <a href="/admin/analytics">Analytics</a>
-      <a href="/personas">Personas</a>
-    </nav>
-    <main>
-      <aside>
-        <h1>Projects</h1>
-        <p>Manage knowledge bases and switch the active project.</p>
+{% extends "base.html" %}
+{% import 'macros/ui.html' as ui %}
+{% block title %}Knowledge Base · Cornerstone{% endblock %}
+
+{% block navigation %}
+  {{ ui.navigation('knowledge') }}
+{% endblock %}
+
+{% block content %}
+  <div class="knowledge-layout">
+    <aside class="surface-card p-6 sm:p-8 space-y-8">
+      <section class="space-y-3">
+        <h1 class="text-2xl font-semibold text-slate-900">Projects</h1>
+        <p class="text-sm text-slate-600">Manage knowledge bases and switch the active project.</p>
         <ul class="project-list">
           {% for project in projects %}
-            <li>
-              <a href="/knowledge?project_id={{ project.id }}" {% if project.id == selected_project %}style="color:#1d4ed8"{% endif %}>{{ project.name }}</a>
-              <span style="color:#6b7280; font-size:0.85rem;">{{ project.created_at.split('T')[0] }}</span>
+            <li class="{{ 'bg-blue-50 border-blue-200' if project.id == selected_project else '' }}">
+              <a href="/knowledge?project_id={{ project.id }}" class="project-link {{ 'font-semibold text-blue-700' if project.id == selected_project else '' }}">{{ project.name }}</a>
+              <span class="text-xs text-slate-500">{{ project.created_at.split('T')[0] }}</span>
             </li>
           {% endfor %}
         </ul>
+      </section>
 
-        <h2 style="margin-top:2rem;">Create Project</h2>
-        <form method="post" action="/knowledge/projects">
-          <input type="text" name="name" placeholder="Project name" required />
-          <textarea name="description" placeholder="Description (optional)"></textarea>
-          <button type="submit">Create</button>
+      <section class="space-y-4">
+        <h2 class="text-lg font-semibold text-slate-900">Create Project</h2>
+        <form method="post" action="/knowledge/projects" class="grid gap-3">
+          <input type="text" name="name" placeholder="Project name" required class="form-input" />
+          <textarea name="description" placeholder="Description (optional)" class="form-textarea min-h-[120px]"></textarea>
+          <button type="submit" class="btn-primary">Create</button>
         </form>
+      </section>
 
-        <h2 style="margin-top:2rem;">Agent Persona</h2>
-        <p>Assign a reusable persona from the catalog, then optionally layer project-specific overrides.</p>
-        <a href="/personas" style="display:inline-block; margin-top:0.35rem; color:#2563eb; font-weight:600; text-decoration:none;">Open persona catalog →</a>
+      <section class="space-y-4">
+        <div class="space-y-2">
+          <h2 class="text-lg font-semibold text-slate-900">Agent Persona</h2>
+          <p class="text-sm text-slate-600">Assign a reusable persona from the catalog, then optionally layer project-specific overrides.</p>
+          <a href="/personas" class="text-sm font-semibold text-primary hover:text-blue-700">Open persona catalog →</a>
+        </div>
 
-        <form class="persona-form" method="post" action="/knowledge/persona" style="margin-top:1.25rem;">
+        <form class="persona-form grid gap-4" method="post" action="/knowledge/persona">
           <input type="hidden" name="project_id" value="{{ selected_project }}" />
-          <div>
-            <label for="persona_id">Catalog persona</label>
-            <select id="persona_id" name="persona_id">
+          <div class="space-y-2">
+            <label for="persona_id" class="text-sm font-semibold text-slate-700">Catalog persona</label>
+            <select id="persona_id" name="persona_id" class="form-select">
               <option value="" {% if not project_persona_id %}selected{% endif %}>Default system persona</option>
               {% for catalog in personas %}
                 <option value="{{ catalog.id }}" {% if project_persona_id == catalog.id %}selected{% endif %}>{{ catalog.name }}</option>
               {% endfor %}
             </select>
-            <small>Selecting a persona applies its base instructions to this project.</small>
+            <small class="text-xs text-slate-500">Selecting a persona applies its base instructions to this project.</small>
           </div>
 
-          <fieldset style="border:none; padding:0; margin:0;">
-            <legend style="font-weight:600; margin-top:0.85rem;">Project overrides (optional)</legend>
-            <div>
-              <label for="persona_name">Display name</label>
-              <input id="persona_name" type="text" name="persona_name" value="{{ (persona_overrides.name if persona_overrides else '') or '' }}" placeholder="e.g. Atlas Assistant" />
+          <fieldset class="grid gap-3">
+            <legend class="text-sm font-semibold text-slate-700">Project overrides (optional)</legend>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                Display name
+                <input id="persona_name" type="text" name="persona_name" value="{{ (persona_overrides.name if persona_overrides else '') or '' }}" placeholder="e.g. Atlas Assistant" class="form-input" />
+              </label>
+              <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                Tone descriptor
+                <input id="persona_tone" type="text" name="persona_tone" value="{{ (persona_overrides.tone if persona_overrides else '') or '' }}" placeholder="e.g. calm and encouraging" class="form-input" />
+              </label>
             </div>
-            <div>
-              <label for="persona_tone">Tone descriptor</label>
-              <input id="persona_tone" type="text" name="persona_tone" value="{{ (persona_overrides.tone if persona_overrides else '') or '' }}" placeholder="e.g. calm and encouraging" />
+            <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+              System prompt additions
+              <textarea id="persona_system_prompt" name="persona_system_prompt" rows="4" placeholder="Custom instructions for this project" class="form-textarea">{{ (persona_overrides.system_prompt if persona_overrides else '') or '' }}</textarea>
+              <small class="text-xs text-slate-500">Overrides merge with the base persona. Leave blank to inherit.</small>
+            </label>
+            <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+              Avatar URL
+              <input id="persona_avatar_url" type="url" name="persona_avatar_url" value="{{ (persona_overrides.avatar_url if persona_overrides else '') or '' }}" placeholder="Link to an image (optional)" class="form-input" />
+            </label>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                Glossary top K
+                <input id="persona_glossary" type="number" min="0" name="glossary_top_k" value="{{ (persona_overrides.glossary_top_k if persona_overrides else '') or '' }}" placeholder="default" class="form-input" />
+              </label>
+              <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                Retrieval top K
+                <input id="persona_retrieval" type="number" min="1" name="retrieval_top_k" value="{{ (persona_overrides.retrieval_top_k if persona_overrides else '') or '' }}" placeholder="default" class="form-input" />
+              </label>
             </div>
-            <div>
-              <label for="persona_system_prompt">System prompt additions</label>
-              <textarea id="persona_system_prompt" name="persona_system_prompt" rows="4" placeholder="Custom instructions for this project">{{ (persona_overrides.system_prompt if persona_overrides else '') or '' }}</textarea>
-              <small>Overrides merge with the base persona. Leave blank to inherit.</small>
-            </div>
-            <div>
-              <label for="persona_avatar_url">Avatar URL</label>
-              <input id="persona_avatar_url" type="url" name="persona_avatar_url" value="{{ (persona_overrides.avatar_url if persona_overrides else '') or '' }}" placeholder="Link to an image (optional)" />
-            </div>
-            <div style="display:grid; gap:0.75rem; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); margin-top:0.85rem;">
-              <div>
-                <label for="persona_glossary_top_k">Glossary entries (override)</label>
-                <input id="persona_glossary_top_k" type="number" min="0" name="persona_glossary_top_k" value="{{ persona_overrides.glossary_top_k if persona_overrides and persona_overrides.glossary_top_k is not none else '' }}" placeholder="{{ defaults.glossary_top_k }}" />
-                <small>Leave blank to inherit default ({{ defaults.glossary_top_k }}).</small>
-              </div>
-              <div>
-                <label for="persona_retrieval_top_k">Context chunks (top K)</label>
-                <input id="persona_retrieval_top_k" type="number" min="1" name="persona_retrieval_top_k" value="{{ persona_overrides.retrieval_top_k if persona_overrides and persona_overrides.retrieval_top_k is not none else '' }}" placeholder="{{ defaults.retrieval_top_k }}" />
-                <small>Higher numbers surface more snippets but can dilute relevance.</small>
-              </div>
-              <div>
-                <label for="persona_chat_temperature">Response temperature</label>
-                <input id="persona_chat_temperature" type="number" min="0" step="0.1" name="persona_chat_temperature" value="{{ persona_overrides.chat_temperature if persona_overrides and persona_overrides.chat_temperature is not none else '' }}" placeholder="{{ '%.1f' % defaults.chat_temperature }}" />
-                <small>0 keeps answers deterministic; increase for more creative tone.</small>
-              </div>
-              <div>
-                <label for="persona_chat_max_tokens">Max response tokens</label>
-                <input id="persona_chat_max_tokens" type="number" min="0" name="persona_chat_max_tokens" value="{{ persona_overrides.chat_max_tokens if persona_overrides and persona_overrides.chat_max_tokens is not none else '' }}" placeholder="{{ defaults.chat_max_tokens if defaults.chat_max_tokens is not none else 'auto' }}" />
-                <small>Set to 0 or leave blank to use the backend default.</small>
-              </div>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                Temperature
+                <input id="persona_temperature" type="number" min="0" step="0.1" name="chat_temperature" value="{{ (persona_overrides.chat_temperature if persona_overrides else '') or '' }}" placeholder="default" class="form-input" />
+              </label>
+              <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                Max tokens
+                <input id="persona_maxtokens" type="number" min="0" name="chat_max_tokens" value="{{ (persona_overrides.chat_max_tokens if persona_overrides else '') or '' }}" placeholder="auto" class="form-input" />
+              </label>
             </div>
           </fieldset>
-
-          <button type="submit">Save Persona Settings</button>
+          <button type="submit" class="btn-primary">Save persona overrides</button>
         </form>
 
-        <div class="persona-preview">
-          <strong>{{ (persona.name if persona and persona.name else 'Support Agent') }}</strong>
-          {% if persona and persona.tone %}
-            <span>Tone: {{ persona.tone }}</span>
-          {% elif persona_base and persona_base.tone %}
-            <span>Tone: {{ persona_base.tone }} (inherited)</span>
-          {% else %}
-            <span>Tone: default support voice</span>
-          {% endif %}
-          {% if persona and persona.system_prompt %}
-            <p>{{ persona.system_prompt }}</p>
-          {% elif persona_base and persona_base.system_prompt %}
-            <p>{{ persona_base.system_prompt }}</p>
-          {% else %}
-            <p>No custom prompt yet. The platform default instructions will be used.</p>
-          {% endif %}
-          <p style="margin-top:0.65rem; font-size:0.85rem; color:#4b5563;">
-            Context window: {{ (persona.retrieval_top_k if persona and persona.retrieval_top_k is not none else defaults.retrieval_top_k) }} chunks · glossary top-{{ (persona.glossary_top_k if persona and persona.glossary_top_k is not none else defaults.glossary_top_k) }}
-          </p>
-          <p style="margin-top:0.15rem; font-size:0.85rem; color:#4b5563;">
-            Generation: temperature {{ '%.1f' % (persona.chat_temperature if persona and persona.chat_temperature is not none else defaults.chat_temperature) }} · max tokens {{ (persona.chat_max_tokens if persona and persona.chat_max_tokens is not none else (defaults.chat_max_tokens if defaults.chat_max_tokens is not none else 'auto')) }}
-          </p>
-          {% if persona_base %}
-            <p style="margin-top:0.65rem; font-size:0.8rem; color:#6b7280;">
-              Base persona: <strong>{{ persona_base.name }}</strong>
-              {% if persona_base.description %}— {{ persona_base.description }}{% endif %}
-              {% if persona_base.tags %}<br />Tags: {{ persona_base.tags | join(', ') }}{% endif %}
-            </p>
-          {% endif %}
-        </div>
+        {% if persona_snapshot %}
+          <div class="persona-preview">
+            <strong>{{ persona_snapshot.base_persona.name if persona_snapshot.base_persona else 'Persona preview' }}</strong>
+            {% if persona_snapshot.base_persona and persona_snapshot.base_persona.tags %}
+              <span>Tags: {{ persona_snapshot.base_persona.tags | join(', ') }}</span>
+            {% endif %}
+            {% if persona_snapshot.base_persona and persona_snapshot.base_persona.description %}
+              <p>{{ persona_snapshot.base_persona.description }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      </section>
+    </aside>
 
-        <div style="margin-top:1.25rem; background:#f9fafb; border-radius:12px; padding:0.85rem 1rem; color:#374151;">
-          <strong style="display:block; color:#111827;">Persona best practices</strong>
-          <ul style="padding-left:1.2rem; margin:0.5rem 0 0;">
-            <li>Keep instructions specific to the support goal and avoid conflicting tone guidance.</li>
-            <li>Include escalation cues (when to route to a human) and empathy prompts.</li>
-            <li>Favor inclusive language; avoid slang that might age poorly.</li>
-            <li>Document overrides when deviating from the shared persona so teammates understand why.</li>
-          </ul>
-        </div>
-      </aside>
-
-      <section data-project-id="{{ selected_project }}" data-default-hint-batch="{{ settings.query_hint_batch_size }}" data-cleanup-job="{{ cleanup_job_id }}">
-        <h1>Documents</h1>
-        <p>Upload documents to enrich <strong>{{ project_name }}</strong>.</p>
+    <section
+      class="space-y-6"
+      data-project-id="{{ selected_project }}"
+      data-default-hint-batch="{{ settings.query_hint_batch_size }}"
+      data-cleanup-job="{{ cleanup_job_id }}"
+    >
+      <div class="surface-card p-6 sm:p-8 space-y-6">
+        <header class="space-y-2">
+          <h1 class="text-2xl font-semibold text-slate-900">Documents</h1>
+          <p class="text-sm text-slate-600">Upload documents to enrich <strong>{{ project_name }}</strong>.</p>
+        </header>
         <div class="upload-panel">
           <div id="drop-zone" class="drop-zone" tabindex="0">
             <strong>Drop files here</strong>
             <p>Supported formats: TXT, MD, PDF, DOCX, HTML</p>
-            <p class="upload-hint">Files upload asynchronously so you can keep working.</p>
+            <p class="text-sm text-slate-500">Files upload asynchronously so you can keep working.</p>
           </div>
           <div class="upload-actions">
-            <button type="button" id="select-files">Select files</button>
+            <button type="button" id="select-files" class="btn-primary">Select files</button>
           </div>
-          <div class="local-import">
-            <label for="local-path" style="font-weight:600; color:#1f2937;">Import local directory</label>
+          <div class="space-y-3">
+            <label for="local-path" class="text-sm font-semibold text-slate-700">Import local directory</label>
             <div class="local-input-group">
               <div class="local-input-wrapper">
-                <input id="local-path" placeholder="e.g. team-notes/2024-q2" autocomplete="off" spellcheck="false" list="local-directories" />
+                <input id="local-path" placeholder="e.g. team-notes/2024-q2" autocomplete="off" spellcheck="false" list="local-directories" class="form-input" />
                 <datalist id="local-directories"></datalist>
               </div>
-              <button type="button" id="import-local">Import</button>
+              <button type="button" id="import-local" class="btn-ghost">Import</button>
             </div>
-            <div id="local-directory-meta" class="directory-meta"></div>
-          <span class="upload-hint">Directories are resolved relative to <code>data/local/</code>.</span>
-        </div>
-          <div class="url-upload">
-            <label for="url-input" style="font-weight:600; color:#1f2937;">Fetch from URL</label>
+            <div id="local-directory-meta" class="text-xs text-slate-500"></div>
+            <span class="text-xs text-slate-500">Directories are resolved relative to <code>data/local/</code>.</span>
+          </div>
+          <div class="space-y-3">
+            <label for="url-input" class="text-sm font-semibold text-slate-700">Fetch from URL</label>
             <div class="url-input-group">
-              <input id="url-input" type="url" placeholder="https://example.com/help.html" />
-              <button type="button" id="submit-url">Fetch &amp; Ingest</button>
+              <input id="url-input" type="url" placeholder="https://example.com/help.html" class="form-input" />
+              <button type="button" id="submit-url" class="btn-ghost">Fetch &amp; Ingest</button>
             </div>
-            <span class="upload-hint">We download the page HTML and embed it like other documents.</span>
+            <span class="text-xs text-slate-500">We download the page HTML and embed it like other documents.</span>
           </div>
           <input id="file-input" type="file" name="files" accept=".txt,.md,.markdown,.pdf,.docx,.html" multiple hidden />
           <ul id="upload-status" class="upload-status"></ul>
           <noscript>
-            <form method="post" action="/knowledge/upload" enctype="multipart/form-data" style="margin-top:1rem;">
+            <form method="post" action="/knowledge/upload" enctype="multipart/form-data" class="mt-4 space-y-3">
               <input type="hidden" name="project_id" value="{{ selected_project }}" />
-              <input type="file" name="file" accept=".txt,.md,.markdown,.pdf,.docx,.html" required />
-              <button type="submit">Upload & Ingest</button>
+              <input type="file" name="file" accept=".txt,.md,.markdown,.pdf,.docx,.html" required class="form-input" />
+              <button type="submit" class="btn-primary">Upload &amp; Ingest</button>
             </form>
           </noscript>
         </div>
-
-        <form id="cleanup-form" method="post" action="/knowledge/cleanup" style="margin-top: 0.75rem;">
+        <form id="cleanup-form" method="post" action="/knowledge/cleanup" class="flex items-center gap-3">
           <input type="hidden" name="project_id" value="{{ selected_project }}" />
-          <button id="cleanup-button" type="submit" style="background:#1f2937; color:#fff; border:none; padding:0.55rem 1.4rem; border-radius:999px; cursor:pointer; box-shadow:0 10px 22px rgba(17,24,39,0.18);">Clear Embedded Data</button>
+          <button id="cleanup-button" type="submit" class="btn-ghost bg-slate-900 text-white hover:bg-slate-800">Clear embedded data</button>
+          <span class="text-xs text-slate-500">Removes all vectors and document records for this project.</span>
         </form>
-        <p style="color:#6b7280; font-size:0.85rem; margin-top:0.35rem;">Removes all vectors and document records for this project.</p>
         <div id="cleanup-status" class="cleanup-status" aria-live="polite"></div>
+      </div>
 
-        {% if documents %}
+      {% if documents %}
+        <div class="knowledge-table-card space-y-5">
           {% if pagination %}
             <div class="table-toolbar">
               <span class="table-summary">Showing {{ pagination.start_index + 1 }}–{{ pagination.end_index }} of {{ pagination.total_documents }} documents</span>
@@ -336,118 +189,105 @@
             </div>
           {% endif %}
           <div class="table-wrapper">
-            <table>
-              <thead>
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+              <thead class="bg-slate-50">
                 <tr>
-                  <th>Filename</th>
-                  <th>Title</th>
-                  <th>Type</th>
-                  <th>Chunks</th>
-                  <th>Size</th>
-                  <th>Uploaded</th>
-                  <th style="text-align:right;">Actions</th>
+                  <th scope="col" class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Filename</th>
+                  <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Source</th>
+                  <th scope="col" class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Size</th>
+                  <th scope="col" class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Chunks</th>
+                  <th scope="col" class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Last updated</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="divide-y divide-slate-200">
                 {% for doc in documents %}
                   <tr>
-                    <td class="filename-cell">{{ doc.filename }}</td>
-                    <td>{% if doc.title %}{{ doc.title }}{% else %}<span style="color:#9ca3af;">—</span>{% endif %}</td>
-                    <td>{% if doc.content_type %}{{ doc.content_type }}{% else %}<span style="color:#9ca3af;">unknown</span>{% endif %}</td>
-                    <td>{{ doc.chunk_count }}</td>
-                    <td>{% if doc.size_bytes %}{{ (doc.size_bytes / 1024)|round(1) }} KB{% else %}-{% endif %}</td>
-                    <td>{{ doc.created_at.split('T')[0] }}</td>
-                    <td style="text-align:right; white-space: nowrap;">
-                      <form method="post" action="/knowledge/delete" style="display:inline;">
-                        <input type="hidden" name="project_id" value="{{ selected_project }}" />
-                        <input type="hidden" name="doc_id" value="{{ doc.id }}" />
-                        <button type="submit" style="background:#dc2626; color:#fff; border:none; padding:0.4rem 1rem; border-radius:999px; cursor:pointer; box-shadow:0 8px 18px rgba(220,38,38,0.25);">Delete</button>
-                      </form>
-                    </td>
+                    <td class="px-4 py-3 font-medium text-slate-900">{{ doc.filename }}</td>
+                    <td class="px-4 py-3 text-slate-600">{{ doc.source }}</td>
+                    <td class="px-4 py-3 text-slate-600">{{ doc.filesize }}</td>
+                    <td class="px-4 py-3 text-slate-600">{{ doc.chunk_count }}</td>
+                    <td class="px-4 py-3 text-slate-600">{{ doc.updated_at }}</td>
                   </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
-          {% if pagination and pagination.total_pages > 1 %}
-            <div class="table-toolbar" style="justify-content:flex-end; margin-top:1rem;">
-              <div class="pager">
-                {% if pagination.has_prev %}
-                  <a class="pager-link" href="/knowledge?project_id={{ selected_project }}&amp;page={{ pagination.page - 1 }}">Previous</a>
-                {% else %}
-                  <span class="pager-link disabled">Previous</span>
-                {% endif %}
-                <span class="pager-page">Page {{ pagination.page }} of {{ pagination.total_pages }}</span>
-                {% if pagination.has_next %}
-                  <a class="pager-link" href="/knowledge?project_id={{ selected_project }}&amp;page={{ pagination.page + 1 }}">Next</a>
-                {% else %}
-                  <span class="pager-link disabled">Next</span>
-                {% endif %}
-              </div>
-            </div>
-          {% endif %}
-        {% else %}
-          <p class="empty">No documents ingested for this project yet.</p>
-        {% endif %}
-
-        <div class="glossary-panel">
-          <div class="glossary-header">
-            <h2>Project Glossary</h2>
-            <p>Add domain definitions and keywords to strengthen retrieval prompts.</p>
-          </div>
-          <form id="glossary-form" class="glossary-form">
-            <div class="glossary-form-grid">
-              <label for="glossary-term">Term
-                <input id="glossary-term" type="text" placeholder="e.g. SLA" required />
-              </label>
-              <label for="glossary-synonyms">Synonyms
-                <input id="glossary-synonyms" type="text" placeholder="Comma-separated alternate names" />
-              </label>
-              <label for="glossary-keywords">Keywords
-                <input id="glossary-keywords" type="text" placeholder="Comma-separated search keywords" />
-              </label>
-              <label for="glossary-definition">Definition
-                <textarea id="glossary-definition" rows="4" placeholder="Write a concise, user-facing explanation" required></textarea>
-              </label>
-            </div>
-            <div class="glossary-actions">
-              <button type="submit" id="glossary-submit">Save Entry</button>
-              <button type="button" id="glossary-cancel" class="button-ghost" style="display:none;">Cancel</button>
-            </div>
-          </form>
-          <div id="glossary-status" class="glossary-status"></div>
-          <ul id="glossary-entries" class="glossary-list"></ul>
         </div>
+      {% else %}
+        <div class="knowledge-table-card text-sm text-slate-600">
+          No documents ingested yet. Upload files or fetch from a URL to populate the knowledge base.
+        </div>
+      {% endif %}
 
-        <div class="glossary-panel" id="query-hints-panel">
-          <div class="glossary-header">
-            <h2>Query Hint Bridges</h2>
-            <p>Cross-language tokens appended to chat queries before retrieval.</p>
+      <div class="glossary-panel" id="glossary-panel">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Glossary</h2>
+            <p class="text-sm text-slate-600">Define key terms and reference phrases to help the agent answer consistently.</p>
           </div>
-          <div class="glossary-actions">
-            <button type="button" id="query-hints-generate">Generate</button>
-            <button type="button" id="query-hints-refresh" class="button-ghost">Refresh</button>
-            <button type="button" id="query-hints-download" class="button-ghost">Download JSON</button>
+          <button type="button" id="glossary-cancel" class="btn-ghost hidden">Cancel editing</button>
+        </div>
+        <form id="glossary-form" class="glossary-form-grid">
+          <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+            Term
+            <input id="glossary-term" type="text" placeholder="e.g. SLA" required class="form-input" />
+          </label>
+          <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+            Synonyms
+            <input id="glossary-synonyms" type="text" placeholder="Comma-separated alternate names" class="form-input" />
+          </label>
+          <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+            Keywords
+            <input id="glossary-keywords" type="text" placeholder="Comma-separated search keywords" class="form-input" />
+          </label>
+          <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700 md:col-span-2">
+            Definition
+            <textarea id="glossary-definition" rows="4" placeholder="Write a concise, user-facing explanation" required class="form-textarea"></textarea>
+          </label>
+          <div class="entry-actions md:col-span-2">
+            <button type="submit" id="glossary-submit" class="btn-primary">Save entry</button>
+            <span id="glossary-status" class="glossary-status"></span>
           </div>
-          <div class="glossary-actions" style="gap:0.35rem; align-items:flex-end;">
-            <label for="query-hints-batch-size" style="display:flex; flex-direction:column; gap:0.25rem; font-weight:600;">
+        </form>
+        <ul id="glossary-entries" class="glossary-list"></ul>
+      </div>
+
+      <div class="glossary-panel" id="query-hints-panel">
+        <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 class="text-lg font-semibold text-slate-900">Query Hint Bridges</h2>
+              <p class="text-sm text-slate-600">Cross-language tokens appended to chat queries before retrieval.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" id="query-hints-generate" class="btn-primary">Generate</button>
+              <button type="button" id="query-hints-refresh" class="btn-ghost">Refresh</button>
+              <button type="button" id="query-hints-download" class="btn-ghost">Download JSON</button>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-end gap-4">
+            <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
               Batch size
-              <input id="query-hints-batch-size" type="number" min="1" max="20" value="" style="max-width:6rem;" />
+              <input id="query-hints-batch-size" type="number" min="1" max="20" value="" class="form-input max-w-[6rem]" />
             </label>
-            <label for="query-hints-schedule" style="display:flex; flex-direction:column; gap:0.25rem; font-weight:600;">
+            <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
               Auto refresh
-              <select id="query-hints-schedule" style="min-width:10rem;">
+              <select id="query-hints-schedule" class="form-select min-w-[10rem]">
                 <option value="" selected>Manual only</option>
                 <option value="daily">Nightly</option>
                 <option value="weekly">Weekly</option>
               </select>
             </label>
           </div>
-          <div id="query-hints-status" class="glossary-status"></div>
-          <ul id="query-hints-list" class="glossary-list"></ul>
         </div>
-      </section>
-    </main>
+        <div id="query-hints-status" class="query-hints-status"></div>
+        <ul id="query-hints-list" class="glossary-list"></ul>
+      </div>
+    </section>
+  </div>
+{% endblock %}
+
+{% block scripts %}
   <script>
     (function () {
       const dropZone = document.getElementById('drop-zone');
@@ -477,7 +317,7 @@
 
       let projectId = projectSection.dataset.projectId || '';
       let cleanupJobId = projectSection.dataset.cleanupJob || '';
-      const cleanupButtonDefaultLabel = cleanupButton ? cleanupButton.textContent : 'Clear Embedded Data';
+      const cleanupButtonDefaultLabel = cleanupButton ? cleanupButton.textContent : 'Clear embedded data';
       let cleanupPollTimer = null;
       const urlParams = new URLSearchParams(window.location.search);
       const cleanupExistingNotice = urlParams.has('cleanup_existing');
@@ -494,48 +334,65 @@
         failed: 'failed',
         pending: 'pending',
         processing: 'processing',
-        throttled: 'throttled (queued)',
+        queued: 'queued',
+        throttled: 'throttled',
       };
-      const THROTTLE_MESSAGE = 'Waiting for an ingestion slot. This job resumes automatically.';
-      const glossaryList = document.getElementById('glossary-entries');
-      const glossaryForm = document.getElementById('glossary-form');
-      const glossaryTerm = document.getElementById('glossary-term');
-      const glossaryDefinition = document.getElementById('glossary-definition');
-      const glossarySynonyms = document.getElementById('glossary-synonyms');
-      const glossaryKeywords = document.getElementById('glossary-keywords');
-      const glossarySubmit = document.getElementById('glossary-submit');
-      const glossaryCancel = document.getElementById('glossary-cancel');
-      const glossaryStatus = document.getElementById('glossary-status');
-      let editingGlossaryId = null;
-      let glossaryEntries = [];
 
-      const queryHintsList = document.getElementById('query-hints-list');
-      const queryHintsStatus = document.getElementById('query-hints-status');
-      const queryHintsRefresh = document.getElementById('query-hints-refresh');
-      const queryHintsDownload = document.getElementById('query-hints-download');
-      const queryHintsGenerate = document.getElementById('query-hints-generate');
-      const queryHintsBatchInput = document.getElementById('query-hints-batch-size');
-      const queryHintsSchedule = document.getElementById('query-hints-schedule');
-      let queryHintsData = {};
-      const DEFAULT_HINT_BATCH_SIZE = Number(projectSection?.dataset.defaultHintBatch || 6);
-      if (queryHintsBatchInput && !queryHintsBatchInput.value) {
-        queryHintsBatchInput.value = DEFAULT_HINT_BATCH_SIZE;
-      }
-
-      if (initialCleanupJob && typeof initialCleanupJob === 'object') {
-        cleanupJobId = initialCleanupJob.id || cleanupJobId;
-        renderCleanupJob(
-          initialCleanupJob,
-          cleanupExistingNotice ? { notice: 'Cleanup already running. Showing current status.' } : {},
-        );
-        const initialState = (initialCleanupJob.status || '').toLowerCase();
-        if (initialState !== 'completed' && initialState !== 'failed') {
-          startCleanupPolling();
+      function renderJobs(jobs) {
+        statusList.innerHTML = '';
+        if (!jobs || !jobs.length) {
+          return;
         }
-      } else if (cleanupJobId) {
-        startCleanupPolling(true);
-      } else {
-        clearCleanupStatus();
+        const fragment = document.createDocumentFragment();
+        [...jobs].forEach((job) => {
+          const item = document.createElement('li');
+          item.dataset.jobId = job.id;
+          item.className = job.status || '';
+          const row = document.createElement('div');
+          row.className = 'job-row';
+          const name = document.createElement('span');
+          name.textContent = job.filename || 'File';
+          const status = document.createElement('span');
+          status.className = 'status';
+          status.textContent = STATUS_LABELS[job.status] || job.status;
+          row.appendChild(name);
+          row.appendChild(status);
+          if (job.error) {
+            const error = document.createElement('span');
+            error.className = 'job-error';
+            error.textContent = job.error;
+            row.appendChild(error);
+          }
+          item.appendChild(row);
+
+          const hasTotals = typeof job.total_files === 'number' && job.total_files > 0;
+          if (hasTotals) {
+            const progress = document.createElement('div');
+            progress.className = 'job-progress';
+            const bar = document.createElement('div');
+            bar.className = 'job-progress-bar';
+            const fraction = Math.min(1, Math.max(0, Number(job.processed_files || 0) / Number(job.total_files || 1)));
+            bar.style.width = `${Math.round(fraction * 100)}%`;
+            progress.appendChild(bar);
+            item.appendChild(progress);
+
+            const label = document.createElement('div');
+            label.className = 'job-progress-label';
+            label.textContent = `${job.processed_files || 0} / ${job.total_files} files`;
+            item.appendChild(label);
+          }
+
+          if (job.status === 'throttled') {
+            const throttle = document.createElement('div');
+            throttle.className = 'job-throttled-note';
+            const processed = Math.max(0, Math.min(job.total_files || 0, job.processed_files || 0));
+            throttle.textContent = `Queue throttled (${processed} / ${job.total_files || 0} files queued)`;
+            item.appendChild(throttle);
+          }
+
+          fragment.appendChild(item);
+        });
+        statusList.appendChild(fragment);
       }
 
       function clearCleanupStatus() {
@@ -654,8 +511,9 @@
           const state = (data.job.status || '').toLowerCase();
           if (state === 'completed') {
             stopCleanupPolling();
-            window.setTimeout(() => window.location.reload(), 800);
-          } else if (state === 'failed') {
+            return;
+          }
+          if (state === 'failed') {
             stopCleanupPolling();
           }
         } catch (error) {
@@ -697,40 +555,61 @@
       }
 
       function setGlossaryStatus(message, tone = 'info') {
-        if (!glossaryStatus) {
+        const el = document.getElementById('glossary-status');
+        if (!el) {
           return;
         }
-        glossaryStatus.textContent = message || '';
+        el.textContent = message || '';
         if (!message) {
-          glossaryStatus.style.color = '#6b7280';
+          el.style.color = '';
           return;
         }
         if (tone === 'error') {
-          glossaryStatus.style.color = '#b91c1c';
+          el.style.color = '#b91c1c';
         } else if (tone === 'success') {
-          glossaryStatus.style.color = '#047857';
+          el.style.color = '#047857';
         } else {
-          glossaryStatus.style.color = '#6b7280';
+          el.style.color = '#6b7280';
         }
       }
 
       function setQueryHintsStatus(message, tone = 'info') {
-        if (!queryHintsStatus) {
+        const el = document.getElementById('query-hints-status');
+        if (!el) {
           return;
         }
-        queryHintsStatus.textContent = message || '';
+        el.textContent = message || '';
         if (!message) {
-          queryHintsStatus.style.color = '#6b7280';
+          el.style.color = '';
           return;
         }
         if (tone === 'error') {
-          queryHintsStatus.style.color = '#b91c1c';
+          el.style.color = '#b91c1c';
         } else if (tone === 'success') {
-          queryHintsStatus.style.color = '#047857';
+          el.style.color = '#047857';
         } else {
-          queryHintsStatus.style.color = '#6b7280';
+          el.style.color = '#6b7280';
         }
       }
+
+      const glossaryTerm = document.getElementById('glossary-term');
+      const glossarySynonyms = document.getElementById('glossary-synonyms');
+      const glossaryKeywords = document.getElementById('glossary-keywords');
+      const glossaryDefinition = document.getElementById('glossary-definition');
+      const glossaryForm = document.getElementById('glossary-form');
+      const glossaryCancel = document.getElementById('glossary-cancel');
+      const glossaryList = document.getElementById('glossary-entries');
+      const glossarySubmit = document.getElementById('glossary-submit');
+      const queryHintsList = document.getElementById('query-hints-list');
+      const queryHintsGenerate = document.getElementById('query-hints-generate');
+      const queryHintsRefresh = document.getElementById('query-hints-refresh');
+      const queryHintsDownload = document.getElementById('query-hints-download');
+      const queryHintsBatchInput = document.getElementById('query-hints-batch-size');
+      const queryHintsSchedule = document.getElementById('query-hints-schedule');
+
+      let editingGlossaryId = null;
+      let glossaryEntries = [];
+      let queryHintsData = {};
 
       function resetGlossaryForm() {
         editingGlossaryId = null;
@@ -738,20 +617,22 @@
         if (glossaryDefinition) glossaryDefinition.value = '';
         if (glossarySynonyms) glossarySynonyms.value = '';
         if (glossaryKeywords) glossaryKeywords.value = '';
-        if (glossarySubmit) glossarySubmit.textContent = 'Save Entry';
-        if (glossaryCancel) glossaryCancel.style.display = 'none';
-        setGlossaryStatus('');
+        if (glossaryCancel) glossaryCancel.classList.add('hidden');
+        if (glossaryForm) {
+          glossaryForm.dataset.mode = 'create';
+        }
       }
 
-      function beginGlossaryEdit(entry) {
+      function populateGlossaryForm(entry) {
         editingGlossaryId = entry.id;
         if (glossaryTerm) glossaryTerm.value = entry.term || '';
         if (glossaryDefinition) glossaryDefinition.value = entry.definition || '';
         if (glossarySynonyms) glossarySynonyms.value = (entry.synonyms || []).join(', ');
         if (glossaryKeywords) glossaryKeywords.value = (entry.keywords || []).join(', ');
-        if (glossarySubmit) glossarySubmit.textContent = 'Update Entry';
-        if (glossaryCancel) glossaryCancel.style.display = 'inline-flex';
-        setGlossaryStatus('Editing glossary entry…');
+        if (glossaryCancel) glossaryCancel.classList.remove('hidden');
+        if (glossaryForm) {
+          glossaryForm.dataset.mode = 'edit';
+        }
       }
 
       function renderGlossaryEntries(entries) {
@@ -760,10 +641,10 @@
         }
         glossaryList.innerHTML = '';
         if (!entries.length) {
-          const emptyItem = document.createElement('li');
-          emptyItem.className = 'glossary-entry';
-          emptyItem.textContent = 'No glossary entries yet. Add one above.';
-          glossaryList.appendChild(emptyItem);
+          const empty = document.createElement('li');
+          empty.className = 'text-sm text-slate-500';
+          empty.textContent = 'No glossary entries yet.';
+          glossaryList.appendChild(empty);
           return;
         }
 
@@ -771,149 +652,93 @@
           const item = document.createElement('li');
           item.className = 'glossary-entry';
 
-          const header = document.createElement('header');
+          const header = document.createElement('div');
+          header.className = 'flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between';
           const title = document.createElement('h3');
-          title.textContent = entry.term;
+          title.className = 'text-sm font-semibold text-slate-800';
+          title.textContent = entry.term || 'Entry';
           header.appendChild(title);
+          if (entry.updated_at) {
+            const timestamp = document.createElement('span');
+            timestamp.className = 'text-xs text-slate-500';
+            timestamp.textContent = `Updated ${entry.updated_at}`;
+            header.appendChild(timestamp);
+          }
+          item.appendChild(header);
+
+          if (entry.definition) {
+            const definition = document.createElement('p');
+            definition.className = 'mt-2 text-sm text-slate-600';
+            definition.textContent = entry.definition;
+            item.appendChild(definition);
+          }
+
+          if (entry.synonyms && entry.synonyms.length) {
+            const synonyms = document.createElement('div');
+            synonyms.className = 'text-xs text-slate-500';
+            synonyms.textContent = `Synonyms: ${entry.synonyms.join(', ')}`;
+            item.appendChild(synonyms);
+          }
+
+          if (entry.keywords && entry.keywords.length) {
+            const keywords = document.createElement('div');
+            keywords.className = 'text-xs text-slate-500';
+            keywords.textContent = `Keywords: ${entry.keywords.join(', ')}`;
+            item.appendChild(keywords);
+          }
 
           const actions = document.createElement('div');
           actions.className = 'entry-actions';
+          const editBtn = document.createElement('button');
+          editBtn.type = 'button';
+          editBtn.className = 'btn-ghost text-sm';
+          editBtn.textContent = 'Edit';
+          editBtn.addEventListener('click', () => populateGlossaryForm(entry));
 
-          const editButton = document.createElement('button');
-          editButton.type = 'button';
-          editButton.textContent = 'Edit';
-          editButton.addEventListener('click', () => beginGlossaryEdit(entry));
-          actions.appendChild(editButton);
+          const deleteBtn = document.createElement('button');
+          deleteBtn.type = 'button';
+          deleteBtn.className = 'btn-ghost text-sm text-rose-600 hover:text-rose-700';
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.addEventListener('click', () => removeGlossaryEntry(entry.id));
 
-          const deleteButton = document.createElement('button');
-          deleteButton.type = 'button';
-          deleteButton.textContent = 'Delete';
-          deleteButton.addEventListener('click', () => removeGlossaryEntry(entry.id));
-          actions.appendChild(deleteButton);
-
-          header.appendChild(actions);
-          item.appendChild(header);
-
-          const definition = document.createElement('p');
-          definition.textContent = entry.definition;
-          item.appendChild(definition);
-
-          const tags = document.createElement('div');
-          tags.className = 'glossary-tags';
-          const synonyms = entry.synonyms || [];
-          const keywords = entry.keywords || [];
-          if (synonyms.length) {
-            const synLabel = document.createElement('span');
-            synLabel.className = 'glossary-tag';
-            synLabel.textContent = `Synonyms · ${synonyms.join(', ')}`;
-            tags.appendChild(synLabel);
-          }
-          if (keywords.length) {
-            keywords.forEach((keyword) => {
-              const chip = document.createElement('span');
-              chip.className = 'glossary-chip';
-              chip.textContent = keyword;
-              tags.appendChild(chip);
-            });
-          }
-          if (tags.children.length) {
-            item.appendChild(tags);
-          }
+          actions.appendChild(editBtn);
+          actions.appendChild(deleteBtn);
+          item.appendChild(actions);
 
           glossaryList.appendChild(item);
         });
       }
 
-      function renderQueryHints(hints) {
+      function renderQueryHints(data) {
         if (!queryHintsList) {
           return;
         }
         queryHintsList.innerHTML = '';
-        const panel = queryHintsList.parentElement;
-        if (panel) {
-          const existingPager = panel.querySelector('.pagination');
-          if (existingPager) {
-            existingPager.remove();
-          }
-        }
-        const keys = Object.keys(hints || {});
-        if (!keys.length) {
-          const emptyItem = document.createElement('li');
-          emptyItem.className = 'glossary-entry';
-          emptyItem.textContent = 'No query hints available yet.';
-          queryHintsList.appendChild(emptyItem);
+        const entries = Object.entries(data || {});
+        if (!entries.length) {
+          const empty = document.createElement('li');
+          empty.className = 'text-sm text-slate-500';
+          empty.textContent = 'No query hints generated yet.';
+          queryHintsList.appendChild(empty);
           return;
         }
-        const pageSize = 20;
-        const totalPages = Math.ceil(keys.length / pageSize) || 1;
-        let currentPage = 1;
 
-        function renderPage(page) {
-          queryHintsList.innerHTML = '';
-          const start = (page - 1) * pageSize;
-          const end = Math.min(start + pageSize, keys.length);
-          for (let index = start; index < end; index += 1) {
-            const token = keys[index];
-            const values = hints[token] || [];
-            const item = document.createElement('li');
-            item.className = 'glossary-entry';
+        entries.forEach(([key, value]) => {
+          const item = document.createElement('li');
+          item.className = 'glossary-entry';
 
-            const header = document.createElement('header');
-            const title = document.createElement('h3');
-            title.textContent = token;
-            header.appendChild(title);
-            item.appendChild(header);
+          const title = document.createElement('h3');
+          title.className = 'text-sm font-semibold text-slate-800';
+          title.textContent = key;
+          item.appendChild(title);
 
-            const body = document.createElement('p');
-            body.textContent = values.join(', ');
-            item.appendChild(body);
+          const body = document.createElement('p');
+          body.className = 'mt-2 text-sm text-slate-600 whitespace-pre-wrap';
+          body.textContent = Array.isArray(value) ? value.join(', ') : String(value);
+          item.appendChild(body);
 
-            queryHintsList.appendChild(item);
-          }
-        }
-
-        renderPage(currentPage);
-
-        if (totalPages > 1 && panel) {
-          const pager = document.createElement('div');
-          pager.className = 'pagination';
-
-          const prev = document.createElement('button');
-          prev.type = 'button';
-          prev.textContent = 'Previous';
-          prev.disabled = currentPage === 1;
-          prev.addEventListener('click', () => {
-            if (currentPage > 1) {
-              currentPage -= 1;
-              renderPage(currentPage);
-              prev.disabled = currentPage === 1;
-              next.disabled = currentPage === totalPages;
-              pageLabel.textContent = `Page ${currentPage} of ${totalPages}`;
-            }
-          });
-
-          const pageLabel = document.createElement('span');
-          pageLabel.textContent = `Page ${currentPage} of ${totalPages}`;
-
-          const next = document.createElement('button');
-          next.type = 'button';
-          next.textContent = 'Next';
-          next.disabled = currentPage === totalPages;
-          next.addEventListener('click', () => {
-            if (currentPage < totalPages) {
-              currentPage += 1;
-              renderPage(currentPage);
-              prev.disabled = currentPage === 1;
-              next.disabled = currentPage === totalPages;
-              pageLabel.textContent = `Page ${currentPage} of ${totalPages}`;
-            }
-          });
-
-          pager.appendChild(prev);
-          pager.appendChild(pageLabel);
-          pager.appendChild(next);
-          panel.appendChild(pager);
-        }
+          queryHintsList.appendChild(item);
+        });
       }
 
       async function loadGlossaryEntries() {
@@ -964,14 +789,11 @@
             if (meta.batch_size) {
               queryHintsBatchInput.value = meta.batch_size;
             } else if (!queryHintsBatchInput.value) {
-              queryHintsBatchInput.value = DEFAULT_HINT_BATCH_SIZE;
+              queryHintsBatchInput.value = {{ settings.query_hint_batch_size }};
             }
           }
           if (queryHintsSchedule) {
             queryHintsSchedule.value = meta.schedule || '';
-          }
-          if (queryHintsGenerate && meta.backend && meta.prompts !== undefined) {
-            queryHintsGenerate.title = `Last generated via ${meta.backend} (prompts ${meta.prompts})`;
           }
           if (meta.last_generated) {
             const generatedDate = new Date(meta.last_generated);
@@ -1011,6 +833,9 @@
         const url = isUpdate ? `/knowledge/glossary/${editingGlossaryId}` : '/knowledge/glossary';
         const method = isUpdate ? 'PUT' : 'POST';
         try {
+          if (glossarySubmit) {
+            glossarySubmit.disabled = true;
+          }
           const response = await fetch(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
@@ -1027,6 +852,10 @@
         } catch (error) {
           console.error(error);
           setGlossaryStatus('Unable to save glossary entry.', 'error');
+        } finally {
+          if (glossarySubmit) {
+            glossarySubmit.disabled = false;
+          }
         }
       }
 
@@ -1181,205 +1010,6 @@
             queryHintsGenerate.disabled = false;
           }
         }
-      }
-
-      function renderJobs(jobs) {
-        statusList.innerHTML = '';
-        if (!jobs || !jobs.length) {
-          return;
-        }
-        const sorted = [...jobs].sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
-        for (const job of sorted) {
-          const item = document.createElement('li');
-          item.className = job.status;
-          const row = document.createElement('div');
-          row.className = 'job-row';
-          const name = document.createElement('span');
-          name.textContent = job.filename || 'File';
-          const status = document.createElement('span');
-          status.className = 'status';
-          const displayStatus = STATUS_LABELS[job.status] || job.status;
-          status.textContent = displayStatus;
-          row.appendChild(name);
-          row.appendChild(status);
-          item.appendChild(row);
-
-          if (job.error) {
-            const error = document.createElement('span');
-            error.className = 'job-error';
-            error.textContent = job.error;
-            row.appendChild(error);
-          }
-
-          const hasFileTotals = typeof job.total_files === 'number' && typeof job.processed_files === 'number' && job.total_files > 0;
-          const hasByteTotals = typeof job.total_bytes === 'number' && typeof job.processed_bytes === 'number' && job.total_bytes > 0;
-          if (hasFileTotals || hasByteTotals) {
-            const totalFiles = hasFileTotals ? job.total_files : null;
-            const processedFiles = hasFileTotals ? Math.min(job.processed_files, totalFiles) : null;
-            const fraction = hasFileTotals && totalFiles ? Math.min(1, Math.max(0, processedFiles / totalFiles)) : null;
-
-            if (fraction !== null && !Number.isNaN(fraction)) {
-              const progress = document.createElement('div');
-              progress.className = 'job-progress';
-              const bar = document.createElement('div');
-              bar.className = 'job-progress-bar';
-              bar.style.width = `${Math.round(fraction * 100)}%`;
-              progress.appendChild(bar);
-              item.appendChild(progress);
-            }
-
-            const labelParts = [];
-            if (hasFileTotals) {
-              labelParts.push(`${processedFiles} / ${totalFiles} files`);
-            }
-            if (hasByteTotals) {
-              labelParts.push(`${formatBytes(job.processed_bytes)} / ${formatBytes(job.total_bytes)}`);
-            }
-            if (labelParts.length) {
-              const label = document.createElement('div');
-              label.className = 'job-progress-label';
-              label.textContent = labelParts.join(' · ');
-              item.appendChild(label);
-            }
-          }
-
-          if (job.status === 'throttled') {
-            const throttleNote = document.createElement('div');
-            throttleNote.className = 'job-throttled-note';
-            let queueSuffix = '';
-            if (typeof job.total_files === 'number' && job.total_files > 0) {
-              const processed = Math.max(0, Math.min(job.total_files, typeof job.processed_files === 'number' ? job.processed_files : 0));
-              queueSuffix = ` (${processed} / ${job.total_files} files queued)`;
-            }
-            throttleNote.textContent = `${THROTTLE_MESSAGE}${queueSuffix}`;
-            item.appendChild(throttleNote);
-          }
-
-          statusList.appendChild(item);
-        }
-      }
-
-      async function pollStatuses() {
-        if (!activeJobs.size) {
-          stopPolling();
-          return;
-        }
-        try {
-          const response = await fetch(`/knowledge/uploads?project_id=${encodeURIComponent(projectId)}`);
-          if (!response.ok) {
-            throw new Error('Failed to poll job status');
-          }
-          const data = await response.json();
-          renderJobs(data.jobs);
-          const completed = (data.jobs || []).filter((job) => activeJobs.has(job.id) && (job.status === 'completed' || job.status === 'failed'));
-          for (const job of completed) {
-            activeJobs.delete(job.id);
-          }
-          if (!activeJobs.size) {
-            stopPolling();
-            setTimeout(() => window.location.reload(), 800);
-          }
-        } catch (error) {
-          console.error(error);
-          stopPolling();
-        }
-      }
-
-      function startPolling() {
-        if (!pollTimer) {
-          pollTimer = window.setInterval(pollStatuses, 1200);
-        }
-      }
-
-      function stopPolling() {
-        if (pollTimer) {
-          window.clearInterval(pollTimer);
-          pollTimer = null;
-        }
-      }
-
-      if (cleanupForm) {
-        cleanupForm.addEventListener('submit', async (event) => {
-          event.preventDefault();
-          if (!projectId) {
-            if (cleanupStatus) {
-              cleanupStatus.classList.add('active');
-              cleanupStatus.innerHTML = '';
-              const summary = document.createElement('div');
-              summary.className = 'cleanup-summary';
-              summary.textContent = 'Select a project before clearing embedded data.';
-              cleanupStatus.appendChild(summary);
-            }
-            return;
-          }
-
-          if (cleanupButton) {
-            cleanupButton.disabled = true;
-            cleanupButton.textContent = 'Clearing…';
-          }
-
-          stopCleanupPolling();
-          clearCleanupStatus();
-
-          const formData = new FormData(cleanupForm);
-          formData.set('project_id', projectId);
-
-          try {
-            const response = await fetch('/knowledge/cleanup', {
-              method: 'POST',
-              headers: { Accept: 'application/json' },
-              body: formData,
-            });
-            if (!response.ok) {
-              const detail = await response.json().catch(() => ({}));
-              const reason = detail.detail || `status ${response.status}`;
-              throw new Error(reason);
-            }
-            const payload = await response.json();
-            if (!payload || !payload.job) {
-              throw new Error('Unexpected cleanup response payload.');
-            }
-
-            cleanupJobId = payload.job.id || '';
-            if (projectSection && cleanupJobId) {
-              projectSection.dataset.cleanupJob = cleanupJobId;
-            }
-
-            if (payload.existing) {
-              renderCleanupJob(payload.job, { notice: 'Cleanup already running. Showing current status.' });
-            } else {
-              renderCleanupJob(payload.job);
-            }
-
-            const state = (payload.job.status || '').toLowerCase();
-            if (state === 'completed') {
-              window.setTimeout(() => window.location.reload(), 800);
-            } else if (state === 'failed') {
-              stopCleanupPolling();
-            } else {
-              startCleanupPolling(true);
-            }
-          } catch (error) {
-            console.error('Cleanup request failed', error);
-            if (cleanupStatus) {
-              cleanupStatus.classList.add('active');
-              cleanupStatus.innerHTML = '';
-              const summary = document.createElement('div');
-              summary.className = 'cleanup-summary';
-              summary.textContent = 'Unable to start cleanup.';
-              cleanupStatus.appendChild(summary);
-              const err = document.createElement('div');
-              err.className = 'job-error';
-              err.textContent = error instanceof Error ? error.message : String(error);
-              cleanupStatus.appendChild(err);
-            }
-          } finally {
-            if (cleanupButton) {
-              cleanupButton.disabled = false;
-              cleanupButton.textContent = cleanupButtonDefaultLabel;
-            }
-          }
-        });
       }
 
       async function uploadFiles(fileList) {
@@ -1593,18 +1223,83 @@
         });
       }
 
-      function renderLocalDirectoryOptions(entries) {
-        if (!localDataList) {
+      async function pollStatuses() {
+        if (!activeJobs.size) {
+          stopPolling();
           return;
         }
-        localDataList.innerHTML = '';
-        entries.forEach((dir) => {
-          const option = document.createElement('option');
-          option.value = dir.path;
-          option.label = dir.path;
-          option.dataset.fileCount = dir.file_count;
-          option.dataset.totalBytes = dir.total_bytes;
-          localDataList.appendChild(option);
+        try {
+          const response = await fetch(`/knowledge/uploads?project_id=${encodeURIComponent(projectId)}`);
+          if (!response.ok) {
+            throw new Error('Failed to poll job status');
+          }
+          const data = await response.json();
+          renderJobs(data.jobs);
+          const completed = (data.jobs || []).filter((job) => activeJobs.has(job.id) && (job.status === 'completed' || job.status === 'failed'));
+          for (const job of completed) {
+            activeJobs.delete(job.id);
+          }
+          if (!activeJobs.size) {
+            stopPolling();
+          }
+        } catch (error) {
+          console.error('Status polling failed', error);
+          stopPolling();
+        }
+      }
+
+      function startPolling() {
+        stopPolling();
+        pollTimer = window.setInterval(pollStatuses, 1800);
+        pollStatuses().catch(() => {});
+      }
+
+      function stopPolling() {
+        if (pollTimer) {
+          window.clearInterval(pollTimer);
+          pollTimer = null;
+        }
+      }
+
+      if (cleanupForm) {
+        cleanupForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          if (!cleanupButton || cleanupButton.disabled) {
+            return;
+          }
+          cleanupButton.disabled = true;
+          cleanupButton.textContent = 'Clearing…';
+          try {
+            const formData = new FormData(cleanupForm);
+            const response = await fetch('/knowledge/cleanup', {
+              method: 'POST',
+              body: formData,
+            });
+            if (!response.ok) {
+              const detail = await response.json().catch(() => ({}));
+              throw new Error(detail.detail || `status ${response.status}`);
+            }
+            const payload = await response.json();
+            if (payload.job) {
+              cleanupJobId = payload.job.id;
+              renderCleanupJob(payload.job, { notice: 'Cleanup started. Tracking progress…' });
+              startCleanupPolling(true);
+            }
+          } catch (error) {
+            console.error('Cleanup request failed', error);
+            renderCleanupJob(null);
+            const summary = document.createElement('div');
+            summary.className = 'cleanup-summary';
+            summary.textContent = 'Unable to start cleanup.';
+            cleanupStatus.appendChild(summary);
+            const err = document.createElement('div');
+            err.className = 'job-error';
+            err.textContent = error instanceof Error ? error.message : String(error);
+            cleanupStatus.appendChild(err);
+          } finally {
+            cleanupButton.disabled = false;
+            cleanupButton.textContent = cleanupButtonDefaultLabel;
+          }
         });
       }
 
@@ -1617,8 +1312,7 @@
           return '';
         }
         const slashAdjusted = trimmed.replace(/\\/g, '/');
-        const collapsed = slashAdjusted.replace(/\/{2,}/g, '/');
-        return collapsed.replace(/^\//, '');
+        return slashAdjusted.replace(/\/{2,}/g, '/').replace(/^\//, '');
       }
 
       async function loadLocalDirectories(path = '') {
@@ -1650,90 +1344,47 @@
         }
       }
 
-      function scheduleLocalDirectoryRefresh(value) {
+      function renderLocalDirectoryOptions(entries) {
         if (!localDataList) {
           return;
         }
+        localDataList.innerHTML = '';
+        entries.forEach((dir) => {
+          const option = document.createElement('option');
+          option.value = dir.path;
+          option.label = dir.path;
+          option.dataset.fileCount = dir.file_count;
+          option.dataset.totalBytes = dir.total_bytes;
+          localDataList.appendChild(option);
+        });
+      }
+
+      function scheduleLocalDirectoryRefresh(value) {
+        if (localDirectoryFetchTimer) {
+          window.clearTimeout(localDirectoryFetchTimer);
+        }
         const normalized = normalizeLocalDirectoryPath(value);
         localDirectoryActiveQuery = normalized;
-        const cacheKey = normalized || LOCAL_DIRECTORY_ROOT_KEY;
-        let immediateEntries = localDirectoryCache.get(cacheKey);
-        if (!immediateEntries && normalized && !normalized.endsWith('/')) {
-          immediateEntries = localDirectoryCache.get(`${normalized}/`);
+        let immediateEntries = null;
+        if (normalized) {
+          immediateEntries = localDirectoryCache.get(LOCAL_DIRECTORY_ROOT_KEY);
+          if (immediateEntries) {
+            immediateEntries = immediateEntries.filter((entry) => entry.path.startsWith(normalized));
+          }
+        } else {
+          immediateEntries = localDirectoryCache.get(LOCAL_DIRECTORY_ROOT_KEY);
         }
-        if (!immediateEntries && normalized) {
-          let parentKey = normalized;
-          while (!immediateEntries && parentKey.includes('/')) {
-            parentKey = parentKey.slice(0, parentKey.lastIndexOf('/'));
-            if (!parentKey) {
-              break;
-            }
-            const possibleKeys = [parentKey, `${parentKey}/`];
-            for (const key of possibleKeys) {
-              const candidate = localDirectoryCache.get(key);
-              if (candidate) {
-                immediateEntries = candidate;
-                break;
-              }
-            }
-          }
-          if (!immediateEntries) {
-            immediateEntries = localDirectoryCache.get(LOCAL_DIRECTORY_ROOT_KEY);
-          }
+        if (!immediateEntries) {
+          immediateEntries = localDirectoryCache.get(LOCAL_DIRECTORY_ROOT_KEY);
         }
         let displayEntries = immediateEntries || [];
         if (normalized && displayEntries.length) {
           displayEntries = displayEntries.filter((entry) => entry.path.startsWith(normalized));
         }
-        if (displayEntries.length) {
-          renderLocalDirectoryOptions(displayEntries);
-        } else {
-          renderLocalDirectoryOptions([]);
-        }
-        if (localDirectoryFetchTimer) {
-          window.clearTimeout(localDirectoryFetchTimer);
-        }
+        renderLocalDirectoryOptions(displayEntries);
         localDirectoryFetchTimer = window.setTimeout(() => {
           loadLocalDirectories(normalized).catch(() => {});
-        }, 150);
-      }
-
-      function focusLocalDirectoryInput(selectText = true) {
-        if (!localPathInput) {
-          return;
-        }
-        const runner = () => {
-          if (!localPathInput) {
-            return;
-          }
-          try {
-            localPathInput.focus({ preventScroll: true });
-          } catch (focusError) {
-            localPathInput.focus();
-          }
-          if (selectText && localPathInput.value) {
-            localPathInput.select();
-          }
-        };
-        if (typeof window.requestAnimationFrame === 'function') {
-          window.requestAnimationFrame(runner);
-        } else {
-          window.setTimeout(runner, 0);
-        }
-      }
-
-      function formatBytes(bytes) {
-        if (!Number.isFinite(bytes) || bytes <= 0) {
-          return '0 B';
-        }
-        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        let value = bytes;
-        let unitIndex = 0;
-        while (value >= 1024 && unitIndex < units.length - 1) {
-          value /= 1024;
-          unitIndex += 1;
-        }
-        return `${value.toFixed(value >= 10 || value < 0.1 ? 0 : 1)} ${units[unitIndex]}`;
+        }, 200);
       }
 
       function updateDirectoryMeta(value) {
@@ -1752,6 +1403,21 @@
           return;
         }
         directoryMeta.textContent = `${files} file${files === 1 ? '' : 's'} · ${formatBytes(bytes)}`;
+      }
+
+      function formatBytes(bytes) {
+        if (!Number.isFinite(bytes) || bytes <= 0) {
+          return '0 B';
+        }
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let value = bytes;
+        let unitIndex = 0;
+        while (value >= 1024 && unitIndex < units.length - 1) {
+          value /= 1024;
+          unitIndex += 1;
+        }
+        const precision = value >= 10 || value < 0.1 ? 0 : 1;
+        return `${value.toFixed(precision)} ${units[unitIndex]}`;
       }
 
       if (localPathInput) {
@@ -1799,7 +1465,30 @@
       loadQueryHints();
       loadLocalDirectories();
       focusLocalDirectoryInput();
+
+      function focusLocalDirectoryInput(selectText = true) {
+        if (!localPathInput) {
+          return;
+        }
+        const runner = () => {
+          if (!localPathInput) {
+            return;
+          }
+          try {
+            localPathInput.focus({ preventScroll: true });
+          } catch (focusError) {
+            localPathInput.focus();
+          }
+          if (selectText && localPathInput.value) {
+            localPathInput.select();
+          }
+        };
+        if (typeof window.requestAnimationFrame === 'function') {
+          window.requestAnimationFrame(runner);
+        } else {
+          window.setTimeout(runner, 0);
+        }
+      }
     })();
   </script>
-  </body>
-</html>
+{% endblock %}

@@ -1,69 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Cornerstone Search</title>
-    <style>
-      body { font-family: sans-serif; margin: 0; background: #f3f4f6; color: #111827; }
-      nav { background: #111827; padding: 1rem 2rem; }
-      nav a { color: #d1d5db; margin-right: 1.5rem; text-decoration: none; }
-      nav a strong { color: #fff; }
-      main { max-width: 900px; margin: 2.5rem auto; background: #fff; border-radius: 16px; padding: 2rem 2.5rem; box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12); }
-      h1 { margin-top: 0; }
-      form { display: flex; gap: 0.75rem; align-items: center; margin-top: 1.5rem; }
-      input[type="text"] { flex: 1; padding: 0.65rem 0.9rem; border-radius: 10px; border: 1px solid #d1d5db; font-size: 1rem; }
-      select { padding: 0.65rem 0.9rem; border-radius: 10px; border: 1px solid #d1d5db; font-size: 1rem; }
-      button { padding: 0.65rem 1.5rem; border-radius: 999px; border: none; background: #2563eb; color: #fff; font-size: 1rem; box-shadow: 0 10px 25px rgba(37,99,235,0.2); cursor: pointer; }
-      button:hover { box-shadow: 0 14px 30px rgba(37,99,235,0.28); }
-      ul { list-style: none; padding: 0; margin: 1.5rem 0 0; }
-      li { margin: 0 0 1rem; padding: 1rem 1.25rem; border-radius: 12px; background: #f9fafb; border: 1px solid #e5e7eb; }
-      .score { color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem; }
-      .empty { margin-top: 1.5rem; color: #6b7280; }
-    </style>
-  </head>
-  <body>
-    <nav>
-      <a href="/"><strong>Search</strong></a>
-      <a href="/support">Support Agent</a>
-      <a href="/knowledge">Knowledge Base</a>
-      <a href="/keywords">Keyword Explorer</a>
-      <a href="/admin/analytics">Analytics</a>
-      <a href="/personas">Personas</a>
-    </nav>
-    <main>
-      <h1>Cornerstone Semantic Search</h1>
-      <p>Search across project-specific knowledge bases with embedded vectors.</p>
-      <form method="post" action="/search">
-        <select name="project_id" aria-label="Select project">
-          {% for project in projects %}
-            <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>{{ project.name }}</option>
-          {% endfor %}
-        </select>
-        <input
-          type="text"
-          name="query"
-          placeholder="Enter a query..."
-          value="{{ query | default('') }}"
-          required
-        />
-        <button type="submit">Search</button>
+{% extends "base.html" %}
+{% import 'macros/ui.html' as ui %}
+{% block title %}Search · Cornerstone{% endblock %}
+
+{% block navigation %}
+  {{ ui.navigation('search') }}
+{% endblock %}
+{% block content %}
+  <div class="surface-card px-6 py-8 sm:px-10">
+    <div class="flex flex-col gap-6">
+      <header>
+        <h1 class="text-2xl font-semibold text-slate-900">Cornerstone Semantic Search</h1>
+        <p class="mt-2 text-sm text-slate-600">Search across project-specific knowledge bases with embedded vectors.</p>
+      </header>
+      <form method="post" action="/search" class="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <label class="flex w-full flex-col gap-2 text-sm font-semibold text-slate-700 sm:max-w-xs">
+          <span>Project</span>
+          <select
+            name="project_id"
+            aria-label="Select project"
+            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+          >
+            {% for project in projects %}
+              <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>{{ project.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="flex w-full flex-col gap-2 text-sm font-semibold text-slate-700">
+          <span>Query</span>
+          <input
+            type="text"
+            name="query"
+            placeholder="Enter a query…"
+            value="{{ query | default('') }}"
+            required
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-base shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </label>
+        <button type="submit" class="btn-primary self-start sm:self-auto">Search</button>
       </form>
 
       {% if results is defined %}
         {% if results %}
-          <h2>Results</h2>
-          <ul>
-            {% for item in results %}
-              <li>
-                <div>{{ item.payload.get("text", item.payload) }}</div>
-                <div class="score">Score: {{ item.score }}</div>
-              </li>
-            {% endfor %}
-          </ul>
+          <section class="space-y-4">
+            <h2 class="text-lg font-semibold text-slate-900">Results</h2>
+            <ul class="space-y-3">
+              {% for item in results %}
+                <li class="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                  <p class="text-sm text-slate-800">{{ item.payload.get("text", item.payload) }}</p>
+                  <p class="mt-2 text-xs font-medium text-slate-500">Score: {{ '%.4f'|format(item.score | float) }}</p>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
         {% else %}
-          <p class="empty">No results found for this project.</p>
+          <p class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">
+            No results found for this project.
+          </p>
         {% endif %}
       {% endif %}
-    </main>
-  </body>
-</html>
+    </div>
+  </div>
+{% endblock %}

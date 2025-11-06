@@ -1,0 +1,54 @@
+{% macro nav_link(href, label, key, active) -%}
+  {% set is_active = key == active %}
+  <a
+    href="{{ href }}"
+    class="rounded-full px-3 py-2 text-sm font-medium transition {{ 'bg-white/10 text-white shadow-sm' if is_active else 'text-slate-200 hover:text-white/90' }}"
+    aria-current="{{ 'page' if is_active else 'false' }}"
+  >
+    {{ label }}
+  </a>
+{%- endmacro %}
+
+{% macro navigation(active_page) -%}
+<nav class="bg-slate-950 text-slate-100">
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <a href="/" class="text-lg font-semibold tracking-tight text-white">Cornerstone</a>
+    <div class="flex flex-wrap gap-2">
+      {{ nav_link('/', 'Search', 'search', active_page) }}
+      {{ nav_link('/support', 'Support Agent', 'support', active_page) }}
+      {{ nav_link('/knowledge', 'Knowledge Base', 'knowledge', active_page) }}
+      {{ nav_link('/keywords', 'Keyword Explorer', 'keywords', active_page) }}
+      {{ nav_link('/admin/analytics', 'Analytics', 'analytics', active_page) }}
+      {{ nav_link('/personas', 'Personas', 'personas', active_page) }}
+    </div>
+  </div>
+</nav>
+{%- endmacro %}
+
+{% macro surface_card(classes='', padded=True) -%}
+  <section class="surface-card {{ 'p-6 sm:p-8' if padded else '' }} {{ classes }}">
+    {{ caller() }}
+  </section>
+{%- endmacro %}
+
+{% macro status_badge(label, tone='info') -%}
+  {% set tone_map = {
+    'info': 'bg-slate-100 text-slate-700 border border-slate-200',
+    'success': 'bg-emerald-100 text-emerald-700 border border-emerald-200',
+    'warning': 'bg-amber-100 text-amber-700 border border-amber-200',
+    'error': 'bg-rose-100 text-rose-700 border border-rose-200'
+  } %}
+  <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ tone_map.get(tone, tone_map['info']) }}">
+    {{ label }}
+  </span>
+{%- endmacro %}
+
+{% macro metric_card(label, value, subtext=None) -%}
+  <div class="surface-card p-5">
+    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ label }}</p>
+    <p class="mt-2 text-2xl font-semibold text-slate-900">{{ value }}</p>
+    {% if subtext %}
+      <p class="mt-1 text-sm text-slate-600">{{ subtext }}</p>
+    {% endif %}
+  </div>
+{%- endmacro %}

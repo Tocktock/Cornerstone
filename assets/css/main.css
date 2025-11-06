@@ -1,0 +1,331 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    @apply min-h-screen bg-slate-100 text-slate-900 antialiased;
+  }
+
+  a {
+    @apply transition-colors duration-150 text-primary;
+  }
+
+  a:hover {
+    @apply text-blue-700;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white shadow-button transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-blue-300 disabled:shadow-none;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .surface-card {
+    @apply rounded-2xl bg-white shadow-card;
+  }
+
+  .knowledge-layout {
+    @apply grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)];
+  }
+
+  .project-list {
+    @apply mt-4 space-y-3 text-sm text-slate-700;
+  }
+
+  .project-list li {
+    @apply flex items-center justify-between gap-2 rounded-xl border border-transparent px-3 py-2 transition hover:bg-slate-50;
+  }
+
+  .project-link {
+    @apply font-medium text-primary hover:text-blue-700;
+  }
+
+  .upload-panel {
+    @apply mt-6 rounded-2xl border border-dashed border-blue-200 bg-white p-6 shadow-inner;
+  }
+
+  .drop-zone {
+    @apply flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50 p-6 text-center text-blue-600 transition;
+  }
+
+  .drop-zone strong {
+    @apply text-base font-semibold text-blue-700;
+  }
+
+  .drop-zone.dragover {
+    @apply border-blue-600 bg-blue-100;
+  }
+
+  .upload-actions,
+  .local-input-group,
+  .url-input-group,
+  .upload-actions {
+    @apply mt-4 flex flex-wrap items-center gap-3;
+  }
+
+  .local-input-wrapper,
+  .url-input-group {
+    @apply flex min-w-0 flex-1 items-center gap-3;
+  }
+
+  .upload-status {
+    @apply mt-5 flex flex-col gap-3 text-sm text-slate-600;
+  }
+
+  .upload-status li {
+    @apply rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-inner;
+  }
+
+  .upload-status li .status {
+    @apply font-semibold text-slate-600;
+  }
+
+  .upload-status li.completed .status {
+    @apply text-emerald-600;
+  }
+
+  .upload-status li.failed .status {
+    @apply text-rose-600;
+  }
+
+  .upload-status li.processing .status {
+    @apply text-blue-600;
+  }
+
+  .upload-status li.throttled .status {
+    @apply text-amber-600;
+  }
+
+  .knowledge-table-card {
+    @apply surface-card p-6 sm:p-8;
+  }
+
+  .table-toolbar {
+    @apply mt-6 flex flex-wrap items-center justify-between gap-4 text-sm;
+  }
+
+  .table-summary {
+    @apply text-sm text-slate-600;
+  }
+
+  .pager {
+    @apply flex items-center gap-2;
+  }
+
+  .pager-link {
+    @apply inline-flex items-center justify-center rounded-full border border-slate-200 px-3 py-1 text-sm font-medium text-primary transition hover:bg-blue-50;
+  }
+
+  .pager-link.disabled {
+    @apply cursor-not-allowed border-slate-100 bg-slate-100 text-slate-400;
+  }
+
+  .pager-page {
+    @apply text-sm text-slate-500;
+  }
+
+  .glossary-panel {
+    @apply surface-card p-6 sm:p-8;
+  }
+
+  .glossary-form-grid {
+    @apply mt-6 grid gap-4 md:grid-cols-2;
+  }
+
+  .glossary-form-grid textarea {
+    @apply md:col-span-2;
+  }
+
+  .glossary-status,
+  .query-hints-status {
+    @apply mt-2 min-h-[1.25rem] text-sm text-slate-500;
+  }
+
+  .glossary-list,
+  .query-hints-list {
+    @apply mt-4 flex flex-col gap-3;
+  }
+
+  .glossary-entry,
+  .query-hint-item {
+    @apply rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-inner;
+  }
+
+  .entry-actions,
+  .hint-actions {
+    @apply mt-3 flex flex-wrap items-center gap-2;
+  }
+
+  .button-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100;
+  }
+
+  .cleanup-status {
+    @apply mt-4 space-y-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600;
+  }
+
+  .cleanup-summary {
+    @apply font-semibold text-slate-700;
+  }
+
+  .step-list {
+    @apply space-y-2;
+  }
+
+  .step-item {
+    @apply flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm;
+  }
+
+  .step-label {
+    @apply font-medium text-slate-700;
+  }
+
+  .step-detail {
+    @apply text-xs text-slate-500;
+  }
+
+  .step-state {
+    @apply text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .job-error {
+    @apply rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600;
+  }
+
+  .job-progress {
+    @apply relative mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200;
+  }
+
+  .job-progress-bar {
+    @apply absolute inset-y-0 left-0 rounded-full bg-primary transition-all;
+  }
+
+  .job-progress-label {
+    @apply mt-2 text-xs text-slate-500;
+  }
+
+  .job-throttled-note {
+    @apply mt-2 text-xs text-amber-600;
+  }
+
+  .knowledge-pager {
+    @apply mt-4;
+  }
+
+  .form-input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30;
+  }
+
+  .form-select {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30;
+  }
+
+  .form-textarea {
+    @apply w-full min-h-[120px] rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30;
+  }
+
+  .chat-shell {
+    @apply flex flex-col overflow-hidden rounded-[28px] bg-white shadow-card;
+  }
+
+  .chat-header {
+    @apply border-b border-slate-200 p-6 space-y-4 sm:p-8;
+  }
+
+  .chat-status-line {
+    @apply mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-600;
+  }
+
+  .chat-actions {
+    @apply mt-4 flex flex-wrap items-center gap-3;
+  }
+
+  .persona-banner {
+    @apply mt-4 flex flex-col gap-4 rounded-2xl bg-slate-50 p-4 shadow-inner md:flex-row md:items-start;
+  }
+
+  .persona-avatar {
+    @apply h-16 w-16 flex-shrink-0 rounded-full object-cover shadow-lg md:h-20 md:w-20;
+  }
+
+  .persona-details {
+    @apply flex-1 space-y-2 overflow-hidden;
+  }
+
+  .persona-tone {
+    @apply text-sm font-medium text-slate-600;
+  }
+
+  .persona-copy {
+    @apply text-sm leading-relaxed text-slate-600 md:max-h-36 md:overflow-y-auto;
+  }
+
+  .persona-caption {
+    @apply text-xs text-slate-500;
+  }
+
+  .persona-tags {
+    @apply text-xs uppercase tracking-wide text-slate-500;
+  }
+
+  .chat-body {
+    @apply flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 to-indigo-50 px-5 py-6 sm:px-8 sm:py-8;
+  }
+
+  .messages {
+    @apply flex flex-col gap-4;
+  }
+
+  .bubble {
+    @apply max-w-full rounded-2xl border border-transparent bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 shadow-lg sm:max-w-[80%];
+  }
+
+  .bubble.user {
+    @apply ml-auto bg-primary text-white shadow-lg;
+  }
+
+  .bubble.assistant {
+    @apply mr-auto bg-white;
+  }
+
+  .bubble footer {
+    @apply mt-4 space-y-3 text-sm text-slate-600;
+  }
+
+  .bubble footer h3 {
+    @apply text-sm font-semibold text-slate-700;
+  }
+
+  .bubble footer ul {
+    @apply list-disc space-y-2 pl-5 text-sm text-slate-600;
+  }
+
+  .sources-toggle {
+    @apply mt-3 text-sm font-semibold text-primary transition hover:text-blue-700;
+  }
+
+  .sources-list {
+    @apply mt-3 space-y-3 border-l-2 border-slate-200 pl-3 text-sm text-slate-600;
+  }
+
+  .composer {
+    @apply border-t border-slate-200 bg-white p-5 sm:p-8 flex flex-col gap-4;
+  }
+
+  .composer-tools {
+    @apply flex flex-wrap items-center justify-between gap-3;
+  }
+
+  .alert {
+    @apply rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm;
+  }
+}

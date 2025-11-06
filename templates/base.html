@@ -1,0 +1,28 @@
+{% import 'macros/ui.html' as ui %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Cornerstone{% endblock %}</title>
+    {% if url_for is defined %}
+      <link rel="stylesheet" href="{{ url_for('static', path='css/main.css') }}" />
+    {% else %}
+      <link rel="stylesheet" href="/static/css/main.css" />
+    {% endif %}
+    {% block head %}{% endblock %}
+  </head>
+  <body class="flex min-h-screen flex-col bg-slate-100 text-slate-900">
+    {% block navigation %}
+      {{ ui.navigation('') }}
+    {% endblock %}
+    <main class="flex-1">
+      {% block main %}
+      <div class="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+      </div>
+      {% endblock %}
+    </main>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

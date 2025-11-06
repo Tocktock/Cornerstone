@@ -14,6 +14,7 @@ from typing import Dict, List, Iterable, Optional, AsyncGenerator
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse, Response, PlainTextResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from qdrant_client import QdrantClient, models
 
@@ -45,6 +46,7 @@ from .conversations import ConversationLogStore, ConversationLogger, AnalyticsSe
 
 _MIN_RESULT_SCORE = 1e-6
 _TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "templates"
+_STATIC_DIR = Path(__file__).resolve().parents[2] / "static"
 
 logger = logging.getLogger(__name__)
 
@@ -343,6 +345,9 @@ def create_app(
                 await keyword_run_queue.shutdown()
 
     app = FastAPI(lifespan=lifespan)
+
+    if _STATIC_DIR.exists():
+        app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
     app.state.services = ApplicationState(
         settings=settings,
         embedding_service=embedding_service,

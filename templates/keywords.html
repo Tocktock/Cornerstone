@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Keyword Explorer</title>
-    <style>
-      body { font-family: sans-serif; margin: 0; background: #f3f4f6; color: #111827; }
+{% extends "base.html" %}
+{% import 'macros/ui.html' as ui %}
+{% block title %}Keyword Explorer · Cornerstone{% endblock %}
+
+{% block head %}
+  <style>
+body { font-family: sans-serif; margin: 0; background: #f3f4f6; color: #111827; }
       nav { background: #111827; padding: 1rem 2rem; display: flex; gap: 1.5rem; flex-wrap: wrap; }
       nav a { color: #d1d5db; text-decoration: none; }
       nav a strong { color: #fff; }
@@ -69,19 +69,16 @@
       @media (max-width: 960px) {
         main { grid-template-columns: 1fr; }
       }
-    </style>
-  </head>
-  <body>
-    <nav>
-      <a href="/">Search</a>
-      <a href="/support">Support Agent</a>
-      <a href="/knowledge">Knowledge Base</a>
-      <a href="/keywords"><strong>Keyword Explorer</strong></a>
-      <a href="/admin/analytics">Analytics</a>
-      <a href="/personas">Personas</a>
-    </nav>
-    <main>
-      <aside>
+  </style>
+{% endblock %}
+
+{% block navigation %}
+  {{ ui.navigation('keywords') }}
+{% endblock %}
+
+{% block content %}
+  <main>
+<aside>
         <h1>Keyword Explorer</h1>
         <p>Pick a project, run a keyword scan, and inspect core concepts pulled from its knowledge base.</p>
         <div class="form-grid">
@@ -135,9 +132,12 @@
           </div>
         </div>
       </section>
-    </main>
-    <script>
-      const keywordRunAsyncEnabled = {{ (settings.keyword_run_async_enabled if settings is defined else false) | tojson }};
+  </main>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+const keywordRunAsyncEnabled = {{ (settings.keyword_run_async_enabled if settings is defined else false) | tojson }};
 
       document.addEventListener('DOMContentLoaded', () => {
         const projectSelect = document.getElementById('project');
@@ -1083,6 +1083,5 @@
           loadKeywords(1).catch((error) => console.error(error));
         }
       });
-    </script>
-  </body>
-</html>
+  </script>
+{% endblock %}

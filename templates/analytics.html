@@ -1,158 +1,106 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Analytics Dashboard</title>
-    <style>
-      body { font-family: sans-serif; margin: 0; background: #f3f4f6; color: #111827; }
-      nav { background: #111827; padding: 1rem 2rem; }
-      nav a { color: #d1d5db; margin-right: 1.5rem; text-decoration: none; }
-      nav a strong { color: #fff; }
-      main { width: min(100% - 2rem, 1100px); margin: 2.5rem auto 3rem; display: flex; flex-direction: column; gap: 2rem; }
-      section { background: #fff; border-radius: 18px; padding: 1.75rem 2rem; box-shadow: 0 18px 38px rgba(15,23,42,0.12); }
-      h1 { margin: 0 0 1.1rem; font-size: 1.85rem; }
-      .filters { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-      .filters select { padding: 0.6rem 0.85rem; border-radius: 10px; border: 1px solid #d1d5db; font-size: 0.95rem; }
-      .filters label { font-size: 0.85rem; color: #4b5563; display: flex; flex-direction: column; gap: 0.45rem; font-weight: 600; }
-      .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
-      .metric-card { background: #f9fafb; border-radius: 14px; padding: 1.1rem 1.2rem; border: 1px solid #e5e7eb; }
-      .metric-label { font-size: 0.85rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
-      .metric-value { font-size: 1.6rem; font-weight: 700; margin-top: 0.3rem; color: #111827; }
-      .metric-sub { font-size: 0.85rem; color: #6b7280; margin-top: 0.35rem; }
-      table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-      th, td { text-align: left; padding: 0.65rem 0.5rem; border-bottom: 1px solid #e5e7eb; font-size: 0.95rem; }
-      th { color: #4b5563; font-weight: 600; }
-      td { color: #1f2937; }
-      .empty { margin-top: 1.25rem; color: #6b7280; font-size: 0.95rem; }
-      .top-list, .unanswered-list { list-style: none; padding: 0; margin: 1rem 0 0; display: flex; flex-direction: column; gap: 0.75rem; }
-      .top-item, .unanswered-item { background: #f9fafb; border-radius: 12px; padding: 0.85rem 1rem; border: 1px solid #e5e7eb; }
-      .top-item strong { display: block; font-size: 1rem; color: #111827; }
-      .top-item span { display: block; margin-top: 0.35rem; font-size: 0.85rem; color: #6b7280; }
-      .unanswered-item strong { display: block; font-size: 1rem; color: #111827; }
-      .unanswered-item p { margin: 0.4rem 0 0; font-size: 0.9rem; color: #374151; }
-      .unanswered-item span { display: block; margin-top: 0.35rem; font-size: 0.8rem; color: #6b7280; }
-      @media (max-width: 720px) {
-        section { padding: 1.5rem; }
-        .metrics-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-      }
-    </style>
-  </head>
-  <body>
-    <nav>
-      <a href="/">Search</a>
-      <a href="/support">Support Agent</a>
-      <a href="/knowledge">Knowledge Base</a>
-      <a href="/keywords">Keyword Explorer</a>
-      <a href="/personas">Personas</a>
-      <a href="/admin/analytics"><strong>Analytics</strong></a>
-    </nav>
-    <main>
-      <section>
-        <h1>Conversation Analytics</h1>
-        <p style="margin:0 0 1.5rem; color:#4b5563;">Tracking {{ project_label }} over the last {{ days }} days.</p>
-        <form class="filters" method="get" action="/admin/analytics">
-          <label>
-            Project
-            <select name="project_id" onchange="this.form.submit()">
-              <option value="all" {% if selected_project == 'all' %}selected{% endif %}>All projects</option>
-              {% for project in projects %}
-                <option value="{{ project.id }}" {% if selected_project == project.id %}selected{% endif %}>{{ project.name }}</option>
-              {% endfor %}
-            </select>
-          </label>
-          <label>
-            Window
-            <select name="days" onchange="this.form.submit()">
-              {% for option in [7, 14, 30, 60, 90] %}
-                <option value="{{ option }}" {% if days == option %}selected{% endif %}>Last {{ option }} days</option>
-              {% endfor %}
-            </select>
-          </label>
-        </form>
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="metric-label">Conversations</div>
-            <div class="metric-value">{{ summary.totals.conversations }}</div>
-            <div class="metric-sub">Resolved {{ (summary.totals.resolution_rate * 100)|round(1) }}% ({{ summary.totals.resolved }} total)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Avg Response Time</div>
-            <div class="metric-value">{{ '%.1f'|format(summary.totals.avg_duration_ms) }} ms</div>
-            <div class="metric-sub">Across logged chat generations</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Prompt Tokens</div>
-            <div class="metric-value">{{ summary.token_usage.prompt_tokens }}</div>
-            <div class="metric-sub">Completion {{ summary.token_usage.completion_tokens }} · Total {{ summary.token_usage.total_tokens }}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Unanswered</div>
-            <div class="metric-value">{{ summary.totals.conversations - summary.totals.resolved }}</div>
-            <div class="metric-sub">Flagged queries requiring follow-up</div>
-          </div>
-        </div>
-      </section>
+{% extends "base.html" %}
+{% import 'macros/ui.html' as ui %}
+{% block title %}Analytics · Cornerstone{% endblock %}
 
-      <section>
-        <h2 style="margin:0 0 1rem; font-size:1.35rem;">Daily Conversation Volume</h2>
-        {% if summary.daily_counts %}
-          <table>
-            <thead>
+{% block navigation %}
+  {{ ui.navigation('analytics') }}
+{% endblock %}
+
+{% block content %}
+  <div class="space-y-6">
+    <section class="surface-card p-6 sm:p-8 space-y-6">
+      <div class="space-y-2">
+        <h1 class="text-2xl font-semibold text-slate-900">Conversation Analytics</h1>
+        <p class="text-sm text-slate-600">Tracking {{ project_label }} over the last {{ days }} days.</p>
+      </div>
+      <form class="flex flex-wrap items-end gap-4" method="get" action="/admin/analytics">
+        <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+          Project
+          <select name="project_id" onchange="this.form.submit()" class="form-select">
+            <option value="all" {% if selected_project == 'all' %}selected{% endif %}>All projects</option>
+            {% for project in projects %}
+              <option value="{{ project.id }}" {% if selected_project == project.id %}selected{% endif %}>{{ project.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+          Window
+          <select name="days" onchange="this.form.submit()" class="form-select">
+            {% for option in [7, 14, 30, 60, 90] %}
+              <option value="{{ option }}" {% if days == option %}selected{% endif %}>Last {{ option }} days</option>
+            {% endfor %}
+          </select>
+        </label>
+      </form>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {{ ui.metric_card('Conversations', summary.totals.conversations, 'Resolved ' ~ (summary.totals.resolution_rate * 100)|round(1) ~ '% (' ~ summary.totals.resolved ~ ' total)') }}
+        {{ ui.metric_card('Avg Response Time', '%.1f'|format(summary.totals.avg_duration_ms) ~ ' ms', 'Across logged chat generations') }}
+        {{ ui.metric_card('Prompt Tokens', summary.token_usage.prompt_tokens, 'Completion ' ~ summary.token_usage.completion_tokens ~ ' · Total ' ~ summary.token_usage.total_tokens) }}
+        {{ ui.metric_card('Unanswered', summary.totals.conversations - summary.totals.resolved, 'Flagged queries requiring follow-up') }}
+      </div>
+    </section>
+
+    <section class="surface-card p-6 sm:p-8 space-y-4">
+      <h2 class="text-xl font-semibold text-slate-900">Daily Conversation Volume</h2>
+      {% if summary.daily_counts %}
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
               <tr>
-                <th>Date</th>
-                <th>Total</th>
-                <th>Resolved</th>
-                <th>Unanswered</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Date</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Total</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Resolved</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Unanswered</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-200">
               {% for row in summary.daily_counts %}
                 <tr>
-                  <td>{{ row.date }}</td>
-                  <td>{{ row.total }}</td>
-                  <td>{{ row.resolved }}</td>
-                  <td>{{ row.unanswered }}</td>
+                  <td class="px-4 py-3 text-slate-700">{{ row.date }}</td>
+                  <td class="px-4 py-3 text-slate-700">{{ row.total }}</td>
+                  <td class="px-4 py-3 text-slate-700">{{ row.resolved }}</td>
+                  <td class="px-4 py-3 text-slate-700">{{ row.unanswered }}</td>
                 </tr>
               {% endfor %}
             </tbody>
           </table>
-        {% else %}
-          <p class="empty">No conversations logged for this window.</p>
-        {% endif %}
-      </section>
+        </div>
+      {% else %}
+        <p class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">No conversations logged for this window.</p>
+      {% endif %}
+    </section>
 
-      <section>
-        <h2 style="margin:0 0 1rem; font-size:1.35rem;">Top Queries</h2>
-        {% if summary.top_queries %}
-          <ul class="top-list">
-            {% for item in summary.top_queries %}
-              <li class="top-item">
-                <strong>{{ item.query }}</strong>
-                <span>{{ item.count }} requests</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="empty">No recurring queries yet.</p>
-        {% endif %}
-      </section>
+    <section class="surface-card p-6 sm:p-8 space-y-4">
+      <h2 class="text-xl font-semibold text-slate-900">Top Queries</h2>
+      {% if summary.top_queries %}
+        <ul class="grid gap-3 sm:grid-cols-2">
+          {% for item in summary.top_queries %}
+            <li class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-inner">
+              <strong class="text-sm font-semibold text-slate-900">{{ item.query }}</strong>
+              <span class="text-xs text-slate-500">{{ item.count }} requests</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">No recurring queries yet.</p>
+      {% endif %}
+    </section>
 
-      <section>
-        <h2 style="margin:0 0 1rem; font-size:1.35rem;">Unanswered Follow-ups</h2>
-        {% if summary.unanswered %}
-          <ul class="unanswered-list">
-            {% for item in summary.unanswered %}
-              <li class="unanswered-item">
-                <strong>{{ item.query }}</strong>
-                <p>{{ item.response or 'No assistant response recorded.' }}</p>
-                <span>{{ item.created_at }}{% if item.persona_name %} · Persona {{ item.persona_name }}{% endif %}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="empty">Everything answered — great job!</p>
-        {% endif %}
-      </section>
-    </main>
-  </body>
-</html>
+    <section class="surface-card p-6 sm:p-8 space-y-4">
+      <h2 class="text-xl font-semibold text-slate-900">Unanswered Follow-ups</h2>
+      {% if summary.unanswered %}
+        <ul class="space-y-3">
+          {% for item in summary.unanswered %}
+            <li class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-inner">
+              <strong class="text-sm font-semibold text-slate-900">{{ item.query }}</strong>
+              <p class="mt-2 text-sm text-slate-600">{{ item.response or 'No assistant response recorded.' }}</p>
+              <span class="text-xs text-slate-500">{{ item.created_at }}{% if item.persona_name %} · Persona {{ item.persona_name }}{% endif %}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">Everything answered — great job!</p>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

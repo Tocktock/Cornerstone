@@ -1,642 +1,386 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Support Agent</title>
-    <style>
-      :root {
-        color-scheme: light dark;
-      }
-      body {
-        font-family: sans-serif;
-        margin: 0;
-        background: #f5f7fb;
-        color: #1b1f24;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-      nav {
-        background: #111827;
-        padding: 1rem 2rem;
-      }
-      nav a {
-        color: #d1d5db;
-        margin-right: 1.5rem;
-        text-decoration: none;
-      }
-      nav a strong {
-        color: #fff;
-      }
-      main {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        padding: 2rem 1rem 3rem;
-      }
-      .chat-shell {
-        width: min(840px, 100%);
-        background: #fff;
-        border-radius: 18px;
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      }
-      header {
-        padding: 1.5rem 2rem 1rem;
-        border-bottom: 1px solid #e5e7eb;
-      }
-      header h1 {
-        margin: 0 0 0.5rem;
-        font-size: 1.75rem;
-      }
-      header p {
-        margin: 0.25rem 0;
-        color: #4b5563;
-      }
-      .chat-actions {
-        margin-top: 0.75rem;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.75rem;
-      }
-      .chat-body {
-        flex: 1;
-        overflow-y: auto;
-        padding: 1.5rem 2rem;
-        background: linear-gradient(180deg, #f9fafb 0%, #eef2ff 100%);
-      }
-      .messages {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-      .bubble {
-        max-width: 80%;
-        padding: 0.85rem 1rem;
-        border-radius: 16px;
-        position: relative;
-        line-height: 1.5;
-        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
-      }
-      .bubble .content {
-        white-space: pre-wrap;
-      }
-      .bubble.user {
-        margin-left: auto;
-        background: #2563eb;
-        color: #fff;
-        border-bottom-right-radius: 4px;
-      }
-      .bubble.assistant {
-        margin-right: auto;
-        background: #fff;
-        border-bottom-left-radius: 4px;
-      }
-      .bubble footer {
-        margin-top: 0.75rem;
-        font-size: 0.85rem;
-        color: #4b5563;
-      }
-      .bubble footer h3 {
-        margin: 0 0 0.35rem;
-        font-size: 0.95rem;
-        color: #1f2937;
-      }
-      .bubble footer ul {
-        margin: 0;
-        padding-left: 1.1rem;
-      }
-      .bubble footer .sources-toggle {
-        margin-top: 0.35rem;
-        background: transparent;
-        color: #2563eb;
-        border: none;
-        padding: 0;
-        font-size: 0.9rem;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      .bubble footer .sources-list {
-        margin-top: 0.5rem;
-        border-left: 2px solid #e5e7eb;
-        padding-left: 0.75rem;
-        color: #374151;
-      }
-      .bubble footer .sources-list > div {
-        margin-bottom: 0.5rem;
-      }
-      .bubble footer .sources-list > div strong {
-        display: block;
-        color: #111827;
-      }
-      #new-chat {
-        background: #111827;
-        color: #fff;
-        border: none;
-        border-radius: 999px;
-        padding: 0.45rem 1.4rem;
-        font-size: 0.9rem;
-        cursor: pointer;
-        box-shadow: 0 12px 28px rgba(17, 24, 39, 0.22);
-        transition: transform 0.15s ease, box-shadow 0.2s ease;
-      }
-      #new-chat:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 16px 34px rgba(17, 24, 39, 0.3);
-      }
-      .persona-banner {
-        margin-top: 1rem;
-        display: flex;
-        gap: 0.85rem;
-        align-items: flex-start;
-        background: #f9fafb;
-        border-radius: 14px;
-        padding: 0.85rem 1rem;
-        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
-      }
-      .persona-banner img {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        object-fit: cover;
-        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
-      }
-      .persona-banner strong {
-        display: block;
-        color: #111827;
-        font-size: 1.05rem;
-      }
-      .persona-banner span {
-        display: block;
-        color: #4b5563;
-        font-size: 0.9rem;
-        margin-top: 0.25rem;
-      }
-      .persona-banner p {
-        margin: 0.45rem 0 0;
-        color: #4b5563;
-        font-size: 0.9rem;
-        line-height: 1.4;
-      }
-      .composer {
-        padding: 1.5rem 2rem 1.75rem;
-        border-top: 1px solid #e5e7eb;
-        background: #fff;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-      .alert {
-        padding: 0.65rem 1rem;
-        border-radius: 10px;
-        border: 1px solid #fca5a5;
-        background: #fef2f2;
-        color: #b91c1c;
-        font-size: 0.9rem;
-      }
-      .alert[hidden] {
-        display: none;
-      }
-      .composer textarea {
-        width: 100%;
-        min-height: 110px;
-        resize: vertical;
-        padding: 0.85rem 1rem;
-        border-radius: 12px;
-        border: 1px solid #d1d5db;
-        font-size: 1rem;
-        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
-      }
-      .composer textarea:focus {
-        outline: none;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
-      }
-      .composer-tools {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: #6b7280;
-        font-size: 0.95rem;
-      }
-      .composer button {
-        background: #2563eb;
-        color: #fff;
-        border: none;
-        border-radius: 999px;
-        padding: 0.6rem 1.8rem;
-        font-size: 1rem;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
-        transition: transform 0.15s ease, box-shadow 0.2s ease;
-      }
-      .composer button:disabled {
-        background: #cbd5f5;
-        cursor: not-allowed;
-        box-shadow: none;
-      }
-      .composer button:hover:not(:disabled) {
-        transform: translateY(-1px);
-        box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28);
-      }
-      .status-line {
-        font-size: 0.9rem;
-        color: #6b7280;
-      }
-      @media (max-width: 640px) {
-        .chat-shell {
-          border-radius: 0;
-          box-shadow: none;
-        }
-        nav { padding: 0.75rem 1.25rem; }
-        .chat-body { padding: 1rem 1.25rem; }
-        .composer { padding: 1rem 1.25rem 1.25rem; }
-      }
-    </style>
-  </head>
-  <body>
-    <nav>
-      <a href="/">Search</a>
-      <a href="/support"><strong>Support Agent</strong></a>
-      <a href="/knowledge">Knowledge Base</a>
-      <a href="/keywords">Keyword Explorer</a>
-      <a href="/admin/analytics">Analytics</a>
-      <a href="/personas">Personas</a>
-    </nav>
+{% extends "base.html" %}
+{% import 'macros/ui.html' as ui %}
+{% block title %}Support Agent · Cornerstone{% endblock %}
+
+{% block navigation %}
+  {{ ui.navigation('support') }}
+{% endblock %}
+{% block main %}
+  <div class="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
     {% set base_name = persona_base.name if persona_base else None %}
     {% set final_name = persona.name if persona and persona.name else (base_name if base_name else 'Support Agent') %}
     {% set base_tone = persona_base.tone if persona_base else None %}
     {% set final_tone = persona.tone if persona and persona.tone else base_tone %}
-    <main>
-      <div class="chat-shell" data-persona-name="{{ final_name }}" data-persona-tone="{{ final_tone or '' }}" data-persona-id="{{ persona.id if persona and persona.id else (persona_base.id if persona_base else '') }}">
-        <header>
-          <h1>Support Agent</h1>
-          <p>Conversational troubleshooting with embedded knowledge and glossary guidance.</p>
-          <div class="status-line">
-            <label for="project">Project:</label>
-            <select id="project" aria-label="Select project">
-              {% for project in projects %}
-                <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>{{ project.name }}</option>
-              {% endfor %}
-            </select>
-            <span>Glossary entries loaded: {{ glossary_count }}</span>
-          </div>
-          <div class="chat-actions">
-            <button id="new-chat" type="button">New Chat</button>
+    <div
+      class="chat-shell surface-card"
+      data-persona-name="{{ final_name }}"
+      data-persona-tone="{{ final_tone or '' }}"
+      data-persona-id="{{ persona.id if persona and persona.id else (persona_base.id if persona_base else '') }}"
+    >
+      <header class="chat-header">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h1 class="text-2xl font-semibold text-slate-900">Support Agent</h1>
+            <p class="mt-1 text-sm text-slate-600">Conversational troubleshooting with embedded knowledge and glossary guidance.</p>
+            <div class="chat-status-line">
+              <label for="project" class="text-sm font-medium text-slate-700">Project</label>
+              <select id="project" aria-label="Select project" class="form-select">
+                {% for project in projects %}
+                  <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>{{ project.name }}</option>
+                {% endfor %}
+              </select>
+              <span class="text-sm text-slate-500">Glossary entries loaded: {{ glossary_count }}</span>
+            </div>
+            <div class="chat-actions">
+              <button id="new-chat" type="button" class="btn-ghost">New chat</button>
+            </div>
           </div>
           <div class="persona-banner" aria-live="polite">
             {% if persona and persona.avatar_url %}
-              <img src="{{ persona.avatar_url }}" alt="{{ final_name }} avatar" />
+              <img src="{{ persona.avatar_url }}" alt="{{ persona.name or 'Persona avatar' }}" class="persona-avatar" />
             {% elif persona_base and persona_base.avatar_url %}
-              <img src="{{ persona_base.avatar_url }}" alt="{{ persona_base.name }} avatar" />
+              <img src="{{ persona_base.avatar_url }}" alt="{{ persona_base.name }} avatar" class="persona-avatar" />
             {% endif %}
-            <div>
-              <strong>{{ final_name }}</strong>
+            <div class="persona-details">
+              <h2 class="text-lg font-semibold text-slate-900">{{ final_name }}</h2>
               {% if persona_base %}
-                <span>Catalog persona: {{ persona_base.name }}</span>
+                <p class="text-xs uppercase tracking-wide text-slate-500">Catalog persona: {{ persona_base.name }}</p>
               {% else %}
-                <span>Catalog persona: default system agent</span>
+                <p class="text-xs uppercase tracking-wide text-slate-500">Catalog persona: default system agent</p>
               {% endif %}
-              {% if final_tone %}
-                <span style="display:block; margin-top:0.35rem;">Tone: {{ final_tone }}{% if persona_base and persona and persona.tone and persona.tone != persona_base.tone %} (override){% elif persona_base and not persona %} (catalog){% endif %}</span>
-              {% else %}
-                <span style="display:block; margin-top:0.35rem;">Tone: default support voice</span>
-              {% endif %}
+              <p class="persona-tone">Tone: {{ final_tone or 'default support voice' }}{% if persona_base and persona and persona.tone and persona.tone != persona_base.tone %} (override){% elif persona_base and not persona %} (catalog){% endif %}</p>
               {% if persona and persona.system_prompt %}
-                <p>{{ persona.system_prompt }}</p>
+                <p class="persona-copy">{{ persona.system_prompt }}</p>
               {% elif persona_base and persona_base.system_prompt %}
-                <p>{{ persona_base.system_prompt }}</p>
+                <p class="persona-copy">{{ persona_base.system_prompt }}</p>
               {% else %}
-                <p>The agent follows the platform default instructions.</p>
+                <p class="persona-copy">The agent follows the platform default instructions.</p>
               {% endif %}
               {% if persona_base and persona_base.description %}
-                <p style="margin-top:0.45rem; font-size:0.85rem; color:#6b7280;">{{ persona_base.description }}</p>
+                <p class="persona-caption">{{ persona_base.description }}</p>
               {% endif %}
               {% if persona_base and persona_base.tags %}
-                <span style="display:block; font-size:0.8rem; color:#6b7280; margin-top:0.25rem;">Tags: {{ persona_base.tags | join(', ') }}</span>
+                <p class="persona-tags">Tags: {{ persona_base.tags | join(', ') }}</p>
               {% endif %}
             </div>
           </div>
-        </header>
-        <div class="chat-body">
-          <div id="messages" class="messages" aria-live="polite"></div>
         </div>
-        <div class="composer">
-          <div id="alert" class="alert" role="alert" hidden tabindex="-1"></div>
-          <textarea id="query" placeholder="Describe the issue or ask a question..." required></textarea>
-          <div class="composer-tools">
-            <span id="status">Press ⌘⏎ / Ctrl⏎ to send</span>
-            <button id="submit" type="button" aria-label="Send message">Send ▷</button>
-          </div>
+      </header>
+      <div class="chat-body">
+        <div id="messages" class="messages" aria-live="polite"></div>
+      </div>
+      <div class="composer" role="form">
+        <div id="alert" class="alert" role="alert" hidden tabindex="-1"></div>
+        <label for="query" class="sr-only">Chat message</label>
+        <textarea id="query" placeholder="Describe the issue or ask a question..." required class="form-textarea"></textarea>
+        <div class="composer-tools">
+          <span id="status" class="text-sm text-slate-500">Press ⌘⏎ / Ctrl⏎ to send</span>
+          <button id="submit" type="button" class="btn-primary" aria-label="Send message">Send ▷</button>
         </div>
       </div>
-    </main>
+    </div>
+  </div>
+{% endblock %}
 
-    <script>
-      const button = document.getElementById('submit');
-      const statusEl = document.getElementById('status');
-      const queryEl = document.getElementById('query');
-      const messagesEl = document.getElementById('messages');
-      const history = [];
-      const projectEl = document.getElementById('project');
-      const chatShell = document.querySelector('.chat-shell');
-      const alertEl = document.getElementById('alert');
-      const newChatButton = document.getElementById('new-chat');
-      let activeStreamController = null;
+{% block scripts %}
+  <script>
+    const button = document.getElementById('submit');
+    const statusEl = document.getElementById('status');
+    const queryEl = document.getElementById('query');
+    const messagesEl = document.getElementById('messages');
+    const history = [];
+    const projectEl = document.getElementById('project');
+    const chatShell = document.querySelector('.chat-shell');
+    const alertEl = document.getElementById('alert');
+    const newChatButton = document.getElementById('new-chat');
+    let activeStreamController = null;
 
-      function applyExtras(bubble, extras = {}) {
-        const existingFooter = bubble.querySelector('footer');
-        if (existingFooter) {
-          existingFooter.remove();
-        }
+    function applyExtras(bubble, extras = {}) {
+      const existingFooter = bubble.querySelector('footer');
+      if (existingFooter) {
+        existingFooter.remove();
+      }
 
-        const definitions = extras.definitions || [];
-        const sources = extras.sources || [];
-        if (!definitions.length && !sources.length) {
-          return;
-        }
+      const definitions = extras.definitions || [];
+      const sources = extras.sources || [];
+      if (!definitions.length && !sources.length) {
+        return;
+      }
 
-        const footer = document.createElement('footer');
-        if (definitions.length) {
-          const defHeading = document.createElement('h3');
-          defHeading.textContent = 'Definitions';
-          footer.appendChild(defHeading);
-          const list = document.createElement('ul');
-          definitions.forEach((def) => {
-            const item = document.createElement('li');
-            if (typeof def === 'string') {
-              const colonIndex = def.indexOf(':');
-              if (colonIndex > 0) {
-                const termText = def.slice(0, colonIndex).trim();
-                const detailText = def.slice(colonIndex + 1).trim();
-                if (termText) {
-                  const termEl = document.createElement('strong');
-                  termEl.textContent = termText;
-                  item.appendChild(termEl);
-                }
-                if (detailText) {
-                  const detailEl = document.createElement('span');
-                  detailEl.textContent = ` - ${detailText}`;
-                  item.appendChild(detailEl);
-                }
+      const footer = document.createElement('footer');
+      if (definitions.length) {
+        const defHeading = document.createElement('h3');
+        defHeading.textContent = 'Definitions';
+        footer.appendChild(defHeading);
+        const list = document.createElement('ul');
+        definitions.forEach((def) => {
+          const item = document.createElement('li');
+          if (typeof def === 'string') {
+            const colonIndex = def.indexOf(':');
+            if (colonIndex > 0) {
+              const termText = def.slice(0, colonIndex).trim();
+              const detailText = def.slice(colonIndex + 1).trim();
+              if (termText) {
+                const termEl = document.createElement('strong');
+                termEl.textContent = termText;
+                item.appendChild(termEl);
+              }
+              if (detailText) {
+                const detailEl = document.createElement('span');
+                detailEl.textContent = ` - ${detailText}`;
+                item.appendChild(detailEl);
               }
             }
-            if (!item.childNodes.length) {
-              item.textContent = typeof def === 'string' ? def : JSON.stringify(def);
-            }
-            list.appendChild(item);
-          });
-          footer.appendChild(list);
-        }
-        if (sources.length) {
-          const sourceHeading = document.createElement('h3');
-          sourceHeading.textContent = 'Sources';
-          footer.appendChild(sourceHeading);
+          }
+          if (!item.childNodes.length) {
+            item.textContent = typeof def === 'string' ? def : JSON.stringify(def);
+          }
+          list.appendChild(item);
+        });
+        footer.appendChild(list);
+      }
+      if (sources.length) {
+        const sourceHeading = document.createElement('h3');
+        sourceHeading.textContent = 'Sources';
+        footer.appendChild(sourceHeading);
 
-          const toggle = document.createElement('button');
-          toggle.type = 'button';
-          toggle.className = 'sources-toggle';
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'sources-toggle';
 
-          const list = document.createElement('div');
-          list.className = 'sources-list';
+        const list = document.createElement('div');
+        list.className = 'sources-list';
 
-          sources.forEach((source) => {
-            const item = document.createElement('div');
-            const titleEl = document.createElement('strong');
-            titleEl.textContent = source.title || 'Snippet';
-            const snippetEl = document.createElement('div');
-            snippetEl.textContent = source.snippet || '';
-            snippetEl.style.whiteSpace = 'pre-wrap';
-            item.appendChild(titleEl);
-            item.appendChild(snippetEl);
-            list.appendChild(item);
-          });
+        sources.forEach((source) => {
+          const item = document.createElement('div');
+          const titleEl = document.createElement('strong');
+          titleEl.textContent = source.title || 'Snippet';
+          const snippetEl = document.createElement('div');
+          snippetEl.textContent = source.snippet || '';
+          snippetEl.style.whiteSpace = 'pre-wrap';
+          item.appendChild(titleEl);
+          item.appendChild(snippetEl);
+          list.appendChild(item);
+        });
 
-          let expanded = false;
-          const updateToggle = () => {
-            list.hidden = !expanded;
-            toggle.textContent = expanded ? 'Hide sources' : 'Show sources';
-            toggle.setAttribute('aria-expanded', String(expanded));
-          };
-          toggle.addEventListener('click', () => {
-            expanded = !expanded;
-            updateToggle();
-          });
+        let expanded = false;
+        const updateToggle = () => {
+          list.hidden = !expanded;
+          toggle.textContent = expanded ? 'Hide sources' : 'Show sources';
+          toggle.setAttribute('aria-expanded', String(expanded));
+        };
+        toggle.addEventListener('click', () => {
+          expanded = !expanded;
           updateToggle();
+        });
+        updateToggle();
 
-          footer.appendChild(toggle);
-          footer.appendChild(list);
-        }
-        bubble.appendChild(footer);
+        footer.appendChild(toggle);
+        footer.appendChild(list);
+      }
+      bubble.appendChild(footer);
+    }
+
+    function appendMessage(role, text, extras = {}) {
+      const bubble = document.createElement('div');
+      bubble.className = `bubble ${role}`;
+
+      const content = document.createElement('div');
+      content.className = 'content';
+      content.textContent = text;
+      bubble.appendChild(content);
+
+      if (role === 'assistant') {
+        applyExtras(bubble, extras);
       }
 
-      function appendMessage(role, text, extras = {}) {
-        const bubble = document.createElement('div');
-        bubble.className = `bubble ${role}`;
-
-        const content = document.createElement('div');
-        content.className = 'content';
-        content.textContent = text;
-        bubble.appendChild(content);
-
-        if (role === 'assistant') {
-          applyExtras(bubble, extras);
-        }
-
-        messagesEl.appendChild(bubble);
-        bubble.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        if (role === 'assistant') {
-          bubble.setAttribute('tabindex', '-1');
-          bubble.focus({ preventScroll: true });
-        }
-        return bubble;
+      messagesEl.appendChild(bubble);
+      bubble.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      if (role === 'assistant') {
+        bubble.setAttribute('tabindex', '-1');
+        bubble.focus({ preventScroll: true });
       }
+      return bubble;
+    }
 
-      function showAlert(message) {
-        if (!alertEl) {
-          return;
-        }
-        if (!message) {
-          alertEl.hidden = true;
-          alertEl.textContent = '';
-          return;
-        }
-        alertEl.hidden = false;
-        alertEl.textContent = message;
-        alertEl.focus({ preventScroll: true });
+    function showAlert(message) {
+      if (!alertEl) {
+        return;
       }
-
-      function hideAlert() {
-        if (!alertEl) {
-          return;
-        }
+      if (!message) {
         alertEl.hidden = true;
         alertEl.textContent = '';
+        return;
+      }
+      alertEl.hidden = false;
+      alertEl.textContent = message;
+      alertEl.focus({ preventScroll: true });
+    }
+
+    function hideAlert() {
+      if (!alertEl) {
+        return;
+      }
+      alertEl.hidden = true;
+      alertEl.textContent = '';
+    }
+
+    function resetConversation() {
+      if (activeStreamController) {
+        activeStreamController.abort();
+        activeStreamController = null;
+      }
+      if (!messagesEl.children.length) {
+        history.length = 0;
+        statusEl.textContent = 'Ready for the next question.';
+        hideAlert();
+        queryEl.focus();
+        return;
+      }
+      const personaName = (chatShell && chatShell.dataset.personaName) ? chatShell.dataset.personaName : 'the agent';
+      const confirmed = window.confirm(`Start a new chat with ${personaName}? This will clear the current conversation.`);
+      if (!confirmed) {
+        return;
+      }
+      history.length = 0;
+      messagesEl.innerHTML = '';
+      hideAlert();
+      statusEl.textContent = 'Chat reset. Ask your next question.';
+      queryEl.focus();
+    }
+
+    async function submitQuery() {
+      const query = queryEl.value.trim();
+      if (!query) {
+        statusEl.textContent = 'Please enter a question before sending.';
+        showAlert('Enter a question so the agent knows what to help with.');
+        return;
       }
 
-      function resetConversation() {
-        if (activeStreamController) {
-          activeStreamController.abort();
+      hideAlert();
+      history.push(`User: ${query}`);
+      appendMessage('user', query);
+      queryEl.value = '';
+      button.disabled = true;
+      if (activeStreamController) {
+        activeStreamController.abort();
+      }
+      const controller = new AbortController();
+      activeStreamController = controller;
+
+      statusEl.textContent = 'The assistant is composing a reply...';
+      const assistantBubble = appendMessage('assistant', '');
+      const contentEl = assistantBubble.querySelector('.content');
+      contentEl.textContent = 'Streaming response...';
+      let accumulated = '';
+
+      try {
+        const response = await fetch('/support/chat/stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, history, projectId: projectEl.value }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok || !response.body) {
+          let detail = 'Unexpected error while contacting the assistant';
+          try {
+            const data = await response.json();
+            detail = data.error || data.detail || detail;
+          } catch (err) {
+            detail = `${detail} (status ${response.status})`;
+          }
+          throw new Error(detail);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            break;
+          }
+          buffer += decoder.decode(value, { stream: true });
+          let newlineIndex = buffer.indexOf('\n');
+          while (newlineIndex !== -1) {
+            const rawLine = buffer.slice(0, newlineIndex).trim();
+            buffer = buffer.slice(newlineIndex + 1);
+            if (rawLine) {
+              try {
+                const event = JSON.parse(rawLine);
+                if (event.event === 'metadata') {
+                  applyExtras(assistantBubble, {
+                    definitions: event.definitions,
+                    sources: event.sources,
+                  });
+                } else if (event.event === 'delta') {
+                  if (event.data) {
+                    accumulated += event.data;
+                    contentEl.textContent = accumulated;
+                    statusEl.textContent = 'Streaming response...';
+                  }
+                } else if (event.event === 'done') {
+                  if (event.message) {
+                    accumulated = event.message;
+                    contentEl.textContent = accumulated;
+                  }
+                  history.push(`Assistant: ${accumulated}`);
+                  statusEl.textContent = 'Ready for the next question.';
+                  hideAlert();
+                  return;
+                } else if (event.event === 'error') {
+                  throw new Error(event.message || 'Streaming error');
+                }
+              } catch (parseErr) {
+                console.debug('Streaming parse error', parseErr);
+              }
+            }
+            newlineIndex = buffer.indexOf('\n');
+          }
+        }
+
+        throw new Error('Stream ended unexpectedly.');
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          return;
+        }
+        contentEl.textContent = `⚠️ ${error.message}`;
+        applyExtras(assistantBubble, {});
+        statusEl.textContent = 'Encountered an error. Try again.';
+        showAlert(error.message || 'Something went wrong while contacting the assistant.');
+      } finally {
+        if (activeStreamController === controller) {
           activeStreamController = null;
         }
-        if (!messagesEl.children.length) {
-          history.length = 0;
-          statusEl.textContent = 'Ready for the next question.';
-          hideAlert();
-          queryEl.focus();
-          return;
-        }
-        const personaName = (chatShell && chatShell.dataset.personaName) ? chatShell.dataset.personaName : 'the agent';
-        const confirmed = window.confirm(`Start a new chat with ${personaName}? This will clear the current conversation.`);
-        if (!confirmed) {
-          return;
-        }
-        history.length = 0;
-        messagesEl.innerHTML = '';
-        hideAlert();
-        statusEl.textContent = 'Chat reset. Ask your next question.';
+        button.disabled = false;
         queryEl.focus();
       }
+    }
 
-      async function submitQuery() {
-        const query = queryEl.value.trim();
-        if (!query) {
-          statusEl.textContent = 'Please enter a question before sending.';
-          showAlert('Enter a question so the agent knows what to help with.');
-          return;
-        }
+    button.addEventListener('click', submitQuery);
+    queryEl.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+        submitQuery();
+        event.preventDefault();
+      }
+    });
 
-        hideAlert();
-        history.push(`User: ${query}`);
-        appendMessage('user', query);
-        queryEl.value = '';
-        button.disabled = true;
+    if (newChatButton) {
+      newChatButton.addEventListener('click', resetConversation);
+    }
+
+    if (projectEl) {
+      projectEl.addEventListener('change', () => {
         if (activeStreamController) {
           activeStreamController.abort();
         }
-        const controller = new AbortController();
-        activeStreamController = controller;
-
-        statusEl.textContent = 'The assistant is composing a reply...';
-        const assistantBubble = appendMessage('assistant', '');
-        const contentEl = assistantBubble.querySelector('.content');
-        contentEl.textContent = 'Streaming response...';
-        let accumulated = '';
-
-        try {
-          const response = await fetch('/support/chat/stream', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, history, projectId: projectEl.value }),
-            signal: controller.signal,
-          });
-
-          if (!response.ok || !response.body) {
-            let detail = 'Unexpected error while contacting the assistant';
-            try {
-              const data = await response.json();
-              detail = data.error || data.detail || detail;
-            } catch (err) {
-              detail = `${detail} (status ${response.status})`;
-            }
-            throw new Error(detail);
-          }
-
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
-
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) {
-              break;
-            }
-            buffer += decoder.decode(value, { stream: true });
-            let newlineIndex = buffer.indexOf('\n');
-            while (newlineIndex !== -1) {
-              const rawLine = buffer.slice(0, newlineIndex).trim();
-              buffer = buffer.slice(newlineIndex + 1);
-              if (rawLine) {
-                try {
-                  const event = JSON.parse(rawLine);
-                  if (event.event === 'metadata') {
-                    applyExtras(assistantBubble, {
-                      definitions: event.definitions,
-                      sources: event.sources,
-                    });
-                  } else if (event.event === 'delta') {
-                    if (event.data) {
-                      accumulated += event.data;
-                      contentEl.textContent = accumulated;
-                      statusEl.textContent = 'Streaming response...';
-                    }
-                  } else if (event.event === 'done') {
-                    if (event.message) {
-                      accumulated = event.message;
-                      contentEl.textContent = accumulated;
-                    }
-                    history.push(`Assistant: ${accumulated}`);
-                    statusEl.textContent = 'Ready for the next question.';
-                    hideAlert();
-                    return;
-                  } else if (event.event === 'error') {
-                    throw new Error(event.message || 'Streaming error');
-                  }
-                } catch (parseErr) {
-                  console.debug('Streaming parse error', parseErr);
-                }
-              }
-              newlineIndex = buffer.indexOf('\n');
-            }
-          }
-
-          throw new Error('Stream ended unexpectedly.');
-        } catch (error) {
-          if (error.name === 'AbortError') {
-            return;
-          }
-          contentEl.textContent = `⚠️ ${error.message}`;
-          applyExtras(assistantBubble, {});
-          statusEl.textContent = 'Encountered an error. Try again.';
-          showAlert(error.message || 'Something went wrong while contacting the assistant.');
-        } finally {
-          if (activeStreamController === controller) {
-            activeStreamController = null;
-          }
-          button.disabled = false;
-          queryEl.focus();
-        }
-      }
-
-      button.addEventListener('click', submitQuery);
-      queryEl.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-          submitQuery();
-          event.preventDefault();
-        }
+        const next = projectEl.value;
+        window.location.href = `/support?project_id=${encodeURIComponent(next)}`;
       });
+    }
 
-      if (newChatButton) {
-        newChatButton.addEventListener('click', resetConversation);
-      }
-
-      if (projectEl) {
-        projectEl.addEventListener('change', () => {
-          if (activeStreamController) {
-            activeStreamController.abort();
-          }
-          const next = projectEl.value;
-          window.location.href = `/support?project_id=${encodeURIComponent(next)}`;
-        });
-      }
-
-      queryEl.focus();
-    </script>
-  </body>
-</html>
+    queryEl.focus();
+  </script>
+{% endblock %}
