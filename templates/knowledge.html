@@ -132,13 +132,8 @@
           </div>
           <div class="space-y-3">
             <label for="local-path" class="text-sm font-semibold text-slate-700">Import local directory</label>
-            <div class="local-input-group">
-              <div class="local-input-wrapper">
-                <input id="local-path" placeholder="e.g. team-notes/2024-q2" autocomplete="off" spellcheck="false" list="local-directories" class="form-input" />
-                <datalist id="local-directories"></datalist>
-              </div>
-              <button type="button" id="import-local" class="btn-ghost">Import</button>
-            </div>
+            <input id="local-path" class="form-input" placeholder="e.g. data/local/team-notes" autocomplete="off" spellcheck="false" />
+            <button type="button" id="import-local" class="btn-ghost">Import</button>
             <div id="local-directory-meta" class="text-xs text-slate-500"></div>
             <span class="text-xs text-slate-500">Directories are resolved relative to <code>data/local/</code>.</span>
           </div>
@@ -303,14 +298,8 @@
       const urlInput = document.getElementById('url-input');
       const submitUrl = document.getElementById('submit-url');
       const localPathInput = document.getElementById('local-path');
-      const localDataList = document.getElementById('local-directories');
       const directoryMeta = document.getElementById('local-directory-meta');
       const importLocalBtn = document.getElementById('import-local');
-      const localDirectoryCache = new Map();
-      const LOCAL_DIRECTORY_ROOT_KEY = '__root__';
-      let localDirectoryRequestId = 0;
-      let localDirectoryFetchTimer = null;
-      let localDirectoryActiveQuery = '';
       if (!dropZone || !fileInput || !selectBtn || !statusList || !projectSection) {
         return;
       }
@@ -1203,9 +1192,17 @@
           ]);
         } finally {
           if (localPathInput) {
-            scheduleLocalDirectoryRefresh(localPathInput.value);
-            updateDirectoryMeta(localPathInput.value);
-            focusLocalDirectoryInput();
+            try {
+              localPathInput.focus({ preventScroll: true });
+            } catch (focusError) {
+              localPathInput.focus();
+            }
+            if (typeof localPathInput.select === 'function') {
+              localPathInput.select();
+            }
+          }
+          if (directoryMeta) {
+            directoryMeta.textContent = 'Import requested. Check the upload status list for progress updates.';
           }
         }
       }
@@ -1303,134 +1300,23 @@
         });
       }
 
-      function normalizeLocalDirectoryPath(value) {
-        if (!value) {
-          return '';
-        }
-        const trimmed = String(value).trim();
-        if (!trimmed) {
-          return '';
-        }
-        const slashAdjusted = trimmed.replace(/\\/g, '/');
-        return slashAdjusted.replace(/\/{2,}/g, '/').replace(/^\//, '');
-      }
-
-      async function loadLocalDirectories(path = '') {
-        if (!localDataList) {
-          return [];
-        }
-        const normalized = normalizeLocalDirectoryPath(path);
-        const cacheKey = normalized || LOCAL_DIRECTORY_ROOT_KEY;
-        const requestId = ++localDirectoryRequestId;
-        try {
-          let endpoint = '/knowledge/local-directories';
-          if (normalized) {
-            endpoint = `${endpoint}?path=${encodeURIComponent(normalized)}`;
-          }
-          const response = await fetch(endpoint);
-          if (!response.ok) {
-            return localDirectoryCache.get(cacheKey) || [];
-          }
-          const data = await response.json();
-          const directories = data.directories || [];
-          localDirectoryCache.set(cacheKey, directories);
-          if (requestId === localDirectoryRequestId && localDirectoryActiveQuery === normalized) {
-            renderLocalDirectoryOptions(directories);
-          }
-          return directories;
-        } catch (error) {
-          console.error('Failed to load local directories', error);
-          return localDirectoryCache.get(cacheKey) || [];
-        }
-      }
-
-      function renderLocalDirectoryOptions(entries) {
-        if (!localDataList) {
-          return;
-        }
-        localDataList.innerHTML = '';
-        entries.forEach((dir) => {
-          const option = document.createElement('option');
-          option.value = dir.path;
-          option.label = dir.path;
-          option.dataset.fileCount = dir.file_count;
-          option.dataset.totalBytes = dir.total_bytes;
-          localDataList.appendChild(option);
-        });
-      }
-
-      function scheduleLocalDirectoryRefresh(value) {
-        if (localDirectoryFetchTimer) {
-          window.clearTimeout(localDirectoryFetchTimer);
-        }
-        const normalized = normalizeLocalDirectoryPath(value);
-        localDirectoryActiveQuery = normalized;
-        let immediateEntries = null;
-        if (normalized) {
-          immediateEntries = localDirectoryCache.get(LOCAL_DIRECTORY_ROOT_KEY);
-          if (immediateEntries) {
-            immediateEntries = immediateEntries.filter((entry) => entry.path.startsWith(normalized));
-          }
-        } else {
-          immediateEntries = localDirectoryCache.get(LOCAL_DIRECTORY_ROOT_KEY);
-        }
-        if (!immediateEntries) {
-          immediateEntries = localDirectoryCache.get(LOCAL_DIRECTORY_ROOT_KEY);
-        }
-        let displayEntries = immediateEntries || [];
-        if (normalized && displayEntries.length) {
-          displayEntries = displayEntries.filter((entry) => entry.path.startsWith(normalized));
-        }
-        renderLocalDirectoryOptions(displayEntries);
-        localDirectoryFetchTimer = window.setTimeout(() => {
-          loadLocalDirectories(normalized).catch(() => {});
-        }, 200);
-      }
-
       function updateDirectoryMeta(value) {
         if (!directoryMeta) {
           return;
         }
-        const option = Array.from(localDataList?.options || []).find((opt) => opt.value === value);
-        if (!option) {
-          directoryMeta.textContent = '';
-          return;
-        }
-        const files = Number(option.dataset.fileCount || 0);
-        const bytes = Number(option.dataset.totalBytes || 0);
-        if (!files) {
-          directoryMeta.textContent = 'No supported files detected';
-          return;
-        }
-        directoryMeta.textContent = `${files} file${files === 1 ? '' : 's'} · ${formatBytes(bytes)}`;
-      }
-
-      function formatBytes(bytes) {
-        if (!Number.isFinite(bytes) || bytes <= 0) {
-          return '0 B';
-        }
-        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        let value = bytes;
-        let unitIndex = 0;
-        while (value >= 1024 && unitIndex < units.length - 1) {
-          value /= 1024;
-          unitIndex += 1;
-        }
-        const precision = value >= 10 || value < 0.1 ? 0 : 1;
-        return `${value.toFixed(precision)} ${units[unitIndex]}`;
+        const cleaned = value ? String(value).trim() : '';
+        directoryMeta.textContent = cleaned
+          ? `Ready to import from ${cleaned}`
+          : 'Enter a relative path inside data/local/.';
       }
 
       if (localPathInput) {
         const handleLocalDirectoryChange = (event) => {
-          const nextValue = event.target.value;
-          updateDirectoryMeta(nextValue);
-          scheduleLocalDirectoryRefresh(nextValue);
+          updateDirectoryMeta(event.target.value);
         };
         localPathInput.addEventListener('input', handleLocalDirectoryChange);
         localPathInput.addEventListener('change', handleLocalDirectoryChange);
-        localPathInput.addEventListener('focus', (event) => {
-          scheduleLocalDirectoryRefresh(event.target.value);
-        });
+        localPathInput.addEventListener('focus', handleLocalDirectoryChange);
       }
 
       if (glossaryForm) {
@@ -1463,32 +1349,7 @@
       resetGlossaryForm();
       loadGlossaryEntries();
       loadQueryHints();
-      loadLocalDirectories();
-      focusLocalDirectoryInput();
-
-      function focusLocalDirectoryInput(selectText = true) {
-        if (!localPathInput) {
-          return;
-        }
-        const runner = () => {
-          if (!localPathInput) {
-            return;
-          }
-          try {
-            localPathInput.focus({ preventScroll: true });
-          } catch (focusError) {
-            localPathInput.focus();
-          }
-          if (selectText && localPathInput.value) {
-            localPathInput.select();
-          }
-        };
-        if (typeof window.requestAnimationFrame === 'function') {
-          window.requestAnimationFrame(runner);
-        } else {
-          window.setTimeout(runner, 0);
-        }
-      }
+      updateDirectoryMeta(localPathInput ? localPathInput.value : '');
     })();
   </script>
 {% endblock %}
