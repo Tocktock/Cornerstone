@@ -77,12 +77,24 @@ uvicorn cornerstone.main:app --reload
 
 This keeps glossary/graph officialization rules unchanged, while `/api/v1/answers` can retrieve raw source evidence from unstructured artifacts and summarize it through the lightweight local Ollama model.
 
-## Docker Compose
+## One-shot launcher
+
+You can start the full local stack with a single command from the repository root:
 
 ```bash
-cp .env.example .env
-docker compose up --build
+./run-all.sh
 ```
+
+Useful variants:
+
+```bash
+./run-all.sh --sample-data --ollama
+./run-all.sh --detach
+./run-all.sh logs
+./run-all.sh down
+```
+
+The script wraps `compose.yml`, creates `.env` from `.env.example` on first run, and starts Postgres + backend + frontend together. If you need the raw Compose equivalent, use `docker compose --env-file .env -f compose.yml up --build`.
 
 Services:
 - frontend: `http://localhost:5173`
