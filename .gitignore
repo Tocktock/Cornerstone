@@ -17,3 +17,6 @@ backend/src/cornerstone_backend.egg-info/
 # Frontend build artifacts
 frontend/node_modules/
 frontend/dist/
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
