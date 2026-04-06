@@ -50,6 +50,7 @@ That means:
 ## Command surface
 
 - `./run-all.sh up`: start the local product stack.
+- `./run-all.sh up --reset-db`: recreate the local dev database volume before startup. Use this after pulling a schema-breaking change such as the P0 model rewrite.
 - `./run-all.sh down`: stop the local product stack.
 - `./run-all.sh check`: run the default local quality gate in one shot.
 - `./run-all.sh check --with-corpus`: run the default gate plus the opt-in full corpus smoke.

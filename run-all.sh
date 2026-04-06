@@ -21,6 +21,7 @@ Options:
   --sample-data Use sample-data instead of demo_sources.
   --demo-data   Use demo_sources. Default.
   --ollama      Enable Ollama-backed answering.
+  --reset-db    Recreate the local dev database volume before startup.
   --with-corpus Include the opt-in full corpus smoke during check.
   --no-build    Skip docker image rebuild on startup.
   -d, --detach  Run startup in the background.
@@ -117,12 +118,25 @@ run_checks() {
   printf 'Cornerstone quality gate passed.\n'
 }
 
+reset_dev_database() {
+  printf 'Resetting local Cornerstone database volume\n'
+  (
+    cd "$ROOT_DIR"
+    docker compose \
+      --project-directory "$ROOT_DIR" \
+      --env-file "$ENV_FILE" \
+      -f "$COMPOSE_FILE" \
+      down -v
+  )
+}
+
 command_name="up"
 data_mode="demo"
 ollama_enabled="false"
 build_enabled="true"
 detach_enabled="false"
 with_corpus="false"
+reset_db="false"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -137,6 +151,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     --ollama)
       ollama_enabled="true"
+      ;;
+    --reset-db)
+      reset_db="true"
       ;;
     --with-corpus)
       with_corpus="true"
@@ -167,6 +184,17 @@ case "$command_name" in
     printf '  data: %s\n' "$data_mode"
     printf '  ollama: %s\n' "$ollama_enabled"
     printf '  detach: %s\n' "$detach_enabled"
+    printf '  reset-db: %s\n' "$reset_db"
+
+    if [[ "$reset_db" == "true" ]]; then
+      reset_dev_database
+    else
+      cat <<'EOF'
+Note:
+- If startup fails with missing columns like `context_spaces.kind`, your local Postgres volume is from the old schema.
+- Recover with: ./run-all.sh up --reset-db
+EOF
+    fi
 
     compose_args=(up)
     if [[ "$build_enabled" == "true" ]]; then
