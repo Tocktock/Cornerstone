@@ -3,16 +3,18 @@ import { EmptyState } from '../components/EmptyState'
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/StatusPill'
 import { useAsyncData } from '../hooks/useAsyncData'
-import type { ContextSpaceRef, SourceConnectionStatus } from '../types/api'
+import type { ActorSession, ContextSpaceRef, SourceConnectionStatus } from '../types/api'
+import { formatLocalDateTime } from '../viewModels'
 
 type SourcesPageProps = {
   workspace: ContextSpaceRef
+  activeActor: ActorSession
 }
 
-export function SourcesPage({ workspace }: SourcesPageProps) {
+export function SourcesPage({ workspace, activeActor }: SourcesPageProps) {
   const sources = useAsyncData<SourceConnectionStatus[]>(
     () => apiGet('/source-connections'),
-    [workspace.context_space_id],
+    [workspace.context_space_id, activeActor.actor_id],
   )
 
   if (sources.error) {
@@ -29,28 +31,38 @@ export function SourcesPage({ workspace }: SourcesPageProps) {
       <div className="page-stack">
         {(sources.data ?? []).map((source) => (
           <article key={source.id} className="panel nested-panel">
-            <div className="page-header compact-header">
+            <div className="page-header compact-header source-card-header">
               <div>
                 <span className="eyebrow">{source.provider}</span>
                 <h3>{source.source_label}</h3>
-                <p>{source.source_boundary_locator}</p>
+                <p className="code-text source-locator">{source.source_boundary_locator}</p>
               </div>
               <div className="inline-meta">
                 <StatusPill value={source.source_connection_state} />
                 <StatusPill value={source.freshness_state} />
               </div>
             </div>
-            <div className="meta-grid compact-columns">
+            <div className="meta-grid compact-columns source-meta-grid">
               <div>
-                <strong>Visibility</strong>
+                <span className="mini-label">Visibility</span>
                 <p>{source.visibility_class}</p>
               </div>
               <div>
-                <strong>Last success</strong>
-                <p>{source.last_successful_sync_at ?? 'Never'}</p>
+                <span className="mini-label">Last success</span>
+                {source.last_successful_sync_at ? (
+                  <time dateTime={source.last_successful_sync_at} title={source.last_successful_sync_at}>
+                    {formatLocalDateTime(source.last_successful_sync_at)}
+                  </time>
+                ) : (
+                  <p>Never</p>
+                )}
               </div>
             </div>
-            {source.last_error ? <p className="error-text">{source.last_error}</p> : null}
+            {source.last_error ? (
+              <div className="alert-row error-text" role="alert">
+                {source.last_error}
+              </div>
+            ) : null}
           </article>
         ))}
       </div>

@@ -12,6 +12,7 @@ import { GraphPage } from './pages/GraphPage'
 import { ReviewPage } from './pages/ReviewPage'
 import { SourcesPage } from './pages/SourcesPage'
 import type { ViewerBootstrap } from './types/api'
+import { canActorReview } from './viewModels'
 
 export function App() {
   const bootstrap = useAsyncData<ViewerBootstrap>(() => apiGet('/bootstrap'), [])
@@ -61,6 +62,8 @@ export function App() {
     return <div className="loading-screen">Preparing actor session…</div>
   }
 
+  const reviewAccess = canActorReview(activeActor)
+
   function handleActorChange(actorId: string) {
     const nextActor = actors.find((actor) => actor.actor_id === actorId)
     if (nextActor) {
@@ -80,16 +83,27 @@ export function App() {
               workspace={bootstrap.data.workspace}
               actors={actors}
               activeActor={activeActor}
+              canReview={reviewAccess}
               onActorChange={handleActorChange}
             />
           }
         >
           <Route index element={<DashboardPage workspace={bootstrap.data.workspace} activeActor={activeActor} />} />
-          <Route path="glossary" element={<GlossaryPage workspace={bootstrap.data.workspace} />} />
-          <Route path="graph" element={<GraphPage workspace={bootstrap.data.workspace} />} />
-          <Route path="decisions" element={<DecisionsPage workspace={bootstrap.data.workspace} />} />
-          <Route path="review" element={<ReviewPage workspace={bootstrap.data.workspace} activeActor={activeActor} />} />
-          <Route path="sources" element={<SourcesPage workspace={bootstrap.data.workspace} />} />
+          <Route path="glossary" element={<GlossaryPage workspace={bootstrap.data.workspace} activeActor={activeActor} />} />
+          <Route path="graph" element={<GraphPage workspace={bootstrap.data.workspace} activeActor={activeActor} />} />
+          <Route path="decisions" element={<DecisionsPage workspace={bootstrap.data.workspace} activeActor={activeActor} />} />
+          <Route
+            path="review"
+            element={
+              <ReviewPage
+                workspace={bootstrap.data.workspace}
+                activeActor={activeActor}
+                actors={actors}
+                canReview={reviewAccess}
+              />
+            }
+          />
+          <Route path="sources" element={<SourcesPage workspace={bootstrap.data.workspace} activeActor={activeActor} />} />
         </Route>
       </Routes>
     </BrowserRouter>

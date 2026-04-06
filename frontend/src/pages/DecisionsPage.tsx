@@ -5,21 +5,22 @@ import { EmptyState } from '../components/EmptyState'
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/StatusPill'
 import { useAsyncData } from '../hooks/useAsyncData'
-import type { ContextSpaceRef, ContractEnvelope, DecisionPayload, ProvenancePayload } from '../types/api'
+import type { ActorSession, ContextSpaceRef, ContractEnvelope, DecisionPayload, ProvenancePayload } from '../types/api'
 
 type DecisionsPageProps = {
   workspace: ContextSpaceRef
+  activeActor: ActorSession
 }
 
-export function DecisionsPage({ workspace }: DecisionsPageProps) {
+export function DecisionsPage({ workspace, activeActor }: DecisionsPageProps) {
   const decisions = useAsyncData<ContractEnvelope<DecisionPayload>[]>(
     () => apiGet('/decisions'),
-    [workspace.context_space_id],
+    [workspace.context_space_id, activeActor.actor_id],
   )
   const [selectedDecisionId, setSelectedDecisionId] = useState<string | null>(null)
   const provenance = useAsyncData<ContractEnvelope<ProvenancePayload> | null>(
     () => (selectedDecisionId ? apiGet(`/provenance/decision/${selectedDecisionId}`) : Promise.resolve(null)),
-    [selectedDecisionId],
+    [selectedDecisionId, activeActor.actor_id],
   )
 
   useEffect(() => {
@@ -37,8 +38,8 @@ export function DecisionsPage({ workspace }: DecisionsPageProps) {
 
       {decisions.error ? <EmptyState title="Decisions unavailable" description={decisions.error} /> : null}
 
-      <div className="two-column-layout">
-        <div className="page-stack">
+      <div className="two-column-layout master-detail-layout">
+        <div className="page-stack master-list">
           {(decisions.data ?? []).map((envelope) => (
             <button
               key={envelope.payload.decision_id}
@@ -54,15 +55,16 @@ export function DecisionsPage({ workspace }: DecisionsPageProps) {
               </div>
               <p>{envelope.payload.decision_statement}</p>
               {envelope.payload.superseded_by_ref ? (
-                <p className="muted">
-                  Superseded by {envelope.payload.superseded_by_ref.resource_label}
-                </p>
+                <div className="chip-row lineage-row">
+                  <span className="chip subtle">Superseded by</span>
+                  <span className="chip">{envelope.payload.superseded_by_ref.resource_label}</span>
+                </div>
               ) : null}
             </button>
           ))}
         </div>
 
-        <article className="panel">
+        <article className="panel detail-pane mobile-priority">
           {provenance.data ? (
             <>
               <span className="eyebrow">Decision provenance</span>

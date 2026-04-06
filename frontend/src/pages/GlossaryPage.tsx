@@ -5,18 +5,22 @@ import { EmptyState } from '../components/EmptyState'
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/StatusPill'
 import { useAsyncData } from '../hooks/useAsyncData'
-import type { ConceptPayload, ContextSpaceRef, ContractEnvelope, ProvenancePayload } from '../types/api'
+import type { ActorSession, ConceptPayload, ContextSpaceRef, ContractEnvelope, ProvenancePayload } from '../types/api'
 
 type GlossaryPageProps = {
   workspace: ContextSpaceRef
+  activeActor: ActorSession
 }
 
-export function GlossaryPage({ workspace }: GlossaryPageProps) {
-  const concepts = useAsyncData<ContractEnvelope<ConceptPayload>[]>(() => apiGet('/concepts'), [workspace.context_space_id])
+export function GlossaryPage({ workspace, activeActor }: GlossaryPageProps) {
+  const concepts = useAsyncData<ContractEnvelope<ConceptPayload>[]>(
+    () => apiGet('/concepts'),
+    [workspace.context_space_id, activeActor.actor_id],
+  )
   const [selectedConceptId, setSelectedConceptId] = useState<string | null>(null)
   const provenance = useAsyncData<ContractEnvelope<ProvenancePayload> | null>(
     () => (selectedConceptId ? apiGet(`/provenance/concept/${selectedConceptId}`) : Promise.resolve(null)),
-    [selectedConceptId],
+    [selectedConceptId, activeActor.actor_id],
   )
 
   useEffect(() => {
@@ -34,8 +38,8 @@ export function GlossaryPage({ workspace }: GlossaryPageProps) {
 
       {concepts.error ? <EmptyState title="Concepts unavailable" description={concepts.error} /> : null}
 
-      <div className="two-column-layout">
-        <div className="page-stack">
+      <div className="two-column-layout master-detail-layout">
+        <div className="page-stack master-list">
           {(concepts.data ?? []).map((envelope) => (
             <button
               key={envelope.payload.concept_id}
@@ -54,7 +58,7 @@ export function GlossaryPage({ workspace }: GlossaryPageProps) {
           ))}
         </div>
 
-        <article className="panel">
+        <article className="panel detail-pane mobile-priority">
           {provenance.data ? (
             <>
               <span className="eyebrow">Provenance</span>

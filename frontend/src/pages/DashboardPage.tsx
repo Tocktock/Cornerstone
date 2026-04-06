@@ -93,11 +93,14 @@ export function DashboardPage({ workspace, activeActor }: DashboardPageProps) {
         />
       </div>
 
-      <article className="panel">
-        <PageHeader
-          title="Search and grounded answers"
-          description="This uses the same contract semantics as the MCP-style read path."
-        />
+      <article className="panel search-panel">
+        <div className="panel-heading panel-heading-start">
+          <div>
+            <span className="eyebrow">Cornerstone workspace</span>
+            <h3>Search and grounded answers</h3>
+          </div>
+          <p className="panel-copy">This uses the same contract semantics as the MCP-style read path.</p>
+        </div>
         <form className="search-form" onSubmit={handleQuery}>
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search workspace context" />
           <button type="submit" disabled={isSubmitting}>
@@ -108,37 +111,76 @@ export function DashboardPage({ workspace, activeActor }: DashboardPageProps) {
         {searchError ? <EmptyState title="Search failed" description={searchError} /> : null}
 
         {answer ? (
-          <div className="two-column-layout">
-            <article className="panel nested-panel">
-              <span className="eyebrow">Answer</span>
-              <div className="inline-meta">
-                <StatusPill value={answer.response_kind} />
-                <StatusPill value={isAnswerPayload(answer.payload) ? answer.payload.support_visibility : answer.payload.reason} />
+          <div className="answer-layout">
+            <article className="panel nested-panel answer-card">
+              <div className="panel-heading panel-heading-start">
+                <div>
+                  <span className="eyebrow">Answer</span>
+                  <h3>{query}</h3>
+                </div>
+                <div className="inline-meta">
+                  <StatusPill value={answer.response_kind} />
+                  <StatusPill value={isAnswerPayload(answer.payload) ? answer.payload.support_visibility : answer.payload.reason} />
+                </div>
               </div>
               {isAnswerPayload(answer.payload) ? (
                 <>
-                  <p>{answer.payload.answer_text}</p>
-                  <p className="muted">
+                  <p className="answer-summary">{answer.payload.answer_text}</p>
+                  <p className="muted answer-meta">
                     Verification: {answer.payload.verification_state} · Visible support items:{' '}
                     {answer.payload.visible_support_items.length}
                   </p>
+                  {answer.payload.answer_sections.length ? (
+                    <div className="section-grid">
+                      {answer.payload.answer_sections.map((section) => (
+                        <article key={section.heading} className="list-card compact-card">
+                          <strong>{section.heading}</strong>
+                          <p>{section.body}</p>
+                        </article>
+                      ))}
+                    </div>
+                  ) : null}
+                  {collectReferenceGroups(answer.payload).map((group) => (
+                    <div key={group.label} className="reference-group">
+                      <span className="mini-label">{group.label}</span>
+                      <div className="chip-row">
+                        {group.refs.map((ref) => (
+                          <span key={ref.resource_id} className="chip subtle">
+                            {ref.resource_label}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </>
               ) : (
                 <EmptyState title={answer.payload.reason} description={answer.payload.request_rewrite_hint ?? 'No answer available.'} />
               )}
             </article>
 
-            <article className="panel nested-panel">
-              <span className="eyebrow">Search results</span>
+            <article className="panel nested-panel results-card">
               {searchResults && isSearchResultsPayload(searchResults.payload) ? (
-                <ul className="stack-list">
+                <>
+                  <div className="panel-heading panel-heading-start">
+                    <div>
+                      <span className="eyebrow">Search results</span>
+                      <h3>{searchResults.payload.result_count} matches</h3>
+                    </div>
+                    <p className="panel-copy">Ranked records that match the current query.</p>
+                  </div>
+                  <ul className="stack-list">
                   {searchResults.payload.results.map((result: SearchResultItem) => (
-                    <li key={result.resource_ref.resource_id} className="list-card">
+                    <li key={result.resource_ref.resource_id} className="list-card compact-card">
                       <strong>{result.resource_ref.resource_label}</strong>
                       <p>{result.match_reason_summary}</p>
+                      <div className="inline-meta">
+                        {result.support_visibility ? <StatusPill value={result.support_visibility} /> : null}
+                        {result.verification_state ? <StatusPill value={result.verification_state} /> : null}
+                      </div>
                     </li>
                   ))}
-                </ul>
+                  </ul>
+                </>
               ) : (
                 <EmptyState
                   title={searchResults && !isSearchResultsPayload(searchResults.payload) ? searchResults.payload.reason : 'Run a search'}
@@ -177,4 +219,12 @@ function isAnswerPayload(payload: AnswerPayload | NoMatchPayload): payload is An
 
 function isSearchResultsPayload(payload: SearchResultsPayload | NoMatchPayload): payload is SearchResultsPayload {
   return 'results' in payload
+}
+
+function collectReferenceGroups(payload: AnswerPayload) {
+  return [
+    { label: 'Cited concepts', refs: payload.cited_concept_refs },
+    { label: 'Cited decisions', refs: payload.cited_decision_refs },
+    { label: 'Follow-up references', refs: payload.follow_up_refs },
+  ].filter((group) => group.refs.length)
 }
