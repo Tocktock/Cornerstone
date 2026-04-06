@@ -22,7 +22,7 @@ export function SourcesPage({ workspace, activeActor }: SourcesPageProps) {
   }
 
   return (
-    <section className="page-stack">
+    <section className="page-stack sources-page">
       <PageHeader
         title="Source status"
         description="This page is the operational symptom surface for current, stale, degraded, paused, and removed source states."
@@ -30,7 +30,7 @@ export function SourcesPage({ workspace, activeActor }: SourcesPageProps) {
 
       <div className="page-stack">
         {(sources.data ?? []).map((source) => (
-          <article key={source.id} className="panel nested-panel">
+          <article key={source.id} className="panel nested-panel source-card">
             <div className="page-header compact-header source-card-header">
               <div>
                 <span className="eyebrow">{source.provider}</span>

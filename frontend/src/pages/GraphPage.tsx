@@ -40,7 +40,7 @@ export function GraphPage({ workspace, activeActor }: GraphPageProps) {
   }
 
   return (
-    <section className="page-stack">
+    <section className="page-stack graph-page">
       <PageHeader
         title="Graph slice"
         description="Explore the current graph slice by selecting a concept and tracing the inbound and outbound relations around it."
@@ -48,7 +48,7 @@ export function GraphPage({ workspace, activeActor }: GraphPageProps) {
 
       {explorer ? (
         <>
-          <article className="panel">
+          <article className="panel graph-root-panel">
             <div className="panel-heading panel-heading-start">
               <div>
                 <span className="eyebrow">Root concepts</span>
@@ -81,7 +81,7 @@ export function GraphPage({ workspace, activeActor }: GraphPageProps) {
               </p>
 
               <div className="graph-relation-columns">
-                <section className="panel nested-panel relation-panel">
+                <section className="panel nested-panel relation-panel outbound-relations">
                   <div className="panel-heading panel-heading-start">
                     <div>
                       <span className="mini-label">Outbound</span>
@@ -109,7 +109,7 @@ export function GraphPage({ workspace, activeActor }: GraphPageProps) {
                   )}
                 </section>
 
-                <section className="panel nested-panel relation-panel">
+                <section className="panel nested-panel relation-panel inbound-relations">
                   <div className="panel-heading panel-heading-start">
                     <div>
                       <span className="mini-label">Inbound</span>
@@ -140,7 +140,7 @@ export function GraphPage({ workspace, activeActor }: GraphPageProps) {
             </article>
 
             <div className="page-stack">
-              <article className="panel">
+              <article className="panel graph-index-panel">
                 <div className="panel-heading panel-heading-start">
                   <div>
                     <span className="eyebrow">Concept index</span>

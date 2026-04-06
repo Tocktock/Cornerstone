@@ -64,7 +64,7 @@ export function DashboardPage({ workspace, activeActor }: DashboardPageProps) {
   }
 
   return (
-    <section className="page-stack">
+    <section className="page-stack dashboard-page">
       <PageHeader
         title="Workspace overview"
         description={`Viewing ${workspace.context_space_name} as ${activeActor.display_name}. The dashboard keeps search, trust disclosure, and source health visible in one place.`}
@@ -93,7 +93,7 @@ export function DashboardPage({ workspace, activeActor }: DashboardPageProps) {
         />
       </div>
 
-      <article className="panel search-panel">
+      <article className="panel search-panel dashboard-search-panel">
         <div className="panel-heading panel-heading-start">
           <div>
             <span className="eyebrow">Cornerstone workspace</span>
@@ -196,7 +196,7 @@ export function DashboardPage({ workspace, activeActor }: DashboardPageProps) {
         ) : null}
       </article>
 
-      <div className="card-grid">
+      <div className="card-grid dashboard-preview-grid">
         {(concepts.data ?? []).slice(0, 3).map((envelope) => (
           <article key={envelope.payload.concept_id} className="panel nested-panel">
             <span className="eyebrow">Concept</span>

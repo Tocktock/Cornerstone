@@ -30,7 +30,7 @@ export function DecisionsPage({ workspace, activeActor }: DecisionsPageProps) {
   }, [decisions.data, selectedDecisionId])
 
   return (
-    <section className="page-stack">
+    <section className="page-stack decisions-page">
       <PageHeader
         title="Decisions"
         description="Supersession lineage stays visible, and the detail cards preserve the canonical decision payload."
@@ -44,7 +44,7 @@ export function DecisionsPage({ workspace, activeActor }: DecisionsPageProps) {
             <button
               key={envelope.payload.decision_id}
               type="button"
-              className={`panel selectable-card ${selectedDecisionId === envelope.payload.decision_id ? 'selected' : ''}`}
+              className={`panel selectable-card decision-card ${selectedDecisionId === envelope.payload.decision_id ? 'selected' : ''}`}
               onClick={() => setSelectedDecisionId(envelope.payload.decision_id)}
             >
               <span className="eyebrow">{envelope.payload.owning_domain}</span>
@@ -64,7 +64,7 @@ export function DecisionsPage({ workspace, activeActor }: DecisionsPageProps) {
           ))}
         </div>
 
-        <article className="panel detail-pane mobile-priority">
+        <article className="panel detail-pane mobile-priority decisions-detail-panel">
           {provenance.data ? (
             <>
               <span className="eyebrow">Decision provenance</span>

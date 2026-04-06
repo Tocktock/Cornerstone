@@ -30,7 +30,7 @@ export function GlossaryPage({ workspace, activeActor }: GlossaryPageProps) {
   }, [concepts.data, selectedConceptId])
 
   return (
-    <section className="page-stack">
+    <section className="page-stack glossary-page">
       <PageHeader
         title="Glossary"
         description="Each concept view comes straight from the canonical concept envelope, including trust and provenance disclosure."
@@ -44,7 +44,7 @@ export function GlossaryPage({ workspace, activeActor }: GlossaryPageProps) {
             <button
               key={envelope.payload.concept_id}
               type="button"
-              className={`panel selectable-card ${selectedConceptId === envelope.payload.concept_id ? 'selected' : ''}`}
+              className={`panel selectable-card glossary-card ${selectedConceptId === envelope.payload.concept_id ? 'selected' : ''}`}
               onClick={() => setSelectedConceptId(envelope.payload.concept_id)}
             >
               <span className="eyebrow">{envelope.payload.owning_domain}</span>
@@ -58,7 +58,7 @@ export function GlossaryPage({ workspace, activeActor }: GlossaryPageProps) {
           ))}
         </div>
 
-        <article className="panel detail-pane mobile-priority">
+        <article className="panel detail-pane mobile-priority glossary-detail-panel">
           {provenance.data ? (
             <>
               <span className="eyebrow">Provenance</span>

@@ -51,7 +51,7 @@ export function ReviewPage({ workspace, activeActor, actors, canReview }: Review
   }
 
   return (
-    <section className="page-stack">
+    <section className="page-stack review-page">
       <PageHeader
         title="Review queue"
         description={`Acting as ${activeActor.display_name}. Cross-domain relations should reject domain-scoped review and require workspace review instead.`}
@@ -98,7 +98,7 @@ export function ReviewPage({ workspace, activeActor, actors, canReview }: Review
                 <button type="button" onClick={() => runReview(item, 'officialize')}>
                   Officialize
                 </button>
-                <button type="button" className="ghost-button" onClick={() => runReview(item, 'reject')}>
+                <button type="button" className="ghost-button destructive-button" onClick={() => runReview(item, 'reject')}>
                   Reject
                 </button>
               </div>
