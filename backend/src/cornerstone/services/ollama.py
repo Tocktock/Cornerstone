@@ -38,7 +38,11 @@ class OllamaClient:
         evidence: list[EvidenceRead],
     ) -> str:
         evidence_blocks = "\n\n".join(
-            f"[{index}] {item.artifact_title}\nSelector: {item.selector}\nExcerpt: {_truncate(item.excerpt, 400)}"
+            (
+                f"[{index}] {item.artifact_title}\n"
+                f"Selector: {item.selector}\n"
+                f"Excerpt: {_truncate(item.excerpt, 400)}"
+            )
             for index, item in enumerate(evidence, start=1)
         )
         prompt = (

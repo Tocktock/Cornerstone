@@ -1,79 +1,59 @@
-import { useState } from 'react'
-
-import { apiGet, apiPost } from '../api/client'
+import { apiGet } from '../api/client'
 import { EmptyState } from '../components/EmptyState'
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/StatusPill'
 import { useAsyncData } from '../hooks/useAsyncData'
-import type { SourceConnection } from '../types/api'
+import type { ContextSpaceRef, SourceConnectionStatus } from '../types/api'
 
 type SourcesPageProps = {
-  contextSpaceId: string | null
+  workspace: ContextSpaceRef
 }
 
-export function SourcesPage({ contextSpaceId }: SourcesPageProps) {
-  const [isSyncingId, setIsSyncingId] = useState<string | null>(null)
-  const sources = useAsyncData<SourceConnection[]>(
-    () => (contextSpaceId ? apiGet('/source-connections', { context_space_id: contextSpaceId }) : Promise.resolve([])),
-    [contextSpaceId],
+export function SourcesPage({ workspace }: SourcesPageProps) {
+  const sources = useAsyncData<SourceConnectionStatus[]>(
+    () => apiGet('/source-connections'),
+    [workspace.context_space_id],
   )
 
-  async function syncConnection(connectionId: string) {
-    setIsSyncingId(connectionId)
-    try {
-      await apiPost(`/source-connections/${connectionId}/sync`)
-      const refreshed = await apiGet<SourceConnection[]>('/source-connections', {
-        context_space_id: contextSpaceId ?? undefined,
-      })
-      sources.setData(refreshed)
-    } finally {
-      setIsSyncingId(null)
-    }
-  }
-
-  if (!contextSpaceId) {
-    return <EmptyState title="No sources yet" description="Wait for the backend bootstrap process to finish." />
+  if (sources.error) {
+    return <EmptyState title="Source status unavailable" description={sources.error} />
   }
 
   return (
-    <div className="page-stack">
+    <section className="page-stack">
       <PageHeader
-        title="Source connections"
-        description="Connector health, eventual sync state, and scope for source-backed ingestion."
+        title="Source status"
+        description="This page is the operational symptom surface for current, stale, degraded, paused, and removed source states."
       />
 
-      <div className="stack-list">
+      <div className="page-stack">
         {(sources.data ?? []).map((source) => (
-          <article key={source.id} className="panel list-card">
-            <div className="card-row between start">
+          <article key={source.id} className="panel nested-panel">
+            <div className="page-header compact-header">
               <div>
                 <span className="eyebrow">{source.provider}</span>
-                <h3>{source.external_scope}</h3>
+                <h3>{source.source_label}</h3>
+                <p>{source.source_boundary_locator}</p>
               </div>
-              <StatusPill value={source.health_status} />
-            </div>
-            <div className="meta-grid">
-              <div>
-                <strong>Sync mode</strong>
-                <span>{source.sync_mode}</span>
-              </div>
-              <div>
-                <strong>Interval</strong>
-                <span>{source.sync_interval_seconds}s</span>
-              </div>
-              <div>
-                <strong>Last synced</strong>
-                <span>{source.last_synced_at ?? 'Not synced yet'}</span>
+              <div className="inline-meta">
+                <StatusPill value={source.source_connection_state} />
+                <StatusPill value={source.freshness_state} />
               </div>
             </div>
-            <div className="button-row">
-              <button onClick={() => syncConnection(source.id)} disabled={isSyncingId === source.id}>
-                {isSyncingId === source.id ? 'Syncing…' : 'Run sync'}
-              </button>
+            <div className="meta-grid compact-columns">
+              <div>
+                <strong>Visibility</strong>
+                <p>{source.visibility_class}</p>
+              </div>
+              <div>
+                <strong>Last success</strong>
+                <p>{source.last_successful_sync_at ?? 'Never'}</p>
+              </div>
             </div>
+            {source.last_error ? <p className="error-text">{source.last_error}</p> : null}
           </article>
         ))}
       </div>
-    </div>
+    </section>
   )
 }

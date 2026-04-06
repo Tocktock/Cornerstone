@@ -3,76 +3,63 @@ import { EmptyState } from '../components/EmptyState'
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/StatusPill'
 import { useAsyncData } from '../hooks/useAsyncData'
-import type { GraphResponse, Relation } from '../types/api'
+import type { ContextSpaceRef, ContractEnvelope, GraphSlicePayload } from '../types/api'
 
 type GraphPageProps = {
-  contextSpaceId: string | null
+  workspace: ContextSpaceRef
 }
 
-export function GraphPage({ contextSpaceId }: GraphPageProps) {
-  const graph = useAsyncData<GraphResponse>(
-    () => (contextSpaceId ? apiGet('/graph', { context_space_id: contextSpaceId }) : Promise.resolve({ nodes: [], edges: [] })),
-    [contextSpaceId],
-  )
-  const relations = useAsyncData<Relation[]>(
-    () => (contextSpaceId ? apiGet('/relations', { context_space_id: contextSpaceId }) : Promise.resolve([])),
-    [contextSpaceId],
-  )
+export function GraphPage({ workspace }: GraphPageProps) {
+  const graph = useAsyncData<ContractEnvelope<GraphSlicePayload>>(() => apiGet('/graph'), [workspace.context_space_id])
 
-  if (!contextSpaceId) {
-    return <EmptyState title="No graph yet" description="The graph view appears after the first context space is ready." />
+  if (graph.error) {
+    return <EmptyState title="Graph unavailable" description={graph.error} />
   }
 
   return (
-    <div className="page-stack">
+    <section className="page-stack">
       <PageHeader
-        title="Ontology and context graph"
-        description="Official concept relations expressed as reviewable assertions with provenance."
+        title="Graph slice"
+        description="The graph surface shows the same relation semantics the API and MCP-style adapter expose."
       />
 
-      <section className="two-column-layout">
-        <article className="panel">
-          <div className="panel-heading">
-            <div>
-              <span className="eyebrow">Nodes</span>
-              <h3>Concept map</h3>
+      {graph.data ? (
+        <>
+          <article className="panel">
+            <span className="eyebrow">Roots</span>
+            <div className="inline-meta">
+              {graph.data.payload.root_concept_refs.map((root) => (
+                <StatusPill key={root.resource_id} value={root.resource_label} />
+              ))}
             </div>
-          </div>
-          <div className="graph-node-grid">
-            {(graph.data?.nodes ?? []).map((node) => (
-              <div key={node.id} className="graph-node-card">
-                <span className="eyebrow">{node.type}</span>
-                <strong>{node.label}</strong>
-                <StatusPill value={node.status} />
-              </div>
-            ))}
-          </div>
-        </article>
+          </article>
 
-        <article className="panel">
-          <div className="panel-heading">
-            <div>
-              <span className="eyebrow">Edges</span>
-              <h3>Relation flow</h3>
-            </div>
-          </div>
-          <div className="stack-list">
-            {(relations.data ?? []).map((relation) => (
-              <article key={relation.id} className="list-card relation-card">
-                <div className="card-row between">
-                  <div className="relation-line">
-                    <span>{relation.subject_name}</span>
-                    <span className="relation-predicate">{relation.predicate}</span>
-                    <span>{relation.object_name}</span>
-                  </div>
-                  <StatusPill value={relation.status} />
-                </div>
-                <p>{relation.description}</p>
+          <div className="card-grid">
+            {graph.data.payload.nodes.map((node) => (
+              <article key={node.resource_id} className="graph-node-card">
+                <span className="eyebrow">{node.resource_kind}</span>
+                <h3>{node.resource_label}</h3>
               </article>
             ))}
           </div>
-        </article>
-      </section>
-    </div>
+
+          <div className="page-stack">
+            {graph.data.payload.edges.map((edge) => (
+              <article key={edge.relation_ref.resource_id} className="panel nested-panel">
+                <strong>
+                  {edge.subject_concept_ref.resource_label} {edge.predicate} {edge.object_concept_ref.resource_label}
+                </strong>
+                <div className="inline-meta">
+                  <StatusPill value={edge.support_visibility} />
+                  <StatusPill value={edge.verification_state} />
+                </div>
+              </article>
+            ))}
+          </div>
+        </>
+      ) : (
+        <EmptyState title="Graph is loading" description="No graph data yet." />
+      )}
+    </section>
   )
 }

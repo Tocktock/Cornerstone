@@ -1,0 +1,130 @@
+{
+  "consumer_scope": "member",
+  "context_space_ref": {
+    "context_space_id": "ctx_6d31237828743f52",
+    "context_space_kind": "workspace",
+    "context_space_name": "Cornerstone Workspace"
+  },
+  "contract_version": "2026-04-p0",
+  "payload": {
+    "answer_sections": [
+      {
+        "body": "Private Escalation Trigger, VIP Escalation Insight",
+        "heading": "Concepts"
+      }
+    ],
+    "answer_status": "official",
+    "answer_text": "Answer for 'escalation' in member scope. Key concepts: Private Escalation Trigger, VIP Escalation Insight. Decisions: Risk-Based Escalation Routing, Legacy Escalation Routing.",
+    "cited_concept_refs": [
+      {
+        "resource_id": "concept_7c7cc05d4dcc4e33",
+        "resource_kind": "concept",
+        "resource_label": "Private Escalation Trigger"
+      },
+      {
+        "resource_id": "concept_f98d3867058c4cfd",
+        "resource_kind": "concept",
+        "resource_label": "VIP Escalation Insight"
+      }
+    ],
+    "cited_decision_refs": [
+      {
+        "resource_id": "decision_f7311d3e5f5b07d1",
+        "resource_kind": "decision",
+        "resource_label": "Risk-Based Escalation Routing"
+      },
+      {
+        "resource_id": "decision_4b6b68806e3267d9",
+        "resource_kind": "decision",
+        "resource_label": "Legacy Escalation Routing"
+      }
+    ],
+    "cited_relation_refs": [],
+    "follow_up_refs": [
+      {
+        "resource_id": "concept_7c7cc05d4dcc4e33",
+        "resource_kind": "concept",
+        "resource_label": "Private Escalation Trigger"
+      },
+      {
+        "resource_id": "concept_f98d3867058c4cfd",
+        "resource_kind": "concept",
+        "resource_label": "VIP Escalation Insight"
+      },
+      {
+        "resource_id": "decision_f7311d3e5f5b07d1",
+        "resource_kind": "decision",
+        "resource_label": "Risk-Based Escalation Routing"
+      },
+      {
+        "resource_id": "decision_4b6b68806e3267d9",
+        "resource_kind": "decision",
+        "resource_label": "Legacy Escalation Routing"
+      }
+    ],
+    "provenance_summary": {
+      "freshness_state": "current",
+      "promotion_lineage_present": true,
+      "restricted_support_present": true,
+      "support_item_count": 4,
+      "verification_state": "verified",
+      "visible_support_item_count": 3
+    },
+    "support_visibility": "source_backed",
+    "verification_state": "verified",
+    "visible_support_items": [
+      {
+        "excerpt_or_summary": "A redacted executive insight recommends risk-based escalation for VIP incidents.",
+        "origin_disclosure_level": "redacted_origin",
+        "source_label": "Promoted personal support",
+        "source_locator": "workspace-promotion:promoted_7d9be9b6ed97f06f",
+        "support_item_id": "promoted_7d9be9b6ed97f06f",
+        "support_item_kind": "promoted_support",
+        "visibility_class": "member_visible"
+      },
+      {
+        "excerpt_or_summary": "The ops playbook defines the shared incident response steps and is visible to all workspace members.",
+        "origin_disclosure_level": null,
+        "source_label": "Workspace handbook",
+        "source_locator": "file://ops-playbook.md",
+        "support_item_id": "supp_83aa1a47572ceec1",
+        "support_item_kind": "evidence_fragment",
+        "visibility_class": "member_visible"
+      },
+      {
+        "excerpt_or_summary": "Legacy escalation routing waited for partner SLA breach confirmation before escalating an incident.",
+        "origin_disclosure_level": null,
+        "source_label": "Workspace handbook",
+        "source_locator": "file://legacy-routing.md",
+        "support_item_id": "supp_d98b269173a5e983",
+        "support_item_kind": "evidence_fragment",
+        "visibility_class": "member_visible"
+      }
+    ]
+  },
+  "related_refs": [
+    {
+      "resource_id": "concept_7c7cc05d4dcc4e33",
+      "resource_kind": "concept",
+      "resource_label": "Private Escalation Trigger"
+    },
+    {
+      "resource_id": "concept_f98d3867058c4cfd",
+      "resource_kind": "concept",
+      "resource_label": "VIP Escalation Insight"
+    },
+    {
+      "resource_id": "decision_f7311d3e5f5b07d1",
+      "resource_kind": "decision",
+      "resource_label": "Risk-Based Escalation Routing"
+    },
+    {
+      "resource_id": "decision_4b6b68806e3267d9",
+      "resource_kind": "decision",
+      "resource_label": "Legacy Escalation Routing"
+    }
+  ],
+  "request_intent": "get_answer",
+  "response_kind": "answer",
+  "warnings": []
+}

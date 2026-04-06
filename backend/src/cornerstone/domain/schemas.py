@@ -1,191 +1,316 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from cornerstone.domain.enums import (
-    ActorType,
-    ConceptStatus,
-    ConceptType,
-    DecisionStatus,
-    RelationStatus,
+    AnswerStatus,
+    ConceptKind,
+    ConsumerScope,
+    ContextSpaceKind,
+    CuratedLifecycleState,
+    DecisionLifecycleState,
+    FreshnessState,
+    NoMatchReason,
+    OriginDisclosureLevel,
+    RequestIntent,
+    ResourceKind,
+    ResponseKind,
+    ReviewAction,
+    SharedSelectionKind,
+    SourceConnectionState,
+    SupportItemKind,
+    SupportVisibility,
     SyncMode,
+    VerificationState,
+    VisibilityClass,
 )
 
 
-class ORMModel(BaseModel):
+class ContractModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ContextSpaceRead(ORMModel):
-    id: str
-    name: str
-    namespace: str
-    status: str
-    created_at: datetime
-    updated_at: datetime
-
-
-class ActorRead(ORMModel):
-    id: str
+class ContextSpaceRef(ContractModel):
     context_space_id: str
-    actor_type: ActorType
-    display_name: str
-    roles: list[str]
-    status: str
+    context_space_kind: ContextSpaceKind
+    context_space_name: str
 
 
-class SourceConnectionRead(ORMModel):
-    id: str
-    context_space_id: str
-    provider: str
-    external_scope: str
-    sync_mode: SyncMode
-    sync_interval_seconds: int
-    health_status: str
-    last_synced_at: datetime | None
-    last_error: str | None
+class ResourceRef(ContractModel):
+    resource_kind: ResourceKind
+    resource_id: str
+    resource_label: str
 
 
-class EvidenceRead(BaseModel):
-    id: str
-    selector: str
-    excerpt: str
-    normalized_claim: str
-    verification_status: str
-    artifact_id: str
-    artifact_title: str
-    artifact_url: str
+class SupportItemSummary(ContractModel):
+    support_item_id: str
+    support_item_kind: SupportItemKind
+    visibility_class: VisibilityClass
+    source_label: str
+    excerpt_or_summary: str | None = None
+    origin_disclosure_level: OriginDisclosureLevel | None = None
+    source_locator: str | None = None
 
 
-class ConceptRead(BaseModel):
-    id: str
-    context_space_id: str
-    concept_type: ConceptType
-    canonical_name: str
-    aliases: list[str]
-    definition: str
-    status: ConceptStatus
-    evidence: list[EvidenceRead]
-    linked_decisions: list[str]
+class ProvenanceSummary(ContractModel):
+    support_item_count: int
+    visible_support_item_count: int
+    restricted_support_present: bool
+    freshness_state: FreshnessState
+    verification_state: VerificationState | None = None
+    promotion_lineage_present: bool
 
 
-class RelationRead(BaseModel):
-    id: str
-    context_space_id: str
-    subject_concept_id: str
-    subject_name: str
-    predicate: str
-    object_concept_id: str
-    object_name: str
-    description: str
-    status: RelationStatus
-    evidence: list[EvidenceRead]
-    linked_decisions: list[str]
-
-
-class DecisionRead(BaseModel):
-    id: str
-    context_space_id: str
-    title: str
-    problem: str
-    decision: str
-    rationale: str
-    constraints: list[str]
-    impact: list[str]
-    status: DecisionStatus
-    evidence: list[EvidenceRead]
-    concepts: list[str]
-    relations: list[str]
-
-
-class ArtifactRead(BaseModel):
-    id: str
-    context_space_id: str
-    source_connection_id: str
-    external_id: str
-    artifact_type: str
-    title: str
-    canonical_url: str
-    status: str
-    evidence_count: int
-    metadata_json: dict[str, Any]
-
-
-class GraphNode(BaseModel):
-    id: str
-    label: str
-    type: str
-    status: str
-
-
-class GraphEdge(BaseModel):
-    id: str
-    source: str
-    target: str
-    label: str
-    status: str
-
-
-class GraphResponse(BaseModel):
-    nodes: list[GraphNode]
-    edges: list[GraphEdge]
-
-
-class StructuredAnswerResponse(BaseModel):
-    query: str
-    summary: str
-    concepts: list[ConceptRead]
-    relations: list[RelationRead]
-    decisions: list[DecisionRead]
-    evidence: list[EvidenceRead]
-
-
-class SyncRunResult(BaseModel):
-    source_connection_id: str
-    artifact_count: int
-    evidence_count: int
-    concept_count: int
-    relation_count: int
-    decision_count: int
-
-
-class ConceptCreate(BaseModel):
-    context_space_id: str
-    concept_type: ConceptType
+class ConceptPayload(ContractModel):
+    concept_id: str
+    public_slug: str
     canonical_name: str
     aliases: list[str] = Field(default_factory=list)
     definition: str
-    owner_actor_id: str | None = None
-    evidence_fragment_ids: list[str] = Field(default_factory=list)
+    owning_domain: str
+    review_domain: str
+    lifecycle_state: CuratedLifecycleState
+    verification_state: VerificationState
+    support_visibility: SupportVisibility
+    visible_support_items: list[SupportItemSummary] = Field(default_factory=list)
+    linked_relation_refs: list[ResourceRef] = Field(default_factory=list)
+    linked_decision_refs: list[ResourceRef] = Field(default_factory=list)
+    provenance_summary: ProvenanceSummary
+
+
+class RelationPayload(ContractModel):
+    relation_id: str
+    subject_concept_ref: ResourceRef
+    predicate: str
+    object_concept_ref: ResourceRef
+    description: str | None = None
+    review_domain: str
+    lifecycle_state: CuratedLifecycleState
+    verification_state: VerificationState
+    support_visibility: SupportVisibility
+    visible_support_items: list[SupportItemSummary] = Field(default_factory=list)
+    linked_decision_refs: list[ResourceRef] = Field(default_factory=list)
+    provenance_summary: ProvenanceSummary
+
+
+class DecisionPayload(ContractModel):
+    decision_id: str
+    title: str
+    decision_statement: str
+    problem_statement: str | None = None
+    rationale: str | None = None
+    constraints: list[str] = Field(default_factory=list)
+    impact_summary: str | None = None
+    owning_domain: str
+    review_domain: str
+    lifecycle_state: DecisionLifecycleState
+    support_visibility: SupportVisibility
+    visible_support_items: list[SupportItemSummary] = Field(default_factory=list)
+    linked_concept_refs: list[ResourceRef] = Field(default_factory=list)
+    linked_relation_refs: list[ResourceRef] = Field(default_factory=list)
+    supersedes_ref: ResourceRef | None = None
+    superseded_by_ref: ResourceRef | None = None
+    provenance_summary: ProvenanceSummary
+
+
+class AnswerSection(ContractModel):
+    heading: str
+    body: str
+
+
+class AnswerPayload(ContractModel):
+    answer_status: AnswerStatus
+    answer_text: str
+    answer_sections: list[AnswerSection] = Field(default_factory=list)
+    support_visibility: SupportVisibility
+    verification_state: VerificationState
+    visible_support_items: list[SupportItemSummary] = Field(default_factory=list)
+    cited_concept_refs: list[ResourceRef] = Field(default_factory=list)
+    cited_relation_refs: list[ResourceRef] = Field(default_factory=list)
+    cited_decision_refs: list[ResourceRef] = Field(default_factory=list)
+    provenance_summary: ProvenanceSummary
+    follow_up_refs: list[ResourceRef] = Field(default_factory=list)
+
+
+class SearchResultItem(ContractModel):
+    resource_ref: ResourceRef
+    match_reason_summary: str
+    support_visibility: SupportVisibility | None = None
+    lifecycle_state: CuratedLifecycleState | DecisionLifecycleState | None = None
+    verification_state: VerificationState | None = None
+    provenance_summary: ProvenanceSummary | None = None
+
+
+class SearchResultsPayload(ContractModel):
+    results: list[SearchResultItem] = Field(default_factory=list)
+    result_count: int
+
+
+class GraphEdgePayload(ContractModel):
+    relation_ref: ResourceRef
+    subject_concept_ref: ResourceRef
+    predicate: str
+    object_concept_ref: ResourceRef
+    support_visibility: SupportVisibility
+    verification_state: VerificationState
+
+
+class GraphSlicePayload(ContractModel):
+    root_concept_refs: list[ResourceRef]
+    nodes: list[ResourceRef]
+    edges: list[GraphEdgePayload] = Field(default_factory=list)
+
+
+class SourceSummary(ContractModel):
+    source_connection_id: str
+    source_label: str
+    source_connection_state: SourceConnectionState
+    freshness_state: FreshnessState
+    visibility_class: VisibilityClass
+    last_attempted_sync_at: datetime | None = None
+    last_successful_sync_at: datetime | None = None
+    effective_sync_policy: dict[str, object] = Field(default_factory=dict)
+    last_error: str | None = None
+
+
+class ProvenancePayload(ContractModel):
+    subject_ref: ResourceRef
+    support_items: list[SupportItemSummary] = Field(default_factory=list)
+    source_summaries: list[SourceSummary] = Field(default_factory=list)
+    provenance_summary: ProvenanceSummary
+
+
+class SuggestedFollowUp(ContractModel):
+    label: str
+    resource_ref: ResourceRef | None = None
+
+
+class NoMatchPayload(ContractModel):
+    reason: NoMatchReason
+    request_rewrite_hint: str | None = None
+    suggested_follow_up: list[SuggestedFollowUp] = Field(default_factory=list)
+
+
+PayloadT = TypeVar("PayloadT", bound=BaseModel)
+
+
+class ContractEnvelope[PayloadT](ContractModel):
+    contract_version: str
+    response_kind: ResponseKind
+    request_intent: RequestIntent
+    context_space_ref: ContextSpaceRef
+    consumer_scope: ConsumerScope
+    payload: PayloadT
+    related_refs: list[ResourceRef] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
+class SourceConnectionStatus(ContractModel):
+    id: str
+    context_space_id: str
+    provider: str
+    source_label: str
+    source_boundary_locator: str
+    visibility_class: VisibilityClass
+    sync_mode: SyncMode
+    sync_interval_seconds: int
+    source_connection_state: SourceConnectionState
+    freshness_state: FreshnessState
+    last_attempted_sync_at: datetime | None = None
+    last_successful_sync_at: datetime | None = None
+    last_error: str | None = None
+    effective_sync_policy: dict[str, object] = Field(default_factory=dict)
+    removed_at: datetime | None = None
+
+
+class ReviewQueueItem(ContractModel):
+    resource_ref: ResourceRef
+    review_domain: str
+    lifecycle_state: CuratedLifecycleState | DecisionLifecycleState
+    verification_state: VerificationState
+    support_visibility: SupportVisibility
+    suggested_actions: list[ReviewAction] = Field(default_factory=list)
+
+
+class ActorSession(ContractModel):
+    actor_id: str
+    display_name: str
+    base_role: str
+    token: str
+    preferred_consumer_scope: ConsumerScope
+
+
+class ViewerBootstrap(ContractModel):
+    workspace: ContextSpaceRef
+    personal_context: ContextSpaceRef
+    actors: list[ActorSession] = Field(default_factory=list)
+
+
+class SyncRunResult(ContractModel):
+    source_connection_id: str
+    artifact_count: int
+    support_item_count: int
+    source_connection_state: SourceConnectionState
+    freshness_state: FreshnessState
+
+
+class DraftConceptCreate(ContractModel):
+    context_space_id: str
+    canonical_name: str
+    definition: str
+    owning_domain: str
+    concept_kind: ConceptKind = ConceptKind.TERM
+    aliases: list[str] = Field(default_factory=list)
+    support_item_ids: list[str] = Field(default_factory=list)
     linked_decision_ids: list[str] = Field(default_factory=list)
 
 
-class RelationCreate(BaseModel):
+class DraftRelationCreate(ContractModel):
     context_space_id: str
     subject_concept_id: str
     predicate: str
     object_concept_id: str
-    description: str = ""
-    evidence_fragment_ids: list[str] = Field(default_factory=list)
+    description: str | None = None
+    support_item_ids: list[str] = Field(default_factory=list)
     linked_decision_ids: list[str] = Field(default_factory=list)
+    workspace_wide: bool = False
 
 
-class DecisionCreate(BaseModel):
+class DraftDecisionCreate(ContractModel):
     context_space_id: str
     title: str
-    problem: str
-    decision: str
-    rationale: str
+    decision_statement: str
+    owning_domain: str
+    problem_statement: str | None = None
+    rationale: str | None = None
     constraints: list[str] = Field(default_factory=list)
-    impact: list[str] = Field(default_factory=list)
-    evidence_fragment_ids: list[str] = Field(default_factory=list)
+    impact_summary: str | None = None
+    support_item_ids: list[str] = Field(default_factory=list)
     linked_concept_ids: list[str] = Field(default_factory=list)
     linked_relation_ids: list[str] = Field(default_factory=list)
+    supersedes_decision_id: str | None = None
 
 
-class ReviewActionRequest(BaseModel):
-    actor_id: str
-    action: str
+class PromotionRequest(ContractModel):
+    personal_support_item_id: str
+    workspace_context_id: str
+    shared_selection_kind: SharedSelectionKind
+    shared_payload: str
+    visibility_class: VisibilityClass = VisibilityClass.MEMBER_VISIBLE
+    origin_disclosure_level: OriginDisclosureLevel = OriginDisclosureLevel.REDACTED_ORIGIN
+
+
+class ReviewActionRequest(ContractModel):
+    action: ReviewAction
+    supersedes_decision_id: str | None = None
+
+
+class McpReadRequest(ContractModel):
+    request_intent: RequestIntent
+    resource_kind: ResourceKind | None = None
+    resource_id: str | None = None
+    query: str | None = None
+    root_concept_id: str | None = None

@@ -36,6 +36,10 @@ where = ["src"]
 minversion = "8.0"
 addopts = "-ra"
 testpaths = ["tests"]
+markers = [
+  "smoke: curated smoke coverage for fixture slices",
+  "corpus: opt-in full corpus regression coverage",
+]
 
 [tool.ruff]
 line-length = 100

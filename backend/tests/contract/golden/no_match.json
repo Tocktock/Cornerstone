@@ -1,0 +1,18 @@
+{
+  "consumer_scope": "member",
+  "context_space_ref": {
+    "context_space_id": "ctx_6d31237828743f52",
+    "context_space_kind": "workspace",
+    "context_space_name": "Cornerstone Workspace"
+  },
+  "contract_version": "2026-04-p0",
+  "payload": {
+    "reason": "no_official_match",
+    "request_rewrite_hint": "Try a narrower domain term or inspect provenance from review scope.",
+    "suggested_follow_up": []
+  },
+  "related_refs": [],
+  "request_intent": "search_context",
+  "response_kind": "no_match",
+  "warnings": []
+}

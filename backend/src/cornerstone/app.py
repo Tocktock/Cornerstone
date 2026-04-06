@@ -19,7 +19,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI):
         app.state.settings = resolved_settings
         app.state.db = database
-        initialize_database(database.engine)
+        initialize_database(database.engine, reset=resolved_settings.reset_database_on_start)
         if resolved_settings.auto_seed_demo:
             with database.session_factory() as session:
                 seed_demo(session, resolved_settings)

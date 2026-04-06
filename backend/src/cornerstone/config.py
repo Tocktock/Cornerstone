@@ -6,50 +6,51 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-def discover_source_root(start_cwd: Path | None = None, config_file: Path | None = None) -> str:
-    cwd = (start_cwd or Path.cwd()).resolve()
-    config_path = (config_file or Path(__file__)).resolve()
+def _discover_repo_root() -> Path:
+    return Path(__file__).resolve().parents[3]
 
-    search_roots: list[Path] = []
-    seen: set[Path] = set()
 
-    def add_root(path: Path) -> None:
-        resolved = path.resolve()
-        if resolved not in seen:
-            seen.add(resolved)
-            search_roots.append(resolved)
+def discover_fixture_root() -> str:
+    return str((_discover_repo_root() / "backend" / "fixtures").resolve())
 
-    add_root(cwd)
-    add_root(cwd.parent)
-    for parent in config_path.parents:
-        add_root(parent)
 
-    for root in search_roots:
-        candidate = root / "demo_sources"
-        if candidate.exists():
-            return str(candidate)
+def discover_workspace_source_root() -> str:
+    return str(
+        (Path(discover_fixture_root()) / "minimal" / "workspace" / "member-visible").resolve()
+    )
 
-    return str((cwd.parent / "demo_sources").resolve())
+
+def discover_personal_source_root() -> str:
+    return str(
+        (Path(discover_fixture_root()) / "minimal" / "personal" / "member-private").resolve()
+    )
 
 
 class Settings(BaseSettings):
     app_name: str = "Cornerstone"
     api_prefix: str = "/api/v1"
-    database_url: str = "sqlite:///./data/cornerstone.db"
-    source_root: str = Field(default_factory=discover_source_root)
+    contract_version: str = "2026-04-p0"
+
+    database_url: str = "postgresql+psycopg://cornerstone:cornerstone@localhost:5432/cornerstone"
     auto_seed_demo: bool = True
-    ollama_enabled: bool = False
-    ollama_base_url: str = "http://127.0.0.1:11434"
-    ollama_chat_model: str = "qwen3:0.6b"
-    ollama_embedding_model: str = "qwen3-embedding:0.6b"
-    ollama_timeout_seconds: int = 30
-    answer_candidate_artifact_limit: int = 24
-    answer_candidate_evidence_limit: int = 48
-    answer_prompt_evidence_limit: int = 6
-    answer_max_evidence: int = 12
-    default_context_space_name: str = "Cornerstone"
-    default_context_space_namespace: str = "cornerstone"
+    reset_database_on_start: bool = False
+
+    fixture_root: str = Field(default_factory=discover_fixture_root)
+    workspace_source_root: str = Field(default_factory=discover_workspace_source_root)
+    personal_source_root: str = Field(default_factory=discover_personal_source_root)
+    corpus_source_root: str = "sample-data/sendy-knowledge"
+
+    fixed_now: str | None = None
+    freshness_target_hours: int = 24
+    source_stale_after_hours: int = 48
+    source_drift_after_hours: int = 96
+
+    default_workspace_name: str = "Cornerstone Workspace"
+    default_workspace_slug: str = "cornerstone"
+    default_personal_name: str = "Member Personal Context"
+    default_personal_slug: str = "cornerstone-member-personal"
     default_sync_interval_seconds: int = 300
+
     cors_origins: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:5173",

@@ -1,0 +1,51 @@
+{
+  "consumer_scope": "member",
+  "context_space_ref": {
+    "context_space_id": "ctx_6d31237828743f52",
+    "context_space_kind": "workspace",
+    "context_space_name": "Cornerstone Workspace"
+  },
+  "contract_version": "2026-04-p0",
+  "payload": {
+    "provenance_summary": {
+      "freshness_state": "current",
+      "promotion_lineage_present": true,
+      "restricted_support_present": false,
+      "support_item_count": 1,
+      "verification_state": "verified",
+      "visible_support_item_count": 1
+    },
+    "source_summaries": [],
+    "subject_ref": {
+      "resource_id": "concept_f98d3867058c4cfd",
+      "resource_kind": "concept",
+      "resource_label": "VIP Escalation Insight"
+    },
+    "support_items": [
+      {
+        "excerpt_or_summary": "A redacted executive insight recommends risk-based escalation for VIP incidents.",
+        "origin_disclosure_level": "redacted_origin",
+        "source_label": "Promoted personal support",
+        "source_locator": "workspace-promotion:promoted_7d9be9b6ed97f06f",
+        "support_item_id": "promoted_7d9be9b6ed97f06f",
+        "support_item_kind": "promoted_support",
+        "visibility_class": "member_visible"
+      }
+    ]
+  },
+  "related_refs": [
+    {
+      "resource_id": "concept_f98d3867058c4cfd",
+      "resource_kind": "concept",
+      "resource_label": "VIP Escalation Insight"
+    },
+    {
+      "resource_id": "promoted_7d9be9b6ed97f06f",
+      "resource_kind": "support_item",
+      "resource_label": "Promoted personal support"
+    }
+  ],
+  "request_intent": "follow_provenance",
+  "response_kind": "provenance",
+  "warnings": []
+}

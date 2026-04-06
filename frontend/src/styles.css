@@ -301,6 +301,17 @@ p {
   flex-wrap: wrap;
 }
 
+.search-form input {
+  flex: 1 1 320px;
+}
+
+.inline-meta {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .answer-block,
 .stack-list,
 .compact-list {
@@ -331,6 +342,39 @@ p {
 .large-card h3,
 .list-card h3 {
   margin: 0.35rem 0 0.55rem;
+}
+
+.nested-panel {
+  box-shadow: none;
+}
+
+.selectable-card {
+  text-align: left;
+  border-radius: var(--border-radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: none;
+}
+
+.selectable-card.selected {
+  border-color: rgba(125, 211, 252, 0.42);
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.persona-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+}
+
+.persona-picker select {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(2, 6, 23, 0.5);
+  color: var(--text-strong);
+  padding: 0.8rem 0.9rem;
 }
 
 .relation-line {
@@ -376,7 +420,10 @@ p {
 .status-pill.accepted,
 .status-pill.verified,
 .status-pill.healthy,
-.status-pill.active {
+.status-pill.active,
+.status-pill.source_backed,
+.status-pill.current,
+.status-pill.member_visible {
   background: rgba(52, 211, 153, 0.16);
   color: #bbf7d0;
 }
@@ -384,13 +431,16 @@ p {
 .status-pill.draft,
 .status-pill.proposed,
 .status-pill.pending,
-.status-pill.unverified {
+.status-pill.unverified,
+.status-pill.monitoring,
+.status-pill.review_required {
   background: rgba(251, 191, 36, 0.14);
   color: #fde68a;
 }
 
 .status-pill.deprecated,
-.status-pill.superseded {
+.status-pill.superseded,
+.status-pill.restricted_support {
   background: rgba(148, 163, 184, 0.16);
   color: #cbd5e1;
 }
@@ -398,7 +448,12 @@ p {
 .status-pill.rejected,
 .status-pill.error,
 .status-pill.removed,
-.status-pill.inactive {
+.status-pill.inactive,
+.status-pill.degraded,
+.status-pill.evidence_only,
+.status-pill.insufficient_support,
+.status-pill.stale,
+.status-pill.drift_detected {
   background: rgba(251, 113, 133, 0.16);
   color: #fecdd3;
 }
@@ -430,6 +485,19 @@ p {
 .empty-state {
   display: grid;
   place-items: start;
+}
+
+.success-banner {
+  border-color: rgba(52, 211, 153, 0.32);
+  color: #bbf7d0;
+}
+
+.error-text {
+  color: #fecdd3;
+}
+
+.compact-header {
+  align-items: start;
 }
 
 .dense-list {

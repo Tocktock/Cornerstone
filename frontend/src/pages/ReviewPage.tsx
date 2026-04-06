@@ -1,180 +1,85 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { apiGet, apiPost } from '../api/client'
 import { EmptyState } from '../components/EmptyState'
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/StatusPill'
 import { useAsyncData } from '../hooks/useAsyncData'
-import type { Concept, Decision, Relation } from '../types/api'
+import type { ActorSession, ContextSpaceRef, ReviewQueueItem } from '../types/api'
 
 type ReviewPageProps = {
-  contextSpaceId: string | null
-  reviewerId: string | null
+  workspace: ContextSpaceRef
+  activeActor: ActorSession
 }
 
-type ReviewBundle = {
-  concepts: Concept[]
-  relations: Relation[]
-  decisions: Decision[]
-}
-
-export function ReviewPage({ contextSpaceId, reviewerId }: ReviewPageProps) {
-  const [busyKey, setBusyKey] = useState<string | null>(null)
-  const reviewData = useAsyncData<ReviewBundle>(
-    async () => {
-      const [concepts, relations, decisions] = await Promise.all([
-        contextSpaceId ? apiGet<Concept[]>('/concepts', { context_space_id: contextSpaceId }) : Promise.resolve([]),
-        contextSpaceId ? apiGet<Relation[]>('/relations', { context_space_id: contextSpaceId }) : Promise.resolve([]),
-        contextSpaceId ? apiGet<Decision[]>('/decisions', { context_space_id: contextSpaceId }) : Promise.resolve([]),
-      ])
-      return { concepts, relations, decisions }
-    },
-    [contextSpaceId],
+export function ReviewPage({ workspace, activeActor }: ReviewPageProps) {
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [actionMessage, setActionMessage] = useState<string | null>(null)
+  const queue = useAsyncData<ReviewQueueItem[]>(
+    () => apiGet('/review-queue'),
+    [workspace.context_space_id, activeActor.actor_id, refreshKey],
   )
 
-  const draftConcepts = useMemo(
-    () => (reviewData.data?.concepts ?? []).filter((item) => item.status === 'DRAFT'),
-    [reviewData.data],
-  )
-  const draftRelations = useMemo(
-    () => (reviewData.data?.relations ?? []).filter((item) => item.status === 'DRAFT'),
-    [reviewData.data],
-  )
-  const proposedDecisions = useMemo(
-    () => (reviewData.data?.decisions ?? []).filter((item) => item.status === 'PROPOSED'),
-    [reviewData.data],
-  )
+  async function runReview(item: ReviewQueueItem, action: 'officialize' | 'reject') {
+    setActionError(null)
+    setActionMessage(null)
+    const basePath =
+      item.resource_ref.resource_kind === 'concept'
+        ? '/concepts'
+        : item.resource_ref.resource_kind === 'relation'
+          ? '/relations'
+          : '/decisions'
 
-  async function reviewItem(kind: 'concepts' | 'relations' | 'decisions', id: string, action: string) {
-    if (!reviewerId) {
-      return
-    }
-    setBusyKey(`${kind}-${id}-${action}`)
     try {
-      const refreshed = await apiPost<Concept | Relation | Decision>(`/${kind}/${id}/review`, {
-        actor_id: reviewerId,
-        action,
-      })
-      reviewData.setData((current) => {
-        if (!current) return current
-        const updated = { ...current }
-        if (kind === 'concepts') {
-          updated.concepts = current.concepts.map((item) => (item.id === id ? (refreshed as Concept) : item))
-        }
-        if (kind === 'relations') {
-          updated.relations = current.relations.map((item) => (item.id === id ? (refreshed as Relation) : item))
-        }
-        if (kind === 'decisions') {
-          updated.decisions = current.decisions.map((item) => (item.id === id ? (refreshed as Decision) : item))
-        }
-        return updated
-      })
+      await apiPost(`${basePath}/${item.resource_ref.resource_id}/review`, { action })
+      setActionMessage(`${action} succeeded for ${item.resource_ref.resource_label}.`)
+      setRefreshKey((value) => value + 1)
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Review action failed.')
-    } finally {
-      setBusyKey(null)
+      setActionError(error instanceof Error ? error.message : 'Review action failed.')
     }
   }
 
-  if (!contextSpaceId) {
-    return <EmptyState title="No review queue" description="Reviewable items appear after the first sync." />
+  if (queue.error) {
+    return <EmptyState title="Review scope unavailable" description={queue.error} />
   }
 
   return (
-    <div className="page-stack">
+    <section className="page-stack">
       <PageHeader
         title="Review queue"
-        description="Human approval is the gate for official concepts, relations, and decision records."
+        description={`Acting as ${activeActor.display_name}. Cross-domain relations should reject domain-scoped review and require workspace review instead.`}
       />
 
-      <section className="review-grid">
-        <article className="panel">
-          <div className="panel-heading">
-            <div>
-              <span className="eyebrow">Concepts</span>
-              <h3>Draft glossary entries</h3>
-            </div>
-          </div>
-          <div className="stack-list">
-            {draftConcepts.map((concept) => (
-              <article key={concept.id} className="list-card">
-                <div className="card-row between">
-                  <strong>{concept.canonical_name}</strong>
-                  <StatusPill value={concept.status} />
-                </div>
-                <p>{concept.definition}</p>
-                <div className="button-row">
-                  <button
-                    onClick={() => reviewItem('concepts', concept.id, 'approve')}
-                    disabled={busyKey === `concepts-${concept.id}-approve`}
-                  >
-                    Approve
-                  </button>
-                  <button className="ghost-button" onClick={() => reviewItem('concepts', concept.id, 'reject')}>
-                    Reject
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        </article>
+      {actionError ? <EmptyState title="Review action failed" description={actionError} /> : null}
+      {actionMessage ? <div className="panel success-banner">{actionMessage}</div> : null}
 
-        <article className="panel">
-          <div className="panel-heading">
-            <div>
-              <span className="eyebrow">Relations</span>
-              <h3>Draft graph assertions</h3>
-            </div>
-          </div>
-          <div className="stack-list">
-            {draftRelations.map((relation) => (
-              <article key={relation.id} className="list-card relation-card">
-                <div className="card-row between">
-                  <div className="relation-line">
-                    <span>{relation.subject_name}</span>
-                    <span className="relation-predicate">{relation.predicate}</span>
-                    <span>{relation.object_name}</span>
-                  </div>
-                  <StatusPill value={relation.status} />
-                </div>
-                <p>{relation.description}</p>
-                <div className="button-row">
-                  <button onClick={() => reviewItem('relations', relation.id, 'approve')}>Approve</button>
-                  <button className="ghost-button" onClick={() => reviewItem('relations', relation.id, 'reject')}>
-                    Reject
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        </article>
-      </section>
-
-      <section className="panel">
-        <div className="panel-heading">
-          <div>
-            <span className="eyebrow">Decisions</span>
-            <h3>Proposed decision records</h3>
-          </div>
-        </div>
-        <div className="stack-list">
-          {proposedDecisions.map((decision) => (
-            <article key={decision.id} className="list-card">
-              <div className="card-row between">
-                <strong>{decision.title}</strong>
-                <StatusPill value={decision.status} />
+      {queue.data?.length ? (
+        <div className="page-stack">
+          {queue.data.map((item) => (
+            <article key={item.resource_ref.resource_id} className="panel nested-panel">
+              <span className="eyebrow">{item.review_domain}</span>
+              <h3>{item.resource_ref.resource_label}</h3>
+              <div className="inline-meta">
+                <StatusPill value={item.resource_ref.resource_kind} />
+                <StatusPill value={item.lifecycle_state} />
+                <StatusPill value={item.verification_state} />
               </div>
-              <p>{decision.decision}</p>
+              <p className="muted">Support disclosure: {item.support_visibility}</p>
               <div className="button-row">
-                <button onClick={() => reviewItem('decisions', decision.id, 'approve')}>Approve</button>
-                <button className="ghost-button" onClick={() => reviewItem('decisions', decision.id, 'reject')}>
+                <button type="button" onClick={() => runReview(item, 'officialize')}>
+                  Officialize
+                </button>
+                <button type="button" className="ghost-button" onClick={() => runReview(item, 'reject')}>
                   Reject
                 </button>
               </div>
             </article>
           ))}
         </div>
-      </section>
-    </div>
+      ) : (
+        <EmptyState title="Queue is clear" description="No draft or review-required shared objects are waiting right now." />
+      )}
+    </section>
   )
 }

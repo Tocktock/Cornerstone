@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-
 from pathlib import Path
 
 from sqlalchemy import create_engine
@@ -15,7 +14,13 @@ class Database:
             db_path = Path(database_url.removeprefix("sqlite:///"))
             if db_path.parent and str(db_path.parent) != ".":
                 db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.engine = create_engine(database_url, future=True, pool_pre_ping=True, connect_args=connect_args)
+
+        self.engine = create_engine(
+            database_url,
+            future=True,
+            pool_pre_ping=True,
+            connect_args=connect_args,
+        )
         self.session_factory = sessionmaker(
             bind=self.engine,
             autoflush=False,

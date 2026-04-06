@@ -20,17 +20,17 @@ services:
       context: ./backend
     environment:
       CORNERSTONE_DATABASE_URL: ${CORNERSTONE_DATABASE_URL:-postgresql+psycopg://cornerstone:cornerstone@db:5432/cornerstone}
-      CORNERSTONE_SOURCE_ROOT: ${CORNERSTONE_SOURCE_ROOT:-/workspace/demo_sources}
+      CORNERSTONE_FIXTURE_ROOT: ${CORNERSTONE_FIXTURE_ROOT:-/workspace/fixtures}
+      CORNERSTONE_WORKSPACE_SOURCE_ROOT: ${CORNERSTONE_WORKSPACE_SOURCE_ROOT:-/workspace/fixtures/minimal/workspace/member-visible}
+      CORNERSTONE_PERSONAL_SOURCE_ROOT: ${CORNERSTONE_PERSONAL_SOURCE_ROOT:-/workspace/fixtures/minimal/personal/member-private}
+      CORNERSTONE_CORPUS_SOURCE_ROOT: ${CORNERSTONE_CORPUS_SOURCE_ROOT:-/workspace/sample-data/sendy-knowledge}
       CORNERSTONE_AUTO_SEED_DEMO: ${CORNERSTONE_AUTO_SEED_DEMO:-true}
+      CORNERSTONE_RESET_DATABASE_ON_START: ${CORNERSTONE_RESET_DATABASE_ON_START:-false}
       CORNERSTONE_CORS_ORIGINS: ${CORNERSTONE_CORS_ORIGINS:-["http://localhost:5173"]}
-      CORNERSTONE_OLLAMA_ENABLED: ${CORNERSTONE_OLLAMA_ENABLED:-false}
-      CORNERSTONE_OLLAMA_BASE_URL: ${CORNERSTONE_OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      CORNERSTONE_OLLAMA_CHAT_MODEL: ${CORNERSTONE_OLLAMA_CHAT_MODEL:-qwen3:0.6b}
-      CORNERSTONE_OLLAMA_EMBEDDING_MODEL: ${CORNERSTONE_OLLAMA_EMBEDDING_MODEL:-qwen3-embedding:0.6b}
     command: ["uvicorn", "cornerstone.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:
       - ./backend:/app
-      - ./demo_sources:/workspace/demo_sources:ro
+      - ./backend/fixtures:/workspace/fixtures:ro
       - ./sample-data:/workspace/sample-data:ro
     depends_on:
       db:

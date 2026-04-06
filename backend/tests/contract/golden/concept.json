@@ -1,0 +1,79 @@
+{
+  "consumer_scope": "member",
+  "context_space_ref": {
+    "context_space_id": "ctx_6d31237828743f52",
+    "context_space_kind": "workspace",
+    "context_space_name": "Cornerstone Workspace"
+  },
+  "contract_version": "2026-04-p0",
+  "payload": {
+    "aliases": [],
+    "canonical_name": "Ops Playbook",
+    "concept_id": "concept_b563f7c5f23a2537",
+    "definition": "The shared operating handbook for incident response.",
+    "lifecycle_state": "official",
+    "linked_decision_refs": [
+      {
+        "resource_id": "decision_4b6b68806e3267d9",
+        "resource_kind": "decision",
+        "resource_label": "Legacy Escalation Routing"
+      },
+      {
+        "resource_id": "decision_f7311d3e5f5b07d1",
+        "resource_kind": "decision",
+        "resource_label": "Risk-Based Escalation Routing"
+      }
+    ],
+    "linked_relation_refs": [
+      {
+        "resource_id": "rel_7b7bbb385c4e1b1a",
+        "resource_kind": "relation",
+        "resource_label": "Ops Playbook depends_on Partner SLA"
+      }
+    ],
+    "owning_domain": "sales_ops",
+    "provenance_summary": {
+      "freshness_state": "current",
+      "promotion_lineage_present": false,
+      "restricted_support_present": false,
+      "support_item_count": 1,
+      "verification_state": "verified",
+      "visible_support_item_count": 1
+    },
+    "public_slug": "ops-playbook",
+    "review_domain": "sales_ops",
+    "support_visibility": "source_backed",
+    "verification_state": "verified",
+    "visible_support_items": [
+      {
+        "excerpt_or_summary": "The ops playbook defines the shared incident response steps and is visible to all workspace members.",
+        "origin_disclosure_level": null,
+        "source_label": "Workspace handbook",
+        "source_locator": "file://ops-playbook.md",
+        "support_item_id": "supp_83aa1a47572ceec1",
+        "support_item_kind": "evidence_fragment",
+        "visibility_class": "member_visible"
+      }
+    ]
+  },
+  "related_refs": [
+    {
+      "resource_id": "rel_7b7bbb385c4e1b1a",
+      "resource_kind": "relation",
+      "resource_label": "Ops Playbook depends_on Partner SLA"
+    },
+    {
+      "resource_id": "decision_4b6b68806e3267d9",
+      "resource_kind": "decision",
+      "resource_label": "Legacy Escalation Routing"
+    },
+    {
+      "resource_id": "decision_f7311d3e5f5b07d1",
+      "resource_kind": "decision",
+      "resource_label": "Risk-Based Escalation Routing"
+    }
+  ],
+  "request_intent": "get_concept",
+  "response_kind": "concept",
+  "warnings": []
+}

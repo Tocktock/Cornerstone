@@ -1,0 +1,3 @@
+ticket_id,status,summary
+INC-1001,open,Partner onboarding incident is under active review
+INC-1002,resolved,Escalation routing was updated after post-incident review

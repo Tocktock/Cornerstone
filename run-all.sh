@@ -8,18 +8,20 @@ ENV_EXAMPLE="$ROOT_DIR/.env.example"
 
 usage() {
   cat <<'EOF'
-Usage: ./run-all.sh [up|down|logs|ps] [options]
+Usage: ./run-all.sh [up|down|logs|ps|check] [options]
 
 Commands:
   up            Start the full Cornerstone stack. Default command.
   down          Stop and remove the stack.
   logs          Follow Compose logs for all services.
   ps            Show Compose service status.
+  check         Run the full local quality gate once.
 
 Options:
   --sample-data Use sample-data instead of demo_sources.
   --demo-data   Use demo_sources. Default.
   --ollama      Enable Ollama-backed answering.
+  --with-corpus Include the opt-in full corpus smoke during check.
   --no-build    Skip docker image rebuild on startup.
   -d, --detach  Run startup in the background.
   -h, --help    Show this help text.
@@ -39,7 +41,7 @@ ensure_prerequisites() {
   docker compose version >/dev/null 2>&1 || fail "docker compose is required"
   docker info >/dev/null 2>&1 || fail "docker daemon is not running"
 
-  if [[ ! -f "$ENV_FILE" ]]; then
+  if [[ "$command_name" != "check" && ! -f "$ENV_FILE" ]]; then
     cp "$ENV_EXAMPLE" "$ENV_FILE"
     printf 'Created %s from %s\n' "$ENV_FILE" "$ENV_EXAMPLE"
   fi
@@ -78,15 +80,53 @@ run_compose() {
   )
 }
 
+run_make() {
+  (
+    cd "$ROOT_DIR"
+    make "$@"
+  )
+}
+
+run_checks() {
+  command -v make >/dev/null 2>&1 || fail "make is required"
+
+  cleanup_stack="true"
+  trap 'if [[ "$cleanup_stack" == "true" ]]; then run_make test-stack-down >/dev/null 2>&1 || true; fi' EXIT
+
+  printf 'Running Cornerstone quality gate\n'
+  printf '  lint\n'
+  run_make lint
+
+  printf '  typecheck\n'
+  run_make typecheck
+
+  printf '  backend-fast\n'
+  run_make backend-fast
+
+  printf '  backend-integration\n'
+  run_make backend-integration
+
+  printf '  symptoms\n'
+  run_make symptoms
+
+  if [[ "$with_corpus" == "true" ]]; then
+    printf '  corpus-smoke\n'
+    run_make corpus-smoke
+  fi
+
+  printf 'Cornerstone quality gate passed.\n'
+}
+
 command_name="up"
 data_mode="demo"
 ollama_enabled="false"
 build_enabled="true"
 detach_enabled="false"
+with_corpus="false"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    up | down | logs | ps)
+    up | down | logs | ps | check)
       command_name="$1"
       ;;
     --sample-data)
@@ -97,6 +137,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     --ollama)
       ollama_enabled="true"
+      ;;
+    --with-corpus)
+      with_corpus="true"
       ;;
     --no-build)
       build_enabled="false"
@@ -155,5 +198,8 @@ EOF
     ;;
   ps)
     run_compose ps
+    ;;
+  check)
+    run_checks
     ;;
 esac

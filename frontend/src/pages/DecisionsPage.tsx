@@ -1,83 +1,93 @@
+import { useEffect, useState } from 'react'
+
 import { apiGet } from '../api/client'
 import { EmptyState } from '../components/EmptyState'
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/StatusPill'
 import { useAsyncData } from '../hooks/useAsyncData'
-import type { Decision } from '../types/api'
+import type { ContextSpaceRef, ContractEnvelope, DecisionPayload, ProvenancePayload } from '../types/api'
 
 type DecisionsPageProps = {
-  contextSpaceId: string | null
+  workspace: ContextSpaceRef
 }
 
-export function DecisionsPage({ contextSpaceId }: DecisionsPageProps) {
-  const decisions = useAsyncData<Decision[]>(
-    () => (contextSpaceId ? apiGet('/decisions', { context_space_id: contextSpaceId }) : Promise.resolve([])),
-    [contextSpaceId],
+export function DecisionsPage({ workspace }: DecisionsPageProps) {
+  const decisions = useAsyncData<ContractEnvelope<DecisionPayload>[]>(
+    () => apiGet('/decisions'),
+    [workspace.context_space_id],
+  )
+  const [selectedDecisionId, setSelectedDecisionId] = useState<string | null>(null)
+  const provenance = useAsyncData<ContractEnvelope<ProvenancePayload> | null>(
+    () => (selectedDecisionId ? apiGet(`/provenance/decision/${selectedDecisionId}`) : Promise.resolve(null)),
+    [selectedDecisionId],
   )
 
-  if (!contextSpaceId) {
-    return <EmptyState title="No decisions" description="Decision records will appear once seeded data is ready." />
-  }
+  useEffect(() => {
+    if (!selectedDecisionId && decisions.data?.[0]) {
+      setSelectedDecisionId(decisions.data[0].payload.decision_id)
+    }
+  }, [decisions.data, selectedDecisionId])
 
   return (
-    <div className="page-stack">
+    <section className="page-stack">
       <PageHeader
-        title="Decision records"
-        description="Reviewable organizational rationale connected to concepts, relations, and evidence."
+        title="Decisions"
+        description="Supersession lineage stays visible, and the detail cards preserve the canonical decision payload."
       />
 
-      <div className="stack-list">
-        {(decisions.data ?? []).map((decision) => (
-          <article key={decision.id} className="panel list-card large-card">
-            <div className="card-row between start">
-              <div>
-                <span className="eyebrow">Decision record</span>
-                <h3>{decision.title}</h3>
+      {decisions.error ? <EmptyState title="Decisions unavailable" description={decisions.error} /> : null}
+
+      <div className="two-column-layout">
+        <div className="page-stack">
+          {(decisions.data ?? []).map((envelope) => (
+            <button
+              key={envelope.payload.decision_id}
+              type="button"
+              className={`panel selectable-card ${selectedDecisionId === envelope.payload.decision_id ? 'selected' : ''}`}
+              onClick={() => setSelectedDecisionId(envelope.payload.decision_id)}
+            >
+              <span className="eyebrow">{envelope.payload.owning_domain}</span>
+              <h3>{envelope.payload.title}</h3>
+              <div className="inline-meta">
+                <StatusPill value={envelope.payload.lifecycle_state} />
+                <StatusPill value={envelope.payload.support_visibility} />
               </div>
-              <StatusPill value={decision.status} />
-            </div>
-            <div className="detail-grid">
-              <div>
-                <strong>Problem</strong>
-                <p>{decision.problem}</p>
-              </div>
-              <div>
-                <strong>Decision</strong>
-                <p>{decision.decision}</p>
-              </div>
-              <div>
-                <strong>Rationale</strong>
-                <p>{decision.rationale}</p>
-              </div>
-            </div>
-            <div className="chip-row">
-              {decision.concepts.map((concept) => (
-                <span key={concept} className="chip">
-                  {concept}
-                </span>
-              ))}
-            </div>
-            <div className="two-column-layout compact-columns">
-              <div>
-                <strong>Constraints</strong>
-                <ul className="dense-list">
-                  {decision.constraints.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <strong>Impact</strong>
-                <ul className="dense-list">
-                  {decision.impact.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </article>
-        ))}
+              <p>{envelope.payload.decision_statement}</p>
+              {envelope.payload.superseded_by_ref ? (
+                <p className="muted">
+                  Superseded by {envelope.payload.superseded_by_ref.resource_label}
+                </p>
+              ) : null}
+            </button>
+          ))}
+        </div>
+
+        <article className="panel">
+          {provenance.data ? (
+            <>
+              <span className="eyebrow">Decision provenance</span>
+              <h3>{provenance.data.payload.subject_ref.resource_label}</h3>
+              <p className="muted">
+                Support items: {provenance.data.payload.provenance_summary.support_item_count} · Promotion lineage:{' '}
+                {String(provenance.data.payload.provenance_summary.promotion_lineage_present)}
+              </p>
+              <ul className="stack-list">
+                {provenance.data.payload.support_items.map((item) => (
+                  <li key={item.support_item_id} className="list-card">
+                    <strong>{item.source_label}</strong>
+                    <p>{item.excerpt_or_summary ?? 'No excerpt available.'}</p>
+                    {item.origin_disclosure_level ? (
+                      <p className="muted">Origin disclosure: {item.origin_disclosure_level}</p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <EmptyState title="Select a decision" description="Decision provenance will appear here." />
+          )}
+        </article>
       </div>
-    </div>
+    </section>
   )
 }

@@ -1,0 +1,77 @@
+{
+  "consumer_scope": "member",
+  "context_space_ref": {
+    "context_space_id": "ctx_6d31237828743f52",
+    "context_space_kind": "workspace",
+    "context_space_name": "Cornerstone Workspace"
+  },
+  "contract_version": "2026-04-p0",
+  "payload": {
+    "edges": [
+      {
+        "object_concept_ref": {
+          "resource_id": "concept_41fe14a77e413ffa",
+          "resource_kind": "concept",
+          "resource_label": "Partner SLA"
+        },
+        "predicate": "depends_on",
+        "relation_ref": {
+          "resource_id": "rel_7b7bbb385c4e1b1a",
+          "resource_kind": "relation",
+          "resource_label": "Ops Playbook depends_on Partner SLA"
+        },
+        "subject_concept_ref": {
+          "resource_id": "concept_b563f7c5f23a2537",
+          "resource_kind": "concept",
+          "resource_label": "Ops Playbook"
+        },
+        "support_visibility": "source_backed",
+        "verification_state": "verified"
+      }
+    ],
+    "nodes": [
+      {
+        "resource_id": "concept_b563f7c5f23a2537",
+        "resource_kind": "concept",
+        "resource_label": "Ops Playbook"
+      },
+      {
+        "resource_id": "concept_41fe14a77e413ffa",
+        "resource_kind": "concept",
+        "resource_label": "Partner SLA"
+      }
+    ],
+    "root_concept_refs": [
+      {
+        "resource_id": "concept_b563f7c5f23a2537",
+        "resource_kind": "concept",
+        "resource_label": "Ops Playbook"
+      }
+    ]
+  },
+  "related_refs": [
+    {
+      "resource_id": "concept_b563f7c5f23a2537",
+      "resource_kind": "concept",
+      "resource_label": "Ops Playbook"
+    },
+    {
+      "resource_id": "concept_b563f7c5f23a2537",
+      "resource_kind": "concept",
+      "resource_label": "Ops Playbook"
+    },
+    {
+      "resource_id": "concept_41fe14a77e413ffa",
+      "resource_kind": "concept",
+      "resource_label": "Partner SLA"
+    },
+    {
+      "resource_id": "rel_7b7bbb385c4e1b1a",
+      "resource_kind": "relation",
+      "resource_label": "Ops Playbook depends_on Partner SLA"
+    }
+  ],
+  "request_intent": "get_graph_slice",
+  "response_kind": "graph_slice",
+  "warnings": []
+}

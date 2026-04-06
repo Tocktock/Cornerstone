@@ -1,0 +1,74 @@
+{
+  "consumer_scope": "member",
+  "context_space_ref": {
+    "context_space_id": "ctx_6d31237828743f52",
+    "context_space_kind": "workspace",
+    "context_space_name": "Cornerstone Workspace"
+  },
+  "contract_version": "2026-04-p0",
+  "payload": {
+    "description": "The playbook references the partner SLA during response.",
+    "lifecycle_state": "official",
+    "linked_decision_refs": [
+      {
+        "resource_id": "decision_f7311d3e5f5b07d1",
+        "resource_kind": "decision",
+        "resource_label": "Risk-Based Escalation Routing"
+      }
+    ],
+    "object_concept_ref": {
+      "resource_id": "concept_41fe14a77e413ffa",
+      "resource_kind": "concept",
+      "resource_label": "Partner SLA"
+    },
+    "predicate": "depends_on",
+    "provenance_summary": {
+      "freshness_state": "current",
+      "promotion_lineage_present": false,
+      "restricted_support_present": false,
+      "support_item_count": 1,
+      "verification_state": "verified",
+      "visible_support_item_count": 1
+    },
+    "relation_id": "rel_7b7bbb385c4e1b1a",
+    "review_domain": "sales_ops",
+    "subject_concept_ref": {
+      "resource_id": "concept_b563f7c5f23a2537",
+      "resource_kind": "concept",
+      "resource_label": "Ops Playbook"
+    },
+    "support_visibility": "source_backed",
+    "verification_state": "verified",
+    "visible_support_items": [
+      {
+        "excerpt_or_summary": "The ops playbook defines the shared incident response steps and is visible to all workspace members.",
+        "origin_disclosure_level": null,
+        "source_label": "Workspace handbook",
+        "source_locator": "file://ops-playbook.md",
+        "support_item_id": "supp_83aa1a47572ceec1",
+        "support_item_kind": "evidence_fragment",
+        "visibility_class": "member_visible"
+      }
+    ]
+  },
+  "related_refs": [
+    {
+      "resource_id": "concept_b563f7c5f23a2537",
+      "resource_kind": "concept",
+      "resource_label": "Ops Playbook"
+    },
+    {
+      "resource_id": "concept_41fe14a77e413ffa",
+      "resource_kind": "concept",
+      "resource_label": "Partner SLA"
+    },
+    {
+      "resource_id": "decision_f7311d3e5f5b07d1",
+      "resource_kind": "decision",
+      "resource_label": "Risk-Based Escalation Routing"
+    }
+  ],
+  "request_intent": "get_relation",
+  "response_kind": "relation",
+  "warnings": []
+}
