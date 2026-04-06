@@ -49,3 +49,7 @@ The following areas may still evolve, but they no longer block P0 implementation
    - The implementation now treats the test environment itself as a product surface.
    - Fast domain checks, Postgres-backed integration and contract checks, and browser symptom tests are all wired into one local command path.
    - The one-shot operator entrypoint is `./run-all.sh check`, with the full corpus smoke remaining opt-in via `--with-corpus`.
+
+9. **Local dev database isolation**
+   - The normal dev Compose stack now uses a P0-specific Postgres volume name.
+   - This prevents the rewritten schema from accidentally booting against the legacy pre-P0 local database volume.

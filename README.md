@@ -62,3 +62,5 @@ The default quality gate currently runs:
 - `make backend-fast`
 - `make backend-integration`
 - `make symptoms`
+
+The local dev stack now uses a P0-specific Postgres volume so `./run-all.sh up` does not reuse the legacy pre-P0 schema volume by accident.
