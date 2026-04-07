@@ -1,0 +1,40 @@
+{
+  "id": "source_450a61aeb213f1a9",
+  "context_space_id": "ctx_6d31237828743f52",
+  "provider": "notion",
+  "source_label": "Snapshot Notion KB",
+  "source_boundary_locator": "notion://page-tree/11111111-1111-1111-1111-111111111111",
+  "template_key": "notion_shared_page_tree",
+  "visibility_class": "member_visible",
+  "sync_mode": "scheduled_sync",
+  "sync_interval_seconds": 900,
+  "source_connection_state": "active",
+  "freshness_state": "monitoring",
+  "last_attempted_sync_at": "2026-04-06T00:00:00Z",
+  "last_successful_sync_at": "2026-04-06T00:00:00Z",
+  "last_error": null,
+  "effective_sync_policy": {
+    "mode": "scheduled_incremental_with_fallback",
+    "provider": "notion",
+    "template_key": "notion_shared_page_tree",
+    "strategy": "fallback_scan"
+  },
+  "next_scheduled_sync_at": "2026-04-06T00:15:00Z",
+  "last_run_at": "2026-04-06T00:00:00Z",
+  "last_run_status": "succeeded",
+  "can_manage": true,
+  "removed_at": null,
+  "provider_credential_ref": null,
+  "selected_scope_json": {
+    "scope_kind": "page_tree",
+    "object_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Cornerstone Handbook",
+    "url": "https://www.notion.so/Cornerstone-Handbook-11111111111111111111111111111111",
+    "input": "11111111-1111-1111-1111-111111111111",
+    "source_label": "Snapshot Notion KB"
+  },
+  "sync_checkpoint_json": {
+    "strategy": "fallback_scan",
+    "last_synced_at": "2026-04-06T08:30:00+09:00"
+  }
+}

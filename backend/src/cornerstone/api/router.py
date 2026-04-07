@@ -8,6 +8,7 @@ from cornerstone.api.deps import get_consumer_scope, get_current_actor, get_db, 
 from cornerstone.config import Settings
 from cornerstone.domain.enums import (
     BaseRole,
+    ConnectorAction,
     ConsumerScope,
     ContextSpaceKind,
     RequestIntent,
@@ -18,21 +19,31 @@ from cornerstone.domain.models import (
     Actor,
     Concept,
     ConceptRelation,
-    ConnectorScopeGrant,
     ContextSpace,
     DecisionRecord,
     SourceConnection,
 )
 from cornerstone.domain.schemas import (
     ActorSession,
+    ConnectorTemplateSummary,
     DraftConceptCreate,
     DraftDecisionCreate,
     DraftRelationCreate,
     McpReadRequest,
     PromotionRequest,
+    ProviderBindingCompleteRequest,
+    ProviderBindingStartResponse,
+    ProviderBindingSummary,
     ReviewActionRequest,
     ReviewQueueItem,
+    SourceConnectionCreate,
+    SourceConnectionDetail,
+    SourceConnectionPreviewRequest,
+    SourceConnectionPreviewResponse,
     SourceConnectionStatus,
+    SourceConnectionUpdate,
+    SyncRunResult,
+    SyncRunSummary,
     ViewerBootstrap,
 )
 from cornerstone.services.answering import answer_query, search_context
@@ -66,6 +77,21 @@ from cornerstone.services.serialization import (
     relation_envelope,
     resource_ref,
     support_items_for_resource,
+)
+from cornerstone.services.source_connections import (
+    actor_can_connector_action,
+    complete_provider_binding,
+    create_source_connection,
+    list_connector_templates,
+    list_sync_runs,
+    pause_source_connection,
+    preview_source_connection,
+    remove_source_connection,
+    resume_source_connection,
+    source_connection_detail_for_actor,
+    source_connection_status_for_actor,
+    start_provider_binding,
+    update_source_connection,
 )
 from cornerstone.services.sync import run_sync
 
@@ -101,11 +127,64 @@ def bootstrap(db: Session = Depends(get_db)):
                 display_name=actor.display_name,
                 base_role=actor.base_role.value,
                 token=actor.auth_token,
+                scoped_capabilities=actor.scoped_capabilities,
                 preferred_consumer_scope=actor.preferred_consumer_scope,
             )
             for actor in actors
         ],
     )
+
+
+@router.get("/connector-templates", response_model=list[ConnectorTemplateSummary])
+def get_connector_templates(actor: Actor = Depends(get_current_actor)):
+    _ensure_connector_manager(actor)
+    return list_connector_templates()
+
+
+@router.post("/provider-bindings/notion/start", response_model=ProviderBindingStartResponse)
+def start_notion_provider_binding(
+    settings: Settings = Depends(get_settings),
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    try:
+        result = start_provider_binding(db, actor=actor, settings=settings, provider="notion")
+        db.commit()
+        return result
+    except PermissionError as exc:
+        db.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/provider-bindings/notion/complete", response_model=ProviderBindingSummary)
+def complete_notion_provider_binding(
+    payload: ProviderBindingCompleteRequest,
+    settings: Settings = Depends(get_settings),
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    if payload.provider != "notion":
+        raise HTTPException(status_code=400, detail="Route only supports the Notion provider.")
+    try:
+        result = complete_provider_binding(
+            db,
+            actor=actor,
+            settings=settings,
+            provider="notion",
+            binding_state=payload.binding_state,
+            code=payload.code,
+        )
+        db.commit()
+        return result
+    except PermissionError as exc:
+        db.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/source-connections", response_model=list[SourceConnectionStatus])
@@ -121,50 +200,172 @@ def get_source_connections(
         )
     )
     return [
-        SourceConnectionStatus(
-            id=connection.id,
-            context_space_id=connection.context_space_id,
-            provider=connection.provider,
-            source_label=connection.source_label,
-            source_boundary_locator=connection.source_boundary_locator,
-            visibility_class=connection.visibility_class,
-            sync_mode=connection.sync_mode,
-            sync_interval_seconds=connection.sync_interval_seconds,
-            source_connection_state=connection.source_connection_state,
-            freshness_state=connection.freshness_state,
-            last_attempted_sync_at=connection.last_attempted_sync_at,
-            last_successful_sync_at=connection.last_successful_sync_at,
-            last_error=connection.last_error,
-            effective_sync_policy=connection.effective_sync_policy,
-            removed_at=connection.removed_at,
-        )
+        source_connection_status_for_actor(db, actor=actor, connection=connection)
         for connection in connections
     ]
 
 
-@router.post("/source-connections/{connection_id}/sync")
+@router.post("/source-connections/preview", response_model=SourceConnectionPreviewResponse)
+def post_source_connection_preview(
+    payload: SourceConnectionPreviewRequest,
+    settings: Settings = Depends(get_settings),
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    try:
+        return preview_source_connection(db, actor=actor, settings=settings, payload=payload)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post(
+    "/source-connections",
+    response_model=SourceConnectionDetail,
+    status_code=status.HTTP_201_CREATED,
+)
+def post_source_connection(
+    payload: SourceConnectionCreate,
+    settings: Settings = Depends(get_settings),
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    try:
+        connection = create_source_connection(db, actor=actor, settings=settings, payload=payload)
+        db.commit()
+        return source_connection_detail_for_actor(db, actor=actor, connection=connection)
+    except PermissionError as exc:
+        db.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/source-connections/{connection_id}", response_model=SourceConnectionDetail)
+def get_source_connection_detail(
+    connection_id: str,
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    connection = _source_connection_for_actor_or_404(db, actor, connection_id)
+    return source_connection_detail_for_actor(db, actor=actor, connection=connection)
+
+
+@router.patch("/source-connections/{connection_id}", response_model=SourceConnectionDetail)
+def patch_source_connection(
+    connection_id: str,
+    payload: SourceConnectionUpdate,
+    settings: Settings = Depends(get_settings),
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    connection = _source_connection_for_actor_or_404(db, actor, connection_id)
+    try:
+        updated = update_source_connection(
+            db,
+            actor=actor,
+            settings=settings,
+            connection=connection,
+            payload=payload,
+        )
+        db.commit()
+        return source_connection_detail_for_actor(db, actor=actor, connection=updated)
+    except PermissionError as exc:
+        db.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/source-connections/{connection_id}/pause", response_model=SourceConnectionDetail)
+def post_pause_source_connection(
+    connection_id: str,
+    settings: Settings = Depends(get_settings),
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    connection = _source_connection_for_actor_or_404(db, actor, connection_id)
+    try:
+        paused = pause_source_connection(db, actor=actor, settings=settings, connection=connection)
+        db.commit()
+        return source_connection_detail_for_actor(db, actor=actor, connection=paused)
+    except PermissionError as exc:
+        db.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+
+@router.post("/source-connections/{connection_id}/resume", response_model=SourceConnectionDetail)
+def post_resume_source_connection(
+    connection_id: str,
+    settings: Settings = Depends(get_settings),
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    connection = _source_connection_for_actor_or_404(db, actor, connection_id)
+    try:
+        resumed = resume_source_connection(
+            db,
+            actor=actor,
+            settings=settings,
+            connection=connection,
+        )
+        db.commit()
+        return source_connection_detail_for_actor(db, actor=actor, connection=resumed)
+    except PermissionError as exc:
+        db.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+
+@router.get("/source-connections/{connection_id}/runs", response_model=list[SyncRunSummary])
+def get_source_connection_runs(
+    connection_id: str,
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    _source_connection_for_actor_or_404(db, actor, connection_id)
+    return list_sync_runs(db, connection_id)
+
+
+@router.post("/source-connections/{connection_id}/sync", response_model=SyncRunResult)
 def sync_source_connection(
     connection_id: str,
     settings: Settings = Depends(get_settings),
     actor: Actor = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ):
-    connection = db.get(SourceConnection, connection_id)
-    if connection is None:
-        raise HTTPException(status_code=404, detail="Source connection not found.")
-    if connection.context_space_id != actor.context_space_id:
-        raise HTTPException(
-            status_code=403, detail="Source connection is outside the actor workspace."
-        )
-    if actor.base_role is not BaseRole.ADMIN:
-        grant = db.scalar(
-            select(ConnectorScopeGrant).where(ConnectorScopeGrant.actor_id == actor.id).limit(1)
-        )
-        if grant is None:
-            raise HTTPException(status_code=403, detail="Actor lacks connector privileges.")
-    result = run_sync(db, connection, settings)
+    connection = _source_connection_for_actor_or_404(db, actor, connection_id)
+    if not actor_can_connector_action(
+        db, actor, ConnectorAction.SYNC, context_space_id=connection.context_space_id
+    ):
+        raise HTTPException(status_code=403, detail="Actor lacks connector sync privileges.")
+    result = run_sync(db, connection, settings, trigger_kind="manual")
     db.commit()
     return result
+
+
+@router.delete("/source-connections/{connection_id}", response_model=SourceConnectionDetail)
+def delete_source_connection(
+    connection_id: str,
+    settings: Settings = Depends(get_settings),
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    connection = _source_connection_for_actor_or_404(db, actor, connection_id)
+    try:
+        removed = remove_source_connection(
+            db,
+            actor=actor,
+            settings=settings,
+            connection=connection,
+        )
+        db.commit()
+        return source_connection_detail_for_actor(db, actor=actor, connection=removed)
+    except PermissionError as exc:
+        db.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
 
 
 @router.get("/concepts")
@@ -643,6 +844,33 @@ def _ensure_operator(actor: Actor) -> None:
     if any(entry.get("capability") == "operate" for entry in actor.scoped_capabilities):
         return
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Actor lacks operate scope.")
+
+
+def _ensure_connector_manager(actor: Actor) -> None:
+    if actor.base_role is BaseRole.ADMIN:
+        return
+    if any(
+        entry.get("capability") == "manage_connectors" and entry.get("scope") == "workspace"
+        for entry in actor.scoped_capabilities
+    ):
+        return
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Actor lacks connector manager scope.",
+    )
+
+
+def _source_connection_for_actor_or_404(
+    db: Session, actor: Actor, connection_id: str
+) -> SourceConnection:
+    connection = db.get(SourceConnection, connection_id)
+    if connection is None:
+        raise HTTPException(status_code=404, detail="Source connection not found.")
+    if connection.context_space_id != actor.context_space_id:
+        raise HTTPException(
+            status_code=403, detail="Source connection is outside the actor workspace."
+        )
+    return connection
 
 
 def _resource_by_kind_or_404(db: Session, resource_kind: ResourceKind, resource_id: str):

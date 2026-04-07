@@ -1,0 +1,13 @@
+[
+  {
+    "id": "run_2a9896edc7d8df9c",
+    "source_connection_id": "source_450a61aeb213f1a9",
+    "trigger_kind": "initial",
+    "run_status": "succeeded",
+    "started_at": "2026-04-06T00:00:00Z",
+    "finished_at": "2026-04-06T00:00:00Z",
+    "artifact_count": 3,
+    "support_item_count": 6,
+    "error_summary": null
+  }
+]

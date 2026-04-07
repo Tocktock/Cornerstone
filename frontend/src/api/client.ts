@@ -66,3 +66,25 @@ export function apiPost<T>(path: string, body?: unknown, params?: Record<string,
     params,
   )
 }
+
+export function apiPatch<T>(path: string, body?: unknown, params?: Record<string, string | undefined>) {
+  return apiFetch<T>(
+    path,
+    {
+      method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
+    },
+    params,
+  )
+}
+
+export function apiDelete<T>(path: string, body?: unknown, params?: Record<string, string | undefined>) {
+  return apiFetch<T>(
+    path,
+    {
+      method: 'DELETE',
+      body: body ? JSON.stringify(body) : undefined,
+    },
+    params,
+  )
+}

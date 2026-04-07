@@ -8,7 +8,13 @@ from fastapi.testclient import TestClient
 from sqlalchemy.engine import make_url
 
 from cornerstone.app import create_app
-from cornerstone.config import Settings
+from cornerstone.config import (
+    Settings,
+    discover_fixture_root,
+    discover_notion_fixture_root,
+    discover_personal_source_root,
+    discover_workspace_source_root,
+)
 
 DEFAULT_TEST_DATABASE_URL = (
     "postgresql+psycopg://cornerstone:cornerstone@localhost:55432/cornerstone_test"
@@ -31,6 +37,8 @@ def test_database_url() -> str:
 
 def _ensure_database(database_url: str) -> None:
     target_url = make_url(database_url)
+    if target_url.drivername.startswith("sqlite"):
+        return
     admin_url = target_url.set(database="postgres")
     dsn = _psycopg_dsn(admin_url.render_as_string(hide_password=False))
     database_name = target_url.database
@@ -48,6 +56,10 @@ def client(test_database_url: str) -> TestClient:
         database_url=test_database_url,
         auto_seed_demo=True,
         reset_database_on_start=True,
+        fixture_root=discover_fixture_root(),
+        workspace_source_root=discover_workspace_source_root(),
+        personal_source_root=discover_personal_source_root(),
+        notion_fixture_root=discover_notion_fixture_root(),
         fixed_now="2026-04-06T09:00:00+09:00",
         cors_origins=["http://localhost:4173"],
     )

@@ -98,3 +98,35 @@ def test_mcp_answer_snapshot_matches_rest_answer(client: TestClient, headers):
     )
 
     assert mcp == rest
+
+
+def test_source_connection_contract_snapshots(client: TestClient, headers):
+    created = client.post(
+        "/api/v1/source-connections",
+        headers=headers["operator"],
+        json={
+            "template_key": "notion_shared_page_tree",
+            "source_label": "Snapshot Notion KB",
+            "selected_scope_input": "11111111-1111-1111-1111-111111111111",
+            "visibility_class": "member_visible",
+            "sync_interval_seconds": 900,
+        },
+    )
+    created.raise_for_status()
+    connection_id = created.json()["id"]
+
+    detail = _normalize(
+        client.get(
+            f"/api/v1/source-connections/{connection_id}",
+            headers=headers["operator"],
+        ).json()
+    )
+    runs = _normalize(
+        client.get(
+            f"/api/v1/source-connections/{connection_id}/runs",
+            headers=headers["operator"],
+        ).json()
+    )
+
+    assert detail == _load_golden("source_connection_detail")
+    assert runs == _load_golden("source_connection_runs")

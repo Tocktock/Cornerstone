@@ -166,6 +166,7 @@ export type SourceConnectionStatus = {
   provider: string
   source_label: string
   source_boundary_locator: string
+  template_key: string
   visibility_class: string
   sync_mode: string
   sync_interval_seconds: number
@@ -175,7 +176,93 @@ export type SourceConnectionStatus = {
   last_successful_sync_at?: string | null
   last_error?: string | null
   effective_sync_policy: Record<string, unknown>
+  next_scheduled_sync_at?: string | null
+  last_run_at?: string | null
+  last_run_status?: string | null
+  can_manage: boolean
   removed_at?: string | null
+}
+
+export type SourceConnectionDetail = SourceConnectionStatus & {
+  provider_credential_ref?: string | null
+  selected_scope_json: Record<string, unknown>
+  sync_checkpoint_json: Record<string, unknown>
+}
+
+export type ConnectorTemplateSummary = {
+  template_key: string
+  provider: string
+  label: string
+  description: string
+  scope_kind: string
+  default_visibility_class: 'member_visible' | 'evidence_only'
+  recommended_sync_interval_seconds: number
+  preview_required: boolean
+}
+
+export type ProviderBindingStartResponse = {
+  provider: string
+  provider_credential_ref?: string | null
+  authorization_url?: string | null
+  binding_state?: string | null
+  account_label?: string | null
+  demo_mode: boolean
+}
+
+export type ProviderBindingSummary = {
+  provider: string
+  provider_credential_ref: string
+  account_label?: string | null
+}
+
+export type SourcePreviewItem = {
+  upstream_id: string
+  title: string
+  artifact_type: string
+  source_locator?: string | null
+  excerpt?: string | null
+  source_updated_at?: string | null
+}
+
+export type SourceConnectionPreviewResponse = {
+  provider: string
+  template_key: string
+  resolved_source_boundary_locator: string
+  selected_scope_json: Record<string, unknown>
+  suggested_sync_mode: string
+  suggested_sync_interval_seconds: number
+  preview_items: SourcePreviewItem[]
+  visibility_class: 'member_visible' | 'evidence_only'
+  effective_sync_policy: Record<string, unknown>
+}
+
+export type SourceConnectionCreatePayload = {
+  template_key: string
+  provider_credential_ref?: string | null
+  source_label: string
+  selected_scope_input: string
+  visibility_class: 'member_visible' | 'evidence_only'
+  sync_interval_seconds?: number | null
+}
+
+export type SourceConnectionUpdatePayload = {
+  source_label?: string
+  visibility_class?: 'member_visible' | 'evidence_only'
+  sync_interval_seconds?: number
+  provider_credential_ref?: string | null
+  selected_scope_input?: string
+}
+
+export type SyncRunSummary = {
+  id: string
+  source_connection_id: string
+  trigger_kind: string
+  run_status: string
+  started_at: string
+  finished_at?: string | null
+  artifact_count: number
+  support_item_count: number
+  error_summary?: string | null
 }
 
 export type ReviewQueueItem = {
@@ -192,6 +279,7 @@ export type ActorSession = {
   display_name: string
   base_role: string
   token: string
+  scoped_capabilities: Array<{ capability: string; scope: string }>
   preferred_consumer_scope: 'member' | 'review' | 'admin'
 }
 

@@ -617,6 +617,15 @@ p {
     rgba(24, 33, 44, 0.95);
 }
 
+.sources-page .connector-manager-panel,
+.sources-page .preview-panel,
+.sources-page .source-editor,
+.sources-page .source-runs {
+  background:
+    linear-gradient(180deg, rgba(116, 174, 221, 0.05), transparent 42%),
+    rgba(24, 33, 44, 0.96);
+}
+
 .relation-line {
   display: flex;
   gap: 0.65rem;
@@ -860,6 +869,65 @@ p {
   padding: 0.95rem 1rem;
 }
 
+.alert-row.info-text {
+  border-color: rgba(116, 174, 221, 0.24);
+  background: rgba(116, 174, 221, 0.12);
+}
+
+.info-text {
+  color: #d8e9f8;
+}
+
+.manager-grid,
+.compact-form-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.manager-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  align-items: start;
+}
+
+.compact-form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.source-manager-form,
+.source-editor,
+.oauth-complete-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.binding-row,
+.source-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.binding-row {
+  justify-content: space-between;
+}
+
+.preview-list,
+.runs-list {
+  margin: 0;
+  padding: 0;
+}
+
+.runs-list li,
+.preview-list li {
+  list-style: none;
+}
+
 .dense-list {
   margin: 0.5rem 0 0;
   padding-left: 1.1rem;
@@ -913,7 +981,8 @@ p {
   .answer-layout,
   .graph-explorer-layout,
   .graph-relation-columns,
-  .review-meta-grid {
+  .review-meta-grid,
+  .manager-grid {
     grid-template-columns: 1fr;
   }
 

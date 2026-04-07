@@ -33,6 +33,8 @@ from cornerstone.domain.enums import (
     SupportItemKind,
     SupportVisibility,
     SyncMode,
+    SyncRunStatus,
+    SyncTriggerKind,
     VerificationState,
     VisibilityClass,
 )
@@ -96,7 +98,15 @@ class ContextSpace(Base, TimestampedMixin):
         back_populates="context_space",
         cascade="all, delete-orphan",
     )
+    provider_credentials: Mapped[list[ProviderCredential]] = relationship(
+        back_populates="context_space",
+        cascade="all, delete-orphan",
+    )
     source_connections: Mapped[list[SourceConnection]] = relationship(
+        back_populates="context_space",
+        cascade="all, delete-orphan",
+    )
+    sync_runs: Mapped[list[SyncRun]] = relationship(
         back_populates="context_space",
         cascade="all, delete-orphan",
     )
@@ -191,6 +201,11 @@ class Actor(Base, TimestampedMixin):
         back_populates="actor",
         cascade="all, delete-orphan",
     )
+    provider_credentials: Mapped[list[ProviderCredential]] = relationship(
+        back_populates="created_by_actor",
+        cascade="all, delete-orphan",
+        foreign_keys="ProviderCredential.created_by_actor_id",
+    )
     promoted_support_items: Mapped[list[SupportItem]] = relationship(
         back_populates="promoter",
         foreign_keys="SupportItem.promoter_id",
@@ -227,6 +242,32 @@ class ConnectorScopeGrant(Base, TimestampedMixin):
     actor: Mapped[Actor] = relationship(back_populates="connector_scope_grants")
 
 
+class ProviderCredential(Base, TimestampedMixin):
+    __tablename__ = "provider_credentials"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    context_space_id: Mapped[str] = mapped_column(
+        ForeignKey("context_spaces.id"), nullable=False, index=True
+    )
+    provider: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    credential_reference: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    binding_state: Mapped[str | None] = mapped_column(String(255), unique=True, index=True)
+    account_label: Mapped[str | None] = mapped_column(String(255))
+    auth_payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    created_by_actor_id: Mapped[str | None] = mapped_column(ForeignKey("actors.id"), index=True)
+    last_validated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    context_space: Mapped[ContextSpace] = relationship(back_populates="provider_credentials")
+    created_by_actor: Mapped[Actor | None] = relationship(
+        back_populates="provider_credentials",
+        foreign_keys=[created_by_actor_id],
+    )
+    source_connections: Mapped[list[SourceConnection]] = relationship(
+        back_populates="provider_credential"
+    )
+
+
 class SourceConnection(Base, TimestampedMixin):
     __tablename__ = "source_connections"
     __table_args__ = (UniqueConstraint("context_space_id", "provider", "source_boundary_locator"),)
@@ -239,6 +280,13 @@ class SourceConnection(Base, TimestampedMixin):
     source_label: Mapped[str] = mapped_column(String(255), nullable=False)
     source_boundary_locator: Mapped[str] = mapped_column(String(2048), nullable=False)
     template_key: Mapped[str] = mapped_column(String(255), nullable=False)
+    provider_credential_ref: Mapped[str | None] = mapped_column(
+        ForeignKey("provider_credentials.credential_reference"), index=True
+    )
+    selected_scope_json: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    sync_checkpoint_json: Mapped[dict[str, Any]] = mapped_column(
+        JSON, nullable=False, default=dict
+    )
     visibility_class: Mapped[VisibilityClass] = mapped_column(
         Enum(VisibilityClass),
         nullable=False,
@@ -264,12 +312,43 @@ class SourceConnection(Base, TimestampedMixin):
     effective_sync_policy: Mapped[dict[str, Any]] = mapped_column(
         JSON, nullable=False, default=dict
     )
+    next_scheduled_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     context_space: Mapped[ContextSpace] = relationship(back_populates="source_connections")
+    provider_credential: Mapped[ProviderCredential | None] = relationship(
+        back_populates="source_connections"
+    )
     artifacts: Mapped[list[Artifact]] = relationship(
         back_populates="source_connection", cascade="all, delete-orphan"
     )
+    sync_runs: Mapped[list[SyncRun]] = relationship(
+        back_populates="source_connection", cascade="all, delete-orphan"
+    )
+
+
+class SyncRun(Base, TimestampedMixin):
+    __tablename__ = "sync_runs"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    context_space_id: Mapped[str] = mapped_column(
+        ForeignKey("context_spaces.id"), nullable=False, index=True
+    )
+    source_connection_id: Mapped[str] = mapped_column(
+        ForeignKey("source_connections.id"), nullable=False, index=True
+    )
+    trigger_kind: Mapped[SyncTriggerKind] = mapped_column(Enum(SyncTriggerKind), nullable=False)
+    run_status: Mapped[SyncRunStatus] = mapped_column(
+        Enum(SyncRunStatus), nullable=False, default=SyncRunStatus.RUNNING
+    )
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    artifact_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    support_item_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    error_summary: Mapped[str | None] = mapped_column(Text)
+
+    context_space: Mapped[ContextSpace] = relationship(back_populates="sync_runs")
+    source_connection: Mapped[SourceConnection] = relationship(back_populates="sync_runs")
 
 
 class Artifact(Base, TimestampedMixin):

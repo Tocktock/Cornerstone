@@ -21,6 +21,8 @@ Those places include:
 This spec owns:
 - connector setup expectations
 - connector template philosophy
+- connector template registry behavior
+- provider-binding expectations
 - source visibility classes
 - connector sync modes
 - shared-source management permissions
@@ -69,6 +71,27 @@ Template intent matters more than provider internals:
 - some templates are snapshots instead of live sync sources
 - some templates exist only for personal context preparation and later promotion
 
+The template registry is code-defined in P0 and is not itself a canonical long-lived entity.
+
+Every template must define at least:
+- `template_key`
+- provider class
+- scope kind expected during setup
+- default `visibility_class`
+- recommended sync cadence
+- supported content unit summary
+- provenance capability summary
+- preview requirements
+
+Connection setup may use ephemeral helper objects such as setup sessions, previews, or sync checkpoints, but those helpers do not replace the canonical `SourceConnection`.
+
+## Provider binding model
+
+- Shared-source provider binding is manager-only.
+- Cornerstone may store provider credentials or auth payloads internally, but a `SourceConnection` may expose only a workspace-bound credential reference and safe account summary.
+- Binding and rebind flows must preserve workspace boundary and must not leak provider secrets to non-manager actors.
+- In P0, user-facing binding should prefer OAuth-style flows when the provider supports them.
+
 ## Visibility model
 
 - `member_visible` sources contribute to normal retrieval, concepts, graph views, and answers.
@@ -96,13 +119,18 @@ Connectors may use one or more of the following modes:
 
 Cornerstone requires eventual correctness and provenance preservation, not strict real-time sync for every provider.
 
+Connector implementations may maintain richer internal run and checkpoint detail, but consumer-facing state must continue to map to canonical `source_connection_state` and `freshness_state`.
+
+Minimal per-run operational history may be persisted for observability and recovery as long as it does not redefine the canonical connector contract.
+
 ## Key workflows
 
 - Shared source setup:
   - choose a provider or template
   - authorize or bind the source
-  - browse or select the target resource
+  - browse, paste, or otherwise select the target scope
   - confirm sync and visibility defaults
+  - preview a safe sample before save
 - Source management:
   - inspect sync health
   - view connection details and recent runs
@@ -130,6 +158,8 @@ Cornerstone requires eventual correctness and provenance preservation, not stric
 
 - [../workspace-and-access/spec.md](../workspace-and-access/spec.md)
 - [../sync-and-provenance/spec.md](../sync-and-provenance/spec.md)
+- [./notion/spec.md](./notion/spec.md)
 - [../../decisions/0006-template-first-zero-config-connectors.md](../../decisions/0006-template-first-zero-config-connectors.md)
 - [../../decisions/0009-access-uses-base-roles-plus-scoped-capabilities.md](../../decisions/0009-access-uses-base-roles-plus-scoped-capabilities.md)
+- [../../decisions/0016-workspace-bound-provider-credentials-back-shared-connectors.md](../../decisions/0016-workspace-bound-provider-credentials-back-shared-connectors.md)
 - [../../decisions/0011-personal-sources-remain-separate-until-explicitly-promoted-into-shared-context.md](../../decisions/0011-personal-sources-remain-separate-until-explicitly-promoted-into-shared-context.md)

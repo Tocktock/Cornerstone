@@ -61,6 +61,20 @@ class SyncMode(StrEnum):
     SNAPSHOT_UPLOAD = "snapshot_upload"
 
 
+class SyncRunStatus(StrEnum):
+    RUNNING = "running"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
+
+class SyncTriggerKind(StrEnum):
+    INITIAL = "initial"
+    MANUAL = "manual"
+    SCHEDULED = "scheduled"
+    RECOVERY = "recovery"
+
+
 class SourceConnectionState(StrEnum):
     PENDING_SETUP = "pending_setup"
     ACTIVE = "active"

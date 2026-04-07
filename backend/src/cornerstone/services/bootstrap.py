@@ -388,7 +388,10 @@ def _seed_actors(session: Session, workspace: ContextSpace) -> dict[str, Actor]:
             display_name="Operator",
             base_role=BaseRole.MEMBER,
             auth_token="demo-operator-token",
-            scoped_capabilities=[{"capability": Capability.OPERATE.value, "scope": "workspace"}],
+            scoped_capabilities=[
+                {"capability": Capability.OPERATE.value, "scope": "workspace"},
+                {"capability": Capability.MANAGE_CONNECTORS.value, "scope": "workspace"},
+            ],
             preferred_consumer_scope=ConsumerScope.REVIEW,
         ),
         "reviewer": Actor(

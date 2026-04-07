@@ -23,6 +23,15 @@ export function canActorReview(actor: ActorSession) {
   return actor.preferred_consumer_scope === 'review' || actor.base_role.toLowerCase() === 'admin'
 }
 
+export function canActorManageConnectors(actor: ActorSession) {
+  return (
+    actor.base_role.toLowerCase() === 'admin' ||
+    actor.scoped_capabilities.some(
+      (entry) => entry.capability === 'manage_connectors' && entry.scope === 'workspace',
+    )
+  )
+}
+
 export function buildGraphExplorer(
   payload: GraphSlicePayload,
   selectedNodeId?: string | null,

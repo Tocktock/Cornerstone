@@ -2,27 +2,20 @@ from __future__ import annotations
 
 import csv
 import hashlib
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import yaml
 
+from cornerstone.connectors.base import (
+    ParsedArtifact,
+    PreparedConnection,
+    PreviewArtifact,
+    ProviderSyncResult,
+)
+from cornerstone.domain.enums import SyncMode, VisibilityClass
 from cornerstone.services.normalization import split_paragraphs
-
-
-@dataclass(slots=True)
-class ParsedArtifact:
-    external_id: str
-    title: str
-    artifact_type: str
-    source_locator: str
-    content_text: str
-    content_hash: str
-    source_updated_at: datetime
-    metadata: dict[str, Any]
-    support_fragments: list[tuple[str, str]]
 
 
 class FilesystemConnector:
@@ -30,6 +23,54 @@ class FilesystemConnector:
 
     def __init__(self, root_path: str):
         self.root = Path(root_path)
+
+    def prepare_connection(
+        self,
+        *,
+        template_key: str,
+        source_label: str,
+        selected_scope_input: str,
+        visibility_class: VisibilityClass,
+        settings,
+        provider_credential=None,
+    ) -> PreparedConnection:
+        artifacts = self.list_artifacts()
+        preview_items = [
+            PreviewArtifact(
+                upstream_id=artifact.external_id,
+                title=artifact.title,
+                artifact_type=artifact.artifact_type,
+                source_locator=artifact.source_locator,
+                excerpt=artifact.support_fragments[0][1] if artifact.support_fragments else None,
+                source_updated_at=artifact.source_updated_at,
+            )
+            for artifact in artifacts[:5]
+        ]
+        return PreparedConnection(
+            provider=self.provider,
+            template_key=template_key,
+            source_boundary_locator=str(self.root),
+            selected_scope={
+                "scope_kind": "filesystem_root",
+                "input": selected_scope_input,
+                "resolved_root": str(self.root),
+                "source_label": source_label,
+            },
+            visibility_class=visibility_class,
+            sync_mode=SyncMode.POLLING,
+            sync_interval_seconds=settings.default_sync_interval_seconds,
+            effective_sync_policy={"mode": "filesystem", "template_key": template_key},
+            preview_items=preview_items,
+        )
+
+    def sync(self, *, connection, settings, provider_credential=None) -> ProviderSyncResult:
+        if not self.root.exists():
+            raise FileNotFoundError(f"Source root does not exist: {self.root}")
+        return ProviderSyncResult(
+            parsed_artifacts=self.list_artifacts(),
+            sync_checkpoint=connection.sync_checkpoint_json or {},
+            effective_sync_policy=connection.effective_sync_policy,
+        )
 
     def list_artifacts(self) -> list[ParsedArtifact]:
         if not self.root.exists():

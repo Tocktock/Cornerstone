@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TypeVar
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from cornerstone.domain.enums import (
     AnswerStatus,
@@ -24,13 +24,26 @@ from cornerstone.domain.enums import (
     SupportItemKind,
     SupportVisibility,
     SyncMode,
+    SyncRunStatus,
+    SyncTriggerKind,
     VerificationState,
     VisibilityClass,
 )
 
 
+def _encode_contract_datetime(value: datetime) -> str:
+    normalized = value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
+    return normalized.isoformat().replace("+00:00", "Z")
+
+
 class ContractModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("*", when_used="json", check_fields=False)
+    def serialize_datetimes(self, value):
+        if isinstance(value, datetime):
+            return _encode_contract_datetime(value)
+        return value
 
 
 class ContextSpaceRef(ContractModel):
@@ -214,6 +227,7 @@ class SourceConnectionStatus(ContractModel):
     provider: str
     source_label: str
     source_boundary_locator: str
+    template_key: str
     visibility_class: VisibilityClass
     sync_mode: SyncMode
     sync_interval_seconds: int
@@ -223,7 +237,111 @@ class SourceConnectionStatus(ContractModel):
     last_successful_sync_at: datetime | None = None
     last_error: str | None = None
     effective_sync_policy: dict[str, object] = Field(default_factory=dict)
+    next_scheduled_sync_at: datetime | None = None
+    last_run_at: datetime | None = None
+    last_run_status: SyncRunStatus | None = None
+    can_manage: bool = False
     removed_at: datetime | None = None
+
+
+class SourceConnectionDetail(SourceConnectionStatus):
+    provider_credential_ref: str | None = None
+    selected_scope_json: dict[str, object] = Field(default_factory=dict)
+    sync_checkpoint_json: dict[str, object] = Field(default_factory=dict)
+
+
+class ConnectorTemplateSummary(ContractModel):
+    template_key: str
+    provider: str
+    label: str
+    description: str
+    scope_kind: str
+    default_visibility_class: VisibilityClass
+    recommended_sync_interval_seconds: int
+    preview_required: bool = True
+
+
+class ProviderBindingStartRequest(ContractModel):
+    provider: str
+
+
+class ProviderBindingStartResponse(ContractModel):
+    provider: str
+    provider_credential_ref: str | None = None
+    authorization_url: str | None = None
+    binding_state: str | None = None
+    account_label: str | None = None
+    demo_mode: bool = False
+
+
+class ProviderBindingCompleteRequest(ContractModel):
+    provider: str
+    binding_state: str
+    code: str
+
+
+class ProviderBindingSummary(ContractModel):
+    provider: str
+    provider_credential_ref: str
+    account_label: str | None = None
+
+
+class SourcePreviewItem(ContractModel):
+    upstream_id: str
+    title: str
+    artifact_type: str
+    source_locator: str | None = None
+    excerpt: str | None = None
+    source_updated_at: datetime | None = None
+
+
+class SourceConnectionPreviewRequest(ContractModel):
+    template_key: str
+    provider_credential_ref: str | None = None
+    source_label: str
+    selected_scope_input: str
+    visibility_class: VisibilityClass = VisibilityClass.MEMBER_VISIBLE
+
+
+class SourceConnectionPreviewResponse(ContractModel):
+    provider: str
+    template_key: str
+    resolved_source_boundary_locator: str
+    selected_scope_json: dict[str, object] = Field(default_factory=dict)
+    suggested_sync_mode: SyncMode
+    suggested_sync_interval_seconds: int
+    preview_items: list[SourcePreviewItem] = Field(default_factory=list)
+    visibility_class: VisibilityClass
+    effective_sync_policy: dict[str, object] = Field(default_factory=dict)
+
+
+class SourceConnectionCreate(ContractModel):
+    template_key: str
+    provider_credential_ref: str | None = None
+    source_label: str
+    selected_scope_input: str
+    visibility_class: VisibilityClass = VisibilityClass.MEMBER_VISIBLE
+    sync_interval_seconds: int | None = None
+
+
+class SourceConnectionUpdate(ContractModel):
+    source_label: str | None = None
+    visibility_class: VisibilityClass | None = None
+    sync_interval_seconds: int | None = None
+    provider_credential_ref: str | None = None
+    selected_scope_input: str | None = None
+
+
+class SyncRunSummary(ContractModel):
+    id: str
+    source_connection_id: str
+    trigger_kind: SyncTriggerKind
+    run_status: SyncRunStatus
+    started_at: datetime
+    finished_at: datetime | None = None
+    artifact_count: int = 0
+    support_item_count: int = 0
+    error_summary: str | None = None
 
 
 class ReviewQueueItem(ContractModel):
@@ -240,6 +358,7 @@ class ActorSession(ContractModel):
     display_name: str
     base_role: str
     token: str
+    scoped_capabilities: list[dict[str, str]] = Field(default_factory=list)
     preferred_consumer_scope: ConsumerScope
 
 

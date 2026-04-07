@@ -23,9 +23,15 @@ services:
       CORNERSTONE_FIXTURE_ROOT: ${CORNERSTONE_FIXTURE_ROOT:-/workspace/fixtures}
       CORNERSTONE_WORKSPACE_SOURCE_ROOT: ${CORNERSTONE_WORKSPACE_SOURCE_ROOT:-/workspace/fixtures/minimal/workspace/member-visible}
       CORNERSTONE_PERSONAL_SOURCE_ROOT: ${CORNERSTONE_PERSONAL_SOURCE_ROOT:-/workspace/fixtures/minimal/personal/member-private}
+      CORNERSTONE_NOTION_FIXTURE_ROOT: ${CORNERSTONE_NOTION_FIXTURE_ROOT:-/workspace/fixtures/notion}
       CORNERSTONE_CORPUS_SOURCE_ROOT: ${CORNERSTONE_CORPUS_SOURCE_ROOT:-/workspace/sample-data/sendy-knowledge}
       CORNERSTONE_AUTO_SEED_DEMO: ${CORNERSTONE_AUTO_SEED_DEMO:-true}
       CORNERSTONE_RESET_DATABASE_ON_START: ${CORNERSTONE_RESET_DATABASE_ON_START:-false}
+      CORNERSTONE_FRONTEND_BASE_URL: ${CORNERSTONE_FRONTEND_BASE_URL:-http://localhost:5173}
+      CORNERSTONE_NOTION_DEMO_OAUTH_MODE: ${CORNERSTONE_NOTION_DEMO_OAUTH_MODE:-true}
+      CORNERSTONE_NOTION_CLIENT_ID: ${CORNERSTONE_NOTION_CLIENT_ID:-}
+      CORNERSTONE_NOTION_CLIENT_SECRET: ${CORNERSTONE_NOTION_CLIENT_SECRET:-}
+      CORNERSTONE_NOTION_OAUTH_REDIRECT_URI: ${CORNERSTONE_NOTION_OAUTH_REDIRECT_URI:-}
       CORNERSTONE_CORS_ORIGINS: ${CORNERSTONE_CORS_ORIGINS:-["http://localhost:5173"]}
     command: ["uvicorn", "cornerstone.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:
@@ -44,6 +50,7 @@ services:
       target: dev
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+      VITE_FRONTEND_BASE_URL: ${CORNERSTONE_FRONTEND_BASE_URL:-http://localhost:5173}
     volumes:
       - ./frontend:/app
       - /app/node_modules

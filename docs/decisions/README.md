@@ -19,3 +19,4 @@ These records capture durable product and architecture decisions that shape Corn
 - [0013 - Canonical state vocabulary is stable across surfaces](./0013-canonical-state-vocabulary-is-stable-across-surfaces.md)
 - [0014 - Review authorization scope is derived deterministically](./0014-review-authorization-scope-is-derived-deterministically.md)
 - [0015 - Ontology layer is the canonical semantic reference](./0015-ontology-layer-is-the-canonical-semantic-reference.md)
+- [0016 - Workspace-bound provider credentials back shared connectors](./0016-workspace-bound-provider-credentials-back-shared-connectors.md)
