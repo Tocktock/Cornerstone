@@ -16,23 +16,27 @@ const corpusSourceRoot =
 const databaseUrl =
   process.env.CORNERSTONE_BROWSER_TEST_DATABASE_URL ??
   'postgresql+psycopg://cornerstone:cornerstone@localhost:55433/cornerstone_test'
-const backendPort = process.env.CORNERSTONE_BROWSER_BACKEND_PORT ?? '8001'
+const backendPort = process.env.CORNERSTONE_BROWSER_BACKEND_PORT ?? '8011'
 const frontendPort = process.env.CORNERSTONE_BROWSER_FRONTEND_PORT ?? '4174'
 const frontendOrigin = `http://127.0.0.1:${frontendPort}`
+const backendOrigin = `http://127.0.0.1:${backendPort}`
 const apiBaseUrl = `http://127.0.0.1:${backendPort}/api/v1`
 
 export default defineConfig({
   testDir: './tests/symptoms',
+  outputDir: path.join(repoRoot, 'output', 'playwright'),
   timeout: 30_000,
+  workers: 1,
   retries: process.env.CI ? 2 : 0,
   use: {
     baseURL: frontendOrigin,
+    screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
   },
   webServer: [
     {
       command: `zsh -lc "cd .. && . .venv/bin/activate && CORNERSTONE_DATABASE_URL=${databaseUrl} CORNERSTONE_FIXTURE_ROOT=${fixtureRoot} CORNERSTONE_WORKSPACE_SOURCE_ROOT=${workspaceSourceRoot} CORNERSTONE_PERSONAL_SOURCE_ROOT=${personalSourceRoot} CORNERSTONE_CORPUS_SOURCE_ROOT=${corpusSourceRoot} CORNERSTONE_RESET_DATABASE_ON_START=true CORNERSTONE_FIXED_NOW=2026-04-06T09:00:00+09:00 CORNERSTONE_CORS_ORIGINS='[\\\"${frontendOrigin}\\\"]' uvicorn cornerstone.main:app --host 127.0.0.1 --port ${backendPort}"`,
-      url: `${apiBaseUrl}/health`,
+      url: backendOrigin,
       reuseExistingServer: false,
       timeout: 60_000,
     },

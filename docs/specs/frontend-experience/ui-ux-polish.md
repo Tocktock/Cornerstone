@@ -69,6 +69,20 @@ This spec owns:
 - This change must not introduce a graph visualization dependency.
 - This change is a polish pass, not a full visual redesign.
 
+## Verification expectations
+
+- Browser signoff for the current frontend must run against the deterministic Postgres-backed stack, not a mocked transport.
+- The Playwright harness must treat backend process readiness separately from API health: the spawned backend must answer a stable root route for boot readiness, and the suite must assert `/api/v1/health` explicitly as an early smoke check.
+- Browser symptom coverage must stay split by feature area so failures localize clearly:
+  - bootstrap and access
+  - sources and connector management
+  - glossary and provenance disclosure
+  - graph exploration
+  - decisions and lineage
+  - review queue behavior
+  - dashboard retrieval and no-match states
+- Browser artifacts for screenshots and traces must land under `output/playwright/`.
+
 ## Related docs
 
 - [../retrieval-and-answers/spec.md](../retrieval-and-answers/spec.md)

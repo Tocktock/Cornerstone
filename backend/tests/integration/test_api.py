@@ -4,6 +4,10 @@ from urllib.parse import parse_qs, urlparse
 
 import httpx
 from fastapi.testclient import TestClient
+from sqlalchemy import select
+
+from cornerstone.domain.enums import ContextSpaceKind
+from cornerstone.domain.models import ContextSpace, SupportItem
 
 
 def test_source_statuses_cover_symptom_states(client: TestClient, headers):
@@ -303,6 +307,32 @@ def test_member_retrieval_hides_evidence_only_support_but_discloses_restriction(
     assert restricted["warnings"] == ["restricted_support"]
 
 
+def test_answers_and_search_respect_scope_and_reject_scope_escalation(client: TestClient, headers):
+    member_answer = client.get("/api/v1/answers", headers=headers["member"], params={"q": "trigger"})
+    member_answer.raise_for_status()
+    reviewer_answer = client.get(
+        "/api/v1/answers", headers=headers["reviewer"], params={"q": "trigger"}
+    )
+    reviewer_answer.raise_for_status()
+
+    assert member_answer.json()["consumer_scope"] == "member"
+    assert member_answer.json()["payload"]["support_visibility"] == "restricted_support"
+    assert member_answer.json()["payload"]["visible_support_items"] == []
+
+    assert reviewer_answer.json()["consumer_scope"] == "review"
+    assert reviewer_answer.json()["payload"]["support_visibility"] == "source_backed"
+    assert len(reviewer_answer.json()["payload"]["visible_support_items"]) == 1
+
+    escalated = client.get(
+        "/api/v1/search",
+        headers=headers["member"],
+        params={"q": "trigger", "requested_scope": "admin"},
+    )
+
+    assert escalated.status_code == 403
+    assert escalated.json()["detail"] == "Requested consumer scope is not allowed."
+
+
 def test_cross_domain_relation_requires_workspace_review(client: TestClient, headers):
     queue = client.get("/api/v1/review-queue", headers=headers["reviewer"])
     queue.raise_for_status()
@@ -318,6 +348,73 @@ def test_cross_domain_relation_requires_workspace_review(client: TestClient, hea
 
     assert response.status_code == 400
     assert "workspace" in response.json()["detail"]
+
+
+def test_same_domain_relation_can_be_officialized_by_domain_reviewer(client: TestClient, headers):
+    concepts = client.get("/api/v1/concepts", headers=headers["member"])
+    concepts.raise_for_status()
+    concept_lookup = {item["payload"]["canonical_name"]: item["payload"]["concept_id"] for item in concepts.json()}
+
+    ops_provenance = client.get(
+        f"/api/v1/provenance/concept/{concept_lookup['Ops Playbook']}",
+        headers=headers["member"],
+    )
+    ops_provenance.raise_for_status()
+    support_item_ids = [
+        item["support_item_id"] for item in ops_provenance.json()["payload"]["support_items"]
+    ]
+
+    created = client.post(
+        "/api/v1/relations",
+        headers=headers["operator"],
+        json={
+            "context_space_id": concepts.json()[0]["context_space_ref"]["context_space_id"],
+            "subject_concept_id": concept_lookup["Partner SLA"],
+            "predicate": "guides_member_comms",
+            "object_concept_id": concept_lookup["VIP Escalation Insight"],
+            "description": "A same-domain relation for reviewer approval coverage.",
+            "support_item_ids": support_item_ids,
+        },
+    )
+    created.raise_for_status()
+
+    approved = client.post(
+        f"/api/v1/relations/{created.json()['payload']['relation_id']}/review",
+        headers=headers["reviewer"],
+        json={"action": "officialize"},
+    )
+    approved.raise_for_status()
+
+    assert approved.json()["payload"]["review_domain"] == "sales_ops"
+    assert approved.json()["payload"]["lifecycle_state"] == "official"
+    assert approved.json()["payload"]["verification_state"] == "verified"
+
+
+def test_mark_for_revalidation_returns_an_official_concept_to_the_review_queue(
+    client: TestClient, headers
+):
+    concepts = client.get("/api/v1/concepts", headers=headers["member"])
+    concepts.raise_for_status()
+    ops_playbook = next(
+        item for item in concepts.json() if item["payload"]["canonical_name"] == "Ops Playbook"
+    )
+
+    revalidation = client.post(
+        f"/api/v1/concepts/{ops_playbook['payload']['concept_id']}/review",
+        headers=headers["reviewer"],
+        json={"action": "mark_for_revalidation"},
+    )
+    revalidation.raise_for_status()
+
+    assert revalidation.json()["payload"]["verification_state"] == "review_required"
+
+    queue = client.get("/api/v1/review-queue", headers=headers["reviewer"])
+    queue.raise_for_status()
+
+    assert any(
+        item["resource_ref"]["resource_id"] == ops_playbook["payload"]["concept_id"]
+        for item in queue.json()
+    )
 
 
 def test_superseded_decisions_remain_readable_with_lineage(client: TestClient, headers):
@@ -360,6 +457,88 @@ def test_promoted_support_enters_workspace_without_private_origin_leakage(
     assert "private:" not in str(provenance.json())
 
 
+def test_promotions_route_creates_workspace_visible_promoted_support_without_private_locator_leakage(
+    client: TestClient, headers
+):
+    with client.app.state.db.session_factory() as session:
+        personal_context = session.scalar(
+            select(ContextSpace).where(ContextSpace.kind == ContextSpaceKind.PERSONAL).limit(1)
+        )
+        seeded_personal_support = session.scalar(
+            select(SupportItem)
+            .where(SupportItem.context_space_id == personal_context.id)
+            .order_by(SupportItem.id.asc())
+            .limit(1)
+        )
+        assert personal_context is not None
+        assert seeded_personal_support is not None
+        personal_support = SupportItem(
+            id="supp_api_promotion_route",
+            context_space_id=personal_context.id,
+            support_item_kind=seeded_personal_support.support_item_kind,
+            visibility_class=seeded_personal_support.visibility_class,
+            source_label=seeded_personal_support.source_label,
+            excerpt_or_summary="A second seeded personal excerpt reserved for API promotion tests.",
+            source_locator=seeded_personal_support.source_locator,
+            freshness_state=seeded_personal_support.freshness_state,
+            artifact_id=seeded_personal_support.artifact_id,
+            selector="paragraph:2",
+            normalized_claim="Secondary personal support for API promotion coverage.",
+        )
+        session.add(personal_support)
+        session.commit()
+
+    bootstrap = client.get("/api/v1/bootstrap")
+    bootstrap.raise_for_status()
+    workspace_id = bootstrap.json()["workspace"]["context_space_id"]
+
+    promoted = client.post(
+        "/api/v1/promotions",
+        headers=headers["member"],
+        json={
+            "personal_support_item_id": personal_support.id,
+            "workspace_context_id": workspace_id,
+            "shared_selection_kind": "summary_claim",
+            "shared_payload": "A promoted summary created through the API route.",
+            "visibility_class": "member_visible",
+            "origin_disclosure_level": "redacted_origin",
+        },
+    )
+    promoted.raise_for_status()
+
+    created_concept = client.post(
+        "/api/v1/concepts",
+        headers=headers["operator"],
+        json={
+            "context_space_id": workspace_id,
+            "canonical_name": "API promoted support concept",
+            "definition": "A concept backed by promoted support created through the promotions route.",
+            "owning_domain": "sales_ops",
+            "support_item_ids": [promoted.json()["promoted_support_id"]],
+        },
+    )
+    created_concept.raise_for_status()
+
+    approved_concept = client.post(
+        f"/api/v1/concepts/{created_concept.json()['payload']['concept_id']}/review",
+        headers=headers["admin"],
+        json={"action": "officialize"},
+    )
+    approved_concept.raise_for_status()
+
+    provenance = client.get(
+        f"/api/v1/provenance/concept/{created_concept.json()['payload']['concept_id']}",
+        headers=headers["member"],
+    )
+    provenance.raise_for_status()
+
+    support_items = provenance.json()["payload"]["support_items"]
+    assert support_items[0]["support_item_kind"] == "promoted_support"
+    assert support_items[0]["source_locator"].startswith("workspace-promotion:")
+    assert support_items[0]["origin_disclosure_level"] == "redacted_origin"
+    assert "private:" not in str(provenance.json())
+
+
 def test_no_match_returns_canonical_reason(client: TestClient, headers):
     response = client.get(
         "/api/v1/search", headers=headers["member"], params={"q": "totally-unmatched-query"}
@@ -368,4 +547,3 @@ def test_no_match_returns_canonical_reason(client: TestClient, headers):
 
     assert response.json()["response_kind"] == "no_match"
     assert response.json()["payload"]["reason"] == "no_official_match"
-
