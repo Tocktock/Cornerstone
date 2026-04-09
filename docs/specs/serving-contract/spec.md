@@ -244,6 +244,7 @@ Each graph edge must expose:
 
 ## Related docs
 
+- [../ai-operator-surfaces/spec.md](../ai-operator-surfaces/spec.md)
 - [../state-vocabulary/spec.md](../state-vocabulary/spec.md)
 - [../retrieval-and-answers/spec.md](../retrieval-and-answers/spec.md)
 - [../workspace-and-access/spec.md](../workspace-and-access/spec.md)

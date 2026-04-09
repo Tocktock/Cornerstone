@@ -369,21 +369,3 @@ def test_no_match_returns_canonical_reason(client: TestClient, headers):
     assert response.json()["response_kind"] == "no_match"
     assert response.json()["payload"]["reason"] == "no_official_match"
 
-
-def test_rest_and_mcp_answer_surfaces_match_contract_semantics(client: TestClient, headers):
-    rest = client.get("/api/v1/answers", headers=headers["member"], params={"q": "escalation"})
-    rest.raise_for_status()
-    mcp = client.post(
-        "/api/v1/mcp/read",
-        headers=headers["member"],
-        json={"request_intent": "get_answer", "query": "escalation"},
-    )
-    mcp.raise_for_status()
-
-    assert rest.json()["response_kind"] == mcp.json()["response_kind"] == "answer"
-    assert (
-        rest.json()["payload"]["support_visibility"] == mcp.json()["payload"]["support_visibility"]
-    )
-    assert (
-        rest.json()["payload"]["verification_state"] == mcp.json()["payload"]["verification_state"]
-    )

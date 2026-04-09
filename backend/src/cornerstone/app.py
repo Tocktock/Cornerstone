@@ -8,12 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from cornerstone.api.router import router
 from cornerstone.config import Settings
 from cornerstone.database import Database
+from cornerstone.mcp import create_mcp_app
 from cornerstone.services.bootstrap import initialize_database, seed_demo
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     resolved_settings = settings or Settings()
     database = Database(resolved_settings.database_url)
+    mcp_app = create_mcp_app(resolved_settings, database)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -23,7 +25,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if resolved_settings.auto_seed_demo:
             with database.session_factory() as session:
                 seed_demo(session, resolved_settings)
-        yield
+        async with mcp_app.router.lifespan_context(mcp_app):
+            yield
 
     app = FastAPI(title=resolved_settings.app_name, lifespan=lifespan)
     app.add_middleware(
@@ -34,6 +37,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(router, prefix=resolved_settings.api_prefix)
+    app.router.add_route("/mcp", mcp_app, methods=["GET", "POST", "DELETE"])
 
     @app.get("/")
     def root() -> dict[str, str]:
@@ -42,6 +46,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "message": "Cornerstone backend is running.",
             "docs": "/docs",
             "api": resolved_settings.api_prefix,
+            "mcp": "/mcp",
         }
 
     return app

@@ -15,9 +15,11 @@ from cornerstone.config import (
     discover_personal_source_root,
     discover_workspace_source_root,
 )
+from cornerstone.database import Database
+from cornerstone.services.bootstrap import initialize_database
 
 DEFAULT_TEST_DATABASE_URL = (
-    "postgresql+psycopg://cornerstone:cornerstone@localhost:55432/cornerstone_test"
+    "postgresql+psycopg://cornerstone:cornerstone@localhost:55433/cornerstone_test"
 )
 
 
@@ -30,15 +32,17 @@ def test_database_url() -> str:
     database_url = os.getenv("CORNERSTONE_TEST_DATABASE_URL", DEFAULT_TEST_DATABASE_URL)
     try:
         _ensure_database(database_url)
-    except psycopg.Error as exc:  # pragma: no cover - environment dependent
-        pytest.skip(f"Postgres test database is unavailable: {exc}")
+    except (psycopg.Error, RuntimeError) as exc:  # pragma: no cover - environment dependent
+        pytest.fail(str(exc), pytrace=False)
     return database_url
 
 
 def _ensure_database(database_url: str) -> None:
     target_url = make_url(database_url)
-    if target_url.drivername.startswith("sqlite"):
-        return
+    if not target_url.drivername.startswith("postgresql"):
+        raise RuntimeError(
+            f"Synthetic backend tests must use PostgreSQL, got {target_url.drivername!r}."
+        )
     admin_url = target_url.set(database="postgres")
     dsn = _psycopg_dsn(admin_url.render_as_string(hide_password=False))
     database_name = target_url.database
@@ -48,6 +52,18 @@ def _ensure_database(database_url: str) -> None:
         cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database_name,))
         if cursor.fetchone() is None:
             cursor.execute(f'CREATE DATABASE "{database_name}"')
+
+
+@pytest.fixture(scope="session")
+def test_database(test_database_url: str) -> Database:
+    return Database(test_database_url)
+
+
+@pytest.fixture()
+def db_session(test_database: Database):
+    initialize_database(test_database.engine, reset=True)
+    with test_database.session_factory() as session:
+        yield session
 
 
 @pytest.fixture()

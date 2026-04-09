@@ -39,6 +39,7 @@ Externally, Cornerstone should be described as the **shared organizational conte
 - [review-and-validation](./specs/review-and-validation/spec.md)
 - [retrieval-and-answers](./specs/retrieval-and-answers/spec.md)
 - [serving-contract](./specs/serving-contract/spec.md)
+- [ai-operator-surfaces](./specs/ai-operator-surfaces/spec.md)
 - [authoring-and-curation](./specs/authoring-and-curation/spec.md)
 - [p0 implementation specs](./specs/p0/README.md)
 

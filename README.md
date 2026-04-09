@@ -22,8 +22,9 @@ Read in this order if you are new to the project:
 12. [docs/specs/review-and-validation/spec.md](./docs/specs/review-and-validation/spec.md)
 13. [docs/specs/retrieval-and-answers/spec.md](./docs/specs/retrieval-and-answers/spec.md)
 14. [docs/specs/serving-contract/spec.md](./docs/specs/serving-contract/spec.md)
-15. [docs/specs/authoring-and-curation/spec.md](./docs/specs/authoring-and-curation/spec.md)
-16. [docs/specs/p0/README.md](./docs/specs/p0/README.md)
+15. [docs/specs/ai-operator-surfaces/spec.md](./docs/specs/ai-operator-surfaces/spec.md)
+16. [docs/specs/authoring-and-curation/spec.md](./docs/specs/authoring-and-curation/spec.md)
+17. [docs/specs/p0/README.md](./docs/specs/p0/README.md)
 
 ## Documentation model
 
@@ -62,5 +63,12 @@ The default quality gate currently runs:
 - `make backend-fast`
 - `make backend-integration`
 - `make symptoms`
+
+## Test backend rule
+
+- All synthetic backend tests in this repository are Postgres-backed.
+- `make backend-fast`, `make backend-integration`, and `make corpus-smoke` provision and run against the local Postgres test database via `CORNERSTONE_TEST_DATABASE_URL`.
+- `./run-all.sh check` is therefore a Postgres-backed quality gate for backend synthetic verification.
+- SQLite may still be useful as an ad hoc local debugging fallback, but it is not the canonical or release-signoff backend for synthetic tests in Cornerstone.
 
 The local dev stack now uses a P0-specific Postgres volume so `./run-all.sh up` does not reuse the legacy pre-P0 schema volume by accident.

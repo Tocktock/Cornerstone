@@ -152,7 +152,7 @@ Inspection rules are fixed:
 ## Related docs
 
 - [../ontology/spec.md](../ontology/spec.md)
-
+- [../ai-operator-surfaces/spec.md](../ai-operator-surfaces/spec.md)
 - [../connectors/spec.md](../connectors/spec.md)
 - [../review-and-validation/spec.md](../review-and-validation/spec.md)
 - [../sync-and-provenance/spec.md](../sync-and-provenance/spec.md)

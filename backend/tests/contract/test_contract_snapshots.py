@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from urllib.parse import urlparse
 
 from fastapi.testclient import TestClient
+
+from ..mcp_testkit import mcp_session
 
 GOLDEN_DIR = Path(__file__).with_name("golden")
 
@@ -89,13 +92,14 @@ def test_mcp_answer_snapshot_matches_rest_answer(client: TestClient, headers):
     rest = _normalize(
         client.get("/api/v1/answers", headers=headers["member"], params={"q": "escalation"}).json()
     )
-    mcp = _normalize(
-        client.post(
-            "/api/v1/mcp/read",
-            headers=headers["member"],
-            json={"request_intent": "get_answer", "query": "escalation"},
-        ).json()
-    )
+    
+    async def fetch_mcp_answer():
+        async with mcp_session(client.app, headers["member"]) as (session, _):
+            return _normalize(
+                (await session.call_tool("get_answer", {"query": "escalation"})).structuredContent
+            )
+
+    mcp = asyncio.run(fetch_mcp_answer())
 
     assert mcp == rest
 

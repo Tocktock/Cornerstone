@@ -20,3 +20,4 @@ These records capture durable product and architecture decisions that shape Corn
 - [0014 - Review authorization scope is derived deterministically](./0014-review-authorization-scope-is-derived-deterministically.md)
 - [0015 - Ontology layer is the canonical semantic reference](./0015-ontology-layer-is-the-canonical-semantic-reference.md)
 - [0016 - Workspace-bound provider credentials back shared connectors](./0016-workspace-bound-provider-credentials-back-shared-connectors.md)
+- [0017 - MCP is the first model-facing transport for AI operator surfaces](./0017-mcp-is-the-first-model-facing-transport-for-ai-operator-surfaces.md)

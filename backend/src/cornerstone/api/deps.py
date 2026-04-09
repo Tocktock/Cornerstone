@@ -22,24 +22,21 @@ def get_settings(request: Request):
     return request.app.state.settings
 
 
-def get_current_actor(
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
-    db: Session = Depends(get_db),
-) -> Actor:
-    if credentials is None or not credentials.credentials:
+def resolve_actor_from_bearer_token(token: str | None, db: Session) -> Actor:
+    if token is None or not token.strip():
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token."
         )
-    actor = db.scalar(select(Actor).where(Actor.auth_token == credentials.credentials).limit(1))
+    actor = db.scalar(select(Actor).where(Actor.auth_token == token).limit(1))
     if actor is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unknown actor token.")
     return actor
 
 
-def get_consumer_scope(
-    requested_scope: ConsumerScope | None = Query(default=None),
-    actor: Actor = Depends(get_current_actor),
-    db: Session = Depends(get_db),
+def resolve_consumer_scope(
+    requested_scope: ConsumerScope | None,
+    actor: Actor,
+    db: Session,
 ) -> ConsumerScope:
     if requested_scope is None:
         return actor.preferred_consumer_scope
@@ -56,3 +53,19 @@ def get_consumer_scope(
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN, detail="Requested consumer scope is not allowed."
     )
+
+
+def get_current_actor(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: Session = Depends(get_db),
+) -> Actor:
+    token = credentials.credentials if credentials is not None else None
+    return resolve_actor_from_bearer_token(token, db)
+
+
+def get_consumer_scope(
+    requested_scope: ConsumerScope | None = Query(default=None),
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+) -> ConsumerScope:
+    return resolve_consumer_scope(requested_scope, actor, db)

@@ -11,7 +11,6 @@ from cornerstone.domain.enums import (
     ConnectorAction,
     ConsumerScope,
     ContextSpaceKind,
-    RequestIntent,
     ResourceKind,
     ReviewAction,
 )
@@ -29,7 +28,6 @@ from cornerstone.domain.schemas import (
     DraftConceptCreate,
     DraftDecisionCreate,
     DraftRelationCreate,
-    McpReadRequest,
     PromotionRequest,
     ProviderBindingCompleteRequest,
     ProviderBindingStartResponse,
@@ -49,7 +47,6 @@ from cornerstone.domain.schemas import (
 from cornerstone.services.answering import answer_query, search_context
 from cornerstone.services.catalog import (
     filter_visible_resources,
-    get_context_space,
     get_policy,
     list_concepts,
     list_decisions,
@@ -62,6 +59,11 @@ from cornerstone.services.creation import (
     create_promoted_support,
     create_relation,
 )
+from cornerstone.services.read_surfaces import (
+    context_space_or_404,
+    graph_slice_response,
+    provenance_response,
+)
 from cornerstone.services.review import (
     ReviewInvariantError,
     review_concept,
@@ -72,11 +74,8 @@ from cornerstone.services.serialization import (
     concept_envelope,
     context_space_ref,
     decision_envelope,
-    graph_slice_envelope,
-    provenance_envelope,
     relation_envelope,
     resource_ref,
-    support_items_for_resource,
 )
 from cornerstone.services.source_connections import (
     actor_can_connector_action,
@@ -376,7 +375,7 @@ def get_concepts(
     actor: Actor = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ):
-    context_space = _workspace_context_or_404(db, actor.context_space_id)
+    context_space = context_space_or_404(db, actor.context_space_id)
     policy = get_policy(db, context_space.id)
     concepts = filter_visible_resources(
         list_concepts(db, context_space.id, query=q), consumer_scope, policy
@@ -395,7 +394,7 @@ def get_concept(
     actor: Actor = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ):
-    context_space = _workspace_context_or_404(db, actor.context_space_id)
+    context_space = context_space_or_404(db, actor.context_space_id)
     policy = get_policy(db, context_space.id)
     concept = db.scalar(
         select(Concept)
@@ -420,7 +419,7 @@ def post_concept(
     concept = create_concept(db, payload)
     db.commit()
     db.refresh(concept)
-    context_space = _workspace_context_or_404(db, concept.context_space_id)
+    context_space = context_space_or_404(db, concept.context_space_id)
     return concept_envelope(
         settings, context_space, get_policy(db, context_space.id), concept, consumer_scope
     )
@@ -438,7 +437,7 @@ def review_concept_route(
     concept = db.get(Concept, concept_id)
     if concept is None:
         raise HTTPException(status_code=404, detail="Concept not found.")
-    context_space = _workspace_context_or_404(db, concept.context_space_id)
+    context_space = context_space_or_404(db, concept.context_space_id)
     policy = get_policy(db, context_space.id)
     try:
         review_concept(db, concept, actor, payload.action, policy=policy)
@@ -457,7 +456,7 @@ def get_relations(
     actor: Actor = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ):
-    context_space = _workspace_context_or_404(db, actor.context_space_id)
+    context_space = context_space_or_404(db, actor.context_space_id)
     policy = get_policy(db, context_space.id)
     relations = filter_visible_resources(
         list_relations(db, context_space.id), consumer_scope, policy
@@ -479,7 +478,7 @@ def get_relation(
     relation = db.get(ConceptRelation, relation_id)
     if relation is None:
         raise HTTPException(status_code=404, detail="Relation not found.")
-    context_space = _workspace_context_or_404(db, relation.context_space_id)
+    context_space = context_space_or_404(db, relation.context_space_id)
     policy = get_policy(db, context_space.id)
     if not resource_visible_to_consumer(relation, consumer_scope, policy):
         raise HTTPException(status_code=404, detail="Relation not found.")
@@ -498,7 +497,7 @@ def post_relation(
     relation = create_relation(db, payload)
     db.commit()
     db.refresh(relation)
-    context_space = _workspace_context_or_404(db, relation.context_space_id)
+    context_space = context_space_or_404(db, relation.context_space_id)
     return relation_envelope(
         settings, context_space, get_policy(db, context_space.id), relation, consumer_scope
     )
@@ -516,7 +515,7 @@ def review_relation_route(
     relation = db.get(ConceptRelation, relation_id)
     if relation is None:
         raise HTTPException(status_code=404, detail="Relation not found.")
-    context_space = _workspace_context_or_404(db, relation.context_space_id)
+    context_space = context_space_or_404(db, relation.context_space_id)
     policy = get_policy(db, context_space.id)
     try:
         review_relation(db, relation, actor, payload.action, policy=policy)
@@ -536,7 +535,7 @@ def get_decisions(
     actor: Actor = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ):
-    context_space = _workspace_context_or_404(db, actor.context_space_id)
+    context_space = context_space_or_404(db, actor.context_space_id)
     policy = get_policy(db, context_space.id)
     decisions = filter_visible_resources(
         list_decisions(db, context_space.id, query=q), consumer_scope, policy
@@ -558,7 +557,7 @@ def get_decision(
     decision = db.get(DecisionRecord, decision_id)
     if decision is None:
         raise HTTPException(status_code=404, detail="Decision not found.")
-    context_space = _workspace_context_or_404(db, decision.context_space_id)
+    context_space = context_space_or_404(db, decision.context_space_id)
     policy = get_policy(db, context_space.id)
     if not resource_visible_to_consumer(decision, consumer_scope, policy):
         raise HTTPException(status_code=404, detail="Decision not found.")
@@ -577,7 +576,7 @@ def post_decision(
     decision = create_decision(db, payload)
     db.commit()
     db.refresh(decision)
-    context_space = _workspace_context_or_404(db, decision.context_space_id)
+    context_space = context_space_or_404(db, decision.context_space_id)
     return decision_envelope(
         db, settings, context_space, get_policy(db, context_space.id), decision, consumer_scope
     )
@@ -595,7 +594,7 @@ def review_decision_route(
     decision = db.get(DecisionRecord, decision_id)
     if decision is None:
         raise HTTPException(status_code=404, detail="Decision not found.")
-    context_space = _workspace_context_or_404(db, decision.context_space_id)
+    context_space = context_space_or_404(db, decision.context_space_id)
     policy = get_policy(db, context_space.id)
     try:
         review_decision(
@@ -628,7 +627,7 @@ def get_review_queue(
         )
         if has_review_grant is None:
             raise HTTPException(status_code=403, detail="Review queue requires review scope.")
-    context_space = _workspace_context_or_404(db, actor.context_space_id)
+    context_space = context_space_or_404(db, actor.context_space_id)
     concepts = [
         concept
         for concept in list_concepts(db, context_space.id)
@@ -669,7 +668,7 @@ def search_route(
     actor: Actor = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ):
-    context_space = _workspace_context_or_404(db, actor.context_space_id)
+    context_space = context_space_or_404(db, actor.context_space_id)
     return search_context(db, settings, context_space, consumer_scope, q)
 
 
@@ -681,7 +680,7 @@ def answer_route(
     actor: Actor = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ):
-    context_space = _workspace_context_or_404(db, actor.context_space_id)
+    context_space = context_space_or_404(db, actor.context_space_id)
     return answer_query(db, settings, context_space, consumer_scope, q)
 
 
@@ -693,45 +692,8 @@ def graph_route(
     actor: Actor = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ):
-    context_space = _workspace_context_or_404(db, actor.context_space_id)
-    policy = get_policy(db, context_space.id)
-    concepts = filter_visible_resources(list_concepts(db, context_space.id), consumer_scope, policy)
-    relations = filter_visible_resources(
-        list_relations(db, context_space.id), consumer_scope, policy
-    )
-    root_concepts = concepts
-    if root:
-        root_concepts = [
-            concept for concept in concepts if concept.public_slug == root or concept.id == root
-        ]
-        if not root_concepts:
-            raise HTTPException(status_code=404, detail="Graph root concept not found.")
-        root_ids = {concept.id for concept in root_concepts}
-        concepts = [
-            concept
-            for concept in concepts
-            if concept.id in root_ids
-            or any(
-                relation.subject_concept_id == concept.id
-                or relation.object_concept_id == concept.id
-                for relation in relations
-                if relation.subject_concept_id in root_ids or relation.object_concept_id in root_ids
-            )
-        ]
-        relations = [
-            relation
-            for relation in relations
-            if relation.subject_concept_id in root_ids or relation.object_concept_id in root_ids
-        ]
-    return graph_slice_envelope(
-        settings,
-        context_space,
-        consumer_scope,
-        root_concepts=root_concepts[:3] or concepts[:3],
-        nodes=concepts[:8],
-        edges=relations[:12],
-        policy=policy,
-    )
+    context_space = context_space_or_404(db, actor.context_space_id)
+    return graph_slice_response(db, settings, context_space, consumer_scope, root=root)
 
 
 @router.get("/provenance/{resource_kind}/{resource_id}")
@@ -743,22 +705,12 @@ def provenance_route(
     actor: Actor = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ):
-    resource = _resource_by_kind_or_404(db, resource_kind, resource_id)
-    context_space = _workspace_context_or_404(db, resource.context_space_id)
-    policy = get_policy(db, context_space.id)
-    if (
-        not resource_visible_to_consumer(resource, consumer_scope, policy)
-        and consumer_scope is ConsumerScope.MEMBER
-    ):
-        raise HTTPException(status_code=404, detail="Resource not found.")
-    return provenance_envelope(
-        settings=settings,
-        context_space=context_space,
-        consumer_scope=consumer_scope,
-        subject=resource,
-        support_items=support_items_for_resource(resource),
-        policy=policy,
-        verification_state=resource.verification_state,
+    return provenance_response(
+        db,
+        settings,
+        consumer_scope,
+        resource_kind=resource_kind,
+        resource_id=resource_id,
     )
 
 
@@ -771,71 +723,6 @@ def promote_support_route(
     promoted_support = create_promoted_support(db, payload, actor)
     db.commit()
     return {"promoted_support_id": promoted_support.id}
-
-
-@router.post("/mcp/read")
-def mcp_read(
-    payload: McpReadRequest,
-    settings: Settings = Depends(get_settings),
-    consumer_scope: ConsumerScope = Depends(get_consumer_scope),
-    actor: Actor = Depends(get_current_actor),
-    db: Session = Depends(get_db),
-):
-    context_space = _workspace_context_or_404(db, actor.context_space_id)
-    if payload.request_intent is RequestIntent.SEARCH_CONTEXT:
-        if not payload.query:
-            raise HTTPException(status_code=400, detail="MCP search requires query.")
-        return search_context(db, settings, context_space, consumer_scope, payload.query)
-    if payload.request_intent is RequestIntent.GET_ANSWER:
-        if not payload.query:
-            raise HTTPException(status_code=400, detail="MCP answer requires query.")
-        return answer_query(db, settings, context_space, consumer_scope, payload.query)
-    if payload.request_intent is RequestIntent.GET_GRAPH_SLICE:
-        return graph_route(
-            root=payload.root_concept_id,
-            settings=settings,
-            consumer_scope=consumer_scope,
-            actor=actor,
-            db=db,
-        )
-    if payload.request_intent is RequestIntent.FOLLOW_PROVENANCE:
-        if payload.resource_kind is None or payload.resource_id is None:
-            raise HTTPException(
-                status_code=400, detail="MCP provenance requires resource reference."
-            )
-        return provenance_route(
-            payload.resource_kind,
-            payload.resource_id,
-            settings=settings,
-            consumer_scope=consumer_scope,
-            actor=actor,
-            db=db,
-        )
-    if payload.resource_kind is None or payload.resource_id is None:
-        raise HTTPException(status_code=400, detail="MCP read requires a resource reference.")
-    if payload.request_intent is RequestIntent.GET_CONCEPT:
-        concept = _resource_by_kind_or_404(db, payload.resource_kind, payload.resource_id)
-        return concept_envelope(
-            settings, context_space, get_policy(db, context_space.id), concept, consumer_scope
-        )
-    if payload.request_intent is RequestIntent.GET_RELATION:
-        relation = _resource_by_kind_or_404(db, payload.resource_kind, payload.resource_id)
-        return relation_envelope(
-            settings, context_space, get_policy(db, context_space.id), relation, consumer_scope
-        )
-    if payload.request_intent is RequestIntent.GET_DECISION:
-        decision = _resource_by_kind_or_404(db, payload.resource_kind, payload.resource_id)
-        return decision_envelope(
-            db, settings, context_space, get_policy(db, context_space.id), decision, consumer_scope
-        )
-    raise HTTPException(status_code=400, detail="Unsupported MCP read request.")
-
-
-def _workspace_context_or_404(db: Session, context_space_id: str) -> ContextSpace:
-    context_space = get_context_space(db, context_space_id)
-    if context_space is None:
-        raise HTTPException(status_code=404, detail="Context space not found.")
-    return context_space
 
 
 def _ensure_operator(actor: Actor) -> None:
@@ -871,20 +758,6 @@ def _source_connection_for_actor_or_404(
             status_code=403, detail="Source connection is outside the actor workspace."
         )
     return connection
-
-
-def _resource_by_kind_or_404(db: Session, resource_kind: ResourceKind, resource_id: str):
-    if resource_kind is ResourceKind.CONCEPT:
-        resource = db.get(Concept, resource_id)
-    elif resource_kind is ResourceKind.RELATION:
-        resource = db.get(ConceptRelation, resource_id)
-    elif resource_kind is ResourceKind.DECISION:
-        resource = db.get(DecisionRecord, resource_id)
-    else:
-        raise HTTPException(status_code=400, detail="Unsupported resource kind for this route.")
-    if resource is None:
-        raise HTTPException(status_code=404, detail="Resource not found.")
-    return resource
 
 
 def _is_published_or_verified(resource) -> bool:

@@ -156,6 +156,7 @@ Minimal per-run operational history may be persisted for observability and recov
 
 ## Related docs
 
+- [../ai-operator-surfaces/spec.md](../ai-operator-surfaces/spec.md)
 - [../workspace-and-access/spec.md](../workspace-and-access/spec.md)
 - [../sync-and-provenance/spec.md](../sync-and-provenance/spec.md)
 - [./notion/spec.md](./notion/spec.md)

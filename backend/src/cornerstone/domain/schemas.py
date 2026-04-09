@@ -425,11 +425,3 @@ class PromotionRequest(ContractModel):
 class ReviewActionRequest(ContractModel):
     action: ReviewAction
     supersedes_decision_id: str | None = None
-
-
-class McpReadRequest(ContractModel):
-    request_intent: RequestIntent
-    resource_kind: ResourceKind | None = None
-    resource_id: str | None = None
-    query: str | None = None
-    root_concept_id: str | None = None
