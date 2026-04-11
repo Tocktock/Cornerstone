@@ -4,13 +4,19 @@ type PageHeaderProps = {
   title: string
   description: string
   actions?: ReactNode
+  eyebrow?: string
 }
 
-export function PageHeader({ title, description, actions }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  description,
+  actions,
+  eyebrow = 'Cornerstone workspace',
+}: PageHeaderProps) {
   return (
     <header className="page-header">
-      <div>
-        <span className="eyebrow">Cornerstone workspace</span>
+      <div className="page-header-copy">
+        <span className="eyebrow">{eyebrow}</span>
         <h2>{title}</h2>
         <p>{description}</p>
       </div>

@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 
 import type { ActorSession, ContextSpaceRef } from '../types/api'
 
@@ -7,79 +7,109 @@ type LayoutProps = {
   actors: ActorSession[]
   activeActor: ActorSession
   canReview: boolean
+  canManageConnectors: boolean
   onActorChange: (actorId: string) => void
 }
 
-const navItems = [
-  { to: '/', label: 'Dashboard' },
-  { to: '/glossary', label: 'Glossary' },
-  { to: '/graph', label: 'Graph' },
-  { to: '/decisions', label: 'Decisions' },
-  { to: '/review', label: 'Review', requiresReview: true },
-  { to: '/sources', label: 'Sources' },
-]
-
-export function Layout({ workspace, actors, activeActor, canReview, onActorChange }: LayoutProps) {
-  const visibleNavItems = navItems.filter((item) => !item.requiresReview || canReview)
+export function Layout({
+  workspace,
+  actors,
+  activeActor,
+  canReview,
+  canManageConnectors,
+  onActorChange,
+}: LayoutProps) {
+  const location = useLocation()
+  const isStudioRoute =
+    location.pathname.startsWith('/review-studio') || location.pathname.startsWith('/source-studio')
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="sidebar-top">
-          <div className="brand-card">
-            <div className="eyebrow">Cornerstone P0</div>
-            <h1>Symptom-first workspace context</h1>
-            <p>
-              One canonical contract powers the UI, REST reads, and the MCP-style adapter.
-            </p>
-          </div>
-
-          <div className="context-grid">
-            <div className="context-card">
-              <div className="context-heading">
-                <span className="eyebrow">Workspace</span>
-                <span className="context-meta">{workspace.context_space_kind}</span>
-              </div>
-              <strong className="context-value">{workspace.context_space_name}</strong>
-            </div>
-
-            <div className="context-card">
-              <div className="context-heading">
-                <span className="eyebrow">Persona</span>
-                <span className="context-meta">{activeActor.preferred_consumer_scope}</span>
-              </div>
-              <strong className="context-value">{activeActor.display_name}</strong>
-              <label className="persona-picker">
-                <span className="muted">Switch actor</span>
-                <select value={activeActor.actor_id} onChange={(event) => onActorChange(event.target.value)}>
-                  {actors.map((actor) => (
-                    <option key={actor.actor_id} value={actor.actor_id}>
-                      {actor.display_name} ({actor.preferred_consumer_scope})
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-          </div>
+    <div className={`app-shell ${isStudioRoute ? 'studio-shell' : 'reader-shell'}`}>
+      <header className="shell-header">
+        <div className="shell-header-bar">
+          <span className="mini-label">{isStudioRoute ? 'Operational surfaces' : 'Reader surfaces'}</span>
+          <span className="shell-header-context">{workspace.context_space_name}</span>
         </div>
 
-        <nav className="nav-list" aria-label="Primary navigation">
-          {visibleNavItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-              end={item.to === '/'}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+        <div className="shell-brand">
+          <span className="mini-label">Shared context</span>
+          <Link className="brand-link" to="/">
+            Cornerstone
+          </Link>
+          <p>Shared organizational context with explicit trust and provenance semantics.</p>
+        </div>
+
+        <nav className="top-nav" aria-label="Primary navigation">
+          <RouteLink to="/" label="Workspace" end />
+          <RouteLink to="/explore/topics" label="Explore" activePrefixes={['/explore', '/concepts/', '/decisions/']} />
+          {canReview ? <RouteLink to="/review-studio" label="Review Studio" /> : null}
+          {canManageConnectors ? <RouteLink to="/source-studio" label="Source Studio" /> : null}
         </nav>
-      </aside>
+
+        <details className="workspace-tray">
+          <summary>
+            <span className="mini-label">Workspace tray</span>
+            <strong>{activeActor.display_name}</strong>
+          </summary>
+          <div className="tray-panel">
+            <div className="tray-card">
+              <span className="mini-label">Workspace</span>
+              <strong>{workspace.context_space_name}</strong>
+              <p>{workspace.context_space_kind}</p>
+            </div>
+            <div className="tray-card">
+              <span className="mini-label">Active scope</span>
+              <strong>{activeActor.preferred_consumer_scope}</strong>
+              <p>{activeActor.base_role}</p>
+            </div>
+            <label className="form-field tray-field">
+              <span className="mini-label">Switch actor</span>
+              <select
+                aria-label="Switch actor"
+                value={activeActor.actor_id}
+                onChange={(event) => onActorChange(event.target.value)}
+              >
+                {actors.map((actor) => (
+                  <option key={actor.actor_id} value={actor.actor_id}>
+                    {actor.display_name} ({actor.preferred_consumer_scope})
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </details>
+      </header>
 
       <main className="content-shell">
         <Outlet context={{ workspace, activeActor }} />
       </main>
     </div>
+  )
+}
+
+function RouteLink({
+  to,
+  label,
+  end = false,
+  activePrefixes = [],
+}: {
+  to: string
+  label: string
+  end?: boolean
+  activePrefixes?: string[]
+}) {
+  const location = useLocation()
+
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) => {
+        const prefixMatch = activePrefixes.some((prefix) => location.pathname.startsWith(prefix))
+        return `top-nav-link ${isActive || prefixMatch ? 'active' : ''}`
+      }}
+    >
+      {label}
+    </NavLink>
   )
 }
