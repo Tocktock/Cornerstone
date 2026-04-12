@@ -7,6 +7,7 @@ ENV_FILE="$ROOT_DIR/.env"
 ENV_EXAMPLE="$ROOT_DIR/.env.example"
 LAUNCHER_NAME="${CORNERSTONE_LAUNCHER_NAME:-$(basename "$0")}"
 LAUNCHER_PROFILE="${CORNERSTONE_LAUNCHER_PROFILE:-generic}"
+COMPOSE_PROJECT_NAME="${CORNERSTONE_COMPOSE_PROJECT_NAME:-cornerstone}"
 
 apply_launcher_profile() {
   case "$LAUNCHER_PROFILE" in
@@ -94,6 +95,7 @@ run_compose() {
     env \
       CORNERSTONE_SOURCE_ROOT="$source_root" \
       CORNERSTONE_OLLAMA_ENABLED="$ollama_enabled" \
+      COMPOSE_PROJECT_NAME="$COMPOSE_PROJECT_NAME" \
       docker compose \
       --project-directory "$ROOT_DIR" \
       --env-file "$ENV_FILE" \
@@ -139,11 +141,42 @@ run_checks() {
   printf 'Cornerstone quality gate passed.\n'
 }
 
+repair_stale_compose_state() {
+  local default_network service cid networks image
+  default_network="${COMPOSE_PROJECT_NAME}_default"
+
+  for service in db backend frontend; do
+    while IFS= read -r cid; do
+      [[ -n "$cid" ]] || continue
+
+      networks="$(docker inspect "$cid" --format '{{json .NetworkSettings.Networks}}' 2>/dev/null || printf '{}')"
+      if [[ "$networks" != *"\"$default_network\""* ]]; then
+        printf 'Removing stale %s container %s missing Compose network %s\n' "$service" "$cid" "$default_network"
+        docker rm -f "$cid" >/dev/null 2>&1 || true
+        continue
+      fi
+
+      if [[ "$service" == "db" ]]; then
+        image="$(docker inspect "$cid" --format '{{.Config.Image}}' 2>/dev/null || true)"
+        if [[ "$image" == postgres:16* ]]; then
+          printf 'Removing stale db container %s using %s so Compose can recreate it with postgres:17-alpine\n' "$cid" "$image"
+          docker rm -f "$cid" >/dev/null 2>&1 || true
+        fi
+      fi
+    done < <(
+      docker ps -aq \
+        --filter "label=com.docker.compose.project=$COMPOSE_PROJECT_NAME" \
+        --filter "label=com.docker.compose.service=$service"
+    )
+  done
+}
+
 reset_dev_database() {
   printf 'Resetting local Cornerstone database volume\n'
   (
     cd "$ROOT_DIR"
     docker compose \
+      --project-name "$COMPOSE_PROJECT_NAME" \
       --project-directory "$ROOT_DIR" \
       --env-file "$ENV_FILE" \
       -f "$COMPOSE_FILE" \
@@ -206,6 +239,7 @@ case "$command_name" in
     printf 'Starting Cornerstone stack\n'
     printf '  launcher: %s\n' "$LAUNCHER_NAME"
     printf '  launcher-profile: %s\n' "$LAUNCHER_PROFILE"
+    printf '  compose-project: %s\n' "$COMPOSE_PROJECT_NAME"
     printf '  runtime-mode: %s\n' "${CORNERSTONE_RUNTIME_MODE:-mock}"
     printf '  demo-seed: %s\n' "${CORNERSTONE_AUTO_SEED_DEMO:-true}"
     printf '  notion-demo-oauth: %s\n' "${CORNERSTONE_NOTION_DEMO_OAUTH_MODE:-true}"
@@ -217,9 +251,11 @@ case "$command_name" in
     if [[ "$reset_db" == "true" ]]; then
       reset_dev_database
     else
+      repair_stale_compose_state
       cat <<EOF
 Note:
-- If startup fails with missing columns like `context_spaces.kind` or `decision_records.public_slug`, your local Postgres volume is from the old schema.
+- If startup fails with missing columns like 'context_spaces.kind' or 'decision_records.public_slug', your local Postgres volume is from the old schema.
+- If startup fails with a Postgres data-directory compatibility error after the Postgres 17 upgrade, your local volume was initialized by the old major version.
 - Recover with: ./$LAUNCHER_NAME up --reset-db
 EOF
     fi
@@ -241,8 +277,8 @@ Cornerstone is starting in the background.
 - backend: http://localhost:8000
 - docs: http://localhost:8000/docs
 
-Use ./run-all.sh logs to follow logs.
-Use ./run-all.sh down to stop the stack.
+Use ./$LAUNCHER_NAME logs to follow logs.
+Use ./$LAUNCHER_NAME down to stop the stack.
 EOF
     fi
     ;;

@@ -104,7 +104,7 @@ export function ArtifactCard({
         <StatusPill value={supportVisibility} />
         {verificationState ? <StatusPill value={verificationState} /> : null}
       </div>
-      <p>{summary}</p>
+      <p className="artifact-card-summary">{summary}</p>
       {meta ? <div className="artifact-meta">{meta}</div> : null}
       {children}
     </article>

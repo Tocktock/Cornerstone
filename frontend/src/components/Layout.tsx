@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 
 import type { ActorSession, ContextSpaceRef, RuntimeBootstrapMeta } from '../types/api'
@@ -23,8 +24,13 @@ export function Layout({
   onActorChange,
 }: LayoutProps) {
   const location = useLocation()
+  const workspaceTrayRef = useRef<HTMLDetailsElement | null>(null)
   const isStudioRoute =
     location.pathname.startsWith('/review-studio') || location.pathname.startsWith('/source-studio')
+
+  useEffect(() => {
+    workspaceTrayRef.current?.removeAttribute('open')
+  }, [activeActor.actor_id, location.pathname])
 
   return (
     <div className={`app-shell ${isStudioRoute ? 'studio-shell' : 'reader-shell'}`}>
@@ -44,7 +50,6 @@ export function Layout({
           <Link className="brand-link" to="/">
             Cornerstone
           </Link>
-          <p>Shared organizational context with explicit trust and provenance semantics.</p>
         </div>
 
         <nav className="top-nav" aria-label="Primary navigation">
@@ -54,7 +59,7 @@ export function Layout({
           {canManageConnectors ? <RouteLink to="/source-studio" label="Source Studio" /> : null}
         </nav>
 
-        <details className="workspace-tray">
+        <details ref={workspaceTrayRef} className="workspace-tray">
           <summary>
             <span className="mini-label">Workspace tray</span>
             <strong>{activeActor.display_name}</strong>
@@ -80,7 +85,10 @@ export function Layout({
               <select
                 aria-label="Switch actor"
                 value={activeActor.actor_id}
-                onChange={(event) => onActorChange(event.target.value)}
+                onChange={(event) => {
+                  workspaceTrayRef.current?.removeAttribute('open')
+                  onActorChange(event.target.value)
+                }}
               >
                 {actors.map((actor) => (
                   <option key={actor.actor_id} value={actor.actor_id}>

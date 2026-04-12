@@ -54,11 +54,12 @@ That means:
 - `./run-prod.sh up`: start the local production-like stack with demo fallback disabled.
 - `./run-all.sh up`: start the local stack through the generic launcher. This respects the current environment and is lower-level than the explicit dev/prod launchers.
 - `./run-dev.sh up --reset-db`: recreate the local dev database volume before startup. Use this after pulling a schema-breaking change such as the P0 model rewrite.
+- `./run-prod.sh up --reset-db`: recreate the local production-profile database volume before startup. Use this after the Postgres 17 image upgrade if an older local prod volume already exists.
 - `./run-all.sh down`: stop the local product stack.
 - `./run-all.sh check`: run the default local quality gate in one shot.
 - `./run-all.sh check --with-corpus`: run the default gate plus the opt-in full corpus smoke.
 
-The backend now backfills additive local schema changes such as `decision_records.public_slug` on startup, but `--reset-db` remains the recovery path for older volumes that drift beyond those compatibility repairs.
+The backend now backfills additive local schema changes such as `decision_records.public_slug` on startup, but `--reset-db` remains the recovery path for older volumes that drift beyond those compatibility repairs or still contain Postgres 16 data files after the Postgres 17 image upgrade.
 
 ## Runtime modes
 
@@ -71,6 +72,15 @@ For normal local use, prefer the dedicated launchers:
 
 - `./run-dev.sh up`
 - `./run-prod.sh up`
+
+These launchers now use separate local Compose project names and separate Postgres volumes:
+
+- `./run-dev.sh` -> `cornerstone-dev`
+- `./run-prod.sh` -> `cornerstone-prod`
+
+That separation prevents `run-prod.sh` from inheriting demo-seeded state from the mock/dev stack.
+
+Both the local app stack and the synthetic test stack now target `postgres:17-alpine`. The launcher removes obviously stale service containers that lost their Compose network or still pin the old Postgres 16 DB container, but if you already have a local `cornerstone-dev`, `cornerstone-prod`, or `cornerstone-test` volume from the previous Postgres 16 image, you still need to reset that stack volume before restarting it.
 
 Use `.env` or direct environment exports only when you intentionally need the generic launcher behavior from `./run-all.sh`.
 

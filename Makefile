@@ -8,7 +8,14 @@ COMPOSE_TEST := COMPOSE_PROJECT_NAME=cornerstone-test docker compose -f compose.
 .PHONY: test-stack-up test-stack-down ensure-test-db ensure-browser-db lint typecheck backend-fast backend-integration symptoms corpus-smoke
 
 test-stack-up:
-	$(COMPOSE_TEST) up -d --wait db
+	@if $(COMPOSE_TEST) up -d --wait db; then \
+		:; \
+	else \
+		echo "error: the Postgres test stack did not start."; \
+		echo "hint: after the Postgres 17 upgrade, reset the old test volume with 'make test-stack-down' and retry."; \
+		$(COMPOSE_TEST) logs --no-color db || true; \
+		exit 1; \
+	fi
 
 test-stack-down:
 	$(COMPOSE_TEST) down -v

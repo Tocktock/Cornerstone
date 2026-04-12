@@ -61,8 +61,33 @@ That means local mode switching no longer needs to depend on hand-editing `.env`
 - `./run-dev.sh` forces the mock/dev runtime profile
 - `./run-prod.sh` forces the production-like runtime profile
 
+Those launchers now also use separate local Compose project names:
+- `cornerstone-dev`
+- `cornerstone-prod`
+
+That separation is intentional so `run-prod.sh` starts against its own local persisted state instead of inheriting demo-seeded workspace data from the mock/dev stack.
+
 The generic `./run-all.sh` launcher still exists for environment-driven operation, but no frontend toggle exists and the backend remains the canonical source of truth.
 
 The operator-facing local files now also enumerate the valid runtime-mode options explicitly:
 - `mock`
 - `production`
+
+## Verified production behavior
+
+After starting a clean production-profile stack with `./run-prod.sh up --reset-db -d`, the backend reported:
+- `runtime_mode=production`
+- `workspace_data_state=awaiting_sources`
+- `linked_source_count=0`
+- `active_source_count=0`
+- `degraded_source_count=0`
+
+That production-profile workspace also returned:
+- no concepts
+- no decisions
+- no source connections
+- an empty graph slice
+
+When production Notion binding was attempted without OAuth configuration, the backend returned a clear configuration error rather than creating demo credentials.
+
+This verified the intended policy: production boot remains honest about an unconnected workspace and never falls back to demo datasource behavior.

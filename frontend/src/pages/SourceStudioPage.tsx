@@ -109,7 +109,6 @@ export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageP
         <PageHeader
           eyebrow="Cornerstone studio"
           title="Source Studio"
-          description="Production source onboarding is managed by connector managers and remains read-only for other actors."
         />
         <EmptyState
           eyebrow="Production access"
@@ -315,11 +314,6 @@ export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageP
       <PageHeader
         eyebrow="Cornerstone studio"
         title="Source Studio"
-        description={
-          productionMode
-            ? 'Operational source health, real datasource onboarding, and first-sync recovery cues for production workspaces.'
-            : 'Operational source health, recovery cues, and a dedicated composer for create and bind flows.'
-        }
       />
 
       {managerError ? <AlertBanner tone="danger" title="Source Studio issue" description={managerError} /> : null}
@@ -328,14 +322,14 @@ export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageP
         <AlertBanner
           eyebrow="Production onboarding"
           title="Connect a live datasource"
-          description="Production mode does not fall back to demo content. Bind a live datasource and create a shared connection to start building workspace knowledge."
+          description="Production mode does not fall back to demo content. Bind a live datasource first."
         />
       ) : null}
       {productionSyncingSources ? (
         <AlertBanner
           eyebrow="Production sync"
           title="First sync in progress"
-          description={`Production sources are connected, but the first usable workspace artifact set is still synchronizing. ${runtimeInfo.linked_source_count} linked sources are currently active or preparing.`}
+          description={`${runtimeInfo.linked_source_count} linked sources are currently active or preparing.`}
         />
       ) : null}
       {productionDegraded ? (
@@ -343,7 +337,7 @@ export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageP
           tone="danger"
           eyebrow="Production recovery"
           title="Recovery cues remain visible"
-          description={`Production mode keeps real content visible where possible, but ${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
+          description={`${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
         />
       ) : null}
 
@@ -371,11 +365,6 @@ export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageP
                 productionMode
                   ? 'Bind Notion and create a production source connection'
                   : 'Bind Notion and create a source connection'
-              }
-              description={
-                productionMode
-                  ? 'Production mode uses only live datasource binding and sync flows. The create flow stays isolated from the monitoring list.'
-                  : 'The create flow stays in its own composer instead of competing with the source list.'
               }
             />
 
@@ -494,7 +483,6 @@ export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageP
             <SectionIntro
               eyebrow="Preview"
               title={preview ? preview.resolved_source_boundary_locator : 'No preview yet'}
-              description="Resolve the scope and inspect sample source memory before the connection becomes operational."
               actions={preview ? <StatusPill value={preview.visibility_class} /> : null}
             />
             {preview ? (
@@ -520,8 +508,8 @@ export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageP
                 title="Preview required"
                 description={
                   productionMode
-                    ? 'Resolve the live scope before creating the connection so the operator can inspect the incoming production source memory.'
-                    : 'Resolve the scope before creating the connection so the operator can inspect sample source memory.'
+                    ? 'Resolve the live scope before creating the connection.'
+                    : 'Resolve the scope before creating the connection.'
                 }
               />
             )}
@@ -533,7 +521,6 @@ export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageP
         <SectionIntro
           eyebrow="Intervention queue"
           title="Sources needing attention"
-          description="Degraded, stale, paused, and removed sources stay isolated from healthy monitoring so operators can triage faster."
         />
         {attentionSources.length ? (
           <div className="studio-grid">
@@ -555,7 +542,6 @@ export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageP
         <SectionIntro
           eyebrow="Healthy monitoring"
           title="Sources tracking normally"
-          description="Healthy connections stay readable without overpowering the intervention queue."
         />
         <div className="studio-grid">
           {healthySources.map((source) => renderSourceCard(source))}
@@ -580,7 +566,6 @@ export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageP
         <SectionIntro
           eyebrow={source.provider}
           title={source.source_label}
-          description={source.source_boundary_locator}
           compact
           actions={
             <div className="artifact-status-row">

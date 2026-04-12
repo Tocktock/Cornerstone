@@ -42,7 +42,6 @@ export function ConceptDetailPage({ activeActor }: ConceptDetailPageProps) {
       <PageHeader
         eyebrow="Cornerstone concept"
         title={concept.data.payload.canonical_name}
-        description="Presentable reader view for the canonical concept artifact."
         actions={<Link className="ghost-link" to="/explore/topics">Back to topics</Link>}
       />
 
@@ -65,8 +64,7 @@ export function ConceptDetailPage({ activeActor }: ConceptDetailPageProps) {
         <aside className="reader-secondary-panel detail-stage-rail">
           <SectionIntro
             eyebrow="Trust strip"
-            title="Presentable evidence posture"
-            description="Trust cues stay explicit while the main narrative remains artifact-first."
+            title="Trust and provenance"
           />
           <ProvenanceStrip
             summary={concept.data.payload.provenance_summary}
@@ -90,16 +88,10 @@ export function ConceptDetailPage({ activeActor }: ConceptDetailPageProps) {
       <div className="reader-two-column detail-layout">
         <article className="reader-primary-panel detail-main-panel">
           <SectionIntro
-            eyebrow="Canonical narrative"
-            title="Definition first"
-            description="Related knowledge stays secondary to the canonical explanation."
+            eyebrow="Related knowledge"
+            title="Connected context"
             compact
           />
-
-          <section className="narrative-section narrative-section-panel">
-            <h4>Canonical definition</h4>
-            <p>{concept.data.payload.definition}</p>
-          </section>
 
           <RefList
             title="Related decisions"
@@ -116,8 +108,7 @@ export function ConceptDetailPage({ activeActor }: ConceptDetailPageProps) {
         <aside className="reader-secondary-panel detail-support-rail">
           <SectionIntro
             eyebrow="Support rail"
-            title="Visible support and origins"
-            description="Evidence and source context stay grouped in structured side rails."
+            title="Support and origins"
           />
 
           <section className="narrative-section narrative-section-panel">
@@ -145,14 +136,6 @@ export function ConceptDetailPage({ activeActor }: ConceptDetailPageProps) {
 
           {provenance.data ? (
             <>
-              <section className="narrative-section narrative-section-panel">
-                <h4>Provenance strip</h4>
-                <p>
-                  {provenance.data.payload.provenance_summary.visible_support_item_count} visible of{' '}
-                  {provenance.data.payload.provenance_summary.support_item_count} total support items.
-                </p>
-              </section>
-
               <section className="narrative-section narrative-section-panel">
                 <h4>Source origins</h4>
                 {provenance.data.payload.source_summaries.length ? (

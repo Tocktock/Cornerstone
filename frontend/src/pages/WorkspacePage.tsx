@@ -99,7 +99,6 @@ export function WorkspacePage({ activeActor, runtimeInfo }: WorkspacePageProps) 
         <PageHeader
           eyebrow="Cornerstone workspace"
           title="Workspace"
-          description={`Artifact-first workspace home for ${activeActor.display_name}. Search, official knowledge, and quiet operational cues stay visible without operator chrome taking over the page.`}
         />
         {awaitingSources ? (
           <EmptyState
@@ -107,8 +106,8 @@ export function WorkspacePage({ activeActor, runtimeInfo }: WorkspacePageProps) 
             title="Connect a shared datasource first"
             description={
               canManageConnectors
-                ? 'Production workspaces do not fall back to demo content. Connect a shared datasource in Source Studio to start building member-facing knowledge.'
-                : 'This production workspace does not have a shared datasource linked yet. A connector manager needs to connect a datasource before member-facing knowledge can appear here.'
+                ? 'Production workspaces do not fall back to demo content. Connect a shared datasource in Source Studio.'
+                : 'This production workspace has no shared datasource yet. A connector manager needs to connect one first.'
             }
             actions={sourceStudioAction}
           />
@@ -116,7 +115,7 @@ export function WorkspacePage({ activeActor, runtimeInfo }: WorkspacePageProps) 
           <EmptyState
             eyebrow="Production sync"
             title="Sources connected, first sync in progress"
-            description={`Production mode is waiting for the first usable workspace artifact set. ${runtimeInfo.linked_source_count} sources are linked and ${runtimeInfo.active_source_count} are active.`}
+            description={`${runtimeInfo.linked_source_count} linked sources are preparing the first usable workspace artifacts.`}
             actions={sourceStudioAction}
           />
         )}
@@ -129,7 +128,6 @@ export function WorkspacePage({ activeActor, runtimeInfo }: WorkspacePageProps) 
       <PageHeader
         eyebrow="Cornerstone workspace"
         title="Workspace"
-        description={`Artifact-first workspace home for ${activeActor.display_name}. Search, official knowledge, and quiet operational cues stay visible without operator chrome taking over the page.`}
       />
 
       {searchError ? <AlertBanner tone="danger" title="Workspace query failed" description={searchError} /> : null}
@@ -138,7 +136,7 @@ export function WorkspacePage({ activeActor, runtimeInfo }: WorkspacePageProps) 
           tone="danger"
           eyebrow="Production recovery"
           title="Source recovery cues remain active"
-          description={`Production content remains visible where possible, but ${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
+          description={`${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
         />
       ) : null}
 
@@ -181,7 +179,6 @@ export function WorkspacePage({ activeActor, runtimeInfo }: WorkspacePageProps) 
           <SectionIntro
             eyebrow="Featured answer"
             title={searchHeading}
-            description="The primary knowledge artifact stays visible before supporting workspace controls."
             actions={activeAnswer ? <StatusPill value={activeAnswer.response_kind} /> : null}
           />
 
@@ -245,7 +242,6 @@ export function WorkspacePage({ activeActor, runtimeInfo }: WorkspacePageProps) 
           <SectionIntro
             eyebrow="Recent changes"
             title="Freshly updated workspace artifacts"
-            description="Read the latest canonical changes before you move into the broader browse surfaces."
           />
           <div className="workspace-river">
             {recentChanges.map((item, index) => (
@@ -285,7 +281,6 @@ export function WorkspacePage({ activeActor, runtimeInfo }: WorkspacePageProps) 
                 ? `${searchResults.payload.result_count} matches`
                 : 'Explore references'
             }
-            description="Supporting knowledge paths stay visible in a compact rail without crowding the main artifact."
           />
 
           {searchResults && isSearchResultsPayload(searchResults.payload) ? (
@@ -332,7 +327,6 @@ export function WorkspacePage({ activeActor, runtimeInfo }: WorkspacePageProps) 
               <SectionIntro
                 eyebrow="Freshness alerts"
                 title="Quiet operational cues"
-                description="Monitoring and degraded states stay explicit without taking over the route."
                 compact
               />
               <div className="alert-grid compact-alert-grid">

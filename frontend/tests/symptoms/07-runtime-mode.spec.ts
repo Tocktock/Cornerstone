@@ -88,7 +88,7 @@ test('production awaiting_sources keeps member guidance read-only', async ({ pag
 
   await goToRoute(page, '/', 'Workspace')
   await expect(page.getByRole('link', { name: 'Open Source Studio' })).toHaveCount(0)
-  await expect(page.getByText(/connector manager needs to connect a datasource/i)).toBeVisible()
+  await expect(page.getByText(/no shared datasource yet/i)).toBeVisible()
 
   await page.goto('/source-studio')
   await waitForShell(page)
@@ -123,7 +123,7 @@ test('production syncing_sources shows first-sync guidance on explore topics', a
   await expect(
     page.getByRole('heading', { name: 'Topic index is waiting for first sync' }),
   ).toBeVisible()
-  await expect(page.getByText(/2 linked sources are currently being prepared/i)).toBeVisible()
+  await expect(page.getByText(/2 linked sources are still preparing the first topic set/i)).toBeVisible()
 })
 
 test('production degraded keeps published topics visible with recovery cues', async ({

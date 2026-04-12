@@ -49,6 +49,9 @@
   --radius-lg: 20px;
   --radius-md: 14px;
   --radius-sm: 10px;
+  --display-tracking: -0.022em;
+  --display-tracking-mobile: -0.014em;
+  --label-tracking: 0.11em;
   --transition-fast: 140ms ease;
   --transition-medium: 220ms ease;
   --transition-slow: 320ms ease;
@@ -205,7 +208,7 @@ h4,
 strong.brand-display {
   margin: 0;
   font-family: 'Newsreader', Georgia, serif;
-  letter-spacing: -0.035em;
+  letter-spacing: var(--display-tracking);
   color: inherit;
 }
 
@@ -227,7 +230,7 @@ h4 {
 
 p {
   margin: 0;
-  line-height: 1.7;
+  line-height: 1.82;
 }
 
 .loading-screen {
@@ -261,11 +264,11 @@ p {
   z-index: 40;
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) auto auto;
-  gap: 1rem 1.15rem;
+  gap: 0.8rem 1rem;
   align-items: center;
   width: min(1320px, calc(100% - 1.6rem));
   margin: 0 auto;
-  padding: 0.95rem 0 1rem;
+  padding: 0.72rem 0 0.78rem;
   backdrop-filter: blur(18px);
 }
 
@@ -359,13 +362,13 @@ p {
 
 .shell-brand {
   display: grid;
-  gap: 0.22rem;
+  gap: 0.12rem;
   align-items: start;
 }
 
 .brand-link {
   font-family: 'Newsreader', Georgia, serif;
-  font-size: clamp(1.7rem, 2vw, 2rem);
+  font-size: clamp(1.55rem, 2vw, 1.9rem);
   font-weight: 700;
   text-decoration: none;
 }
@@ -389,7 +392,7 @@ p {
   flex-wrap: wrap;
   gap: 0.55rem;
   justify-content: center;
-  padding: 0.4rem;
+  padding: 0.32rem;
   border-radius: 999px;
   border: 1px solid var(--reader-border);
   background: rgba(255, 251, 245, 0.56);
@@ -545,13 +548,13 @@ p {
 .content-shell {
   width: min(1320px, calc(100% - 1.6rem));
   margin: 0 auto;
-  padding: 1.6rem 0 3.5rem;
+  padding: 1.2rem 0 3.5rem;
 }
 
 .page-stack {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.35rem;
 }
 
 .reader-page,
@@ -592,12 +595,13 @@ p {
 .page-header {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
+  gap: 0.75rem 1rem;
 }
 
 .page-header-copy {
   display: grid;
-  gap: 0.45rem;
-  max-width: 62rem;
+  gap: 0.65rem;
+  max-width: 50rem;
 }
 
 .page-actions {
@@ -609,6 +613,7 @@ p {
 .section-intro {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
+  gap: 0.75rem 1rem;
 }
 
 .section-intro.compact {
@@ -617,7 +622,7 @@ p {
 
 .section-intro-copy {
   display: grid;
-  gap: 0.38rem;
+  gap: 0.5rem;
 }
 
 .section-intro-actions {
@@ -632,7 +637,7 @@ p {
   align-items: center;
   gap: 0.35rem;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: var(--label-tracking);
   font-size: 0.74rem;
   font-weight: 700;
 }
@@ -779,13 +784,42 @@ p {
 }
 
 .artifact-lead {
-  font-size: 1.08rem;
+  font-size: 1.12rem;
+  line-height: 1.9;
+  max-width: 40ch;
 }
 
 .artifact-card {
   display: grid;
   gap: 0.85rem;
   align-content: start;
+}
+
+.artifact-card-summary,
+.page-header-copy p,
+.section-intro-copy p,
+.empty-state p,
+.alert-banner p,
+.panel-copy,
+.meta-copy,
+.muted {
+  max-width: 60ch;
+}
+
+.artifact-card-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.artifact-card-lead .artifact-card-summary {
+  -webkit-line-clamp: 3;
+}
+
+.artifact-card-standard .artifact-card-summary,
+.artifact-card-compact .artifact-card-summary,
+.artifact-card-rail .artifact-card-summary {
+  -webkit-line-clamp: 2;
 }
 
 .artifact-card-standard {
@@ -1166,7 +1200,7 @@ p {
 
 .empty-state {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.65rem;
 }
 
 .ghost-link {
@@ -1333,6 +1367,12 @@ p {
 }
 
 @media (max-width: 720px) {
+  h1,
+  h2,
+  h3 {
+    letter-spacing: var(--display-tracking-mobile);
+  }
+
   .shell-header {
     width: min(100% - 1rem, 1320px);
   }

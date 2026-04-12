@@ -103,6 +103,7 @@ Cornerstone has two backend-owned runtime modes:
 The runtime mode is deployment-controlled and is not user-switchable in the UI.
 
 Local operator tooling may expose dedicated launchers such as development and production-profile scripts, but those launchers are convenience wrappers only. They must preselect runtime-mode inputs without redefining the canonical meaning of `mock` or `production`.
+Local production-like tooling should also isolate persistence from mock/demo tooling so a production-profile workspace does not inherit demo-seeded source state through a shared local database volume.
 
 Connector behavior must follow these rules:
 - In `mock`, demo fixture bootstrap and demo provider binding may remain available.

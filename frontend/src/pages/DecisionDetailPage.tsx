@@ -6,7 +6,7 @@ import { LineageRail, ProvenanceStrip, RefList, SectionIntro } from '../componen
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/StatusPill'
 import { useAsyncData } from '../hooks/useAsyncData'
-import type { ActorSession, ConceptPayload, ContractEnvelope, DecisionPayload, ProvenancePayload, ResourceRef } from '../types/api'
+import type { ActorSession, ConceptPayload, ContractEnvelope, DecisionPayload, ResourceRef } from '../types/api'
 
 type DecisionDetailPageProps = {
   activeActor: ActorSession
@@ -17,10 +17,6 @@ export function DecisionDetailPage({ activeActor }: DecisionDetailPageProps) {
   const decision = useAsyncData<ContractEnvelope<DecisionPayload> | null>(
     () => (publicSlug ? apiGet(`/decisions/${publicSlug}`) : Promise.resolve(null)),
     [activeActor.actor_id, publicSlug],
-  )
-  const provenance = useAsyncData<ContractEnvelope<ProvenancePayload> | null>(
-    () => (decision.data ? apiGet(`/provenance/decision/${decision.data.payload.decision_id}`) : Promise.resolve(null)),
-    [activeActor.actor_id, decision.data?.payload.decision_id],
   )
   const concepts = useAsyncData<ContractEnvelope<ConceptPayload>[]>(
     () => apiGet('/concepts'),
@@ -53,7 +49,6 @@ export function DecisionDetailPage({ activeActor }: DecisionDetailPageProps) {
       <PageHeader
         eyebrow="Cornerstone decision"
         title={decision.data.payload.title}
-        description="Presentable reader view for a canonical decision record."
         actions={<Link className="ghost-link" to="/explore/decisions">Back to decisions</Link>}
       />
 
@@ -67,8 +62,7 @@ export function DecisionDetailPage({ activeActor }: DecisionDetailPageProps) {
         <aside className="reader-secondary-panel detail-stage-rail">
           <SectionIntro
             eyebrow="Lineage and trust"
-            title="Decision posture"
-            description="Lineage, provenance, and support state remain visible without crowding the story order."
+            title="Lineage and provenance"
           />
           <LineageRail
             variant="timeline"
@@ -99,15 +93,9 @@ export function DecisionDetailPage({ activeActor }: DecisionDetailPageProps) {
         <article className="reader-primary-panel detail-main-panel">
           <SectionIntro
             eyebrow="Decision story"
-            title="Readable narrative order"
-            description="The decision statement leads, followed by rationale, constraints, impact, and linked knowledge."
+            title="Decision details"
             compact
           />
-
-          <section className="narrative-section narrative-section-panel">
-            <h4>Decision statement</h4>
-            <p>{decision.data.payload.decision_statement}</p>
-          </section>
 
           {decision.data.payload.problem_statement ? (
             <section className="narrative-section narrative-section-panel">
@@ -158,8 +146,7 @@ export function DecisionDetailPage({ activeActor }: DecisionDetailPageProps) {
         <aside className="reader-secondary-panel detail-support-rail">
           <SectionIntro
             eyebrow="Support rail"
-            title="Visible support and provenance detail"
-            description="Supporting evidence remains explicit, grouped, and readable in a structured side rail."
+            title="Visible support"
           />
 
           <section className="narrative-section narrative-section-panel">
@@ -185,31 +172,6 @@ export function DecisionDetailPage({ activeActor }: DecisionDetailPageProps) {
             </div>
           </section>
 
-          {provenance.data ? (
-            <section className="narrative-section narrative-section-panel">
-              <h4>Provenance details</h4>
-              <p>
-                {provenance.data.payload.provenance_summary.visible_support_item_count} visible of{' '}
-                {provenance.data.payload.provenance_summary.support_item_count} total support items.
-              </p>
-              {provenance.data.payload.support_items.length ? (
-                <div className="stack-list">
-                  {provenance.data.payload.support_items.map((item) => (
-                    <article key={item.support_item_id} className="list-card compact-card">
-                      <strong>{item.source_label}</strong>
-                      <p>{item.excerpt_or_summary ?? 'No visible excerpt available.'}</p>
-                    </article>
-                  ))}
-                </div>
-                ) : null}
-              </section>
-          ) : (
-            <EmptyState
-              title="Provenance is loading"
-              description="Decision provenance will render here."
-              eyebrow="Decision provenance"
-            />
-          )}
         </aside>
       </div>
     </section>

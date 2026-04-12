@@ -61,7 +61,6 @@ export function ReviewStudioPage({ activeActor, actors, canReview }: ReviewStudi
       <PageHeader
         eyebrow="Cornerstone studio"
         title="Review Studio"
-        description={`Queue clarity and action safety for ${activeActor.display_name}. Officialize and reject stay visually separated.`}
       />
 
       {!canReview ? (
@@ -99,7 +98,6 @@ export function ReviewStudioPage({ activeActor, actors, canReview }: ReviewStudi
                 <SectionIntro
                   eyebrow={leadItem.review_domain}
                   title={leadItem.resource_ref.resource_label}
-                  description="The highest-priority queue item stays isolated so the next safe action is obvious."
                   actions={
                     <div className="artifact-status-row">
                       <StatusPill value={leadItem.resource_ref.resource_kind} />
@@ -133,18 +131,13 @@ export function ReviewStudioPage({ activeActor, actors, canReview }: ReviewStudi
               <aside className="studio-panel studio-guidance-panel">
                 <SectionIntro
                   eyebrow="Queue guidance"
-                  title="Review with hierarchy intact"
-                  description="Expressive polish is allowed here only when it makes queue priority, disclosure, and workflow safety easier to read."
+                  title="Review posture"
                   compact
                 />
                 <div className="stack-list">
                   <article className="list-card compact-card">
-                    <span className="mini-label">Priority posture</span>
-                    <p>Keep the first action cluster obvious. Never blur officialize and reject into equivalent visual weight.</p>
-                  </article>
-                  <article className="list-card compact-card">
-                    <span className="mini-label">Disclosure rule</span>
-                    <p>Review domain and support disclosure remain explicit even when cards become more expressive.</p>
+                    <span className="mini-label">Action safety</span>
+                    <p>Keep the next action obvious. Officialize and reject never share equal visual weight.</p>
                   </article>
                 </div>
               </aside>
@@ -156,7 +149,6 @@ export function ReviewStudioPage({ activeActor, actors, canReview }: ReviewStudi
               <SectionIntro
                 eyebrow="Remaining queue"
                 title="Continue through the review stack"
-                description="Secondary items stay compact, readable, and action-safe."
               />
               <div className="studio-grid">
                 {remainingItems.map((item) => (

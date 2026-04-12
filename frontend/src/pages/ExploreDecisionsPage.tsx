@@ -53,7 +53,6 @@ export function ExploreDecisionsPage({ activeActor, runtimeInfo }: ExploreDecisi
         <PageHeader
           eyebrow="Cornerstone explore"
           title="Explore Decisions"
-          description="Browse decision records as readable artifacts with explicit lineage instead of buried operator metadata."
         />
         <ExploreTabs />
         <EmptyState
@@ -62,9 +61,9 @@ export function ExploreDecisionsPage({ activeActor, runtimeInfo }: ExploreDecisi
           description={
             awaitingSources
               ? canManageConnectors
-                ? 'Production mode does not show demo decision records. Connect a shared datasource before decision artifacts can appear.'
-                : 'This production workspace has no linked shared datasource yet. A connector manager needs to connect one before decision records can appear.'
-              : `Sources are connected, but the first usable decision set is not ready yet. ${runtimeInfo.linked_source_count} linked sources are currently being prepared.`
+                ? 'Production mode does not show demo decision records. Connect a shared datasource first.'
+                : 'This production workspace has no linked shared datasource yet.'
+              : `${runtimeInfo.linked_source_count} linked sources are still preparing the first decision set.`
           }
           actions={sourceStudioAction}
         />
@@ -77,14 +76,13 @@ export function ExploreDecisionsPage({ activeActor, runtimeInfo }: ExploreDecisi
       <PageHeader
         eyebrow="Cornerstone explore"
         title="Explore Decisions"
-        description="Browse decision records as readable artifacts with explicit lineage instead of buried operator metadata."
       />
       <ExploreTabs />
       {productionDegraded ? (
         <EmptyState
           eyebrow="Production recovery"
           title="Some source health is degraded"
-          description={`Published decision records remain visible when available, but ${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
+          description={`${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
           actions={sourceStudioAction}
         />
       ) : null}
@@ -128,7 +126,6 @@ export function ExploreDecisionsPage({ activeActor, runtimeInfo }: ExploreDecisi
             <SectionIntro
               eyebrow="Decision browse"
               title={`${(decisions.data ?? []).length} current records`}
-              description="Use the lead record for orientation, then scan compact lineage-aware entries."
             />
             <div className="stack-list">
               {railDecisions.map((envelope) => (
@@ -183,7 +180,6 @@ export function ExploreDecisionsPage({ activeActor, runtimeInfo }: ExploreDecisi
           <SectionIntro
             eyebrow="Decision library"
             title="Readable records with lineage in-line"
-            description="The browse surface keeps lineage visible without turning decisions back into operator cards."
           />
           <div className="card-grid browse-card-grid">
             {libraryDecisions.map((envelope, index) => {
@@ -241,7 +237,7 @@ export function ExploreDecisionsPage({ activeActor, runtimeInfo }: ExploreDecisi
         <EmptyState
           eyebrow="Published decisions"
           title="No published decisions yet"
-          description="The workspace has source connectivity, but no member-facing decision artifacts are published yet."
+          description="The workspace has connectivity, but no member-facing decisions are published yet."
           actions={sourceStudioAction}
         />
       ) : null}

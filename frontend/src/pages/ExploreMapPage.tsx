@@ -60,7 +60,6 @@ export function ExploreMapPage({ activeActor, runtimeInfo }: ExploreMapPageProps
         <PageHeader
           eyebrow="Cornerstone explore"
           title="Explore Map"
-          description="Trace concept relationships through a URL-addressable map with clearer relation storytelling."
         />
         <ExploreTabs />
         <EmptyState
@@ -70,8 +69,8 @@ export function ExploreMapPage({ activeActor, runtimeInfo }: ExploreMapPageProps
             awaitingSources
               ? canManageConnectors
                 ? 'Connect a shared datasource before the production concept map can be built.'
-                : 'A connector manager needs to connect a shared datasource before the concept map can appear in this production workspace.'
-              : `Sources are connected, but the first usable map slice is not ready yet. ${runtimeInfo.linked_source_count} linked sources are currently being prepared.`
+                : 'A connector manager needs to connect a shared datasource before the concept map can appear.'
+              : `${runtimeInfo.linked_source_count} linked sources are still preparing the first map slice.`
           }
           actions={sourceStudioAction}
         />
@@ -84,14 +83,13 @@ export function ExploreMapPage({ activeActor, runtimeInfo }: ExploreMapPageProps
       <PageHeader
         eyebrow="Cornerstone explore"
         title="Explore Map"
-        description="Trace concept relationships through a URL-addressable map with clearer relation storytelling."
       />
       <ExploreTabs />
       {productionDegraded ? (
         <EmptyState
           eyebrow="Production recovery"
           title="Some source health is degraded"
-          description={`Map navigation remains available where possible, but ${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
+          description={`${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
           actions={sourceStudioAction}
         />
       ) : null}
@@ -102,7 +100,11 @@ export function ExploreMapPage({ activeActor, runtimeInfo }: ExploreMapPageProps
             <SectionIntro
               eyebrow="Map focus"
               title={explorer.selectedNode.resource_label}
-              description={`${explorer.selectedNode.totalRelationCount} direct relations remain visible in the current slice.`}
+              actions={
+                <div className="artifact-status-row">
+                  <StatusPill value={`${explorer.selectedNode.totalRelationCount} links`} />
+                </div>
+              }
             />
 
             <div className="chip-row root-jump-row">
@@ -123,9 +125,6 @@ export function ExploreMapPage({ activeActor, runtimeInfo }: ExploreMapPageProps
               <article className="list-card map-focus-card">
                 <span className="eyebrow">{explorer.selectedNode.isRoot ? 'Root concept' : 'Linked concept'}</span>
                 <p className="map-focus-title">{explorer.selectedNode.resource_label}</p>
-                <p className="panel-copy">
-                  The active object stays visually dominant while the surrounding relation lanes update around it.
-                </p>
                 <div className="artifact-status-row">
                   <StatusPill value={`${explorer.selectedNode.outboundCount} outbound`} />
                   <StatusPill value={`${explorer.selectedNode.inboundCount} inbound`} />
@@ -155,7 +154,6 @@ export function ExploreMapPage({ activeActor, runtimeInfo }: ExploreMapPageProps
                 <SectionIntro
                   eyebrow="Outbound"
                   title="Outbound relations"
-                  description="Follow what the current concept points toward."
                   compact
                 />
                 {explorer.outboundRelations.length ? (
@@ -188,7 +186,6 @@ export function ExploreMapPage({ activeActor, runtimeInfo }: ExploreMapPageProps
                 <SectionIntro
                   eyebrow="Inbound"
                   title="Inbound relations"
-                  description="See what currently resolves back into the active concept."
                   compact
                 />
                 {explorer.inboundRelations.length ? (
@@ -223,7 +220,6 @@ export function ExploreMapPage({ activeActor, runtimeInfo }: ExploreMapPageProps
             <SectionIntro
               eyebrow="Concept index"
               title="Navigate the slice"
-              description="Roots and linked concepts stay visually distinct so the current path remains legible."
             />
 
             <section className="narrative-section compact-section">
@@ -278,7 +274,7 @@ export function ExploreMapPage({ activeActor, runtimeInfo }: ExploreMapPageProps
       ) : (
         <EmptyState
           title="No published map yet"
-          description="The workspace has source connectivity, but no member-facing concept map is published yet."
+          description="The workspace has connectivity, but no member-facing concept map is published yet."
           actions={sourceStudioAction}
         />
       )}

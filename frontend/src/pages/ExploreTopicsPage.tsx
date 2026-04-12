@@ -52,7 +52,6 @@ export function ExploreTopicsPage({ activeActor, runtimeInfo }: ExploreTopicsPag
         <PageHeader
           eyebrow="Cornerstone explore"
           title="Explore Topics"
-          description="Browse canonical concepts in an editorial view that keeps definitions first and trust disclosure close behind."
         />
         <ExploreTabs />
         <EmptyState
@@ -61,9 +60,9 @@ export function ExploreTopicsPage({ activeActor, runtimeInfo }: ExploreTopicsPag
           description={
             awaitingSources
               ? canManageConnectors
-                ? 'Production mode does not render demo topics. Connect a shared datasource before topic artifacts can appear.'
-                : 'This production workspace has no linked shared datasource yet. A connector manager needs to connect one before topics can appear.'
-              : `Sources are connected, but the first usable topic set is not ready yet. ${runtimeInfo.linked_source_count} linked sources are currently being prepared.`
+                ? 'Production mode does not render demo topics. Connect a shared datasource first.'
+                : 'This production workspace has no linked shared datasource yet.'
+              : `${runtimeInfo.linked_source_count} linked sources are still preparing the first topic set.`
           }
           actions={sourceStudioAction}
         />
@@ -76,14 +75,13 @@ export function ExploreTopicsPage({ activeActor, runtimeInfo }: ExploreTopicsPag
       <PageHeader
         eyebrow="Cornerstone explore"
         title="Explore Topics"
-        description="Browse canonical concepts in an editorial view that keeps definitions first and trust disclosure close behind."
       />
       <ExploreTabs />
       {productionDegraded ? (
         <EmptyState
           eyebrow="Production recovery"
           title="Some source health is degraded"
-          description={`Published topics remain visible when available, but ${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
+          description={`${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
           actions={sourceStudioAction}
         />
       ) : null}
@@ -122,7 +120,6 @@ export function ExploreTopicsPage({ activeActor, runtimeInfo }: ExploreTopicsPag
             <SectionIntro
               eyebrow="Browse guide"
               title={`${(concepts.data ?? []).length} official topics`}
-              description="Use the lead artifact for orientation, then move through the compact topic library."
             />
             <div className="stack-list">
               {railConcepts.map((envelope) => (
@@ -149,7 +146,6 @@ export function ExploreTopicsPage({ activeActor, runtimeInfo }: ExploreTopicsPag
           <SectionIntro
             eyebrow="Topic library"
             title="Definitions with trust in line"
-            description="The browse surface stays compact and readable while preserving direct continuity into presentable detail routes."
           />
           <div className="card-grid browse-card-grid">
             {libraryConcepts.map((envelope, index) => (
@@ -175,7 +171,7 @@ export function ExploreTopicsPage({ activeActor, runtimeInfo }: ExploreTopicsPag
         <EmptyState
           eyebrow="Published topics"
           title="No published topics yet"
-          description="The workspace has source connectivity, but no member-facing topic artifacts are published yet."
+          description="The workspace has connectivity, but no member-facing topics are published yet."
           actions={sourceStudioAction}
         />
       ) : null}

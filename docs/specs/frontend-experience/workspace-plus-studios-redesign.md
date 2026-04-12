@@ -18,6 +18,7 @@ This spec owns:
 - the shared shell posture for reader and studio surfaces
 - the reader-mode and studio-mode visual split
 - the shared expressive token, spacing, and motion grammar
+- the shared clarity and copy-budget rules for route composition
 - mode-aware empty-state and onboarding behavior for mock versus production runtime
 - workspace-home behavior and its frontend presentation
 - explore topics, decisions, and map behavior
@@ -53,9 +54,11 @@ Compatibility redirects for one release:
 ## Shared shell requirements
 
 - The app must use a compact top header instead of a persistent left sidebar.
+- The shell header must stay shallow enough that the first route artifact remains visible without a large dead zone beneath the chrome.
 - Primary navigation must emphasize `Workspace` and `Explore` first.
 - `Review Studio` and `Source Studio` must appear in primary navigation only when the active actor can use them.
 - Workspace metadata and actor switching must live inside a workspace/profile tray rather than consuming the main reading column.
+- The workspace/profile tray must dismiss cleanly when route or actor selection changes so stale overlays do not obscure the primary viewport.
 - Reader routes must place the artifact or answer surface in the first viewport before secondary workspace controls.
 - The shared shell may expose a subtle runtime-mode label so demo mode stays explicit while production remains quiet and operational.
 
@@ -67,8 +70,16 @@ Compatibility redirects for one release:
 - The reader canvas should feel paper-toned and artifact-first rather than operational-first.
 - Typography must pair `Newsreader` for display headings with `IBM Plex Sans` for UI/body and `IBM Plex Mono` for metadata.
 - Reader routes must use stronger display scale, layered backgrounds, and assertive spacing so the first viewport leads with the primary artifact instead of shell furniture.
+- Reader routes must keep one dominant message in the first viewport and must avoid stacking multiple explanatory paragraphs before the primary artifact.
 - Browse and detail routes must preserve card-to-detail identity through shared artifact, provenance, and section-header primitives.
 - Provenance, support disclosure, freshness, and verification states must stay visible without dominating the primary reading column.
+- Display headings and labels must favor readability over compressed tracking; typography should not rely on tight spacing to create emphasis.
+- Shared page composition should default to sparse headers and title-first section intros, adding explanatory body copy only when it communicates new route-specific meaning.
+- Shared composition must enforce a strict content budget:
+  - page-header subtitle is optional and should stay within one short sentence when present
+  - section-intro description is optional and should default to absent on reader routes
+  - alert or empty-state body copy should stay within one sentence unless the state requires a concrete next step
+  - artifact-card summaries should clamp to two lines on compact and standard cards and three lines on lead cards
 
 ### Studio mode
 
@@ -135,6 +146,7 @@ Trust and provenance semantics remain canonical and unchanged:
 
 - Direct concept routes must present the canonical definition first.
 - Related decisions and relations must be secondary narrative sections.
+- The concept definition must not be duplicated in a second narrative section immediately below the hero.
 - Provenance and visible support must appear below the primary narrative rather than before it.
 - Provenance, support, and source-origin details may move into structured rails, but they must remain explicit and textual.
 - The reading column must avoid operator controls.
@@ -142,6 +154,7 @@ Trust and provenance semantics remain canonical and unchanged:
 ### Decision detail
 
 - Direct decision routes must present the decision statement before supporting rationale sections.
+- The decision statement must not be duplicated in a second narrative section immediately below the hero.
 - Problem statement, rationale, constraints, impact, and lineage must render in readable story order.
 - Supersedes and superseded-by links must remain explicit through a lineage rail or equivalent presentable structure.
 - Provenance and support must render in structured rails or grouped side sections rather than as stacked generic cards.
@@ -186,6 +199,7 @@ Trust and provenance semantics remain canonical and unchanged:
 - Contract verification must cover `workspace_home` and `DecisionPayload.public_slug`.
 - Bootstrap verification must cover runtime metadata and workspace readiness states.
 - `npm run build` must pass after the shared token and route composition changes.
+- Local launcher verification must confirm `run-dev.sh` and `run-prod.sh` use separate Compose project boundaries so production-like local startup does not inherit mock/demo persistence.
 - Frontend verification must cover workspace home, explore topics, explore decisions, explore map, direct concept routes, direct decision routes, review-studio access and queue behavior, and source-studio manager versus member behavior.
 - Synthetic browser verification must cover desktop and mobile reader routes, studio gating, queue actions, and disclosure visibility.
 - Trust and provenance vocabulary must remain explicit in screenshots and browser checks for every redesigned route.
