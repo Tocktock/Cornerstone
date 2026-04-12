@@ -1,0 +1,377 @@
+{
+  "consumer_scope": "member",
+  "context_space_ref": {
+    "context_space_id": "ctx_6d31237828743f52",
+    "context_space_kind": "workspace",
+    "context_space_name": "Cornerstone Workspace"
+  },
+  "contract_version": "2026-04-p0",
+  "payload": {
+    "hero_prompt": "Ask about official workspace context, operating guidance, decision lineage, or source-backed explanations.",
+    "featured_answer": {
+      "consumer_scope": "member",
+      "context_space_ref": {
+        "context_space_id": "ctx_6d31237828743f52",
+        "context_space_kind": "workspace",
+        "context_space_name": "Cornerstone Workspace"
+      },
+      "contract_version": "2026-04-p0",
+      "payload": {
+        "answer_sections": [
+          {
+            "body": "Private Escalation Trigger, VIP Escalation Insight",
+            "heading": "Concepts"
+          }
+        ],
+        "answer_status": "official",
+        "answer_text": "Answer for 'escalation' in member scope. Key concepts: Private Escalation Trigger, VIP Escalation Insight. Decisions: Risk-Based Escalation Routing, Legacy Escalation Routing.",
+        "cited_concept_refs": [
+          {
+            "resource_id": "concept_7c7cc05d4dcc4e33",
+            "resource_kind": "concept",
+            "resource_label": "Private Escalation Trigger"
+          },
+          {
+            "resource_id": "concept_f98d3867058c4cfd",
+            "resource_kind": "concept",
+            "resource_label": "VIP Escalation Insight"
+          }
+        ],
+        "cited_decision_refs": [
+          {
+            "resource_id": "decision_f7311d3e5f5b07d1",
+            "resource_kind": "decision",
+            "resource_label": "Risk-Based Escalation Routing"
+          },
+          {
+            "resource_id": "decision_4b6b68806e3267d9",
+            "resource_kind": "decision",
+            "resource_label": "Legacy Escalation Routing"
+          }
+        ],
+        "cited_relation_refs": [],
+        "follow_up_refs": [
+          {
+            "resource_id": "concept_7c7cc05d4dcc4e33",
+            "resource_kind": "concept",
+            "resource_label": "Private Escalation Trigger"
+          },
+          {
+            "resource_id": "concept_f98d3867058c4cfd",
+            "resource_kind": "concept",
+            "resource_label": "VIP Escalation Insight"
+          },
+          {
+            "resource_id": "decision_f7311d3e5f5b07d1",
+            "resource_kind": "decision",
+            "resource_label": "Risk-Based Escalation Routing"
+          },
+          {
+            "resource_id": "decision_4b6b68806e3267d9",
+            "resource_kind": "decision",
+            "resource_label": "Legacy Escalation Routing"
+          }
+        ],
+        "provenance_summary": {
+          "freshness_state": "current",
+          "promotion_lineage_present": true,
+          "restricted_support_present": true,
+          "support_item_count": 4,
+          "verification_state": "verified",
+          "visible_support_item_count": 3
+        },
+        "support_visibility": "source_backed",
+        "verification_state": "verified",
+        "visible_support_items": [
+          {
+            "excerpt_or_summary": "A redacted executive insight recommends risk-based escalation for VIP incidents.",
+            "origin_disclosure_level": "redacted_origin",
+            "source_label": "Promoted personal support",
+            "source_locator": "workspace-promotion:promoted_7d9be9b6ed97f06f",
+            "support_item_id": "promoted_7d9be9b6ed97f06f",
+            "support_item_kind": "promoted_support",
+            "visibility_class": "member_visible"
+          },
+          {
+            "excerpt_or_summary": "The ops playbook defines the shared incident response steps and is visible to all workspace members.",
+            "origin_disclosure_level": null,
+            "source_label": "Workspace handbook",
+            "source_locator": "file://ops-playbook.md",
+            "support_item_id": "supp_83aa1a47572ceec1",
+            "support_item_kind": "evidence_fragment",
+            "visibility_class": "member_visible"
+          },
+          {
+            "excerpt_or_summary": "Legacy escalation routing waited for partner SLA breach confirmation before escalating an incident.",
+            "origin_disclosure_level": null,
+            "source_label": "Workspace handbook",
+            "source_locator": "file://legacy-routing.md",
+            "support_item_id": "supp_d98b269173a5e983",
+            "support_item_kind": "evidence_fragment",
+            "visibility_class": "member_visible"
+          }
+        ]
+      },
+      "related_refs": [
+        {
+          "resource_id": "concept_7c7cc05d4dcc4e33",
+          "resource_kind": "concept",
+          "resource_label": "Private Escalation Trigger"
+        },
+        {
+          "resource_id": "concept_f98d3867058c4cfd",
+          "resource_kind": "concept",
+          "resource_label": "VIP Escalation Insight"
+        },
+        {
+          "resource_id": "decision_f7311d3e5f5b07d1",
+          "resource_kind": "decision",
+          "resource_label": "Risk-Based Escalation Routing"
+        },
+        {
+          "resource_id": "decision_4b6b68806e3267d9",
+          "resource_kind": "decision",
+          "resource_label": "Legacy Escalation Routing"
+        }
+      ],
+      "request_intent": "get_answer",
+      "response_kind": "answer",
+      "warnings": []
+    },
+    "featured_cards": [
+      {
+        "eyebrow": "sales_ops topic",
+        "lifecycle_state": "official",
+        "provenance_summary": {
+          "freshness_state": "current",
+          "promotion_lineage_present": false,
+          "restricted_support_present": false,
+          "support_item_count": 1,
+          "verification_state": "verified",
+          "visible_support_item_count": 1
+        },
+        "public_slug": "ops-playbook",
+        "resource_ref": {
+          "resource_id": "concept_b563f7c5f23a2537",
+          "resource_kind": "concept",
+          "resource_label": "Ops Playbook"
+        },
+        "summary": "The shared operating handbook for incident response.",
+        "support_visibility": "source_backed",
+        "title": "Ops Playbook",
+        "verification_state": "verified"
+      },
+      {
+        "eyebrow": "sales_ops topic",
+        "lifecycle_state": "official",
+        "provenance_summary": {
+          "freshness_state": "current",
+          "promotion_lineage_present": false,
+          "restricted_support_present": false,
+          "support_item_count": 1,
+          "verification_state": "verified",
+          "visible_support_item_count": 1
+        },
+        "public_slug": "partner-sla",
+        "resource_ref": {
+          "resource_id": "concept_41fe14a77e413ffa",
+          "resource_kind": "concept",
+          "resource_label": "Partner SLA"
+        },
+        "summary": "The published partner commitment used during issue triage.",
+        "support_visibility": "source_backed",
+        "title": "Partner SLA",
+        "verification_state": "verified"
+      },
+      {
+        "eyebrow": "sales_ops decision",
+        "lifecycle_state": "accepted",
+        "provenance_summary": {
+          "freshness_state": "current",
+          "promotion_lineage_present": true,
+          "restricted_support_present": false,
+          "support_item_count": 2,
+          "verification_state": "verified",
+          "visible_support_item_count": 2
+        },
+        "public_slug": "risk-based-escalation-routing",
+        "resource_ref": {
+          "resource_id": "decision_f7311d3e5f5b07d1",
+          "resource_kind": "decision",
+          "resource_label": "Risk-Based Escalation Routing"
+        },
+        "summary": "Escalate VIP incidents when risk signals or private review inputs justify urgency.",
+        "support_visibility": "source_backed",
+        "title": "Risk-Based Escalation Routing",
+        "verification_state": "verified"
+      },
+      {
+        "eyebrow": "sales_ops decision",
+        "lifecycle_state": "superseded",
+        "provenance_summary": {
+          "freshness_state": "current",
+          "promotion_lineage_present": false,
+          "restricted_support_present": false,
+          "support_item_count": 1,
+          "verification_state": "verified",
+          "visible_support_item_count": 1
+        },
+        "public_slug": "legacy-escalation-routing",
+        "resource_ref": {
+          "resource_id": "decision_4b6b68806e3267d9",
+          "resource_kind": "decision",
+          "resource_label": "Legacy Escalation Routing"
+        },
+        "summary": "Escalate incidents only after partner SLA breach confirmation.",
+        "support_visibility": "source_backed",
+        "title": "Legacy Escalation Routing",
+        "verification_state": "verified"
+      }
+    ],
+    "freshness_alerts": [
+      {
+        "freshness_state": "unknown",
+        "last_successful_sync_at": null,
+        "note": "Source root does not exist: /Users/jiyong/playground/Cornerstone/backend/fixtures/missing/does-not-exist",
+        "source_connection_id": "source_a879638d6186fe4a",
+        "source_connection_state": "degraded",
+        "source_label": "Broken shared drive mirror"
+      },
+      {
+        "freshness_state": "monitoring",
+        "last_successful_sync_at": "2026-04-05T18:00:00Z",
+        "note": "Paused by operator for fixture isolation.",
+        "source_connection_id": "source_a06ec270060068b0",
+        "source_connection_state": "paused",
+        "source_label": "Paused import"
+      },
+      {
+        "freshness_state": "unknown",
+        "last_successful_sync_at": "2026-03-23T00:00:00Z",
+        "note": "Removed from workspace scope.",
+        "source_connection_id": "source_af0ba64c15dfd20f",
+        "source_connection_state": "removed",
+        "source_label": "Removed legacy source"
+      },
+      {
+        "freshness_state": "stale",
+        "last_successful_sync_at": "2026-04-03T22:00:00Z",
+        "note": "Freshness is overdue against the workspace policy target.",
+        "source_connection_id": "source_cd52eee43528a556",
+        "source_connection_state": "active",
+        "source_label": "Scheduled exports"
+      }
+    ],
+    "hero_prompt": "Ask about official workspace context, operating guidance, decision lineage, or source-backed explanations.",
+    "recent_changes": [
+      {
+        "change_summary": "Escalate VIP incidents when risk signals or private review inputs justify urgency.",
+        "changed_at": "__RECENT_CHANGE_AT__",
+        "lifecycle_state": "accepted",
+        "public_slug": "risk-based-escalation-routing",
+        "resource_ref": {
+          "resource_id": "decision_f7311d3e5f5b07d1",
+          "resource_kind": "decision",
+          "resource_label": "Risk-Based Escalation Routing"
+        },
+        "support_visibility": "source_backed",
+        "verification_state": "verified"
+      },
+      {
+        "change_summary": "Escalate incidents only after partner SLA breach confirmation.",
+        "changed_at": "__RECENT_CHANGE_AT__",
+        "lifecycle_state": "superseded",
+        "public_slug": "legacy-escalation-routing",
+        "resource_ref": {
+          "resource_id": "decision_4b6b68806e3267d9",
+          "resource_kind": "decision",
+          "resource_label": "Legacy Escalation Routing"
+        },
+        "support_visibility": "source_backed",
+        "verification_state": "verified"
+      },
+      {
+        "change_summary": "The platform safety control that limits cascading failures.",
+        "changed_at": "__RECENT_CHANGE_AT__",
+        "lifecycle_state": "official",
+        "public_slug": "platform-circuit-breaker",
+        "resource_ref": {
+          "resource_id": "concept_cc32b57e0f7b996c",
+          "resource_kind": "concept",
+          "resource_label": "Platform Circuit Breaker"
+        },
+        "support_visibility": "source_backed",
+        "verification_state": "verified"
+      },
+      {
+        "change_summary": "A workspace-visible snapshot distilled from personal context.",
+        "changed_at": "__RECENT_CHANGE_AT__",
+        "lifecycle_state": "official",
+        "public_slug": "vip-escalation-insight",
+        "resource_ref": {
+          "resource_id": "concept_f98d3867058c4cfd",
+          "resource_kind": "concept",
+          "resource_label": "VIP Escalation Insight"
+        },
+        "support_visibility": "source_backed",
+        "verification_state": "verified"
+      }
+    ],
+    "review_queue_summary": {
+      "officialize_ready_count": 0,
+      "pending_count": 1,
+      "review_required_count": 1
+    },
+    "source_health_summary": {
+      "active_count": 3,
+      "degraded_count": 1,
+      "monitoring_count": 1,
+      "paused_count": 1,
+      "removed_count": 1,
+      "stale_count": 1,
+      "total_count": 6
+    }
+  },
+  "related_refs": [
+    {
+      "resource_id": "concept_b563f7c5f23a2537",
+      "resource_kind": "concept",
+      "resource_label": "Ops Playbook"
+    },
+    {
+      "resource_id": "concept_41fe14a77e413ffa",
+      "resource_kind": "concept",
+      "resource_label": "Partner SLA"
+    },
+    {
+      "resource_id": "decision_f7311d3e5f5b07d1",
+      "resource_kind": "decision",
+      "resource_label": "Risk-Based Escalation Routing"
+    },
+    {
+      "resource_id": "decision_4b6b68806e3267d9",
+      "resource_kind": "decision",
+      "resource_label": "Legacy Escalation Routing"
+    },
+    {
+      "resource_id": "concept_cc32b57e0f7b996c",
+      "resource_kind": "concept",
+      "resource_label": "Platform Circuit Breaker"
+    },
+    {
+      "resource_id": "concept_f98d3867058c4cfd",
+      "resource_kind": "concept",
+      "resource_label": "VIP Escalation Insight"
+    },
+    {
+      "resource_id": "concept_7c7cc05d4dcc4e33",
+      "resource_kind": "concept",
+      "resource_label": "Private Escalation Trigger"
+    }
+  ],
+  "request_intent": "get_workspace_home",
+  "response_kind": "workspace_home",
+  "warnings": [
+    "Operational studios remain capability-gated."
+  ]
+}

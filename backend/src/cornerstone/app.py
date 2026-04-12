@@ -9,7 +9,7 @@ from cornerstone.api.router import router
 from cornerstone.config import Settings
 from cornerstone.database import Database
 from cornerstone.mcp import create_mcp_app
-from cornerstone.services.bootstrap import initialize_database, seed_demo
+from cornerstone.services.bootstrap import ensure_minimal_bootstrap, initialize_database, seed_demo
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -22,9 +22,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.settings = resolved_settings
         app.state.db = database
         initialize_database(database.engine, reset=resolved_settings.reset_database_on_start)
-        if resolved_settings.auto_seed_demo:
-            with database.session_factory() as session:
+        with database.session_factory() as session:
+            ensure_minimal_bootstrap(session, resolved_settings)
+            if resolved_settings.seed_demo_content:
                 seed_demo(session, resolved_settings)
+            else:
+                session.commit()
         async with mcp_app.router.lifespan_context(mcp_app):
             yield
 

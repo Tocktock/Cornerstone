@@ -6,6 +6,9 @@ import httpx
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
+from cornerstone.app import create_app
+from cornerstone.config import Settings
+from cornerstone.domain.enums import RuntimeMode
 from cornerstone.domain.enums import ContextSpaceKind
 from cornerstone.domain.models import ContextSpace, SupportItem
 
@@ -180,6 +183,39 @@ def test_connector_manager_can_complete_mocked_notion_oauth_and_sync_live_databa
     assert any(url.endswith("/oauth/token") for _, url, _ in request_log)
     assert any(url.endswith(f"/databases/{database_id}") for _, url, _ in request_log)
     assert any(url.endswith(f"/data_sources/{data_source_id}/query") for _, url, _ in request_log)
+
+
+def test_production_runtime_rejects_demo_binding_when_oauth_is_missing(
+    test_database_url: str,
+):
+    settings = Settings(
+        database_url=test_database_url,
+        runtime_mode=RuntimeMode.PRODUCTION,
+        auto_seed_demo=True,
+        reset_database_on_start=True,
+        notion_client_id=None,
+        notion_client_secret=None,
+        fixed_now="2026-04-06T09:00:00+09:00",
+        cors_origins=["http://localhost:4173"],
+    )
+    app = create_app(settings)
+
+    with TestClient(app) as client:
+        bootstrap = client.get("/api/v1/bootstrap")
+        bootstrap.raise_for_status()
+        operator_token = next(
+            actor["token"]
+            for actor in bootstrap.json()["actors"]
+            if actor["display_name"] == "Operator"
+        )
+
+        response = client.post(
+            "/api/v1/provider-bindings/notion/start",
+            headers={"Authorization": f"Bearer {operator_token}"},
+        )
+
+    assert response.status_code == 400
+    assert "Notion OAuth is not configured for production runtime mode." in response.text
 
 
 def test_connector_manager_can_bind_preview_create_and_manage_notion_connection(

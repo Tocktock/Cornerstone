@@ -5,6 +5,8 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from cornerstone.domain.enums import RuntimeMode
+
 
 def _discover_repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
@@ -36,6 +38,7 @@ class Settings(BaseSettings):
     contract_version: str = "2026-04-p0"
 
     database_url: str = "postgresql+psycopg://cornerstone:cornerstone@localhost:5432/cornerstone"
+    runtime_mode: RuntimeMode = RuntimeMode.MOCK
     auto_seed_demo: bool = True
     reset_database_on_start: bool = False
 
@@ -81,3 +84,15 @@ class Settings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
+
+    @property
+    def seed_demo_content(self) -> bool:
+        if self.runtime_mode is RuntimeMode.PRODUCTION:
+            return False
+        return self.auto_seed_demo
+
+    @property
+    def notion_demo_binding_enabled(self) -> bool:
+        if self.runtime_mode is RuntimeMode.PRODUCTION:
+            return False
+        return self.notion_demo_oauth_mode or not self.notion_client_id

@@ -11,6 +11,7 @@
       "Historic partner workflow"
     ],
     "decision_id": "decision_4b6b68806e3267d9",
+    "public_slug": "legacy-escalation-routing",
     "decision_statement": "Escalate incidents only after partner SLA breach confirmation.",
     "impact_summary": "Created slow paths for high-value incidents.",
     "lifecycle_state": "superseded",

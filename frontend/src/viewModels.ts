@@ -1,4 +1,10 @@
-import type { ActorSession, GraphEdgePayload, GraphSlicePayload, ResourceRef } from './types/api'
+import type {
+  ActorSession,
+  GraphEdgePayload,
+  GraphSlicePayload,
+  ResourceRef,
+  RuntimeBootstrapMeta,
+} from './types/api'
 
 type GraphExplorerNode = ResourceRef & {
   isRoot: boolean
@@ -29,6 +35,32 @@ export function canActorManageConnectors(actor: ActorSession) {
     actor.scoped_capabilities.some(
       (entry) => entry.capability === 'manage_connectors' && entry.scope === 'workspace',
     )
+  )
+}
+
+export function isProductionRuntime(runtimeInfo: RuntimeBootstrapMeta) {
+  return runtimeInfo.runtime_mode === 'production'
+}
+
+export function runtimeModeLabel(runtimeInfo: RuntimeBootstrapMeta) {
+  return runtimeInfo.runtime_mode === 'mock' ? 'Demo mode' : 'Production'
+}
+
+export function workspaceDataStateLabel(runtimeInfo: RuntimeBootstrapMeta) {
+  return runtimeInfo.workspace_data_state.replaceAll('_', ' ')
+}
+
+export function isProductionWorkspacePending(runtimeInfo: RuntimeBootstrapMeta) {
+  return (
+    isProductionRuntime(runtimeInfo) &&
+    (runtimeInfo.workspace_data_state === 'awaiting_sources' ||
+      runtimeInfo.workspace_data_state === 'syncing_sources')
+  )
+}
+
+export function isProductionWorkspaceDegraded(runtimeInfo: RuntimeBootstrapMeta) {
+  return (
+    isProductionRuntime(runtimeInfo) && runtimeInfo.workspace_data_state === 'degraded'
   )
 }
 

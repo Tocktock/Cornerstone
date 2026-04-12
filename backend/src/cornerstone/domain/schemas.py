@@ -26,8 +26,10 @@ from cornerstone.domain.enums import (
     SyncMode,
     SyncRunStatus,
     SyncTriggerKind,
+    RuntimeMode,
     VerificationState,
     VisibilityClass,
+    WorkspaceDataState,
 )
 
 
@@ -111,6 +113,7 @@ class RelationPayload(ContractModel):
 
 class DecisionPayload(ContractModel):
     decision_id: str
+    public_slug: str
     title: str
     decision_statement: str
     problem_statement: str | None = None
@@ -219,6 +222,63 @@ class ContractEnvelope[PayloadT](ContractModel):
     payload: PayloadT
     related_refs: list[ResourceRef] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
+
+
+class WorkspaceHomeFeaturedCard(ContractModel):
+    resource_ref: ResourceRef
+    public_slug: str
+    title: str
+    eyebrow: str
+    summary: str
+    support_visibility: SupportVisibility
+    lifecycle_state: CuratedLifecycleState | DecisionLifecycleState
+    verification_state: VerificationState | None = None
+    provenance_summary: ProvenanceSummary
+
+
+class WorkspaceHomeRecentChange(ContractModel):
+    resource_ref: ResourceRef
+    public_slug: str
+    change_summary: str
+    changed_at: datetime
+    support_visibility: SupportVisibility
+    lifecycle_state: CuratedLifecycleState | DecisionLifecycleState
+    verification_state: VerificationState | None = None
+
+
+class WorkspaceHomeFreshnessAlert(ContractModel):
+    source_connection_id: str
+    source_label: str
+    source_connection_state: SourceConnectionState
+    freshness_state: FreshnessState
+    last_successful_sync_at: datetime | None = None
+    note: str
+
+
+class ReviewQueueSummary(ContractModel):
+    pending_count: int
+    review_required_count: int
+    officialize_ready_count: int
+
+
+class SourceHealthSummary(ContractModel):
+    total_count: int
+    active_count: int
+    monitoring_count: int
+    stale_count: int
+    degraded_count: int
+    paused_count: int
+    removed_count: int
+
+
+class WorkspaceHomePayload(ContractModel):
+    hero_prompt: str
+    featured_answer: ContractEnvelope[AnswerPayload | NoMatchPayload] | None = None
+    featured_cards: list[WorkspaceHomeFeaturedCard] = Field(default_factory=list)
+    recent_changes: list[WorkspaceHomeRecentChange] = Field(default_factory=list)
+    freshness_alerts: list[WorkspaceHomeFreshnessAlert] = Field(default_factory=list)
+    review_queue_summary: ReviewQueueSummary
+    source_health_summary: SourceHealthSummary
 
 
 class SourceConnectionStatus(ContractModel):
@@ -366,6 +426,11 @@ class ViewerBootstrap(ContractModel):
     workspace: ContextSpaceRef
     personal_context: ContextSpaceRef
     actors: list[ActorSession] = Field(default_factory=list)
+    runtime_mode: RuntimeMode
+    workspace_data_state: WorkspaceDataState
+    linked_source_count: int = 0
+    active_source_count: int = 0
+    degraded_source_count: int = 0
 
 
 class SyncRunResult(ContractModel):

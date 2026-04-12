@@ -22,6 +22,7 @@ This spec owns:
 - connector setup expectations
 - connector template philosophy
 - connector template registry behavior
+- runtime-mode policy for connector bootstrap and provider binding
 - provider-binding expectations
 - source visibility classes
 - connector sync modes
@@ -89,8 +90,26 @@ Connection setup may use ephemeral helper objects such as setup sessions, previe
 
 - Shared-source provider binding is manager-only.
 - Cornerstone may store provider credentials or auth payloads internally, but a `SourceConnection` may expose only a workspace-bound credential reference and safe account summary.
+- A persisted `SourceConnection` must preserve its workspace-bound credential reference, selected provider scope payload, and sync checkpoint payload so shared connector recovery survives backend restarts and local database reuse.
 - Binding and rebind flows must preserve workspace boundary and must not leak provider secrets to non-manager actors.
 - In P0, user-facing binding should prefer OAuth-style flows when the provider supports them.
+
+## Runtime-mode policy
+
+Cornerstone has two backend-owned runtime modes:
+- `mock`
+- `production`
+
+The runtime mode is deployment-controlled and is not user-switchable in the UI.
+
+Local operator tooling may expose dedicated launchers such as development and production-profile scripts, but those launchers are convenience wrappers only. They must preselect runtime-mode inputs without redefining the canonical meaning of `mock` or `production`.
+
+Connector behavior must follow these rules:
+- In `mock`, demo fixture bootstrap and demo provider binding may remain available.
+- In `production`, demo fixture bootstrap is disabled.
+- In `production`, provider-binding flows must never silently create demo credentials.
+- In `production`, missing OAuth configuration must surface as a clear configuration error instead of falling back to demo behavior.
+- In `production`, live provider sync paths are the only valid sync paths for shared workspace connectors.
 
 ## Visibility model
 
@@ -151,6 +170,7 @@ Minimal per-run operational history may be persisted for observability and recov
 
 - Connectors are not the place where official meaning is approved.
 - Connectors must not require ordinary members to manage shared workspace connector credentials or raw resource identifiers.
+- Production runtime must not fall back to demo provider credentials once `runtime_mode=production`.
 - The exact provider list is replaceable.
 - Query-time chat tools are not the primary connector model.
 

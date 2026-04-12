@@ -2,9 +2,9 @@
 
 ## Summary
 
-This spec defines the next visual-system pass for the Cornerstone frontend.
+This spec records the earlier dark-first visual-system refresh that preceded the workspace-plus-studios redesign.
 
-The goal is to replace the current generic cyan-plus-purple dark SaaS palette with a warm-editorial dark theme that feels more trustworthy, operational, and distinctive while preserving the existing route behavior and backend contracts.
+The current active ownership for reader-versus-studio visual tone now lives in [./workspace-plus-studios-redesign.md](./workspace-plus-studios-redesign.md).
 
 ## Scope and owned behavior
 
@@ -122,6 +122,8 @@ The app remains dark-first in this pass. No theme switcher or alternate color mo
 
 ## Related docs
 
+- [./workspace-plus-studios-redesign.md](./workspace-plus-studios-redesign.md)
+- [./craft-ui-ux-benchmark.md](./craft-ui-ux-benchmark.md)
 - [./ui-ux-polish.md](./ui-ux-polish.md)
 - [../graph-and-relations/spec.md](../graph-and-relations/spec.md)
 - [../review-and-validation/spec.md](../review-and-validation/spec.md)

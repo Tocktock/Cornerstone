@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -7,14 +8,25 @@ import { ExploreTabs, SectionIntro } from '../components/experience'
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/StatusPill'
 import { useAsyncData } from '../hooks/useAsyncData'
-import type { ActorSession, ContractEnvelope, GraphSlicePayload } from '../types/api'
-import { buildGraphExplorer } from '../viewModels'
+import type {
+  ActorSession,
+  ContractEnvelope,
+  GraphSlicePayload,
+  RuntimeBootstrapMeta,
+} from '../types/api'
+import {
+  buildGraphExplorer,
+  canActorManageConnectors,
+  isProductionWorkspaceDegraded,
+  isProductionWorkspacePending,
+} from '../viewModels'
 
 type ExploreMapPageProps = {
   activeActor: ActorSession
+  runtimeInfo: RuntimeBootstrapMeta
 }
 
-export function ExploreMapPage({ activeActor }: ExploreMapPageProps) {
+export function ExploreMapPage({ activeActor, runtimeInfo }: ExploreMapPageProps) {
   const { conceptId } = useParams()
   const navigate = useNavigate()
   const graph = useAsyncData<ContractEnvelope<GraphSlicePayload>>(
@@ -28,9 +40,43 @@ export function ExploreMapPage({ activeActor }: ExploreMapPageProps) {
   )
   const rootNodes = explorer?.nodes.filter((node) => node.isRoot) ?? []
   const linkedNodes = explorer?.nodes.filter((node) => !node.isRoot) ?? []
+  const canManageConnectors = canActorManageConnectors(activeActor)
+  const productionPending = isProductionWorkspacePending(runtimeInfo)
+  const productionDegraded = isProductionWorkspaceDegraded(runtimeInfo)
+  const sourceStudioAction = canManageConnectors ? (
+    <Link className="ghost-link" to="/source-studio">
+      Open Source Studio
+    </Link>
+  ) : null
 
   if (graph.error) {
     return <EmptyState title="Map unavailable" description={graph.error} />
+  }
+
+  if (productionPending) {
+    const awaitingSources = runtimeInfo.workspace_data_state === 'awaiting_sources'
+    return (
+      <section className="page-stack reader-page explore-page">
+        <PageHeader
+          eyebrow="Cornerstone explore"
+          title="Explore Map"
+          description="Trace concept relationships through a URL-addressable map with clearer relation storytelling."
+        />
+        <ExploreTabs />
+        <EmptyState
+          eyebrow={awaitingSources ? 'Production onboarding' : 'Production sync'}
+          title={awaitingSources ? 'Map data is not connected yet' : 'Map data is still synchronizing'}
+          description={
+            awaitingSources
+              ? canManageConnectors
+                ? 'Connect a shared datasource before the production concept map can be built.'
+                : 'A connector manager needs to connect a shared datasource before the concept map can appear in this production workspace.'
+              : `Sources are connected, but the first usable map slice is not ready yet. ${runtimeInfo.linked_source_count} linked sources are currently being prepared.`
+          }
+          actions={sourceStudioAction}
+        />
+      </section>
+    )
   }
 
   return (
@@ -41,6 +87,14 @@ export function ExploreMapPage({ activeActor }: ExploreMapPageProps) {
         description="Trace concept relationships through a URL-addressable map with clearer relation storytelling."
       />
       <ExploreTabs />
+      {productionDegraded ? (
+        <EmptyState
+          eyebrow="Production recovery"
+          title="Some source health is degraded"
+          description={`Map navigation remains available where possible, but ${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
+          actions={sourceStudioAction}
+        />
+      ) : null}
 
       {explorer ? (
         <div className="reader-two-column map-layout map-stage-grid">
@@ -222,7 +276,11 @@ export function ExploreMapPage({ activeActor }: ExploreMapPageProps) {
           </aside>
         </div>
       ) : (
-        <EmptyState title="Map is loading" description="The explore map will render here." />
+        <EmptyState
+          title="No published map yet"
+          description="The workspace has source connectivity, but no member-facing concept map is published yet."
+          actions={sourceStudioAction}
+        />
       )}
     </section>
   )

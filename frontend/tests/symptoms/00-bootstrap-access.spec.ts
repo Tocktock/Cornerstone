@@ -22,49 +22,56 @@ test('backend healthcheck is reachable and actor switching persists across reloa
   const reviewer = actorNamed(bootstrap, 'Domain Reviewer')
   const admin = actorNamed(bootstrap, 'Workspace Admin')
 
-  await goToRoute(page, '/', 'Workspace overview')
-  await expect(
-    page.locator('.context-card').filter({ hasText: bootstrap.workspace.context_space_name }).first(),
-  ).toBeVisible()
+  await goToRoute(page, '/', 'Workspace')
+  await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toContainText('Explore')
 
   await switchActor(page, reviewer)
-  await goToRoute(page, '/review', 'Review queue')
+  await goToRoute(page, '/review-studio', 'Review Studio')
   await expect(page.getByRole('heading', { name: 'Review access required' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Officialize' }).first()).toBeVisible()
 
   await switchActor(page, admin)
-  await page.goto('/graph')
+  await page.goto('/explore/map')
   await waitForShell(page)
-  await expect(page.getByRole('heading', { name: 'Graph slice' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Explore Map' })).toBeVisible()
   await expect(page.getByLabel('Switch actor')).toHaveValue(admin.actor_id)
 
   await page.reload()
   await waitForShell(page)
   await expect(page.getByLabel('Switch actor')).toHaveValue(admin.actor_id)
 
-  await captureSnapshot(page, testInfo, 'bootstrap-access-admin-graph')
+  await page.goto('/review')
+  await waitForShell(page)
+  await expect(page).toHaveURL(/\/review-studio$/)
+  await expect(page.getByRole('heading', { name: 'Review Studio' })).toBeVisible()
+
+  await captureSnapshot(page, testInfo, 'bootstrap-access-admin-review-studio')
 })
 
-test('member hides review navigation and direct review visits show a friendly access state', async ({
+test('member hides studio navigation and direct studio visits show a friendly access state', async ({
   page,
   request,
 }, testInfo) => {
   const bootstrap = await bootstrapViewer(request)
   const member = actorNamed(bootstrap, 'Member')
 
-  await goToRoute(page, '/', 'Workspace overview')
+  await goToRoute(page, '/', 'Workspace')
   await switchActor(page, member)
 
-  await expect(
-    page.getByRole('navigation', { name: 'Primary navigation' }).getByText('Review'),
-  ).toHaveCount(0)
+  const nav = page.getByRole('navigation', { name: 'Primary navigation' })
+  await expect(nav.getByText('Review Studio')).toHaveCount(0)
+  await expect(nav.getByText('Source Studio')).toHaveCount(0)
 
-  await page.goto('/review')
+  await page.goto('/review-studio')
   await waitForShell(page)
-
   await expect(page.getByRole('heading', { name: 'Review access required' })).toBeVisible()
   await expect(page.getByText(/Use Switch actor to choose/i)).toBeVisible()
   await expect(page.locator('body')).not.toContainText('{"detail"')
 
-  await captureSnapshot(page, testInfo, 'member-review-access-required')
+  await page.goto('/glossary')
+  await waitForShell(page)
+  await expect(page).toHaveURL(/\/explore\/topics$/)
+  await expect(page.getByRole('heading', { name: 'Explore Topics' })).toBeVisible()
+
+  await captureSnapshot(page, testInfo, 'member-review-studio-access-required')
 })

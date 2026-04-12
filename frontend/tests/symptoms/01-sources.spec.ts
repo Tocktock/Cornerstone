@@ -9,7 +9,7 @@ import {
   uniqueName,
 } from './testkit'
 
-test('operator can bind preview create and manage Notion connections from the sources page', async ({
+test('operator can bind preview create and manage Notion connections from Source Studio', async ({
   page,
   request,
 }, testInfo) => {
@@ -18,10 +18,12 @@ test('operator can bind preview create and manage Notion connections from the so
   const pageTreeLabel = uniqueName(testInfo, 'Page Tree source')
   const databaseLabel = uniqueName(testInfo, 'Database source')
 
-  await goToRoute(page, '/sources', 'Source status')
+  await goToRoute(page, '/source-studio', 'Source Studio')
   await switchActor(page, operator)
 
   await expect(page.getByText('Bind Notion and create a source connection')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Sources needing attention' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Sources tracking normally' })).toBeVisible()
   await expect(page.locator('.status-pill.stale').first()).toBeVisible()
   await expect(page.locator('.status-pill.degraded').first()).toBeVisible()
   await expect(page.locator('.status-pill.paused').first()).toBeVisible()
@@ -83,25 +85,26 @@ test('operator can bind preview create and manage Notion connections from the so
   await expect(page.getByText(`${databaseLabel} remove completed.`)).toBeVisible()
   await expect(createdCard.locator('.status-pill.removed')).toBeVisible()
 
-  await captureSnapshot(page, testInfo, 'sources-operator-managed-connection')
+  await captureSnapshot(page, testInfo, 'source-studio-operator-managed-connection')
 })
 
-test('member cannot see connector manager controls on the sources page', async ({
+test('member cannot see source composer controls in Source Studio', async ({
   page,
   request,
 }, testInfo) => {
   const bootstrap = await bootstrapViewer(request)
   const member = actorNamed(bootstrap, 'Member')
 
-  await goToRoute(page, '/sources', 'Source status')
+  await goToRoute(page, '/source-studio', 'Source Studio')
   await switchActor(page, member)
 
   await expect(page.getByText('Bind Notion and create a source connection')).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Bind Notion' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Resync' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Pause' })).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Sources needing attention' })).toBeVisible()
 
-  await captureSnapshot(page, testInfo, 'sources-member-readonly')
+  await captureSnapshot(page, testInfo, 'source-studio-member-readonly')
 })
 
 function sourceCard(page: Page, label: string) {

@@ -20,6 +20,7 @@ services:
       context: ./backend
     environment:
       CORNERSTONE_DATABASE_URL: ${CORNERSTONE_DATABASE_URL:-postgresql+psycopg://cornerstone:cornerstone@db:5432/cornerstone}
+      CORNERSTONE_RUNTIME_MODE: ${CORNERSTONE_RUNTIME_MODE:-mock}
       CORNERSTONE_FIXTURE_ROOT: ${CORNERSTONE_FIXTURE_ROOT:-/workspace/fixtures}
       CORNERSTONE_WORKSPACE_SOURCE_ROOT: ${CORNERSTONE_WORKSPACE_SOURCE_ROOT:-/workspace/fixtures/minimal/workspace/member-visible}
       CORNERSTONE_PERSONAL_SOURCE_ROOT: ${CORNERSTONE_PERSONAL_SOURCE_ROOT:-/workspace/fixtures/minimal/personal/member-private}

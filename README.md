@@ -50,11 +50,41 @@ That means:
 
 ## Command surface
 
-- `./run-all.sh up`: start the local product stack.
-- `./run-all.sh up --reset-db`: recreate the local dev database volume before startup. Use this after pulling a schema-breaking change such as the P0 model rewrite.
+- `./run-dev.sh up`: start the local mock/dev stack with demo-friendly defaults.
+- `./run-prod.sh up`: start the local production-like stack with demo fallback disabled.
+- `./run-all.sh up`: start the local stack through the generic launcher. This respects the current environment and is lower-level than the explicit dev/prod launchers.
+- `./run-dev.sh up --reset-db`: recreate the local dev database volume before startup. Use this after pulling a schema-breaking change such as the P0 model rewrite.
 - `./run-all.sh down`: stop the local product stack.
 - `./run-all.sh check`: run the default local quality gate in one shot.
 - `./run-all.sh check --with-corpus`: run the default gate plus the opt-in full corpus smoke.
+
+The backend now backfills additive local schema changes such as `decision_records.public_slug` on startup, but `--reset-db` remains the recovery path for older volumes that drift beyond those compatibility repairs.
+
+## Runtime modes
+
+The local stack supports two backend-owned runtime mode values through `CORNERSTONE_RUNTIME_MODE`:
+
+- `mock`: default local posture; demo content seeding and demo connector fallback may remain available
+- `production`: disables demo content seeding and demo connector fallback, so shared workspaces must be populated by real linked sources
+
+For normal local use, prefer the dedicated launchers:
+
+- `./run-dev.sh up`
+- `./run-prod.sh up`
+
+Use `.env` or direct environment exports only when you intentionally need the generic launcher behavior from `./run-all.sh`.
+
+Example:
+
+```dotenv
+CORNERSTONE_RUNTIME_MODE=mock
+```
+
+```dotenv
+CORNERSTONE_RUNTIME_MODE=production
+```
+
+The runtime mode is deployment-controlled and is not user-switchable in the UI. The dedicated launchers are local operator conveniences only; canonical behavior remains defined in [docs/specs/connectors/spec.md](./docs/specs/connectors/spec.md) and [docs/specs/workspace-and-access/spec.md](./docs/specs/workspace-and-access/spec.md).
 
 The default quality gate currently runs:
 

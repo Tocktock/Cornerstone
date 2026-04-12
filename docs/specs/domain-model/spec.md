@@ -176,6 +176,7 @@ Must preserve:
 
 Must preserve:
 - stable `decision_ref`
+- stable `public_slug`
 - title
 - problem statement
 - decision statement

@@ -31,6 +31,7 @@ This spec prevents that drift.
 ## Canonical operation intents
 
 Allowed `request_intent` values are:
+- `get_workspace_home`
 - `search_context`
 - `get_concept`
 - `get_relation`
@@ -42,6 +43,7 @@ Allowed `request_intent` values are:
 ## Canonical response kinds
 
 Allowed `response_kind` values are:
+- `workspace_home`
 - `concept`
 - `relation`
 - `decision`
@@ -65,6 +67,23 @@ Every consumer-facing response must preserve the following fields:
 | `payload` | `1` | Response-kind-specific body |
 | `related_refs` | `0..*` | Linked resources that may be followed next |
 | `warnings` | `0..*` | Non-fatal disclosure or caution labels |
+
+## Bootstrap contract
+
+The frontend bootstrap payload is additive and must preserve:
+
+| Field | Cardinality | Meaning |
+| --- | --- | --- |
+| `workspace` | `1` | Primary shared workspace context reference |
+| `personal_context` | `1` | Default personal context reference |
+| `actors` | `0..*` | Available actor sessions for the current app bootstrap |
+| `runtime_mode` | `1` | One of `mock` or `production` |
+| `workspace_data_state` | `1` | One of `demo_seeded`, `awaiting_sources`, `syncing_sources`, `ready`, `degraded` |
+| `linked_source_count` | `1` | Count of currently linked shared workspace sources |
+| `active_source_count` | `1` | Count of currently active shared workspace sources |
+| `degraded_source_count` | `1` | Count of linked sources currently requiring recovery attention |
+
+Bootstrap runtime metadata is additive only. It must not redefine the semantic meaning of concept, decision, answer, graph, provenance, or workspace-home payloads.
 
 ### Context-space reference
 
@@ -148,6 +167,7 @@ Every consumer-facing response must preserve the following fields:
 | Field | Cardinality | Meaning |
 | --- | --- | --- |
 | `decision_id` | `1` | Stable decision identity |
+| `public_slug` | `1` | Stable member-facing decision identifier |
 | `title` | `1` | Decision title |
 | `decision_statement` | `1` | Explicit decision statement |
 | `problem_statement` | `0..1` | Trigger or problem |
@@ -164,6 +184,75 @@ Every consumer-facing response must preserve the following fields:
 | `supersedes_ref` | `0..1` | Older decision replaced or narrowed |
 | `superseded_by_ref` | `0..1` | Newer decision that replaced this one |
 | `provenance_summary` | `1` | Provenance summary |
+
+### `workspace_home` payload
+
+| Field | Cardinality | Meaning |
+| --- | --- | --- |
+| `hero_prompt` | `1` | Primary prompt copy for the workspace ask surface |
+| `featured_answer` | `0..1` | Featured answer envelope or no-match envelope for the default home prompt |
+| `featured_cards` | `0..*` | Editorial summaries for featured concepts and decisions |
+| `recent_changes` | `0..*` | Lightweight summaries of recently changed presentable artifacts |
+| `freshness_alerts` | `0..*` | Quiet operational cues about source freshness and degraded state |
+| `review_queue_summary` | `1` | Aggregate review pressure summary for the current workspace |
+| `source_health_summary` | `1` | Aggregate source-connection health summary for the current workspace |
+
+Each featured card must expose:
+
+| Field | Cardinality | Meaning |
+| --- | --- | --- |
+| `resource_ref` | `1` | Referenced concept or decision |
+| `public_slug` | `1` | Stable presentable slug for the card detail route |
+| `title` | `1` | Reader-facing artifact title |
+| `eyebrow` | `1` | Short editorial label for the artifact type and domain |
+| `summary` | `1` | Short presentable summary text |
+| `support_visibility` | `1` | Canonical support-visibility value |
+| `lifecycle_state` | `1` | Canonical lifecycle state |
+| `verification_state` | `0..1` | Canonical verification state when available |
+| `provenance_summary` | `1` | Provenance summary |
+
+Each recent-change item must expose:
+
+| Field | Cardinality | Meaning |
+| --- | --- | --- |
+| `resource_ref` | `1` | Changed concept or decision |
+| `public_slug` | `1` | Stable presentable slug for the detail route |
+| `change_summary` | `1` | Reader-facing description of the current artifact state |
+| `changed_at` | `1` | Timestamp for the most recent material artifact change |
+| `support_visibility` | `1` | Canonical support-visibility value |
+| `lifecycle_state` | `1` | Canonical lifecycle state |
+| `verification_state` | `0..1` | Canonical verification state when available |
+
+Each freshness-alert item must expose:
+
+| Field | Cardinality | Meaning |
+| --- | --- | --- |
+| `source_connection_id` | `1` | Stable source-connection identity |
+| `source_label` | `1` | Human-readable source label |
+| `source_connection_state` | `1` | Canonical source-connection state |
+| `freshness_state` | `1` | Canonical freshness state |
+| `last_successful_sync_at` | `0..1` | Timestamp for the most recent successful sync |
+| `note` | `1` | Human-readable monitoring or intervention note |
+
+The review-queue summary must expose:
+
+| Field | Cardinality | Meaning |
+| --- | --- | --- |
+| `pending_count` | `1` | Number of shared objects currently needing review attention |
+| `review_required_count` | `1` | Number of items blocked on explicit review-required state |
+| `officialize_ready_count` | `1` | Number of items that can be moved forward without review-required blocking state |
+
+The source-health summary must expose:
+
+| Field | Cardinality | Meaning |
+| --- | --- | --- |
+| `total_count` | `1` | Number of source connections in the workspace |
+| `active_count` | `1` | Number of active source connections |
+| `monitoring_count` | `1` | Number of connections in monitoring freshness state |
+| `stale_count` | `1` | Number of stale connections |
+| `degraded_count` | `1` | Number of degraded connections |
+| `paused_count` | `1` | Number of paused connections |
+| `removed_count` | `1` | Number of removed connections |
 
 ### `answer` payload
 

@@ -8,30 +8,31 @@ import {
   bootstrapViewer,
   captureSnapshot,
   decisionByTitle,
-  expectDetailPaneBeforeList,
   goToRoute,
   supportItemIdsForConcept,
   switchActor,
   uniqueName,
 } from './testkit'
 
-test('seeded decisions preserve readable lineage and mobile detail ordering', async ({
+test('seeded decisions preserve readable lineage and presentable direct routes on mobile', async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await goToRoute(page, '/decisions', 'Decisions')
-  await expectDetailPaneBeforeList(page)
+  await goToRoute(page, '/explore/decisions', 'Explore Decisions')
 
-  const legacyCard = page.locator('.decision-card').filter({ hasText: 'Legacy Escalation Routing' })
+  const legacyCard = page
+    .locator('.artifact-card')
+    .filter({ has: page.locator('h3', { hasText: 'Legacy Escalation Routing' }) })
   await expect(legacyCard).toBeVisible()
   await expect(legacyCard.getByText('Superseded by')).toBeVisible()
   await expect(legacyCard.getByText('Risk-Based Escalation Routing')).toBeVisible()
 
-  await page.locator('.decision-card').filter({ hasText: 'Risk-Based Escalation Routing' }).first().click()
-  await expect(page.getByText(/Support items: 2 · Promotion lineage: true/i)).toBeVisible()
-  await expect(page.getByText('Promoted personal support')).toBeVisible()
+  await page.goto('/decisions/risk-based-escalation-routing')
+  await expect(page.locator('.detail-hero h2')).toHaveText('Risk-Based Escalation Routing')
+  await expect(page.locator('.lineage-rail')).toContainText('Legacy Escalation Routing')
+  await expect(page.locator('.decision-detail-page')).toContainText('Promoted personal support')
 
-  await captureSnapshot(page, testInfo, 'decisions-seeded-lineage')
+  await captureSnapshot(page, testInfo, 'decisions-presentable-reader')
 })
 
 test('draft decisions can be officialized and extend visible supersession lineage', async ({
@@ -55,7 +56,7 @@ test('draft decisions can be officialized and extend visible supersession lineag
 
   expect(officialRelation, 'Missing seeded official relation.').toBeTruthy()
 
-  const draftDecision = await apiPostAs<ContractEnvelope<{ decision_id: string; title: string; lifecycle_state: string }>>(
+  const draftDecision = await apiPostAs<ContractEnvelope<{ decision_id: string; public_slug: string; title: string; lifecycle_state: string }>>(
     request,
     operator,
     '/decisions',
@@ -79,11 +80,11 @@ test('draft decisions can be officialized and extend visible supersession lineag
 
   expect(draftDecision.payload.lifecycle_state).toBe('proposed')
 
-  await goToRoute(page, '/decisions', 'Decisions')
+  await goToRoute(page, '/explore/decisions', 'Explore Decisions')
   await switchActor(page, member)
-  await expect(page.locator('.decision-card h3').filter({ hasText: decisionTitle })).toHaveCount(0)
+  await expect(page.locator('.artifact-card h3').filter({ hasText: decisionTitle })).toHaveCount(0)
 
-  await goToRoute(page, '/review', 'Review queue')
+  await goToRoute(page, '/review-studio', 'Review Studio')
   await switchActor(page, admin)
 
   const decisionCard = page.locator('.review-item-card').filter({ hasText: decisionTitle })
@@ -92,13 +93,16 @@ test('draft decisions can be officialized and extend visible supersession lineag
   await expect(page.getByText(new RegExp(`officialize succeeded for ${decisionTitle}`, 'i'))).toBeVisible()
   await expect(decisionCard).toHaveCount(0)
 
-  await goToRoute(page, '/decisions', 'Decisions')
-  await expect(page.locator('.decision-card h3').filter({ hasText: decisionTitle })).toHaveCount(1)
+  await goToRoute(page, '/explore/decisions', 'Explore Decisions')
+  await expect(page.locator('.artifact-card h3').filter({ hasText: decisionTitle })).toHaveCount(1)
   const supersededCard = page
-    .locator('.decision-card')
+    .locator('.artifact-card')
     .filter({ has: page.locator('h3', { hasText: 'Risk-Based Escalation Routing' }) })
   await expect(supersededCard.getByText('Superseded by')).toBeVisible()
   await expect(supersededCard.getByText(decisionTitle)).toBeVisible()
+
+  await page.goto(`/decisions/${draftDecision.payload.public_slug}`)
+  await expect(page.locator('.detail-hero h2')).toHaveText(decisionTitle)
 
   await captureSnapshot(page, testInfo, 'decisions-officialized-draft-lineage')
 })

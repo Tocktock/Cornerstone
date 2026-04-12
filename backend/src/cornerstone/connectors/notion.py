@@ -18,7 +18,7 @@ from cornerstone.connectors.base import (
     PreviewArtifact,
     ProviderSyncResult,
 )
-from cornerstone.domain.enums import SyncMode, VisibilityClass
+from cornerstone.domain.enums import RuntimeMode, SyncMode, VisibilityClass
 from cornerstone.services.normalization import split_paragraphs
 
 NOTION_ID_PATTERN = re.compile(
@@ -668,6 +668,13 @@ class NotionConnector:
         return access_token
 
     def _is_demo_mode(self, settings, provider_credential) -> bool:
+        if settings.runtime_mode is RuntimeMode.PRODUCTION:
+            if (
+                provider_credential is not None
+                and provider_credential.auth_payload.get("mode") == "demo_fixture"
+            ):
+                raise ValueError("Demo Notion bindings are disabled in production runtime mode.")
+            return False
         if provider_credential is None:
-            return bool(settings.notion_demo_oauth_mode)
+            return bool(settings.notion_demo_binding_enabled)
         return provider_credential.auth_payload.get("mode") == "demo_fixture"

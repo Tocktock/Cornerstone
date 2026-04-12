@@ -134,6 +134,7 @@ def create_decision(session: Session, payload: DraftDecisionCreate) -> DecisionR
     decision = DecisionRecord(
         id=stable_id("decision", payload.context_space_id, payload.title),
         context_space_id=payload.context_space_id,
+        public_slug=slugify(payload.title),
         title=payload.title,
         problem_statement=payload.problem_statement,
         decision_statement=payload.decision_statement,

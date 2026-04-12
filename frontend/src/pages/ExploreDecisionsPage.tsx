@@ -1,15 +1,28 @@
+import { Link } from 'react-router-dom'
+
 import { apiGet } from '../api/client'
 import { EmptyState } from '../components/EmptyState'
 import { ArtifactCard, ExploreTabs, LineageRail, ProvenanceStrip, SectionIntro } from '../components/experience'
 import { PageHeader } from '../components/PageHeader'
 import { useAsyncData } from '../hooks/useAsyncData'
-import type { ActorSession, ContractEnvelope, DecisionPayload } from '../types/api'
+import type {
+  ActorSession,
+  ContractEnvelope,
+  DecisionPayload,
+  RuntimeBootstrapMeta,
+} from '../types/api'
+import {
+  canActorManageConnectors,
+  isProductionWorkspaceDegraded,
+  isProductionWorkspacePending,
+} from '../viewModels'
 
 type ExploreDecisionsPageProps = {
   activeActor: ActorSession
+  runtimeInfo: RuntimeBootstrapMeta
 }
 
-export function ExploreDecisionsPage({ activeActor }: ExploreDecisionsPageProps) {
+export function ExploreDecisionsPage({ activeActor, runtimeInfo }: ExploreDecisionsPageProps) {
   const decisions = useAsyncData<ContractEnvelope<DecisionPayload>[]>(
     () => apiGet('/decisions'),
     [activeActor.actor_id],
@@ -24,6 +37,40 @@ export function ExploreDecisionsPage({ activeActor }: ExploreDecisionsPageProps)
   const railDecisions = supportingDecisions.slice(0, 3)
   const libraryDecisions = supportingDecisions.slice(3)
   const decisionsById = new Map((decisions.data ?? []).map((item) => [item.payload.decision_id, item.payload]))
+  const canManageConnectors = canActorManageConnectors(activeActor)
+  const productionPending = isProductionWorkspacePending(runtimeInfo)
+  const productionDegraded = isProductionWorkspaceDegraded(runtimeInfo)
+  const sourceStudioAction = canManageConnectors ? (
+    <Link className="ghost-link" to="/source-studio">
+      Open Source Studio
+    </Link>
+  ) : null
+
+  if (productionPending) {
+    const awaitingSources = runtimeInfo.workspace_data_state === 'awaiting_sources'
+    return (
+      <section className="page-stack reader-page explore-page">
+        <PageHeader
+          eyebrow="Cornerstone explore"
+          title="Explore Decisions"
+          description="Browse decision records as readable artifacts with explicit lineage instead of buried operator metadata."
+        />
+        <ExploreTabs />
+        <EmptyState
+          eyebrow={awaitingSources ? 'Production onboarding' : 'Production sync'}
+          title={awaitingSources ? 'No production decisions yet' : 'Decision records are waiting for first sync'}
+          description={
+            awaitingSources
+              ? canManageConnectors
+                ? 'Production mode does not show demo decision records. Connect a shared datasource before decision artifacts can appear.'
+                : 'This production workspace has no linked shared datasource yet. A connector manager needs to connect one before decision records can appear.'
+              : `Sources are connected, but the first usable decision set is not ready yet. ${runtimeInfo.linked_source_count} linked sources are currently being prepared.`
+          }
+          actions={sourceStudioAction}
+        />
+      </section>
+    )
+  }
 
   return (
     <section className="page-stack reader-page explore-page">
@@ -33,6 +80,14 @@ export function ExploreDecisionsPage({ activeActor }: ExploreDecisionsPageProps)
         description="Browse decision records as readable artifacts with explicit lineage instead of buried operator metadata."
       />
       <ExploreTabs />
+      {productionDegraded ? (
+        <EmptyState
+          eyebrow="Production recovery"
+          title="Some source health is degraded"
+          description={`Published decision records remain visible when available, but ${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
+          actions={sourceStudioAction}
+        />
+      ) : null}
 
       {leadDecision ? (
         <div className="reader-two-column browse-stage-grid">
@@ -180,6 +235,15 @@ export function ExploreDecisionsPage({ activeActor }: ExploreDecisionsPageProps)
             })}
           </div>
         </section>
+      ) : null}
+
+      {!leadDecision && !productionDegraded ? (
+        <EmptyState
+          eyebrow="Published decisions"
+          title="No published decisions yet"
+          description="The workspace has source connectivity, but no member-facing decision artifacts are published yet."
+          actions={sourceStudioAction}
+        />
       ) : null}
     </section>
   )

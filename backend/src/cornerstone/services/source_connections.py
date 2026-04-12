@@ -138,7 +138,7 @@ def start_provider_binding(
         secrets.token_hex(6),
     )
 
-    if settings.notion_demo_oauth_mode or not settings.notion_client_id:
+    if settings.notion_demo_binding_enabled:
         credential = ProviderCredential(
             id=stable_id("cred", credential_reference),
             context_space_id=actor.context_space_id,
@@ -156,6 +156,12 @@ def start_provider_binding(
             provider_credential_ref=credential_reference,
             account_label=credential.account_label,
             demo_mode=True,
+        )
+
+    if not settings.notion_client_id or not settings.notion_client_secret:
+        raise ValueError(
+            "Notion OAuth is not configured for production runtime mode. "
+            "Set CORNERSTONE_NOTION_CLIENT_ID and CORNERSTONE_NOTION_CLIENT_SECRET."
         )
 
     binding_state = secrets.token_urlsafe(24)

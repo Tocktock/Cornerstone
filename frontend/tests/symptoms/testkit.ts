@@ -107,7 +107,12 @@ export async function waitForShell(page: Page) {
 }
 
 export async function switchActor(page: Page, actor: ActorSession) {
+  const traySummary = page.locator('.workspace-tray summary')
   const selector = page.getByLabel('Switch actor')
+  if (!(await selector.isVisible())) {
+    await traySummary.click()
+    await expect(selector).toBeVisible()
+  }
   await selector.selectOption(actor.actor_id)
   await expect(selector).toHaveValue(actor.actor_id)
   await expect

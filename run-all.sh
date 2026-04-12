@@ -5,10 +5,27 @@ ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_FILE="$ROOT_DIR/compose.yml"
 ENV_FILE="$ROOT_DIR/.env"
 ENV_EXAMPLE="$ROOT_DIR/.env.example"
+LAUNCHER_NAME="${CORNERSTONE_LAUNCHER_NAME:-$(basename "$0")}"
+LAUNCHER_PROFILE="${CORNERSTONE_LAUNCHER_PROFILE:-generic}"
+
+apply_launcher_profile() {
+  case "$LAUNCHER_PROFILE" in
+    dev)
+      export CORNERSTONE_RUNTIME_MODE="${CORNERSTONE_RUNTIME_MODE:-mock}"
+      export CORNERSTONE_AUTO_SEED_DEMO="${CORNERSTONE_AUTO_SEED_DEMO:-true}"
+      export CORNERSTONE_NOTION_DEMO_OAUTH_MODE="${CORNERSTONE_NOTION_DEMO_OAUTH_MODE:-true}"
+      ;;
+    prod)
+      export CORNERSTONE_RUNTIME_MODE="${CORNERSTONE_RUNTIME_MODE:-production}"
+      export CORNERSTONE_AUTO_SEED_DEMO="${CORNERSTONE_AUTO_SEED_DEMO:-false}"
+      export CORNERSTONE_NOTION_DEMO_OAUTH_MODE="${CORNERSTONE_NOTION_DEMO_OAUTH_MODE:-false}"
+      ;;
+  esac
+}
 
 usage() {
-  cat <<'EOF'
-Usage: ./run-all.sh [up|down|logs|ps|check] [options]
+  cat <<EOF
+Usage: ./$LAUNCHER_NAME [up|down|logs|ps|check] [options]
 
 Commands:
   up            Start the full Cornerstone stack. Default command.
@@ -26,6 +43,10 @@ Options:
   --no-build    Skip docker image rebuild on startup.
   -d, --detach  Run startup in the background.
   -h, --help    Show this help text.
+
+Launchers:
+  ./run-dev.sh  Force the local mock/dev runtime profile.
+  ./run-prod.sh Force the local production-like runtime profile.
 EOF
 }
 
@@ -138,6 +159,8 @@ detach_enabled="false"
 with_corpus="false"
 reset_db="false"
 
+apply_launcher_profile
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     up | down | logs | ps | check)
@@ -181,6 +204,11 @@ ensure_prerequisites
 case "$command_name" in
   up)
     printf 'Starting Cornerstone stack\n'
+    printf '  launcher: %s\n' "$LAUNCHER_NAME"
+    printf '  launcher-profile: %s\n' "$LAUNCHER_PROFILE"
+    printf '  runtime-mode: %s\n' "${CORNERSTONE_RUNTIME_MODE:-mock}"
+    printf '  demo-seed: %s\n' "${CORNERSTONE_AUTO_SEED_DEMO:-true}"
+    printf '  notion-demo-oauth: %s\n' "${CORNERSTONE_NOTION_DEMO_OAUTH_MODE:-true}"
     printf '  data: %s\n' "$data_mode"
     printf '  ollama: %s\n' "$ollama_enabled"
     printf '  detach: %s\n' "$detach_enabled"
@@ -189,10 +217,10 @@ case "$command_name" in
     if [[ "$reset_db" == "true" ]]; then
       reset_dev_database
     else
-      cat <<'EOF'
+      cat <<EOF
 Note:
-- If startup fails with missing columns like `context_spaces.kind`, your local Postgres volume is from the old schema.
-- Recover with: ./run-all.sh up --reset-db
+- If startup fails with missing columns like `context_spaces.kind` or `decision_records.public_slug`, your local Postgres volume is from the old schema.
+- Recover with: ./$LAUNCHER_NAME up --reset-db
 EOF
     fi
 

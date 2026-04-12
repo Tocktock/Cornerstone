@@ -13,17 +13,24 @@ import type {
   AnswerPayload,
   ContractEnvelope,
   NoMatchPayload,
+  RuntimeBootstrapMeta,
   SearchResultItem,
   SearchResultsPayload,
   WorkspaceHomePayload,
 } from '../types/api'
-import { formatLocalDateTime } from '../viewModels'
+import {
+  canActorManageConnectors,
+  formatLocalDateTime,
+  isProductionWorkspaceDegraded,
+  isProductionWorkspacePending,
+} from '../viewModels'
 
 type WorkspacePageProps = {
   activeActor: ActorSession
+  runtimeInfo: RuntimeBootstrapMeta
 }
 
-export function WorkspacePage({ activeActor }: WorkspacePageProps) {
+export function WorkspacePage({ activeActor, runtimeInfo }: WorkspacePageProps) {
   const home = useAsyncData<ContractEnvelope<WorkspaceHomePayload>>(
     () => apiGet('/workspace-home'),
     [activeActor.actor_id],
@@ -44,6 +51,14 @@ export function WorkspacePage({ activeActor }: WorkspacePageProps) {
   const sourceSummary = home.data?.payload.source_health_summary
   const leadFeaturedCard = featuredCards[0] ?? null
   const supportingFeaturedCards = leadFeaturedCard ? featuredCards.slice(1) : []
+  const canManageConnectors = canActorManageConnectors(activeActor)
+  const productionPending = isProductionWorkspacePending(runtimeInfo)
+  const productionDegraded = isProductionWorkspaceDegraded(runtimeInfo)
+  const sourceStudioAction = canManageConnectors ? (
+    <Link className="ghost-link" to="/source-studio">
+      Open Source Studio
+    </Link>
+  ) : null
 
   const searchHeading = useMemo(() => {
     if (!activeAnswer) {
@@ -77,7 +92,39 @@ export function WorkspacePage({ activeActor }: WorkspacePageProps) {
     return <EmptyState title="Workspace unavailable" description={home.error} />
   }
 
-      return (
+  if (productionPending) {
+    const awaitingSources = runtimeInfo.workspace_data_state === 'awaiting_sources'
+    return (
+      <section className="page-stack reader-page workspace-page">
+        <PageHeader
+          eyebrow="Cornerstone workspace"
+          title="Workspace"
+          description={`Artifact-first workspace home for ${activeActor.display_name}. Search, official knowledge, and quiet operational cues stay visible without operator chrome taking over the page.`}
+        />
+        {awaitingSources ? (
+          <EmptyState
+            eyebrow="Production onboarding"
+            title="Connect a shared datasource first"
+            description={
+              canManageConnectors
+                ? 'Production workspaces do not fall back to demo content. Connect a shared datasource in Source Studio to start building member-facing knowledge.'
+                : 'This production workspace does not have a shared datasource linked yet. A connector manager needs to connect a datasource before member-facing knowledge can appear here.'
+            }
+            actions={sourceStudioAction}
+          />
+        ) : (
+          <EmptyState
+            eyebrow="Production sync"
+            title="Sources connected, first sync in progress"
+            description={`Production mode is waiting for the first usable workspace artifact set. ${runtimeInfo.linked_source_count} sources are linked and ${runtimeInfo.active_source_count} are active.`}
+            actions={sourceStudioAction}
+          />
+        )}
+      </section>
+    )
+  }
+
+  return (
     <section className="page-stack reader-page workspace-page">
       <PageHeader
         eyebrow="Cornerstone workspace"
@@ -86,6 +133,14 @@ export function WorkspacePage({ activeActor }: WorkspacePageProps) {
       />
 
       {searchError ? <AlertBanner tone="danger" title="Workspace query failed" description={searchError} /> : null}
+      {productionDegraded ? (
+        <AlertBanner
+          tone="danger"
+          eyebrow="Production recovery"
+          title="Source recovery cues remain active"
+          description={`Production content remains visible where possible, but ${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
+        />
+      ) : null}
 
       <div className="workspace-stage-grid">
         <article className="hero-block workspace-hero">

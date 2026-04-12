@@ -583,12 +583,16 @@ class ConceptRelation(Base, TimestampedMixin):
 
 class DecisionRecord(Base, TimestampedMixin):
     __tablename__ = "decision_records"
-    __table_args__ = (UniqueConstraint("context_space_id", "title"),)
+    __table_args__ = (
+        UniqueConstraint("context_space_id", "public_slug", name="uq_decisions_context_space_public_slug"),
+        UniqueConstraint("context_space_id", "title"),
+    )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     context_space_id: Mapped[str] = mapped_column(
         ForeignKey("context_spaces.id"), nullable=False, index=True
     )
+    public_slug: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     problem_statement: Mapped[str | None] = mapped_column(Text)
     decision_statement: Mapped[str] = mapped_column(Text, nullable=False)

@@ -2,9 +2,9 @@
 
 ## Summary
 
-This spec defines the UI and interaction polish required for the current Cornerstone frontend without changing the underlying backend contracts.
+This spec records the earlier incremental polish pass that preceded the workspace-plus-studios redesign.
 
-The goal is to make the existing routes readable, responsive, permission-aware, and easier to scan while preserving the current dark visual language.
+The current active ownership for shell posture, route structure, and member-versus-studio presentation now lives in [./workspace-plus-studios-redesign.md](./workspace-plus-studios-redesign.md).
 
 ## Scope and owned behavior
 
@@ -85,6 +85,8 @@ This spec owns:
 
 ## Related docs
 
+- [./workspace-plus-studios-redesign.md](./workspace-plus-studios-redesign.md)
+- [./craft-ui-ux-benchmark.md](./craft-ui-ux-benchmark.md)
 - [../retrieval-and-answers/spec.md](../retrieval-and-answers/spec.md)
 - [../graph-and-relations/spec.md](../graph-and-relations/spec.md)
 - [../review-and-validation/spec.md](../review-and-validation/spec.md)

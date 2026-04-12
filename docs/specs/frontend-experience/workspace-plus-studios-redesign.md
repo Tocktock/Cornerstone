@@ -18,6 +18,7 @@ This spec owns:
 - the shared shell posture for reader and studio surfaces
 - the reader-mode and studio-mode visual split
 - the shared expressive token, spacing, and motion grammar
+- mode-aware empty-state and onboarding behavior for mock versus production runtime
 - workspace-home behavior and its frontend presentation
 - explore topics, decisions, and map behavior
 - direct concept and decision reading surfaces
@@ -56,6 +57,7 @@ Compatibility redirects for one release:
 - `Review Studio` and `Source Studio` must appear in primary navigation only when the active actor can use them.
 - Workspace metadata and actor switching must live inside a workspace/profile tray rather than consuming the main reading column.
 - Reader routes must place the artifact or answer surface in the first viewport before secondary workspace controls.
+- The shared shell may expose a subtle runtime-mode label so demo mode stays explicit while production remains quiet and operational.
 
 ## Visual system requirements
 
@@ -89,6 +91,12 @@ The frontend depends on the following additive serving-contract behavior:
 - `response_kind: workspace_home`
 - `WorkspaceHomePayload` on `/api/v1/workspace-home`
 - `DecisionPayload.public_slug` for presentable direct routes
+- `/api/v1/bootstrap` runtime metadata:
+  - `runtime_mode`
+  - `workspace_data_state`
+  - `linked_source_count`
+  - `active_source_count`
+  - `degraded_source_count`
 
 Trust and provenance semantics remain canonical and unchanged:
 - `support_visibility`
@@ -107,6 +115,10 @@ Trust and provenance semantics remain canonical and unchanged:
 - The page must render a featured answer, featured official knowledge cards, recent changes, freshness alerts, and quiet review/source summaries.
 - Operational summaries must remain secondary to the artifact and answer surfaces.
 - Recent changes must read as an artifact river with direct continuity into detail routes.
+- In `mock`, the seeded artifact-first experience may remain the default local posture.
+- In `production` plus `awaiting_sources`, `Workspace` must render guided empty states instead of demo content.
+- In `production` plus `syncing_sources`, `Workspace` must render first-sync guidance and source-health cues instead of fake artifacts.
+- In `production` plus `degraded`, `Workspace` must preserve visible content when available and surface recovery cues clearly.
 
 ### Explore
 
@@ -115,6 +127,9 @@ Trust and provenance semantics remain canonical and unchanged:
 - Topics must render editorial concept previews with direct links to presentable concept routes.
 - Decisions must render lineage-aware decision previews with direct links to presentable decision routes.
 - Map must preserve URL-addressable selection, selected-object continuity, and clearly separate inbound from outbound relation storytelling.
+- In `production` plus `awaiting_sources` or `syncing_sources`, Explore surfaces must show guided route-specific empty states instead of demo browse content.
+- In `production` plus `ready`, Explore surfaces must render only real workspace artifacts returned by the current data set.
+- In `production` plus `degraded`, Explore surfaces must keep any visible content present while surfacing recovery messaging.
 
 ### Concept detail
 
@@ -147,6 +162,9 @@ Trust and provenance semantics remain canonical and unchanged:
 - Healthy sources and degraded sources must render in separate sections and visibly distinct operational zones.
 - Operational state, locator, last-success time, and error rows must stay scannable.
 - Summary band, intervention queue, composer/editor area, and healthy-monitoring area must remain visually distinct.
+- In `mock`, Source Studio may preserve demo-friendly datasource binding language.
+- In `production`, Source Studio must lead with live datasource onboarding and first-sync guidance.
+- In `production`, non-managers must receive read-only datasource guidance rather than fake content or hidden admin actions.
 
 ## Mobile and responsiveness
 
@@ -166,6 +184,7 @@ Trust and provenance semantics remain canonical and unchanged:
 ## Verification expectations
 
 - Contract verification must cover `workspace_home` and `DecisionPayload.public_slug`.
+- Bootstrap verification must cover runtime metadata and workspace readiness states.
 - `npm run build` must pass after the shared token and route composition changes.
 - Frontend verification must cover workspace home, explore topics, explore decisions, explore map, direct concept routes, direct decision routes, review-studio access and queue behavior, and source-studio manager versus member behavior.
 - Synthetic browser verification must cover desktop and mobile reader routes, studio gating, queue actions, and disclosure visibility.

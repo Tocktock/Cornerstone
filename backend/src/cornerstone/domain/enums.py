@@ -8,6 +8,19 @@ class ContextSpaceKind(StrEnum):
     PERSONAL = "personal"
 
 
+class RuntimeMode(StrEnum):
+    MOCK = "mock"
+    PRODUCTION = "production"
+
+
+class WorkspaceDataState(StrEnum):
+    DEMO_SEEDED = "demo_seeded"
+    AWAITING_SOURCES = "awaiting_sources"
+    SYNCING_SOURCES = "syncing_sources"
+    READY = "ready"
+    DEGRADED = "degraded"
+
+
 class ActorKind(StrEnum):
     HUMAN = "human"
     TEAM = "team"
@@ -184,6 +197,7 @@ class ResponseKind(StrEnum):
     CONCEPT = "concept"
     RELATION = "relation"
     DECISION = "decision"
+    WORKSPACE_HOME = "workspace_home"
     ANSWER = "answer"
     SEARCH_RESULTS = "search_results"
     GRAPH_SLICE = "graph_slice"
@@ -196,6 +210,7 @@ class RequestIntent(StrEnum):
     GET_CONCEPT = "get_concept"
     GET_RELATION = "get_relation"
     GET_DECISION = "get_decision"
+    GET_WORKSPACE_HOME = "get_workspace_home"
     GET_ANSWER = "get_answer"
     GET_GRAPH_SLICE = "get_graph_slice"
     FOLLOW_PROVENANCE = "follow_provenance"

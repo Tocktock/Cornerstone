@@ -345,6 +345,7 @@ def decision_envelope(
     support_visibility = compute_support_visibility(support_items, visible_items, policy)
     payload = DecisionPayload(
         decision_id=decision.id,
+        public_slug=decision.public_slug,
         title=decision.title,
         decision_statement=decision.decision_statement,
         problem_statement=decision.problem_statement,

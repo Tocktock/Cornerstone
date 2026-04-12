@@ -12,7 +12,7 @@ import {
   uniqueName,
 } from './testkit'
 
-test('review queue supports valid officialization, invalid scope denial, and queue refresh', async ({
+test('Review Studio supports valid officialization, invalid scope denial, and queue refresh', async ({
   page,
   request,
 }, testInfo) => {
@@ -22,10 +22,9 @@ test('review queue supports valid officialization, invalid scope denial, and que
   const reviewer = actorNamed(bootstrap, 'Domain Reviewer')
   const admin = actorNamed(bootstrap, 'Workspace Admin')
 
-  const opsPlaybook = await conceptByName(request, member, 'Ops Playbook')
   const partnerSla = await conceptByName(request, member, 'Partner SLA')
   const vipInsight = await conceptByName(request, member, 'VIP Escalation Insight')
-  const platformBreaker = await conceptByName(request, member, 'Platform Circuit Breaker')
+  const platformBreaker = await conceptByName(request, reviewer, 'Platform Circuit Breaker')
   const conceptSupportItemIds = await supportItemIdsForConcept(request, member, 'Ops Playbook')
   const platformSupportItemIds = await supportItemIdsForConcept(request, reviewer, 'Platform Circuit Breaker')
 
@@ -65,11 +64,11 @@ test('review queue supports valid officialization, invalid scope denial, and que
     },
   })
 
-  await goToRoute(page, '/glossary', 'Glossary')
+  await goToRoute(page, '/explore/topics', 'Explore Topics')
   await switchActor(page, member)
-  await expect(page.getByRole('button', { name: new RegExp(conceptName, 'i') })).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: new RegExp(conceptName, 'i') })).toHaveCount(0)
 
-  await goToRoute(page, '/review', 'Review queue')
+  await goToRoute(page, '/review-studio', 'Review Studio')
   await switchActor(page, reviewer)
 
   const conceptCard = page.locator('.review-item-card').filter({ hasText: conceptName })
@@ -97,10 +96,15 @@ test('review queue supports valid officialization, invalid scope denial, and que
   await expect(page.getByText(new RegExp(`officialize succeeded for ${crossDomainLabel}`, 'i'))).toBeVisible()
   await expect(crossDomainCard).toHaveCount(0)
 
-  await goToRoute(page, '/glossary', 'Glossary')
-  await expect(page.getByRole('button', { name: new RegExp(conceptName, 'i') })).toBeVisible()
+  await goToRoute(page, '/explore/topics', 'Explore Topics')
+  await expect(
+    page
+      .locator('.artifact-card')
+      .filter({ has: page.locator('h3', { hasText: conceptName }) })
+      .first(),
+  ).toBeVisible()
 
-  await goToRoute(page, '/graph', 'Graph slice')
+  await goToRoute(page, '/explore/map', 'Explore Map')
   await page.getByRole('button', { name: 'Explore Partner SLA' }).click()
   const detailPanel = page.locator('.graph-detail-panel')
   await expect(detailPanel).toContainText('VIP Escalation Insight')
@@ -108,5 +112,5 @@ test('review queue supports valid officialization, invalid scope denial, and que
   await expect(detailPanel).toContainText(sameDomainPredicate)
   await expect(detailPanel).toContainText(crossDomainPredicate)
 
-  await captureSnapshot(page, testInfo, 'review-queue-valid-and-invalid-actions')
+  await captureSnapshot(page, testInfo, 'review-studio-valid-and-invalid-actions')
 })

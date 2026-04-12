@@ -24,6 +24,7 @@ This spec owns:
 - review-scope derivation and authorization rules
 - access defaults
 - visibility rules for member-facing and admin-facing surfaces
+- production-mode empty-workspace and role-aware datasource guidance expectations
 - personal-source boundary rules
 - service access principles for programmatic and model-facing consumers
 
@@ -141,6 +142,17 @@ Inspection rules are fixed:
 - `evidence_only` sources and support items may support curation and review but are hidden from normal member-facing retrieval.
 - A member-facing output may be labeled `source_backed` only when at least one visible support item is available to that member.
 - If an output is official but relies partly or wholly on hidden support, the output must disclose `restricted_support`.
+
+## Production workspace onboarding behavior
+
+When the runtime mode is `production`, shared workspaces may start without demo content.
+
+The following rules are fixed:
+- A production workspace with no linked shared datasource must not render demo concepts, decisions, answers, or browse results as filler.
+- Managers may receive clear CTA guidance into `Source Studio` so they can connect the first datasource.
+- Non-managers must receive explanatory read-only guidance that a connector manager needs to link a datasource.
+- Once sources are linked but the first usable artifact set is not ready, the UI may describe first-sync progress, but must not invent member-facing knowledge.
+- If source health becomes degraded, the UI may surface recovery messaging while preserving any already-visible member-facing content.
 
 ## Constraints and non-goals
 

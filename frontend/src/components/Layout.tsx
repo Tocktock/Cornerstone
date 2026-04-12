@@ -1,9 +1,11 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 
-import type { ActorSession, ContextSpaceRef } from '../types/api'
+import type { ActorSession, ContextSpaceRef, RuntimeBootstrapMeta } from '../types/api'
+import { runtimeModeLabel, workspaceDataStateLabel } from '../viewModels'
 
 type LayoutProps = {
   workspace: ContextSpaceRef
+  runtimeInfo: RuntimeBootstrapMeta
   actors: ActorSession[]
   activeActor: ActorSession
   canReview: boolean
@@ -13,6 +15,7 @@ type LayoutProps = {
 
 export function Layout({
   workspace,
+  runtimeInfo,
   actors,
   activeActor,
   canReview,
@@ -28,7 +31,12 @@ export function Layout({
       <header className="shell-header">
         <div className="shell-header-bar">
           <span className="mini-label">{isStudioRoute ? 'Operational surfaces' : 'Reader surfaces'}</span>
-          <span className="shell-header-context">{workspace.context_space_name}</span>
+          <div className="shell-header-meta">
+            <span className={`mode-indicator ${runtimeInfo.runtime_mode}`}>
+              {runtimeModeLabel(runtimeInfo)}
+            </span>
+            <span className="shell-header-context">{workspace.context_space_name}</span>
+          </div>
         </div>
 
         <div className="shell-brand">
@@ -61,6 +69,11 @@ export function Layout({
               <span className="mini-label">Active scope</span>
               <strong>{activeActor.preferred_consumer_scope}</strong>
               <p>{activeActor.base_role}</p>
+            </div>
+            <div className="tray-card">
+              <span className="mini-label">Runtime</span>
+              <strong>{runtimeModeLabel(runtimeInfo)}</strong>
+              <p>{workspaceDataStateLabel(runtimeInfo)}</p>
             </div>
             <label className="form-field tray-field">
               <span className="mini-label">Switch actor</span>

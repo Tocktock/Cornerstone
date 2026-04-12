@@ -294,6 +294,12 @@ p {
   padding: 0 0.25rem;
 }
 
+.shell-header-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
 .shell-header-context {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.78rem;
@@ -305,6 +311,51 @@ p {
 .studio-shell .shell-header-context {
   color: var(--studio-muted);
 }
+
+.mode-indicator {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.9rem;
+  padding: 0.2rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid var(--reader-border);
+  background: rgba(255, 250, 244, 0.72);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--reader-muted);
+}
+
+.mode-indicator.mock {
+  border-color: rgba(146, 86, 40, 0.2);
+  background: rgba(146, 86, 40, 0.12);
+  color: var(--reader-accent);
+}
+
+.studio-shell .mode-indicator,
+.mode-indicator.production {
+  border-color: var(--reader-border);
+  background: rgba(255, 250, 244, 0.56);
+}
+
+.studio-shell .mode-indicator {
+  border-color: var(--studio-border);
+  background: rgba(30, 42, 56, 0.72);
+  color: var(--studio-muted);
+}
+
+.studio-shell .mode-indicator.mock {
+  border-color: rgba(217, 159, 98, 0.24);
+  background: rgba(217, 159, 98, 0.14);
+  color: var(--studio-accent);
+}
+
+.studio-shell .mode-indicator.production {
+  border-color: var(--studio-border);
+  background: rgba(30, 42, 56, 0.72);
+}
+
 
 .shell-brand {
   display: grid;

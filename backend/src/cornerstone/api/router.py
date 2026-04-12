@@ -25,6 +25,7 @@ from cornerstone.domain.models import (
 from cornerstone.domain.schemas import (
     ActorSession,
     ConnectorTemplateSummary,
+    ContractEnvelope,
     DraftConceptCreate,
     DraftDecisionCreate,
     DraftRelationCreate,
@@ -43,8 +44,10 @@ from cornerstone.domain.schemas import (
     SyncRunResult,
     SyncRunSummary,
     ViewerBootstrap,
+    WorkspaceHomePayload,
 )
 from cornerstone.services.answering import answer_query, search_context
+from cornerstone.services.bootstrap import derive_workspace_data_state
 from cornerstone.services.catalog import (
     filter_visible_resources,
     get_policy,
@@ -93,6 +96,7 @@ from cornerstone.services.source_connections import (
     update_source_connection,
 )
 from cornerstone.services.sync import run_sync
+from cornerstone.services.workspace_home import workspace_home_envelope
 
 router = APIRouter()
 
@@ -103,7 +107,10 @@ def healthcheck() -> dict[str, str]:
 
 
 @router.get("/bootstrap", response_model=ViewerBootstrap)
-def bootstrap(db: Session = Depends(get_db)):
+def bootstrap(
+    settings: Settings = Depends(get_settings),
+    db: Session = Depends(get_db),
+):
     workspace = db.scalar(
         select(ContextSpace).where(ContextSpace.kind == ContextSpaceKind.WORKSPACE).limit(1)
     )
@@ -117,6 +124,12 @@ def bootstrap(db: Session = Depends(get_db)):
             select(Actor).where(Actor.context_space_id == workspace.id).order_by(Actor.display_name)
         )
     )
+    (
+        workspace_data_state,
+        linked_source_count,
+        active_source_count,
+        degraded_source_count,
+    ) = derive_workspace_data_state(db, settings, workspace)
     return ViewerBootstrap(
         workspace=context_space_ref(workspace),
         personal_context=context_space_ref(personal_context),
@@ -131,7 +144,23 @@ def bootstrap(db: Session = Depends(get_db)):
             )
             for actor in actors
         ],
+        runtime_mode=settings.runtime_mode,
+        workspace_data_state=workspace_data_state,
+        linked_source_count=linked_source_count,
+        active_source_count=active_source_count,
+        degraded_source_count=degraded_source_count,
     )
+
+
+@router.get("/workspace-home", response_model=ContractEnvelope[WorkspaceHomePayload])
+def get_workspace_home(
+    settings: Settings = Depends(get_settings),
+    consumer_scope: ConsumerScope = Depends(get_consumer_scope),
+    actor: Actor = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+):
+    context_space = context_space_or_404(db, actor.context_space_id)
+    return workspace_home_envelope(db, settings, context_space, actor, consumer_scope)
 
 
 @router.get("/connector-templates", response_model=list[ConnectorTemplateSummary])
@@ -546,15 +575,15 @@ def get_decisions(
     ]
 
 
-@router.get("/decisions/{decision_id}")
+@router.get("/decisions/{decision_lookup}")
 def get_decision(
-    decision_id: str,
+    decision_lookup: str,
     settings: Settings = Depends(get_settings),
     consumer_scope: ConsumerScope = Depends(get_consumer_scope),
     actor: Actor = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ):
-    decision = db.get(DecisionRecord, decision_id)
+    decision = _decision_for_actor_or_404(db, actor, decision_lookup)
     if decision is None:
         raise HTTPException(status_code=404, detail="Decision not found.")
     context_space = context_space_or_404(db, decision.context_space_id)
@@ -758,6 +787,26 @@ def _source_connection_for_actor_or_404(
             status_code=403, detail="Source connection is outside the actor workspace."
         )
     return connection
+
+
+def _decision_for_actor_or_404(
+    db: Session,
+    actor: Actor,
+    decision_lookup: str,
+) -> DecisionRecord:
+    decision = db.scalar(
+        select(DecisionRecord)
+        .where(
+            DecisionRecord.context_space_id == actor.context_space_id,
+            DecisionRecord.public_slug == decision_lookup,
+        )
+        .limit(1)
+    )
+    if decision is None:
+        decision = db.get(DecisionRecord, decision_lookup)
+    if decision is None or decision.context_space_id != actor.context_space_id:
+        raise HTTPException(status_code=404, detail="Decision not found.")
+    return decision
 
 
 def _is_published_or_verified(resource) -> bool:

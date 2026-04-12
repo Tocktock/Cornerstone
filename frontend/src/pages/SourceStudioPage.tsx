@@ -12,6 +12,7 @@ import type {
   ConnectorTemplateSummary,
   ProviderBindingStartResponse,
   ProviderBindingSummary,
+  RuntimeBootstrapMeta,
   SourceConnectionCreatePayload,
   SourceConnectionDetail,
   SourceConnectionPreviewResponse,
@@ -19,10 +20,16 @@ import type {
   SourceConnectionUpdatePayload,
   SyncRunSummary,
 } from '../types/api'
-import { canActorManageConnectors, formatLocalDateTime } from '../viewModels'
+import {
+  canActorManageConnectors,
+  formatLocalDateTime,
+  isProductionRuntime,
+  isProductionWorkspaceDegraded,
+} from '../viewModels'
 
 type SourceStudioPageProps = {
   activeActor: ActorSession
+  runtimeInfo: RuntimeBootstrapMeta
 }
 
 type EditorState = {
@@ -36,7 +43,7 @@ type EditorState = {
 
 const DEFAULT_TEMPLATE = 'notion_shared_page_tree'
 
-export function SourceStudioPage({ activeActor }: SourceStudioPageProps) {
+export function SourceStudioPage({ activeActor, runtimeInfo }: SourceStudioPageProps) {
   const canManage = canActorManageConnectors(activeActor)
   const [refreshIndex, setRefreshIndex] = useState(0)
   const [templateKey, setTemplateKey] = useState(DEFAULT_TEMPLATE)
@@ -85,9 +92,32 @@ export function SourceStudioPage({ activeActor }: SourceStudioPageProps) {
   )
   const totalSources = (sources.data ?? []).length
   const activeSources = (sources.data ?? []).filter((source) => source.source_connection_state === 'active').length
+  const productionMode = isProductionRuntime(runtimeInfo)
+  const productionAwaitingSources =
+    runtimeInfo.runtime_mode === 'production' && runtimeInfo.workspace_data_state === 'awaiting_sources'
+  const productionSyncingSources =
+    runtimeInfo.runtime_mode === 'production' && runtimeInfo.workspace_data_state === 'syncing_sources'
+  const productionDegraded = isProductionWorkspaceDegraded(runtimeInfo)
 
   if (sources.error) {
     return <EmptyState title="Source Studio unavailable" description={sources.error} />
+  }
+
+  if (productionAwaitingSources && !canManage) {
+    return (
+      <section className="page-stack studio-page source-studio-page">
+        <PageHeader
+          eyebrow="Cornerstone studio"
+          title="Source Studio"
+          description="Production source onboarding is managed by connector managers and remains read-only for other actors."
+        />
+        <EmptyState
+          eyebrow="Production access"
+          title="A connector manager needs to connect the first datasource"
+          description="This production workspace does not have a shared datasource linked yet. Connector managers can use Source Studio to bind a datasource and start the first sync."
+        />
+      </section>
+    )
   }
 
   async function handleStartBinding() {
@@ -285,11 +315,37 @@ export function SourceStudioPage({ activeActor }: SourceStudioPageProps) {
       <PageHeader
         eyebrow="Cornerstone studio"
         title="Source Studio"
-        description="Operational source health, recovery cues, and a dedicated composer for create and bind flows."
+        description={
+          productionMode
+            ? 'Operational source health, real datasource onboarding, and first-sync recovery cues for production workspaces.'
+            : 'Operational source health, recovery cues, and a dedicated composer for create and bind flows.'
+        }
       />
 
       {managerError ? <AlertBanner tone="danger" title="Source Studio issue" description={managerError} /> : null}
       {managerNotice ? <AlertBanner title="Source Studio update" description={managerNotice} /> : null}
+      {productionAwaitingSources && canManage ? (
+        <AlertBanner
+          eyebrow="Production onboarding"
+          title="Connect a live datasource"
+          description="Production mode does not fall back to demo content. Bind a live datasource and create a shared connection to start building workspace knowledge."
+        />
+      ) : null}
+      {productionSyncingSources ? (
+        <AlertBanner
+          eyebrow="Production sync"
+          title="First sync in progress"
+          description={`Production sources are connected, but the first usable workspace artifact set is still synchronizing. ${runtimeInfo.linked_source_count} linked sources are currently active or preparing.`}
+        />
+      ) : null}
+      {productionDegraded ? (
+        <AlertBanner
+          tone="danger"
+          eyebrow="Production recovery"
+          title="Recovery cues remain visible"
+          description={`Production mode keeps real content visible where possible, but ${runtimeInfo.degraded_source_count} linked sources currently need recovery attention.`}
+        />
+      ) : null}
 
       <div className="summary-strip studio-summary-strip source-summary-strip">
         <StatCard
@@ -311,8 +367,16 @@ export function SourceStudioPage({ activeActor }: SourceStudioPageProps) {
           <article className="studio-panel studio-control-panel">
             <SectionIntro
               eyebrow="Source composer"
-              title="Bind Notion and create a source connection"
-              description="The create flow stays in its own composer instead of competing with the source list."
+              title={
+                productionMode
+                  ? 'Bind Notion and create a production source connection'
+                  : 'Bind Notion and create a source connection'
+              }
+              description={
+                productionMode
+                  ? 'Production mode uses only live datasource binding and sync flows. The create flow stays isolated from the monitoring list.'
+                  : 'The create flow stays in its own composer instead of competing with the source list.'
+              }
             />
 
             {templates.error ? <AlertBanner tone="danger" title="Templates unavailable" description={templates.error} /> : null}
@@ -341,7 +405,13 @@ export function SourceStudioPage({ activeActor }: SourceStudioPageProps) {
               <div className="binding-row">
                 <div>
                   <span className="mini-label">Provider binding</span>
-                  <p>{boundCredentialRef ? `Ready · ${boundCredentialRef}` : 'No Notion workspace bound yet.'}</p>
+                  <p>
+                    {boundCredentialRef
+                      ? `Ready · ${boundCredentialRef}`
+                      : productionMode
+                        ? 'No live Notion workspace bound yet.'
+                        : 'No Notion workspace bound yet.'}
+                  </p>
                 </div>
                 <button type="button" className="ghost-button" onClick={handleStartBinding} disabled={isBinding}>
                   {isBinding ? 'Starting…' : 'Bind Notion'}
@@ -448,7 +518,11 @@ export function SourceStudioPage({ activeActor }: SourceStudioPageProps) {
             ) : (
               <EmptyState
                 title="Preview required"
-                description="Resolve the scope before creating the connection so the operator can inspect sample source memory."
+                description={
+                  productionMode
+                    ? 'Resolve the live scope before creating the connection so the operator can inspect the incoming production source memory.'
+                    : 'Resolve the scope before creating the connection so the operator can inspect sample source memory.'
+                }
               />
             )}
           </article>
@@ -466,7 +540,14 @@ export function SourceStudioPage({ activeActor }: SourceStudioPageProps) {
             {attentionSources.map((source) => renderSourceCard(source))}
           </div>
         ) : (
-          <EmptyState title="No intervention needed" description="No sources currently require operator attention." />
+          <EmptyState
+            title="No intervention needed"
+            description={
+              productionMode
+                ? 'No linked production sources currently require operator attention.'
+                : 'No sources currently require operator attention.'
+            }
+          />
         )}
       </section>
 
@@ -479,6 +560,16 @@ export function SourceStudioPage({ activeActor }: SourceStudioPageProps) {
         <div className="studio-grid">
           {healthySources.map((source) => renderSourceCard(source))}
         </div>
+        {!healthySources.length ? (
+          <EmptyState
+            title="No healthy sources yet"
+            description={
+              productionMode
+                ? 'Healthy production sources will appear here after the first successful sync completes.'
+                : 'Healthy sources will appear here once the demo or live connections settle.'
+            }
+          />
+        ) : null}
       </section>
     </section>
   )

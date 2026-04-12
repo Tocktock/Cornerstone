@@ -14,7 +14,10 @@ GOLDEN_DIR = Path(__file__).with_name("golden")
 
 def _normalize(value):
     if isinstance(value, dict):
-        return {key: _normalize(item) for key, item in value.items()}
+        normalized = {key: _normalize(item) for key, item in value.items()}
+        if "changed_at" in normalized:
+            normalized["changed_at"] = "__RECENT_CHANGE_AT__"
+        return normalized
     if isinstance(value, list):
         return [_normalize(item) for item in value]
     if isinstance(value, str) and value.startswith("file://"):
@@ -42,12 +45,19 @@ def test_canonical_contract_snapshots(client: TestClient, headers):
 
     decisions = client.get("/api/v1/decisions", headers=headers["member"])
     decisions.raise_for_status()
+    legacy_decision = next(
+        item
+        for item in decisions.json()
+        if item["payload"]["title"] == "Legacy Escalation Routing"
+    )
     decision = _normalize(
-        next(
-            item
-            for item in decisions.json()
-            if item["payload"]["title"] == "Legacy Escalation Routing"
-        )
+        client.get(
+            f"/api/v1/decisions/{legacy_decision['payload']['public_slug']}",
+            headers=headers["member"],
+        ).json()
+    )
+    workspace_home = _normalize(
+        client.get("/api/v1/workspace-home", headers=headers["member"]).json()
     )
 
     answer = _normalize(
@@ -86,6 +96,7 @@ def test_canonical_contract_snapshots(client: TestClient, headers):
     assert graph_slice == _load_golden("graph_slice")
     assert provenance == _load_golden("provenance")
     assert no_match == _load_golden("no_match")
+    assert workspace_home == _load_golden("workspace_home")
 
 
 def test_mcp_answer_snapshot_matches_rest_answer(client: TestClient, headers):

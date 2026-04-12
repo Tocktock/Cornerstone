@@ -63,6 +63,7 @@ export type RelationPayload = {
 
 export type DecisionPayload = {
   decision_id: string
+  public_slug: string
   title: string
   decision_statement: string
   problem_statement?: string | null
@@ -147,6 +148,63 @@ export type NoMatchPayload = {
   reason: string
   request_rewrite_hint?: string | null
   suggested_follow_up: Array<{ label: string; resource_ref?: ResourceRef | null }>
+}
+
+export type WorkspaceHomeFeaturedCard = {
+  resource_ref: ResourceRef
+  public_slug: string
+  title: string
+  eyebrow: string
+  summary: string
+  support_visibility: string
+  lifecycle_state: string
+  verification_state?: string | null
+  provenance_summary: ProvenanceSummary
+}
+
+export type WorkspaceHomeRecentChange = {
+  resource_ref: ResourceRef
+  public_slug: string
+  change_summary: string
+  changed_at: string
+  support_visibility: string
+  lifecycle_state: string
+  verification_state?: string | null
+}
+
+export type WorkspaceHomeFreshnessAlert = {
+  source_connection_id: string
+  source_label: string
+  source_connection_state: string
+  freshness_state: string
+  last_successful_sync_at?: string | null
+  note: string
+}
+
+export type ReviewQueueSummary = {
+  pending_count: number
+  review_required_count: number
+  officialize_ready_count: number
+}
+
+export type SourceHealthSummary = {
+  total_count: number
+  active_count: number
+  monitoring_count: number
+  stale_count: number
+  degraded_count: number
+  paused_count: number
+  removed_count: number
+}
+
+export type WorkspaceHomePayload = {
+  hero_prompt: string
+  featured_answer: ContractEnvelope<AnswerPayload | NoMatchPayload> | null
+  featured_cards: WorkspaceHomeFeaturedCard[]
+  recent_changes: WorkspaceHomeRecentChange[]
+  freshness_alerts: WorkspaceHomeFreshnessAlert[]
+  review_queue_summary: ReviewQueueSummary
+  source_health_summary: SourceHealthSummary
 }
 
 export type ContractEnvelope<T> = {
@@ -283,11 +341,34 @@ export type ActorSession = {
   preferred_consumer_scope: 'member' | 'review' | 'admin'
 }
 
+export type RuntimeMode = 'mock' | 'production'
+
+export type WorkspaceDataState =
+  | 'demo_seeded'
+  | 'awaiting_sources'
+  | 'syncing_sources'
+  | 'ready'
+  | 'degraded'
+
 export type ViewerBootstrap = {
   workspace: ContextSpaceRef
   personal_context: ContextSpaceRef
   actors: ActorSession[]
+  runtime_mode: RuntimeMode
+  workspace_data_state: WorkspaceDataState
+  linked_source_count: number
+  active_source_count: number
+  degraded_source_count: number
 }
+
+export type RuntimeBootstrapMeta = Pick<
+  ViewerBootstrap,
+  | 'runtime_mode'
+  | 'workspace_data_state'
+  | 'linked_source_count'
+  | 'active_source_count'
+  | 'degraded_source_count'
+>
 
 export type SyncRunResult = {
   source_connection_id: string
