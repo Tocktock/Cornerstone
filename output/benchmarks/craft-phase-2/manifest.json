@@ -1,0 +1,152 @@
+{
+  "generated_at": "2026-04-10T14:40:54.931Z",
+  "cornerstone_routes": [
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/workspace/desktop/home.png",
+      "route": "/",
+      "device": "desktop",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/workspace/mobile/home.png",
+      "route": "/",
+      "device": "mobile",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/explore-topics/desktop/index.png",
+      "route": "/explore/topics",
+      "device": "desktop",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/explore-topics/mobile/index.png",
+      "route": "/explore/topics",
+      "device": "mobile",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/explore-decisions/desktop/index.png",
+      "route": "/explore/decisions",
+      "device": "desktop",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/explore-decisions/mobile/index.png",
+      "route": "/explore/decisions",
+      "device": "mobile",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/explore-map/desktop/index.png",
+      "route": "/explore/map",
+      "device": "desktop",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/explore-map/mobile/index.png",
+      "route": "/explore/map",
+      "device": "mobile",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/explore-map-detail/desktop/partner-sla.png",
+      "route": "/explore/map/concept_41fe14a77e413ffa",
+      "device": "desktop",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/explore-map-detail/mobile/partner-sla.png",
+      "route": "/explore/map/concept_41fe14a77e413ffa",
+      "device": "mobile",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/concept-detail/desktop/ops-playbook.png",
+      "route": "/concepts/ops-playbook",
+      "device": "desktop",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/concept-detail/mobile/ops-playbook.png",
+      "route": "/concepts/ops-playbook",
+      "device": "mobile",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/decision-detail/desktop/legacy-escalation-routing.png",
+      "route": "/decisions/legacy-escalation-routing",
+      "device": "desktop",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/decision-detail/mobile/legacy-escalation-routing.png",
+      "route": "/decisions/legacy-escalation-routing",
+      "device": "mobile",
+      "actor": "Member"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/review-studio/desktop/reviewer-queue.png",
+      "route": "/review-studio",
+      "device": "desktop",
+      "actor": "Domain Reviewer"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/review-studio/mobile/reviewer-queue.png",
+      "route": "/review-studio",
+      "device": "mobile",
+      "actor": "Domain Reviewer"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/source-studio/desktop/operator-managed.png",
+      "route": "/source-studio",
+      "device": "desktop",
+      "actor": "Operator"
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/cornerstone/source-studio/mobile/operator-managed.png",
+      "route": "/source-studio",
+      "device": "mobile",
+      "actor": "Operator"
+    }
+  ],
+  "craft_public_routes": [
+    {
+      "artifact": "output/benchmarks/craft-phase-2/craft/public-home/desktop/landing.png",
+      "url": "https://www.craft.do/",
+      "device": "desktop",
+      "authenticated": false
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/craft/public-home/mobile/landing.png",
+      "url": "https://www.craft.do/",
+      "device": "mobile",
+      "authenticated": false
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/craft/public-write/desktop/landing.png",
+      "url": "https://www.craft.do/write",
+      "device": "desktop",
+      "authenticated": false
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/craft/public-organize/desktop/landing.png",
+      "url": "https://www.craft.do/organize",
+      "device": "desktop",
+      "authenticated": false
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/craft/public-customize/desktop/landing.png",
+      "url": "https://www.craft.do/customize",
+      "device": "desktop",
+      "authenticated": false
+    },
+    {
+      "artifact": "output/benchmarks/craft-phase-2/craft/public-login/desktop/gate.png",
+      "url": "https://www.craft.do/login",
+      "device": "desktop",
+      "authenticated": false
+    }
+  ],
+  "authenticated_craft_status": "blocked_no_authenticated_session"
+}

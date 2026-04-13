@@ -22,3 +22,7 @@ frontend/vite.config.js
 frontend/vite.config.d.ts
 frontend/test-results/
 frontend/playwright-report/
+
+# Generated local verification byproducts
+output/connector-snapshots/
+output/playwright/.last-run.json

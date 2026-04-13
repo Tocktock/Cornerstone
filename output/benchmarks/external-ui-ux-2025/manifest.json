@@ -1,0 +1,549 @@
+{
+  "generated_at": "2026-04-10T23:30:48.730Z",
+  "note": "Explicit source list contains 9 references; this implementation follows the explicit list rather than the summary count of 8.",
+  "references": [
+    {
+      "source_id": "dropbox-brand",
+      "source_name": "Dropbox Brand",
+      "source_type": "award_public",
+      "basis": "CSS Design Awards 2025 Website of the Year winner",
+      "captured_url": "https://www.dropboxbrand.com/",
+      "device": "desktop",
+      "flow": "landing",
+      "tags": [
+        "brand-system",
+        "layout",
+        "navigation"
+      ],
+      "captured_at": "2026-04-10T23:30:54.138Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/dropbox-brand/desktop/landing.png"
+    },
+    {
+      "source_id": "dropbox-brand",
+      "source_name": "Dropbox Brand",
+      "source_type": "award_public",
+      "basis": "CSS Design Awards 2025 Website of the Year winner",
+      "captured_url": "https://www.dropboxbrand.com/",
+      "device": "mobile",
+      "flow": "landing",
+      "tags": [
+        "brand-system",
+        "mobile",
+        "layout"
+      ],
+      "captured_at": "2026-04-10T23:30:59.483Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/dropbox-brand/mobile/landing.png"
+    },
+    {
+      "source_id": "exat-typeface",
+      "source_name": "Exat Typeface",
+      "source_type": "award_public",
+      "basis": "CSS Design Awards 2025 Best UI site",
+      "captured_url": "https://exat.hottype.co/",
+      "device": "desktop",
+      "flow": "landing",
+      "tags": [
+        "typography",
+        "motion",
+        "css-craft"
+      ],
+      "captured_at": "2026-04-10T23:31:05.927Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/exat-typeface/desktop/landing.png"
+    },
+    {
+      "source_id": "exat-typeface",
+      "source_name": "Exat Typeface",
+      "source_type": "award_public",
+      "basis": "CSS Design Awards 2025 Best UI site",
+      "captured_url": "https://exat.hottype.co/",
+      "device": "mobile",
+      "flow": "landing",
+      "tags": [
+        "typography",
+        "mobile",
+        "css-craft"
+      ],
+      "captured_at": "2026-04-10T23:31:12.470Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/exat-typeface/mobile/landing.png"
+    },
+    {
+      "source_id": "compsych-brand-hub",
+      "source_name": "ComPsych Brand Hub",
+      "source_type": "award_public",
+      "basis": "CSSDA 2025 WOTY nominee and Konpo case study",
+      "captured_url": "https://compsych.konpo.co/",
+      "device": "desktop",
+      "flow": "landing",
+      "tags": [
+        "enterprise",
+        "brand-system",
+        "structured-nav"
+      ],
+      "captured_at": "2026-04-10T23:31:25.666Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/compsych-brand-hub/desktop/landing.png"
+    },
+    {
+      "source_id": "compsych-brand-hub",
+      "source_name": "ComPsych Brand Hub",
+      "source_type": "award_public",
+      "basis": "CSSDA 2025 WOTY nominee and Konpo case study",
+      "captured_url": "https://compsych.konpo.co/",
+      "device": "mobile",
+      "flow": "landing",
+      "tags": [
+        "enterprise",
+        "mobile",
+        "structured-nav"
+      ],
+      "captured_at": "2026-04-10T23:31:38.908Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/compsych-brand-hub/mobile/landing.png"
+    },
+    {
+      "source_id": "lacoste-members-experience",
+      "source_name": "Lacoste Members Experience",
+      "source_type": "award_public",
+      "basis": "Awwwards and CSSDA recognized 2025 experience reference",
+      "captured_url": "https://www.awwwards.com/sites/lacoste-members-experience",
+      "device": "desktop",
+      "flow": "award-page",
+      "tags": [
+        "immersive",
+        "navigation",
+        "customization"
+      ],
+      "captured_at": "2026-04-10T23:31:50.126Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/lacoste-members-experience/desktop/award-page.png"
+    },
+    {
+      "source_id": "lacoste-members-experience",
+      "source_name": "Lacoste Members Experience",
+      "source_type": "award_public",
+      "basis": "Awwwards and CSSDA recognized 2025 experience reference",
+      "captured_url": "https://www.awwwards.com/sites/lacoste-members-experience",
+      "device": "mobile",
+      "flow": "award-page",
+      "tags": [
+        "immersive",
+        "mobile",
+        "navigation"
+      ],
+      "captured_at": "2026-04-10T23:31:59.079Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/lacoste-members-experience/mobile/award-page.png"
+    },
+    {
+      "source_id": "sing-sing-a24",
+      "source_name": "Sing Sing on A24",
+      "source_type": "award_public",
+      "basis": "2025 Webby winner for Best Mobile User Experience",
+      "captured_url": "https://a24films.com/films/sing-sing/",
+      "device": "desktop",
+      "flow": "film-page",
+      "tags": [
+        "mobile-first",
+        "narrative",
+        "cinematic"
+      ],
+      "captured_at": "2026-04-10T23:32:05.021Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/sing-sing-a24/desktop/film-page.png"
+    },
+    {
+      "source_id": "sing-sing-a24",
+      "source_name": "Sing Sing on A24",
+      "source_type": "award_public",
+      "basis": "2025 Webby winner for Best Mobile User Experience",
+      "captured_url": "https://a24films.com/films/sing-sing/",
+      "device": "mobile",
+      "flow": "film-page",
+      "tags": [
+        "mobile-first",
+        "mobile",
+        "narrative"
+      ],
+      "captured_at": "2026-04-10T23:32:10.237Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/sing-sing-a24/mobile/film-page.png"
+    },
+    {
+      "source_id": "pinterest-predicts-2025",
+      "source_name": "Pinterest Predicts 2025",
+      "source_type": "award_public",
+      "basis": "2025 Webby winner for Best Trend, Insights or Impact Report",
+      "captured_url": "https://business.pinterest.com/pinterest-predicts/",
+      "device": "desktop",
+      "flow": "landing",
+      "tags": [
+        "editorial-data",
+        "trend-report",
+        "storytelling"
+      ],
+      "captured_at": "2026-04-10T23:32:20.266Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/pinterest-predicts-2025/desktop/landing.png"
+    },
+    {
+      "source_id": "pinterest-predicts-2025",
+      "source_name": "Pinterest Predicts 2025",
+      "source_type": "award_public",
+      "basis": "2025 Webby winner for Best Trend, Insights or Impact Report",
+      "captured_url": "https://business.pinterest.com/pinterest-predicts/",
+      "device": "mobile",
+      "flow": "landing",
+      "tags": [
+        "editorial-data",
+        "mobile",
+        "storytelling"
+      ],
+      "captured_at": "2026-04-10T23:32:31.387Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/pinterest-predicts-2025/mobile/landing.png"
+    },
+    {
+      "source_id": "linear-inbox-docs",
+      "source_name": "Linear Inbox docs",
+      "source_type": "product_public",
+      "basis": "Fit-for-purpose product reference for dense action handling",
+      "captured_url": "https://linear.app/docs/inbox",
+      "device": "desktop",
+      "flow": "docs-page",
+      "tags": [
+        "keyboard",
+        "dense-actions",
+        "notification-triage"
+      ],
+      "captured_at": "2026-04-10T23:32:39.018Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/linear-inbox-docs/desktop/docs-page.png"
+    },
+    {
+      "source_id": "linear-inbox-docs",
+      "source_name": "Linear Inbox docs",
+      "source_type": "product_public",
+      "basis": "Fit-for-purpose product reference for dense action handling",
+      "captured_url": "https://linear.app/docs/inbox",
+      "device": "mobile",
+      "flow": "docs-page",
+      "tags": [
+        "docs",
+        "mobile",
+        "dense-actions"
+      ],
+      "captured_at": "2026-04-10T23:32:44.745Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/linear-inbox-docs/mobile/docs-page.png"
+    },
+    {
+      "source_id": "stripe-apis",
+      "source_name": "Stripe APIs docs",
+      "source_type": "product_public",
+      "basis": "Fit-for-purpose product reference for technical data presentation",
+      "captured_url": "https://docs.stripe.com/apis",
+      "device": "desktop",
+      "flow": "apis-index",
+      "tags": [
+        "api-docs",
+        "data-representation",
+        "navigation"
+      ],
+      "captured_at": "2026-04-10T23:33:00.305Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/stripe-apis/desktop/apis-index.png"
+    },
+    {
+      "source_id": "stripe-apis",
+      "source_name": "Stripe APIs docs",
+      "source_type": "product_public",
+      "basis": "Fit-for-purpose product reference for technical data presentation",
+      "captured_url": "https://docs.stripe.com/apis",
+      "device": "mobile",
+      "flow": "apis-index",
+      "tags": [
+        "api-docs",
+        "mobile",
+        "data-representation"
+      ],
+      "captured_at": "2026-04-10T23:33:15.326Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/stripe-apis/mobile/apis-index.png"
+    },
+    {
+      "source_id": "vercel-observability",
+      "source_name": "Vercel Observability docs",
+      "source_type": "product_public",
+      "basis": "Fit-for-purpose product reference for operational data surfaces",
+      "captured_url": "https://vercel.com/docs/observability",
+      "device": "desktop",
+      "flow": "overview",
+      "tags": [
+        "observability",
+        "ops-ui",
+        "metric-hierarchy"
+      ],
+      "captured_at": "2026-04-10T23:33:21.425Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/vercel-observability/desktop/overview.png"
+    },
+    {
+      "source_id": "vercel-observability",
+      "source_name": "Vercel Observability docs",
+      "source_type": "product_public",
+      "basis": "Fit-for-purpose product reference for operational data surfaces",
+      "captured_url": "https://vercel.com/docs/observability",
+      "device": "mobile",
+      "flow": "overview",
+      "tags": [
+        "observability",
+        "mobile",
+        "ops-ui"
+      ],
+      "captured_at": "2026-04-10T23:33:26.554Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/references/vercel-observability/mobile/overview.png"
+    }
+  ],
+  "cornerstone_routes": [
+    {
+      "surface": "workspace",
+      "route": "/",
+      "device": "desktop",
+      "state": "home",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "reader",
+        "home"
+      ],
+      "captured_at": "2026-04-10T23:33:30.155Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/workspace/desktop/home.png"
+    },
+    {
+      "surface": "workspace",
+      "route": "/",
+      "device": "mobile",
+      "state": "home",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "reader",
+        "mobile"
+      ],
+      "captured_at": "2026-04-10T23:33:33.911Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/workspace/mobile/home.png"
+    },
+    {
+      "surface": "explore-topics",
+      "route": "/explore/topics",
+      "device": "desktop",
+      "state": "index",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "browse",
+        "topics"
+      ],
+      "captured_at": "2026-04-10T23:33:37.475Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/explore-topics/desktop/index.png"
+    },
+    {
+      "surface": "explore-topics",
+      "route": "/explore/topics",
+      "device": "mobile",
+      "state": "index",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "browse",
+        "mobile"
+      ],
+      "captured_at": "2026-04-10T23:33:41.161Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/explore-topics/mobile/index.png"
+    },
+    {
+      "surface": "explore-decisions",
+      "route": "/explore/decisions",
+      "device": "desktop",
+      "state": "index",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "browse",
+        "decisions"
+      ],
+      "captured_at": "2026-04-10T23:33:44.740Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/explore-decisions/desktop/index.png"
+    },
+    {
+      "surface": "explore-decisions",
+      "route": "/explore/decisions",
+      "device": "mobile",
+      "state": "index",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "browse",
+        "mobile"
+      ],
+      "captured_at": "2026-04-10T23:33:48.463Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/explore-decisions/mobile/index.png"
+    },
+    {
+      "surface": "explore-map",
+      "route": "/explore/map",
+      "device": "desktop",
+      "state": "root",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "map",
+        "root"
+      ],
+      "captured_at": "2026-04-10T23:33:52.031Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/explore-map/desktop/root.png"
+    },
+    {
+      "surface": "explore-map",
+      "route": "/explore/map",
+      "device": "mobile",
+      "state": "root",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "map",
+        "mobile"
+      ],
+      "captured_at": "2026-04-10T23:33:55.721Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/explore-map/mobile/root.png"
+    },
+    {
+      "surface": "explore-map-detail",
+      "route": "/explore/map/concept_41fe14a77e413ffa",
+      "device": "desktop",
+      "state": "partner-sla",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "map",
+        "detail"
+      ],
+      "captured_at": "2026-04-10T23:33:59.298Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/explore-map-detail/desktop/partner-sla.png"
+    },
+    {
+      "surface": "explore-map-detail",
+      "route": "/explore/map/concept_41fe14a77e413ffa",
+      "device": "mobile",
+      "state": "partner-sla",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "map",
+        "detail-mobile"
+      ],
+      "captured_at": "2026-04-10T23:34:02.958Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/explore-map-detail/mobile/partner-sla.png"
+    },
+    {
+      "surface": "concept-detail",
+      "route": "/concepts/ops-playbook",
+      "device": "desktop",
+      "state": "ops-playbook",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "detail",
+        "concept"
+      ],
+      "captured_at": "2026-04-10T23:34:06.521Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/concept-detail/desktop/ops-playbook.png"
+    },
+    {
+      "surface": "concept-detail",
+      "route": "/concepts/ops-playbook",
+      "device": "mobile",
+      "state": "ops-playbook",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "detail",
+        "mobile"
+      ],
+      "captured_at": "2026-04-10T23:34:10.239Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/concept-detail/mobile/ops-playbook.png"
+    },
+    {
+      "surface": "decision-detail",
+      "route": "/decisions/legacy-escalation-routing",
+      "device": "desktop",
+      "state": "legacy-escalation-routing",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "detail",
+        "decision"
+      ],
+      "captured_at": "2026-04-10T23:34:13.846Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/decision-detail/desktop/legacy-escalation-routing.png"
+    },
+    {
+      "surface": "decision-detail",
+      "route": "/decisions/legacy-escalation-routing",
+      "device": "mobile",
+      "state": "legacy-escalation-routing",
+      "actor_token": "demo-member-token",
+      "tags": [
+        "member",
+        "detail",
+        "mobile"
+      ],
+      "captured_at": "2026-04-10T23:34:17.562Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/decision-detail/mobile/legacy-escalation-routing.png"
+    },
+    {
+      "surface": "review-studio",
+      "route": "/review-studio",
+      "device": "desktop",
+      "state": "reviewer-queue",
+      "actor_token": "demo-reviewer-token",
+      "tags": [
+        "review",
+        "studio",
+        "queue"
+      ],
+      "captured_at": "2026-04-10T23:34:21.146Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/review-studio/desktop/reviewer-queue.png"
+    },
+    {
+      "surface": "review-studio",
+      "route": "/review-studio",
+      "device": "mobile",
+      "state": "reviewer-queue",
+      "actor_token": "demo-reviewer-token",
+      "tags": [
+        "review",
+        "studio",
+        "mobile"
+      ],
+      "captured_at": "2026-04-10T23:34:24.833Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/review-studio/mobile/reviewer-queue.png"
+    },
+    {
+      "surface": "source-studio",
+      "route": "/source-studio",
+      "device": "desktop",
+      "state": "operator-managed",
+      "actor_token": "demo-operator-token",
+      "tags": [
+        "operator",
+        "studio",
+        "sources"
+      ],
+      "captured_at": "2026-04-10T23:34:28.415Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/source-studio/desktop/operator-managed.png"
+    },
+    {
+      "surface": "source-studio",
+      "route": "/source-studio",
+      "device": "mobile",
+      "state": "operator-managed",
+      "actor_token": "demo-operator-token",
+      "tags": [
+        "operator",
+        "studio",
+        "mobile"
+      ],
+      "captured_at": "2026-04-10T23:34:32.135Z",
+      "artifact": "output/benchmarks/external-ui-ux-2025/cornerstone/source-studio/mobile/operator-managed.png"
+    }
+  ],
+  "failures": []
+}
