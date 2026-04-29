@@ -27,6 +27,9 @@ jobs:
       PERSISTENCE_BACKEND: postgres
       PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
       RUN_POSTGRES_TESTS: "1"
+    defaults:
+      run:
+        working-directory: cornerstone-backend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

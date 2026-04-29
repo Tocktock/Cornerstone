@@ -4,7 +4,7 @@ Cornerstone Backend v1.0.0 is the backend MVP release.
 
 ## Release Basis
 
-This release promotes the verified `v1.0.0-rc.1` / `v0.13.1` line to final `v1.0.0` after clean checks, live PostgreSQL proof, live Notion proof, product-loop proof, safety negative checks, secret scan, and human release approval.
+Create the final `v1.0.0` tag from the verified `v1.0.0-rc.1` / `v0.13.1` line only after clean checks, live PostgreSQL proof, live Notion proof, product-loop proof, safety negative checks, secret scan, and human release approval are recorded.
 
 ## Proven Product Loop
 

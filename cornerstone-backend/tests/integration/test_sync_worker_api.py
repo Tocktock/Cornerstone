@@ -62,6 +62,46 @@ def test_cancelled_queued_sync_job_does_not_ingest_content(client: TestClient) -
     assert client.get(f"/v1/artifacts?datasourceId={source_id}").json() == []
 
 
+def test_disconnected_source_fails_queued_sync_job_without_leaving_running_lease(
+    client: TestClient,
+    store: InMemoryStore,
+) -> None:
+    source_id = _connect_test_discover_select_notion(client)
+    job = client.post(
+        f"/v1/sources/{source_id}/sync-jobs",
+        json={"createdBy": "admin@example.com"},
+    ).json()["job"]
+    disconnect_response = client.post(f"/v1/sources/{source_id}/disconnect")
+
+    run_response = client.post(
+        "/v1/sync-worker/run",
+        json={"jobId": job["id"], "workerId": "worker-a", "leaseSeconds": 120},
+    )
+
+    assert disconnect_response.status_code == 200
+    assert run_response.status_code == 200
+    body = run_response.json()
+    assert body["processedJobCount"] == 1
+    failed_job = body["jobs"][0]["job"]
+    assert failed_job["status"] == "failed"
+    assert failed_job["leaseOwner"] is None
+    assert failed_job["leaseExpiresAt"] is None
+    assert failed_job["error"]["code"] == "no_credential"
+    assert failed_job["error"]["nextAction"] == "reconnect"
+    assert [event["eventType"] for event in body["jobs"][0]["events"]] == [
+        "sync.job_queued",
+        "sync.job_claimed",
+        "sync.job_failed",
+    ]
+    saved = store.get_sync_job(job["id"])
+    assert saved.status == "failed"
+    assert saved.lease_owner is None
+    source = client.get(f"/v1/sources/{source_id}").json()
+    assert source["status"] == "disconnected"
+    assert source["authStatus"] == "revoked"
+    assert source["nextAction"] == "reconnect"
+
+
 def test_rate_limited_sync_job_waits_for_retry_and_does_not_advance_cursor(
     client: TestClient,
     store: InMemoryStore,

@@ -53,6 +53,14 @@ class SyncSelectionError(RuntimeError):
         self.connector_error = connector_error
 
 
+class SyncCredentialError(RuntimeError):
+    """Raised when a durable job can no longer access an active source credential."""
+
+    def __init__(self, connector_error: ConnectorError) -> None:
+        super().__init__(connector_error.user_message)
+        self.connector_error = connector_error
+
+
 RUNNABLE_STATUSES = {SyncJobStatus.QUEUED, SyncJobStatus.RETRY_WAITING}
 
 
@@ -132,12 +140,17 @@ async def run_sync_job_once(
         cancelled = _mark_job_cancelled(store, claimed, cancelled_by=claimed.cancelled_by or worker_id)
         return SyncJobDetail(job=cancelled, events=store.list_sync_job_events(cancelled.id))
 
-    data_source = cast(DataSource, store.get_data_source(claimed.datasource_id))
-    credential = cast(ConnectorCredential, store.get_active_credential_for_source(claimed.datasource_id))
-    selection = _get_source_selection_for_sync(claimed.datasource_id, store)
-
-    running = _record_claimed_job_started(store, claimed, data_source)
     try:
+        data_source = cast(DataSource, store.get_data_source(claimed.datasource_id))
+    except NotFoundError as exc:
+        failed = _mark_job_failed_without_source(store=store, job=claimed, exc=exc)
+        return SyncJobDetail(job=failed, events=store.list_sync_job_events(failed.id))
+
+    running = claimed
+    try:
+        credential = _get_active_credential_for_sync(claimed.datasource_id, store)
+        selection = _get_source_selection_for_sync(claimed.datasource_id, store)
+        running = _record_claimed_job_started(store, claimed, data_source)
         _ensure_not_cancel_requested(store, running.id)
         selected_objects = _get_selected_provider_snapshots_for_sync(data_source.id, store)
         if not selected_objects:
@@ -497,11 +510,7 @@ def _handle_job_failure(*, store: Any, job: SyncJob, data_source: DataSource, ex
         )
         return saved
 
-    failed_status = (
-        DataSourceStatus.DEGRADED
-        if data_source.last_successful_sync_at is not None
-        else DataSourceStatus.FAILED
-    )
+    failed_status = _failed_source_status(data_source)
     failed = job.model_copy(
         update={
             "status": SyncJobStatus.FAILED,
@@ -524,7 +533,7 @@ def _handle_job_failure(*, store: Any, job: SyncJob, data_source: DataSource, ex
                     if data_source.last_successful_sync_at is not None
                     else DataSourceSyncStatus.FAILED
                 ),
-                "next_action": DataSourceNextAction.RETRY_SYNC,
+                "next_action": _data_source_next_action_from_connector_action(connector_error.next_action),
                 "last_error": ErrorInfo(code=str(connector_error.code), message=connector_error.user_message),
                 "sync_freshness_state": FreshnessState.UNKNOWN,
             },
@@ -597,6 +606,45 @@ def _mark_job_cancelled(store: Any, job: SyncJob, *, cancelled_by: str) -> SyncJ
         {"cancelledBy": cancelled_by},
     )
     log_event("sync.job_cancelled", syncJobId=saved.id, sourceId=saved.datasource_id, cancelledBy=cancelled_by)
+    return saved
+
+
+def _mark_job_failed_without_source(*, store: Any, job: SyncJob, exc: Exception) -> SyncJob:
+    now = utc_now()
+    connector_error = ConnectorError(
+        code=ConnectorErrorCode.OBJECT_NOT_FOUND,
+        user_message="The data source for this sync job no longer exists.",
+        technical_message=str(exc),
+        retryable=False,
+        next_action=ConnectorNextAction.CONTACT_ADMIN,
+    )
+    failed = job.model_copy(
+        update={
+            "status": SyncJobStatus.FAILED,
+            "finished_at": now,
+            "error": connector_error,
+            "lease_owner": None,
+            "lease_acquired_at": None,
+            "lease_expires_at": None,
+            "lease_heartbeat_at": None,
+        },
+        deep=True,
+    )
+    saved = cast(SyncJob, store.update_sync_job(failed))
+    _add_sync_job_event(
+        store,
+        saved,
+        "sync.job_failed",
+        "Sync job failed because its data source was not found.",
+        {"errorCode": str(connector_error.code), "errorType": type(exc).__name__},
+    )
+    log_event(
+        "sync.job_failed",
+        syncJobId=saved.id,
+        sourceId=saved.datasource_id,
+        provider=saved.provider,
+        errorType=type(exc).__name__,
+    )
     return saved
 
 
@@ -703,6 +751,43 @@ def _connector_error_from_exception(exc: Exception) -> ConnectorError:
         retryable=True,
         next_action=ConnectorNextAction.RETRY,
     )
+
+
+def _get_active_credential_for_sync(source_id: str, store: Any) -> ConnectorCredential:
+    try:
+        return cast(ConnectorCredential, store.get_active_credential_for_source(source_id))
+    except NotFoundError as exc:
+        raise SyncCredentialError(
+            ConnectorError(
+                code=ConnectorErrorCode.NO_CREDENTIAL,
+                user_message="No active credential exists for this source. Reconnect the source.",
+                technical_message=str(exc),
+                retryable=False,
+                next_action=ConnectorNextAction.RECONNECT,
+            )
+        ) from exc
+
+
+def _failed_source_status(data_source: DataSource) -> DataSourceStatus:
+    if data_source.status == DataSourceStatus.DISCONNECTED:
+        return DataSourceStatus.DISCONNECTED
+    if data_source.last_successful_sync_at is not None:
+        return DataSourceStatus.DEGRADED
+    return DataSourceStatus.FAILED
+
+
+def _data_source_next_action_from_connector_action(action: ConnectorNextAction) -> DataSourceNextAction:
+    if action == ConnectorNextAction.RECONNECT:
+        return DataSourceNextAction.RECONNECT
+    if action == ConnectorNextAction.GRANT_PERMISSION:
+        return DataSourceNextAction.GRANT_PERMISSION
+    if action == ConnectorNextAction.SELECT_SOURCES:
+        return DataSourceNextAction.SELECT_SOURCES
+    if action == ConnectorNextAction.TEST_CONNECTION:
+        return DataSourceNextAction.TEST_CONNECTION
+    if action in {ConnectorNextAction.RETRY, ConnectorNextAction.WAIT_AND_RETRY}:
+        return DataSourceNextAction.RETRY_SYNC
+    return DataSourceNextAction.NONE
 
 
 def _retry_delay_seconds(*, connector_error: ConnectorError, attempt_count: int) -> int:
