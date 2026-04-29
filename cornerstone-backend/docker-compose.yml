@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: cornerstone-postgres
+    environment:
+      POSTGRES_DB: cornerstone
+      POSTGRES_USER: cornerstone
+      POSTGRES_PASSWORD: cornerstone
+    ports:
+      - "5432:5432"
+    volumes:
+      - cornerstone_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cornerstone -d cornerstone"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  sync-worker:
+    image: python:3.13-slim
+    container_name: cornerstone-sync-worker
+    profiles: ["worker"]
+    working_dir: /app
+    command: >-
+      bash -lc "pip install -e '.[dev]' && python scripts/run_sync_worker.py --run-scheduler --iterations 1 --max-jobs 10"
+    environment:
+      PERSISTENCE_BACKEND: postgres
+      DATABASE_URL: postgresql+psycopg://cornerstone:cornerstone@postgres:5432/cornerstone
+      NOTION_MOCK_EXTERNAL_API: "true"
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  cornerstone_postgres_data:

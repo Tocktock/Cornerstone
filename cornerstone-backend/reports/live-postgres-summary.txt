@@ -1,0 +1,4 @@
+passed=5
+skipped=0
+failed=0
+errors=0

@@ -1,0 +1,75 @@
+$ /Users/jiyong/playground/Cornerstone/cornerstone-backend/.venv/bin/python -m alembic upgrade head
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001_postgres_persistence, postgres persistence foundation
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001_postgres_persistence, postgres persistence foundation
+INFO  [alembic.runtime.migration] Running upgrade 0001_postgres_persistence -> 0002_connector_framework, connector framework and notion skeleton persistence
+INFO  [alembic.runtime.migration] Running upgrade 0001_postgres_persistence -> 0002_connector_framework, connector framework and notion skeleton persistence
+INFO  [alembic.runtime.migration] Running upgrade 0002_connector_framework -> 0003_source_state_discovery, refined source runtime state and provider discovery snapshots
+INFO  [alembic.runtime.migration] Running upgrade 0002_connector_framework -> 0003_source_state_discovery, refined source runtime state and provider discovery snapshots
+INFO  [alembic.runtime.migration] Running upgrade 0003_source_state_discovery -> 0004_generic_ingestion_contract, generic connector ingestion contract
+INFO  [alembic.runtime.migration] Running upgrade 0003_source_state_discovery -> 0004_generic_ingestion_contract, generic connector ingestion contract
+INFO  [alembic.runtime.migration] Running upgrade 0004_generic_ingestion_contract -> 0005_durable_sync_worker, durable sync worker runtime
+INFO  [alembic.runtime.migration] Running upgrade 0004_generic_ingestion_contract -> 0005_durable_sync_worker, durable sync worker runtime
+INFO  [alembic.runtime.migration] Running upgrade 0005_durable_sync_worker -> 0006_scheduled_sync_runtime, scheduled sync runtime and external worker readiness
+INFO  [alembic.runtime.migration] Running upgrade 0005_durable_sync_worker -> 0006_scheduled_sync_runtime, scheduled sync runtime and external worker readiness
+INFO  [alembic.runtime.migration] Running upgrade 0006_scheduled_sync_runtime -> 0007_provider_object_ingestion_support, provider object ingestion support metadata
+INFO  [alembic.runtime.migration] Running upgrade 0006_scheduled_sync_runtime -> 0007_provider_object_ingestion_support, provider object ingestion support metadata
+INFO  [alembic.runtime.migration] Running upgrade 0007_provider_object_ingestion_support -> 0008_worker_lease_primitives, sync worker lease and scheduled enqueue idempotency primitives
+INFO  [alembic.runtime.migration] Running upgrade 0007_provider_object_ingestion_support -> 0008_worker_lease_primitives, sync worker lease and scheduled enqueue idempotency primitives
+INFO  [alembic.runtime.migration] Running upgrade 0008_worker_lease_primitives -> 0009_live_postgres_worker_concurrency, live postgres worker concurrency guardrails
+INFO  [alembic.runtime.migration] Running upgrade 0008_worker_lease_primitives -> 0009_live_postgres_worker_concurrency, live postgres worker concurrency guardrails
+INFO  [alembic.runtime.migration] Running upgrade 0009_live_postgres_worker_concurrency -> 0010_officialization_workbench, officialization workbench relations and review queue
+INFO  [alembic.runtime.migration] Running upgrade 0009_live_postgres_worker_concurrency -> 0010_officialization_workbench, officialization workbench relations and review queue
+INFO  [alembic.runtime.migration] Running upgrade 0010_officialization_workbench -> 0011_grounded_context_evaluation, grounded context evaluation framework
+INFO  [alembic.runtime.migration] Running upgrade 0010_officialization_workbench -> 0011_grounded_context_evaluation, grounded context evaluation framework
+
+
+$ /Users/jiyong/playground/Cornerstone/cornerstone-backend/.venv/bin/python scripts/check_postgres_extensions.py
+required_extensions=pgcrypto,citext,vector
+installed_extensions=citext,pgcrypto,plpgsql,vector
+
+
+$ /Users/jiyong/playground/Cornerstone/cornerstone-backend/.venv/bin/python -m pytest tests/postgres -m postgres -vv --color=no
+============================= test session starts ==============================
+platform darwin -- Python 3.14.4, pytest-9.0.3, pluggy-1.6.0 -- /Users/jiyong/playground/Cornerstone/cornerstone-backend/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/jiyong/playground/Cornerstone/cornerstone-backend
+configfile: pyproject.toml
+collecting ... 
+----------------------------- live log collection ------------------------------
+setup plugin alembic.autogenerate.schemas
+setup plugin alembic.autogenerate.tables
+setup plugin alembic.autogenerate.types
+setup plugin alembic.autogenerate.constraints
+setup plugin alembic.autogenerate.defaults
+setup plugin alembic.autogenerate.comments
+collected 5 items
+
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_extensions_and_migration_head PASSED [ 20%]
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_claims_job_once_under_concurrent_workers PASSED [ 40%]
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_expired_lease_can_be_reclaimed_once PASSED [ 60%]
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_heartbeat_requires_owner_and_extends_lease PASSED [ 80%]
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_duplicate_scheduled_enqueue_key_is_rejected PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_extensions_and_migration_head
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_claims_job_once_under_concurrent_workers
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_expired_lease_can_be_reclaimed_once
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_heartbeat_requires_owner_and_extends_lease
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_duplicate_scheduled_enqueue_key_is_rejected
+  /Users/jiyong/playground/Cornerstone/cornerstone-backend/.venv/lib/python3.14/site-packages/alembic/config.py:612: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_claims_job_once_under_concurrent_workers
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_expired_lease_can_be_reclaimed_once
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_heartbeat_requires_owner_and_extends_lease
+tests/postgres/test_live_postgres_worker_concurrency.py::test_live_postgres_duplicate_scheduled_enqueue_key_is_rejected
+  /Users/jiyong/playground/Cornerstone/cornerstone-backend/src/cornerstone/persistence/store.py:127: SAWarning: Cannot correctly sort tables; there are unresolvable cycles between tables "sync_jobs, sync_schedules", which is usually caused by mutually dependent foreign key constraints.  Foreign key constraints involving these tables will not be considered; this warning may raise an error in a future release.
+    for table in reversed(Base.metadata.sorted_tables):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /Users/jiyong/playground/Cornerstone/cornerstone-backend/reports/junit.xml -
+======================== 5 passed, 9 warnings in 0.36s =========================

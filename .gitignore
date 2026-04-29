@@ -1,87 +1,104 @@
-# Byte-compiled / optimized / DLL files
+# Cornerstone backend local/runtime ignores.
+#
+# Keep the backend release package trackable, including docs, tests, migrations,
+# scripts, and sanitized files under cornerstone-backend/reports/.
+
+# Secrets and local environment files
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Python bytecode and interpreter caches
 __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-
 # Virtual environments
-.env
-.venv
-env/
+.venv/
 venv/
+env/
 ENV/
 env.bak/
 venv.bak/
+**/.venv/
+**/venv/
+**/env/
 
-# Poetry / Hatch / Pipenv / PDM caches
-.poetry/
-.hatch/
-.pdm/
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
+# Test, lint, type-check, and coverage runtime output
 .coverage
 .coverage.*
-.cache
-pytest_cache/
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
+**/.coverage
+**/.coverage.*
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.hypothesis/
+htmlcov/
+.cache/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/htmlcov/
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# Python build and packaging output
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+pip-wheel-metadata/
+site/
 
-# pyenv
-.python-version
-
-# dotenv
-.env.local
-.env.*
-
-# VS Code
-.vscode/
-
-# macOS Finder
-.DS_Store
-
-# PyCharm
-.idea/
-
-# Local data / artifacts
+# Local databases, scratch data, and runtime files
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+/data/
 /tmp/
-*.log
-data/
+/temp/
+/var/
+/local-data/
+/cornerstone-backend/data/
+/cornerstone-backend/tmp/
+/cornerstone-backend/temp/
+/cornerstone-backend/var/
+/cornerstone-backend/local-data/
 
-# Qdrant snapshots
+# Logs and local process files
+*.log
+*.pid
+*.pid.lock
+
+# Sanitized release reports are part of the backend artifact.
+!cornerstone-backend/reports/
+!cornerstone-backend/reports/**
+
+# Docker/local service state
+.docker/
+docker-data/
+postgres-data/
+pgdata/
 qdrant_storage/
+
+# OS and editor metadata
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Tool-specific local state
+.python-version
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.serena/

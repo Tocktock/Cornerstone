@@ -1,0 +1,112 @@
+{
+  "paths": {
+    "/v1/evaluations/results": [
+      "get"
+    ],
+    "/v1/evaluations/results/{result_id}": [
+      "get"
+    ],
+    "/v1/evaluations/run": [
+      "post"
+    ],
+    "/v1/evaluations/summary": [
+      "get"
+    ],
+    "/v1/evaluations/tasks": [
+      "get",
+      "post"
+    ],
+    "/v1/evaluations/tasks/{task_id}": [
+      "get"
+    ],
+    "/v1/evaluations/tasks/{task_id}/run": [
+      "post"
+    ]
+  },
+  "schemas": {
+    "CreateGroundedContextEvalTaskRequest": [
+      "createdBy",
+      "expectedAnswerContains",
+      "expectedClarificationReduced",
+      "expectedFreshnessState",
+      "expectedTrustLabel",
+      "metadata",
+      "minEvidenceCount",
+      "name",
+      "query",
+      "requireEvidence",
+      "requireOfficialAnswer",
+      "requiredConceptIds",
+      "requiredDecisionRecordIds",
+      "requiredEvidenceFragmentIds",
+      "tags"
+    ],
+    "GroundedContextEvalMetricSummary": [
+      "citationValidityRate",
+      "evaluatedResultCount",
+      "freshnessComplianceRate",
+      "generatedAt",
+      "groundedContextTaskSuccessRate",
+      "provenanceCoverageRate",
+      "successfulResultCount",
+      "totalTaskCount",
+      "trustLabelCorrectnessRate",
+      "unsupportedAnswerCorrectnessRate"
+    ],
+    "GroundedContextEvalResult": [
+      "answer",
+      "answerCorrect",
+      "citationValidityRate",
+      "clarificationReduced",
+      "evaluatedAt",
+      "evaluatedBy",
+      "evidenceValid",
+      "failureReasons",
+      "freshnessPolicyRespected",
+      "id",
+      "provenancePresent",
+      "query",
+      "response",
+      "responseId",
+      "success",
+      "taskId",
+      "trustLabel",
+      "trustLabelCorrect",
+      "unsupportedOfficialClaim"
+    ],
+    "GroundedContextEvalRunResponse": [
+      "groundedContextTaskSuccessRate",
+      "results",
+      "successCount",
+      "totalCount"
+    ],
+    "GroundedContextEvalTask": [
+      "createdAt",
+      "createdBy",
+      "expectedAnswerContains",
+      "expectedClarificationReduced",
+      "expectedFreshnessState",
+      "expectedTrustLabel",
+      "id",
+      "metadata",
+      "minEvidenceCount",
+      "name",
+      "query",
+      "requireEvidence",
+      "requireOfficialAnswer",
+      "requiredConceptIds",
+      "requiredDecisionRecordIds",
+      "requiredEvidenceFragmentIds",
+      "tags",
+      "updatedAt"
+    ],
+    "RunGroundedContextEvalRequest": [
+      "evaluatedBy",
+      "taskIds"
+    ],
+    "RunGroundedContextEvalTaskRequest": [
+      "clarificationReduced",
+      "evaluatedBy"
+    ]
+  }
+}

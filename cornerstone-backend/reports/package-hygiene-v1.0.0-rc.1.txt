@@ -1,0 +1,13 @@
+package hygiene check for v1.0.0-rc.1
+
+__pycache__: 0
+*.pyc: 0
+*.pyo: 0
+.pytest_cache: 0
+.mypy_cache: 0
+.ruff_cache: 0
+.coverage: 0
+.venv: 0
+.env: 0
+
+package_hygiene=passed

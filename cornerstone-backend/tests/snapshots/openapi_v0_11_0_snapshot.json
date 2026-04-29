@@ -1,0 +1,345 @@
+{
+  "paths": {
+    "/v1/context/query": {
+      "get": {
+        "operationId": "query_context_v1_context_query_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroundedContextResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Query Context",
+        "tags": [
+          "context"
+        ]
+      }
+    }
+  },
+  "schemas": {
+    "CitationSupportRef": {
+      "properties": {
+        "entityId": {
+          "title": "Entityid",
+          "type": "string"
+        },
+        "entityType": {
+          "$ref": "#/components/schemas/CitationSupportType"
+        },
+        "relationship": {
+          "default": "supports",
+          "title": "Relationship",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entityType",
+        "entityId"
+      ],
+      "title": "CitationSupportRef",
+      "type": "object"
+    },
+    "CitationSupportType": {
+      "enum": [
+        "concept",
+        "concept_relation",
+        "decision_record",
+        "evidence_fragment"
+      ],
+      "title": "CitationSupportType",
+      "type": "string"
+    },
+    "ConceptRef": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/components/schemas/ConceptStatus"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "status"
+      ],
+      "title": "ConceptRef",
+      "type": "object"
+    },
+    "ConceptRelationRef": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "relationType": {
+          "$ref": "#/components/schemas/RelationType"
+        },
+        "sourceConceptId": {
+          "title": "Sourceconceptid",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/components/schemas/RelationStatus"
+        },
+        "targetConceptId": {
+          "title": "Targetconceptid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "sourceConceptId",
+        "targetConceptId",
+        "relationType",
+        "status"
+      ],
+      "title": "ConceptRelationRef",
+      "type": "object"
+    },
+    "DecisionRecordRef": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "DecisionRecordRef",
+      "type": "object"
+    },
+    "EvidenceCitation": {
+      "properties": {
+        "artifactId": {
+          "title": "Artifactid",
+          "type": "string"
+        },
+        "artifactTitle": {
+          "title": "Artifacttitle",
+          "type": "string"
+        },
+        "capturedAt": {
+          "format": "date-time",
+          "title": "Capturedat",
+          "type": "string"
+        },
+        "evidenceFragmentId": {
+          "title": "Evidencefragmentid",
+          "type": "string"
+        },
+        "freshnessState": {
+          "$ref": "#/components/schemas/FreshnessState"
+        },
+        "isValid": {
+          "default": true,
+          "title": "Isvalid",
+          "type": "boolean"
+        },
+        "sourceUpdatedAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sourceupdatedat"
+        },
+        "sourceUrl": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sourceurl"
+        },
+        "supports": {
+          "items": {
+            "$ref": "#/components/schemas/CitationSupportRef"
+          },
+          "title": "Supports",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "trustState": {
+          "$ref": "#/components/schemas/TrustState"
+        },
+        "validityErrors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Validityerrors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "evidenceFragmentId",
+        "artifactId",
+        "text",
+        "artifactTitle",
+        "capturedAt",
+        "freshnessState",
+        "trustState"
+      ],
+      "title": "EvidenceCitation",
+      "type": "object"
+    },
+    "FreshnessSummary": {
+      "properties": {
+        "staleEvidenceCount": {
+          "default": 0,
+          "title": "Staleevidencecount",
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "#/components/schemas/FreshnessState"
+        },
+        "unknownEvidenceCount": {
+          "default": 0,
+          "title": "Unknownevidencecount",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "title": "FreshnessSummary",
+      "type": "object"
+    },
+    "GroundedContextResponse": {
+      "properties": {
+        "answer": {
+          "title": "Answer",
+          "type": "string"
+        },
+        "concepts": {
+          "items": {
+            "$ref": "#/components/schemas/ConceptRef"
+          },
+          "title": "Concepts",
+          "type": "array"
+        },
+        "decisions": {
+          "items": {
+            "$ref": "#/components/schemas/DecisionRecordRef"
+          },
+          "title": "Decisions",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/components/schemas/EvidenceCitation"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "freshness": {
+          "$ref": "#/components/schemas/FreshnessSummary"
+        },
+        "generatedAt": {
+          "format": "date-time",
+          "title": "Generatedat",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "officialAnswerAvailable": {
+          "default": false,
+          "title": "Officialansweravailable",
+          "type": "boolean"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "relations": {
+          "items": {
+            "$ref": "#/components/schemas/ConceptRelationRef"
+          },
+          "title": "Relations",
+          "type": "array"
+        },
+        "responseId": {
+          "title": "Responseid",
+          "type": "string"
+        },
+        "trustLabel": {
+          "$ref": "#/components/schemas/TrustLabel"
+        }
+      },
+      "required": [
+        "query",
+        "answer",
+        "trustLabel",
+        "freshness"
+      ],
+      "title": "GroundedContextResponse",
+      "type": "object"
+    },
+    "TrustLabel": {
+      "enum": [
+        "official",
+        "evidence_supported",
+        "partially_supported",
+        "stale",
+        "conflicted",
+        "unsupported"
+      ],
+      "title": "TrustLabel",
+      "type": "string"
+    }
+  }
+}

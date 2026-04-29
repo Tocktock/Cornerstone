@@ -1,0 +1,5 @@
+release-candidate check: passed for v0.13.0
+required_docs=10
+package_hygiene=passed
+api_freeze_review=present
+live_proof_record=present
