@@ -1,0 +1,2 @@
+manual release docs verification: passed
+equivalent checks from tests/unit/test_release_candidate_docs.py: 4 passed

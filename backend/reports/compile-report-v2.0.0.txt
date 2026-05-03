@@ -1,0 +1,7 @@
+$ python -S -m compileall -q src tests scripts
+cwd=/mnt/data/pywork-v2.0.0/cornerstone-backend
+exit_code=0
+
+STDOUT:
+
+STDERR:

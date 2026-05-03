@@ -1,0 +1,95 @@
+Cornerstone v1.9.0 Verification Summary
+========================================
+
+Release: v1.9.0 — End-to-end proof and operator UX checklist
+Base: v1.8.0 — Connector-driven re-extraction
+Date: 2026-05-01
+
+Scope verified
+--------------
+- Added checklist-focused ontology proof service and API endpoint.
+- Added CLI option for running the ontology proof checklist.
+- Preserved the candidate-only extraction boundary.
+- Preserved normal review/officialization gates for Concepts and Relations.
+- Did not add UI, graph visualization, live external LLM provider, or automatic official graph mutation.
+
+Commands and results
+--------------------
+1. Syntax compilation
+   Command: python -S -m compileall -q src tests scripts
+   Result: passed
+
+2. Release candidate checker
+   Command: python -S scripts/check_release_candidate.py
+   Result: passed
+   Output:
+   release-candidate check: passed for v1.9.0
+   required_docs=60
+   package_hygiene=passed
+   api_freeze_review=present
+   live_proof_record=present
+   rc_tag_plan=present
+
+3. Release documentation tests
+   Command: PYTHONPATH="src:/opt/pyvenv/lib/python3.13/site-packages" PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -S -m pytest tests/unit/test_release_candidate_docs.py -q
+   Result: 4 passed
+
+4. Direct ontology proof service smoke test
+   Result: passed
+   Observed summary:
+   status=passed
+   required_passed=8
+   required_failed=0
+   official_graph_available=True
+   official_graph_mutated=False
+   approved_concepts=3
+   approved_relations=2
+   evaluation_success=True
+
+5. Direct ontology proof API smoke test
+   Result: passed
+   Observed summary:
+   dry_run_status_code=201
+   dry_run_status=planned
+   blocked_status_code=409
+   run_status_code=201
+   run_status=passed
+   required_passed=8
+   required_failed=0
+   official_graph_available=True
+   evaluation_success=True
+   approved_concepts=3
+   approved_relations=2
+
+Reports generated
+-----------------
+- reports/compile-report-v1.9.0.txt
+- reports/release-candidate-v1.9.0.txt
+- reports/pytest-docs-v1.9.0.txt
+- reports/ontology-proof-service-smoke-v1.9.0.txt
+- reports/ontology-proof-api-smoke-v1.9.0.txt
+- reports/v1.9.0-changed-files.txt
+
+Sandbox limitations
+-------------------
+- Full integration pytest execution for tests/integration/test_ontology_proof_api.py timed out during collection/teardown in this sandbox, while direct TestClient API smoke testing passed.
+- Full project pytest regression was not rerun for v1.9.0 in this sandbox.
+- SQLAlchemy/Alembic persistent-store regression was not required for v1.9.0 because no new persisted table or migration was added, but full persistent-store regression should still be run in a dependency-complete local environment.
+- Ruff and mypy were not executed in this sandbox.
+
+Exit criteria assessment
+------------------------
+Passed:
+- v1.9.0 version bump is present.
+- Per-version documentation exists.
+- API contract documents POST /v1/ontology/proof-runs.
+- Dry-run checklist returns planned steps and creates no data.
+- Mutation path requires confirmMutation=true.
+- Authorized reviewer gate is preserved.
+- Proof run uses source sync, re-extraction, evidence review, candidate review, official graph serving, and ontology evaluation.
+- Extraction/re-extraction does not mutate the official graph directly.
+- Official graph becomes available only after reviewed candidate approval.
+
+Decision
+--------
+Ready as a checklist-focused v1.9.0 implementation, with full dependency-complete regression recommended before production adoption.

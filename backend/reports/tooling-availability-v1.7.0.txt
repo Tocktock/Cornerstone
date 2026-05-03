@@ -1,0 +1,14 @@
+$ python - <<'PY'
+for name in ['sqlalchemy','alembic','ruff','mypy']:
+    try:
+        __import__(name)
+        print(name, 'installed')
+    except Exception as exc:
+        print(name, 'not installed:', type(exc).__name__)
+PY
+sqlalchemy not installed: ModuleNotFoundError
+alembic not installed: ModuleNotFoundError
+ruff not installed: ModuleNotFoundError
+mypy not installed: ModuleNotFoundError
+
+Persistent-store tests, Alembic offline SQL generation, Ruff, and mypy require a dependency-complete environment.

@@ -1,0 +1,9 @@
+Cornerstone v1.2.1 ontology contract docs inventory
+
+docs/36-ontology-ssot-product-contract-v1.2.1.md
+docs/37-ontology-domain-model-proposal-v1.2.1.md
+docs/38-ontology-versioned-implementation-plan-v1.2.1.md
+docs/adr/0001-ontology-official-trust-boundary.md
+docs/templates/release-doc-template.md
+docs/release/v1.2.1-ontology-contract-readiness.md
+docs/release/v1.2.1-release-notes.md

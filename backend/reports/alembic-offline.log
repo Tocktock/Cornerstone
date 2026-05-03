@@ -1,0 +1,39 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Generating static SQL
+INFO  [alembic.runtime.migration] Generating static SQL
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001_postgres_persistence, postgres persistence foundation
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001_postgres_persistence, postgres persistence foundation
+INFO  [alembic.runtime.migration] Running upgrade 0001_postgres_persistence -> 0002_connector_framework, connector framework and notion skeleton persistence
+INFO  [alembic.runtime.migration] Running upgrade 0001_postgres_persistence -> 0002_connector_framework, connector framework and notion skeleton persistence
+INFO  [alembic.runtime.migration] Running upgrade 0002_connector_framework -> 0003_source_state_discovery, refined source runtime state and provider discovery snapshots
+INFO  [alembic.runtime.migration] Running upgrade 0002_connector_framework -> 0003_source_state_discovery, refined source runtime state and provider discovery snapshots
+INFO  [alembic.runtime.migration] Running upgrade 0003_source_state_discovery -> 0004_generic_ingestion_contract, generic connector ingestion contract
+INFO  [alembic.runtime.migration] Running upgrade 0003_source_state_discovery -> 0004_generic_ingestion_contract, generic connector ingestion contract
+INFO  [alembic.runtime.migration] Running upgrade 0004_generic_ingestion_contract -> 0005_durable_sync_worker, durable sync worker runtime
+INFO  [alembic.runtime.migration] Running upgrade 0004_generic_ingestion_contract -> 0005_durable_sync_worker, durable sync worker runtime
+INFO  [alembic.runtime.migration] Running upgrade 0005_durable_sync_worker -> 0006_scheduled_sync_runtime, scheduled sync runtime and external worker readiness
+INFO  [alembic.runtime.migration] Running upgrade 0005_durable_sync_worker -> 0006_scheduled_sync_runtime, scheduled sync runtime and external worker readiness
+INFO  [alembic.runtime.migration] Running upgrade 0006_scheduled_sync_runtime -> 0007_provider_object_ingestion_support, provider object ingestion support metadata
+INFO  [alembic.runtime.migration] Running upgrade 0006_scheduled_sync_runtime -> 0007_provider_object_ingestion_support, provider object ingestion support metadata
+INFO  [alembic.runtime.migration] Running upgrade 0007_provider_object_ingestion_support -> 0008_worker_lease_primitives, sync worker lease and scheduled enqueue idempotency primitives
+INFO  [alembic.runtime.migration] Running upgrade 0007_provider_object_ingestion_support -> 0008_worker_lease_primitives, sync worker lease and scheduled enqueue idempotency primitives
+INFO  [alembic.runtime.migration] Running upgrade 0008_worker_lease_primitives -> 0009_live_postgres_worker_concurrency, live postgres worker concurrency guardrails
+INFO  [alembic.runtime.migration] Running upgrade 0008_worker_lease_primitives -> 0009_live_postgres_worker_concurrency, live postgres worker concurrency guardrails
+INFO  [alembic.runtime.migration] Running upgrade 0009_live_postgres_worker_concurrency -> 0010_officialization_workbench, officialization workbench relations and review queue
+INFO  [alembic.runtime.migration] Running upgrade 0009_live_postgres_worker_concurrency -> 0010_officialization_workbench, officialization workbench relations and review queue
+INFO  [alembic.runtime.migration] Running upgrade 0010_officialization_workbench -> 0011_grounded_context_evaluation, grounded context evaluation framework
+INFO  [alembic.runtime.migration] Running upgrade 0010_officialization_workbench -> 0011_grounded_context_evaluation, grounded context evaluation framework
+INFO  [alembic.runtime.migration] Running upgrade 0011_grounded_context_evaluation -> 0012_concept_aliases_ontology_graph, concept aliases for ontology graph search
+INFO  [alembic.runtime.migration] Running upgrade 0011_grounded_context_evaluation -> 0012_concept_aliases_ontology_graph, concept aliases for ontology graph search
+INFO  [alembic.runtime.migration] Running upgrade 0012_concept_aliases_ontology_graph -> 0013_ontology_extraction_candidates, ontology extraction candidate persistence
+INFO  [alembic.runtime.migration] Running upgrade 0012_concept_aliases_ontology_graph -> 0013_ontology_extraction_candidates, ontology extraction candidate persistence
+INFO  [alembic.runtime.migration] Running upgrade 0013_ontology_extraction_candidates -> 0014_ontology_candidate_review_workflow, ontology candidate review workflow
+INFO  [alembic.runtime.migration] Running upgrade 0013_ontology_extraction_candidates -> 0014_ontology_candidate_review_workflow, ontology candidate review workflow
+INFO  [alembic.runtime.migration] Running upgrade 0014_ontology_candidate_review_workflow -> 0015_ontology_graph_evaluation, ontology graph evaluation framework
+INFO  [alembic.runtime.migration] Running upgrade 0014_ontology_candidate_review_workflow -> 0015_ontology_graph_evaluation, ontology graph evaluation framework
+INFO  [alembic.runtime.migration] Running upgrade 0015_ontology_graph_evaluation -> 0016_ontology_reextraction_runs, connector driven ontology re-extraction runs
+INFO  [alembic.runtime.migration] Running upgrade 0015_ontology_graph_evaluation -> 0016_ontology_reextraction_runs, connector driven ontology re-extraction runs
+Alembic offline SQL rendered

@@ -1,0 +1,24 @@
+# v1.6.0 Verification Summary
+
+## Commands run
+
+```text
+python -S -m compileall -q src tests scripts -> passed
+python -S scripts/check_release_candidate.py -> passed for v1.6.0
+direct service smoke: official settlement explainable graph -> passed
+direct service smoke: pending candidate summary without promotion -> passed
+manual unit verification: 6 checks -> passed
+```
+
+## Environment limitation
+
+The sandbox default Python site initialization hangs on normal pytest/TestClient execution, so full pytest, Ruff, mypy, and OpenAPI/TestClient checks were not fully executed here. Ruff and mypy modules are not installed in the sandbox. Compile, release-candidate static checks, direct service smoke tests, and manual unit-document checks passed under python -S.
+
+## Trust boundary check
+
+```text
+- Official graph mode remains candidate-free.
+- CandidateSummary reports pending candidates without promotion.
+- Graph serving does not call an LLM.
+- Graph depth remains max 1.
+```

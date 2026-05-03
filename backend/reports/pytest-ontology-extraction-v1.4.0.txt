@@ -1,0 +1,114 @@
+exit_code=1
+STDOUT:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.5', 'Platform': 'Linux-4.4.0-x86_64-with-glibc2.41', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'cov': '7.0.0', 'metadata': '3.1.1', 'ddtrace': '4.4.0', 'Faker': '40.1.2', 'asyncio': '1.3.0', 'json-report': '1.5.0', 'anyio': '4.12.1'}, 'PLATFORM': 'linux/amd64', 'CI': 'true'}
+rootdir: /mnt/data/cornerstone_v140_final/cornerstone-backend
+configfile: pyproject.toml
+plugins: cov-7.0.0, metadata-3.1.1, ddtrace-4.4.0, Faker-40.1.2, asyncio-1.3.0, json-report-1.5.0, anyio-4.12.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+[1mcollecting ... [0mcollected 5 items
+
+tests/integration/test_ontology_extraction_api.py::test_ontology_extraction_run_creates_candidate_only_concepts_and_relations 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Ontology Extraction","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"444090a4-dc72-459c-8c36-a0922c66b61f","sourceName":"Ontology Extraction","sourceType":"manual","status":"connected"}
+{"durationMs":5.84,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"93c85f60-66ea-491a-8a06-2d64aa0eaa3e","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"manual_source.text_upload_requested","objectCount":1,"schemaVersion":1,"sourceId":"444090a4-dc72-459c-8c36-a0922c66b61f"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"444090a4-dc72-459c-8c36-a0922c66b61f","sourceType":"manual","startedAt":"2026-04-30T09:46:26.501829+00:00"}
+{"artifactId":"de155d6b-e17b-4d83-b073-75aa9417a035","event":"artifact.extracted","evidenceFragmentCount":3,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"manual-upload:text:Settlement Notes","sourceId":"444090a4-dc72-459c-8c36-a0922c66b61f"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":3,"freshnessState":"fresh","schemaVersion":1,"sourceId":"444090a4-dc72-459c-8c36-a0922c66b61f","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":3}
+{"durationMs":10.33,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/444090a4-dc72-459c-8c36-a0922c66b61f/uploads/text","requestId":"ecdcd443-1d66-41ff-8509-40451d3bced1","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/444090a4-dc72-459c-8c36-a0922c66b61f/uploads/text "HTTP/1.1 200 OK"
+{"conceptCandidateCount":3,"event":"ontology.extraction_run_created","provider":"local_rule_based","relationCandidateCount":2,"runId":"cf3a2b5d-3901-4e3a-b7c9-340c07704492","schemaVersion":1}
+{"durationMs":35.43,"event":"http.request.completed","method":"POST","path":"/v1/ontology/extraction-runs","requestId":"ad450beb-e936-40cb-920b-88d7f25e8f84","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/ontology/extraction-runs "HTTP/1.1 201 Created"
+{"depth":1,"edgeCount":0,"event":"ontology.graph_served","mode":"official","nodeCount":0,"query":"settlement","schemaVersion":1,"trustLabel":"unsupported"}
+{"durationMs":4.18,"event":"http.request.completed","method":"GET","path":"/v1/ontology/graph","requestId":"3c02e4bf-7363-4135-a2eb-15abb76a278b","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/graph?concept=settlement "HTTP/1.1 200 OK"
+[32mPASSED[0m[32m                                                                   [ 20%][0m
+tests/integration/test_ontology_extraction_api.py::test_ontology_extraction_run_can_be_read_and_candidates_listed 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Ontology Extraction","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"2eb8745d-6afc-4e7c-b1b3-297fec547258","sourceName":"Ontology Extraction","sourceType":"manual","status":"connected"}
+{"durationMs":5.39,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"5a9f0c0d-1998-49d8-a7d8-477f1cf43006","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"manual_source.text_upload_requested","objectCount":1,"schemaVersion":1,"sourceId":"2eb8745d-6afc-4e7c-b1b3-297fec547258"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"2eb8745d-6afc-4e7c-b1b3-297fec547258","sourceType":"manual","startedAt":"2026-04-30T09:46:26.793872+00:00"}
+{"artifactId":"91f2036e-17bb-4cbd-97fa-236af5763a4c","event":"artifact.extracted","evidenceFragmentCount":3,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"manual-upload:text:Settlement Notes","sourceId":"2eb8745d-6afc-4e7c-b1b3-297fec547258"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":3,"freshnessState":"fresh","schemaVersion":1,"sourceId":"2eb8745d-6afc-4e7c-b1b3-297fec547258","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":3}
+{"durationMs":8.49,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/2eb8745d-6afc-4e7c-b1b3-297fec547258/uploads/text","requestId":"89ea2ba3-5667-476c-98ba-d3739ef154d2","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/2eb8745d-6afc-4e7c-b1b3-297fec547258/uploads/text "HTTP/1.1 200 OK"
+{"conceptCandidateCount":3,"event":"ontology.extraction_run_created","provider":"local_rule_based","relationCandidateCount":2,"runId":"1adaa403-e6e7-4e29-8b1d-1cf575bb5e9a","schemaVersion":1}
+{"durationMs":43.71,"event":"http.request.completed","method":"POST","path":"/v1/ontology/extraction-runs","requestId":"7d41acd7-49bf-4011-b197-0e33c1894062","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/ontology/extraction-runs "HTTP/1.1 201 Created"
+{"durationMs":4.16,"event":"http.request.completed","method":"GET","path":"/v1/ontology/extraction-runs/1adaa403-e6e7-4e29-8b1d-1cf575bb5e9a","requestId":"c250eb08-a8df-4267-a373-82f53e81aa2f","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/extraction-runs/1adaa403-e6e7-4e29-8b1d-1cf575bb5e9a "HTTP/1.1 200 OK"
+{"durationMs":3.68,"event":"http.request.completed","method":"GET","path":"/v1/ontology/concept-candidates","requestId":"22ea43ac-dc2c-49dc-b7f9-33d06d3e27d3","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/concept-candidates?runId=1adaa403-e6e7-4e29-8b1d-1cf575bb5e9a&status=pending "HTTP/1.1 200 OK"
+{"durationMs":4.14,"event":"http.request.completed","method":"GET","path":"/v1/ontology/relation-candidates","requestId":"efa7e61d-4df3-420d-9a94-4cce278f7fde","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/relation-candidates?runId=1adaa403-e6e7-4e29-8b1d-1cf575bb5e9a&status=pending "HTTP/1.1 200 OK"
+{"durationMs":3.09,"event":"http.request.completed","method":"GET","path":"/v1/ontology/extraction-runs","requestId":"42bcc53d-7fce-4e8c-b11b-ba3db0a81296","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/extraction-runs "HTTP/1.1 200 OK"
+[32mPASSED[0m[32m                                                                   [ 40%][0m
+tests/integration/test_ontology_extraction_api.py::test_ontology_extraction_matches_existing_concept_by_name_or_alias 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Ontology Extraction","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"6ec54e86-bc5a-4e7a-9dc4-ed6978dfa30b","sourceName":"Ontology Extraction","sourceType":"manual","status":"connected"}
+{"durationMs":4.7,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"4008684d-3c73-45e5-96c4-8cd1cb64b335","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"manual_source.text_upload_requested","objectCount":1,"schemaVersion":1,"sourceId":"6ec54e86-bc5a-4e7a-9dc4-ed6978dfa30b"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"6ec54e86-bc5a-4e7a-9dc4-ed6978dfa30b","sourceType":"manual","startedAt":"2026-04-30T09:46:27.114142+00:00"}
+{"artifactId":"8f45da5d-4d77-4447-8ad4-806ff498cc6c","event":"artifact.extracted","evidenceFragmentCount":3,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"manual-upload:text:Settlement Notes","sourceId":"6ec54e86-bc5a-4e7a-9dc4-ed6978dfa30b"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":3,"freshnessState":"fresh","schemaVersion":1,"sourceId":"6ec54e86-bc5a-4e7a-9dc4-ed6978dfa30b","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":3}
+{"durationMs":9.97,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/6ec54e86-bc5a-4e7a-9dc4-ed6978dfa30b/uploads/text","requestId":"8a96d815-ccc8-44d6-b131-84322cea12c6","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/6ec54e86-bc5a-4e7a-9dc4-ed6978dfa30b/uploads/text "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"7707391c-ba26-41cf-9200-65dac331bb42","conceptId":"acb12139-4b16-45a2-b9a6-cb67576eb80d","decisionRecordCount":0,"event":"concept.created","evidenceFragmentCount":1,"name":"Settlement","schemaVersion":1,"status":"candidate"}
+{"durationMs":5.86,"event":"http.request.completed","method":"POST","path":"/v1/concepts","requestId":"0810b1c6-a177-421e-ac53-64462c325bd8","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concepts "HTTP/1.1 201 Created"
+{"conceptCandidateCount":3,"event":"ontology.extraction_run_created","provider":"local_rule_based","relationCandidateCount":2,"runId":"bfd67815-873c-4515-a4fc-883211e7af7e","schemaVersion":1}
+{"durationMs":5.97,"event":"http.request.completed","method":"POST","path":"/v1/ontology/extraction-runs","requestId":"95c7f1d7-5e2a-4c5f-bfdd-7b1846dac2ce","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/ontology/extraction-runs "HTTP/1.1 201 Created"
+[32mPASSED[0m[32m                                                                   [ 60%][0m
+tests/integration/test_ontology_extraction_api.py::test_ontology_extraction_rejects_empty_scope 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"durationMs":3.18,"event":"http.request.completed","method":"POST","path":"/v1/ontology/extraction-runs","requestId":"541be9d6-1121-414b-8f9c-033573a7b694","schemaVersion":1,"statusCode":422}
+HTTP Request: POST http://testserver/v1/ontology/extraction-runs "HTTP/1.1 422 Unprocessable Entity"
+[32mPASSED[0m[32m                                                                   [ 80%][0m
+tests/integration/test_ontology_extraction_api.py::test_ontology_extraction_candidates_round_trip_in_persistent_store [31mERROR[0m[31m [100%][0m
+
+==================================== ERRORS ====================================
+[31m[1m_ ERROR at setup of test_ontology_extraction_candidates_round_trip_in_persistent_store _[0m
+[1m[31m/opt/pyvenv/lib/python3.13/site-packages/pytest_asyncio/plugin.py[0m:728: in pytest_fixture_setup
+    [0m[94mreturn[39;49;00m ([94myield[39;49;00m)[90m[39;49;00m
+            ^^^^^[90m[39;49;00m
+[1m[31mtests/conftest.py[0m:37: in sqlite_persistent_store
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96msqlalchemy[39;49;00m[90m [39;49;00m[94mimport[39;49;00m create_engine[90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'sqlalchemy'[0m
+- generated xml file: /mnt/data/cornerstone_v140_final/cornerstone-backend/reports/junit.xml -
+[36m[1m=========================== short test summary info ============================[0m
+[31mERROR[0m tests/integration/test_ontology_extraction_api.py::[1mtest_ontology_extraction_candidates_round_trip_in_persistent_store[0m - ModuleNotFoundError: No module named 'sqlalchemy'
+[31m========================== [32m4 passed[0m, [31m[1m1 error[0m[31m in 3.98s[0m[31m ==========================[0m
+
+STDERR:
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/generated/interface/models.py", line 35986, in hydrate_crdt_from_proto
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/client.py", line 150, in call
+presentation_artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+

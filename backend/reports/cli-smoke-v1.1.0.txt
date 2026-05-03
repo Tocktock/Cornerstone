@@ -1,0 +1,50 @@
+1.1.0
+DRY RUN: docker compose up -d postgres
+DRY RUN: alembic upgrade head
+DRY RUN: python scripts/run_sync_worker.py --once --run-scheduler --max-jobs 2
+{
+  "checks": [
+    {
+      "detail": "3.11.8",
+      "name": "python",
+      "ok": false,
+      "required": true
+    },
+    {
+      "detail": "not found",
+      "name": "docker",
+      "ok": false,
+      "required": true
+    },
+    {
+      "detail": "/usr/bin/git",
+      "name": "git",
+      "ok": true,
+      "required": true
+    },
+    {
+      "detail": "not found",
+      "name": "jq",
+      "ok": false,
+      "required": false
+    },
+    {
+      "detail": "/mnt/data/cornerstone_cli_work/cornerstone-backend/pyproject.toml",
+      "name": "pyproject",
+      "ok": true,
+      "required": true
+    },
+    {
+      "detail": "/mnt/data/cornerstone_cli_work/cornerstone-backend/alembic.ini",
+      "name": "alembic",
+      "ok": true,
+      "required": true
+    },
+    {
+      "detail": "/mnt/data/cornerstone_cli_work/cornerstone-backend/docker-compose.yml",
+      "name": "docker_compose",
+      "ok": true,
+      "required": true
+    },
+    {
+      "detail": "/mnt/data/cornerstone_cli_work/cor

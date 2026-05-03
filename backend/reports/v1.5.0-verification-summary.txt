@@ -1,0 +1,67 @@
+Cornerstone v1.5.0 Verification Summary
+=======================================
+
+Release theme
+-------------
+Ontology Candidate Review Workflow.
+
+Goal
+----
+Implement the human review layer that lets authorized reviewers edit, approve, reject, or merge ConceptCandidates and RelationCandidates created by v1.4.0 extraction runs.
+
+Trust boundary verified
+-----------------------
+- LLM/extractor output remains candidate-only.
+- Only pending candidates can be reviewed.
+- Reviewer authorization is enforced in production mode.
+- Candidate approval promotes through the existing officialization gates.
+- Candidate rejection creates no official Concept or ConceptRelation.
+- Candidate merge updates an existing Concept or ConceptRelation and preserves evidence gates.
+- Unsupported candidates cannot enter the official graph.
+
+Commands run
+------------
+1. python -m compileall -q src tests scripts
+   Result: passed, exit_code=0
+
+2. python scripts/check_release_candidate.py
+   Result: passed
+   Output:
+   release-candidate check: passed for v1.5.0
+   required_docs=48
+   package_hygiene=passed
+   api_freeze_review=present
+   live_proof_record=present
+   rc_tag_plan=present
+
+3. python -m pytest tests/integration/test_ontology_candidate_review_api.py -q
+   Result: 6 passed
+
+4. python -m pytest tests/unit/test_release_candidate_docs.py -q
+   Result: 4 passed
+
+5. python -m pytest tests/integration/test_ontology_extraction_api.py tests/integration/test_ontology_api.py tests/integration/test_manual_uploads_api.py -q -k 'not persistent and not sqlalchemy'
+   Result: 14 passed, 2 deselected
+
+6. python -m ruff check <modified v1.5.0 source/test files>
+   Result: not executed; ruff is not installed in this sandbox runtime.
+
+7. python -m mypy <modified v1.5.0 source files>
+   Result: not executed; mypy is not installed in this sandbox runtime.
+
+8. python -m alembic upgrade head --sql
+   Result: not executed successfully; alembic is not installed in this sandbox runtime.
+
+Environment limitations
+-----------------------
+- SQLAlchemy and Alembic are not installed in this sandbox runtime, so persistent-store integration tests and Alembic offline SQL generation were not executed here.
+- Ruff and mypy are not installed in this sandbox runtime, so static lint/type gates were not executed here.
+
+Manual proof behavior
+---------------------
+The v1.5.0 integration test exercises the settlement review loop:
+manual uploaded settlement text -> EvidenceFragments -> reviewed evidence -> ontology extraction -> ConceptCandidates and RelationCandidates -> candidate approval/merge/reject -> official Concept/Relation creation through officialization gates -> depth-1 official graph includes approved RelationCandidate edge.
+
+Verdict
+-------
+Release candidate behavior is verified for the in-memory API path and documentation gate. Persistent SQL verification should be run in a fully provisioned developer environment with SQLAlchemy/Alembic installed before production use.

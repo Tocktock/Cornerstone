@@ -1,0 +1,224 @@
+[
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "--version"
+    ],
+    "destructive": false,
+    "expected_result": "Python version is >=3.13 and <3.15.",
+    "goal": "Confirm the active interpreter satisfies the Python 3.13+ release target.",
+    "id": "V203-CMD-01-python-version",
+    "report_path": "reports/v2.0.3-python-version.txt",
+    "required_env": [],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python --version"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "-c",
+      "import importlib.util; required=['fastapi','uvicorn','pydantic','httpx','sqlalchemy','alembic','psycopg','cryptography','notion_client','googleapiclient','google.auth','multipart','pytest','coverage','ruff','mypy']; missing=[name for name in required if importlib.util.find_spec(name) is None]; assert not missing, 'missing dependency modules: '+', '.join(missing); print('dependency imports ok: '+', '.join(required))"
+    ],
+    "destructive": false,
+    "expected_result": "All required runtime/dev modules import successfully.",
+    "goal": "Confirm runtime and dev dependency modules are importable after editable install.",
+    "id": "V203-CMD-02-dependency-imports",
+    "report_path": "reports/v2.0.3-dependency-imports.txt",
+    "required_env": [],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python -c 'import importlib.util; required=['\"'\"'fastapi'\"'\"','\"'\"'uvicorn'\"'\"','\"'\"'pydantic'\"'\"','\"'\"'httpx'\"'\"','\"'\"'sqlalchemy'\"'\"','\"'\"'alembic'\"'\"','\"'\"'psycopg'\"'\"','\"'\"'cryptography'\"'\"','\"'\"'notion_client'\"'\"','\"'\"'googleapiclient'\"'\"','\"'\"'google.auth'\"'\"','\"'\"'multipart'\"'\"','\"'\"'pytest'\"'\"','\"'\"'coverage'\"'\"','\"'\"'ruff'\"'\"','\"'\"'mypy'\"'\"']; missing=[name for name in required if importlib.util.find_spec(name) is None]; assert not missing, '\"'\"'missing dependency modules: '\"'\"'+'\"'\"', '\"'\"'.join(missing); print('\"'\"'dependency imports ok: '\"'\"'+'\"'\"', '\"'\"'.join(required))'"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "-m",
+      "compileall",
+      "-q",
+      "src",
+      "tests",
+      "scripts",
+      "migrations"
+    ],
+    "destructive": false,
+    "expected_result": "exit_code=0",
+    "goal": "Compile application, test, script, and migration Python files.",
+    "id": "V203-CMD-03-compileall",
+    "report_path": "reports/v2.0.3-compileall.txt",
+    "required_env": [],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python -m compileall -q src tests scripts migrations"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "scripts/check_release_candidate.py"
+    ],
+    "destructive": false,
+    "expected_result": "exit_code=0",
+    "goal": "Run static release-candidate hygiene, version, document, and API-freeze checks.",
+    "id": "V203-CMD-04-release-candidate-check",
+    "report_path": "reports/v2.0.3-release-candidate.txt",
+    "required_env": [],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python scripts/check_release_candidate.py"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "-m",
+      "ruff",
+      "check",
+      "src",
+      "tests",
+      "migrations",
+      "scripts"
+    ],
+    "destructive": false,
+    "expected_result": "exit_code=0",
+    "goal": "Run lint and import-order checks across application, tests, migrations, and scripts.",
+    "id": "V203-CMD-05-ruff",
+    "report_path": "reports/v2.0.3-ruff.txt",
+    "required_env": [],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python -m ruff check src tests migrations scripts"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "-m",
+      "mypy",
+      "src",
+      "--show-error-codes",
+      "--no-color-output",
+      "--no-incremental",
+      "--cache-dir",
+      "reports/.mypy_cache_v2_0_3"
+    ],
+    "destructive": false,
+    "expected_result": "exit_code=0",
+    "goal": "Run strict static typing checks for application source.",
+    "id": "V203-CMD-06-mypy",
+    "report_path": "reports/v2.0.3-mypy.txt",
+    "required_env": [],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python -m mypy src --show-error-codes --no-color-output --no-incremental --cache-dir reports/.mypy_cache_v2_0_3"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "-m",
+      "alembic",
+      "upgrade",
+      "head",
+      "--sql"
+    ],
+    "destructive": false,
+    "expected_result": "exit_code=0",
+    "goal": "Render Alembic upgrade SQL to prove migration graph is syntactically reachable.",
+    "id": "V203-CMD-07-alembic-offline-sql",
+    "report_path": "reports/v2.0.3-alembic-offline.sql",
+    "required_env": [],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python -m alembic upgrade head --sql"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "-m",
+      "alembic",
+      "upgrade",
+      "head"
+    ],
+    "destructive": true,
+    "expected_result": "exit_code=0",
+    "goal": "Apply Alembic migrations to a live PostgreSQL database.",
+    "id": "V203-CMD-08-alembic-live-upgrade",
+    "report_path": "reports/v2.0.3-alembic-live-upgrade.txt",
+    "required_env": [
+      "DATABASE_URL",
+      "PERSISTENCE_BACKEND",
+      "RUN_POSTGRES_TESTS"
+    ],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python -m alembic upgrade head"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "scripts/run_live_postgres_tests.py"
+    ],
+    "destructive": true,
+    "expected_result": "exit_code=0",
+    "goal": "Run strict PostgreSQL tests with no skips when explicitly enabled.",
+    "id": "V203-CMD-09-postgres-live-tests",
+    "report_path": "reports/v2.0.3-live-postgres.txt",
+    "required_env": [
+      "DATABASE_URL",
+      "RUN_POSTGRES_TESTS"
+    ],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python scripts/run_live_postgres_tests.py"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "-m",
+      "pytest",
+      "tests",
+      "-q",
+      "--color=no"
+    ],
+    "destructive": false,
+    "expected_result": "exit_code=0",
+    "goal": "Run the full test suite after dependency installation.",
+    "id": "V203-CMD-10-full-pytest",
+    "report_path": "reports/v2.0.3-pytest-full.txt",
+    "required_env": [
+      "RUN_POSTGRES_TESTS"
+    ],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python -m pytest tests -q --color=no"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "-m",
+      "pytest",
+      "tests/integration/test_openapi_contract.py",
+      "-q",
+      "--color=no"
+    ],
+    "destructive": false,
+    "expected_result": "exit_code=0",
+    "goal": "Verify OpenAPI snapshots and public contract stability.",
+    "id": "V203-CMD-11-openapi-contract",
+    "report_path": "reports/v2.0.3-openapi-contract.txt",
+    "required_env": [],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python -m pytest tests/integration/test_openapi_contract.py -q --color=no"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "-m",
+      "pytest",
+      "tests/integration/test_ontology_proof_api.py",
+      "tests/integration/test_ontology_ssot_readiness_api.py",
+      "-q",
+      "--color=no"
+    ],
+    "destructive": false,
+    "expected_result": "exit_code=0",
+    "goal": "Verify ontology proof-loop and SSOT readiness tests through the API layer.",
+    "id": "V203-CMD-12-proof-and-readiness",
+    "report_path": "reports/v2.0.3-proof-readiness.txt",
+    "required_env": [],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python -m pytest tests/integration/test_ontology_proof_api.py tests/integration/test_ontology_ssot_readiness_api.py -q --color=no"
+  },
+  {
+    "command": [
+      "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python",
+      "-m",
+      "pytest",
+      "tests/unit/test_refactor_boundaries_v2_0_1.py",
+      "-q",
+      "--color=no"
+    ],
+    "destructive": false,
+    "expected_result": "exit_code=0",
+    "goal": "Run the duplicate-code boundary audit preserved from v2.0.1.",
+    "id": "V203-CMD-13-duplicate-audit",
+    "report_path": "reports/v2.0.3-duplicate-audit.txt",
+    "required_env": [],
+    "shellCommand": "/Users/jiyong/playground/Cornerstone/backend/.venv/bin/python -m pytest tests/unit/test_refactor_boundaries_v2_0_1.py -q --color=no"
+  }
+]

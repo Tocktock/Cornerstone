@@ -1,0 +1,50 @@
+{
+  "baseUrl": "http://localhost:8000",
+  "categories": {
+    "secret_scan": {
+      "failed": 0,
+      "passed": 1,
+      "planned": 0,
+      "skipped": 0,
+      "total": 1
+    }
+  },
+  "dryRun": false,
+  "finishedAt": "2026-05-03T11:47:57.195754Z",
+  "generatedAt": "2026-05-03T11:47:57.195745Z",
+  "query": "What is Cornerstone?",
+  "schemaVersion": 2,
+  "scope": {
+    "local": false,
+    "localTests": false,
+    "notion": false,
+    "ontologyLoop": false,
+    "postgres": false,
+    "productLoop": false,
+    "safetyChecks": false,
+    "secretScan": true,
+    "ssotReadiness": false
+  },
+  "startedAt": "2026-05-03T11:47:57.171648Z",
+  "steps": [
+    {
+      "category": "secret_scan",
+      "command": null,
+      "detail": "No Notion token pattern found.",
+      "duration_seconds": 0.024,
+      "exit_code": null,
+      "name": "secret_scan",
+      "payload": null,
+      "status": "passed"
+    }
+  ],
+  "summary": {
+    "failed": 0,
+    "passed": 1,
+    "planned": 0,
+    "skipped": 0,
+    "status": "passed",
+    "total": 1
+  },
+  "version": "2.5.0"
+}

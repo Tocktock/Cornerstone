@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/data/cornerstone_v190_work/cornerstone-backend
+configfile: pyproject.toml
+collecting ... collected 4 items
+
+tests/unit/test_release_candidate_docs.py::test_release_candidate_docs_exist_and_are_actionable PASSED [ 25%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_api_freeze_documents_removed_unsafe_routes PASSED [ 50%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_check_script_exists_and_targets_current_version PASSED [ 75%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_checker_allows_local_runtime_artifacts PASSED [100%]
+
+- generated xml file: /mnt/data/cornerstone_v190_work/cornerstone-backend/reports/junit.xml -
+============================== 4 passed in 0.13s ===============================

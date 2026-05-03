@@ -1,0 +1,40 @@
+$ /opt/pyvenv/bin/python -m cornerstone.cli setup linux --fix --dry-run
+exit=0
+
+STDOUT:
+Cornerstone local setup (linux)
+Project root: /mnt/data/cornerstone-v113-py/cornerstone-backend
+Recommended shell: bash
+Quickstart: docs/integration-starter-kit/linux-quickstart.md
+
+Prerequisites:
+- Python 3.13+
+- Docker Desktop or Docker Engine with Compose plugin
+- Git
+- Notion integration token and shared page for live Notion proof
+
+Recommended commands:
+- cornerstone doctor
+- cornerstone setup --fix
+- cornerstone stack up --migrate
+- cornerstone api --reload
+- cornerstone proof run --all --continue-on-failure --markdown
+
+Applying safe local fixes:
+- create .env from .env.example with local-safe defaults
+- ensure reports directory exists
+- mark shell scripts executable
+
+
+STDERR:
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/generated/interface/models.py", line 35986, in hydrate_crdt_from_proto
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/client.py", line 150, in call
+presentation_artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+

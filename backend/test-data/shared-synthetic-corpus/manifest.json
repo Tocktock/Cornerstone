@@ -1,0 +1,1661 @@
+{
+  "coverage": {
+    "artifactTypes": [
+      "decision_record",
+      "field_report",
+      "glossary",
+      "sop"
+    ],
+    "conceptCount": 16,
+    "documentCount": 49,
+    "expectedRelationCount": 16,
+    "sourceObjectCount": 49,
+    "totalSentences": 1449,
+    "totalWords": 18382,
+    "visibilityModes": [
+      "evidence_only",
+      "member_visible"
+    ]
+  },
+  "dataPolicy": {
+    "containsRealPeople": false,
+    "containsSecrets": false,
+    "intendedUse": "Shared project test data and demos; not normative product documentation.",
+    "publicDatasetDependency": false,
+    "syntheticOnly": true
+  },
+  "datasetId": "cornerstone-shared-synthetic-corpus-v1",
+  "description": "A synthetic, domain-specific organizational corpus for Cornerstone ingestion, evidence review, ontology extraction, graph serving, and evaluation tests.",
+  "documents": [
+    {
+      "artifactType": "glossary",
+      "documentId": "hpcc-v1-domain-glossary",
+      "expectedConcepts": [
+        "Lane Qualification",
+        "Stability Budget",
+        "Temperature Excursion",
+        "Chain of Custody",
+        "Validated Shipper",
+        "Quality Hold",
+        "Deviation Triage",
+        "CAPA",
+        "Calibration Drift",
+        "Refrigerant Conditioning",
+        "Route Risk Scoring",
+        "Release Evidence Packet",
+        "FEFO Allocation",
+        "Sensor Pairing",
+        "Quarantine Workflow",
+        "GDP Audit Readiness"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "policy",
+        "requirement"
+      ],
+      "path": "documents/000-hpcc-v1-domain-glossary.md",
+      "primaryConcept": "Domain Glossary",
+      "reviewIntent": "Use as broad concept vocabulary and alias coverage.",
+      "sentenceCount": 89,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-domain-glossary",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "glossary",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "HelioPharm Cold Chain Domain Glossary",
+      "visibility": "member_visible",
+      "wordCount": 1310
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-lane-qualification-sop",
+      "expectedConcepts": [
+        "CAPA",
+        "Lane Qualification",
+        "Route Risk Scoring"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/001-hpcc-v1-lane-qualification-sop.md",
+      "primaryConcept": "Lane Qualification",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-lane-qualification-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "logistics_control",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Lane Qualification Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 392
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-lane-qualification-decision_record",
+      "expectedConcepts": [
+        "CAPA",
+        "Lane Qualification",
+        "Route Risk Scoring"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/002-hpcc-v1-lane-qualification-decision_record.md",
+      "primaryConcept": "Lane Qualification",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-lane-qualification-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "logistics_control",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Lane Qualification Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 368
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-lane-qualification-field_report",
+      "expectedConcepts": [
+        "CAPA",
+        "Lane Qualification",
+        "Route Risk Scoring"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/003-hpcc-v1-lane-qualification-field_report.md",
+      "primaryConcept": "Lane Qualification",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-lane-qualification-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "logistics_control",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Lane Qualification Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 361
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-stability-budget-sop",
+      "expectedConcepts": [
+        "FEFO Allocation",
+        "Stability Budget",
+        "Validated Shipper"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/004-hpcc-v1-stability-budget-sop.md",
+      "primaryConcept": "Stability Budget",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 33,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-stability-budget-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_science",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Stability Budget Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 385
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-stability-budget-decision_record",
+      "expectedConcepts": [
+        "FEFO Allocation",
+        "Stability Budget",
+        "Validated Shipper"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/005-hpcc-v1-stability-budget-decision_record.md",
+      "primaryConcept": "Stability Budget",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 29,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-stability-budget-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_science",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Stability Budget Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 360
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-stability-budget-field_report",
+      "expectedConcepts": [
+        "FEFO Allocation",
+        "Stability Budget",
+        "Validated Shipper"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/006-hpcc-v1-stability-budget-field_report.md",
+      "primaryConcept": "Stability Budget",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 30,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-stability-budget-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_science",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Stability Budget Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 360
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-temperature-excursion-sop",
+      "expectedConcepts": [
+        "Calibration Drift",
+        "Deviation Triage",
+        "Quality Hold",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/007-hpcc-v1-temperature-excursion-sop.md",
+      "primaryConcept": "Temperature Excursion",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-temperature-excursion-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_event",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Temperature Excursion Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 380
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-temperature-excursion-decision_record",
+      "expectedConcepts": [
+        "Calibration Drift",
+        "Deviation Triage",
+        "Quality Hold",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/008-hpcc-v1-temperature-excursion-decision_record.md",
+      "primaryConcept": "Temperature Excursion",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-temperature-excursion-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_event",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Temperature Excursion Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 356
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-temperature-excursion-field_report",
+      "expectedConcepts": [
+        "Calibration Drift",
+        "Deviation Triage",
+        "Quality Hold",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/009-hpcc-v1-temperature-excursion-field_report.md",
+      "primaryConcept": "Temperature Excursion",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-temperature-excursion-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_event",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Temperature Excursion Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 351
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-chain-of-custody-sop",
+      "expectedConcepts": [
+        "Chain of Custody",
+        "GDP Audit Readiness",
+        "Release Evidence Packet"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/010-hpcc-v1-chain-of-custody-sop.md",
+      "primaryConcept": "Chain of Custody",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-chain-of-custody-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "compliance_record",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Chain of Custody Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 372
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-chain-of-custody-decision_record",
+      "expectedConcepts": [
+        "Chain of Custody",
+        "GDP Audit Readiness",
+        "Release Evidence Packet"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/011-hpcc-v1-chain-of-custody-decision_record.md",
+      "primaryConcept": "Chain of Custody",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-chain-of-custody-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "compliance_record",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Chain of Custody Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 349
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-chain-of-custody-field_report",
+      "expectedConcepts": [
+        "Chain of Custody",
+        "GDP Audit Readiness",
+        "Release Evidence Packet"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/012-hpcc-v1-chain-of-custody-field_report.md",
+      "primaryConcept": "Chain of Custody",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-chain-of-custody-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "compliance_record",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Chain of Custody Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 338
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-validated-shipper-sop",
+      "expectedConcepts": [
+        "Refrigerant Conditioning",
+        "Stability Budget",
+        "Validated Shipper"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/013-hpcc-v1-validated-shipper-sop.md",
+      "primaryConcept": "Validated Shipper",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-validated-shipper-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "packaging_system",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Validated Shipper Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 374
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-validated-shipper-decision_record",
+      "expectedConcepts": [
+        "Refrigerant Conditioning",
+        "Stability Budget",
+        "Validated Shipper"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/014-hpcc-v1-validated-shipper-decision_record.md",
+      "primaryConcept": "Validated Shipper",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-validated-shipper-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "packaging_system",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Validated Shipper Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 350
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-validated-shipper-field_report",
+      "expectedConcepts": [
+        "Refrigerant Conditioning",
+        "Stability Budget",
+        "Validated Shipper"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/015-hpcc-v1-validated-shipper-field_report.md",
+      "primaryConcept": "Validated Shipper",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-validated-shipper-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "packaging_system",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Validated Shipper Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 343
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-quality-hold-sop",
+      "expectedConcepts": [
+        "Quality Hold",
+        "Quarantine Workflow",
+        "Release Evidence Packet",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/016-hpcc-v1-quality-hold-sop.md",
+      "primaryConcept": "Quality Hold",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-quality-hold-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "release_control",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Quality Hold Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 380
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-quality-hold-decision_record",
+      "expectedConcepts": [
+        "Quality Hold",
+        "Quarantine Workflow",
+        "Release Evidence Packet",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/017-hpcc-v1-quality-hold-decision_record.md",
+      "primaryConcept": "Quality Hold",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-quality-hold-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "release_control",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Quality Hold Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 355
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-quality-hold-field_report",
+      "expectedConcepts": [
+        "Quality Hold",
+        "Quarantine Workflow",
+        "Release Evidence Packet",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/018-hpcc-v1-quality-hold-field_report.md",
+      "primaryConcept": "Quality Hold",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-quality-hold-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "release_control",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Quality Hold Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 349
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-deviation-triage-sop",
+      "expectedConcepts": [
+        "CAPA",
+        "Deviation Triage",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/019-hpcc-v1-deviation-triage-sop.md",
+      "primaryConcept": "Deviation Triage",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-deviation-triage-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_workflow",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Deviation Triage Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 373
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-deviation-triage-decision_record",
+      "expectedConcepts": [
+        "CAPA",
+        "Deviation Triage",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/020-hpcc-v1-deviation-triage-decision_record.md",
+      "primaryConcept": "Deviation Triage",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-deviation-triage-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_workflow",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Deviation Triage Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 347
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-deviation-triage-field_report",
+      "expectedConcepts": [
+        "CAPA",
+        "Deviation Triage",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/021-hpcc-v1-deviation-triage-field_report.md",
+      "primaryConcept": "Deviation Triage",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-deviation-triage-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_workflow",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Deviation Triage Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 339
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-capa-sop",
+      "expectedConcepts": [
+        "CAPA",
+        "Deviation Triage",
+        "Lane Qualification"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/022-hpcc-v1-capa-sop.md",
+      "primaryConcept": "CAPA",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-capa-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_system",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "CAPA Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 369
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-capa-decision_record",
+      "expectedConcepts": [
+        "CAPA",
+        "Deviation Triage",
+        "Lane Qualification"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/023-hpcc-v1-capa-decision_record.md",
+      "primaryConcept": "CAPA",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-capa-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_system",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "CAPA Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 339
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-capa-field_report",
+      "expectedConcepts": [
+        "CAPA",
+        "Deviation Triage",
+        "Lane Qualification"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/024-hpcc-v1-capa-field_report.md",
+      "primaryConcept": "CAPA",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-capa-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "quality_system",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "CAPA Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 336
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-calibration-drift-sop",
+      "expectedConcepts": [
+        "Calibration Drift",
+        "Sensor Pairing",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/025-hpcc-v1-calibration-drift-sop.md",
+      "primaryConcept": "Calibration Drift",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 33,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-calibration-drift-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "measurement_control",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Calibration Drift Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 373
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-calibration-drift-decision_record",
+      "expectedConcepts": [
+        "Calibration Drift",
+        "Sensor Pairing",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/026-hpcc-v1-calibration-drift-decision_record.md",
+      "primaryConcept": "Calibration Drift",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 29,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-calibration-drift-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "measurement_control",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Calibration Drift Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 346
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-calibration-drift-field_report",
+      "expectedConcepts": [
+        "Calibration Drift",
+        "Sensor Pairing",
+        "Temperature Excursion"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/027-hpcc-v1-calibration-drift-field_report.md",
+      "primaryConcept": "Calibration Drift",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 30,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-calibration-drift-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "measurement_control",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Calibration Drift Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 346
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-refrigerant-conditioning-sop",
+      "expectedConcepts": [
+        "Refrigerant Conditioning",
+        "Validated Shipper"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/028-hpcc-v1-refrigerant-conditioning-sop.md",
+      "primaryConcept": "Refrigerant Conditioning",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-refrigerant-conditioning-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "packaging_process",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Refrigerant Conditioning Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 367
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-refrigerant-conditioning-decision_record",
+      "expectedConcepts": [
+        "Refrigerant Conditioning",
+        "Validated Shipper"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/029-hpcc-v1-refrigerant-conditioning-decision_record.md",
+      "primaryConcept": "Refrigerant Conditioning",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-refrigerant-conditioning-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "packaging_process",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Refrigerant Conditioning Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 339
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-refrigerant-conditioning-field_report",
+      "expectedConcepts": [
+        "Refrigerant Conditioning",
+        "Validated Shipper"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/030-hpcc-v1-refrigerant-conditioning-field_report.md",
+      "primaryConcept": "Refrigerant Conditioning",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-refrigerant-conditioning-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "packaging_process",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Refrigerant Conditioning Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 336
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-route-risk-scoring-sop",
+      "expectedConcepts": [
+        "Lane Qualification",
+        "Route Risk Scoring"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/031-hpcc-v1-route-risk-scoring-sop.md",
+      "primaryConcept": "Route Risk Scoring",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-route-risk-scoring-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "risk_model",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Route Risk Scoring Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 374
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-route-risk-scoring-decision_record",
+      "expectedConcepts": [
+        "Lane Qualification",
+        "Route Risk Scoring"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/032-hpcc-v1-route-risk-scoring-decision_record.md",
+      "primaryConcept": "Route Risk Scoring",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-route-risk-scoring-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "risk_model",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Route Risk Scoring Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 349
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-route-risk-scoring-field_report",
+      "expectedConcepts": [
+        "Lane Qualification",
+        "Route Risk Scoring"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/033-hpcc-v1-route-risk-scoring-field_report.md",
+      "primaryConcept": "Route Risk Scoring",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-route-risk-scoring-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "risk_model",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Route Risk Scoring Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 338
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-release-evidence-packet-sop",
+      "expectedConcepts": [
+        "Chain of Custody",
+        "GDP Audit Readiness",
+        "Quality Hold",
+        "Release Evidence Packet"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/034-hpcc-v1-release-evidence-packet-sop.md",
+      "primaryConcept": "Release Evidence Packet",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-release-evidence-packet-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "release_record",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Release Evidence Packet Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 375
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-release-evidence-packet-decision_record",
+      "expectedConcepts": [
+        "Chain of Custody",
+        "GDP Audit Readiness",
+        "Quality Hold",
+        "Release Evidence Packet"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/035-hpcc-v1-release-evidence-packet-decision_record.md",
+      "primaryConcept": "Release Evidence Packet",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-release-evidence-packet-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "release_record",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Release Evidence Packet Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 349
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-release-evidence-packet-field_report",
+      "expectedConcepts": [
+        "Chain of Custody",
+        "GDP Audit Readiness",
+        "Quality Hold",
+        "Release Evidence Packet"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/036-hpcc-v1-release-evidence-packet-field_report.md",
+      "primaryConcept": "Release Evidence Packet",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-release-evidence-packet-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "release_record",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Release Evidence Packet Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 338
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-fefo-allocation-sop",
+      "expectedConcepts": [
+        "FEFO Allocation",
+        "Stability Budget"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/037-hpcc-v1-fefo-allocation-sop.md",
+      "primaryConcept": "FEFO Allocation",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-fefo-allocation-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "inventory_control",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "FEFO Allocation Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 372
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-fefo-allocation-decision_record",
+      "expectedConcepts": [
+        "FEFO Allocation",
+        "Stability Budget"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/038-hpcc-v1-fefo-allocation-decision_record.md",
+      "primaryConcept": "FEFO Allocation",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-fefo-allocation-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "inventory_control",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "FEFO Allocation Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 345
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-fefo-allocation-field_report",
+      "expectedConcepts": [
+        "FEFO Allocation",
+        "Stability Budget"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/039-hpcc-v1-fefo-allocation-field_report.md",
+      "primaryConcept": "FEFO Allocation",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-fefo-allocation-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "inventory_control",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "FEFO Allocation Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 336
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-sensor-pairing-sop",
+      "expectedConcepts": [
+        "Calibration Drift",
+        "Sensor Pairing"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/040-hpcc-v1-sensor-pairing-sop.md",
+      "primaryConcept": "Sensor Pairing",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-sensor-pairing-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "measurement_control",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Sensor Pairing Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 363
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-sensor-pairing-decision_record",
+      "expectedConcepts": [
+        "Calibration Drift",
+        "Sensor Pairing"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/041-hpcc-v1-sensor-pairing-decision_record.md",
+      "primaryConcept": "Sensor Pairing",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-sensor-pairing-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "measurement_control",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Sensor Pairing Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 333
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-sensor-pairing-field_report",
+      "expectedConcepts": [
+        "Calibration Drift",
+        "Sensor Pairing"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/042-hpcc-v1-sensor-pairing-field_report.md",
+      "primaryConcept": "Sensor Pairing",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-sensor-pairing-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "measurement_control",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Sensor Pairing Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 326
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-quarantine-workflow-sop",
+      "expectedConcepts": [
+        "Quality Hold",
+        "Quarantine Workflow"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/043-hpcc-v1-quarantine-workflow-sop.md",
+      "primaryConcept": "Quarantine Workflow",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-quarantine-workflow-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "inventory_control",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Quarantine Workflow Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 374
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-quarantine-workflow-decision_record",
+      "expectedConcepts": [
+        "Quality Hold",
+        "Quarantine Workflow"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/044-hpcc-v1-quarantine-workflow-decision_record.md",
+      "primaryConcept": "Quarantine Workflow",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-quarantine-workflow-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "inventory_control",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Quarantine Workflow Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 344
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-quarantine-workflow-field_report",
+      "expectedConcepts": [
+        "Quality Hold",
+        "Quarantine Workflow"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/045-hpcc-v1-quarantine-workflow-field_report.md",
+      "primaryConcept": "Quarantine Workflow",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-quarantine-workflow-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "inventory_control",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "Quarantine Workflow Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 342
+    },
+    {
+      "artifactType": "sop",
+      "documentId": "hpcc-v1-gdp-audit-readiness-sop",
+      "expectedConcepts": [
+        "Chain of Custody",
+        "GDP Audit Readiness",
+        "Release Evidence Packet"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/046-hpcc-v1-gdp-audit-readiness-sop.md",
+      "primaryConcept": "GDP Audit Readiness",
+      "reviewIntent": "Review as policy and requirement evidence before officialization.",
+      "sentenceCount": 31,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-gdp-audit-readiness-sop",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "compliance_program",
+        "sop",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "GDP Audit Readiness Control SOP",
+      "visibility": "member_visible",
+      "wordCount": 379
+    },
+    {
+      "artifactType": "decision_record",
+      "documentId": "hpcc-v1-gdp-audit-readiness-decision_record",
+      "expectedConcepts": [
+        "Chain of Custody",
+        "GDP Audit Readiness",
+        "Release Evidence Packet"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/047-hpcc-v1-gdp-audit-readiness-decision_record.md",
+      "primaryConcept": "GDP Audit Readiness",
+      "reviewIntent": "Review as decision evidence and relation justification.",
+      "sentenceCount": 27,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-gdp-audit-readiness-decision_record",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "compliance_program",
+        "decision_record",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "GDP Audit Readiness Governance Decision Record",
+      "visibility": "member_visible",
+      "wordCount": 354
+    },
+    {
+      "artifactType": "field_report",
+      "documentId": "hpcc-v1-gdp-audit-readiness-field_report",
+      "expectedConcepts": [
+        "Chain of Custody",
+        "GDP Audit Readiness",
+        "Release Evidence Packet"
+      ],
+      "expectedEvidenceTypes": [
+        "definition",
+        "requirement",
+        "policy",
+        "decision",
+        "example",
+        "open_question"
+      ],
+      "path": "documents/048-hpcc-v1-gdp-audit-readiness-field_report.md",
+      "primaryConcept": "GDP Audit Readiness",
+      "reviewIntent": "Review as evidence-only operational signal; do not officialize without corroboration.",
+      "sentenceCount": 26,
+      "sourceUpdatedAt": null,
+      "sourceUrl": "synthetic://cornerstone-shared-synthetic-corpus-v1/hpcc-v1-gdp-audit-readiness-field_report",
+      "tags": [
+        "temperature-controlled specialty pharmacy logistics",
+        "compliance_program",
+        "field_report",
+        "synthetic",
+        "not-public-data"
+      ],
+      "title": "GDP Audit Readiness Field Evidence Report",
+      "visibility": "evidence_only",
+      "wordCount": 348
+    }
+  ],
+  "domain": "temperature-controlled specialty pharmacy logistics",
+  "files": {
+    "documentsDirectory": "documents",
+    "evaluationTasks": "evaluation_tasks.json",
+    "expectedOntology": "expected_ontology.json",
+    "sourceObjectsJsonl": "source_objects.jsonl"
+  },
+  "generatedAt": "2026-05-03",
+  "organization": "HelioPharm Cold Chain Operations",
+  "version": "1.0.0"
+}

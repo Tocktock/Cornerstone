@@ -1,0 +1,149 @@
+$ python -m pytest tests/integration/test_evaluations_api.py tests/unit/test_evaluation.py -q -k 'not persistent'
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.5', 'Platform': 'Linux-4.4.0-x86_64-with-glibc2.41', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'metadata': '3.1.1', 'cov': '7.0.0', 'anyio': '4.12.1', 'asyncio': '1.3.0', 'ddtrace': '4.4.0', 'json-report': '1.5.0', 'Faker': '40.1.2'}, 'PLATFORM': 'linux/amd64', 'CI': 'true'}
+rootdir: /mnt/data/cs_v17/cornerstone-backend
+configfile: pyproject.toml
+plugins: metadata-3.1.1, cov-7.0.0, anyio-4.12.1, asyncio-1.3.0, ddtrace-4.4.0, json-report-1.5.0, Faker-40.1.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 16 items / 1 deselected / 15 selected
+
+tests/integration/test_evaluations_api.py::test_evaluation_task_run_succeeds_for_official_grounded_context 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Pilot Domain","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"1ae73c34-84c2-4340-83cd-61ab273fdaa8","sourceName":"Pilot Domain","sourceType":"manual","status":"connected"}
+{"durationMs":24.56,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"21710d54-d3ca-43a5-a37a-07cb7914c9ef","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"1ae73c34-84c2-4340-83cd-61ab273fdaa8","sourceType":"manual","startedAt":"2026-05-01T04:04:55.135736+00:00"}
+{"artifactId":"bb678c53-4316-4e11-9dae-63ec76674773","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"doc-1","sourceId":"1ae73c34-84c2-4340-83cd-61ab273fdaa8"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"1ae73c34-84c2-4340-83cd-61ab273fdaa8","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":6.08,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/1ae73c34-84c2-4340-83cd-61ab273fdaa8/sync","requestId":"57ae9e09-5e6b-4e54-a9af-21112a85d49c","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/1ae73c34-84c2-4340-83cd-61ab273fdaa8/sync "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"1a937a8e-16b8-4b7a-b68f-cea403767567","event":"evidence.reviewed","evidenceFragmentId":"3e1f50f8-cacb-4157-b6df-a6f8a12e5176","schemaVersion":1,"trustState":"reviewed"}
+{"durationMs":4.5,"event":"http.request.completed","method":"POST","path":"/v1/evidence/3e1f50f8-cacb-4157-b6df-a6f8a12e5176/review","requestId":"6c085465-0667-4aa4-829b-e3d8c4bccb87","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evidence/3e1f50f8-cacb-4157-b6df-a6f8a12e5176/review "HTTP/1.1 200 OK"
+-------------------------------- live log call ---------------------------------
+{"actor":"reviewer@example.com","auditEventId":"fbfc2349-8834-4a6e-869c-0e7eeefdb4a0","conceptId":"4b564a4b-053d-46ea-8a61-3a00829a9f49","decisionRecordCount":0,"event":"concept.created","evidenceFragmentCount":1,"name":"Cornerstone","schemaVersion":1,"status":"candidate"}
+{"durationMs":4.15,"event":"http.request.completed","method":"POST","path":"/v1/concepts","requestId":"473bd7d1-f499-4080-b563-94648b8c6a8b","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concepts "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptId":"4b564a4b-053d-46ea-8a61-3a00829a9f49","decisionRecordCount":0,"event":"concept.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"3bbb4468-0f6b-4b72-928a-2ee153c38878","conceptId":"4b564a4b-053d-46ea-8a61-3a00829a9f49","event":"concept.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":6.18,"event":"http.request.completed","method":"POST","path":"/v1/concepts/4b564a4b-053d-46ea-8a61-3a00829a9f49/officialize","requestId":"606e5fe8-6a41-4a74-b75a-205fddb110a0","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concepts/4b564a4b-053d-46ea-8a61-3a00829a9f49/officialize "HTTP/1.1 200 OK"
+{"event":"evaluation.task_created","expectedTrustLabel":"official","query":"What is Cornerstone?","schemaVersion":1,"taskId":"8a0364fb-9b9b-4352-b9b3-3e867db502cb"}
+{"durationMs":3.32,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks","requestId":"233a534f-db35-49d1-bf3d-bfe3169415f5","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/tasks "HTTP/1.1 201 Created"
+{"event":"evaluation.task_completed","resultId":"7cd4cbf3-a097-4fc8-9595-123659f29749","schemaVersion":1,"success":true,"taskId":"8a0364fb-9b9b-4352-b9b3-3e867db502cb","trustLabel":"official"}
+{"durationMs":4.97,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks/8a0364fb-9b9b-4352-b9b3-3e867db502cb/run","requestId":"c27f078c-ba44-40bc-bb78-7473fc5f4df1","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evaluations/tasks/8a0364fb-9b9b-4352-b9b3-3e867db502cb/run "HTTP/1.1 200 OK"
+{"durationMs":25.65,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/summary","requestId":"c51d26f5-c987-4b19-84c2-5e36e5fd462e","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/evaluations/summary "HTTP/1.1 200 OK"
+PASSED                                                                   [  6%]
+tests/integration/test_evaluations_api.py::test_evaluation_detects_unsupported_official_claim 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Pilot Domain","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"c154040d-c051-40f8-abc3-862b04b73696","sourceName":"Pilot Domain","sourceType":"manual","status":"connected"}
+{"durationMs":4.07,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"44e99c2d-2a3a-41e8-8ffa-48af664ec996","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"c154040d-c051-40f8-abc3-862b04b73696","sourceType":"manual","startedAt":"2026-05-01T04:04:55.324936+00:00"}
+{"artifactId":"40a8a7e2-9c06-4b7e-a9d2-18a844c609c3","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"doc-1","sourceId":"c154040d-c051-40f8-abc3-862b04b73696"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"c154040d-c051-40f8-abc3-862b04b73696","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":6.07,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/c154040d-c051-40f8-abc3-862b04b73696/sync","requestId":"811a5137-f5c0-4f56-b06e-a5b011ee2bad","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/c154040d-c051-40f8-abc3-862b04b73696/sync "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"b2bb2b4e-a98f-4199-90de-1e0e2de78806","event":"evidence.reviewed","evidenceFragmentId":"5133c07f-461a-4820-9a31-3f7025ab9291","schemaVersion":1,"trustState":"reviewed"}
+{"durationMs":4.51,"event":"http.request.completed","method":"POST","path":"/v1/evidence/5133c07f-461a-4820-9a31-3f7025ab9291/review","requestId":"c89b05e0-6f6b-4772-854d-8c998da13ed1","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evidence/5133c07f-461a-4820-9a31-3f7025ab9291/review "HTTP/1.1 200 OK"
+-------------------------------- live log call ---------------------------------
+{"actor":"reviewer@example.com","auditEventId":"9131d9b2-0184-4d7a-9057-8ab0e5e34232","conceptId":"270920b1-c1d8-49a4-8206-bd0eccfd144b","decisionRecordCount":0,"event":"concept.created","evidenceFragmentCount":1,"name":"Cornerstone","schemaVersion":1,"status":"candidate"}
+{"durationMs":3.83,"event":"http.request.completed","method":"POST","path":"/v1/concepts","requestId":"6503ec16-0915-4f0d-8ef7-d647cb3a1b61","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concepts "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptId":"270920b1-c1d8-49a4-8206-bd0eccfd144b","decisionRecordCount":0,"event":"concept.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"75d28ab0-48b0-4793-b892-832745f250d4","conceptId":"270920b1-c1d8-49a4-8206-bd0eccfd144b","event":"concept.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":4.79,"event":"http.request.completed","method":"POST","path":"/v1/concepts/270920b1-c1d8-49a4-8206-bd0eccfd144b/officialize","requestId":"0993230d-5ab1-4065-aaba-d35d583c625d","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concepts/270920b1-c1d8-49a4-8206-bd0eccfd144b/officialize "HTTP/1.1 200 OK"
+{"event":"evaluation.task_created","expectedTrustLabel":"unsupported","query":"What is Cornerstone?","schemaVersion":1,"taskId":"01da42fb-270c-499e-bfc2-9930751cf439"}
+{"durationMs":4.13,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks","requestId":"d08ad4eb-4d65-4f8c-9d49-db464803cacc","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/tasks "HTTP/1.1 201 Created"
+{"event":"evaluation.task_completed","resultId":"466030ff-6850-4cc5-8401-8ee260287277","schemaVersion":1,"success":false,"taskId":"01da42fb-270c-499e-bfc2-9930751cf439","trustLabel":"official"}
+{"durationMs":5.4,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks/01da42fb-270c-499e-bfc2-9930751cf439/run","requestId":"eadf325e-1985-4613-9b6f-5f850bd62af7","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evaluations/tasks/01da42fb-270c-499e-bfc2-9930751cf439/run "HTTP/1.1 200 OK"
+PASSED                                                                   [ 13%]
+tests/integration/test_evaluations_api.py::test_bulk_evaluation_run_and_results_filter 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"event":"evaluation.task_created","expectedTrustLabel":"unsupported","query":"What is MissingThing?","schemaVersion":1,"taskId":"1679c7fd-a88f-4e06-9be8-77bd754aa5df"}
+{"durationMs":4.76,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks","requestId":"fedeaf30-31eb-425e-8f35-a5b313d4e2da","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/tasks "HTTP/1.1 201 Created"
+{"event":"evaluation.task_created","expectedTrustLabel":"unsupported","query":"What is OtherMissingThing?","schemaVersion":1,"taskId":"152ae57f-e3ce-46e3-a757-88d1108a632b"}
+{"durationMs":4.02,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks","requestId":"5735a3d7-01aa-453a-91e4-6da274e9141a","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/tasks "HTTP/1.1 201 Created"
+{"event":"evaluation.run_completed","groundedContextTaskSuccessRate":1.0,"schemaVersion":1,"successCount":2,"totalCount":2}
+{"durationMs":4.7,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/run","requestId":"e1da85f3-08a9-43a9-9a34-50b0126797ba","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evaluations/run "HTTP/1.1 200 OK"
+{"durationMs":2.76,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/results","requestId":"23155eaf-91be-4265-be3c-cce9e24ca1fd","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/evaluations/results?taskId=1679c7fd-a88f-4e06-9be8-77bd754aa5df "HTTP/1.1 200 OK"
+PASSED                                                                   [ 20%]
+tests/integration/test_evaluations_api.py::test_evaluation_task_rejects_unsupported_with_evidence_requirement 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"durationMs":3.7,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks","requestId":"8ab84ed2-889d-4687-8f2b-3ddb534746c6","schemaVersion":1,"statusCode":422}
+HTTP Request: POST http://testserver/v1/evaluations/tasks "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 26%]
+tests/integration/test_evaluations_api.py::test_evaluation_task_rejects_vague_success_contract 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"durationMs":3.04,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks","requestId":"dbb8a474-9f9e-4b67-a934-a60c7ef38018","schemaVersion":1,"statusCode":422}
+HTTP Request: POST http://testserver/v1/evaluations/tasks "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 33%]
+tests/integration/test_evaluations_api.py::test_evaluation_task_rejects_unsupported_with_nonzero_evidence_count 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"durationMs":3.06,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks","requestId":"1ec67f68-822b-456b-add8-c27cc3266959","schemaVersion":1,"statusCode":422}
+HTTP Request: POST http://testserver/v1/evaluations/tasks "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 40%]
+tests/integration/test_evaluations_api.py::test_evaluation_task_rejects_underspecified_supported_task 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"durationMs":3.01,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks","requestId":"ac0adc1e-252a-4e06-b99f-5191dce4575f","schemaVersion":1,"statusCode":422}
+HTTP Request: POST http://testserver/v1/evaluations/tasks "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 46%]
+tests/integration/test_evaluations_api.py::test_evaluation_list_read_and_missing_routes 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"event":"evaluation.task_created","expectedTrustLabel":"unsupported","query":"What is MissingThing?","schemaVersion":1,"taskId":"0beaa3f5-5b81-4d29-9798-ffa7eadcc9c3"}
+{"durationMs":4.5,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks","requestId":"3f5a5886-0d10-4bce-97e2-1e84e6603a76","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/tasks "HTTP/1.1 201 Created"
+{"durationMs":3.0,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/tasks","requestId":"5b83db09-d0e5-4bde-b0a7-a93d5eadb042","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/evaluations/tasks "HTTP/1.1 200 OK"
+{"durationMs":2.38,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/tasks/0beaa3f5-5b81-4d29-9798-ffa7eadcc9c3","requestId":"2f2ae3f3-0f15-43dc-96a3-ea101e6575e9","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/evaluations/tasks/0beaa3f5-5b81-4d29-9798-ffa7eadcc9c3 "HTTP/1.1 200 OK"
+{"event":"evaluation.task_completed","resultId":"7ef44635-af54-49f2-921f-67a4e31af6e2","schemaVersion":1,"success":true,"taskId":"0beaa3f5-5b81-4d29-9798-ffa7eadcc9c3","trustLabel":"unsupported"}
+{"durationMs":4.02,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/tasks/0beaa3f5-5b81-4d29-9798-ffa7eadcc9c3/run","requestId":"d30609cb-742c-427f-ab98-33fbea2215d9","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evaluations/tasks/0beaa3f5-5b81-4d29-9798-ffa7eadcc9c3/run "HTTP/1.1 200 OK"
+{"durationMs":2.13,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/results/7ef44635-af54-49f2-921f-67a4e31af6e2","requestId":"1db2eb0b-e994-40e8-b7ca-b0c97c7c4e11","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/evaluations/results/7ef44635-af54-49f2-921f-67a4e31af6e2 "HTTP/1.1 200 OK"
+{"durationMs":1.95,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/tasks/missing-task","requestId":"a33692fa-5e43-458b-93ff-c2c3f13e284d","schemaVersion":1,"statusCode":404}
+HTTP Request: GET http://testserver/v1/evaluations/tasks/missing-task "HTTP/1.1 404 Not Found"
+{"durationMs":2.25,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/results/missing-result","requestId":"cbde18b9-d3c0-4684-b55d-c695b191d0ca","schemaVersion":1,"statusCode":404}
+HTTP Request: GET http://testserver/v1/evaluations/results/missing-result "HTTP/1.1 404 Not Found"
+PASSED                                                                   [ 53%]
+tests/unit/test_evaluation.py::test_eval_task_accepts_unsupported_without_evidence_requirement PASSED [ 60%]
+tests/unit/test_evaluation.py::test_eval_task_fails_when_expected_trust_label_is_wrong PASSED [ 66%]
+tests/unit/test_evaluation.py::test_eval_task_requires_expected_answer_text PASSED [ 73%]
+tests/unit/test_evaluation.py::test_eval_summary_computes_grounded_context_task_success_rate PASSED [ 80%]
+tests/unit/test_evaluation.py::test_store_persists_eval_tasks_and_results_in_memory PASSED [ 86%]
+tests/unit/test_evaluation.py::test_eval_task_rejects_non_unsupported_without_evidence_requirement PASSED [ 93%]
+tests/unit/test_evaluation.py::test_eval_task_rejects_vague_success_contract_in_model PASSED [100%]
+
+-- generated xml file: /mnt/data/cs_v17/cornerstone-backend/reports/junit.xml --
+======================= 15 passed, 1 deselected in 3.63s =======================
+exit_code=0

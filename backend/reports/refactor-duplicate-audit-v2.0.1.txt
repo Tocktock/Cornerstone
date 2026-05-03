@@ -1,0 +1,20 @@
+Cornerstone v2.0.1 duplicate-code audit
+
+Scope:
+- Scanned src/cornerstone/**/*.py
+- Compared AST function bodies for functions >= 5 implementation lines
+- Ignored __init__ methods
+
+Result:
+- duplicate function body groups found: 0
+- audit passed
+
+Refactor areas covered:
+- evidence support and citation provenance helpers
+- ontology depth and trust-domain constants
+- evaluation freshness/citation rules
+- sync job claimability and event construction
+- connector provider timestamp/hash/error helpers
+- source selection lookup for sync runtime and worker paths
+- live proof integer environment parsing
+- evaluation task validator delegation

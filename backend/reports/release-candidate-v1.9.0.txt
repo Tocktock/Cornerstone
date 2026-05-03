@@ -1,0 +1,6 @@
+release-candidate check: passed for v1.9.0
+required_docs=60
+package_hygiene=passed
+api_freeze_review=present
+live_proof_record=present
+rc_tag_plan=present

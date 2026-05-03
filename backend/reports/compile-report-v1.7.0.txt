@@ -1,0 +1,2 @@
+$ python -m compileall -q src tests scripts
+exit_code=0

@@ -1,0 +1,60 @@
+$ /opt/pyvenv/bin/python -m pytest tests/integration/test_ontology_ssot_readiness_api.py -q
+cwd=/mnt/data/pywork-v2.0.0/cornerstone-backend
+exit_code=0
+elapsed_seconds=20.16
+
+STDOUT:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.5', 'Platform': 'Linux-4.4.0-x86_64-with-glibc2.41', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'asyncio': '1.3.0', 'json-report': '1.5.0', 'cov': '7.0.0', 'ddtrace': '4.4.0', 'metadata': '3.1.1', 'anyio': '4.12.1', 'Faker': '40.1.2'}, 'PLATFORM': 'linux/amd64', 'CI': 'true'}
+rootdir: /mnt/data/pywork-v2.0.0/cornerstone-backend
+configfile: pyproject.toml
+plugins: asyncio-1.3.0, json-report-1.5.0, cov-7.0.0, ddtrace-4.4.0, metadata-3.1.1, anyio-4.12.1, Faker-40.1.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+[1mcollecting ... [0mcollected 2 items
+
+tests/integration/test_ontology_ssot_readiness_api.py::test_ontology_ssot_readiness_reports_not_ready_before_official_graph 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"depth":1,"event":"ontology.ssot_readiness_served","focusConcept":"settlement","mode":"official","officialGraphSafe":false,"requiredFailed":6,"schemaVersion":1,"status":"failed"}
+{"durationMs":9.31,"event":"http.request.completed","method":"GET","path":"/v1/ontology/ssot/readiness","requestId":"4069e7ef-68e5-4e53-bd21-4e4eaa7c1795","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/ssot/readiness?focusConcept=settlement "HTTP/1.1 200 OK"
+{"event":"source.listed","hasRealSources":false,"onboardingRequired":true,"productionEnabled":true,"schemaVersion":1,"sourceCount":0}
+{"durationMs":3.51,"event":"http.request.completed","method":"GET","path":"/v1/sources","requestId":"df981ac3-4411-4201-ba73-1716bfe7e694","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/sources "HTTP/1.1 200 OK"
+[32mPASSED[0m[32m                                                                   [ 50%][0m
+tests/integration/test_ontology_ssot_readiness_api.py::test_ontology_ssot_readiness_passes_after_operator_proof 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"a181cdc3-e4a4-4c40-af77-85565a4b657c","sourceType":"manual","startedAt":"2026-05-01T13:37:39.055558+00:00"}
+{"artifactId":"4fda5108-ba85-4793-8336-92cd996f8ceb","event":"artifact.extracted","evidenceFragmentCount":5,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"v1.9.0-proof-settlement","sourceId":"a181cdc3-e4a4-4c40-af77-85565a4b657c"}
+{"artifactChangedCount":0,"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":5,"freshnessState":"fresh","schemaVersion":1,"sourceId":"a181cdc3-e4a4-4c40-af77-85565a4b657c","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":5}
+{"artifactCount":1,"event":"ontology.reextraction_queued","evidenceFragmentCount":5,"runId":"e204970d-7706-47a9-880d-69f98d08bf74","schemaVersion":1,"sourceId":"a181cdc3-e4a4-4c40-af77-85565a4b657c","syncJobId":null,"trigger":"manual_upload"}
+{"conceptCandidateCount":3,"event":"ontology.reextraction_completed","extractionRunIds":["3b9a205c-32aa-4586-b420-080f2b14af11"],"officialGraphMutated":false,"relationCandidateCount":2,"runId":"e204970d-7706-47a9-880d-69f98d08bf74","schemaVersion":1}
+{"dryRun":false,"event":"ontology.proof_run_completed","focusConcept":"Settlement","officialGraphAvailable":true,"requiredFailed":0,"requiredPassed":8,"runId":"ea953d3d-82b7-4406-953c-d381c8a22fdd","schemaVersion":1,"status":"passed"}
+{"durationMs":49.0,"event":"http.request.completed","method":"POST","path":"/v1/ontology/proof-runs","requestId":"cf9c740e-0ba0-4190-85f5-d6d1d3bbfe8a","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/ontology/proof-runs "HTTP/1.1 201 Created"
+{"depth":1,"event":"ontology.ssot_readiness_served","focusConcept":"Settlement","mode":"official","officialGraphSafe":true,"requiredFailed":0,"schemaVersion":1,"status":"passed"}
+{"durationMs":14.34,"event":"http.request.completed","method":"GET","path":"/v1/ontology/ssot/readiness","requestId":"321f062f-16fc-4e9a-ac34-83347cdc0275","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/ssot/readiness?focusConcept=Settlement&depth=1&mode=official&includeGraph=true "HTTP/1.1 200 OK"
+[32mPASSED[0m[32m                                                                   [100%][0m
+
+- generated xml file: /mnt/data/pywork-v2.0.0/cornerstone-backend/reports/junit.xml -
+[32m============================== [32m[1m2 passed[0m[32m in 2.90s[0m[32m ===============================[0m
+
+
+STDERR:
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/generated/interface/models.py", line 35986, in hydrate_crdt_from_proto
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/client.py", line 150, in call
+presentation_artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+

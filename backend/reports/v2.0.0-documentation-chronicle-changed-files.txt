@@ -1,0 +1,22 @@
+Cornerstone v2.0.0 documentation chronicle changed files
+
+- README.md
+- docs/36-ontology-ssot-product-contract-v1.2.1.md
+- docs/37-ontology-domain-model-proposal-v1.2.1.md
+- docs/38-ontology-versioned-implementation-plan-v1.2.1.md
+- docs/39-ontology-graph-runtime-v1.3.0.md
+- docs/40-manual-upload-ingestion-v1.3.1.md
+- docs/41-llm-ontology-extraction-v1.4.0.md
+- docs/42-ontology-candidate-review-workflow-v1.5.0.md
+- docs/43-explainable-graph-serving-v1.6.0.md
+- docs/44-ontology-evaluation-v1.7.0.md
+- docs/45-connector-driven-reextraction-v1.8.0.md
+- docs/46-end-to-end-proof-operator-ux-v1.9.0.md
+- docs/47-ontology-ssot-release-v2.0.0.md
+- docs/48-version-chronicle-and-measurable-checklists-v2.0.0.md
+- docs/release/v2.0.0-documentation-chronicle-readiness.md
+- docs/templates/release-doc-template.md
+- reports/v2.0.0-documentation-chronicle-audit.txt
+- reports/v2.0.0-documentation-chronicle-verification-summary.txt
+- scripts/check_release_candidate.py
+- tests/unit/test_release_candidate_docs.py

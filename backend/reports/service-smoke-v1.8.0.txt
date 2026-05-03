@@ -1,0 +1,1 @@
+service smoke passed: manual source sync created one Artifact, queued one OntologyReExtractionRun, running it created ConceptCandidates and RelationCandidates, and officialGraphMutated remained false.

@@ -1,0 +1,54 @@
+Cornerstone v1.3.1 verification summary
+=======================================
+
+Release goal
+------------
+Add manual uploaded data ingestion for UTF-8 text-like files and pasted text.
+Uploaded data is normalized into existing manual SourceObject records and passed
+through the existing sync path to create Artifacts and EvidenceFragments.
+
+Non-goals preserved
+-------------------
+- No LLM ontology extraction.
+- No ConceptCandidate or RelationCandidate runtime model.
+- No automatic Concept creation.
+- No automatic ConceptRelation creation.
+- No ontology graph inference from uploaded data.
+- No PDF, Office, image, archive, or arbitrary binary parsing.
+
+Checks run
+----------
+1. compileall
+   Command: python -S -m compileall -q src tests scripts
+   Result: passed
+
+2. Manual upload integration tests
+   Command: python -m pytest tests/integration/test_manual_uploads_api.py -q
+   Result: 5 passed
+
+3. Full test suite
+   Command: python -m pytest -q
+   Result: 269 passed, 6 skipped
+   Skips: live Notion E2E and live PostgreSQL tests requiring explicit environment variables/secrets.
+
+4. Release candidate check
+   Command: python -S scripts/check_release_candidate.py
+   Result: passed for v1.3.1
+
+5. Ruff on v1.3.1 modified source/test/release-check files
+   Command: ruff check <v1.3.1 modified files>
+   Result: All checks passed.
+
+6. Alembic offline SQL generation
+   Command: python -m alembic upgrade head --sql
+   Result: passed; no v1.3.1 migration is required because this release adds no database schema change.
+
+Recorded limitation
+-------------------
+Targeted mypy verification was attempted during final packaging, but mypy did not complete in the sandbox runtime.
+This is recorded as an environment/tooling limitation. No mypy failure was observed.
+
+Important implementation boundary
+---------------------------------
+Manual upload creates uploaded_file/uploaded_text Artifacts and EvidenceFragments only.
+Those EvidenceFragments still require normal review before they can support official ontology objects.

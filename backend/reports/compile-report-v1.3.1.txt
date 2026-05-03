@@ -1,0 +1,2 @@
+compileall passed for src tests scripts
+command: python -S -m compileall -q src tests scripts

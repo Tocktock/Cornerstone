@@ -1,0 +1,105 @@
+Name                                                            Stmts   Miss Branch BrPart  Cover   Missing
+-----------------------------------------------------------------------------------------------------------
+src/cornerstone/__init__.py                                         2      0      0      0   100%
+src/cornerstone/api/__init__.py                                     0      0      0      0   100%
+src/cornerstone/api/dependencies.py                                 5      0      0      0   100%
+src/cornerstone/api/routes/__init__.py                              0      0      0      0   100%
+src/cornerstone/api/routes/artifacts.py                             9      0      0      0   100%
+src/cornerstone/api/routes/audit.py                                 9      0      0      0   100%
+src/cornerstone/api/routes/concept_relations.py                    84      2      4      0    98%   179-180
+src/cornerstone/api/routes/concepts.py                             81      5      8      1    93%   149-150, 191-199
+src/cornerstone/api/routes/connector_catalog.py                    33      2      8      0    95%   74-75
+src/cornerstone/api/routes/connectors.py                          262     43     52     13    79%   123, 127-128, 158, 176, 307-328, 364-380, 443-444, 479, 484, 566-567, 569->575, 610-620, 643, 652-653, 673-674, 695, 697, 699-701, 713
+src/cornerstone/api/routes/context.py                              14      0      0      0   100%
+src/cornerstone/api/routes/decision_records.py                     75      6      8      0    93%   123-124, 136-137, 149-150
+src/cornerstone/api/routes/evaluations.py                          94      8      0      0    91%   73-74, 93-94, 168-169, 188-189
+src/cornerstone/api/routes/evidence.py                             93     11     18      6    85%   51->53, 54, 56, 65-66, 68, 126-127, 178-179, 220, 226
+src/cornerstone/api/routes/health.py                                8      0      0      0   100%
+src/cornerstone/api/routes/integration.py                          18      2      2      0    90%   36-37
+src/cornerstone/api/routes/manual_sources.py                       74     15     16      4    79%   86-93, 131, 136, 157-164, 174-182, 246, 256-260, 269-276
+src/cornerstone/api/routes/ontology.py                            239     86      0      0    64%   80-81, 102-116, 136-137, 184, 212-213, 224-227, 256-257, 269-272, 354-355, 377-378, 395-400, 422, 448-453, 472-477, 494-508, 525-530, 547-561, 571-590
+src/cornerstone/api/routes/sources.py                              35      4      4      0    90%   109-112
+src/cornerstone/api/routes/sync_runtime.py                        120     22     14      4    81%   63-64, 89, 94, 148, 164-170, 212-213, 224-225, 237-250, 304-305, 315-316
+src/cornerstone/cli/__init__.py                                     5      0      0      0   100%
+src/cornerstone/cli/__main__.py                                     3      3      0      0     0%   1-5
+src/cornerstone/cli/commands/__init__.py                           12      0      0      0   100%
+src/cornerstone/cli/commands/completion.py                          6      0      0      0   100%
+src/cornerstone/cli/commands/concept.py                            31     16      8      1    41%   11-15, 18-23, 35, 42-47
+src/cornerstone/cli/commands/config.py                             35     13     12      3    62%   12-13, 19-21, 26-28, 34-36, 39-40
+src/cornerstone/cli/commands/context.py                            36      5     10      3    78%   16-17, 33, 38-39
+src/cornerstone/cli/commands/evaluation.py                         47     29     14      1    31%   13-26, 46, 53-63, 66-84
+src/cornerstone/cli/commands/evidence.py                           43     26     14      1    32%   14, 20-40, 43-48, 54, 57
+src/cornerstone/cli/commands/review.py                             32      1     10      5    86%   11->13, 13->15, 15->17, 23, 46->48
+src/cornerstone/cli/commands/runtime.py                           159     64     70     15    54%   29-42, 54-56, 84->89, 90-93, 95-98, 108->110, 110->112, 115, 117-118, 124->126, 127-130, 133-139, 142-143, 152->154, 154->156, 156->158, 159, 161, 165-173, 176-187
+src/cornerstone/cli/commands/source.py                             46     32     12      0    24%   17-26, 29-57, 60-62, 65-74
+src/cornerstone/cli/completion.py                                  10      2      6      2    75%   7, 27
+src/cornerstone/cli/config.py                                      58      6     14      4    86%   36-37, 39, 56, 67, 69->71, 79
+src/cornerstone/cli/main.py                                        14      5      2      0    56%   14-18
+src/cornerstone/cli/models.py                                      27      0      0      0   100%
+src/cornerstone/cli/parser.py                                     238      0      2      0   100%
+src/cornerstone/cli/proof.py                                      225     54     86     16    72%   66-81, 120, 134, 136->135, 138, 279, 321-356, 377, 452, 464-482, 495, 618-627, 638-647, 703, 715, 735, 787->799, 802-805, 813, 816->818
+src/cornerstone/cli/support.py                                    210     90     66     18    54%   21->20, 23, 30-31, 34, 43-64, 73, 79-81, 85-86, 96-97, 113-117, 126, 127->exit, 134, 136, 147, 152-160, 169-171, 174, 175->179, 178, 252, 287-303, 306, 317, 329, 338, 352, 369-389
+src/cornerstone/config.py                                         164      7     52      5    94%   126, 128, 197, 295-297, 314
+src/cornerstone/connectors/__init__.py                              0      0      0      0   100%
+src/cornerstone/connectors/base.py                                 30      5      0      0    83%   44, 47, 55, 65, 75
+src/cornerstone/connectors/catalog.py                              10      1      4      2    79%   215->214, 217
+src/cornerstone/connectors/google_drive.py                          2      0      0      0   100%
+src/cornerstone/connectors/manual.py                               25      6      2      1    74%   34, 37-38, 46-47, 97
+src/cornerstone/connectors/notion.py                                2      0      0      0   100%
+src/cornerstone/connectors/providers/__init__.py                    0      0      0      0   100%
+src/cornerstone/connectors/providers/common.py                     19      2      2      0    90%   18-19
+src/cornerstone/connectors/providers/google_drive/__init__.py       2      0      0      0   100%
+src/cornerstone/connectors/providers/google_drive/adapter.py       99     49     28      5    45%   59, 78-90, 98-117, 147-148, 169-173, 184, 186, 191, 193, 213-229, 238, 248-298, 309-310, 317-319
+src/cornerstone/connectors/providers/google_drive/gateway.py      125     74     14      0    37%   26-31, 37, 50, 53, 56, 59, 67-87, 157-158, 168, 178, 187, 190, 193, 196-205, 214-226, 231-237, 242-249, 252-259, 263-276, 286-291, 299-301
+src/cornerstone/connectors/providers/google_drive/mapper.py        65     21     34      8    57%   89-97, 105, 109, 112-118, 123, 127, 137
+src/cornerstone/connectors/providers/notion/__init__.py             3      0      0      0   100%
+src/cornerstone/connectors/providers/notion/adapter.py            115      6     38      4    93%   235-236, 292-293, 321->323, 330, 334->312, 351
+src/cornerstone/connectors/providers/notion/gateway.py            120     13     10      3    88%   41, 52, 55, 58, 68, 93, 171-172, 214, 238->240, 275-278
+src/cornerstone/connectors/providers/notion/mapper.py              77     17     40      7    73%   88, 95-96, 101-107, 117-119, 129-131, 139->138, 141
+src/cornerstone/connectors/registry.py                             22      2      6      2    86%   27, 30
+src/cornerstone/connectors/security.py                             19      2      4      2    83%   18, 24
+src/cornerstone/domain/__init__.py                                  0      0      0      0   100%
+src/cornerstone/domain/ontology.py                                 13      1      4      1    88%   28
+src/cornerstone/integration/__init__.py                             3      0      0      0   100%
+src/cornerstone/integration/client.py                              16      2      4      2    80%   61, 63
+src/cornerstone/main.py                                            48      7      8      2    80%   51-58, 95
+src/cornerstone/observability.py                                   52      2     14      2    94%   60, 107
+src/cornerstone/persistence/__init__.py                             4      0      0      0   100%
+src/cornerstone/persistence/database.py                             9      4      2      0    45%   9-12
+src/cornerstone/persistence/extensions.py                          25      1      6      1    94%   16
+src/cornerstone/persistence/models.py                             473      0      6      0   100%
+src/cornerstone/persistence/store.py                             1068    214    146     38    75%   143, 148-150, 164, 171, 194, 200-204, 212, 216-218, 229-235, 238-242, 256, 260-265, 277-278, 288, 292-297, 312-316, 328->327, 333-342, 351->353, 354, 382-383, 390, 399, 407, 424, 440-461, 475, 498->500, 513, 534, 548, 551-556, 586, 597-598, 613, 640-641, 648, 665, 688, 708->713, 718-738, 741-742, 778, 822, 831, 835-842, 852-856, 859-865, 875->877, 878, 890-894, 897-903, 913->915, 916, 930-936, 939-943, 951-958, 973, 977-981, 986, 996, 1000-1005, 1009-1013, 1016-1020, 1023-1030, 1033-1039, 1042-1046, 1049-1057, 1076-1078, 1091, 1124, 1154, 1170-1173, 1178-1192, 1200, 1204, 1690, 1709, 2122, 2149, 2176, 2205
+src/cornerstone/schemas.py                                       1578     24     64     21    97%   44, 49, 361-363, 402, 431, 433, 435, 437, 439, 451, 484, 586, 602, 604, 894, 927, 929, 1083, 1118, 1347, 1520, 1541
+src/cornerstone/services/__init__.py                                0      0      0      0   100%
+src/cornerstone/services/evaluation.py                            288     46    144     42    79%   87-90, 119, 123, 143, 259-262, 291, 299, 315, 323, 327, 409, 419, 423, 430, 434, 436, 438, 440, 442, 444, 446, 447->454, 450, 453, 467, 471, 473, 475, 477, 482->485, 484, 509, 511, 515, 519, 523, 532, 534, 536, 538, 563, 565
+src/cornerstone/services/evaluation_rules.py                       20      3      8      3    79%   22, 24, 26
+src/cornerstone/services/evidence_support.py                       76     17     24      7    76%   35->33, 46-47, 54, 56, 58, 60, 63-65, 67, 69, 72-73, 82-83, 97-98
+src/cornerstone/services/extraction.py                             36      1     18      1    96%   67
+src/cornerstone/services/freshness.py                              24      1      8      1    94%   32
+src/cornerstone/services/grounded_context.py                      230     22    116     20    87%   195-197, 221, 226->223, 255, 263->261, 270->269, 278->276, 335, 376, 378, 382, 428, 437, 438->440, 454, 458, 460, 461->463, 475, 479-481, 485-487, 489
+src/cornerstone/services/manual_uploads.py                         65     12     24      8    73%   84, 88, 94, 106, 140, 143, 171, 174-178
+src/cornerstone/services/officialization.py                       111     20     64     21    77%   50, 54, 56, 57->exit, 63, 78, 84, 89, 92, 111, 122, 125, 128, 139, 208, 214, 216, 227, 230, 233, 244
+src/cornerstone/services/ontology_extraction.py                   310     51    102     20    79%   105, 190, 200-201, 205-206, 230, 283-343, 361, 365, 434->432, 440->439, 457, 487, 511, 541-551, 566, 579->exit, 594->596, 644, 655-656, 693, 699, 704
+src/cornerstone/services/ontology_graph.py                        374     73    176     52    76%   157->178, 166-167, 266, 270, 286, 297, 301, 309, 349-369, 383-385, 387-388, 395-399, 409-411, 413-414, 420, 422, 468->466, 471, 473-475, 481-482, 529, 602, 607, 613, 619, 686, 688, 690, 692, 704, 723, 729, 733, 735, 737, 741, 743, 745, 747, 750->754, 778-779, 781-782, 807, 809, 811, 862, 947, 949, 951, 954, 959, 961, 963, 974
+src/cornerstone/services/ontology_proof.py                        223     48     66     21    72%   112-116, 119->exit, 133-141, 198, 221, 223, 229, 270, 284, 288-294, 303->282, 305-306, 310, 324, 328-333, 342->322, 344-345, 349, 366, 368, 370, 412, 577, 586-594, 598-600, 609-611, 632
+src/cornerstone/services/ontology_reextraction.py                 112     29     40      9    67%   88, 92, 114, 124, 139-148, 159-169, 223, 225-239, 244, 267-269
+src/cornerstone/services/ontology_review.py                       360    102    120     27    69%   101, 109, 150-151, 153-160, 187-188, 190-197, 204, 205->199, 233, 397->409, 431->433, 434->436, 444-487, 494-517, 544, 606-653, 662, 670-671, 682-690, 692, 729-730, 732-733, 737-738, 743-752, 760->758, 773, 788, 815, 817, 822, 844
+src/cornerstone/services/ontology_ssot_readiness.py                49      3     10      3    90%   267, 286, 288
+src/cornerstone/services/source_eligibility.py                     27      4     16      4    81%   24, 39, 56, 60
+src/cornerstone/services/source_selection.py                        9      0      0      0   100%
+src/cornerstone/services/source_sync.py                            86      4     28      6    91%   53, 109->117, 203->212, 259, 261, 263
+src/cornerstone/services/sync_jobs.py                              20      3     10      3    80%   12, 22, 26
+src/cornerstone/services/sync_scheduler.py                         93     18     22      8    77%   103-104, 114-115, 117-118, 122-123, 176-178, 211-212, 214, 216, 218, 221, 243
+src/cornerstone/services/sync_worker.py                           227     42     56     18    78%   57-58, 102, 114-115, 137-138, 149, 203-204, 318, 341-345, 365, 368-382, 406-408, 410, 431->433, 446-447, 558-611, 632-633, 634->650, 664, 683-684, 723, 749, 771, 774
+src/cornerstone/store.py                                          639     89    158     40    82%   124-147, 165, 183, 191, 197->196, 202-203, 214, 219-223, 235->237, 244, 251->250, 256-260, 274-282, 296-300, 309->311, 312, 326, 340->339, 349, 358, 364-365, 379, 397, 451, 458, 473-478, 486->485, 491-495, 522->521, 530, 551, 580, 607, 638, 646, 662, 668, 695, 701, 745, 770, 778, 789->791, 792, 818, 858, 879, 882, 885, 888, 891, 894
+src/cornerstone/verification/__init__.py                            2      0      0      0   100%
+src/cornerstone/verification/dependency_complete.py                43      0      2      0   100%
+src/cornerstone/verification/env.py                                 8      4      2      1    50%   8-11
+src/cornerstone/verification/google_drive_e2e.py                  123     58     30      7    47%   46-48, 83, 103->110, 110->117, 117->124, 124->131, 131->138, 138->145, 146, 156-158, 169-308
+src/cornerstone/verification/notion_e2e.py                        123     18     30      8    82%   46-48, 83, 146, 158, 216-219, 242-243, 245, 247, 300-301, 306, 310
+src/cornerstone/verification/postgres_ci.py                        49      6     18      4    82%   38, 45, 61-65, 76
+src/cornerstone/workers/__init__.py                                 0      0      0      0   100%
+src/cornerstone/workers/sync_worker.py                             68      9     12      3    80%   34, 81->99, 96-98, 117-121
+-----------------------------------------------------------------------------------------------------------
+TOTAL                                                           10475   1695   2252    540    80%
+Coverage failure: total of 80 is less than fail-under=85

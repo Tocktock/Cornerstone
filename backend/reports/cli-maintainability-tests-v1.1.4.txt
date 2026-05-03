@@ -1,0 +1,37 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python3
+cachedir: .pytest_cache
+rootdir: /mnt/data/cornerstone_v114_work/cornerstone-backend
+configfile: pyproject.toml
+collecting ... collected 27 items
+
+tests/unit/test_cli.py::test_cli_version_prints_package_version PASSED   [  3%]
+tests/unit/test_cli.py::test_cli_dry_run_stack_up_prints_command PASSED  [  7%]
+tests/unit/test_cli.py::test_cli_dry_run_worker_prints_command PASSED    [ 11%]
+tests/unit/test_cli.py::test_cli_doctor_json_reports_project_root PASSED [ 14%]
+tests/unit/test_cli.py::test_cli_env_init_creates_local_env PASSED       [ 18%]
+tests/unit/test_cli.py::test_cli_source_list_formats_table PASSED        [ 22%]
+tests/unit/test_cli.py::test_cli_evidence_review_posts_expected_payload PASSED [ 25%]
+tests/unit/test_cli.py::test_cli_concept_create_from_evidence_posts_expected_payload PASSED [ 29%]
+tests/unit/test_cli.py::test_cli_context_query_formats_trust_label_and_citations PASSED [ 33%]
+tests/unit/test_cli.py::test_cli_eval_create_builds_metric_safe_payload PASSED [ 37%]
+tests/unit/test_cli.py::test_cli_proof_run_dry_run_writes_consolidated_report PASSED [ 40%]
+tests/unit/test_cli.py::test_cli_proof_run_safety_checks_and_secret_scan PASSED [ 44%]
+tests/unit/test_cli.py::test_cli_proof_run_product_loop_checks PASSED    [ 48%]
+tests/unit/test_cli.py::test_cli_setup_json_reports_windows_profile PASSED [ 51%]
+tests/unit/test_cli.py::test_cli_setup_fix_dry_run_lists_safe_fixes PASSED [ 55%]
+tests/unit/test_cli.py::test_cli_doctor_fix_dry_run_includes_fixes PASSED [ 59%]
+tests/unit/test_cli.py::test_cli_local_reset_requires_confirmation PASSED [ 62%]
+tests/unit/test_cli.py::test_cli_local_reset_dry_run_prints_destructive_commands PASSED [ 66%]
+tests/unit/test_cli.py::test_cli_config_set_get_unset_with_custom_config_dir PASSED [ 70%]
+tests/unit/test_cli.py::test_cli_completion_prints_shell_scripts PASSED  [ 74%]
+tests/unit/test_cli.py::test_cli_is_split_into_maintainable_modules PASSED [ 77%]
+tests/unit/test_integration_starter_docs.py::test_cli_and_macos_starter_docs_exist PASSED [ 81%]
+tests/unit/test_integration_starter_docs.py::test_macos_scripts_are_present_and_executable PASSED [ 85%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_docs_exist_and_are_actionable PASSED [ 88%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_api_freeze_documents_removed_unsafe_routes PASSED [ 92%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_check_script_exists_and_targets_current_version PASSED [ 96%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_checker_allows_local_runtime_artifacts PASSED [100%]
+
+- generated xml file: /mnt/data/cornerstone_v114_work/cornerstone-backend/reports/junit.xml -
+============================== 27 passed in 0.40s ==============================

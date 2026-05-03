@@ -1,0 +1,50 @@
+$ /opt/pyvenv/bin/python -m pytest -q tests/unit/test_cli.py tests/unit/test_integration_starter_docs.py tests/unit/test_release_candidate_docs.py --tb=short --color=no
+exit_code=0
+
+STDOUT:
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.5', 'Platform': 'Linux-4.4.0-x86_64-with-glibc2.41', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'Faker': '40.1.2', 'cov': '7.0.0', 'anyio': '4.12.1', 'ddtrace': '4.4.0', 'metadata': '3.1.1', 'json-report': '1.5.0', 'asyncio': '1.3.0'}, 'PLATFORM': 'linux/amd64', 'CI': 'true'}
+rootdir: /mnt/data/cornerstone_v112_pywork/cornerstone-backend
+configfile: pyproject.toml
+plugins: Faker-40.1.2, cov-7.0.0, anyio-4.12.1, ddtrace-4.4.0, metadata-3.1.1, json-report-1.5.0, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 19 items
+
+tests/unit/test_cli.py::test_cli_version_prints_package_version PASSED   [  5%]
+tests/unit/test_cli.py::test_cli_dry_run_stack_up_prints_command PASSED  [ 10%]
+tests/unit/test_cli.py::test_cli_dry_run_worker_prints_command PASSED    [ 15%]
+tests/unit/test_cli.py::test_cli_doctor_json_reports_project_root PASSED [ 21%]
+tests/unit/test_cli.py::test_cli_env_init_creates_local_env PASSED       [ 26%]
+tests/unit/test_cli.py::test_cli_source_list_formats_table PASSED        [ 31%]
+tests/unit/test_cli.py::test_cli_evidence_review_posts_expected_payload PASSED [ 36%]
+tests/unit/test_cli.py::test_cli_concept_create_from_evidence_posts_expected_payload PASSED [ 42%]
+tests/unit/test_cli.py::test_cli_context_query_formats_trust_label_and_citations PASSED [ 47%]
+tests/unit/test_cli.py::test_cli_eval_create_builds_metric_safe_payload PASSED [ 52%]
+tests/unit/test_cli.py::test_cli_proof_run_dry_run_writes_consolidated_report PASSED [ 57%]
+tests/unit/test_cli.py::test_cli_proof_run_safety_checks_and_secret_scan PASSED [ 63%]
+tests/unit/test_cli.py::test_cli_proof_run_product_loop_checks PASSED    [ 68%]
+tests/unit/test_integration_starter_docs.py::test_cli_and_macos_starter_docs_exist PASSED [ 73%]
+tests/unit/test_integration_starter_docs.py::test_macos_scripts_are_present_and_executable PASSED [ 78%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_docs_exist_and_are_actionable PASSED [ 84%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_api_freeze_documents_removed_unsafe_routes PASSED [ 89%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_check_script_exists_and_targets_current_version PASSED [ 94%]
+tests/unit/test_release_candidate_docs.py::test_release_candidate_checker_allows_local_runtime_artifacts PASSED [100%]
+
+- generated xml file: /mnt/data/cornerstone_v112_pywork/cornerstone-backend/reports/junit.xml -
+============================== 19 passed in 0.23s ==============================
+
+
+STDERR:
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/generated/interface/models.py", line 35986, in hydrate_crdt_from_proto
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/client.py", line 150, in call
+presentation_artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+

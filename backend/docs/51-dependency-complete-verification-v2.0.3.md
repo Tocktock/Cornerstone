@@ -1,0 +1,214 @@
+# v2.0.3 — Dependency-Complete Verification and CI Hardening
+
+## Version goal
+
+`v2.0.3` proves that Cornerstone can be verified in a dependency-complete development or CI environment after the ontology SSOT product contract, refactor, and product documentation releases.
+
+The goal is not to add new ontology behavior. The goal is to make the existing backend easier to trust operationally:
+
+```text
+clean checkout
+→ install package with dev dependencies
+→ verify dependency imports
+→ run static release checks
+→ run compile/lint/type checks
+→ run migrations
+→ run full tests
+→ run live PostgreSQL checks
+→ run ontology proof/readiness checks
+→ collect reports
+```
+
+## Product context
+
+Cornerstone's product contract is already stable at this point:
+
+```text
+Raw documents are inputs.
+Extractor or LLM output is a proposal.
+Pending candidates are not official truth.
+The reviewed official ontology graph is the Single Source of Truth.
+```
+
+`v2.0.3` does not change that trust model. It verifies that the implementation and tooling around that trust model can be run repeatedly.
+
+## Confirmed non-goal
+
+`v2.0.3` does not add:
+
+```text
+- new public API endpoints
+- new request or response schemas
+- new database tables or migrations
+- live external LLM provider behavior
+- new connector behavior
+- new candidate review behavior
+- graph depth above 1
+- graph visualization UI
+- automatic candidate approval
+- automatic official graph mutation
+```
+
+## What changed
+
+`v2.0.3` adds a dependency-complete verification harness and CI contract.
+
+New files:
+
+```text
+src/cornerstone/verification/dependency_complete.py
+scripts/run_dependency_complete_verification.py
+scripts/run_dependency_complete_verification.sh
+.github/workflows/dependency-complete-verification.yml
+docs/51-dependency-complete-verification-v2.0.3.md
+docs/release/v2.0.3-verification-readiness.md
+docs/release/v2.0.3-release-notes.md
+```
+
+Updated files:
+
+```text
+README.md
+pyproject.toml
+src/cornerstone/__init__.py
+src/cornerstone/schemas.py
+docs/01-api-contract.md
+docs/48-version-chronicle-and-measurable-checklists-v2.0.0.md
+docs/release/api-freeze-review.md
+docs/release/known-limitations.md
+scripts/check_release_candidate.py
+tests/unit/test_release_candidate_docs.py
+tests/integration/test_ontology_ssot_readiness_api.py
+```
+
+## Dependency-complete verification harness
+
+The new command plan is defined in:
+
+```text
+src/cornerstone/verification/dependency_complete.py
+```
+
+The runner is:
+
+```bash
+python scripts/run_dependency_complete_verification.py --plan-only
+```
+
+Strict dependency-complete execution is explicit because it applies migrations and live PostgreSQL tests to `DATABASE_URL`:
+
+```bash
+RUN_POSTGRES_TESTS=1 \
+PERSISTENCE_BACKEND=postgres \
+DATABASE_URL='postgresql+psycopg://cornerstone:cornerstone@localhost:5432/cornerstone' \
+python scripts/run_dependency_complete_verification.py --strict --confirm-live-db
+```
+
+A shell wrapper is also available:
+
+```bash
+scripts/run_dependency_complete_verification.sh
+```
+
+## Command plan
+
+| ID | Goal | Report |
+|---|---|---|
+| V203-CMD-01 | Verify Python version. | `reports/v2.0.3-python-version.txt` |
+| V203-CMD-02 | Verify runtime/dev dependency imports. | `reports/v2.0.3-dependency-imports.txt` |
+| V203-CMD-03 | Compile application, tests, scripts, and migrations. | `reports/v2.0.3-compileall.txt` |
+| V203-CMD-04 | Run release-candidate checks. | `reports/v2.0.3-release-candidate.txt` |
+| V203-CMD-05 | Run Ruff. | `reports/v2.0.3-ruff.txt` |
+| V203-CMD-06 | Run mypy. | `reports/v2.0.3-mypy.txt` |
+| V203-CMD-07 | Render Alembic offline SQL. | `reports/v2.0.3-alembic-offline.sql` |
+| V203-CMD-08 | Apply Alembic upgrade to live PostgreSQL. | `reports/v2.0.3-alembic-live-upgrade.txt` |
+| V203-CMD-09 | Run strict live PostgreSQL tests. | `reports/v2.0.3-live-postgres.txt` |
+| V203-CMD-10 | Run full pytest suite. | `reports/v2.0.3-pytest-full.txt` |
+| V203-CMD-11 | Run OpenAPI contract tests. | `reports/v2.0.3-openapi-contract.txt` |
+| V203-CMD-12 | Run ontology proof and SSOT readiness API tests. | `reports/v2.0.3-proof-readiness.txt` |
+| V203-CMD-13 | Run duplicate-code boundary audit. | `reports/v2.0.3-duplicate-audit.txt` |
+
+## CI hardening
+
+A new workflow is added:
+
+```text
+.github/workflows/dependency-complete-verification.yml
+```
+
+The workflow provisions PostgreSQL with the `pgvector/pgvector:pg17` image, installs the package with dev dependencies, renders the v2.0.3 verification command plan, runs strict verification, and uploads `reports/` as a CI artifact.
+
+## Measurable acceptance checklist
+
+| ID | Measurable acceptance condition | Evidence / verification source | Status |
+|---|---|---|---|
+| V203-01 | Version metadata reports `2.0.3`. | `pyproject.toml`, `src/cornerstone/__init__.py`, `src/cornerstone/schemas.py`. | complete |
+| V203-02 | Dependency-complete command plan exists and is generated by code. | `src/cornerstone/verification/dependency_complete.py`; `reports/dependency-complete-command-plan-v2.0.3.md`. | complete |
+| V203-03 | Strict verification runner exists and requires explicit live DB confirmation. | `scripts/run_dependency_complete_verification.py`; `--strict --confirm-live-db`. | complete |
+| V203-04 | CI workflow provisions PostgreSQL and runs the verification runner. | `.github/workflows/dependency-complete-verification.yml`. | complete |
+| V203-05 | Release checker requires v2.0.3 docs and version metadata. | `scripts/check_release_candidate.py`. | complete |
+| V203-06 | Documentation tests require the v2.0.3 verification docs and command plan. | `tests/unit/test_release_candidate_docs.py`. | complete |
+| V203-07 | API freeze records that no endpoint or schema changed. | `docs/release/api-freeze-review.md`. | complete |
+| V203-08 | Known limitations record that this is verification tooling, not new product behavior. | `docs/release/known-limitations.md`. | complete |
+| V203-09 | Chronicle records v2.0.3 with goal, non-goal, checklist, and handoff. | `docs/48-version-chronicle-and-measurable-checklists-v2.0.0.md`. | complete |
+| V203-10 | Plan-only verification can run in a minimal sandbox without importing product runtime dependencies beyond the package source. | `python scripts/run_dependency_complete_verification.py --plan-only`. | complete |
+
+## Operator checklist
+
+Before declaring a dependency-complete environment healthy, run:
+
+```bash
+python3.13 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e '.[dev]'
+python scripts/run_dependency_complete_verification.py --plan-only
+RUN_POSTGRES_TESTS=1 \
+PERSISTENCE_BACKEND=postgres \
+DATABASE_URL='postgresql+psycopg://cornerstone:cornerstone@localhost:5432/cornerstone' \
+python scripts/run_dependency_complete_verification.py --strict --confirm-live-db
+```
+
+The strict run should produce a report for every command in the plan and should end with:
+
+```text
+passed=13
+failed=0
+```
+
+## Verification completed in this sandbox
+
+This sandbox was used to verify the static and plan-only parts of the release:
+
+```text
+python -m compileall -q src tests scripts
+python scripts/run_dependency_complete_verification.py --plan-only
+python scripts/check_release_candidate.py
+python -m pytest tests/unit/test_release_candidate_docs.py tests/unit/test_dependency_complete_verification_v2_0_3.py -q --confcutdir=tests/unit
+```
+
+The sandbox does not include all external runtime dependencies such as SQLAlchemy, Alembic, Ruff, and mypy, so strict dependency-complete execution is intentionally left for CI or a fully provisioned local environment.
+
+## Exit criteria
+
+`v2.0.3` is complete when:
+
+```text
+- version metadata reports 2.0.3
+- dependency-complete command plan exists
+- strict runner exists
+- CI workflow uses the runner
+- v2.0.3 docs are required by release checks
+- plan-only verification passes in minimal environments
+- no product endpoint/schema/runtime behavior changed
+```
+
+## Next version handoff
+
+After `v2.0.3`, the next product release can be:
+
+```text
+v2.1.0 — Live LLM Ontology Provider
+```
+
+That release should add a real configurable LLM extraction provider while preserving the candidate-only trust boundary.

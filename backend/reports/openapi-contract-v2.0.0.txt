@@ -1,0 +1,47 @@
+$ /opt/pyvenv/bin/python -m pytest tests/integration/test_openapi_contract.py -q
+cwd=/mnt/data/pywork-v2.0.0/cornerstone-backend
+exit_code=0
+elapsed_seconds=18.62
+
+STDOUT:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.5', 'Platform': 'Linux-4.4.0-x86_64-with-glibc2.41', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'asyncio': '1.3.0', 'json-report': '1.5.0', 'cov': '7.0.0', 'ddtrace': '4.4.0', 'metadata': '3.1.1', 'anyio': '4.12.1', 'Faker': '40.1.2'}, 'PLATFORM': 'linux/amd64', 'CI': 'true'}
+rootdir: /mnt/data/pywork-v2.0.0/cornerstone-backend
+configfile: pyproject.toml
+plugins: asyncio-1.3.0, json-report-1.5.0, cov-7.0.0, ddtrace-4.4.0, metadata-3.1.1, anyio-4.12.1, Faker-40.1.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+[1mcollecting ... [0mcollected 2 items
+
+tests/integration/test_openapi_contract.py::test_grounded_serving_and_evaluation_openapi_contract_matches_snapshot 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"durationMs":164.11,"event":"http.request.completed","method":"GET","path":"/openapi.json","requestId":"c05768b5-8467-4ad3-9369-dab6f6bf8421","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/openapi.json "HTTP/1.1 200 OK"
+[32mPASSED[0m[32m                                                                   [ 50%][0m
+tests/integration/test_openapi_contract.py::test_evaluation_openapi_contract_matches_snapshot 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"durationMs":169.1,"event":"http.request.completed","method":"GET","path":"/openapi.json","requestId":"0fe8764d-41e2-489e-8590-5dc74366f9a7","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/openapi.json "HTTP/1.1 200 OK"
+[32mPASSED[0m[32m                                                                   [100%][0m
+
+- generated xml file: /mnt/data/pywork-v2.0.0/cornerstone-backend/reports/junit.xml -
+[32m============================== [32m[1m2 passed[0m[32m in 2.66s[0m[32m ===============================[0m
+
+
+STDERR:
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/generated/interface/models.py", line 35986, in hydrate_crdt_from_proto
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/client.py", line 150, in call
+presentation_artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+

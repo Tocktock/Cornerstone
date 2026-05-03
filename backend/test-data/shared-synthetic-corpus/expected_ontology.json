@@ -1,0 +1,308 @@
+{
+  "concepts": [
+    {
+      "aliases": [
+        "qualified lane",
+        "route qualification",
+        "lane validation"
+      ],
+      "canonicalName": "Lane Qualification",
+      "category": "logistics_control",
+      "definitionCue": "Lane Qualification means a documented approval that a transport lane can protect product quality under expected seasonal, carrier, customs, and handoff conditions.",
+      "owner": "Quality Operations"
+    },
+    {
+      "aliases": [
+        "thermal budget",
+        "stability allowance",
+        "excursion budget"
+      ],
+      "canonicalName": "Stability Budget",
+      "category": "quality_science",
+      "definitionCue": "Stability Budget means the remaining approved exposure allowance for a product lot after considering temperature, duration, and product-specific stability evidence.",
+      "owner": "Product Quality"
+    },
+    {
+      "aliases": [
+        "thermal excursion",
+        "out-of-range event",
+        "temperature breach"
+      ],
+      "canonicalName": "Temperature Excursion",
+      "category": "quality_event",
+      "definitionCue": "Temperature Excursion means an observed or inferred product exposure outside the approved temperature range for a material duration.",
+      "owner": "Quality Operations"
+    },
+    {
+      "aliases": [
+        "custody chain",
+        "handoff chain",
+        "custody evidence"
+      ],
+      "canonicalName": "Chain of Custody",
+      "category": "compliance_record",
+      "definitionCue": "Chain of Custody means the ordered record of accountable handoffs from pack-out through patient site receipt.",
+      "owner": "Compliance"
+    },
+    {
+      "aliases": [
+        "qualified shipper",
+        "thermal shipper",
+        "packout system"
+      ],
+      "canonicalName": "Validated Shipper",
+      "category": "packaging_system",
+      "definitionCue": "Validated Shipper means a packaging configuration proven to maintain the target temperature range for a defined duration and payload profile.",
+      "owner": "Packaging Engineering"
+    },
+    {
+      "aliases": [
+        "QA hold",
+        "release hold",
+        "product hold"
+      ],
+      "canonicalName": "Quality Hold",
+      "category": "release_control",
+      "definitionCue": "Quality Hold means a controlled state that prevents product release until quality evidence is reviewed and disposition is recorded.",
+      "owner": "Quality Assurance"
+    },
+    {
+      "aliases": [
+        "deviation assessment",
+        "event triage",
+        "quality triage"
+      ],
+      "canonicalName": "Deviation Triage",
+      "category": "quality_workflow",
+      "definitionCue": "Deviation Triage means the first structured assessment that classifies a quality event, assigns ownership, and selects the disposition path.",
+      "owner": "Quality Operations"
+    },
+    {
+      "aliases": [
+        "corrective preventive action",
+        "corrective action",
+        "preventive action"
+      ],
+      "canonicalName": "CAPA",
+      "category": "quality_system",
+      "definitionCue": "CAPA means a corrective and preventive action record that addresses root cause, containment, verification, and recurrence prevention.",
+      "owner": "Quality Systems"
+    },
+    {
+      "aliases": [
+        "sensor drift",
+        "logger drift",
+        "calibration variance"
+      ],
+      "canonicalName": "Calibration Drift",
+      "category": "measurement_control",
+      "definitionCue": "Calibration Drift means movement of a measurement device away from accepted tolerance between calibration events.",
+      "owner": "Metrology"
+    },
+    {
+      "aliases": [
+        "coolant conditioning",
+        "gel pack conditioning",
+        "phase-change conditioning"
+      ],
+      "canonicalName": "Refrigerant Conditioning",
+      "category": "packaging_process",
+      "definitionCue": "Refrigerant Conditioning means preparing coolant to the validated temperature and physical state before pack-out.",
+      "owner": "Packaging Operations"
+    },
+    {
+      "aliases": [
+        "lane risk score",
+        "transport risk score",
+        "route risk model"
+      ],
+      "canonicalName": "Route Risk Scoring",
+      "category": "risk_model",
+      "definitionCue": "Route Risk Scoring means the calculation that estimates product quality risk across route, weather, customs, carrier, and contingency factors.",
+      "owner": "Network Planning"
+    },
+    {
+      "aliases": [
+        "release packet",
+        "disposition packet",
+        "QA evidence packet"
+      ],
+      "canonicalName": "Release Evidence Packet",
+      "category": "release_record",
+      "definitionCue": "Release Evidence Packet means the collected evidence used to justify shipment disposition and downstream release state.",
+      "owner": "Quality Assurance"
+    },
+    {
+      "aliases": [
+        "first-expiry-first-out",
+        "expiry allocation",
+        "lot allocation"
+      ],
+      "canonicalName": "FEFO Allocation",
+      "category": "inventory_control",
+      "definitionCue": "FEFO Allocation means selecting inventory by earliest usable expiry while respecting quality state, route feasibility, and patient scheduling constraints.",
+      "owner": "Inventory Operations"
+    },
+    {
+      "aliases": [
+        "dual logger pairing",
+        "paired sensors",
+        "sensor redundancy"
+      ],
+      "canonicalName": "Sensor Pairing",
+      "category": "measurement_control",
+      "definitionCue": "Sensor Pairing means assigning two compatible measurement devices to a shipment so readings can validate each other and expose drift or placement error.",
+      "owner": "Metrology"
+    },
+    {
+      "aliases": [
+        "inventory quarantine",
+        "segregation workflow",
+        "blocked stock workflow"
+      ],
+      "canonicalName": "Quarantine Workflow",
+      "category": "inventory_control",
+      "definitionCue": "Quarantine Workflow means the physical and system segregation process for units that cannot be released until quality disposition is complete.",
+      "owner": "Warehouse Quality"
+    },
+    {
+      "aliases": [
+        "good distribution practice audit",
+        "GDP readiness",
+        "distribution audit readiness"
+      ],
+      "canonicalName": "GDP Audit Readiness",
+      "category": "compliance_program",
+      "definitionCue": "GDP Audit Readiness means the ability to prove distribution controls, evidence integrity, and quality decisions during a good distribution practice audit.",
+      "owner": "Compliance"
+    }
+  ],
+  "datasetId": "cornerstone-shared-synthetic-corpus-v1",
+  "negativeControls": [
+    {
+      "expectedTrustLabel": "unsupported",
+      "query": "Does HelioPharm approve room-temperature shipment for frozen gene therapy without quality review?",
+      "reason": "The corpus never permits room-temperature release for frozen therapy."
+    },
+    {
+      "expectedTrustLabel": "unsupported",
+      "query": "Can billing clear a quality hold after carrier delivery?",
+      "reason": "Quality hold policy blocks billing until quality disposition."
+    }
+  ],
+  "relations": [
+    {
+      "expectedEvidenceCue": "Lane Qualification depends on Route Risk Scoring.",
+      "from": "Lane Qualification",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Route Risk Scoring",
+      "type": "depends_on"
+    },
+    {
+      "expectedEvidenceCue": "Route Risk Scoring informs Lane Qualification.",
+      "from": "Route Risk Scoring",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Lane Qualification",
+      "type": "informs"
+    },
+    {
+      "expectedEvidenceCue": "Temperature Excursion triggers Deviation Triage.",
+      "from": "Temperature Excursion",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Deviation Triage",
+      "type": "triggers"
+    },
+    {
+      "expectedEvidenceCue": "Temperature Excursion triggers Quality Hold.",
+      "from": "Temperature Excursion",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Quality Hold",
+      "type": "triggers"
+    },
+    {
+      "expectedEvidenceCue": "Quality Hold requires Release Evidence Packet.",
+      "from": "Quality Hold",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Release Evidence Packet",
+      "type": "requires"
+    },
+    {
+      "expectedEvidenceCue": "Deviation Triage may create CAPA.",
+      "from": "Deviation Triage",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "CAPA",
+      "type": "may_create"
+    },
+    {
+      "expectedEvidenceCue": "CAPA can update Lane Qualification.",
+      "from": "CAPA",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Lane Qualification",
+      "type": "can_update"
+    },
+    {
+      "expectedEvidenceCue": "Validated Shipper protects Stability Budget.",
+      "from": "Validated Shipper",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Stability Budget",
+      "type": "protects"
+    },
+    {
+      "expectedEvidenceCue": "Refrigerant Conditioning precondition for Validated Shipper.",
+      "from": "Refrigerant Conditioning",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Validated Shipper",
+      "type": "precondition_for"
+    },
+    {
+      "expectedEvidenceCue": "Calibration Drift can invalidate Temperature Excursion.",
+      "from": "Calibration Drift",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Temperature Excursion",
+      "type": "can_invalidate"
+    },
+    {
+      "expectedEvidenceCue": "Sensor Pairing detects Calibration Drift.",
+      "from": "Sensor Pairing",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Calibration Drift",
+      "type": "detects"
+    },
+    {
+      "expectedEvidenceCue": "Chain of Custody supports Release Evidence Packet.",
+      "from": "Chain of Custody",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Release Evidence Packet",
+      "type": "supports"
+    },
+    {
+      "expectedEvidenceCue": "FEFO Allocation must preserve Stability Budget.",
+      "from": "FEFO Allocation",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Stability Budget",
+      "type": "must_preserve"
+    },
+    {
+      "expectedEvidenceCue": "Quarantine Workflow implements Quality Hold.",
+      "from": "Quarantine Workflow",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Quality Hold",
+      "type": "implements"
+    },
+    {
+      "expectedEvidenceCue": "GDP Audit Readiness requires Release Evidence Packet.",
+      "from": "GDP Audit Readiness",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Release Evidence Packet",
+      "type": "requires"
+    },
+    {
+      "expectedEvidenceCue": "GDP Audit Readiness requires Chain of Custody.",
+      "from": "GDP Audit Readiness",
+      "officializationPolicy": "candidate_only_until_human_review",
+      "to": "Chain of Custody",
+      "type": "requires"
+    }
+  ],
+  "version": "1.0.0"
+}

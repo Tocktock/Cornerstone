@@ -1,0 +1,31 @@
+Added files:
++ docs/40-manual-upload-ingestion-v1.3.1.md
++ docs/release/v1.3.1-manual-upload-readiness.md
++ docs/release/v1.3.1-release-notes.md
++ reports/alembic-offline-v1.3.1.sql
++ reports/compile-report-v1.3.1.txt
++ reports/mypy-modified-v1.3.1.txt
++ reports/pytest-full-v1.3.1.txt
++ reports/pytest-manual-uploads-v1.3.1.txt
++ reports/release-candidate-v1.3.1.txt
++ reports/ruff-modified-v1.3.1.txt
++ reports/v1.3.1-changed-files.txt
++ src/cornerstone/services/manual_uploads.py
++ tests/integration/test_manual_uploads_api.py
+
+Modified files:
+~ .env.example
+~ README.md
+~ docs/01-api-contract.md
+~ docs/release/api-freeze-review.md
+~ docs/release/known-limitations.md
+~ pyproject.toml
+~ scripts/check_release_candidate.py
+~ src/cornerstone/__init__.py
+~ src/cornerstone/api/routes/manual_sources.py
+~ src/cornerstone/config.py
+~ src/cornerstone/schemas.py
+~ tests/unit/test_release_candidate_docs.py
+
+Deleted files:
+(none)

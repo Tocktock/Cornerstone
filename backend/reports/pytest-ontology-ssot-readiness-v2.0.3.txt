@@ -1,0 +1,40 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.5', 'Platform': 'Linux-4.4.0-x86_64-with-glibc2.41', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'ddtrace': '4.4.0', 'cov': '7.0.0', 'json-report': '1.5.0', 'metadata': '3.1.1', 'asyncio': '1.3.0', 'anyio': '4.13.0', 'Faker': '40.1.2'}, 'PLATFORM': 'linux/amd64', 'CI': 'true'}
+rootdir: /mnt/data/cornerstone_v203_work/cornerstone-backend
+configfile: pyproject.toml
+plugins: ddtrace-4.4.0, cov-7.0.0, json-report-1.5.0, metadata-3.1.1, asyncio-1.3.0, anyio-4.13.0, Faker-40.1.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 2 items
+
+tests/integration/test_ontology_ssot_readiness_api.py::test_ontology_ssot_readiness_reports_not_ready_before_official_graph 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"depth":1,"event":"ontology.ssot_readiness_served","focusConcept":"settlement","mode":"official","officialGraphSafe":false,"requiredFailed":6,"schemaVersion":1,"status":"failed"}
+{"durationMs":13.19,"event":"http.request.completed","method":"GET","path":"/v1/ontology/ssot/readiness","requestId":"2177e6c7-e499-4ec7-9139-21426c75cd95","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/ssot/readiness?focusConcept=settlement "HTTP/1.1 200 OK"
+{"event":"source.listed","hasRealSources":false,"onboardingRequired":true,"productionEnabled":true,"schemaVersion":1,"sourceCount":0}
+{"durationMs":2.08,"event":"http.request.completed","method":"GET","path":"/v1/sources","requestId":"f50ff378-aebd-4dc8-bb85-dd3ce1d43a02","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/sources "HTTP/1.1 200 OK"
+PASSED                                                                   [ 50%]
+tests/integration/test_ontology_ssot_readiness_api.py::test_ontology_ssot_readiness_passes_after_operator_proof 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"325e67a6-90af-4478-a9d8-3bb1395657b5","sourceType":"manual","startedAt":"2026-05-02T14:59:15.123920+00:00"}
+{"artifactId":"66439916-0d7f-4e0d-9c53-a39d5f6a16a5","event":"artifact.extracted","evidenceFragmentCount":5,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"v1.9.0-proof-settlement","sourceId":"325e67a6-90af-4478-a9d8-3bb1395657b5"}
+{"artifactChangedCount":0,"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":5,"freshnessState":"fresh","schemaVersion":1,"sourceId":"325e67a6-90af-4478-a9d8-3bb1395657b5","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":5}
+{"artifactCount":1,"event":"ontology.reextraction_queued","evidenceFragmentCount":5,"runId":"168cdf1b-0a84-4fdb-8e9d-bda6ab8e4a26","schemaVersion":1,"sourceId":"325e67a6-90af-4478-a9d8-3bb1395657b5","syncJobId":null,"trigger":"manual_upload"}
+{"conceptCandidateCount":3,"event":"ontology.reextraction_completed","extractionRunIds":["05c0e91f-d760-4176-b298-3da51b5a5b0b"],"officialGraphMutated":false,"relationCandidateCount":2,"runId":"168cdf1b-0a84-4fdb-8e9d-bda6ab8e4a26","schemaVersion":1}
+{"dryRun":false,"event":"ontology.proof_run_completed","focusConcept":"Settlement","officialGraphAvailable":true,"requiredFailed":0,"requiredPassed":8,"runId":"cfd64bac-6f08-4890-b817-b722a05b9fd9","schemaVersion":1,"status":"passed"}
+{"durationMs":20.93,"event":"http.request.completed","method":"POST","path":"/v1/ontology/proof-runs","requestId":"1d14825f-fa24-42e8-a110-734ddb9ed5bd","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/ontology/proof-runs "HTTP/1.1 201 Created"
+{"depth":1,"event":"ontology.ssot_readiness_served","focusConcept":"Settlement","mode":"official","officialGraphSafe":true,"requiredFailed":0,"schemaVersion":1,"status":"passed"}
+{"durationMs":6.13,"event":"http.request.completed","method":"GET","path":"/v1/ontology/ssot/readiness","requestId":"835dd919-71eb-432a-b577-260111435511","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/ssot/readiness?focusConcept=Settlement&depth=1&mode=official&includeGraph=true "HTTP/1.1 200 OK"
+PASSED                                                                   [100%]
+
+- generated xml file: /mnt/data/cornerstone_v203_work/cornerstone-backend/reports/junit.xml -
+============================== 2 passed in 2.29s ===============================

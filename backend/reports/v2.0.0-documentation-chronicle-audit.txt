@@ -1,0 +1,25 @@
+Cornerstone v2.0.0 documentation chronicle audit
+
+Ontology docs inspected:
+- 36-ontology-ssot-product-contract-v1.2.1.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 37-ontology-domain-model-proposal-v1.2.1.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 38-ontology-versioned-implementation-plan-v1.2.1.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 39-ontology-graph-runtime-v1.3.0.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 40-manual-upload-ingestion-v1.3.1.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 41-llm-ontology-extraction-v1.4.0.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 42-ontology-candidate-review-workflow-v1.5.0.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 43-explainable-graph-serving-v1.6.0.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 44-ontology-evaluation-v1.7.0.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 45-connector-driven-reextraction-v1.8.0.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 46-end-to-end-proof-operator-ux-v1.9.0.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+- 47-ontology-ssot-release-v2.0.0.md: chronicle_section=True, measurable_conditions=True, confirmed_non_goal=True, checklist_rows=5
+
+Master chronicle:
+- docs/48-version-chronicle-and-measurable-checklists-v2.0.0.md
+
+Release readiness:
+- docs/release/v2.0.0-documentation-chronicle-readiness.md
+
+Known historical chronology notes:
+- docs/27-backend-release-candidate-v0.13.0.md keeps a historical filename while the document title records v0.13.1.
+- planned v1.4.1 was not released separately; its scope was absorbed by v1.3.0 and v1.5.0.

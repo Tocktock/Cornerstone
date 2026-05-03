@@ -1,0 +1,68 @@
+Cornerstone v2.0.1 — Refactor and Domain Boundary Hardening verification summary
+
+Release type:
+- Behavior-preserving patch release after v2.0.0 Ontology SSOT Release.
+- No public API endpoint additions/removals.
+- No database migration added.
+- No graph behavior, graph depth, extraction, review, or officialization behavior changed intentionally.
+
+Version checks:
+- pyproject.toml version: 2.0.1
+- src/cornerstone/__init__.py __version__: 2.0.1
+- OntologySsotReadinessResponse releaseVersion default: 2.0.1
+- scripts/check_release_candidate.py EXPECTED_VERSION: 2.0.1
+- scripts/check_release_candidate.py RC_TAG: v2.0.1
+
+Commands executed successfully in this sandbox:
+
+1. Syntax compilation
+   Command: python -m compileall -q src tests scripts
+   Result: passed, exit_code=0
+
+2. Release candidate checker
+   Command: python scripts/check_release_candidate.py
+   Result:
+     release-candidate check: passed for v2.0.1
+     required_docs=69
+     package_hygiene=passed
+     api_freeze_review=present
+     live_proof_record=present
+     rc_tag_plan=present
+
+3. Documentation and refactor-boundary tests
+   Command: python -m pytest tests/unit/test_release_candidate_docs.py tests/unit/test_refactor_boundaries_v2_0_1.py -q
+   Result: 11 passed
+
+4. Ontology regression subset
+   Command: python -m pytest tests/integration/test_ontology_proof_api.py tests/integration/test_ontology_ssot_readiness_api.py tests/integration/test_ontology_api.py tests/integration/test_ontology_evaluations_api.py -q -k 'not sqlalchemy and not persistent'
+   Result: 17 passed, 1 deselected
+
+5. OpenAPI contract tests
+   Command: python -m pytest tests/integration/test_openapi_contract.py -q
+   Result: 2 passed
+
+6. Duplicate-code audit
+   Command: AST scan of src/cornerstone/**/*.py for duplicate function bodies >= 5 implementation lines, excluding __init__ methods
+   Result: 0 duplicate function body groups found
+   Report: reports/refactor-duplicate-audit-v2.0.1.txt
+
+Refactor areas verified:
+- ontology graph depth policy centralized in cornerstone.domain.ontology
+- evidence support / citation provenance helpers centralized in services.evidence_support
+- evaluation freshness and citation rules centralized in services.evaluation_rules
+- sync job claimability and event construction centralized in services.sync_jobs
+- source selection lookup centralized in services.source_selection
+- connector provider timestamp/hash/error helpers centralized in connectors.providers.common
+- proof-script integer environment parsing centralized in verification.env
+- eval-task model validation delegates to shared validator helpers
+- v2.0.1 version/readiness docs are required by release checker and unit tests
+
+Environment limitations:
+- SQLAlchemy is not installed in this sandbox; persistent-store tests were not executed.
+- Alembic is not installed in this sandbox; offline migration SQL generation was not executed.
+- Ruff is not installed in this sandbox; linting was not executed.
+- mypy is not installed in this sandbox; static typing checks were not executed.
+
+Verdict:
+- v2.0.1 refactor checks passed in the available in-memory/runtime test environment.
+- Persistent-store, Alembic, Ruff, and mypy checks should be rerun in a dependency-complete local or CI environment.

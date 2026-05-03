@@ -1,0 +1,32 @@
+Cornerstone v1.5.0 changed files relative to v1.4.0
+
+Added:
+- docs/42-ontology-candidate-review-workflow-v1.5.0.md
+- docs/release/v1.5.0-ontology-candidate-review-readiness.md
+- docs/release/v1.5.0-release-notes.md
+- migrations/versions/0014_ontology_candidate_review_workflow.py
+- reports/alembic-offline-v1.5.0.txt
+- reports/compile-report-v1.5.0.txt
+- reports/pytest-ontology-candidate-review-v1.5.0.txt
+- reports/pytest-ontology-regression-v1.5.0.txt
+- reports/pytest-release-docs-v1.5.0.txt
+- reports/release-candidate-v1.5.0.txt
+- reports/v1.5.0-verification-summary.txt
+- src/cornerstone/services/ontology_review.py
+- tests/integration/test_ontology_candidate_review_api.py
+
+Modified:
+- README.md
+- docs/01-api-contract.md
+- docs/release/api-freeze-review.md
+- docs/release/known-limitations.md
+- pyproject.toml
+- scripts/check_release_candidate.py
+- src/cornerstone/__init__.py
+- src/cornerstone/api/routes/ontology.py
+- src/cornerstone/persistence/models.py
+- src/cornerstone/persistence/store.py
+- src/cornerstone/schemas.py
+- src/cornerstone/store.py
+- tests/unit/test_release_candidate_docs.py
+- reports/v1.5.0-changed-files.txt

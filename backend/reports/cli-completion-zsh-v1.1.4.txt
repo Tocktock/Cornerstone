@@ -1,0 +1,3 @@
+#compdef cornerstone
+_arguments '1:command:(version doctor setup local env stack db api worker live status source evidence concept ask context eval proof config completion)'
+

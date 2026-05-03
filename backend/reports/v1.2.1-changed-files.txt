@@ -1,0 +1,27 @@
+Cornerstone v1.2.1 changed files against v1.2.0
+
+README.md
+docs/36-ontology-ssot-product-contract-v1.2.1.md
+docs/37-ontology-domain-model-proposal-v1.2.1.md
+docs/38-ontology-versioned-implementation-plan-v1.2.1.md
+docs/adr/0001-ontology-official-trust-boundary.md
+docs/release/known-limitations.md
+docs/release/v1.2.1-ontology-contract-readiness.md
+docs/release/v1.2.1-release-notes.md
+docs/templates/release-doc-template.md
+pyproject.toml
+reports/compile-report-v1.2.1.txt
+reports/docs-inventory-v1.2.1.txt
+reports/pytest-docs-v1.2.1.txt
+reports/release-candidate-v1.2.1.txt
+reports/v1.2.1-verification-summary.txt
+scripts/check_release_candidate.py
+scripts/macos_run_live_proof.sh
+scripts/macos_setup.sh
+scripts/macos_start_local.sh
+src/cornerstone/__init__.py
+tests/unit/test_release_candidate_docs.py
+reports/v1.2.1-changed-files.txt
+
+Deleted files:
+None

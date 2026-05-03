@@ -1,0 +1,33 @@
+Cornerstone v2.0.4 — Forward Roadmap Goals and Measurable Checklists Verification Summary
+
+Scope:
+- Documentation-first roadmap release.
+- Adds planning docs for v2.1.0 through v2.5.0.
+- Updates package/readiness version metadata to 2.0.4.
+- Does not add runtime behavior, endpoints, migrations, graph changes, connector changes, live LLM behavior, frontend UI, or integration package behavior.
+
+Verification commands run:
+1. python -m compileall -q src tests scripts
+   Result: passed, exit_code=0
+
+2. python scripts/check_release_candidate.py
+   Result: passed for v2.0.4
+   required_docs=95
+   product_docs=present
+   dependency_complete_verification=present
+   forward_roadmap_docs=present
+   package_hygiene=passed
+   api_freeze_review=present
+   live_proof_record=present
+   rc_tag_plan=present
+
+3. python -m pytest tests/unit/test_release_candidate_docs.py -q --confcutdir=tests/unit
+   Result: 11 passed
+
+Measurable checklist outcome:
+- V204-01 through V204-12 are documented as complete.
+- V204-RDY-01 through V204-RDY-10 are documented as complete.
+- Roadmap docs for v2.1.0 through v2.5.0 include version goal, confirmed non-goal, domain boundary, measurable acceptance checklist, verification checklist, exit criteria, and next-version handoff.
+
+Known limitation:
+- This release is documentation/planning only. Future releases remain unimplemented until their own implementation, tests, and verification are completed.

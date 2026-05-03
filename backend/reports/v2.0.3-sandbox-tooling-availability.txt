@@ -1,0 +1,19 @@
+Cornerstone v2.0.3 Sandbox Tooling Availability
+===============================================
+python=3.13.5
+fastapi=present
+uvicorn=present
+pydantic=present
+httpx=present
+sqlalchemy=missing
+alembic=missing
+psycopg=missing
+cryptography=present
+notion_client=missing
+googleapiclient=missing
+google.auth=missing
+multipart=present
+pytest=present
+coverage=present
+ruff=missing
+mypy=missing

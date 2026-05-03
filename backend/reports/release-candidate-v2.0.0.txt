@@ -1,0 +1,13 @@
+$ python -S scripts/check_release_candidate.py
+cwd=/mnt/data/pywork-v2.0.0/cornerstone-backend
+exit_code=0
+
+STDOUT:
+release-candidate check: passed for v2.0.0
+required_docs=64
+package_hygiene=passed
+api_freeze_review=present
+live_proof_record=present
+rc_tag_plan=present
+
+STDERR:

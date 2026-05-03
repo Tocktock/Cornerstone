@@ -1,0 +1,46 @@
+Cornerstone v1.2.1 verification summary
+
+Scope:
+- Documentation-first ontology SSOT contract release.
+- No runtime ontology API, database migration, or LLM extraction added.
+
+Version:
+- pyproject.toml: 1.2.1
+- src/cornerstone/__init__.py: 1.2.1
+- README current version: v1.2.1 — Ontology SSOT contract baseline
+
+Checks:
+1. python -m compileall -q src tests scripts
+   Result: passed, return code 0.
+
+2. python scripts/check_release_candidate.py
+   Result: passed, return code 0.
+   Output included: release-candidate check: passed for v1.2.1.
+
+3. python -m pytest tests/unit/test_release_candidate_docs.py tests/unit/test_integration_starter_docs.py -q
+   Result: passed, return code 0.
+   Output included: 6 passed.
+
+Note:
+The sandbox Python runtime emitted a spreadsheet runtime warmup traceback to stderr during startup.
+The checked commands still returned success codes. This appears to be an environment startup side effect, not a Cornerstone project failure.
+
+Changed implementation behavior:
+- None. v1.2.1 is documentation-first.
+
+Changed release metadata:
+- Package version updated to 1.2.1.
+- Release checker target updated to v1.2.1.
+- README current version updated.
+
+Added ontology docs:
+- docs/36-ontology-ssot-product-contract-v1.2.1.md
+- docs/37-ontology-domain-model-proposal-v1.2.1.md
+- docs/38-ontology-versioned-implementation-plan-v1.2.1.md
+- docs/adr/0001-ontology-official-trust-boundary.md
+- docs/templates/release-doc-template.md
+- docs/release/v1.2.1-ontology-contract-readiness.md
+- docs/release/v1.2.1-release-notes.md
+
+Next target:
+- v1.3.0 — Ontology graph contract implementation.

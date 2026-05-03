@@ -1,0 +1,2 @@
+Command: python -S -m compileall -q src tests scripts
+Result: passed

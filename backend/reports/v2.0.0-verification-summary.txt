@@ -1,0 +1,168 @@
+# Cornerstone v2.0.0 Verification Summary
+
+Release: v2.0.0 — Ontology SSOT release
+Date: 2026-05-01
+
+## Scope
+
+v2.0.0 is a stabilization and backend-contract release for the ontology Single Source of Truth loop. It adds a read-only SSOT readiness checklist endpoint and CLI proof scope. It does not add a visual UI, live external LLM provider, automatic approval, automatic official graph mutation, graph depth above 1, or vector/semantic graph expansion.
+
+## Commands executed
+
+### Syntax compilation
+
+Command:
+
+```bash
+python -S -m compileall -q src tests scripts
+```
+
+Result:
+
+```text
+passed
+exit_code=0
+```
+
+Report:
+
+```text
+reports/compile-report-v2.0.0.txt
+```
+
+### Release-candidate check
+
+Command:
+
+```bash
+python -S scripts/check_release_candidate.py
+```
+
+Result:
+
+```text
+release-candidate check: passed for v2.0.0
+required_docs=64
+package_hygiene=passed
+api_freeze_review=present
+live_proof_record=present
+rc_tag_plan=present
+```
+
+Report:
+
+```text
+reports/release-candidate-v2.0.0.txt
+```
+
+### SSOT readiness integration tests
+
+Command:
+
+```bash
+python -m pytest tests/integration/test_ontology_ssot_readiness_api.py -q
+```
+
+Result:
+
+```text
+2 passed
+```
+
+Report:
+
+```text
+reports/pytest-ontology-ssot-readiness-v2.0.0.txt
+```
+
+### Release documentation tests
+
+Command:
+
+```bash
+python -m pytest tests/unit/test_release_candidate_docs.py -q
+```
+
+Result:
+
+```text
+5 passed
+```
+
+Report:
+
+```text
+reports/pytest-release-docs-v2.0.0.txt
+```
+
+### Operator proof + SSOT readiness regression
+
+Command:
+
+```bash
+python -m pytest tests/integration/test_ontology_proof_api.py tests/integration/test_ontology_ssot_readiness_api.py -q
+```
+
+Result:
+
+```text
+6 passed
+```
+
+Report:
+
+```text
+reports/pytest-ontology-proof-ssot-v2.0.0.txt
+```
+
+### OpenAPI contract tests
+
+Command:
+
+```bash
+python -m pytest tests/integration/test_openapi_contract.py -q
+```
+
+Result:
+
+```text
+2 passed
+```
+
+Report:
+
+```text
+reports/openapi-contract-v2.0.0.txt
+```
+
+### Ontology regression subset
+
+Command:
+
+```bash
+python -m pytest tests/integration/test_ontology_api.py tests/integration/test_ontology_extraction_api.py tests/integration/test_ontology_candidate_review_api.py tests/integration/test_ontology_evaluations_api.py tests/integration/test_ontology_reextraction_api.py tests/integration/test_ontology_proof_api.py tests/integration/test_ontology_ssot_readiness_api.py -q -k 'not sqlalchemy and not persistent'
+```
+
+Result:
+
+```text
+33 passed, 2 deselected
+```
+
+Report:
+
+```text
+reports/ontology-regression-subset-v2.0.0.txt
+```
+
+## Environment notes
+
+The sandbox environment does not have SQLAlchemy, Alembic, Ruff, or mypy installed, so persistent-store migration verification, Alembic offline SQL generation, Ruff, and mypy were not executed here.
+
+During normal Python/pytest process startup or teardown, the sandbox emitted a presentation artifact runtime warmup traceback to stderr. The project commands above returned successful exit codes where listed, so this is recorded as an environment side effect rather than a Cornerstone failure.
+
+## Release verdict
+
+The v2.0.0 read-only SSOT readiness endpoint, CLI proof scope, documentation, release-candidate checks, OpenAPI contract tests, and non-persistent ontology regression subset passed in this environment.
+
+Before production deployment, rerun the persistent-store tests, Alembic migration generation, Ruff, mypy, and live connector proofs in a dependency-complete local or CI environment.

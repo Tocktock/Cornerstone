@@ -1,0 +1,29 @@
+$ python -m pytest tests/integration/test_openapi_contract.py -q
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.5', 'Platform': 'Linux-4.4.0-x86_64-with-glibc2.41', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'metadata': '3.1.1', 'cov': '7.0.0', 'anyio': '4.12.1', 'asyncio': '1.3.0', 'ddtrace': '4.4.0', 'json-report': '1.5.0', 'Faker': '40.1.2'}, 'PLATFORM': 'linux/amd64', 'CI': 'true'}
+rootdir: /mnt/data/cs_v17/cornerstone-backend
+configfile: pyproject.toml
+plugins: metadata-3.1.1, cov-7.0.0, anyio-4.12.1, asyncio-1.3.0, ddtrace-4.4.0, json-report-1.5.0, Faker-40.1.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 2 items
+
+tests/integration/test_openapi_contract.py::test_grounded_serving_and_evaluation_openapi_contract_matches_snapshot 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"durationMs":204.26,"event":"http.request.completed","method":"GET","path":"/openapi.json","requestId":"3dea9dd1-a28e-42ee-bd68-5b300d8fbbc2","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/openapi.json "HTTP/1.1 200 OK"
+PASSED                                                                   [ 50%]
+tests/integration/test_openapi_contract.py::test_evaluation_openapi_contract_matches_snapshot 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"durationMs":139.57,"event":"http.request.completed","method":"GET","path":"/openapi.json","requestId":"239cb9b0-f94a-41bf-895e-b766428e53dc","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/openapi.json "HTTP/1.1 200 OK"
+PASSED                                                                   [100%]
+
+-- generated xml file: /mnt/data/cs_v17/cornerstone-backend/reports/junit.xml --
+============================== 2 passed in 2.48s ===============================
+exit_code=0

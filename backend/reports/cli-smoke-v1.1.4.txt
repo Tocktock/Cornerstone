@@ -1,0 +1,9 @@
+CLI smoke checks:
+- version:
+1.1.4
+- config get first line:
+{
+- completion zsh first line:
+#compdef cornerstone
+- proof plan status:
+Proof summary: PLANNED — passed=0 failed=0 planned=1 skipped=0 total=1

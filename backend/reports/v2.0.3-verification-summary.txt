@@ -1,0 +1,109 @@
+Cornerstone v2.0.3 Verification Summary
+=======================================
+
+Release: v2.0.3 — Dependency-Complete Verification and CI Hardening
+Base: v2.0.2 — Product Documentation Layer
+Scope: verification tooling, CI hardening, release/version documentation, and version metadata only.
+
+No product runtime behavior changed:
+- no public API endpoint added or removed
+- no request/response schema changed except releaseVersion metadata now reporting 2.0.3
+- no database migration added
+- no graph behavior changed
+- no ontology extraction/review behavior changed
+- no connector behavior changed
+- no live external LLM provider added
+- no frontend UI added
+
+Checks run in this sandbox
+--------------------------
+
+1. Plan-only dependency-complete verification
+Command:
+  python scripts/run_dependency_complete_verification.py --plan-only
+Result:
+  passed
+Reports:
+  reports/dependency-complete-command-plan-v2.0.3.json
+  reports/dependency-complete-command-plan-v2.0.3.md
+
+2. Compile check
+Command:
+  python -m compileall -q src tests scripts
+Result:
+  passed, exit_code=0
+Report:
+  reports/v2.0.3-compileall-sandbox.txt
+
+3. Static release-candidate check
+Command:
+  python scripts/check_release_candidate.py
+Result:
+  passed, exit_code=0
+Report:
+  reports/release-candidate-v2.0.3.txt
+
+Release checker output:
+  release-candidate check: passed for v2.0.3
+  required_docs=86
+  product_docs=present
+  dependency_complete_verification=present
+  package_hygiene=passed
+  api_freeze_review=present
+  live_proof_record=present
+  rc_tag_plan=present
+
+4. Documentation and dependency-complete unit tests
+Command:
+  python -m pytest tests/unit/test_release_candidate_docs.py tests/unit/test_dependency_complete_verification_v2_0_3.py -q --confcutdir=tests/unit
+Result:
+  13 passed
+Report:
+  reports/pytest-docs-v2.0.3.txt
+
+5. SSOT readiness API metadata regression
+Command:
+  python -m pytest tests/integration/test_ontology_ssot_readiness_api.py -q
+Result:
+  2 passed
+Report:
+  reports/pytest-ontology-ssot-readiness-v2.0.3.txt
+
+6. OpenAPI contract regression
+Command:
+  python -m pytest tests/integration/test_openapi_contract.py -q
+Result:
+  2 passed
+Report:
+  reports/openapi-contract-v2.0.3.txt
+
+Dependency-complete strict run
+------------------------------
+
+The strict dependency-complete command was added but not executed in this sandbox:
+
+  RUN_POSTGRES_TESTS=1 \
+  PERSISTENCE_BACKEND=postgres \
+  DATABASE_URL='postgresql+psycopg://cornerstone:cornerstone@localhost:5432/cornerstone' \
+  python scripts/run_dependency_complete_verification.py --strict --confirm-live-db
+
+Reason:
+  This sandbox does not provide the full dependency-complete environment needed for the strict run. In particular, live PostgreSQL service access and several package dependencies used by strict verification are not available here.
+
+Intended execution environment:
+  - Python >=3.13,<3.15
+  - pip install -e '.[dev]'
+  - PostgreSQL with required extensions
+  - DATABASE_URL pointed at a disposable verification database
+  - PERSISTENCE_BACKEND=postgres
+  - RUN_POSTGRES_TESTS=1
+
+New CI contract:
+  .github/workflows/dependency-complete-verification.yml provisions PostgreSQL, installs dev dependencies, renders the plan, runs strict verification, and uploads reports.
+
+Verdict
+-------
+
+v2.0.3 static, documentation, plan-only, SSOT readiness metadata, and OpenAPI checks passed in the available sandbox.
+
+Strict dependency-complete verification is ready for CI/local execution but was not run here due environment limitations.

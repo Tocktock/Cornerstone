@@ -1,0 +1,73 @@
+{
+  "datasetId": "cornerstone-shared-synthetic-corpus-v1",
+  "tasks": [
+    {
+      "expectedAnswerFragments": [
+        "stability budget uncertainty",
+        "quality hold",
+        "Product Quality signs"
+      ],
+      "expectedTrustLabel": "official_after_review",
+      "query": "Why does a shipment with uncertain stability budget enter quality hold?",
+      "requiredConcepts": [
+        "Stability Budget",
+        "Quality Hold",
+        "Release Evidence Packet"
+      ],
+      "requiredRelations": [
+        "Temperature Excursion->Quality Hold",
+        "Quality Hold->Release Evidence Packet"
+      ],
+      "taskId": "hpcc-eval-quality-hold-release"
+    },
+    {
+      "expectedAnswerFragments": [
+        "thermal margin",
+        "carrier reliability",
+        "qualification packet"
+      ],
+      "expectedTrustLabel": "official_after_review",
+      "query": "How should lane qualification use route risk scoring?",
+      "requiredConcepts": [
+        "Lane Qualification",
+        "Route Risk Scoring"
+      ],
+      "requiredRelations": [
+        "Lane Qualification->Route Risk Scoring",
+        "Route Risk Scoring->Lane Qualification"
+      ],
+      "taskId": "hpcc-eval-lane-risk"
+    },
+    {
+      "expectedAnswerFragments": [
+        "custody evidence",
+        "reviewer identity",
+        "source evidence"
+      ],
+      "expectedTrustLabel": "official_after_review",
+      "query": "What evidence is needed for GDP audit readiness after a thermal event?",
+      "requiredConcepts": [
+        "GDP Audit Readiness",
+        "Chain of Custody",
+        "Release Evidence Packet"
+      ],
+      "requiredRelations": [
+        "GDP Audit Readiness->Release Evidence Packet",
+        "GDP Audit Readiness->Chain of Custody"
+      ],
+      "taskId": "hpcc-eval-custody-audit"
+    },
+    {
+      "expectedAnswerFragments": [
+        "must not be released",
+        "billing systems"
+      ],
+      "expectedTrustLabel": "unsupported",
+      "query": "Can billing clear a quality hold after carrier delivery?",
+      "requiredConcepts": [],
+      "requiredRelations": [],
+      "taskId": "hpcc-eval-negative-billing-hold"
+    }
+  ],
+  "version": "1.0.0"
+}

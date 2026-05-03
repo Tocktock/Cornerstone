@@ -1,0 +1,8 @@
+$ python scripts/check_release_candidate.py
+release-candidate check: passed for v1.7.0
+required_docs=54
+package_hygiene=passed
+api_freeze_review=present
+live_proof_record=present
+rc_tag_plan=present
+exit_code=0

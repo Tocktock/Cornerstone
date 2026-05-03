@@ -1,0 +1,39 @@
+Cornerstone v1.3.0 changed files against v1.2.1
+===================================================
+
+Added (16)
++ docs/39-ontology-graph-runtime-v1.3.0.md
++ docs/release/v1.3.0-ontology-graph-readiness.md
++ docs/release/v1.3.0-release-notes.md
++ migrations/versions/0012_concept_aliases_ontology_graph.py
++ reports/alembic-offline-v1.3.0.log
++ reports/alembic-offline-v1.3.0.sql
++ reports/compile-report-v1.3.0.txt
++ reports/mypy-targeted-v1.3.0.txt
++ reports/pytest-v1.3.0.txt
++ reports/release-candidate-v1.3.0.txt
++ reports/ruff-targeted-v1.3.0.txt
++ reports/v1.3.0-changed-files.txt
++ reports/v1.3.0-verification-summary.txt
++ src/cornerstone/api/routes/ontology.py
++ src/cornerstone/services/ontology_graph.py
++ tests/integration/test_ontology_api.py
+
+Changed (15)
+~ README.md
+~ docs/01-api-contract.md
+~ docs/38-ontology-versioned-implementation-plan-v1.2.1.md
+~ docs/release/api-freeze-review.md
+~ docs/release/known-limitations.md
+~ pyproject.toml
+~ reports/junit.xml
+~ scripts/check_release_candidate.py
+~ src/cornerstone/__init__.py
+~ src/cornerstone/api/routes/concepts.py
+~ src/cornerstone/main.py
+~ src/cornerstone/persistence/models.py
+~ src/cornerstone/persistence/store.py
+~ src/cornerstone/schemas.py
+~ tests/unit/test_release_candidate_docs.py
+
+Removed (0)

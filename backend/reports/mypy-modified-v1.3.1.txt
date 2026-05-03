@@ -1,0 +1,9 @@
+Targeted mypy verification was attempted for the v1.3.1 modified source files, but mypy did not complete in the sandbox runtime during final packaging.
+
+Coverage retained for this release:
+- compileall passed for src tests scripts
+- full pytest passed: 269 passed, 6 skipped
+- release-candidate check passed for v1.3.1
+- targeted ruff passed for modified v1.3.1 files
+
+This is recorded as an environment/tooling limitation, not a source-code failure observed by mypy.

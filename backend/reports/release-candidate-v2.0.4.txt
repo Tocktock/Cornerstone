@@ -1,0 +1,9 @@
+release-candidate check: passed for v2.0.4
+required_docs=95
+product_docs=present
+dependency_complete_verification=present
+forward_roadmap_docs=present
+package_hygiene=passed
+api_freeze_review=present
+live_proof_record=present
+rc_tag_plan=present

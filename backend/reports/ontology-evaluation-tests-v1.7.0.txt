@@ -1,0 +1,127 @@
+$ python -m pytest tests/integration/test_ontology_evaluations_api.py -q
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.5', 'Platform': 'Linux-4.4.0-x86_64-with-glibc2.41', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'metadata': '3.1.1', 'cov': '7.0.0', 'anyio': '4.12.1', 'asyncio': '1.3.0', 'ddtrace': '4.4.0', 'json-report': '1.5.0', 'Faker': '40.1.2'}, 'PLATFORM': 'linux/amd64', 'CI': 'true'}
+rootdir: /mnt/data/cs_v17/cornerstone-backend
+configfile: pyproject.toml
+plugins: metadata-3.1.1, cov-7.0.0, anyio-4.12.1, asyncio-1.3.0, ddtrace-4.4.0, json-report-1.5.0, Faker-40.1.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 6 items
+
+tests/integration/test_ontology_evaluations_api.py::test_ontology_graph_evaluation_task_run_succeeds_for_official_graph 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Ontology Eval","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"cdfce184-04ce-4682-a607-fcfc32bbcdcb","sourceName":"Ontology Eval","sourceType":"manual","status":"connected"}
+{"durationMs":4.87,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"f70b185e-0bae-4b5b-b02a-71a049290a50","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"cdfce184-04ce-4682-a607-fcfc32bbcdcb","sourceType":"manual","startedAt":"2026-05-01T04:06:50.576266+00:00"}
+{"artifactId":"036123cc-4434-4ea7-b326-3065624c5edc","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"settlement-eval-doc","sourceId":"cdfce184-04ce-4682-a607-fcfc32bbcdcb"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"cdfce184-04ce-4682-a607-fcfc32bbcdcb","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":6.32,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/cdfce184-04ce-4682-a607-fcfc32bbcdcb/sync","requestId":"4042dd3f-1958-4549-bc4d-cfb83bd7a6fe","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/cdfce184-04ce-4682-a607-fcfc32bbcdcb/sync "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"3f8185df-1f24-4fd1-a6be-62ac96a453c8","event":"evidence.reviewed","evidenceFragmentId":"4f9ff0d5-c108-4f53-80a5-643abf90aeb9","schemaVersion":1,"trustState":"reviewed"}
+{"durationMs":4.96,"event":"http.request.completed","method":"POST","path":"/v1/evidence/4f9ff0d5-c108-4f53-80a5-643abf90aeb9/review","requestId":"bb0943a5-9705-4983-8415-a357b8fbe3d3","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evidence/4f9ff0d5-c108-4f53-80a5-643abf90aeb9/review "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"d9b2a3c1-89ca-4f60-b690-624bcaa7643a","conceptId":"9c17a4a7-2de4-41d2-b9be-a1e3c4bf670b","decisionRecordCount":0,"event":"concept.created","evidenceFragmentCount":1,"name":"Settlement","schemaVersion":1,"status":"candidate"}
+{"durationMs":4.11,"event":"http.request.completed","method":"POST","path":"/v1/concepts","requestId":"df97aee5-925f-483b-b1c7-5e771c416170","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concepts "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptId":"9c17a4a7-2de4-41d2-b9be-a1e3c4bf670b","decisionRecordCount":0,"event":"concept.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"039834db-0877-4156-bf1b-d94f56d19667","conceptId":"9c17a4a7-2de4-41d2-b9be-a1e3c4bf670b","event":"concept.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":5.21,"event":"http.request.completed","method":"POST","path":"/v1/concepts/9c17a4a7-2de4-41d2-b9be-a1e3c4bf670b/officialize","requestId":"ddece516-0c49-4b97-a256-2adf4b40b35b","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concepts/9c17a4a7-2de4-41d2-b9be-a1e3c4bf670b/officialize "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"ba364664-598a-4673-8110-d0e5fa67c2de","conceptId":"893fb7a0-3b08-4129-8ed2-a2b3c391a8a6","decisionRecordCount":0,"event":"concept.created","evidenceFragmentCount":1,"name":"Ledger","schemaVersion":1,"status":"candidate"}
+{"durationMs":4.95,"event":"http.request.completed","method":"POST","path":"/v1/concepts","requestId":"35867b43-6cfc-41c5-81e0-7cf393893f65","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concepts "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptId":"893fb7a0-3b08-4129-8ed2-a2b3c391a8a6","decisionRecordCount":0,"event":"concept.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"ba0c9701-fcf8-40d9-b07f-7f8b3b670edd","conceptId":"893fb7a0-3b08-4129-8ed2-a2b3c391a8a6","event":"concept.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":5.16,"event":"http.request.completed","method":"POST","path":"/v1/concepts/893fb7a0-3b08-4129-8ed2-a2b3c391a8a6/officialize","requestId":"f74c2ba1-956f-415f-aeb4-16bf4f187dd2","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concepts/893fb7a0-3b08-4129-8ed2-a2b3c391a8a6/officialize "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"47d9bf89-b29a-4a7e-868d-52b9f0a3b87e","conceptRelationId":"4e588a50-0fbc-44ae-ac6e-96037341b7a7","event":"concept_relation.created","evidenceFragmentCount":1,"relationType":"updates","schemaVersion":1,"sourceConceptId":"9c17a4a7-2de4-41d2-b9be-a1e3c4bf670b","targetConceptId":"893fb7a0-3b08-4129-8ed2-a2b3c391a8a6"}
+{"durationMs":4.46,"event":"http.request.completed","method":"POST","path":"/v1/concept-relations","requestId":"4a1cbcd9-078c-40cb-b640-54ad7cc02079","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concept-relations "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptRelationId":"4e588a50-0fbc-44ae-ac6e-96037341b7a7","decisionRecordId":null,"event":"concept_relation.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"9aa61507-1269-4daf-8c95-48ad57e1123b","conceptRelationId":"4e588a50-0fbc-44ae-ac6e-96037341b7a7","event":"concept_relation.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":4.79,"event":"http.request.completed","method":"POST","path":"/v1/concept-relations/4e588a50-0fbc-44ae-ac6e-96037341b7a7/officialize","requestId":"c09670ce-6f22-4a6d-9064-6183d8804983","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concept-relations/4e588a50-0fbc-44ae-ac6e-96037341b7a7/officialize "HTTP/1.1 200 OK"
+{"conceptQuery":"payment settlement","event":"evaluation.ontology_graph_task_created","expectedTrustLabel":"official","schemaVersion":1,"taskId":"4307ed09-e29e-4d30-aa8d-824f1e983fbc"}
+{"durationMs":4.12,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks","requestId":"2628a1cd-d84f-4e23-b891-185080f1aefb","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks "HTTP/1.1 201 Created"
+{"event":"evaluation.ontology_graph_task_completed","resultId":"29f206fc-5a0e-493c-bbc0-21005d138951","schemaVersion":1,"success":true,"taskId":"4307ed09-e29e-4d30-aa8d-824f1e983fbc","trustLabel":"official"}
+{"durationMs":39.35,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks/4307ed09-e29e-4d30-aa8d-824f1e983fbc/run","requestId":"8246319c-2d18-4f7a-89d3-aecfb825aaac","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks/4307ed09-e29e-4d30-aa8d-824f1e983fbc/run "HTTP/1.1 200 OK"
+{"durationMs":2.73,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/ontology/summary","requestId":"28370b2a-cdac-470d-b94b-c5ed31c45765","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/evaluations/ontology/summary "HTTP/1.1 200 OK"
+PASSED                                                                   [ 16%]
+tests/integration/test_ontology_evaluations_api.py::test_ontology_graph_evaluation_detects_missing_official_graph 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"conceptQuery":"Missing Settlement","event":"evaluation.ontology_graph_task_created","expectedTrustLabel":"official","schemaVersion":1,"taskId":"0c9ae5a0-73e3-45f2-b39d-f7a4f1556bf0"}
+{"durationMs":3.92,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks","requestId":"31d8c381-1cb4-4448-85cd-03c5112da4d4","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks "HTTP/1.1 201 Created"
+{"event":"evaluation.ontology_graph_task_completed","resultId":"88f46c3a-0846-44b0-9ca6-5ed6f9e5bb27","schemaVersion":1,"success":false,"taskId":"0c9ae5a0-73e3-45f2-b39d-f7a4f1556bf0","trustLabel":"unsupported"}
+{"durationMs":4.5,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks/0c9ae5a0-73e3-45f2-b39d-f7a4f1556bf0/run","requestId":"b0db1cf8-17aa-4826-999b-c8bbbdbd8093","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks/0c9ae5a0-73e3-45f2-b39d-f7a4f1556bf0/run "HTTP/1.1 200 OK"
+PASSED                                                                   [ 33%]
+tests/integration/test_ontology_evaluations_api.py::test_ontology_graph_evaluation_allows_explicit_unsupported_graph_task 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"conceptQuery":"Missing Settlement","event":"evaluation.ontology_graph_task_created","expectedTrustLabel":"unsupported","schemaVersion":1,"taskId":"9dfc5d05-677b-4be7-8ef9-495ca8b5913f"}
+{"durationMs":5.18,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks","requestId":"41d77feb-80d3-4324-b06e-83e1607fdbed","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks "HTTP/1.1 201 Created"
+{"event":"evaluation.ontology_graph_task_completed","resultId":"80eb70f5-6f8b-49d4-b5ad-d0d11c6d7562","schemaVersion":1,"success":true,"taskId":"9dfc5d05-677b-4be7-8ef9-495ca8b5913f","trustLabel":"unsupported"}
+{"durationMs":4.45,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks/9dfc5d05-677b-4be7-8ef9-495ca8b5913f/run","requestId":"3b982033-4228-40f4-91ce-0c109004596a","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks/9dfc5d05-677b-4be7-8ef9-495ca8b5913f/run "HTTP/1.1 200 OK"
+PASSED                                                                   [ 50%]
+tests/integration/test_ontology_evaluations_api.py::test_ontology_graph_evaluation_rejects_invalid_unsupported_contract 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"durationMs":2.57,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks","requestId":"c96ed0ab-9fe7-4fc2-8958-87d75bb17862","schemaVersion":1,"statusCode":422}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks "HTTP/1.1 422 Unprocessable Entity"
+PASSED                                                                   [ 66%]
+tests/integration/test_ontology_evaluations_api.py::test_ontology_graph_evaluation_bulk_run_and_results_filter 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"conceptQuery":"Missing Settlement One","event":"evaluation.ontology_graph_task_created","expectedTrustLabel":"unsupported","schemaVersion":1,"taskId":"bea685cc-98c7-41ff-b33d-b555fe05fb6f"}
+{"durationMs":3.97,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks","requestId":"80d1973d-8bd6-43ba-9873-d7e6b9d1cdfd","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks "HTTP/1.1 201 Created"
+{"conceptQuery":"Missing Settlement Two","event":"evaluation.ontology_graph_task_created","expectedTrustLabel":"unsupported","schemaVersion":1,"taskId":"b2aa221b-33a6-4e4c-8535-cdd4ea87bb09"}
+{"durationMs":3.51,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks","requestId":"8dfe6d49-e3a7-4a27-b659-74db51bfbd4a","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks "HTTP/1.1 201 Created"
+{"event":"evaluation.ontology_graph_run_completed","ontologyGraphTaskSuccessRate":1.0,"schemaVersion":1,"successCount":2,"totalCount":2}
+{"durationMs":4.39,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/run","requestId":"17872dd9-4c3a-4ad7-af30-bae3d43bf73e","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/run "HTTP/1.1 200 OK"
+{"durationMs":2.3,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/ontology/results","requestId":"774ef4e3-b4fa-4046-ab29-2ba3f5d91935","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/evaluations/ontology/results?taskId=bea685cc-98c7-41ff-b33d-b555fe05fb6f "HTTP/1.1 200 OK"
+PASSED                                                                   [ 83%]
+tests/integration/test_ontology_evaluations_api.py::test_ontology_graph_evaluation_list_read_and_missing_routes 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"conceptQuery":"Missing Settlement","event":"evaluation.ontology_graph_task_created","expectedTrustLabel":"unsupported","schemaVersion":1,"taskId":"6b4a6ec8-1886-401e-8dc3-1d4f8e6b911c"}
+{"durationMs":4.06,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks","requestId":"09155b93-01b0-47d8-aadf-4ab2cc517e57","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks "HTTP/1.1 201 Created"
+{"durationMs":2.41,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/ontology/tasks","requestId":"67c9c02d-85e0-49c1-8dc5-4cbba5b9d4e0","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/evaluations/ontology/tasks "HTTP/1.1 200 OK"
+{"durationMs":2.42,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/ontology/tasks/6b4a6ec8-1886-401e-8dc3-1d4f8e6b911c","requestId":"807b6550-0d9f-40fa-bc5d-4519dea7dce8","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/evaluations/ontology/tasks/6b4a6ec8-1886-401e-8dc3-1d4f8e6b911c "HTTP/1.1 200 OK"
+{"event":"evaluation.ontology_graph_task_completed","resultId":"47857a88-e0c8-424b-b39d-1befe7fdeacb","schemaVersion":1,"success":true,"taskId":"6b4a6ec8-1886-401e-8dc3-1d4f8e6b911c","trustLabel":"unsupported"}
+{"durationMs":3.75,"event":"http.request.completed","method":"POST","path":"/v1/evaluations/ontology/tasks/6b4a6ec8-1886-401e-8dc3-1d4f8e6b911c/run","requestId":"0fee3142-5220-4788-a609-3a1f63259e8d","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evaluations/ontology/tasks/6b4a6ec8-1886-401e-8dc3-1d4f8e6b911c/run "HTTP/1.1 200 OK"
+{"durationMs":2.29,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/ontology/results/47857a88-e0c8-424b-b39d-1befe7fdeacb","requestId":"1f9082dc-416c-4bba-a12b-d196ca9c3f07","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/evaluations/ontology/results/47857a88-e0c8-424b-b39d-1befe7fdeacb "HTTP/1.1 200 OK"
+{"durationMs":1.97,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/ontology/tasks/missing-task","requestId":"6f4b438e-70a6-48aa-9a3f-779a0e8e6f4a","schemaVersion":1,"statusCode":404}
+HTTP Request: GET http://testserver/v1/evaluations/ontology/tasks/missing-task "HTTP/1.1 404 Not Found"
+{"durationMs":2.48,"event":"http.request.completed","method":"GET","path":"/v1/evaluations/ontology/results/missing-result","requestId":"ed7a7c3f-a9c4-4772-8ce7-5b4d0177a23b","schemaVersion":1,"statusCode":404}
+HTTP Request: GET http://testserver/v1/evaluations/ontology/results/missing-result "HTTP/1.1 404 Not Found"
+PASSED                                                                   [100%]
+
+-- generated xml file: /mnt/data/cs_v17/cornerstone-backend/reports/junit.xml --
+============================== 6 passed in 3.31s ===============================
+exit_code=0

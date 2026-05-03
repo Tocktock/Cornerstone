@@ -1,0 +1,8 @@
+
+Proof summary: PLANNED — passed=0 failed=0 planned=1 skipped=0 total=1
+
+secret_scan: passed=0 failed=0 planned=1 skipped=0
+
+PLAN [secret_scan] secret_scan: Dry run; token scan was not executed.
+Saved JSON proof report to reports/proof-plan-v1.1.4.json
+Saved Markdown proof report to reports/proof-plan-v1.1.4.md

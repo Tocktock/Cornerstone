@@ -1,7 +1,7 @@
 # Cornerstone backend local/runtime ignores.
 #
 # Keep the backend release package trackable, including docs, tests, migrations,
-# scripts, and sanitized files under cornerstone-backend/reports/.
+# scripts, and sanitized files under backend/reports/.
 
 # Secrets and local environment files
 .env
@@ -65,11 +65,12 @@ site/
 /temp/
 /var/
 /local-data/
-/cornerstone-backend/data/
-/cornerstone-backend/tmp/
-/cornerstone-backend/temp/
-/cornerstone-backend/var/
-/cornerstone-backend/local-data/
+/backend/data/
+/backend/tmp/
+/backend/temp/
+/backend/var/
+/backend/local-data/
+/review-archives/
 
 # Logs and local process files
 *.log
@@ -77,8 +78,8 @@ site/
 *.pid.lock
 
 # Sanitized release reports are part of the backend artifact.
-!cornerstone-backend/reports/
-!cornerstone-backend/reports/**
+!/backend/reports/
+!/backend/reports/**
 
 # Docker/local service state
 .docker/

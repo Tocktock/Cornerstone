@@ -1,0 +1,37 @@
+# v1.8.0 changed files
+
+## Added
+- docs/45-connector-driven-reextraction-v1.8.0.md
+- docs/release/v1.8.0-connector-driven-reextraction-readiness.md
+- docs/release/v1.8.0-release-notes.md
+- migrations/versions/0016_ontology_reextraction_runs.py
+- reports/compile-report-v1.8.0.txt
+- reports/pytest-docs-v1.8.0.txt
+- reports/pytest-reextraction-v1.8.0.txt
+- reports/release-candidate-v1.8.0.txt
+- reports/service-smoke-v1.8.0.txt
+- reports/v1.8.0-changed-files.txt
+- reports/v1.8.0-verification-summary.txt
+- src/cornerstone/services/ontology_reextraction.py
+- tests/integration/test_ontology_reextraction_api.py
+
+## Modified
+- README.md
+- docs/01-api-contract.md
+- docs/release/api-freeze-review.md
+- docs/release/known-limitations.md
+- pyproject.toml
+- scripts/check_release_candidate.py
+- src/cornerstone/__init__.py
+- src/cornerstone/api/routes/manual_sources.py
+- src/cornerstone/api/routes/ontology.py
+- src/cornerstone/api/routes/sync_runtime.py
+- src/cornerstone/persistence/models.py
+- src/cornerstone/persistence/store.py
+- src/cornerstone/schemas.py
+- src/cornerstone/services/source_sync.py
+- src/cornerstone/services/sync_worker.py
+- src/cornerstone/store.py
+- tests/unit/test_release_candidate_docs.py
+
+## Removed

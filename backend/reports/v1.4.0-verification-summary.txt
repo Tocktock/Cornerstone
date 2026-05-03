@@ -1,0 +1,93 @@
+# v1.4.0 Verification Summary
+
+Version: v1.4.0
+Theme: LLM ontology extraction
+
+## Checks run
+
+```text
+python -S -m compileall -q src tests scripts
+result: passed
+report: reports/compile-report-v1.4.0.txt
+```
+
+```text
+python -S scripts/check_release_candidate.py
+result: passed
+report: reports/release-candidate-v1.4.0.txt
+```
+
+```text
+python -S <manual release-doc verification mirroring tests/unit/test_release_candidate_docs.py>
+result: equivalent checks passed (4 checks)
+report: reports/pytest-release-docs-v1.4.0.txt
+```
+
+```text
+python -m pytest tests/integration/test_ontology_extraction_api.py -q -k 'not persistent'
+result: 4 passed, 1 deselected
+report: reports/pytest-ontology-extraction-memory-v1.4.0.txt
+```
+
+```text
+python -m pytest tests/integration/test_ontology_api.py tests/integration/test_manual_uploads_api.py -q -k 'not persistent'
+result: 10 passed, 1 deselected
+report: reports/pytest-ontology-manual-memory-v1.4.0.txt
+```
+
+```text
+ontology extraction service smoke test
+result: passed
+report: reports/ontology-extraction-smoke-v1.4.0.txt
+```
+
+```text
+ontology route import smoke test
+result: passed
+report: reports/ontology-route-import-v1.4.0.txt
+```
+
+## Environment limitations
+
+The sandbox Python environment used for this packaging run does not have SQLAlchemy installed.
+Persistent-store integration tests and Alembic offline SQL generation therefore could not be fully executed in this environment.
+
+The attempted full ontology extraction integration test is recorded in:
+
+```text
+reports/pytest-ontology-extraction-v1.4.0.txt
+```
+
+It shows the in-memory tests passed before the persistent-store test failed at fixture setup due to:
+
+```text
+ModuleNotFoundError: No module named 'sqlalchemy'
+```
+
+The attempted ontology/manual integration test is recorded in:
+
+```text
+reports/pytest-ontology-manual-v1.4.0.txt
+```
+
+It similarly shows in-memory tests passed before a SQLAlchemy-backed persistence test failed at fixture setup.
+
+The Python process also emitted a spreadsheet runtime warmup traceback to stderr during some normal startup paths. It did not change successful command exit codes. One direct pytest invocation for the release-doc unit test hung in this sandbox, so the same assertions were executed with a minimal python -S verifier and recorded in reports/pytest-release-docs-v1.4.0.txt.
+
+## Trust boundary checks
+
+```text
+[x] Extraction creates OntologyExtractionRun records.
+[x] Extraction creates ConceptCandidates.
+[x] Extraction creates RelationCandidates.
+[x] Candidate status defaults to pending.
+[x] Candidates include evidenceFragmentIds.
+[x] Extraction does not create official Concepts.
+[x] Extraction does not create official ConceptRelations.
+[x] Extraction does not mutate the official graph.
+[x] Documentation states non-goals and next-version handoff.
+```
+
+## Result
+
+v1.4.0 is packaged as a candidate-only ontology extraction release.

@@ -1,0 +1,1552 @@
+{
+  "paths": {
+    "/v1/context/query": {
+      "get": {
+        "operationId": "query_context_v1_context_query_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroundedContextResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Query Context",
+        "tags": [
+          "context"
+        ]
+      }
+    },
+    "/v1/evaluations/ontology/results": {
+      "get": {
+        "operationId": "list_ontology_graph_eval_results_v1_evaluations_ontology_results_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "taskId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Taskid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OntologyGraphEvalResult"
+                  },
+                  "title": "Response List Ontology Graph Eval Results V1 Evaluations Ontology Results Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Ontology Graph Eval Results",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/ontology/results/{result_id}": {
+      "get": {
+        "operationId": "get_ontology_graph_eval_result_v1_evaluations_ontology_results__result_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "result_id",
+            "required": true,
+            "schema": {
+              "title": "Result Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyGraphEvalResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Ontology Graph Eval Result",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/ontology/run": {
+      "post": {
+        "operationId": "run_ontology_graph_eval_tasks_v1_evaluations_ontology_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/RunOntologyGraphEvalRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyGraphEvalRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Ontology Graph Eval Tasks",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/ontology/summary": {
+      "get": {
+        "operationId": "get_ontology_graph_eval_summary_v1_evaluations_ontology_summary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyGraphEvalMetricSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Ontology Graph Eval Summary",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/ontology/tasks": {
+      "get": {
+        "operationId": "list_ontology_graph_eval_tasks_v1_evaluations_ontology_tasks_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OntologyGraphEvalTask"
+                  },
+                  "title": "Response List Ontology Graph Eval Tasks V1 Evaluations Ontology Tasks Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Ontology Graph Eval Tasks",
+        "tags": [
+          "evaluations"
+        ]
+      },
+      "post": {
+        "operationId": "create_ontology_graph_eval_task_v1_evaluations_ontology_tasks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOntologyGraphEvalTaskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyGraphEvalTask"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Ontology Graph Eval Task",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/ontology/tasks/{task_id}": {
+      "get": {
+        "operationId": "get_ontology_graph_eval_task_v1_evaluations_ontology_tasks__task_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyGraphEvalTask"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Ontology Graph Eval Task",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/ontology/tasks/{task_id}/run": {
+      "post": {
+        "operationId": "run_ontology_graph_eval_task_v1_evaluations_ontology_tasks__task_id__run_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/RunOntologyGraphEvalTaskRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyGraphEvalResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Ontology Graph Eval Task",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/results": {
+      "get": {
+        "operationId": "list_eval_results_v1_evaluations_results_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "taskId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Taskid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GroundedContextEvalResult"
+                  },
+                  "title": "Response List Eval Results V1 Evaluations Results Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Eval Results",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/results/{result_id}": {
+      "get": {
+        "operationId": "get_eval_result_v1_evaluations_results__result_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "result_id",
+            "required": true,
+            "schema": {
+              "title": "Result Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroundedContextEvalResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Eval Result",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/run": {
+      "post": {
+        "operationId": "run_eval_tasks_v1_evaluations_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/RunGroundedContextEvalRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroundedContextEvalRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Eval Tasks",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/summary": {
+      "get": {
+        "operationId": "get_eval_summary_v1_evaluations_summary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroundedContextEvalMetricSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Eval Summary",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/tasks": {
+      "get": {
+        "operationId": "list_eval_tasks_v1_evaluations_tasks_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GroundedContextEvalTask"
+                  },
+                  "title": "Response List Eval Tasks V1 Evaluations Tasks Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Eval Tasks",
+        "tags": [
+          "evaluations"
+        ]
+      },
+      "post": {
+        "operationId": "create_eval_task_v1_evaluations_tasks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroundedContextEvalTaskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroundedContextEvalTask"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Eval Task",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/tasks/{task_id}": {
+      "get": {
+        "operationId": "get_eval_task_v1_evaluations_tasks__task_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroundedContextEvalTask"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Eval Task",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    },
+    "/v1/evaluations/tasks/{task_id}/run": {
+      "post": {
+        "operationId": "run_eval_task_v1_evaluations_tasks__task_id__run_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/RunGroundedContextEvalTaskRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroundedContextEvalResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Eval Task",
+        "tags": [
+          "evaluations"
+        ]
+      }
+    }
+  },
+  "schemas": {
+    "CitationSupportRef": {
+      "properties": {
+        "entityId": {
+          "title": "Entityid",
+          "type": "string"
+        },
+        "entityType": {
+          "$ref": "#/components/schemas/CitationSupportType"
+        },
+        "relationship": {
+          "default": "supports",
+          "title": "Relationship",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entityType",
+        "entityId"
+      ],
+      "title": "CitationSupportRef",
+      "type": "object"
+    },
+    "CitationSupportType": {
+      "enum": [
+        "concept",
+        "concept_relation",
+        "decision_record",
+        "evidence_fragment"
+      ],
+      "title": "CitationSupportType",
+      "type": "string"
+    },
+    "ConceptRef": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/components/schemas/ConceptStatus"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "status"
+      ],
+      "title": "ConceptRef",
+      "type": "object"
+    },
+    "ConceptRelationRef": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "relationType": {
+          "$ref": "#/components/schemas/RelationType"
+        },
+        "sourceConceptId": {
+          "title": "Sourceconceptid",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/components/schemas/RelationStatus"
+        },
+        "targetConceptId": {
+          "title": "Targetconceptid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "sourceConceptId",
+        "targetConceptId",
+        "relationType",
+        "status"
+      ],
+      "title": "ConceptRelationRef",
+      "type": "object"
+    },
+    "CreateGroundedContextEvalTaskRequest": {
+      "properties": {
+        "createdBy": {
+          "default": "system",
+          "minLength": 1,
+          "title": "Createdby",
+          "type": "string"
+        },
+        "expectedAnswerContains": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Expectedanswercontains",
+          "type": "array"
+        },
+        "expectedClarificationReduced": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expectedclarificationreduced"
+        },
+        "expectedFreshnessState": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/FreshnessState"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expectedTrustLabel": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/TrustLabel"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        },
+        "minEvidenceCount": {
+          "default": 1,
+          "minimum": 0.0,
+          "title": "Minevidencecount",
+          "type": "integer"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "query": {
+          "minLength": 1,
+          "title": "Query",
+          "type": "string"
+        },
+        "requireEvidence": {
+          "default": true,
+          "title": "Requireevidence",
+          "type": "boolean"
+        },
+        "requireOfficialAnswer": {
+          "default": false,
+          "title": "Requireofficialanswer",
+          "type": "boolean"
+        },
+        "requiredConceptIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requiredconceptids",
+          "type": "array"
+        },
+        "requiredDecisionRecordIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requireddecisionrecordids",
+          "type": "array"
+        },
+        "requiredEvidenceFragmentIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requiredevidencefragmentids",
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "query"
+      ],
+      "title": "CreateGroundedContextEvalTaskRequest",
+      "type": "object"
+    },
+    "DecisionRecordRef": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "DecisionRecordRef",
+      "type": "object"
+    },
+    "EvidenceCitation": {
+      "properties": {
+        "artifactId": {
+          "title": "Artifactid",
+          "type": "string"
+        },
+        "artifactTitle": {
+          "title": "Artifacttitle",
+          "type": "string"
+        },
+        "capturedAt": {
+          "format": "date-time",
+          "title": "Capturedat",
+          "type": "string"
+        },
+        "dataSourceId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Datasourceid"
+        },
+        "evidenceFragmentId": {
+          "title": "Evidencefragmentid",
+          "type": "string"
+        },
+        "freshnessState": {
+          "$ref": "#/components/schemas/FreshnessState"
+        },
+        "isValid": {
+          "default": true,
+          "title": "Isvalid",
+          "type": "boolean"
+        },
+        "reviewedAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewedat"
+        },
+        "reviewedBy": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewedby"
+        },
+        "sourceExternalId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sourceexternalid"
+        },
+        "sourceType": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/DataSourceType"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sourceUpdatedAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sourceupdatedat"
+        },
+        "sourceUrl": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sourceurl"
+        },
+        "supports": {
+          "items": {
+            "$ref": "#/components/schemas/CitationSupportRef"
+          },
+          "title": "Supports",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "trustState": {
+          "$ref": "#/components/schemas/TrustState"
+        },
+        "validityErrors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Validityerrors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "evidenceFragmentId",
+        "artifactId",
+        "text",
+        "artifactTitle",
+        "capturedAt",
+        "freshnessState",
+        "trustState"
+      ],
+      "title": "EvidenceCitation",
+      "type": "object"
+    },
+    "FreshnessSummary": {
+      "properties": {
+        "staleEvidenceCount": {
+          "default": 0,
+          "title": "Staleevidencecount",
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "#/components/schemas/FreshnessState"
+        },
+        "unknownEvidenceCount": {
+          "default": 0,
+          "title": "Unknownevidencecount",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "title": "FreshnessSummary",
+      "type": "object"
+    },
+    "GroundedContextEvalMetricSummary": {
+      "properties": {
+        "citationValidityRate": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Citationvalidityrate",
+          "type": "number"
+        },
+        "evaluatedResultCount": {
+          "default": 0,
+          "title": "Evaluatedresultcount",
+          "type": "integer"
+        },
+        "freshnessComplianceRate": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Freshnesscompliancerate",
+          "type": "number"
+        },
+        "generatedAt": {
+          "format": "date-time",
+          "title": "Generatedat",
+          "type": "string"
+        },
+        "groundedContextTaskSuccessRate": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Groundedcontexttasksuccessrate",
+          "type": "number"
+        },
+        "provenanceCoverageRate": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Provenancecoveragerate",
+          "type": "number"
+        },
+        "successfulResultCount": {
+          "default": 0,
+          "title": "Successfulresultcount",
+          "type": "integer"
+        },
+        "totalTaskCount": {
+          "default": 0,
+          "title": "Totaltaskcount",
+          "type": "integer"
+        },
+        "trustLabelCorrectnessRate": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Trustlabelcorrectnessrate",
+          "type": "number"
+        },
+        "unsupportedAnswerCorrectnessRate": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Unsupportedanswercorrectnessrate",
+          "type": "number"
+        }
+      },
+      "title": "GroundedContextEvalMetricSummary",
+      "type": "object"
+    },
+    "GroundedContextEvalResult": {
+      "properties": {
+        "answer": {
+          "title": "Answer",
+          "type": "string"
+        },
+        "answerCorrect": {
+          "title": "Answercorrect",
+          "type": "boolean"
+        },
+        "citationValidityRate": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Citationvalidityrate",
+          "type": "number"
+        },
+        "clarificationReduced": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clarificationreduced"
+        },
+        "evaluatedAt": {
+          "format": "date-time",
+          "title": "Evaluatedat",
+          "type": "string"
+        },
+        "evaluatedBy": {
+          "default": "system",
+          "minLength": 1,
+          "title": "Evaluatedby",
+          "type": "string"
+        },
+        "evidenceValid": {
+          "title": "Evidencevalid",
+          "type": "boolean"
+        },
+        "failureReasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Failurereasons",
+          "type": "array"
+        },
+        "freshnessPolicyRespected": {
+          "title": "Freshnesspolicyrespected",
+          "type": "boolean"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "provenancePresent": {
+          "title": "Provenancepresent",
+          "type": "boolean"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "response": {
+          "$ref": "#/components/schemas/GroundedContextResponse"
+        },
+        "responseId": {
+          "title": "Responseid",
+          "type": "string"
+        },
+        "success": {
+          "title": "Success",
+          "type": "boolean"
+        },
+        "taskId": {
+          "title": "Taskid",
+          "type": "string"
+        },
+        "trustLabel": {
+          "$ref": "#/components/schemas/TrustLabel"
+        },
+        "trustLabelCorrect": {
+          "title": "Trustlabelcorrect",
+          "type": "boolean"
+        },
+        "unsupportedOfficialClaim": {
+          "title": "Unsupportedofficialclaim",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "taskId",
+        "responseId",
+        "query",
+        "answer",
+        "trustLabel",
+        "response",
+        "answerCorrect",
+        "evidenceValid",
+        "provenancePresent",
+        "trustLabelCorrect",
+        "freshnessPolicyRespected",
+        "unsupportedOfficialClaim",
+        "citationValidityRate",
+        "success"
+      ],
+      "title": "GroundedContextEvalResult",
+      "type": "object"
+    },
+    "GroundedContextEvalRunResponse": {
+      "properties": {
+        "groundedContextTaskSuccessRate": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Groundedcontexttasksuccessrate",
+          "type": "number"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/components/schemas/GroundedContextEvalResult"
+          },
+          "title": "Results",
+          "type": "array"
+        },
+        "successCount": {
+          "title": "Successcount",
+          "type": "integer"
+        },
+        "totalCount": {
+          "title": "Totalcount",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "results",
+        "totalCount",
+        "successCount",
+        "groundedContextTaskSuccessRate"
+      ],
+      "title": "GroundedContextEvalRunResponse",
+      "type": "object"
+    },
+    "GroundedContextEvalTask": {
+      "properties": {
+        "createdAt": {
+          "format": "date-time",
+          "title": "Createdat",
+          "type": "string"
+        },
+        "createdBy": {
+          "default": "system",
+          "minLength": 1,
+          "title": "Createdby",
+          "type": "string"
+        },
+        "expectedAnswerContains": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Expectedanswercontains",
+          "type": "array"
+        },
+        "expectedClarificationReduced": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expectedclarificationreduced"
+        },
+        "expectedFreshnessState": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/FreshnessState"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expectedTrustLabel": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/TrustLabel"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        },
+        "minEvidenceCount": {
+          "default": 1,
+          "minimum": 0.0,
+          "title": "Minevidencecount",
+          "type": "integer"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "query": {
+          "minLength": 1,
+          "title": "Query",
+          "type": "string"
+        },
+        "requireEvidence": {
+          "default": true,
+          "title": "Requireevidence",
+          "type": "boolean"
+        },
+        "requireOfficialAnswer": {
+          "default": false,
+          "title": "Requireofficialanswer",
+          "type": "boolean"
+        },
+        "requiredConceptIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requiredconceptids",
+          "type": "array"
+        },
+        "requiredDecisionRecordIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requireddecisionrecordids",
+          "type": "array"
+        },
+        "requiredEvidenceFragmentIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requiredevidencefragmentids",
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "title": "Updatedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "query"
+      ],
+      "title": "GroundedContextEvalTask",
+      "type": "object"
+    },
+    "GroundedContextResponse": {
+      "properties": {
+        "answer": {
+          "title": "Answer",
+          "type": "string"
+        },
+        "concepts": {
+          "items": {
+            "$ref": "#/components/schemas/ConceptRef"
+          },
+          "title": "Concepts",
+          "type": "array"
+        },
+        "decisions": {
+          "items": {
+            "$ref": "#/components/schemas/DecisionRecordRef"
+          },
+          "title": "Decisions",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/components/schemas/EvidenceCitation"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "freshness": {
+          "$ref": "#/components/schemas/FreshnessSummary"
+        },
+        "generatedAt": {
+          "format": "date-time",
+          "title": "Generatedat",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "officialAnswerAvailable": {
+          "default": false,
+          "title": "Officialansweravailable",
+          "type": "boolean"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "relations": {
+          "items": {
+            "$ref": "#/components/schemas/ConceptRelationRef"
+          },
+          "title": "Relations",
+          "type": "array"
+        },
+        "responseId": {
+          "title": "Responseid",
+          "type": "string"
+        },
+        "trustLabel": {
+          "$ref": "#/components/schemas/TrustLabel"
+        }
+      },
+      "required": [
+        "query",
+        "answer",
+        "trustLabel",
+        "freshness"
+      ],
+      "title": "GroundedContextResponse",
+      "type": "object"
+    },
+    "RunGroundedContextEvalRequest": {
+      "properties": {
+        "evaluatedBy": {
+          "default": "system",
+          "minLength": 1,
+          "title": "Evaluatedby",
+          "type": "string"
+        },
+        "taskIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Taskids",
+          "type": "array"
+        }
+      },
+      "title": "RunGroundedContextEvalRequest",
+      "type": "object"
+    },
+    "RunGroundedContextEvalTaskRequest": {
+      "properties": {
+        "clarificationReduced": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clarificationreduced"
+        },
+        "evaluatedBy": {
+          "default": "system",
+          "minLength": 1,
+          "title": "Evaluatedby",
+          "type": "string"
+        }
+      },
+      "title": "RunGroundedContextEvalTaskRequest",
+      "type": "object"
+    },
+    "TrustLabel": {
+      "enum": [
+        "official",
+        "evidence_supported",
+        "partially_supported",
+        "stale",
+        "conflicted",
+        "unsupported"
+      ],
+      "title": "TrustLabel",
+      "type": "string"
+    }
+  }
+}

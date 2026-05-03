@@ -1,0 +1,8 @@
+{
+  "config": {
+    "baseUrl": "http://localhost:8000",
+    "defaultReportsDir": "reports",
+    "defaultReviewer": null
+  },
+  "path": "/tmp/cornerstone-cli-v114/config.json"
+}

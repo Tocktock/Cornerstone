@@ -1,0 +1,2 @@
+/opt/pyvenv/bin/python: No module named alembic
+exit_code=1

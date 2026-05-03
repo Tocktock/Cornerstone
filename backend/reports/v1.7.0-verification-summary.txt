@@ -1,0 +1,55 @@
+Cornerstone v1.7.0 verification summary
+=======================================
+
+Release theme:
+Ontology Evaluation — read-only evaluation tasks/results/summary for served ontology graphs.
+
+Passed checks in this sandbox:
+
+1. Syntax compilation
+   Command: python -m compileall -q src tests scripts
+   Result: exit_code=0
+   Report: reports/compile-report-v1.7.0.txt
+
+2. Ontology evaluation API tests
+   Command: python -m pytest tests/integration/test_ontology_evaluations_api.py -q
+   Result: 6 passed
+   Report: reports/ontology-evaluation-tests-v1.7.0.txt
+
+3. OpenAPI contract snapshot tests
+   Command: python -m pytest tests/integration/test_openapi_contract.py -q
+   Result: 2 passed
+   Report: reports/openapi-contract-v1.7.0.txt
+
+4. Release documentation tests
+   Command: python -m pytest tests/unit/test_release_candidate_docs.py -q
+   Result: 4 passed
+   Report: reports/pytest-docs-v1.7.0.txt
+
+5. Release candidate static check
+   Command: python scripts/check_release_candidate.py
+   Result: release-candidate check passed for v1.7.0
+   Report: reports/release-candidate-v1.7.0.txt
+
+6. Ontology/manual-upload regression subset
+   Command: python -m pytest tests/integration/test_ontology_api.py tests/integration/test_manual_uploads_api.py tests/integration/test_ontology_extraction_api.py tests/integration/test_ontology_candidate_review_api.py tests/integration/test_ontology_evaluations_api.py -q -k 'not persistent and not sqlalchemy'
+   Result: 26 passed, 2 deselected
+   Report: reports/ontology-regression-v1.7.0.txt
+
+7. Grounded evaluation regression subset
+   Command: python -m pytest tests/integration/test_evaluations_api.py tests/unit/test_evaluation.py -q -k 'not persistent'
+   Result: 15 passed, 1 deselected
+   Report: reports/grounded-evaluation-regression-v1.7.0.txt
+
+Environment limitations:
+
+- SQLAlchemy is not installed in this sandbox.
+- Alembic is not installed in this sandbox.
+- Ruff is not installed in this sandbox.
+- mypy is not installed in this sandbox.
+
+Therefore persistent-store tests, Alembic offline SQL generation, Ruff, and mypy were not fully executed here. They should be rerun in a dependency-complete development environment.
+
+SSOT boundary check:
+
+v1.7.0 evaluation is read-only. It creates evaluation tasks/results only and does not create, edit, approve, reject, merge, or delete Concepts, ConceptRelations, candidates, EvidenceFragments, Artifacts, or source records.

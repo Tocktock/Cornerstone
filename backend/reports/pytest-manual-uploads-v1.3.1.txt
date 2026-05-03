@@ -1,0 +1,88 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.5', 'Platform': 'Linux-4.4.0-x86_64-with-glibc2.41', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'metadata': '3.1.1', 'asyncio': '1.3.0', 'ddtrace': '4.4.0', 'anyio': '4.12.1', 'Faker': '40.1.2', 'cov': '7.0.0', 'json-report': '1.5.0'}, 'PLATFORM': 'linux/amd64', 'CI': 'true'}
+rootdir: /mnt/data/cornerstone-v1.3.1-work/cornerstone-backend
+configfile: pyproject.toml
+plugins: metadata-3.1.1, asyncio-1.3.0, ddtrace-4.4.0, anyio-4.12.1, Faker-40.1.2, cov-7.0.0, json-report-1.5.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 5 items
+
+tests/integration/test_manual_uploads_api.py::test_manual_file_upload_creates_artifacts_and_evidence 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Manual Uploads","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"ed369b9f-d494-45bd-b303-9e79829bfc3d","sourceName":"Manual Uploads","sourceType":"manual","status":"connected"}
+{"durationMs":3.51,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"4c1d4346-cd0f-42d1-a867-fdde4a15b458","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"manual_source.file_upload_requested","fileCount":1,"schemaVersion":1,"sourceId":"ed369b9f-d494-45bd-b303-9e79829bfc3d"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"ed369b9f-d494-45bd-b303-9e79829bfc3d","sourceType":"manual","startedAt":"2026-04-30T07:13:44.795523+00:00"}
+{"artifactId":"1b5fcc19-da9a-48ee-851c-3a57ff9e2af6","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"manual-upload:settlement.md","sourceId":"ed369b9f-d494-45bd-b303-9e79829bfc3d"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"ed369b9f-d494-45bd-b303-9e79829bfc3d","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":12.03,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/ed369b9f-d494-45bd-b303-9e79829bfc3d/uploads","requestId":"6933cdae-a2cc-4967-96e3-868785f64c4f","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/ed369b9f-d494-45bd-b303-9e79829bfc3d/uploads "HTTP/1.1 200 OK"
+PASSED                                                                   [ 20%]
+tests/integration/test_manual_uploads_api.py::test_manual_file_upload_is_idempotent_for_same_filename_and_content 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Manual Uploads","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"d348c948-fac2-427b-a146-32af571d9a39","sourceName":"Manual Uploads","sourceType":"manual","status":"connected"}
+{"durationMs":2.66,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"4ae26a14-c39b-4ef2-8293-cf64c5d0e624","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"manual_source.file_upload_requested","fileCount":1,"schemaVersion":1,"sourceId":"d348c948-fac2-427b-a146-32af571d9a39"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"d348c948-fac2-427b-a146-32af571d9a39","sourceType":"manual","startedAt":"2026-04-30T07:13:44.871795+00:00"}
+{"artifactId":"193c9f74-d974-44b0-8b39-26f855f87fbf","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"manual-upload:settlement.txt","sourceId":"d348c948-fac2-427b-a146-32af571d9a39"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"d348c948-fac2-427b-a146-32af571d9a39","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":3.92,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/d348c948-fac2-427b-a146-32af571d9a39/uploads","requestId":"86fb2b96-5780-4618-b1c0-4def057710cc","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/d348c948-fac2-427b-a146-32af571d9a39/uploads "HTTP/1.1 200 OK"
+{"event":"manual_source.file_upload_requested","fileCount":1,"schemaVersion":1,"sourceId":"d348c948-fac2-427b-a146-32af571d9a39"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"d348c948-fac2-427b-a146-32af571d9a39","sourceType":"manual","startedAt":"2026-04-30T07:13:44.879150+00:00"}
+{"artifactId":"193c9f74-d974-44b0-8b39-26f855f87fbf","event":"artifact.reused","evidenceFragmentCount":2,"schemaVersion":1,"sourceExternalId":"manual-upload:settlement.txt","sourceId":"d348c948-fac2-427b-a146-32af571d9a39"}
+{"artifactCount":1,"artifactCreatedCount":0,"artifactReusedCount":1,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"d348c948-fac2-427b-a146-32af571d9a39","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":3.59,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/d348c948-fac2-427b-a146-32af571d9a39/uploads","requestId":"92daa836-06c2-4177-bfec-cd557e1854e8","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/d348c948-fac2-427b-a146-32af571d9a39/uploads "HTTP/1.1 200 OK"
+PASSED                                                                   [ 40%]
+tests/integration/test_manual_uploads_api.py::test_manual_file_upload_rejects_pdf 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Manual Uploads","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"bdfb8a8d-460f-4ba9-99f1-0f758413bda7","sourceName":"Manual Uploads","sourceType":"manual","status":"connected"}
+{"durationMs":3.07,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"8fd89c3b-70ce-4e2a-8bc7-c1181a6f328a","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"detail":"Uploaded file appears to be binary: settlement.pdf","event":"manual_source.file_upload_rejected","filename":"settlement.pdf","reason":"unsupported_type","schemaVersion":1,"sourceId":"bdfb8a8d-460f-4ba9-99f1-0f758413bda7"}
+{"durationMs":2.62,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/bdfb8a8d-460f-4ba9-99f1-0f758413bda7/uploads","requestId":"9d963135-25c9-4a8b-a4ce-fe1f465afe81","schemaVersion":1,"statusCode":415}
+HTTP Request: POST http://testserver/v1/manual-sources/bdfb8a8d-460f-4ba9-99f1-0f758413bda7/uploads "HTTP/1.1 415 Unsupported Media Type"
+PASSED                                                                   [ 60%]
+tests/integration/test_manual_uploads_api.py::test_manual_file_upload_rejects_invalid_utf8_text 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Manual Uploads","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"ce54013a-5757-4525-a2bc-12db361b19ae","sourceName":"Manual Uploads","sourceType":"manual","status":"connected"}
+{"durationMs":2.85,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"35af275d-222f-4b4a-8eba-da41335ffda2","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"detail":"Uploaded file must be UTF-8 text: settlement.txt","event":"manual_source.file_upload_rejected","filename":"settlement.txt","reason":"unsupported_type","schemaVersion":1,"sourceId":"ce54013a-5757-4525-a2bc-12db361b19ae"}
+{"durationMs":2.05,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/ce54013a-5757-4525-a2bc-12db361b19ae/uploads","requestId":"b1cef0fe-2848-48a9-825f-3ec30718c34c","schemaVersion":1,"statusCode":415}
+HTTP Request: POST http://testserver/v1/manual-sources/ce54013a-5757-4525-a2bc-12db361b19ae/uploads "HTTP/1.1 415 Unsupported Media Type"
+PASSED                                                                   [ 80%]
+tests/integration/test_manual_uploads_api.py::test_manual_text_upload_creates_uploaded_text_artifact 
+-------------------------------- live log setup --------------------------------
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+-------------------------------- live log call ---------------------------------
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Manual Uploads","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"bf10b263-d1a9-4c50-b73d-ce5fa25bd5da","sourceName":"Manual Uploads","sourceType":"manual","status":"connected"}
+{"durationMs":2.51,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"ca622dbe-506d-463f-9acc-d4ed0948516c","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"manual_source.text_upload_requested","objectCount":1,"schemaVersion":1,"sourceId":"bf10b263-d1a9-4c50-b73d-ce5fa25bd5da"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"bf10b263-d1a9-4c50-b73d-ce5fa25bd5da","sourceType":"manual","startedAt":"2026-04-30T07:13:45.050459+00:00"}
+{"artifactId":"97eb931f-e697-4814-ad59-6c60e0dd2158","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"manual-upload:text:Settlement Notes","sourceId":"bf10b263-d1a9-4c50-b73d-ce5fa25bd5da"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"bf10b263-d1a9-4c50-b73d-ce5fa25bd5da","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":3.77,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/bf10b263-d1a9-4c50-b73d-ce5fa25bd5da/uploads/text","requestId":"b9a69ce1-be01-4a77-a53c-5ce4a84a4abc","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/bf10b263-d1a9-4c50-b73d-ce5fa25bd5da/uploads/text "HTTP/1.1 200 OK"
+PASSED                                                                   [100%]
+
+- generated xml file: /mnt/data/cornerstone-v1.3.1-work/cornerstone-backend/reports/junit.xml -
+============================== 5 passed in 2.66s ===============================

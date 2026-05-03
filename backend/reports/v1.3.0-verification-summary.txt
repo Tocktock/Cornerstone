@@ -1,0 +1,65 @@
+Cornerstone v1.3.0 Verification Summary
+========================================
+
+Release theme
+-------------
+Ontology graph runtime.
+
+Goal
+----
+Add a narrow runtime ontology API over existing Concepts and ConceptRelations:
+- ontology search by concept name or alias
+- depth-1 ontology graph lookup
+- official/candidate/mixed graph modes
+- explainable graph nodes and edges with evidence citations and trust labels
+
+Explicit non-goals
+------------------
+- no LLM ontology extraction
+- no ConceptCandidate or RelationCandidate runtime
+- no manual file upload ingestion
+- no vector search
+- no graph UI
+- no graph database
+- no inferred relations
+- no depth greater than 1
+
+Verification commands
+---------------------
+python -m compileall -q src tests scripts
+Result: exit_code=0
+Report: reports/compile-report-v1.3.0.txt
+
+python scripts/check_release_candidate.py
+Result: exit_code=0
+Report: reports/release-candidate-v1.3.0.txt
+
+python -m ruff check <v1.3.0 modified/new source and test files>
+Result: exit_code=0
+Report: reports/ruff-targeted-v1.3.0.txt
+
+python -m mypy <v1.3.0 modified/new source files> --show-error-codes --no-color-output --no-incremental
+Result: exit_code=0
+Report: reports/mypy-targeted-v1.3.0.txt
+
+python -m pytest -q
+Result: exit_code=0
+Report: reports/pytest-v1.3.0.txt
+Summary: 264 passed, 6 skipped
+Skipped tests: live Notion E2E and live PostgreSQL tests gated by environment variables.
+
+DATABASE_URL='postgresql+psycopg://cornerstone:cornerstone@localhost:5432/cornerstone' python -m alembic upgrade head --sql
+Result: exit_code=0
+Reports: reports/alembic-offline-v1.3.0.sql, reports/alembic-offline-v1.3.0.log
+
+Implementation boundary check
+-----------------------------
+The v1.3.0 code does not call an LLM and does not create ontology candidates. It exposes graph/search behavior only from Concepts, Concept aliases, ConceptRelations, EvidenceFragments, and existing review/officialization state.
+
+Known limitations
+-----------------
+- Graph depth is intentionally capped at 1.
+- Candidate graph mode uses existing non-official Concept/Relation states; dedicated ConceptCandidate and RelationCandidate models are deferred.
+- Alias persistence is implemented for PostgreSQL and memory model behavior is represented on the Concept object; broader deduplication policy is deferred to v1.4.1.
+- No UI is included.
+- No live PostgreSQL or live connector proof was run in this sandbox.

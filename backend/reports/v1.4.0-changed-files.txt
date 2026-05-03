@@ -1,0 +1,36 @@
+Changed or added files relative to v1.3.1:
+README.md
+docs/01-api-contract.md
+docs/41-llm-ontology-extraction-v1.4.0.md
+docs/release/api-freeze-review.md
+docs/release/known-limitations.md
+docs/release/v1.4.0-llm-ontology-extraction-readiness.md
+docs/release/v1.4.0-release-notes.md
+migrations/versions/0013_ontology_extraction_candidates.py
+pyproject.toml
+reports/compile-report-v1.4.0.txt
+reports/junit.xml
+reports/ontology-extraction-smoke-v1.4.0.txt
+reports/ontology-route-import-v1.4.0.txt
+reports/pytest-ontology-extraction-memory-v1.4.0.txt
+reports/pytest-ontology-extraction-v1.4.0.txt
+reports/pytest-ontology-manual-memory-v1.4.0.txt
+reports/pytest-ontology-manual-v1.4.0.txt
+reports/pytest-release-docs-v1.4.0.txt
+reports/release-candidate-v1.4.0.txt
+reports/v1.4.0-changed-files.txt
+reports/v1.4.0-verification-summary.txt
+scripts/check_release_candidate.py
+src/cornerstone/__init__.py
+src/cornerstone/api/routes/ontology.py
+src/cornerstone/main.py
+src/cornerstone/persistence/models.py
+src/cornerstone/persistence/store.py
+src/cornerstone/schemas.py
+src/cornerstone/services/ontology_extraction.py
+src/cornerstone/store.py
+tests/integration/test_ontology_extraction_api.py
+tests/unit/test_release_candidate_docs.py
+
+Removed files relative to v1.3.1:
+

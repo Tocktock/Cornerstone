@@ -1,0 +1,68 @@
+# Cornerstone v1.8.0 Verification Summary
+
+Version: 1.8.0
+Release: Connector-driven re-extraction
+
+## Commands executed
+
+```bash
+python -S -m compileall -q src tests scripts
+```
+
+Result: passed.
+
+```bash
+python -S scripts/check_release_candidate.py
+```
+
+Result:
+
+```text
+release-candidate check: passed for v1.8.0
+required_docs=57
+package_hygiene=passed
+api_freeze_review=present
+live_proof_record=present
+rc_tag_plan=present
+```
+
+```bash
+pytest tests/unit/test_release_candidate_docs.py -q
+```
+
+Result: 4 passed.
+
+```bash
+pytest tests/integration/test_ontology_reextraction_api.py -q
+```
+
+Observed result: 6 passed in the captured pytest summary. The sandbox command timed out during Python/TestClient teardown after pytest printed the success summary, consistent with the known sandbox runtime shutdown issue.
+
+Direct service smoke result: passed.
+
+## Covered behavior
+
+```text
+- manual uploaded text queues OntologyReExtractionRun
+- queued run remains candidate-only before execution
+- running re-extraction creates ConceptCandidates and RelationCandidates
+- official graph remains unchanged after re-extraction
+- exact artifact reuse does not queue duplicate re-extraction
+- changed artifact content queues a new re-extraction run
+- source-wide manual re-extraction can run inline
+- connector sync worker queues ontology.reextraction_queued event
+- officialGraphMutated remains false
+- release docs and API freeze checks include v1.8.0
+```
+
+## Not fully executed in this sandbox
+
+```text
+- SQLAlchemy persistent-store tests
+- Alembic offline SQL generation
+- Ruff
+- mypy
+- full pytest suite
+```
+
+Reason: the sandbox Python environment lacks SQLAlchemy, Alembic, Ruff, and mypy. Normal Python/TestClient execution can also hang during interpreter teardown; `python -S` static checks and direct service smoke verification were used where possible.

@@ -1,0 +1,237 @@
+exit_code=1
+STDOUT:
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /opt/pyvenv/bin/python
+cachedir: .pytest_cache
+metadata: {'Python': '3.13.5', 'Platform': 'Linux-4.4.0-x86_64-with-glibc2.41', 'Packages': {'pytest': '9.0.2', 'pluggy': '1.6.0'}, 'Plugins': {'cov': '7.0.0', 'metadata': '3.1.1', 'ddtrace': '4.4.0', 'Faker': '40.1.2', 'asyncio': '1.3.0', 'json-report': '1.5.0', 'anyio': '4.12.1'}, 'PLATFORM': 'linux/amd64', 'CI': 'true'}
+rootdir: /mnt/data/cornerstone_v140_final/cornerstone-backend
+configfile: pyproject.toml
+plugins: cov-7.0.0, metadata-3.1.1, ddtrace-4.4.0, Faker-40.1.2, asyncio-1.3.0, json-report-1.5.0, anyio-4.12.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+[1mcollecting ... [0mcollected 11 items
+
+tests/integration/test_ontology_api.py::test_ontology_search_finds_official_concept_by_alias 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Pilot Domain","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"3aeba8b3-6c6e-443a-ac39-45eb7117e213","sourceName":"Pilot Domain","sourceType":"manual","status":"connected"}
+{"durationMs":4.92,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"6f819791-b39c-4df9-8228-c116a1a3ffdc","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"3aeba8b3-6c6e-443a-ac39-45eb7117e213","sourceType":"manual","startedAt":"2026-04-30T09:47:37.751828+00:00"}
+{"artifactId":"54246388-afa8-47e7-b68b-c80054f06cb3","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"doc-1","sourceId":"3aeba8b3-6c6e-443a-ac39-45eb7117e213"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"3aeba8b3-6c6e-443a-ac39-45eb7117e213","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":7.37,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/3aeba8b3-6c6e-443a-ac39-45eb7117e213/sync","requestId":"94ba7c35-0f7c-4f31-8b07-abab3c5da8ed","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/3aeba8b3-6c6e-443a-ac39-45eb7117e213/sync "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"efa1b9a2-c606-4a5e-9e2a-ad20bb43ca07","event":"evidence.reviewed","evidenceFragmentId":"e6f40a7f-677e-42f4-904e-505c67f85e5f","schemaVersion":1,"trustState":"reviewed"}
+{"durationMs":4.35,"event":"http.request.completed","method":"POST","path":"/v1/evidence/e6f40a7f-677e-42f4-904e-505c67f85e5f/review","requestId":"9395a899-a79f-4e0d-8133-fcc95bfa6887","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evidence/e6f40a7f-677e-42f4-904e-505c67f85e5f/review "HTTP/1.1 200 OK"
+[1m-------------------------------- live log call ---------------------------------[0m
+{"actor":"reviewer@example.com","auditEventId":"1a9af01d-1d49-4404-aead-8b498201783b","conceptId":"e6871f77-17bc-49f9-a259-3856b04ea6cd","decisionRecordCount":0,"event":"concept.created","evidenceFragmentCount":1,"name":"Settlement","schemaVersion":1,"status":"candidate"}
+{"durationMs":4.1,"event":"http.request.completed","method":"POST","path":"/v1/concepts","requestId":"650d7910-fbea-43c3-add5-ea406b32e928","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concepts "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptId":"e6871f77-17bc-49f9-a259-3856b04ea6cd","decisionRecordCount":0,"event":"concept.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"2464d385-a0b4-4002-8ecb-78488d3d6ecd","conceptId":"e6871f77-17bc-49f9-a259-3856b04ea6cd","event":"concept.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":4.67,"event":"http.request.completed","method":"POST","path":"/v1/concepts/e6871f77-17bc-49f9-a259-3856b04ea6cd/officialize","requestId":"524bc380-5293-41f2-b5cd-4c224d23a6ae","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concepts/e6871f77-17bc-49f9-a259-3856b04ea6cd/officialize "HTTP/1.1 200 OK"
+{"event":"ontology.search","mode":"official","query":"payment settlement","resultCount":1,"schemaVersion":1}
+{"durationMs":3.33,"event":"http.request.completed","method":"GET","path":"/v1/ontology/search","requestId":"2bfc5ffe-f21b-4519-8472-90a81c0739ca","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/search?q=payment+settlement "HTTP/1.1 200 OK"
+[32mPASSED[0m[32m                                                                   [  9%][0m
+tests/integration/test_ontology_api.py::test_ontology_graph_returns_depth_one_official_nodes_edges_and_citations 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Pilot Domain","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"54ab1c30-ce99-492c-ad7d-d4ef59311612","sourceName":"Pilot Domain","sourceType":"manual","status":"connected"}
+{"durationMs":4.2,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"bbf71058-2f5a-4da9-aa88-3010be98f6a7","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"54ab1c30-ce99-492c-ad7d-d4ef59311612","sourceType":"manual","startedAt":"2026-04-30T09:47:37.947849+00:00"}
+{"artifactId":"c18cc367-1b5f-4c8d-956c-48135c7c8fd3","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"doc-1","sourceId":"54ab1c30-ce99-492c-ad7d-d4ef59311612"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"54ab1c30-ce99-492c-ad7d-d4ef59311612","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":5.54,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/54ab1c30-ce99-492c-ad7d-d4ef59311612/sync","requestId":"815a1ea4-0d5d-4a13-baaf-86b4ca5c77eb","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/54ab1c30-ce99-492c-ad7d-d4ef59311612/sync "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"eb15314d-b740-4935-8693-d29aa3a67f33","event":"evidence.reviewed","evidenceFragmentId":"c421f2fd-4219-4d78-b89f-650500cc5834","schemaVersion":1,"trustState":"reviewed"}
+{"durationMs":4.13,"event":"http.request.completed","method":"POST","path":"/v1/evidence/c421f2fd-4219-4d78-b89f-650500cc5834/review","requestId":"b62b9226-eb98-443e-af0c-9cc6c1ac2357","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evidence/c421f2fd-4219-4d78-b89f-650500cc5834/review "HTTP/1.1 200 OK"
+[1m-------------------------------- live log call ---------------------------------[0m
+{"actor":"reviewer@example.com","auditEventId":"05703550-13a5-4e1f-aaab-23ca8a5a554c","conceptId":"debee7d8-f7e4-4a55-bd43-6f64a0b3edd7","decisionRecordCount":0,"event":"concept.created","evidenceFragmentCount":1,"name":"Settlement","schemaVersion":1,"status":"candidate"}
+{"durationMs":3.73,"event":"http.request.completed","method":"POST","path":"/v1/concepts","requestId":"ca10eb83-5ab7-43a0-a0fd-dc636a8ef428","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concepts "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptId":"debee7d8-f7e4-4a55-bd43-6f64a0b3edd7","decisionRecordCount":0,"event":"concept.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"bb7d8126-b31f-4848-b1ed-ae72608745c9","conceptId":"debee7d8-f7e4-4a55-bd43-6f64a0b3edd7","event":"concept.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":4.59,"event":"http.request.completed","method":"POST","path":"/v1/concepts/debee7d8-f7e4-4a55-bd43-6f64a0b3edd7/officialize","requestId":"84dca2d2-2c5e-4c8d-a209-e1bca0eafd10","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concepts/debee7d8-f7e4-4a55-bd43-6f64a0b3edd7/officialize "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"3d36fd2f-b737-4954-b281-2853ddfbd0da","conceptId":"cca1041c-08c6-487e-a23d-e0615319361e","decisionRecordCount":0,"event":"concept.created","evidenceFragmentCount":1,"name":"Ledger","schemaVersion":1,"status":"candidate"}
+{"durationMs":3.94,"event":"http.request.completed","method":"POST","path":"/v1/concepts","requestId":"d6c41fbc-473d-4fc2-b431-2c8338d584a3","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concepts "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptId":"cca1041c-08c6-487e-a23d-e0615319361e","decisionRecordCount":0,"event":"concept.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"2d8ee0c1-d54d-410d-a0a2-bebdf35830ba","conceptId":"cca1041c-08c6-487e-a23d-e0615319361e","event":"concept.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":4.76,"event":"http.request.completed","method":"POST","path":"/v1/concepts/cca1041c-08c6-487e-a23d-e0615319361e/officialize","requestId":"14cc2aad-2165-4131-82c0-e31da9b55290","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concepts/cca1041c-08c6-487e-a23d-e0615319361e/officialize "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"e0bf5bc1-1a6c-4814-9db0-c40fd4e723d9","conceptRelationId":"ca37b981-86e5-4906-9589-df8ad3002962","event":"concept_relation.created","evidenceFragmentCount":1,"relationType":"updates","schemaVersion":1,"sourceConceptId":"debee7d8-f7e4-4a55-bd43-6f64a0b3edd7","targetConceptId":"cca1041c-08c6-487e-a23d-e0615319361e"}
+{"durationMs":4.79,"event":"http.request.completed","method":"POST","path":"/v1/concept-relations","requestId":"57c6174d-a246-4b92-a6f4-d174ab605aac","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concept-relations "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptRelationId":"ca37b981-86e5-4906-9589-df8ad3002962","decisionRecordId":null,"event":"concept_relation.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"5ab66b28-e130-4320-a84d-6537a90635de","conceptRelationId":"ca37b981-86e5-4906-9589-df8ad3002962","event":"concept_relation.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":4.99,"event":"http.request.completed","method":"POST","path":"/v1/concept-relations/ca37b981-86e5-4906-9589-df8ad3002962/officialize","requestId":"f058e3e7-dea9-4a69-aa66-b6dff02310c7","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concept-relations/ca37b981-86e5-4906-9589-df8ad3002962/officialize "HTTP/1.1 200 OK"
+{"depth":1,"edgeCount":1,"event":"ontology.graph_served","mode":"official","nodeCount":2,"query":"payment settlement","schemaVersion":1,"trustLabel":"official"}
+{"durationMs":4.35,"event":"http.request.completed","method":"GET","path":"/v1/ontology/graph","requestId":"ad226958-cbad-4b69-ad97-abd981c07800","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/graph?concept=payment+settlement&depth=1 "HTTP/1.1 200 OK"
+[32mPASSED[0m[32m                                                                   [ 18%][0m
+tests/integration/test_ontology_api.py::test_official_ontology_graph_excludes_candidate_relations 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Pilot Domain","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"2af5da02-ba20-4562-b914-c321a7aa4bda","sourceName":"Pilot Domain","sourceType":"manual","status":"connected"}
+{"durationMs":4.02,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"9dae8a19-9bc9-4ba2-871d-f0d96c940d43","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"2af5da02-ba20-4562-b914-c321a7aa4bda","sourceType":"manual","startedAt":"2026-04-30T09:47:38.190197+00:00"}
+{"artifactId":"72067b5f-8a74-4065-b044-332814ff3cc1","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"doc-1","sourceId":"2af5da02-ba20-4562-b914-c321a7aa4bda"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"2af5da02-ba20-4562-b914-c321a7aa4bda","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":6.26,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/2af5da02-ba20-4562-b914-c321a7aa4bda/sync","requestId":"7a5d6758-f2f7-458c-b931-46c614115f58","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/2af5da02-ba20-4562-b914-c321a7aa4bda/sync "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"ddeaa86d-d0b0-4da4-bba2-d7bc362377c1","event":"evidence.reviewed","evidenceFragmentId":"60e0edf5-e5c5-4d8e-b3e6-a17aba314af8","schemaVersion":1,"trustState":"reviewed"}
+{"durationMs":4.27,"event":"http.request.completed","method":"POST","path":"/v1/evidence/60e0edf5-e5c5-4d8e-b3e6-a17aba314af8/review","requestId":"14e63669-27e7-49b1-9d4d-388e727ed191","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/evidence/60e0edf5-e5c5-4d8e-b3e6-a17aba314af8/review "HTTP/1.1 200 OK"
+[1m-------------------------------- live log call ---------------------------------[0m
+{"actor":"reviewer@example.com","auditEventId":"af370711-fad3-4093-b986-bcd723917da5","conceptId":"21543616-3b97-4cde-8d60-c7238dc41184","decisionRecordCount":0,"event":"concept.created","evidenceFragmentCount":1,"name":"Settlement","schemaVersion":1,"status":"candidate"}
+{"durationMs":4.34,"event":"http.request.completed","method":"POST","path":"/v1/concepts","requestId":"10e01e13-9dc1-4c42-9c66-1021ceecb3cc","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concepts "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptId":"21543616-3b97-4cde-8d60-c7238dc41184","decisionRecordCount":0,"event":"concept.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"357861f9-1350-4529-b55d-f22fb3a95316","conceptId":"21543616-3b97-4cde-8d60-c7238dc41184","event":"concept.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":5.88,"event":"http.request.completed","method":"POST","path":"/v1/concepts/21543616-3b97-4cde-8d60-c7238dc41184/officialize","requestId":"f9c3e463-0a78-43bd-be21-e648d5ea88ed","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concepts/21543616-3b97-4cde-8d60-c7238dc41184/officialize "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"5910b49a-4d99-4695-849b-efb73b2516a1","conceptId":"4bb9552f-f8ef-4cca-a5c3-3b58f27f02f3","decisionRecordCount":0,"event":"concept.created","evidenceFragmentCount":1,"name":"Clearing","schemaVersion":1,"status":"candidate"}
+{"durationMs":4.48,"event":"http.request.completed","method":"POST","path":"/v1/concepts","requestId":"eb6924b0-daf2-49d5-a70b-c9ab651b0a48","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concepts "HTTP/1.1 201 Created"
+{"actor":"reviewer@example.com","conceptId":"4bb9552f-f8ef-4cca-a5c3-3b58f27f02f3","decisionRecordCount":0,"event":"concept.officialize_attempted","evidenceFragmentCount":1,"schemaVersion":1,"status":"candidate"}
+{"actor":"reviewer@example.com","auditEventId":"2a3cb693-be89-4e5a-84ea-f43b7893f876","conceptId":"4bb9552f-f8ef-4cca-a5c3-3b58f27f02f3","event":"concept.officialized","schemaVersion":1,"status":"official"}
+{"durationMs":4.67,"event":"http.request.completed","method":"POST","path":"/v1/concepts/4bb9552f-f8ef-4cca-a5c3-3b58f27f02f3/officialize","requestId":"96fcc69b-8404-472d-a3e5-733e4b9e4ca6","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/concepts/4bb9552f-f8ef-4cca-a5c3-3b58f27f02f3/officialize "HTTP/1.1 200 OK"
+{"actor":"reviewer@example.com","auditEventId":"47befcd0-c629-47e9-98a4-8daa809f2142","conceptRelationId":"c35c8624-652d-425c-b907-a34d9c17efca","event":"concept_relation.created","evidenceFragmentCount":1,"relationType":"follows","schemaVersion":1,"sourceConceptId":"21543616-3b97-4cde-8d60-c7238dc41184","targetConceptId":"4bb9552f-f8ef-4cca-a5c3-3b58f27f02f3"}
+{"durationMs":5.24,"event":"http.request.completed","method":"POST","path":"/v1/concept-relations","requestId":"f08d6578-f16f-404c-8eae-4589a591d443","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/concept-relations "HTTP/1.1 201 Created"
+{"depth":1,"edgeCount":0,"event":"ontology.graph_served","mode":"official","nodeCount":1,"query":"Settlement","schemaVersion":1,"trustLabel":"official"}
+{"durationMs":4.75,"event":"http.request.completed","method":"GET","path":"/v1/ontology/graph","requestId":"8638b10e-4670-4325-9a4d-4a1c2ec40fb3","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/graph?concept=Settlement "HTTP/1.1 200 OK"
+{"depth":1,"edgeCount":1,"event":"ontology.graph_served","mode":"mixed","nodeCount":2,"query":"Settlement","schemaVersion":1,"trustLabel":"evidence_supported"}
+{"durationMs":4.57,"event":"http.request.completed","method":"GET","path":"/v1/ontology/graph","requestId":"809c9622-8bb7-4393-b8a7-ed1d55d3bc75","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/graph?concept=Settlement&mode=mixed "HTTP/1.1 200 OK"
+[32mPASSED[0m[32m                                                                   [ 27%][0m
+tests/integration/test_ontology_api.py::test_ontology_graph_unknown_concept_returns_unsupported_response 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"depth":1,"edgeCount":0,"event":"ontology.graph_served","mode":"official","nodeCount":0,"query":"Missing concept","schemaVersion":1,"trustLabel":"unsupported"}
+{"durationMs":4.67,"event":"http.request.completed","method":"GET","path":"/v1/ontology/graph","requestId":"76dd9201-73ed-4d57-acdf-3404ac61a95f","schemaVersion":1,"statusCode":200}
+HTTP Request: GET http://testserver/v1/ontology/graph?concept=Missing+concept "HTTP/1.1 200 OK"
+[32mPASSED[0m[32m                                                                   [ 36%][0m
+tests/integration/test_ontology_api.py::test_ontology_graph_rejects_depth_above_one 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"durationMs":2.96,"event":"http.request.completed","method":"GET","path":"/v1/ontology/graph","requestId":"d73942fb-6544-4f43-8354-ea8388904594","schemaVersion":1,"statusCode":422}
+HTTP Request: GET http://testserver/v1/ontology/graph?concept=Settlement&depth=2 "HTTP/1.1 422 Unprocessable Entity"
+[32mPASSED[0m[32m                                                                   [ 45%][0m
+tests/integration/test_ontology_api.py::test_ontology_aliases_round_trip_in_sqlalchemy_store [31mERROR[0m[31m [ 54%][0m
+tests/integration/test_manual_uploads_api.py::test_manual_file_upload_creates_artifacts_and_evidence 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Manual Uploads","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"110c0c2e-41e0-42b4-a221-37cfe8f96b12","sourceName":"Manual Uploads","sourceType":"manual","status":"connected"}
+{"durationMs":6.6,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"e2fc8409-6f54-4515-a4ca-6c4497eca10c","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"manual_source.file_upload_requested","fileCount":1,"schemaVersion":1,"sourceId":"110c0c2e-41e0-42b4-a221-37cfe8f96b12"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"110c0c2e-41e0-42b4-a221-37cfe8f96b12","sourceType":"manual","startedAt":"2026-04-30T09:47:38.976525+00:00"}
+{"artifactId":"28b06ad2-e02c-4579-8c34-ed1311c84eec","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"manual-upload:settlement.md","sourceId":"110c0c2e-41e0-42b4-a221-37cfe8f96b12"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"110c0c2e-41e0-42b4-a221-37cfe8f96b12","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":8.55,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/110c0c2e-41e0-42b4-a221-37cfe8f96b12/uploads","requestId":"0b7c904a-f3de-45fd-a10c-72d069bdaac5","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/110c0c2e-41e0-42b4-a221-37cfe8f96b12/uploads "HTTP/1.1 200 OK"
+[32mPASSED[0m[31m                                                                   [ 63%][0m
+tests/integration/test_manual_uploads_api.py::test_manual_file_upload_is_idempotent_for_same_filename_and_content 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Manual Uploads","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"49587097-8881-462f-bfb9-d829a9f7942e","sourceName":"Manual Uploads","sourceType":"manual","status":"connected"}
+{"durationMs":5.61,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"213be047-2136-4139-b730-5ba2cbc1fe8d","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"manual_source.file_upload_requested","fileCount":1,"schemaVersion":1,"sourceId":"49587097-8881-462f-bfb9-d829a9f7942e"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"49587097-8881-462f-bfb9-d829a9f7942e","sourceType":"manual","startedAt":"2026-04-30T09:47:39.166364+00:00"}
+{"artifactId":"1026bc57-01cd-43c6-96a1-70f5b4602039","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"manual-upload:settlement.txt","sourceId":"49587097-8881-462f-bfb9-d829a9f7942e"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"49587097-8881-462f-bfb9-d829a9f7942e","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":7.16,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/49587097-8881-462f-bfb9-d829a9f7942e/uploads","requestId":"a7e70f74-4413-497e-9385-5a0a0ebf624a","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/49587097-8881-462f-bfb9-d829a9f7942e/uploads "HTTP/1.1 200 OK"
+{"event":"manual_source.file_upload_requested","fileCount":1,"schemaVersion":1,"sourceId":"49587097-8881-462f-bfb9-d829a9f7942e"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"49587097-8881-462f-bfb9-d829a9f7942e","sourceType":"manual","startedAt":"2026-04-30T09:47:39.177792+00:00"}
+{"artifactId":"1026bc57-01cd-43c6-96a1-70f5b4602039","event":"artifact.reused","evidenceFragmentCount":2,"schemaVersion":1,"sourceExternalId":"manual-upload:settlement.txt","sourceId":"49587097-8881-462f-bfb9-d829a9f7942e"}
+{"artifactCount":1,"artifactCreatedCount":0,"artifactReusedCount":1,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"49587097-8881-462f-bfb9-d829a9f7942e","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":6.48,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/49587097-8881-462f-bfb9-d829a9f7942e/uploads","requestId":"1ef55450-a498-4dd8-95f8-248f1f3600fa","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/49587097-8881-462f-bfb9-d829a9f7942e/uploads "HTTP/1.1 200 OK"
+[32mPASSED[0m[31m                                                                   [ 72%][0m
+tests/integration/test_manual_uploads_api.py::test_manual_file_upload_rejects_pdf 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Manual Uploads","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"5ee9e48b-1f76-4e6a-a636-6ddef4b39739","sourceName":"Manual Uploads","sourceType":"manual","status":"connected"}
+{"durationMs":4.96,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"b796a332-14a2-4bbb-bc68-59ac4ad50eae","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"detail":"Uploaded file appears to be binary: settlement.pdf","event":"manual_source.file_upload_rejected","filename":"settlement.pdf","reason":"unsupported_type","schemaVersion":1,"sourceId":"5ee9e48b-1f76-4e6a-a636-6ddef4b39739"}
+{"durationMs":4.17,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/5ee9e48b-1f76-4e6a-a636-6ddef4b39739/uploads","requestId":"25052792-0c4a-4057-b1e0-9beb031689b6","schemaVersion":1,"statusCode":415}
+HTTP Request: POST http://testserver/v1/manual-sources/5ee9e48b-1f76-4e6a-a636-6ddef4b39739/uploads "HTTP/1.1 415 Unsupported Media Type"
+[32mPASSED[0m[31m                                                                   [ 81%][0m
+tests/integration/test_manual_uploads_api.py::test_manual_file_upload_rejects_invalid_utf8_text 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Manual Uploads","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"3e7e6b98-322f-4f4a-891c-790e9a83f83f","sourceName":"Manual Uploads","sourceType":"manual","status":"connected"}
+{"durationMs":5.14,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"e19bfe57-6116-4a85-9683-49cf18d91202","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"detail":"Uploaded file must be UTF-8 text: settlement.txt","event":"manual_source.file_upload_rejected","filename":"settlement.txt","reason":"unsupported_type","schemaVersion":1,"sourceId":"3e7e6b98-322f-4f4a-891c-790e9a83f83f"}
+{"durationMs":4.55,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/3e7e6b98-322f-4f4a-891c-790e9a83f83f/uploads","requestId":"77f76e36-18ae-4acc-8bae-a3afa4bcef50","schemaVersion":1,"statusCode":415}
+HTTP Request: POST http://testserver/v1/manual-sources/3e7e6b98-322f-4f4a-891c-790e9a83f83f/uploads "HTTP/1.1 415 Unsupported Media Type"
+[32mPASSED[0m[31m                                                                   [ 90%][0m
+tests/integration/test_manual_uploads_api.py::test_manual_text_upload_creates_uploaded_text_artifact 
+[1m-------------------------------- live log setup --------------------------------[0m
+{"appEnv":"local","event":"app.persistence_configured","persistenceBackend":"InMemoryStore","productionMode":true,"schemaVersion":1}
+[1m-------------------------------- live log call ---------------------------------[0m
+{"event":"source.create_requested","productionEnabled":true,"schemaVersion":1,"sourceName":"Manual Uploads","sourceType":"manual"}
+{"event":"source.created","productionEnabled":true,"schemaVersion":1,"sourceId":"a746220f-a22a-400a-88fd-995bfd1fe179","sourceName":"Manual Uploads","sourceType":"manual","status":"connected"}
+{"durationMs":5.25,"event":"http.request.completed","method":"POST","path":"/v1/sources","requestId":"e4c2d6d3-cd81-402f-9255-ada9fdffa4a4","schemaVersion":1,"statusCode":201}
+HTTP Request: POST http://testserver/v1/sources "HTTP/1.1 201 Created"
+{"event":"manual_source.text_upload_requested","objectCount":1,"schemaVersion":1,"sourceId":"a746220f-a22a-400a-88fd-995bfd1fe179"}
+{"event":"source.sync_started","objectCount":1,"schemaVersion":1,"sourceId":"a746220f-a22a-400a-88fd-995bfd1fe179","sourceType":"manual","startedAt":"2026-04-30T09:47:39.850177+00:00"}
+{"artifactId":"bb4838ac-f922-411f-9147-8c727b470487","event":"artifact.extracted","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceExternalId":"manual-upload:text:Settlement Notes","sourceId":"a746220f-a22a-400a-88fd-995bfd1fe179"}
+{"artifactCount":1,"artifactCreatedCount":1,"artifactReusedCount":0,"contentFreshnessState":"fresh","event":"source.sync_succeeded","evidenceFragmentCount":2,"freshnessState":"fresh","schemaVersion":1,"sourceId":"a746220f-a22a-400a-88fd-995bfd1fe179","sourceType":"manual","status":"connected","syncFreshnessState":"fresh","totalArtifactCount":1,"totalEvidenceFragmentCount":2}
+{"durationMs":7.79,"event":"http.request.completed","method":"POST","path":"/v1/manual-sources/a746220f-a22a-400a-88fd-995bfd1fe179/uploads/text","requestId":"33938ba5-4b47-4e06-9e4e-061f0006ec97","schemaVersion":1,"statusCode":200}
+HTTP Request: POST http://testserver/v1/manual-sources/a746220f-a22a-400a-88fd-995bfd1fe179/uploads/text "HTTP/1.1 200 OK"
+[32mPASSED[0m[31m                                                                   [100%][0m
+
+==================================== ERRORS ====================================
+[31m[1m____ ERROR at setup of test_ontology_aliases_round_trip_in_sqlalchemy_store ____[0m
+[1m[31m/opt/pyvenv/lib/python3.13/site-packages/pytest_asyncio/plugin.py[0m:728: in pytest_fixture_setup
+    [0m[94mreturn[39;49;00m ([94myield[39;49;00m)[90m[39;49;00m
+            ^^^^^[90m[39;49;00m
+[1m[31mtests/conftest.py[0m:37: in sqlite_persistent_store
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96msqlalchemy[39;49;00m[90m [39;49;00m[94mimport[39;49;00m create_engine[90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'sqlalchemy'[0m
+- generated xml file: /mnt/data/cornerstone_v140_final/cornerstone-backend/reports/junit.xml -
+[36m[1m=========================== short test summary info ============================[0m
+[31mERROR[0m tests/integration/test_ontology_api.py::[1mtest_ontology_aliases_round_trip_in_sqlalchemy_store[0m - ModuleNotFoundError: No module named 'sqlalchemy'
+[31m========================= [32m10 passed[0m, [31m[1m1 error[0m[31m in 5.14s[0m[31m ==========================[0m
+
+STDERR:
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/generated/interface/models.py", line 35986, in hydrate_crdt_from_proto
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/client.py", line 150, in call
+presentation_artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+

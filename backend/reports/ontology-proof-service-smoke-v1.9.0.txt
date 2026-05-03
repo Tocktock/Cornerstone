@@ -1,0 +1,16 @@
+status=passed
+required_passed=8
+required_failed=0
+official_graph_available=True
+official_graph_mutated=False
+approved_concepts=3
+approved_relations=2
+evaluation_success=True
+step=create_manual_source; status=passed; detail=Manual proof DataSource created as production-enabled source material.
+step=sync_manual_seed; status=passed; detail=Manual proof text synced into Artifacts/EvidenceFragments and queued for ontology re-extraction.
+step=run_reextraction; status=passed; detail=Connector-driven re-extraction produced candidate-only ontology output.
+step=review_evidence; status=passed; detail=All proof EvidenceFragments were reviewed before candidate approval.
+step=approve_concepts; status=passed; detail=ConceptCandidates were reviewed and promoted/merged through officialization gates.
+step=approve_relations; status=passed; detail=RelationCandidates were reviewed and promoted/merged into official graph edges.
+step=serve_explainable_graph; status=passed; detail=Depth-1 official ontology graph served with citations and explanation fields.
+step=run_ontology_evaluation; status=passed; detail=Ontology graph evaluation passed deterministic SSOT gates.

@@ -1,0 +1,50 @@
+$ /opt/pyvenv/bin/python -m cornerstone.cli setup windows --json --dry-run
+exit=0
+
+STDOUT:
+{
+  "dryRun": true,
+  "fixesApplied": [],
+  "plan": {
+    "detectedOs": "linux",
+    "manualPrerequisites": [
+      "Python 3.13+",
+      "Docker Desktop or Docker Engine with Compose plugin",
+      "Git",
+      "Notion integration token and shared page for live Notion proof"
+    ],
+    "nextCommands": [
+      "cornerstone doctor",
+      "cornerstone setup --fix",
+      "cornerstone stack up --migrate",
+      "cornerstone api --reload",
+      "cornerstone proof run --all --continue-on-failure --markdown"
+    ],
+    "projectRoot": "/mnt/data/cornerstone-v113-py/cornerstone-backend",
+    "proofScript": "scripts/windows_run_live_proof.ps1",
+    "quickstart": "docs/integration-starter-kit/windows-quickstart.md",
+    "recommendedShell": "PowerShell 7+ or Windows PowerShell",
+    "safeFixes": [
+      "create .env if missing",
+      "create reports directory",
+      "chmod shell scripts on Unix-like systems"
+    ],
+    "setupScript": "scripts/windows_setup.ps1",
+    "startScript": "scripts/windows_start_local.ps1",
+    "targetOs": "windows"
+  }
+}
+
+
+STDERR:
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 720, in _warm_feature_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/spreadsheet_warmup.py", line 704, in _warm_collaboration_flows
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/generated/interface/models.py", line 35986, in hydrate_crdt_from_proto
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/remote.py", line 747, in __call__
+  File "/tmp/tmp.vJDWZqkmKn/artifact_tool_v2-2.6.11/presentation_artifact_tool/rpc/client.py", line 150, in call
+presentation_artifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.
+
