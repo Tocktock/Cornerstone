@@ -1,0 +1,53 @@
+version: "0.2"
+effective_date: "2026-06-08"
+owner: "JiYong / Tars"
+canonical_spelling: "CornerStone"
+status: "active documentation reset"
+
+product_goal:
+  file: "docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md"
+  authority: "canonical product identity, mission, direction, UX shape, product boundaries"
+  supersedes:
+    - "project-sot.md product-goal language"
+    - "Palantir/OpenClaw-as-product-identity framing"
+    - "logistics-first-as-core-product framing"
+
+scenario_standard:
+  file: "docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md"
+  authority: "canonical product behavior and release gate"
+  first_subset:
+    product_identity: "CS-PROD-001..CS-PROD-005"
+    archive_evidence: "CS-ARCH-001..CS-ARCH-009"
+    search_understanding: "CS-UND-001..CS-UND-005"
+    conversation_claim: "CS-CLAIM-001..CS-CLAIM-010"
+    namespaces: "CS-NS-001..CS-NS-004"
+    autonomy_action_boundary: "CS-AUTO-001..CS-AUTO-011"
+    security: "CS-SEC-001..CS-SEC-008"
+    regression: "CS-REG-001..CS-REG-006"
+
+technical_defaults:
+  file: "docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md"
+  authority: "implementation defaults only where compatible with product SoT"
+  defaults:
+    durable_state: "PostgreSQL-first"
+    tenant_isolation: "RLS + service/policy checks"
+    search: "Postgres FTS + pgvector"
+    policy: "OPA/Rego-compatible"
+    audit: "append-only tamper-evident"
+    connector_boundary: "ConnectorHub-mediated"
+    model_access: "provider-neutral router"
+    local_start: "one-command local/on-prem target"
+
+deprecated:
+  - file: "project-sot.md"
+    treatment: "archive as superseded; extract compatible technical defaults only"
+  - phrase: "This document is the only SoT"
+    treatment: "replace with SoT bundle authority order"
+  - phrase: "freight & logistics as core identity"
+    treatment: "replace with general-purpose personal-first + organization expansion; logistics optional solution pack"
+
+first_implementation_contract:
+  file: "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md"
+  goal: "personal messy input -> immutable artifact -> search -> evidence-backed brief -> claim -> action card dry-run/approval/execution -> audit"
+
+release_rule: "No PASS without concrete scenario evidence."
