@@ -37,6 +37,13 @@ scenario_matrix:
   csv: "docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv"
   scenario_count: 206
 
+cli_native_first:
+  contract: "docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md"
+  feature_parity_matrix: "docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv"
+  authority: "mandatory execution overlay: no CLI, no feature PASS"
+  release_gate: "Every product feature must have a verified native cornerstone CLI path or be explicitly classified as a non-feature implementation internal."
+  verification_command: "scripts/verify_cli_native_first_docs.sh"
+
 technical_defaults:
   file: "docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md"
   authority: "implementation defaults only where compatible with product SoT"
@@ -71,4 +78,5 @@ deprecated:
 
 verification:
   command: "scripts/verify_sot_docs.sh"
-  release_rule: "No PASS without concrete scenario evidence."
+  cli_native_first_command: "scripts/verify_cli_native_first_docs.sh"
+  release_rule: "No PASS without concrete scenario evidence. No CLI, no feature PASS."

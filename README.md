@@ -26,10 +26,12 @@ Users should experience one CornerStone product. Internally, the product keeps c
 3. `docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md`
 4. `docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md`
 5. `docs/scenario-contracts/SCENARIO_MATRIX_FULL.md`
-6. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md`
-7. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-8. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-9. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
+6. `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md`
+7. `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv`
+8. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md`
+9. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+10. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+11. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
 
 ## Active Authority
 
@@ -39,6 +41,8 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md` | Canonical product identity and direction |
 | `docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md` | Canonical long-term scenario and release-gate standard |
 | `docs/scenario-contracts/SCENARIO_MATRIX_FULL.md` | Scenario index generated from the full standard |
+| `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md` | Mandatory no-CLI-no-feature-PASS execution gate |
+| `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv` | Required CLI command coverage by feature family |
 | `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` | Frozen first implementation subset |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
 | `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md` | Verification-centered agent workflow |
@@ -49,11 +53,13 @@ Users should experience one CornerStone product. Internally, the product keeps c
 - Full scenario standard: 206 scenarios.
 - VS-0 implementation subset: 58 scenarios.
 - Release rule: no PASS without concrete scenario evidence.
+- CLI-native-first rule: no feature scenario can be marked PASS unless its native `cornerstone ...` CLI path is verified or the item is explicitly classified as a non-feature implementation internal.
 
 Verify the documentation wiring with:
 
 ```sh
 scripts/verify_sot_docs.sh
+scripts/verify_cli_native_first_docs.sh
 ```
 
 ## First Implementation Target
@@ -72,3 +78,9 @@ Personal messy input
 ```
 
 The full long-term scenario suite remains authoritative. VS-0 is only the first implementation subset.
+
+## CLI Native First
+
+Every product feature must be CLI-native first. UI and API remain important, but a user-visible, operator-visible, admin-visible, API-visible, workflow-visible, connector-visible, verification-visible, or automation-visible capability is not complete until it has a verified native `cornerstone ...` command path.
+
+The release invariant is: **No CLI, no feature PASS.** The CLI must use the same Product / Archive / Connector / Workflow / Policy / Evidence / Audit boundaries as the UI/API and must provide scriptable `--json` output, stable exit codes, workspace/namespace scope, dry-run for mutations, evidence refs, and audit refs.

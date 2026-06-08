@@ -15,6 +15,11 @@ Scenario Verification:
 | CS-... | MUST_PASS | ... | ... | ... | PASS/FAIL/NOT_VERIFIED/NOT_RUN/HUMAN_REQUIRED/OUT_OF_SCOPE |
 | CS-REG-... | REGRESSION_GUARD | ... | ... | ... | PASS/FAIL/NOT_VERIFIED/NOT_RUN/HUMAN_REQUIRED/OUT_OF_SCOPE |
 
+CLI Parity Summary:
+| Feature / Scenario | CLI Command(s) | JSON Schema | Exit-Code Tests | Evidence / Audit Refs | Same Backend Path | Status |
+|---|---|---|---|---|---|---|
+| ... | `cornerstone ... --json` | ... | ... | ... | ... | PASS/FAIL/NOT_VERIFIED/NOT_RUN/HUMAN_REQUIRED/OUT_OF_SCOPE |
+
 Human Required:
 | ID | Why AI Cannot Verify | Required Human Action | Expected Evidence | Release Impact |
 |---|---|---|---|---|
@@ -26,6 +31,7 @@ Tool / Process Evidence:
 - Files or artifacts changed:
 - Checks run:
 - Failed checks and fixes:
+- CLI commands/transcripts checked:
 - Checks not run:
 
 Failure Reverse Engineering:
@@ -34,6 +40,9 @@ Failure Reverse Engineering:
 | ... | ... | ... | ... | ... | ... | ... |
 
 Verification Gaps:
+- TODO
+
+CLI Parity Gaps:
 - TODO
 
 Risks:
