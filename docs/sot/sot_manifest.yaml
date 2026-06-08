@@ -1,12 +1,13 @@
-version: "0.2"
+version: "0.3"
 effective_date: "2026-06-08"
 owner: "JiYong / Tars"
 canonical_spelling: "CornerStone"
-status: "active documentation reset"
+status: "active V2 full MUST-PASS handoff"
 
 product_goal:
   file: "docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md"
   authority: "canonical product identity, mission, direction, UX shape, product boundaries"
+  source_package_file: "docs/sot/01_PRODUCT_GOAL_AND_DIRECTION_FULL.md"
   supersedes:
     - "project-sot.md product-goal language"
     - "Palantir/OpenClaw-as-product-identity framing"
@@ -14,16 +15,27 @@ product_goal:
 
 scenario_standard:
   file: "docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md"
-  authority: "canonical product behavior and release gate"
-  first_subset:
-    product_identity: "CS-PROD-001..CS-PROD-005"
-    archive_evidence: "CS-ARCH-001..CS-ARCH-009"
-    search_understanding: "CS-UND-001..CS-UND-005"
-    conversation_claim: "CS-CLAIM-001..CS-CLAIM-010"
-    namespaces: "CS-NS-001..CS-NS-004"
-    autonomy_action_boundary: "CS-AUTO-001..CS-AUTO-011"
-    security: "CS-SEC-001..CS-SEC-008"
-    regression: "CS-REG-001..CS-REG-006"
+  authority: "canonical long-term product behavior and release gate"
+  scenario_count: 206
+  counts_by_area:
+    CS-PROD: 10
+    CS-ARCH: 14
+    CS-UND: 12
+    CS-CLAIM: 14
+    CS-MEM: 18
+    CS-NS: 14
+    CS-AUTO: 20
+    CS-AGENT: 14
+    CS-BRAIN: 16
+    CS-LEARN: 18
+    CS-EXT: 16
+    CS-SEC: 20
+    CS-REG: 20
+
+scenario_matrix:
+  markdown: "docs/scenario-contracts/SCENARIO_MATRIX_FULL.md"
+  csv: "docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv"
+  scenario_count: 206
 
 technical_defaults:
   file: "docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md"
@@ -38,6 +50,17 @@ technical_defaults:
     model_access: "provider-neutral router"
     local_start: "one-command local/on-prem target"
 
+first_implementation_contract:
+  file: "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md"
+  goal: "personal messy input -> immutable artifact -> search -> evidence-backed brief -> claim -> action card dry-run/approval/execution -> audit"
+  scenario_count: 58
+  source_package_file: "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT_STRICT.md"
+
+agent_guidance:
+  scenario_first_instruction: "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md"
+  project_constitution: "docs/agent/PROJECT_OPERATING_CONSTITUTION.md"
+  handoff: "docs/handoff/AI_AGENT_HANDOFF_V2_FULL_WITH_MUST_PASS_EMBEDDED.md"
+
 deprecated:
   - file: "project-sot.md"
     treatment: "archive as superseded; extract compatible technical defaults only"
@@ -46,8 +69,6 @@ deprecated:
   - phrase: "freight & logistics as core identity"
     treatment: "replace with general-purpose personal-first + organization expansion; logistics optional solution pack"
 
-first_implementation_contract:
-  file: "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md"
-  goal: "personal messy input -> immutable artifact -> search -> evidence-backed brief -> claim -> action card dry-run/approval/execution -> audit"
-
-release_rule: "No PASS without concrete scenario evidence."
+verification:
+  command: "scripts/verify_sot_docs.sh"
+  release_rule: "No PASS without concrete scenario evidence."

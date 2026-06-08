@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-08  
 **Owner:** JiYong / Tars  
-**Status:** Architecture boundary document
+**Status:** Architecture boundary document, subordinate to the SoT and scenario standard
 
 ## 1. Decision
 
@@ -10,14 +10,14 @@ CornerStone should be implemented as one coherent product experience with three 
 
 ```text
 CornerStone
-├── Product / Mission / Intelligence Engine
-├── Archive / Evidence / KnowledgeBase Engine
-└── Connector / Provider / Action Engine
+|-- Product / Mission / Intelligence Engine
+|-- Archive / Evidence / KnowledgeBase Engine
+`-- Connector / Provider / Action Engine
 ```
 
 This is a product and safety boundary, not a user-facing split.
 
-## 2. User-facing rule
+## 2. User-Facing Rule
 
 Users should see:
 
@@ -41,7 +41,7 @@ Users should not need to understand:
 - archive internals;
 - model-provider implementation details.
 
-## 3. Engine ownership
+## 3. Engine Ownership
 
 ### Product / Mission / Intelligence Engine
 
@@ -118,30 +118,30 @@ Does not own:
 - mission approval policy;
 - direct user-facing product identity.
 
-## 4. Boundary flow
+## 4. Boundary Flow
 
 ### Ingestion
 
 ```text
 Connector or upload
-→ Archive Engine preserves original artifact
-→ Archive Engine creates derived representations
-→ Product Engine creates brief/claim/memory candidates
-→ Evidence Bundle links everything
+-> Archive Engine preserves original artifact
+-> Archive Engine creates derived representations
+-> Product Engine creates brief/claim/memory candidates
+-> Evidence Bundle links everything
 ```
 
 ### Action
 
 ```text
 Claim or Mission proposes action
-→ Product Engine creates ActionCard
-→ Workflow/Policy evaluates dry-run
-→ Connector Engine executes external capability only if allowed
-→ Audit records lifecycle
-→ Outcome re-ingested as evidence/experience
+-> Product Engine creates ActionCard
+-> Workflow/Policy evaluates dry-run
+-> Connector Engine executes external capability only if allowed
+-> Audit records lifecycle
+-> Outcome re-ingested as evidence/experience
 ```
 
-## 5. Zero-base repo strategy
+## 5. Zero-Base Repo Strategy
 
 Do not start by merging the three existing repos.
 
@@ -177,7 +177,7 @@ Existing repos become evidence/adapters:
 | `Tocktock/KnowledgeBase` | Archive/evidence/redaction/stable URI concepts |
 | `Tocktock/Connector-Hub` | Connector/provider/action boundary and capability model |
 
-## 6. Adapter rule
+## 6. Adapter Rule
 
 Port by capability, not by repository.
 
@@ -191,7 +191,7 @@ connectorhub_client.adapters.connectorhubkit
 
 Do not let adapter convenience break product boundaries.
 
-## 7. Anti-drift rules
+## 7. Anti-Drift Rules
 
 - Do not expose old repo names as product navigation.
 - Do not duplicate connector credential handling in Product Engine.
@@ -200,10 +200,10 @@ Do not let adapter convenience break product boundaries.
 - Do not claim provider E2E without real verification.
 - Do not claim scenario PASS without evidence.
 
-## 8. First slice
+## 8. First Slice
 
 Implement only this first:
 
-`Artifact → Search → Evidence-backed Brief → Claim → ActionCard dry-run/approval/execution → Audit`
+`Artifact -> Search -> Evidence-backed Brief -> Claim -> ActionCard dry-run/approval/execution -> Audit`
 
 Memory, full autonomy, Agent Packs, and Experience Library depend on this foundation.

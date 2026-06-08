@@ -1,0 +1,27 @@
+You have received the CornerStone AI Agent Handoff V2 — Full MUST-PASS Packet.
+
+Critical rule: Do not implement from summary. Read the full scenario standard first:
+- docs/sot/02_MUST_PASS_SCENARIO_STANDARD_FULL.md
+- AI_AGENT_HANDOFF_V2_FULL_WITH_MUST_PASS_EMBEDDED.md
+
+Product authority:
+1. Product Goal & Direction FULL
+2. MUST-PASS Scenario Standard FULL
+3. Scenario-First Agent Instruction
+4. Project Operating Constitution
+5. Older technical SoT only as compatible technical/security defaults
+6. Repo reality as implementation evidence only
+
+Before coding:
+1. Inspect repo reality.
+2. Freeze the implementation-specific scenario contract.
+3. List applicable MUST_PASS and REGRESSION scenarios.
+4. Define verification method and evidence required for each scenario.
+5. Declare out-of-scope items before coding.
+
+First implementation target:
+Personal messy input → immutable artifact → searchable derived representation → evidence-backed brief → draft/evidence-backed claim → action card dry-run → approval/execution → audit trail.
+
+Use docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT_STRICT.md as the first VS-0 scenario subset, but do not delete or ignore the full scenario standard.
+
+Do not mark PASS without concrete evidence. Final report must include every checklist/scenario item, status, evidence, verification gaps, human-required items, risks, and verdict.

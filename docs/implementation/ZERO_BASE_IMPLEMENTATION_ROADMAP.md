@@ -4,31 +4,35 @@
 **Owner:** JiYong / Tars  
 **Status:** Implementation planning document, subordinate to the SoT and scenario standard
 
-## 1. Implementation stance
+## 1. Implementation Stance
 
 Build from zero base as one CornerStone product.
 
 Do not begin with a big-bang repo merge. Build a clean core with scenario-first verification, then import proven behavior from existing projects through adapters.
 
-## 2. Milestone 0 — Documentation and scenario foundation
+## 2. Milestone 0 - Documentation and Scenario Foundation
 
 Goal: prevent drift before coding.
 
 Deliverables:
 
 - SoT docs installed under `docs/sot/`.
-- Old conflicting docs archived or replaced.
+- Full V2 handoff preserved under `docs/handoff/`.
+- Full scenario matrix installed under `docs/scenario-contracts/`.
+- Old conflicting docs archived, replaced, or explicitly marked superseded.
 - `VS0_IMPLEMENTATION_CONTRACT.md` frozen.
 - Scenario report template added.
-- CI placeholder for scenario verification.
+- Local docs verification script added.
 
 Exit criteria:
 
 - No active doc claims old `project-sot.md` is the only SoT.
 - Product goal points to living evidence-first autonomous operational intelligence.
-- First scenario contract exists.
+- Full scenario standard contains 206 scenarios.
+- First scenario contract contains 58 VS-0 scenarios.
+- `scripts/verify_sot_docs.sh` passes.
 
-## 3. Milestone 1 — One-command product shell
+## 3. Milestone 1 - One-Command Product Shell
 
 Goal: one CornerStone app starts locally.
 
@@ -48,7 +52,7 @@ Exit criteria:
 - Personal workspace exists.
 - Audit records bootstrap events.
 
-## 4. Milestone 2 — Archive Engine
+## 4. Milestone 2 - Archive Engine
 
 Goal: preserve original input first.
 
@@ -68,7 +72,7 @@ Exit criteria:
 - Duplicate content dedupes/links.
 - Redacted generated output/log tests pass.
 
-## 5. Milestone 3 — Search and evidence snapshots
+## 5. Milestone 3 - Search and Evidence Snapshots
 
 Goal: search becomes reproducible evidence.
 
@@ -86,7 +90,7 @@ Exit criteria:
 - Search result can be saved as evidence.
 - Namespace isolation tests pass.
 
-## 6. Milestone 4 — Briefs and claims
+## 6. Milestone 4 - Briefs and Claims
 
 Goal: messy input becomes evidence-backed understanding.
 
@@ -103,7 +107,7 @@ Exit criteria:
 - Claim without evidence cannot be approved.
 - Claim with evidence can be promoted.
 
-## 7. Milestone 5 — ActionCard, Workflow, Policy, Audit
+## 7. Milestone 5 - ActionCard, Workflow, Policy, Audit
 
 Goal: claims can lead to safe internal action.
 
@@ -124,14 +128,14 @@ Exit criteria:
 - Direct write outside Workflow/Action is denied.
 - Audit lifecycle is complete.
 
-## 8. Milestone 6 — First-value onboarding and Mission Control
+## 8. Milestone 6 - First-Value Onboarding and Mission Control
 
-Goal: make VS-0+ usable.
+Goal: make VS-0 usable.
 
 Deliverables:
 
 - Onboarding guide.
-- Inbox → Brief → Claim → Action → Learn visible path.
+- Inbox -> Brief -> Claim -> Action -> Learn visible path.
 - Mission Control with artifacts, briefs, claims, evidence gaps, actions, approvals, audit links.
 
 Exit criteria:
@@ -139,7 +143,7 @@ Exit criteria:
 - New user reaches first value without connectors/models/ontology setup.
 - Product does not expose repo split.
 
-## 9. Milestone 7 — Permanent Wiki and Memory Sovereignty v0
+## 9. Milestone 7 - Permanent Wiki and Memory Sovereignty v0
 
 Goal: start living memory safely.
 
@@ -157,7 +161,7 @@ Exit criteria:
 - Memory is source-aware synthesis, not raw truth.
 - Personal memory does not influence org workspace unless promoted.
 
-## 10. Milestone 8 — ConnectorHub boundary integration
+## 10. Milestone 8 - ConnectorHub Boundary Integration
 
 Goal: connect source systems safely.
 
@@ -174,7 +178,7 @@ Exit criteria:
 - Read-only connector ingestion creates artifacts/evidence.
 - External writeback path requires ActionCard, dry-run, policy, approval/autopilot authority, and audit.
 
-## 11. Milestone 9 — Mission contracts and bounded autonomy
+## 11. Milestone 9 - Mission Contracts and Bounded Autonomy
 
 Goal: introduce safe autonomy.
 
@@ -192,7 +196,7 @@ Exit criteria:
 - Locked mode blocks autonomous actions.
 - High-risk action escalates.
 
-## 12. Milestone 10 — Experience Library and learning
+## 12. Milestone 10 - Experience Library and Learning
 
 Goal: close the loop.
 
@@ -211,7 +215,7 @@ Exit criteria:
 - Lessons are proposed, not auto-globalized.
 - Product learning cannot silently rewrite user/org truth.
 
-## 13. Release rule
+## 13. Release Rule
 
 Every milestone must produce a scenario verification report.
 

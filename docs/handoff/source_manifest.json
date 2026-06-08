@@ -1,0 +1,89 @@
+{
+  "package": "cornerstone_ai_agent_handoff_v2_full_must_pass",
+  "created_utc": "2026-06-08T08:39:50.858081+00:00",
+  "purpose": "Corrected AI agent handoff with full MUST-PASS scenarios included and embedded.",
+  "scenario_count": 206,
+  "scenario_counts_by_area": {
+    "AGENT": 14,
+    "ARCH": 14,
+    "AUTO": 20,
+    "BRAIN": 16,
+    "CLAIM": 14,
+    "EXT": 16,
+    "LEARN": 18,
+    "MEM": 18,
+    "NS": 14,
+    "PROD": 10,
+    "REG": 20,
+    "SEC": 20,
+    "UND": 12
+  },
+  "vs0_scenario_count": 58,
+  "files": [
+    {
+      "path": "AI_AGENT_COPY_PASTE_PROMPT_V2.txt",
+      "bytes": 1390,
+      "sha256": "694b67be9d8ba177f7ccae71c9e15f7295c3361c30f51cf99c7a12c3829ead79"
+    },
+    {
+      "path": "AI_AGENT_HANDOFF_V2_FULL_WITH_MUST_PASS_EMBEDDED.md",
+      "bytes": 103332,
+      "sha256": "159af14d4d2375fb9e36a0d615819e644c06e8331f1ce3262cedae988b71ed5c"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1108,
+      "sha256": "82b50cb63ffc403af2fab4ceea93884a39c84144b979872010e5f4186d20df0a"
+    },
+    {
+      "path": "docs/agent/PROJECT_OPERATING_CONSTITUTION_FULL.md",
+      "bytes": 24695,
+      "sha256": "242c247bb60969b144623f7041e8b5f43d6da832272ba317b219d61489ca3eb2"
+    },
+    {
+      "path": "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION_FULL.md",
+      "bytes": 12161,
+      "sha256": "cf59a81d6e237c2baeee5fd5092d2c521f1681ebfebe570cc3db434280a23f72"
+    },
+    {
+      "path": "docs/handoff/AI_AGENT_HANDOFF_V2_FULL_WITH_MUST_PASS_EMBEDDED.md",
+      "bytes": 103332,
+      "sha256": "159af14d4d2375fb9e36a0d615819e644c06e8331f1ce3262cedae988b71ed5c"
+    },
+    {
+      "path": "docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv",
+      "bytes": 66562,
+      "sha256": "b8fd0edbe1cc9f4471b9bf8aabad27a55171842529226b7d2f54e0df9e1acedf"
+    },
+    {
+      "path": "docs/scenario-contracts/SCENARIO_MATRIX_FULL.md",
+      "bytes": 26103,
+      "sha256": "1f5fc91480689fe10ccd3ddb10900bae7bca0975470c9e79c06976d412f77a33"
+    },
+    {
+      "path": "docs/scenario-contracts/SCENARIO_VERIFICATION_REPORT_TEMPLATE.md",
+      "bytes": 963,
+      "sha256": "625e9118a8edc889d86db3adb2cc460258dbc85b63663803af2f2779173e8e7e"
+    },
+    {
+      "path": "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT_STRICT.md",
+      "bytes": 15475,
+      "sha256": "6f8cdffa09b70b91dd9748412ff132257f44c286f28c0995989a759e13929714"
+    },
+    {
+      "path": "docs/sot/01_PRODUCT_GOAL_AND_DIRECTION_FULL.md",
+      "bytes": 42892,
+      "sha256": "6f8073cc952d0ee07b674939b3b51ab07bba4169980a5630582de40455fa4082"
+    },
+    {
+      "path": "docs/sot/02_MUST_PASS_SCENARIO_STANDARD_FULL.md",
+      "bytes": 99598,
+      "sha256": "fdfd1d42f1f3d39d1126e26efa998282c4e6332dd3ae38477be5a4726b8dcd20"
+    },
+    {
+      "path": "docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS_SUPERSEDED_COMPATIBLE.md",
+      "bytes": 39997,
+      "sha256": "a4e70c0bf6f3db3d07103e912124d349a669b465ae7956b9c015ef82610d193d"
+    }
+  ]
+}

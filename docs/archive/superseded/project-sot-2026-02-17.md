@@ -1,8 +1,6 @@
-# SUPERSEDED — Historical Technical/Product SoT
+# SUPERSEDED AS PRODUCT AUTHORITY; COMPATIBLE TECHNICAL DEFAULTS ONLY
 
-**Superseded date:** 2026-06-08  
-**Reason:** Product goal changed. This file may be used as historical evidence and as a source for compatible technical defaults, but it is no longer the current product SoT.  
-**Current product authority:** `docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md` and `docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md`.
+This file is preserved as technical/security/architecture evidence only. It must not override the 2026-06-07 Product Goal & Direction or the Comprehensive MUST-PASS Scenario Standard.
 
 ---
 
