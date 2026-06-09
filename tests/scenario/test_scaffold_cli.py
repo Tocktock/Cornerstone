@@ -518,6 +518,53 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_mission_action_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-mission-action", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-mission-action")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 16)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_MISSION_ACTION_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {
+                "CS-CLAIM-010",
+                "CS-AUTO-001",
+                "CS-AUTO-003",
+                "CS-AUTO-004",
+                "CS-AUTO-005",
+                "CS-AUTO-006",
+                "CS-AUTO-007",
+                "CS-AUTO-008",
+                "CS-AUTO-009",
+                "CS-AUTO-010",
+                "CS-AUTO-011",
+                "CS-REG-002",
+                "CS-REG-003",
+                "CS-REG-011",
+                "CS-REG-012",
+                "CS-AUTO-020",
+            },
+        )
+        evidence = payload["mission_action_evidence"]
+        self.assertEqual(evidence["available_modes"], ["assist", "autopilot", "locked", "manual"])
+        self.assertTrue(all(evidence["mission_contract_fields_present"].values()))
+        self.assertEqual(evidence["low_policy"]["policy"], "low_risk_autopilot_allowed")
+        self.assertEqual(evidence["high_policy"]["policy"], "high_risk_action_requires_approval")
+        self.assertEqual(evidence["out_of_contract_policy"]["policy"], "mission_contract_action_scope")
+        self.assertEqual(evidence["manual_policy"]["policy"], "workspace_mode_no_autonomous_execution")
+        self.assertEqual(evidence["locked_policy"]["policy"], "workspace_mode_locked")
+        self.assertEqual(evidence["high_execute_before_approval_exit_code"], 8)
+        self.assertEqual(evidence["high_approval_status"], "approved")
+        self.assertEqual(evidence["low_result"]["external_http_calls"], 0)
+        self.assertEqual(evidence["high_result"]["mock_connector_calls"], 1)
+        self.assertEqual(evidence["direct_write_policy"]["policy"], "workflow_action_path_required")
+        self.assertIn("action.executed", evidence["audit_event_types"])
+        self.assertIn("connector.direct_write.denied", evidence["audit_event_types"])
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

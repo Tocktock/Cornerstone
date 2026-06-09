@@ -518,6 +518,23 @@ def _policy_denied(transcript: dict[str, Any], error_code: str) -> bool:
     )
 
 
+def _action_policy_blocked(transcript: dict[str, Any]) -> bool:
+    payload = _payload(transcript)
+    errors = payload.get("errors", [])
+    decisions = payload.get("policy_decisions", [])
+    blocking_decisions = {"deny", "requires_approval", "escalate"}
+    return (
+        transcript.get("exit_code") == 8
+        and payload.get("status") == "denied"
+        and isinstance(errors, list)
+        and any(error.get("code") == "CS_ACTION_POLICY_DENIED" for error in errors if isinstance(error, dict))
+        and isinstance(decisions, list)
+        and any(decision.get("decision") in blocking_decisions for decision in decisions if isinstance(decision, dict))
+        and bool(payload.get("policy_decision_refs"))
+        and bool(payload.get("audit_refs"))
+    )
+
+
 def _scenario_state_rel(name: str) -> str:
     return f"tmp/scenario/{name}-{os.getpid()}"
 
@@ -2198,6 +2215,464 @@ def verify_vs0_briefing(root: Path) -> dict[str, Any]:
             "required_ontology_setup": 0 if ontology.get("preconfigured_ontology_required") is False else 1,
             "missing_uncertainty": 0 if brief.get("uncertainty") else 1,
             "missing_next_steps": 0 if brief.get("recommended_next_steps") else 1,
+        },
+        "human_required": [],
+    }
+
+
+def verify_vs0_mission_action(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-mission-action")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["mode_show_default"] = _run_cli_json(root, ["workspace", "mode", "show", "--state-dir", state_rel, "--json"])
+    transcripts["mode_set_manual"] = _run_cli_json(root, ["workspace", "mode", "set", "manual", "--state-dir", state_rel, "--json"])
+    transcripts["mode_set_locked"] = _run_cli_json(root, ["workspace", "mode", "set", "locked", "--state-dir", state_rel, "--json"])
+    transcripts["mode_set_autopilot"] = _run_cli_json(root, ["workspace", "mode", "set", "autopilot", "--state-dir", state_rel, "--json"])
+
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The Alpha evidence anchor is ready for a governed mission action.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Keep Alpha evidence review moving safely",
+            "--claim-id",
+            claim_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if claim_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["mission_activate"] = _run_cli_json(
+        root,
+        ["mission", "activate", mission_id, "--mode", "autopilot", "--state-dir", state_rel, "--json"],
+    ) if mission_id else {}
+    activated_mission = _payload(transcripts["mission_activate"]).get("mission", {})
+
+    transcripts["low_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Update the internal mission status",
+            "--action-kind",
+            "internal_status_update",
+            "--risk",
+            "low",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    low_action = _payload(transcripts["low_action_propose"]).get("action_card", {})
+    low_action_id = low_action.get("action_id", "")
+    transcripts["low_action_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", low_action_id, "--state-dir", state_rel, "--json"],
+    ) if low_action_id else {}
+    low_result = _payload(transcripts["low_action_execute"]).get("action_result", {})
+
+    transcripts["high_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Write the reviewed status to a mocked connected source",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "mock_connector",
+            "--target",
+            "mock://connected-source/alpha",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    high_action = _payload(transcripts["high_action_propose"]).get("action_card", {})
+    high_action_id = high_action.get("action_id", "")
+    transcripts["high_action_execute_before_approval"] = _run_cli_json(
+        root,
+        ["action", "execute", high_action_id, "--state-dir", state_rel, "--json"],
+    ) if high_action_id else {}
+    transcripts["high_action_approve"] = _run_cli_json(
+        root,
+        ["action", "approve", high_action_id, "--approver", "owner", "--state-dir", state_rel, "--json"],
+    ) if high_action_id else {}
+    transcripts["high_action_execute_after_approval"] = _run_cli_json(
+        root,
+        ["action", "execute", high_action_id, "--state-dir", state_rel, "--json"],
+    ) if high_action_id else {}
+    high_executed = _payload(transcripts["high_action_execute_after_approval"]).get("action_card", {})
+    high_result = _payload(transcripts["high_action_execute_after_approval"]).get("action_result", {})
+
+    transcripts["out_of_contract_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Delete source material outside the contract",
+            "--action-kind",
+            "destructive_change",
+            "--risk",
+            "destructive",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    out_of_contract = _payload(transcripts["out_of_contract_propose"]).get("action_card", {})
+    out_of_contract_id = out_of_contract.get("action_id", "")
+    transcripts["out_of_contract_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", out_of_contract_id, "--state-dir", state_rel, "--json"],
+    ) if out_of_contract_id else {}
+
+    transcripts["mode_set_manual_for_denial"] = _run_cli_json(root, ["workspace", "mode", "set", "manual", "--state-dir", state_rel, "--json"])
+    transcripts["manual_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Attempt low-risk work while manual",
+            "--action-kind",
+            "internal_status_update",
+            "--risk",
+            "low",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    manual_action = _payload(transcripts["manual_action_propose"]).get("action_card", {})
+    manual_action_id = manual_action.get("action_id", "")
+    transcripts["manual_action_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", manual_action_id, "--state-dir", state_rel, "--json"],
+    ) if manual_action_id else {}
+
+    transcripts["mode_set_locked_for_denial"] = _run_cli_json(root, ["workspace", "mode", "set", "locked", "--state-dir", state_rel, "--json"])
+    transcripts["locked_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Attempt action while locked",
+            "--action-kind",
+            "internal_status_update",
+            "--risk",
+            "low",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    locked_action = _payload(transcripts["locked_action_propose"]).get("action_card", {})
+    locked_action_id = locked_action.get("action_id", "")
+    transcripts["locked_action_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", locked_action_id, "--state-dir", state_rel, "--json"],
+    ) if locked_action_id else {}
+
+    transcripts["other_scope_execute"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "execute",
+            low_action_id,
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "other-user",
+            "--json",
+        ],
+    ) if low_action_id else {}
+    transcripts["connector_direct_write"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "direct-write-test",
+            "--provider",
+            "mock_provider",
+            "--target",
+            "mock://connected-source/alpha",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    default_mode = _payload(transcripts["mode_show_default"]).get("workspace_mode", {})
+    manual_mode = _payload(transcripts["mode_set_manual"]).get("workspace_mode", {})
+    locked_mode = _payload(transcripts["mode_set_locked"]).get("workspace_mode", {})
+    autopilot_mode = _payload(transcripts["mode_set_autopilot"]).get("workspace_mode", {})
+    mission_fields = [
+        "goal",
+        "scope",
+        "allowed_actions",
+        "forbidden_actions",
+        "success_criteria",
+        "stop_conditions",
+        "review_cadence",
+        "escalation_rules",
+        "evidence_expectations",
+    ]
+    low_policy = low_action.get("policy_decision", {})
+    high_policy = high_action.get("policy_decision", {})
+    out_policy = out_of_contract.get("policy_decision", {})
+    manual_policy = manual_action.get("policy_decision", {})
+    locked_policy = locked_action.get("policy_decision", {})
+    low_dry_run = low_action.get("dry_run", {})
+    high_dry_run = high_action.get("dry_run", {})
+    high_approved_payload = _payload(transcripts["high_action_approve"])
+    direct_payload = _payload(transcripts["connector_direct_write"])
+    audit_events = _audit_events(root, state_rel)
+    event_types = [event.get("event_type") for event in audit_events]
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+
+    modes_ok = (
+        _exit_ok(transcripts["mode_show_default"])
+        and _exit_ok(transcripts["mode_set_manual"])
+        and _exit_ok(transcripts["mode_set_locked"])
+        and _exit_ok(transcripts["mode_set_autopilot"])
+        and default_mode.get("mode") == "assist"
+        and manual_mode.get("mode") == "manual"
+        and locked_mode.get("mode") == "locked"
+        and autopilot_mode.get("mode") == "autopilot"
+        and {row.get("mode") for row in default_mode.get("available_modes", [])} == {"manual", "assist", "autopilot", "locked"}
+        and manual_mode.get("behaviors", {}).get("autonomous_execution_allowed") is False
+        and autopilot_mode.get("behaviors", {}).get("autonomous_execution_allowed") is True
+        and locked_mode.get("behaviors", {}).get("action_proposals_allowed") is False
+    )
+    mission_contract_ok = (
+        _exit_ok(transcripts["mission_create"])
+        and all(field in mission and mission.get(field) for field in mission_fields)
+        and mission.get("source_claim", {}).get("claim_id") == claim_id
+        and mission.get("evidence", {}).get("evidence_bundle_id") == bundle_id
+        and f"artifact:{artifact_id}" in mission.get("evidence", {}).get("artifact_refs", [])
+        and mission.get("risk_state") == "controlled_policy_required"
+    )
+    mission_authority_ok = (
+        _exit_ok(transcripts["mission_activate"])
+        and activated_mission.get("status") == "active"
+        and activated_mission.get("authority_view", {}).get("may_act_in_scope") == activated_mission.get("scope")
+        and activated_mission.get("authority_view", {}).get("allowed_actions")
+        and activated_mission.get("authority_view", {}).get("forbidden_actions")
+        and activated_mission.get("authority_view", {}).get("requires_escalation")
+        and activated_mission.get("authority_view", {}).get("pause_stop_revoke")
+    )
+    action_card_fields_ok = (
+        _exit_ok(transcripts["low_action_propose"])
+        and low_action.get("goal")
+        and low_action.get("evidence", {}).get("artifact_refs")
+        and low_dry_run.get("diff")
+        and low_dry_run.get("expected_impact")
+        and low_action.get("policy_decision", {}).get("decision") == "allow"
+        and low_action.get("risk") == "low"
+        and low_action.get("approval", {}).get("status") == "not_required"
+        and low_action.get("execution", {}).get("status") == "ready_to_execute"
+        and low_action.get("audit_ref")
+    )
+    dry_run_ok = (
+        action_card_fields_ok
+        and _exit_ok(transcripts["high_action_propose"])
+        and high_dry_run.get("diff")
+        and high_dry_run.get("expected_impact", {}).get("external_calls") == 1
+        and high_dry_run.get("policy_decision", {}).get("decision") == "requires_approval"
+        and high_action.get("execution", {}).get("status") == "pending_approval"
+    )
+    high_approval_ok = (
+        _exit_ok(transcripts["high_action_propose"])
+        and _action_policy_blocked(transcripts["high_action_execute_before_approval"])
+        and high_policy.get("decision") == "requires_approval"
+        and high_action.get("approval", {}).get("status") == "pending"
+        and _exit_ok(transcripts["high_action_approve"])
+        and high_approved_payload.get("action_card", {}).get("approval", {}).get("status") == "approved"
+        and _exit_ok(transcripts["high_action_execute_after_approval"])
+        and high_result.get("status") == "success"
+    )
+    low_auto_ok = (
+        _exit_ok(transcripts["low_action_execute"])
+        and low_policy.get("decision") == "allow"
+        and low_policy.get("can_execute_now") is True
+        and low_action.get("approval", {}).get("required") is False
+        and low_result.get("status") == "success"
+        and low_result.get("side_effect_boundary") == "local_internal_state"
+        and low_result.get("external_http_calls") == 0
+    )
+    bounded_ok = (
+        low_auto_ok
+        and high_approval_ok
+        and _action_policy_blocked(transcripts["out_of_contract_execute"])
+        and _scope_denied(transcripts["other_scope_execute"])
+        and out_policy.get("policy") == "mission_contract_action_scope"
+    )
+    governance_ok = (
+        low_policy.get("policy") == "low_risk_autopilot_allowed"
+        and high_policy.get("policy") == "high_risk_action_requires_approval"
+        and out_policy.get("policy") == "mission_contract_action_scope"
+        and manual_policy.get("policy") == "workspace_mode_no_autonomous_execution"
+        and locked_policy.get("policy") == "workspace_mode_locked"
+        and bool(_payload(transcripts["low_action_propose"]).get("policy_decision_refs"))
+        and bool(_payload(transcripts["high_action_execute_before_approval"]).get("policy_decision_refs"))
+        and "action.execution.denied" in event_types
+    )
+    workflow_mediated_ok = (
+        _policy_denied(transcripts["connector_direct_write"], "CS_DIRECT_WRITE_DENIED")
+        and direct_payload.get("policy_decisions", [{}])[0].get("policy") == "workflow_action_path_required"
+        and _exit_ok(transcripts["high_action_execute_after_approval"])
+        and high_executed.get("connector_boundary", {}).get("mediated_by") == "ConnectorHub"
+        and high_executed.get("connector_boundary", {}).get("direct_provider_access") is False
+        and high_executed.get("connector_boundary", {}).get("credentials_exposed_to_agent") is False
+        and high_result.get("mock_connector_calls") == 1
+        and high_result.get("external_http_calls") == 0
+    )
+    mode_enforcement_ok = (
+        _policy_denied(transcripts["manual_action_execute"], "CS_ACTION_POLICY_DENIED")
+        and _policy_denied(transcripts["locked_action_execute"], "CS_ACTION_POLICY_DENIED")
+        and _payload(transcripts["manual_action_execute"]).get("policy_decisions", [{}])[0].get("policy") == "workspace_mode_no_autonomous_execution"
+        and _payload(transcripts["locked_action_execute"]).get("policy_decisions", [{}])[0].get("policy") == "workspace_mode_locked"
+    )
+    search_to_action_ok = (
+        _exit_ok(transcripts["search"])
+        and _exit_ok(transcripts["bundle_create"])
+        and _exit_ok(transcripts["claim_create"])
+        and _exit_ok(transcripts["mission_create"])
+        and _exit_ok(transcripts["low_action_propose"])
+        and snapshot.get("result_count") == 1
+        and claim.get("evidence_bundle", {}).get("search_snapshot_id") == snapshot_id
+        and low_action.get("evidence", {}).get("evidence_bundle_id") == bundle_id
+    )
+
+    rows = [
+        _row("CS-CLAIM-010", "MUST_PASS", "PASS" if mission_contract_ok and action_card_fields_ok and audit_ok else "FAIL", ["cornerstone mission create --claim-id <claim_id> --json", "cornerstone action propose --mission-id <mission_id> --claim-id <claim_id> --json"], "Evidence-backed claim becomes a Mission Goal Contract and Action Card carrying evidence, risk, scope, and approval requirements."),
+        _row("CS-AUTO-001", "MUST_PASS", "PASS" if modes_ok and mode_enforcement_ok and audit_ok else "FAIL", ["cornerstone workspace mode show --json", "cornerstone workspace mode set <mode> --json"], "Workspace mode records expose Manual, Assist, Autopilot, and Locked behaviors and execution behavior changes with mode."),
+        _row("CS-AUTO-003", "MUST_PASS", "PASS" if mission_contract_ok and audit_ok else "FAIL", ["cornerstone mission create --goal <goal> --claim-id <claim_id> --json"], "Natural-language goal is converted into an editable Mission Goal Contract with goal, scope, allowed/forbidden actions, success criteria, stop conditions, cadence, escalation rules, and evidence expectations."),
+        _row("CS-AUTO-004", "MUST_PASS", "PASS" if mission_authority_ok and audit_ok else "FAIL", ["cornerstone mission activate <mission_id> --mode autopilot --json"], "Activated mission exposes granted scope, allowed actions, forbidden actions, escalation requirements, and pause/stop/revoke controls."),
+        _row("CS-AUTO-005", "MUST_PASS", "PASS" if bounded_ok and audit_ok else "FAIL", ["cornerstone action execute <allowed_low_risk_action_id> --json", "cornerstone action execute <out_of_contract_action_id> --json", "cornerstone action execute <action_id> --owner-id other-user --json"], "Autopilot executes only an allowed low-risk in-scope action, while out-of-contract and cross-scope attempts are denied."),
+        _row("CS-AUTO-006", "MUST_PASS", "PASS" if governance_ok and audit_ok else "FAIL", ["cornerstone action propose ... --json", "cornerstone action execute ... --json"], "Simple mode/action surfaces are backed by policy decisions for risk, scope, egress, approval, and escalation."),
+        _row("CS-AUTO-007", "MUST_PASS", "PASS" if action_card_fields_ok and audit_ok else "FAIL", ["cornerstone action propose --mission-id <mission_id> --claim-id <claim_id> --json"], "Action Card record shows goal, evidence, diff, expected impact, policy decision, risk, approval/execution state, and audit link."),
+        _row("CS-AUTO-008", "MUST_PASS", "PASS" if dry_run_ok and high_approval_ok and audit_ok else "FAIL", ["cornerstone action propose --action-kind external_writeback --risk high --json"], "High-risk mocked external writeback receives dry-run diff, expected impact, policy result, expected external calls, and links to approval/execution records."),
+        _row("CS-AUTO-009", "MUST_PASS", "PASS" if high_approval_ok and audit_ok else "FAIL", ["cornerstone action execute <high_risk_action_id> --json", "cornerstone action approve <high_risk_action_id> --json"], "High-risk action is blocked before owner approval and can execute only after approval."),
+        _row("CS-AUTO-010", "MUST_PASS", "PASS" if low_auto_ok and audit_ok else "FAIL", ["cornerstone action execute <low_risk_action_id> --json"], "Low-risk allowed Autopilot action executes through local internal state and records the result and audit event."),
+        _row("CS-AUTO-011", "MUST_PASS", "PASS" if workflow_mediated_ok and audit_ok else "FAIL", ["cornerstone connector direct-write-test --json", "cornerstone action approve <external_action_id> --json", "cornerstone action execute <external_action_id> --json"], "Direct provider writeback is denied; mocked writeback succeeds only through the governed Workflow/Action path with policy, approval, result, ConnectorHub boundary, and audit."),
+        _row("CS-REG-002", "REGRESSION_GUARD", "PASS" if search_to_action_ok and audit_ok else "FAIL", ["cornerstone search query ... --json", "cornerstone action propose ... --json"], "Search results become an Evidence Bundle, evidence-backed claim, Mission Goal Contract, and Action Card."),
+        _row("CS-REG-003", "REGRESSION_GUARD", "PASS" if workflow_mediated_ok and search_to_action_ok and audit_ok else "FAIL", ["cornerstone connector direct-write-test --json", "cornerstone action execute <external_action_id> --json"], "Mock connector capability is framed as supporting evidence-backed mission/action/audit work, not as the product identity."),
+        _row("CS-REG-011", "REGRESSION_GUARD", "PASS" if _action_policy_blocked(transcripts["out_of_contract_execute"]) and audit_ok else "FAIL", ["cornerstone action execute <out_of_contract_action_id> --json"], "Autopilot cannot bypass the Mission Goal Contract; out-of-contract destructive action is denied."),
+        _row("CS-REG-012", "REGRESSION_GUARD", "PASS" if mode_enforcement_ok and audit_ok else "FAIL", ["cornerstone workspace mode set manual --json", "cornerstone workspace mode set locked --json"], "Manual and Locked workspace modes block autonomous execution."),
+        _row("CS-AUTO-020", "REGRESSION_GUARD", "PASS" if _scope_denied(transcripts["other_scope_execute"]) and bounded_ok and audit_ok else "FAIL", ["cornerstone action execute <action_id> --owner-id other-user --json"], "Autopilot action execution remains inside the active owner namespace, Mission Goal Contract, connector capability, and policy boundary."),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-mission-action",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_MISSION_ACTION_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "mission_action_evidence": {
+            "artifact_id": artifact_id,
+            "search_snapshot_id": snapshot_id,
+            "evidence_bundle_id": bundle_id,
+            "claim_id": claim_id,
+            "mission_id": mission_id,
+            "low_action_id": low_action_id,
+            "high_action_id": high_action_id,
+            "out_of_contract_action_id": out_of_contract_id,
+            "manual_action_id": manual_action_id,
+            "locked_action_id": locked_action_id,
+            "available_modes": sorted(row.get("mode") for row in default_mode.get("available_modes", [])),
+            "mission_contract_fields_present": {field: bool(mission.get(field)) for field in mission_fields},
+            "authority_view": activated_mission.get("authority_view"),
+            "low_policy": low_policy,
+            "high_policy": high_policy,
+            "out_of_contract_policy": out_policy,
+            "manual_policy": manual_policy,
+            "locked_policy": locked_policy,
+            "high_execute_before_approval_exit_code": transcripts["high_action_execute_before_approval"].get("exit_code"),
+            "high_approval_status": high_approved_payload.get("action_card", {}).get("approval", {}).get("status"),
+            "high_result": high_result,
+            "low_result": low_result,
+            "direct_write_policy": direct_payload.get("policy_decisions", [{}])[0] if direct_payload.get("policy_decisions") else {},
+            "audit_event_types": event_types,
+            "audit_event_count": len(audit_events),
+        },
+        "negative_evidence": {
+            "real_external_http_calls": int(low_result.get("external_http_calls", 1)) + int(high_result.get("external_http_calls", 1)),
+            "high_risk_executed_without_approval": 0 if _action_policy_blocked(transcripts["high_action_execute_before_approval"]) else 1,
+            "out_of_contract_action_executed": 0 if _action_policy_blocked(transcripts["out_of_contract_execute"]) else 1,
+            "manual_mode_autonomous_execution": 0 if _policy_denied(transcripts["manual_action_execute"], "CS_ACTION_POLICY_DENIED") else 1,
+            "locked_mode_autonomous_execution": 0 if _policy_denied(transcripts["locked_action_execute"], "CS_ACTION_POLICY_DENIED") else 1,
+            "cross_scope_action_executed": 0 if _scope_denied(transcripts["other_scope_execute"]) else 1,
+            "direct_provider_write_allowed": 0 if _policy_denied(transcripts["connector_direct_write"], "CS_DIRECT_WRITE_DENIED") else 1,
+            "connector_credentials_exposed": 0 if high_executed.get("connector_boundary", {}).get("credentials_exposed_to_agent") is False else 1,
         },
         "human_required": [],
     }

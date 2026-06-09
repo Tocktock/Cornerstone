@@ -14,6 +14,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_audit_ledger,
     verify_vs0_briefing,
     verify_vs0_claim_evidence,
+    verify_vs0_mission_action,
     verify_vs0_namespace_isolation,
     verify_vs0_regression_guardrails,
     verify_vs0_security_policy,
@@ -828,6 +829,336 @@ def command_claim_show(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_workspace_mode_set(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.set_workspace_mode(args.mode, requested_scope)
+    workspace_mode = result["workspace_mode"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone workspace mode set", "success", root)
+    payload.update(requested_scope)
+    payload["workspace_mode"] = workspace_mode
+    payload["ids"].update({"workspace_id": requested_scope["workspace_id"], "audit_event_id": audit_event["event_id"]})
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_workspace_mode_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    workspace_mode = store.get_workspace_mode(requested_scope)
+    payload = base_response("cornerstone workspace mode show", "success", root)
+    payload.update(requested_scope)
+    payload["workspace_mode"] = workspace_mode
+    payload["evidence_refs"].append(f"workspace:{requested_scope['workspace_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_mission_create(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_mission_contract(
+        args.goal,
+        requested_scope,
+        claim_id=args.claim_id,
+        evidence_bundle_id=args.evidence_bundle_id,
+    )
+    payload = base_response("cornerstone mission create", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_MISSION_SOURCE_NOT_FOUND",
+                "message": "Mission source claim or evidence bundle was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Mission source is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    if result.get("status") == "evidence_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_MISSION_EVIDENCE_REQUIRED",
+                "message": "Mission Goal Contract requires an Evidence Bundle with at least one artifact reference.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+
+    mission = result["mission"]
+    audit_event = result["audit_event"]
+    payload.update(mission["scope"])
+    payload["ids"].update({"mission_id": mission["mission_id"], "audit_event_id": audit_event["event_id"]})
+    if mission["source_claim"].get("claim_id"):
+        payload["ids"]["claim_id"] = mission["source_claim"]["claim_id"]
+    if mission["evidence"].get("evidence_bundle_id"):
+        payload["ids"]["evidence_bundle_id"] = mission["evidence"]["evidence_bundle_id"]
+    payload["mission"] = mission
+    payload["evidence_refs"].append(f"mission:{mission['mission_id']}")
+    if mission["source_claim"].get("claim_id"):
+        payload["evidence_refs"].append(f"claim:{mission['source_claim']['claim_id']}")
+    if mission["evidence"].get("evidence_bundle_id"):
+        payload["evidence_refs"].append(f"evidence_bundle:{mission['evidence']['evidence_bundle_id']}")
+    payload["evidence_refs"].extend(mission["evidence"].get("artifact_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_mission_activate(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.activate_mission(args.mission_id, requested_scope, mode=args.mode)
+    payload = base_response("cornerstone mission activate", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_MISSION_NOT_FOUND",
+                "message": "Mission Goal Contract was not found.",
+                "mission_id": args.mission_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Mission is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+
+    mission = result["mission"]
+    payload.update(mission["scope"])
+    payload["ids"].update({"mission_id": mission["mission_id"]})
+    payload["mission"] = mission
+    payload["workspace_mode"] = result["workspace_mode"]
+    payload["evidence_refs"].append(f"mission:{mission['mission_id']}")
+    payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in result["audit_events"])
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_mission_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    mission = store.get_mission(args.mission_id)
+    payload = base_response("cornerstone mission show", "success", root)
+    payload.update(requested_scope)
+    if mission is None:
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_MISSION_NOT_FOUND", "message": "Mission was not found.", "mission_id": args.mission_id})
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if mission.get("scope") != requested_scope:
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_SCOPE_DENIED", "message": "Mission is outside the requested scope.", "resource_scope": mission.get("scope")})
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    payload["mission"] = mission
+    payload["evidence_refs"].append(f"mission:{mission['mission_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_action_propose(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.propose_action(
+        args.mission_id,
+        args.claim_id,
+        args.action_kind,
+        args.risk,
+        requested_scope,
+        goal=args.goal,
+        connector=args.connector,
+        target=args.target,
+    )
+    payload = base_response("cornerstone action propose", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ACTION_SOURCE_NOT_FOUND",
+                "message": "Action source mission or claim was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Action source is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    if result.get("status") == "evidence_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ACTION_EVIDENCE_REQUIRED",
+                "message": "Action proposal requires an evidence-backed claim.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+
+    card = result["action_card"]
+    audit_event = result["audit_event"]
+    payload.update(card["scope"])
+    payload["ids"].update(
+        {
+            "action_id": card["action_id"],
+            "mission_id": card["mission_id"],
+            "claim_id": card["source_claim_id"],
+            "dry_run_id": card["dry_run"]["dry_run_id"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["action_card"] = card
+    payload["policy_decisions"] = [card["policy_decision"]]
+    payload["policy_decision_refs"].append(f"policy:{card['policy_decision']['id']}")
+    payload["evidence_refs"].extend(
+        [
+            f"action:{card['action_id']}",
+            f"mission:{card['mission_id']}",
+            f"claim:{card['source_claim_id']}",
+            f"dry_run:{card['dry_run']['dry_run_id']}",
+        ]
+    )
+    evidence_bundle_id = card.get("evidence", {}).get("evidence_bundle_id")
+    if evidence_bundle_id:
+        payload["evidence_refs"].append(f"evidence_bundle:{evidence_bundle_id}")
+    payload["evidence_refs"].extend(card.get("evidence", {}).get("artifact_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_action_approve(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.approve_action(args.action_id, requested_scope, approver=args.approver)
+    payload = base_response("cornerstone action approve", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_ACTION_NOT_FOUND", "message": "Action Card was not found.", "action_id": args.action_id})
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_SCOPE_DENIED", "message": "Action Card is outside the requested scope.", "resource_scope": result.get("resource_scope")})
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    card = result["action_card"]
+    payload["action_card"] = card
+    payload["ids"].update({"action_id": card["action_id"]})
+    payload["evidence_refs"].append(f"action:{card['action_id']}")
+    if result.get("audit_event"):
+        payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_action_execute(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.execute_action(args.action_id, requested_scope)
+    payload = base_response("cornerstone action execute", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_ACTION_NOT_FOUND", "message": "Action Card or its Mission was not found.", "action_id": args.action_id})
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_SCOPE_DENIED", "message": "Action Card is outside the requested scope.", "resource_scope": result.get("resource_scope")})
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    card = result["action_card"]
+    payload["action_card"] = card
+    payload["ids"].update({"action_id": card["action_id"], "mission_id": card["mission_id"]})
+    payload["evidence_refs"].append(f"action:{card['action_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    if result.get("status") == "policy_denied":
+        payload["status"] = "denied"
+        payload["policy_decisions"] = [result["policy_decision"]]
+        payload["policy_decision_refs"].append(f"policy:{result['policy_decision']['id']}")
+        payload["errors"].append(
+            {
+                "code": "CS_ACTION_POLICY_DENIED",
+                "message": result["policy_decision"]["reason"],
+                "resolution_path": result["policy_decision"]["resolution_path"],
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_POLICY_DENIED
+    payload["action_result"] = result["action_result"]
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_connector_direct_write_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.deny_direct_connector_write(args.provider, args.target, requested_scope)
+    decision = result["policy_decision"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone connector direct-write-test", "denied", root)
+    payload.update(requested_scope)
+    payload["policy_decisions"] = [decision]
+    payload["policy_decision_refs"].append(f"policy:{decision['id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    payload["errors"].append(
+        {
+            "code": "CS_DIRECT_WRITE_DENIED",
+            "message": decision["reason"],
+            "resolution_path": decision["resolution_path"],
+            "external_http_calls": 0,
+        }
+    )
+    print_payload(payload, args.json)
+    return EXIT_POLICY_DENIED
+
+
 def command_scenario_list(args: argparse.Namespace) -> int:
     root = repo_root()
     scenarios = list_scenarios(root, args.set)
@@ -909,6 +1240,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_regression_guardrails(root)
     elif args.contract == "vs0-briefing":
         report = verify_vs0_briefing(root)
+    elif args.contract == "vs0-mission-action":
+        report = verify_vs0_mission_action(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -929,6 +1262,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-security-policy",
                     "vs0-regression-guardrails",
                     "vs0-briefing",
+                    "vs0-mission-action",
                 ],
             }
         )
@@ -1143,6 +1477,93 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(claim_show)
     claim_show.add_argument("--json", action="store_true", help="Emit JSON output")
     claim_show.set_defaults(func=command_claim_show)
+
+    workspace = subcommands.add_parser("workspace", help="Workspace governance commands")
+    workspace_sub = workspace.add_subparsers(dest="workspace_command")
+    workspace_mode = workspace_sub.add_parser("mode", help="Workspace mode operations")
+    workspace_mode_sub = workspace_mode.add_subparsers(dest="workspace_mode_command")
+
+    workspace_mode_set = workspace_mode_sub.add_parser("set", help="Set workspace mode")
+    workspace_mode_set.add_argument("mode", choices=["manual", "assist", "autopilot", "locked"])
+    add_state_argument(workspace_mode_set)
+    add_scope_arguments(workspace_mode_set)
+    workspace_mode_set.add_argument("--json", action="store_true", help="Emit JSON output")
+    workspace_mode_set.set_defaults(func=command_workspace_mode_set)
+
+    workspace_mode_show = workspace_mode_sub.add_parser("show", help="Show workspace mode")
+    add_state_argument(workspace_mode_show)
+    add_scope_arguments(workspace_mode_show)
+    workspace_mode_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    workspace_mode_show.set_defaults(func=command_workspace_mode_show)
+
+    mission = subcommands.add_parser("mission", help="Mission Goal Contract commands")
+    mission_sub = mission.add_subparsers(dest="mission_command")
+
+    mission_create = mission_sub.add_parser("create", help="Create an editable Mission Goal Contract")
+    mission_create.add_argument("--goal", required=True, help="Natural-language mission goal")
+    mission_create.add_argument("--claim-id", help="Source claim ID")
+    mission_create.add_argument("--evidence-bundle-id", help="Source Evidence Bundle ID")
+    add_state_argument(mission_create)
+    add_scope_arguments(mission_create)
+    mission_create.add_argument("--json", action="store_true", help="Emit JSON output")
+    mission_create.set_defaults(func=command_mission_create)
+
+    mission_activate = mission_sub.add_parser("activate", help="Activate a Mission Goal Contract")
+    mission_activate.add_argument("mission_id", help="Mission ID")
+    mission_activate.add_argument("--mode", choices=["manual", "assist", "autopilot", "locked"], default="autopilot")
+    add_state_argument(mission_activate)
+    add_scope_arguments(mission_activate)
+    mission_activate.add_argument("--json", action="store_true", help="Emit JSON output")
+    mission_activate.set_defaults(func=command_mission_activate)
+
+    mission_show = mission_sub.add_parser("show", help="Show a Mission Goal Contract")
+    mission_show.add_argument("mission_id", help="Mission ID")
+    add_state_argument(mission_show)
+    add_scope_arguments(mission_show)
+    mission_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    mission_show.set_defaults(func=command_mission_show)
+
+    action = subcommands.add_parser("action", help="Governed Workflow/Action commands")
+    action_sub = action.add_subparsers(dest="action_command")
+
+    action_propose = action_sub.add_parser("propose", help="Propose an Action Card and dry-run")
+    action_propose.add_argument("--mission-id", required=True, help="Mission ID")
+    action_propose.add_argument("--claim-id", required=True, help="Source claim ID")
+    action_propose.add_argument("--goal", required=True, help="Action goal")
+    action_propose.add_argument("--action-kind", choices=["internal_status_update", "draft_task", "refresh_brief", "external_writeback", "destructive_change"], default="internal_status_update")
+    action_propose.add_argument("--risk", choices=["low", "medium", "high", "destructive", "sensitive"], default="low")
+    action_propose.add_argument("--connector", default="mock_connector")
+    action_propose.add_argument("--target", default="mock://local-target")
+    add_state_argument(action_propose)
+    add_scope_arguments(action_propose)
+    action_propose.add_argument("--json", action="store_true", help="Emit JSON output")
+    action_propose.set_defaults(func=command_action_propose)
+
+    action_approve = action_sub.add_parser("approve", help="Approve an Action Card")
+    action_approve.add_argument("action_id", help="Action ID")
+    action_approve.add_argument("--approver", default="owner")
+    add_state_argument(action_approve)
+    add_scope_arguments(action_approve)
+    action_approve.add_argument("--json", action="store_true", help="Emit JSON output")
+    action_approve.set_defaults(func=command_action_approve)
+
+    action_execute = action_sub.add_parser("execute", help="Execute an approved or allowed Action Card")
+    action_execute.add_argument("action_id", help="Action ID")
+    add_state_argument(action_execute)
+    add_scope_arguments(action_execute)
+    action_execute.add_argument("--json", action="store_true", help="Emit JSON output")
+    action_execute.set_defaults(func=command_action_execute)
+
+    connector = subcommands.add_parser("connector", help="Connector boundary commands")
+    connector_sub = connector.add_subparsers(dest="connector_command")
+
+    direct_write = connector_sub.add_parser("direct-write-test", help="Deny direct provider writeback without a Workflow/Action path")
+    direct_write.add_argument("--provider", default="mock_provider")
+    direct_write.add_argument("--target", default="mock://connected-source")
+    add_state_argument(direct_write)
+    add_scope_arguments(direct_write)
+    direct_write.add_argument("--json", action="store_true", help="Emit JSON output")
+    direct_write.set_defaults(func=command_connector_direct_write_test)
 
     scenario = subcommands.add_parser("scenario", help="Scenario registry and verification commands")
     scenario_sub = scenario.add_subparsers(dest="scenario_command")

@@ -31,7 +31,8 @@ claim_json=$(mktemp)
 policy_json=$(mktemp)
 guardrails_json=$(mktemp)
 brief_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json"' EXIT
+mission_action_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -229,6 +230,43 @@ grep -q '"missing_uncertainty": 0' "$brief_json" || fail "vs0-briefing missed un
 grep -q '"missing_next_steps": 0' "$brief_json" || fail "vs0-briefing missed next steps"
 grep -q '"product_feature_claims": "PARTIAL_VS0_BRIEFING_ONLY"' "$brief_json" || fail "vs0-briefing overclaimed product feature scope"
 
+cornerstone scenario verify vs0-mission-action --json > "$mission_action_json"
+python3 -m json.tool "$mission_action_json" >/dev/null
+grep -q '"scenario_set": "vs0-mission-action"' "$mission_action_json" || fail "vs0-mission-action report missing scenario set"
+grep -q '"blocking": 0' "$mission_action_json" || fail "vs0-mission-action report has blocking scenarios"
+grep -q '"pass": 16' "$mission_action_json" || fail "vs0-mission-action did not pass exactly sixteen scenarios"
+grep -q '"id": "CS-CLAIM-010"' "$mission_action_json" || fail "vs0-mission-action missing CS-CLAIM-010"
+grep -q '"id": "CS-AUTO-001"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-001"
+grep -q '"id": "CS-AUTO-003"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-003"
+grep -q '"id": "CS-AUTO-004"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-004"
+grep -q '"id": "CS-AUTO-005"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-005"
+grep -q '"id": "CS-AUTO-006"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-006"
+grep -q '"id": "CS-AUTO-007"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-007"
+grep -q '"id": "CS-AUTO-008"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-008"
+grep -q '"id": "CS-AUTO-009"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-009"
+grep -q '"id": "CS-AUTO-010"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-010"
+grep -q '"id": "CS-AUTO-011"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-011"
+grep -q '"id": "CS-REG-002"' "$mission_action_json" || fail "vs0-mission-action missing CS-REG-002"
+grep -q '"id": "CS-REG-003"' "$mission_action_json" || fail "vs0-mission-action missing CS-REG-003"
+grep -q '"id": "CS-REG-011"' "$mission_action_json" || fail "vs0-mission-action missing CS-REG-011"
+grep -q '"id": "CS-REG-012"' "$mission_action_json" || fail "vs0-mission-action missing CS-REG-012"
+grep -q '"id": "CS-AUTO-020"' "$mission_action_json" || fail "vs0-mission-action missing CS-AUTO-020"
+grep -q '"workflow_action_path_required"' "$mission_action_json" || fail "vs0-mission-action missing direct-write denial"
+grep -q '"low_risk_autopilot_allowed"' "$mission_action_json" || fail "vs0-mission-action missing low-risk allow policy"
+grep -q '"high_risk_action_requires_approval"' "$mission_action_json" || fail "vs0-mission-action missing high-risk approval policy"
+grep -q '"mission_contract_action_scope"' "$mission_action_json" || fail "vs0-mission-action missing mission-contract policy"
+grep -q '"workspace_mode_no_autonomous_execution"' "$mission_action_json" || fail "vs0-mission-action missing manual mode denial"
+grep -q '"workspace_mode_locked"' "$mission_action_json" || fail "vs0-mission-action missing locked mode denial"
+grep -q '"real_external_http_calls": 0' "$mission_action_json" || fail "vs0-mission-action reported real external HTTP calls"
+grep -q '"high_risk_executed_without_approval": 0' "$mission_action_json" || fail "vs0-mission-action executed high-risk action without approval"
+grep -q '"out_of_contract_action_executed": 0' "$mission_action_json" || fail "vs0-mission-action executed out-of-contract action"
+grep -q '"manual_mode_autonomous_execution": 0' "$mission_action_json" || fail "vs0-mission-action executed while manual"
+grep -q '"locked_mode_autonomous_execution": 0' "$mission_action_json" || fail "vs0-mission-action executed while locked"
+grep -q '"cross_scope_action_executed": 0' "$mission_action_json" || fail "vs0-mission-action executed cross-scope action"
+grep -q '"direct_provider_write_allowed": 0' "$mission_action_json" || fail "vs0-mission-action allowed direct provider write"
+grep -q '"connector_credentials_exposed": 0' "$mission_action_json" || fail "vs0-mission-action exposed connector credentials"
+grep -q '"product_feature_claims": "PARTIAL_VS0_MISSION_ACTION_ONLY"' "$mission_action_json" || fail "vs0-mission-action overclaimed product feature scope"
+
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, unittest).\n'

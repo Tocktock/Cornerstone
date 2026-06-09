@@ -102,10 +102,11 @@ cornerstone scenario verify vs0-claim-evidence --json
 cornerstone scenario verify vs0-security-policy --json
 cornerstone scenario verify vs0-regression-guardrails --json
 cornerstone scenario verify vs0-briefing --json
+cornerstone scenario verify vs0-mission-action --json
 make verify-local-fast
 ```
 
-The current scaffold CLI can verify scaffold readiness, scenario registry coverage, deterministic local fixture-validator readiness, the first CLI-native artifact preservation slice, the first redaction/prompt-injection safety slice, the first search/evidence-bundle/draft-claim/evidence-viewer slice, the first deterministic search-understanding slice, the first owner/namespace isolation slice, the first tamper-evident audit-ledger slice, the first universal non-logistics core slice, the first claim evidence-gating slice, the first default-deny egress/sandbox policy slice, the first regression guardrail summary slice, and the first evidence-backed briefing slice. It does not claim the full VS-0 product loop is implemented or passing.
+The current scaffold CLI can verify scaffold readiness, scenario registry coverage, deterministic local fixture-validator readiness, the first CLI-native artifact preservation slice, the first redaction/prompt-injection safety slice, the first search/evidence-bundle/draft-claim/evidence-viewer slice, the first deterministic search-understanding slice, the first owner/namespace isolation slice, the first tamper-evident audit-ledger slice, the first universal non-logistics core slice, the first claim evidence-gating slice, the first default-deny egress/sandbox policy slice, the first regression guardrail summary slice, the first evidence-backed briefing slice, and the first Mission Goal Contract / Action Card / dry-run / approval / mocked connector-action safety slice. It does not claim the full VS-0 product loop is implemented or passing.
 
 ## First Implementation Target
 

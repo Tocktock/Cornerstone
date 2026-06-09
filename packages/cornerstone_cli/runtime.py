@@ -81,6 +81,9 @@ class LocalRuntimeStore:
         self.artifact_dir = state_dir / "artifacts"
         self.original_dir = self.artifact_dir / "originals"
         self.record_dir = self.artifact_dir / "records"
+        self.workspace_dir = state_dir / "workspaces"
+        self.mission_dir = state_dir / "missions"
+        self.action_dir = state_dir / "actions"
         self.audit_path = state_dir / "audit" / "events.jsonl"
 
     def reset(self) -> None:
@@ -165,6 +168,15 @@ class LocalRuntimeStore:
     def claim_path(self, claim_id: str) -> Path:
         return self.state_dir / "claims" / f"{claim_id}.json"
 
+    def workspace_path(self, scope: dict[str, str]) -> Path:
+        return self.workspace_dir / f"{scope_key(scope)}.json"
+
+    def mission_path(self, mission_id: str) -> Path:
+        return self.mission_dir / f"{mission_id}.json"
+
+    def action_path(self, action_id: str) -> Path:
+        return self.action_dir / f"{action_id}.json"
+
     def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
         if scope is not None:
             scoped_path = self.artifact_path(artifact_id, scope)
@@ -208,6 +220,24 @@ class LocalRuntimeStore:
         if not path.exists():
             return None
         return _read_json(path)
+
+    def get_mission(self, mission_id: str) -> dict[str, Any] | None:
+        path = self.mission_path(mission_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_action(self, action_id: str) -> dict[str, Any] | None:
+        path = self.action_path(action_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_workspace_mode(self, scope: dict[str, str]) -> dict[str, Any]:
+        path = self.workspace_path(scope)
+        if path.exists():
+            return _read_json(path)
+        return self._workspace_mode_record("assist", scope)
 
     def _artifact_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
         if not self.record_dir.exists():
@@ -761,6 +791,508 @@ class LocalRuntimeStore:
             },
         )
         return {"policy_decision": decision, "audit_event": event}
+
+    def _workspace_mode_record(self, mode: str, scope: dict[str, str]) -> dict[str, Any]:
+        behaviors = {
+            "manual": {
+                "label": "Manual",
+                "action_proposals_allowed": True,
+                "autonomous_execution_allowed": False,
+                "approval_required_for_execution": True,
+                "description": "CornerStone may propose work, but execution requires explicit owner action.",
+            },
+            "assist": {
+                "label": "Assist",
+                "action_proposals_allowed": True,
+                "autonomous_execution_allowed": False,
+                "approval_required_for_execution": True,
+                "description": "CornerStone can draft briefs, claims, mission contracts, and action cards without autonomous execution.",
+            },
+            "autopilot": {
+                "label": "Autopilot",
+                "action_proposals_allowed": True,
+                "autonomous_execution_allowed": True,
+                "approval_required_for_execution": False,
+                "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            },
+            "locked": {
+                "label": "Locked",
+                "action_proposals_allowed": False,
+                "autonomous_execution_allowed": False,
+                "approval_required_for_execution": True,
+                "description": "CornerStone records evidence and audit only; action proposal and execution are blocked.",
+            },
+        }
+        return {
+            "schema_version": "cs.workspace_mode.v0",
+            "mode": mode,
+            "scope": scope,
+            "behaviors": behaviors[mode],
+            "available_modes": [
+                {
+                    "mode": key,
+                    "label": value["label"],
+                    "autonomous_execution_allowed": value["autonomous_execution_allowed"],
+                    "approval_required_for_execution": value["approval_required_for_execution"],
+                }
+                for key, value in behaviors.items()
+            ],
+            "updated_at": utc_now(),
+        }
+
+    def set_workspace_mode(self, mode: str, scope: dict[str, str]) -> dict[str, Any]:
+        record = self._workspace_mode_record(mode, scope)
+        _write_json(self.workspace_path(scope), record)
+        event = self.append_audit(
+            "workspace.mode.set",
+            scope,
+            {"type": "workspace", "id": scope_key(scope)},
+            {
+                "mode": mode,
+                "autonomous_execution_allowed": record["behaviors"]["autonomous_execution_allowed"],
+            },
+        )
+        return {"workspace_mode": record, "audit_event": event}
+
+    def create_mission_contract(
+        self,
+        goal: str,
+        scope: dict[str, str],
+        *,
+        claim_id: str | None = None,
+        evidence_bundle_id: str | None = None,
+    ) -> dict[str, Any]:
+        claim = self.get_claim(claim_id) if claim_id else None
+        if claim_id and claim is None:
+            return {"status": "not_found", "resource": "claim"}
+        if claim and claim.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": claim.get("scope")}
+
+        bundle_id = evidence_bundle_id
+        if claim and not bundle_id:
+            bundle_id = claim.get("evidence_bundle", {}).get("evidence_bundle_id")
+        bundle = self.get_evidence_bundle(bundle_id) if bundle_id else None
+        if bundle_id and bundle is None:
+            return {"status": "not_found", "resource": "evidence_bundle"}
+        if bundle and bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+
+        evidence_artifact_refs = []
+        if claim:
+            evidence_artifact_refs.extend(claim.get("evidence_bundle", {}).get("artifact_refs", []))
+        if bundle:
+            evidence_artifact_refs.extend(f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", []))
+        evidence_artifact_refs = sorted(set(evidence_artifact_refs))
+        if not evidence_artifact_refs:
+            return {"status": "evidence_required"}
+
+        mode = self.get_workspace_mode(scope)
+        contract_base = {
+            "schema_version": "cs.mission_goal_contract.v0",
+            "status": "draft",
+            "goal": goal,
+            "scope": scope,
+            "workspace_mode": mode["mode"],
+            "source_claim": {
+                "claim_id": claim.get("claim_id") if claim else None,
+                "statement": claim.get("statement") if claim else None,
+                "trust_state": claim.get("trust_state") if claim else None,
+            },
+            "evidence": {
+                "evidence_bundle_id": bundle_id,
+                "artifact_refs": evidence_artifact_refs,
+                "search_snapshot_id": bundle.get("search_snapshot_id") if bundle else None,
+            },
+            "risk_state": "controlled_policy_required",
+            "allowed_actions": [
+                "internal_status_update",
+                "draft_task",
+                "refresh_brief",
+            ],
+            "forbidden_actions": [
+                "external_writeback_without_workflow_action",
+                "cross_namespace_access",
+                "destructive_change",
+                "secret_exfiltration",
+            ],
+            "success_criteria": [
+                "Use attached evidence refs for every durable claim or action.",
+                "Record every action proposal, dry-run, policy decision, approval, result, and audit event.",
+            ],
+            "stop_conditions": [
+                "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+                "A required approval is missing.",
+                "A requested action is outside the mission contract.",
+            ],
+            "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+            "escalation_rules": [
+                "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+                "Escalate when evidence coverage is insufficient or policy decision is deny.",
+            ],
+            "evidence_expectations": [
+                "Evidence Bundle with at least one artifact reference.",
+                "Dry-run diff and expected impact before side-effecting action.",
+                "Audit refs for every policy and action transition.",
+            ],
+            "authority": {
+                "may_do": ["propose action cards", "run allowed low-risk internal actions in Autopilot mode"],
+                "may_not_do": ["direct external writeback", "cross-namespace action", "destructive action without approval"],
+                "requires_escalation": ["high-risk", "external_writeback", "sensitive", "out_of_contract"],
+                "controls": ["pause", "stop", "revoke", "reduce_scope"],
+            },
+            "created_at": utc_now(),
+        }
+        mission_id = f"mission_{_json_hash(contract_base)[:16]}"
+        contract = dict(contract_base)
+        contract["mission_id"] = mission_id
+        _write_json(self.mission_path(mission_id), contract)
+        event = self.append_audit(
+            "mission.contract.created",
+            scope,
+            {"type": "mission", "id": mission_id},
+            {
+                "claim_id": claim_id,
+                "evidence_bundle_id": bundle_id,
+                "workspace_mode": mode["mode"],
+                "allowed_actions": contract["allowed_actions"],
+            },
+        )
+        return {"mission": contract, "audit_event": event}
+
+    def activate_mission(self, mission_id: str, scope: dict[str, str], mode: str = "autopilot") -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        if mission is None:
+            return {"status": "not_found"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+        mode_result = self.set_workspace_mode(mode, scope)
+        activated = dict(mission)
+        activated["status"] = "active"
+        activated["workspace_mode"] = mode
+        activated["activated_at"] = utc_now()
+        activated["authority_view"] = {
+            "may_act_in_scope": scope,
+            "allowed_actions": activated.get("allowed_actions", []),
+            "forbidden_actions": activated.get("forbidden_actions", []),
+            "requires_escalation": activated.get("authority", {}).get("requires_escalation", []),
+            "pause_stop_revoke": activated.get("authority", {}).get("controls", []),
+        }
+        _write_json(self.mission_path(mission_id), activated)
+        event = self.append_audit(
+            "mission.activated",
+            scope,
+            {"type": "mission", "id": mission_id},
+            {
+                "mode": mode,
+                "allowed_actions": activated.get("allowed_actions", []),
+                "forbidden_actions": activated.get("forbidden_actions", []),
+            },
+        )
+        return {"mission": activated, "workspace_mode": mode_result["workspace_mode"], "audit_events": [mode_result["audit_event"], event]}
+
+    def _action_policy(
+        self,
+        mission: dict[str, Any],
+        action_kind: str,
+        risk: str,
+        scope: dict[str, str],
+        connector: str,
+        direct: bool = False,
+    ) -> dict[str, Any]:
+        workspace_mode = self.get_workspace_mode(scope)
+        mode = workspace_mode["mode"]
+        allowed_actions = set(mission.get("allowed_actions", []))
+        external = action_kind == "external_writeback"
+        high_risk = risk in {"high", "destructive", "sensitive"} or external
+
+        if direct:
+            decision = "deny"
+            policy = "workflow_action_path_required"
+            reason = "Direct provider writeback is denied. Use a governed Workflow/Action path with dry-run, policy, approval, result, and audit."
+            approval_required = True
+            can_execute_now = False
+            execution_status = "blocked_direct_write"
+        elif mode == "locked":
+            decision = "deny"
+            policy = "workspace_mode_locked"
+            reason = "Workspace mode is Locked, so action proposal and execution are disabled."
+            approval_required = True
+            can_execute_now = False
+            execution_status = "blocked_by_workspace_mode"
+        elif action_kind not in allowed_actions and not external:
+            decision = "escalate"
+            policy = "mission_contract_action_scope"
+            reason = "Requested action is outside the Mission Goal Contract allowed actions."
+            approval_required = True
+            can_execute_now = False
+            execution_status = "escalated_out_of_contract"
+        elif high_risk:
+            decision = "requires_approval"
+            policy = "high_risk_action_requires_approval"
+            reason = "High-risk or external writeback action requires owner approval before execution."
+            approval_required = True
+            can_execute_now = False
+            execution_status = "pending_approval"
+        elif mode != "autopilot":
+            decision = "deny"
+            policy = "workspace_mode_no_autonomous_execution"
+            reason = "Workspace mode does not allow autonomous execution."
+            approval_required = True
+            can_execute_now = False
+            execution_status = "blocked_by_workspace_mode"
+        else:
+            decision = "allow"
+            policy = "low_risk_autopilot_allowed"
+            reason = "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary."
+            approval_required = False
+            can_execute_now = True
+            execution_status = "ready_to_execute"
+
+        return {
+            "schema_version": "cs.policy_decision.v0",
+            "id": f"policy_{_json_hash({'mission_id': mission.get('mission_id'), 'action_kind': action_kind, 'risk': risk, 'mode': mode, 'direct': direct})[:16]}",
+            "decision": decision,
+            "policy": policy,
+            "reason": reason,
+            "scope": scope,
+            "workspace_mode": mode,
+            "mission_id": mission.get("mission_id"),
+            "action_kind": action_kind,
+            "risk": risk,
+            "connector": connector,
+            "approval_required": approval_required,
+            "can_execute_now": can_execute_now,
+            "execution_status": execution_status,
+            "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it.",
+            ],
+            "decided_at": utc_now(),
+        }
+
+    def propose_action(
+        self,
+        mission_id: str,
+        claim_id: str,
+        action_kind: str,
+        risk: str,
+        scope: dict[str, str],
+        *,
+        goal: str,
+        connector: str = "mock_connector",
+        target: str = "mock://local-target",
+    ) -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+        claim = self.get_claim(claim_id)
+        if claim is None:
+            return {"status": "not_found", "resource": "claim"}
+        if claim.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": claim.get("scope")}
+        if not claim.get("evidence_bundle", {}).get("artifact_refs"):
+            return {"status": "evidence_required"}
+
+        policy = self._action_policy(mission, action_kind, risk, scope, connector)
+        expected_external_calls = 1 if action_kind == "external_writeback" else 0
+        dry_run_base = {
+            "schema_version": "cs.action_dry_run.v0",
+            "mission_id": mission_id,
+            "claim_id": claim_id,
+            "action_kind": action_kind,
+            "goal": goal,
+            "scope": scope,
+            "diff": {
+                "before": "no side effect applied",
+                "after": f"would perform {action_kind} against {target}",
+            },
+            "expected_impact": {
+                "risk": risk,
+                "target": target,
+                "connector": connector,
+                "external_calls": expected_external_calls,
+            },
+            "policy_decision": policy,
+            "created_at": utc_now(),
+        }
+        dry_run = dict(dry_run_base)
+        dry_run["dry_run_id"] = f"dryrun_{_json_hash(dry_run_base)[:16]}"
+        card_base = {
+            "schema_version": "cs.action_card.v0",
+            "mission_id": mission_id,
+            "source_claim_id": claim_id,
+            "goal": goal,
+            "scope": scope,
+            "evidence": claim.get("evidence_bundle"),
+            "risk": risk,
+            "action_kind": action_kind,
+            "connector_boundary": {
+                "mediated_by": "ConnectorHub",
+                "connector": connector,
+                "direct_provider_access": False,
+                "credentials_exposed_to_agent": False,
+                "mocked": True,
+            },
+            "dry_run": dry_run,
+            "policy_decision": policy,
+            "approval": {
+                "required": policy["approval_required"],
+                "status": "not_required" if not policy["approval_required"] else "pending",
+                "approver": None,
+            },
+            "execution": {
+                "status": policy["execution_status"],
+                "can_execute_now": policy["can_execute_now"],
+                "result": None,
+            },
+            "created_at": utc_now(),
+        }
+        action_id = f"action_{_json_hash(card_base)[:16]}"
+        card = dict(card_base)
+        card["action_id"] = action_id
+        _write_json(self.action_path(action_id), card)
+        event = self.append_audit(
+            "action.card.proposed",
+            scope,
+            {"type": "action", "id": action_id},
+            {
+                "mission_id": mission_id,
+                "claim_id": claim_id,
+                "action_kind": action_kind,
+                "risk": risk,
+                "policy": policy["policy"],
+                "decision": policy["decision"],
+                "dry_run_id": dry_run["dry_run_id"],
+            },
+        )
+        card["audit_ref"] = f"audit:{event['event_id']}"
+        _write_json(self.action_path(action_id), card)
+        return {"action_card": card, "audit_event": event}
+
+    def approve_action(self, action_id: str, scope: dict[str, str], approver: str = "owner") -> dict[str, Any]:
+        action = self.get_action(action_id)
+        if action is None:
+            return {"status": "not_found"}
+        if action.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": action.get("scope")}
+        if not action.get("approval", {}).get("required"):
+            return {"status": "approval_not_required", "action_card": action}
+
+        approved = dict(action)
+        approved["approval"] = {
+            "required": True,
+            "status": "approved",
+            "approver": approver,
+            "approved_at": utc_now(),
+        }
+        approved["execution"] = dict(approved["execution"])
+        approved["execution"]["status"] = "ready_to_execute"
+        approved["execution"]["can_execute_now"] = True
+        _write_json(self.action_path(action_id), approved)
+        event = self.append_audit(
+            "action.approved",
+            scope,
+            {"type": "action", "id": action_id},
+            {
+                "mission_id": approved.get("mission_id"),
+                "approver": approver,
+                "policy": approved.get("policy_decision", {}).get("policy"),
+            },
+        )
+        return {"action_card": approved, "audit_event": event}
+
+    def execute_action(self, action_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        action = self.get_action(action_id)
+        if action is None:
+            return {"status": "not_found"}
+        if action.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": action.get("scope")}
+
+        mission = self.get_mission(action["mission_id"])
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        policy = self._action_policy(
+            mission,
+            action.get("action_kind", ""),
+            action.get("risk", ""),
+            scope,
+            action.get("connector_boundary", {}).get("connector", "mock_connector"),
+        )
+        approved = action.get("approval", {}).get("status") == "approved"
+        if not policy["can_execute_now"] and not approved:
+            event = self.append_audit(
+                "action.execution.denied",
+                scope,
+                {"type": "action", "id": action_id},
+                {
+                    "mission_id": action.get("mission_id"),
+                    "policy": policy["policy"],
+                    "reason": policy["reason"],
+                },
+            )
+            return {"status": "policy_denied", "policy_decision": policy, "action_card": action, "audit_event": event}
+
+        external = action.get("action_kind") == "external_writeback"
+        result_record = {
+            "schema_version": "cs.action_result.v0",
+            "status": "success",
+            "action_id": action_id,
+            "mission_id": action.get("mission_id"),
+            "side_effect_boundary": "mocked_connector" if external else "local_internal_state",
+            "external_http_calls": 0,
+            "mock_connector_calls": 1 if external else 0,
+            "message": "Action execution was recorded through the governed Workflow/Action path.",
+            "executed_at": utc_now(),
+        }
+        executed = dict(action)
+        executed["execution"] = {
+            "status": "executed",
+            "can_execute_now": False,
+            "result": result_record,
+        }
+        _write_json(self.action_path(action_id), executed)
+        event = self.append_audit(
+            "action.executed",
+            scope,
+            {"type": "action", "id": action_id},
+            {
+                "mission_id": executed.get("mission_id"),
+                "action_kind": executed.get("action_kind"),
+                "external_http_calls": 0,
+                "mock_connector_calls": result_record["mock_connector_calls"],
+            },
+        )
+        return {"status": "executed", "action_card": executed, "action_result": result_record, "audit_event": event}
+
+    def deny_direct_connector_write(self, provider: str, target: str, scope: dict[str, str]) -> dict[str, Any]:
+        synthetic_mission = {
+            "mission_id": "none",
+            "allowed_actions": [],
+        }
+        policy = self._action_policy(
+            synthetic_mission,
+            "external_writeback",
+            "high",
+            scope,
+            provider,
+            direct=True,
+        )
+        event = self.append_audit(
+            "connector.direct_write.denied",
+            scope,
+            {"type": "connector", "id": provider},
+            {
+                "provider": provider,
+                "target": target,
+                "policy": policy["policy"],
+                "direct_provider_access": False,
+                "external_http_calls": 0,
+            },
+        )
+        return {"policy_decision": policy, "audit_event": event}
 
     def ingest_artifact(
         self,

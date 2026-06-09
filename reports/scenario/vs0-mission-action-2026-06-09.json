@@ -1,0 +1,4419 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-mission-action",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "7cd1d8a"
+  },
+  "mission_action_evidence": {
+    "artifact_id": "art_2735313e0cb92563",
+    "audit_event_count": 25,
+    "audit_event_types": [
+      "workspace.mode.set",
+      "workspace.mode.set",
+      "workspace.mode.set",
+      "artifact.ingested",
+      "search.snapshot.created",
+      "evidence_bundle.created",
+      "claim.draft.created",
+      "mission.contract.created",
+      "workspace.mode.set",
+      "mission.activated",
+      "action.card.proposed",
+      "action.executed",
+      "action.card.proposed",
+      "action.execution.denied",
+      "action.approved",
+      "action.executed",
+      "action.card.proposed",
+      "action.execution.denied",
+      "workspace.mode.set",
+      "action.card.proposed",
+      "action.execution.denied",
+      "workspace.mode.set",
+      "action.card.proposed",
+      "action.execution.denied",
+      "connector.direct_write.denied"
+    ],
+    "authority_view": {
+      "allowed_actions": [
+        "internal_status_update",
+        "draft_task",
+        "refresh_brief"
+      ],
+      "forbidden_actions": [
+        "external_writeback_without_workflow_action",
+        "cross_namespace_access",
+        "destructive_change",
+        "secret_exfiltration"
+      ],
+      "may_act_in_scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      },
+      "pause_stop_revoke": [
+        "pause",
+        "stop",
+        "revoke",
+        "reduce_scope"
+      ],
+      "requires_escalation": [
+        "high-risk",
+        "external_writeback",
+        "sensitive",
+        "out_of_contract"
+      ]
+    },
+    "available_modes": [
+      "assist",
+      "autopilot",
+      "locked",
+      "manual"
+    ],
+    "claim_id": "claim_3263498b4d824c63",
+    "direct_write_policy": {
+      "action_kind": "external_writeback",
+      "approval_required": true,
+      "can_execute_now": false,
+      "connector": "mock_provider",
+      "decided_at": "2026-06-09T12:58:05.908695Z",
+      "decision": "deny",
+      "execution_status": "blocked_direct_write",
+      "id": "policy_b75beac4359327a8",
+      "mission_id": "none",
+      "policy": "workflow_action_path_required",
+      "reason": "Direct provider writeback is denied. Use a governed Workflow/Action path with dry-run, policy, approval, result, and audit.",
+      "resolution_path": [
+        "Use an active Mission Goal Contract.",
+        "Keep action inside allowed actions and owner namespace.",
+        "Run dry-run and request owner approval when policy requires it."
+      ],
+      "risk": "high",
+      "schema_version": "cs.policy_decision.v0",
+      "scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      },
+      "workspace_mode": "locked"
+    },
+    "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+    "high_action_id": "action_4efe824e634dc399",
+    "high_approval_status": "approved",
+    "high_execute_before_approval_exit_code": 8,
+    "high_policy": {
+      "action_kind": "external_writeback",
+      "approval_required": true,
+      "can_execute_now": false,
+      "connector": "mock_connector",
+      "decided_at": "2026-06-09T12:58:05.255836Z",
+      "decision": "requires_approval",
+      "execution_status": "pending_approval",
+      "id": "policy_daa9a5ec1567c40d",
+      "mission_id": "mission_3fceea91e8d56ebd",
+      "policy": "high_risk_action_requires_approval",
+      "reason": "High-risk or external writeback action requires owner approval before execution.",
+      "resolution_path": [
+        "Use an active Mission Goal Contract.",
+        "Keep action inside allowed actions and owner namespace.",
+        "Run dry-run and request owner approval when policy requires it."
+      ],
+      "risk": "high",
+      "schema_version": "cs.policy_decision.v0",
+      "scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      },
+      "workspace_mode": "autopilot"
+    },
+    "high_result": {
+      "action_id": "action_4efe824e634dc399",
+      "executed_at": "2026-06-09T12:58:05.403648Z",
+      "external_http_calls": 0,
+      "message": "Action execution was recorded through the governed Workflow/Action path.",
+      "mission_id": "mission_3fceea91e8d56ebd",
+      "mock_connector_calls": 1,
+      "schema_version": "cs.action_result.v0",
+      "side_effect_boundary": "mocked_connector",
+      "status": "success"
+    },
+    "locked_action_id": "action_a088b3ebf85deb58",
+    "locked_policy": {
+      "action_kind": "internal_status_update",
+      "approval_required": true,
+      "can_execute_now": false,
+      "connector": "mock_connector",
+      "decided_at": "2026-06-09T12:58:05.740439Z",
+      "decision": "deny",
+      "execution_status": "blocked_by_workspace_mode",
+      "id": "policy_2b2914399ff06764",
+      "mission_id": "mission_3fceea91e8d56ebd",
+      "policy": "workspace_mode_locked",
+      "reason": "Workspace mode is Locked, so action proposal and execution are disabled.",
+      "resolution_path": [
+        "Use an active Mission Goal Contract.",
+        "Keep action inside allowed actions and owner namespace.",
+        "Run dry-run and request owner approval when policy requires it."
+      ],
+      "risk": "low",
+      "schema_version": "cs.policy_decision.v0",
+      "scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      },
+      "workspace_mode": "locked"
+    },
+    "low_action_id": "action_14d3a269e4b1efad",
+    "low_policy": {
+      "action_kind": "internal_status_update",
+      "approval_required": false,
+      "can_execute_now": true,
+      "connector": "mock_connector",
+      "decided_at": "2026-06-09T12:58:05.154957Z",
+      "decision": "allow",
+      "execution_status": "ready_to_execute",
+      "id": "policy_4466a3d169df7b10",
+      "mission_id": "mission_3fceea91e8d56ebd",
+      "policy": "low_risk_autopilot_allowed",
+      "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+      "resolution_path": [
+        "Use an active Mission Goal Contract.",
+        "Keep action inside allowed actions and owner namespace.",
+        "Run dry-run and request owner approval when policy requires it."
+      ],
+      "risk": "low",
+      "schema_version": "cs.policy_decision.v0",
+      "scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      },
+      "workspace_mode": "autopilot"
+    },
+    "low_result": {
+      "action_id": "action_14d3a269e4b1efad",
+      "executed_at": "2026-06-09T12:58:05.205792Z",
+      "external_http_calls": 0,
+      "message": "Action execution was recorded through the governed Workflow/Action path.",
+      "mission_id": "mission_3fceea91e8d56ebd",
+      "mock_connector_calls": 0,
+      "schema_version": "cs.action_result.v0",
+      "side_effect_boundary": "local_internal_state",
+      "status": "success"
+    },
+    "manual_action_id": "action_fe7f866e139a2f21",
+    "manual_policy": {
+      "action_kind": "internal_status_update",
+      "approval_required": true,
+      "can_execute_now": false,
+      "connector": "mock_connector",
+      "decided_at": "2026-06-09T12:58:05.596792Z",
+      "decision": "deny",
+      "execution_status": "blocked_by_workspace_mode",
+      "id": "policy_e360b77416a6c291",
+      "mission_id": "mission_3fceea91e8d56ebd",
+      "policy": "workspace_mode_no_autonomous_execution",
+      "reason": "Workspace mode does not allow autonomous execution.",
+      "resolution_path": [
+        "Use an active Mission Goal Contract.",
+        "Keep action inside allowed actions and owner namespace.",
+        "Run dry-run and request owner approval when policy requires it."
+      ],
+      "risk": "low",
+      "schema_version": "cs.policy_decision.v0",
+      "scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      },
+      "workspace_mode": "manual"
+    },
+    "mission_contract_fields_present": {
+      "allowed_actions": true,
+      "escalation_rules": true,
+      "evidence_expectations": true,
+      "forbidden_actions": true,
+      "goal": true,
+      "review_cadence": true,
+      "scope": true,
+      "stop_conditions": true,
+      "success_criteria": true
+    },
+    "mission_id": "mission_3fceea91e8d56ebd",
+    "out_of_contract_action_id": "action_53afc93214dd5387",
+    "out_of_contract_policy": {
+      "action_kind": "destructive_change",
+      "approval_required": true,
+      "can_execute_now": false,
+      "connector": "mock_connector",
+      "decided_at": "2026-06-09T12:58:05.453081Z",
+      "decision": "escalate",
+      "execution_status": "escalated_out_of_contract",
+      "id": "policy_341c368e0a02e737",
+      "mission_id": "mission_3fceea91e8d56ebd",
+      "policy": "mission_contract_action_scope",
+      "reason": "Requested action is outside the Mission Goal Contract allowed actions.",
+      "resolution_path": [
+        "Use an active Mission Goal Contract.",
+        "Keep action inside allowed actions and owner namespace.",
+        "Run dry-run and request owner approval when policy requires it."
+      ],
+      "risk": "destructive",
+      "schema_version": "cs.policy_decision.v0",
+      "scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      },
+      "workspace_mode": "autopilot"
+    },
+    "search_snapshot_id": "search_35b7a3578453a55b"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "connector_credentials_exposed": 0,
+    "cross_scope_action_executed": 0,
+    "direct_provider_write_allowed": 0,
+    "high_risk_executed_without_approval": 0,
+    "locked_mode_autonomous_execution": 0,
+    "manual_mode_autonomous_execution": 0,
+    "out_of_contract_action_executed": 0,
+    "real_external_http_calls": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-mission-action-2026-06-09.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone mission create --claim-id <claim_id> --json",
+        "cornerstone action propose --mission-id <mission_id> --claim-id <claim_id> --json"
+      ],
+      "id": "CS-CLAIM-010",
+      "notes": "Evidence-backed claim becomes a Mission Goal Contract and Action Card carrying evidence, risk, scope, and approval requirements.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone workspace mode show --json",
+        "cornerstone workspace mode set <mode> --json"
+      ],
+      "id": "CS-AUTO-001",
+      "notes": "Workspace mode records expose Manual, Assist, Autopilot, and Locked behaviors and execution behavior changes with mode.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone mission create --goal <goal> --claim-id <claim_id> --json"
+      ],
+      "id": "CS-AUTO-003",
+      "notes": "Natural-language goal is converted into an editable Mission Goal Contract with goal, scope, allowed/forbidden actions, success criteria, stop conditions, cadence, escalation rules, and evidence expectations.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone mission activate <mission_id> --mode autopilot --json"
+      ],
+      "id": "CS-AUTO-004",
+      "notes": "Activated mission exposes granted scope, allowed actions, forbidden actions, escalation requirements, and pause/stop/revoke controls.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone action execute <allowed_low_risk_action_id> --json",
+        "cornerstone action execute <out_of_contract_action_id> --json",
+        "cornerstone action execute <action_id> --owner-id other-user --json"
+      ],
+      "id": "CS-AUTO-005",
+      "notes": "Autopilot executes only an allowed low-risk in-scope action, while out-of-contract and cross-scope attempts are denied.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone action propose ... --json",
+        "cornerstone action execute ... --json"
+      ],
+      "id": "CS-AUTO-006",
+      "notes": "Simple mode/action surfaces are backed by policy decisions for risk, scope, egress, approval, and escalation.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone action propose --mission-id <mission_id> --claim-id <claim_id> --json"
+      ],
+      "id": "CS-AUTO-007",
+      "notes": "Action Card record shows goal, evidence, diff, expected impact, policy decision, risk, approval/execution state, and audit link.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone action propose --action-kind external_writeback --risk high --json"
+      ],
+      "id": "CS-AUTO-008",
+      "notes": "High-risk mocked external writeback receives dry-run diff, expected impact, policy result, expected external calls, and links to approval/execution records.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone action execute <high_risk_action_id> --json",
+        "cornerstone action approve <high_risk_action_id> --json"
+      ],
+      "id": "CS-AUTO-009",
+      "notes": "High-risk action is blocked before owner approval and can execute only after approval.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone action execute <low_risk_action_id> --json"
+      ],
+      "id": "CS-AUTO-010",
+      "notes": "Low-risk allowed Autopilot action executes through local internal state and records the result and audit event.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone connector direct-write-test --json",
+        "cornerstone action approve <external_action_id> --json",
+        "cornerstone action execute <external_action_id> --json"
+      ],
+      "id": "CS-AUTO-011",
+      "notes": "Direct provider writeback is denied; mocked writeback succeeds only through the governed Workflow/Action path with policy, approval, result, ConnectorHub boundary, and audit.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone search query ... --json",
+        "cornerstone action propose ... --json"
+      ],
+      "id": "CS-REG-002",
+      "notes": "Search results become an Evidence Bundle, evidence-backed claim, Mission Goal Contract, and Action Card.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "cornerstone connector direct-write-test --json",
+        "cornerstone action execute <external_action_id> --json"
+      ],
+      "id": "CS-REG-003",
+      "notes": "Mock connector capability is framed as supporting evidence-backed mission/action/audit work, not as the product identity.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "cornerstone action execute <out_of_contract_action_id> --json"
+      ],
+      "id": "CS-REG-011",
+      "notes": "Autopilot cannot bypass the Mission Goal Contract; out-of-contract destructive action is denied.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "cornerstone workspace mode set manual --json",
+        "cornerstone workspace mode set locked --json"
+      ],
+      "id": "CS-REG-012",
+      "notes": "Manual and Locked workspace modes block autonomous execution.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "cornerstone action execute <action_id> --owner-id other-user --json"
+      ],
+      "id": "CS-AUTO-020",
+      "notes": "Autopilot action execution remains inside the active owner namespace, Mission Goal Contract, connector capability, and policy boundary.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "vs0-mission-action",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/vs0-mission-action-44506",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 16,
+    "product_feature_claims": "PARTIAL_VS0_MISSION_ACTION_ONLY",
+    "scenario_count": 16
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 25,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "7cd1d8a"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_35b7a3578453a55b",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_87591f7333146f3e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T12:58:04.964234Z",
+          "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+          "evidence_items": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "provenance": {
+                "created_at": "2026-06-09T12:58:04.876741Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_35b7a3578453a55b",
+              "snippet": "alpha-evidence-anchor.",
+              "source": {
+                "ingested_at": "2026-06-09T12:58:04.876741Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_2735313e0cb92563",
+                "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+                "evidence_refs": [
+                  "artifact:art_2735313e0cb92563",
+                  "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "alpha-evidence-anchor",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "alpha-evidence-anchor",
+                    "query_term": "alpha-evidence-anchor",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "alpha-evidence-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_35b7a3578453a55b"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_2ef732f42cb4cf2e",
+          "search_snapshot:search_35b7a3578453a55b",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_87591f7333146f3e",
+          "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+          "git_commit": "7cd1d8a",
+          "search_snapshot_id": "search_35b7a3578453a55b"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_2ef732f42cb4cf2e",
+        "--statement",
+        "The Alpha evidence anchor is ready for a governed mission action.",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_84b334e1332c6d1b"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_3263498b4d824c63",
+          "created_at": "2026-06-09T12:58:05.012164Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The Alpha evidence anchor is ready for a governed mission action.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_3263498b4d824c63",
+          "evidence_bundle:evb_2ef732f42cb4cf2e",
+          "search_snapshot:search_35b7a3578453a55b",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_84b334e1332c6d1b",
+          "claim_id": "claim_3263498b4d824c63",
+          "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+          "git_commit": "7cd1d8a",
+          "search_snapshot_id": "search_35b7a3578453a55b"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "connector_direct_write": {
+      "command": [
+        "cornerstone",
+        "connector",
+        "direct-write-test",
+        "--provider",
+        "mock_provider",
+        "--target",
+        "mock://connected-source/alpha",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_861da201e84e71cf"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone connector direct-write-test",
+        "errors": [
+          {
+            "code": "CS_DIRECT_WRITE_DENIED",
+            "external_http_calls": 0,
+            "message": "Direct provider writeback is denied. Use a governed Workflow/Action path with dry-run, policy, approval, result, and audit.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "7cd1d8a"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_b75beac4359327a8"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_provider",
+            "decided_at": "2026-06-09T12:58:05.908695Z",
+            "decision": "deny",
+            "execution_status": "blocked_direct_write",
+            "id": "policy_b75beac4359327a8",
+            "mission_id": "none",
+            "policy": "workflow_action_path_required",
+            "reason": "Direct provider writeback is denied. Use a governed Workflow/Action path with dry-run, policy, approval, result, and audit.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "locked"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "high_action_approve": {
+      "command": [
+        "cornerstone",
+        "action",
+        "approve",
+        "action_4efe824e634dc399",
+        "--approver",
+        "owner",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_4efe824e634dc399",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approved_at": "2026-06-09T12:58:05.353884Z",
+            "approver": "owner",
+            "required": true,
+            "status": "approved"
+          },
+          "audit_ref": "audit:audit_8cab7d877272a1a5",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.255977Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.255951Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://connected-source/alpha",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_c23343205b9486fa",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 1,
+              "risk": "high",
+              "target": "mock://connected-source/alpha"
+            },
+            "goal": "Write the reviewed status to a mocked connected source",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.255836Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_daa9a5ec1567c40d",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": true,
+            "result": null,
+            "status": "ready_to_execute"
+          },
+          "goal": "Write the reviewed status to a mocked connected source",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.255836Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_daa9a5ec1567c40d",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "audit_refs": [
+          "audit:audit_eae9a5ae7b8341ef"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action approve",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_4efe824e634dc399"
+        ],
+        "ids": {
+          "action_id": "action_4efe824e634dc399",
+          "git_commit": "7cd1d8a"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "high_action_execute_after_approval": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_4efe824e634dc399",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_4efe824e634dc399",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approved_at": "2026-06-09T12:58:05.353884Z",
+            "approver": "owner",
+            "required": true,
+            "status": "approved"
+          },
+          "audit_ref": "audit:audit_8cab7d877272a1a5",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.255977Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.255951Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://connected-source/alpha",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_c23343205b9486fa",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 1,
+              "risk": "high",
+              "target": "mock://connected-source/alpha"
+            },
+            "goal": "Write the reviewed status to a mocked connected source",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.255836Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_daa9a5ec1567c40d",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": {
+              "action_id": "action_4efe824e634dc399",
+              "executed_at": "2026-06-09T12:58:05.403648Z",
+              "external_http_calls": 0,
+              "message": "Action execution was recorded through the governed Workflow/Action path.",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "mock_connector_calls": 1,
+              "schema_version": "cs.action_result.v0",
+              "side_effect_boundary": "mocked_connector",
+              "status": "success"
+            },
+            "status": "executed"
+          },
+          "goal": "Write the reviewed status to a mocked connected source",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.255836Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_daa9a5ec1567c40d",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "action_result": {
+          "action_id": "action_4efe824e634dc399",
+          "executed_at": "2026-06-09T12:58:05.403648Z",
+          "external_http_calls": 0,
+          "message": "Action execution was recorded through the governed Workflow/Action path.",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "mock_connector_calls": 1,
+          "schema_version": "cs.action_result.v0",
+          "side_effect_boundary": "mocked_connector",
+          "status": "success"
+        },
+        "audit_refs": [
+          "audit:audit_5ceb36d4f59a8d00"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_4efe824e634dc399"
+        ],
+        "ids": {
+          "action_id": "action_4efe824e634dc399",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "high_action_execute_before_approval": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_4efe824e634dc399",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_4efe824e634dc399",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_8cab7d877272a1a5",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.255977Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.255951Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://connected-source/alpha",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_c23343205b9486fa",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 1,
+              "risk": "high",
+              "target": "mock://connected-source/alpha"
+            },
+            "goal": "Write the reviewed status to a mocked connected source",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.255836Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_daa9a5ec1567c40d",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "pending_approval"
+          },
+          "goal": "Write the reviewed status to a mocked connected source",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.255836Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_daa9a5ec1567c40d",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "audit_refs": [
+          "audit:audit_df20044005986619"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [
+          {
+            "code": "CS_ACTION_POLICY_DENIED",
+            "message": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ]
+          }
+        ],
+        "evidence_refs": [
+          "action:action_4efe824e634dc399"
+        ],
+        "ids": {
+          "action_id": "action_4efe824e634dc399",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_daa9a5ec1567c40d"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.305469Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_daa9a5ec1567c40d",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "high_action_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_3fceea91e8d56ebd",
+        "--claim-id",
+        "claim_3263498b4d824c63",
+        "--goal",
+        "Write the reviewed status to a mocked connected source",
+        "--action-kind",
+        "external_writeback",
+        "--risk",
+        "high",
+        "--connector",
+        "mock_connector",
+        "--target",
+        "mock://connected-source/alpha",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_4efe824e634dc399",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_8cab7d877272a1a5",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.255977Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.255951Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://connected-source/alpha",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_c23343205b9486fa",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 1,
+              "risk": "high",
+              "target": "mock://connected-source/alpha"
+            },
+            "goal": "Write the reviewed status to a mocked connected source",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.255836Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_daa9a5ec1567c40d",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "pending_approval"
+          },
+          "goal": "Write the reviewed status to a mocked connected source",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.255836Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_daa9a5ec1567c40d",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "audit_refs": [
+          "audit:audit_8cab7d877272a1a5"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_4efe824e634dc399",
+          "mission:mission_3fceea91e8d56ebd",
+          "claim:claim_3263498b4d824c63",
+          "dry_run:dryrun_c23343205b9486fa",
+          "evidence_bundle:evb_2ef732f42cb4cf2e",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "action_id": "action_4efe824e634dc399",
+          "audit_event_id": "audit_8cab7d877272a1a5",
+          "claim_id": "claim_3263498b4d824c63",
+          "dry_run_id": "dryrun_c23343205b9486fa",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_daa9a5ec1567c40d"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.255836Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_daa9a5ec1567c40d",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/01_artifact_basic/input.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-09T12:58:04.876741Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T12:58:04.876741Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_56fbc8df2e8b568a"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_56fbc8df2e8b568a",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "7cd1d8a"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "locked_action_execute": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_a088b3ebf85deb58",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_a088b3ebf85deb58",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_54026cab1faf835f",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.740584Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.740560Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_4ad0da913efc9358",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Attempt action while locked",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.740439Z",
+              "decision": "deny",
+              "execution_status": "blocked_by_workspace_mode",
+              "id": "policy_2b2914399ff06764",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "workspace_mode_locked",
+              "reason": "Workspace mode is Locked, so action proposal and execution are disabled.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "locked"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "blocked_by_workspace_mode"
+          },
+          "goal": "Attempt action while locked",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.740439Z",
+            "decision": "deny",
+            "execution_status": "blocked_by_workspace_mode",
+            "id": "policy_2b2914399ff06764",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "workspace_mode_locked",
+            "reason": "Workspace mode is Locked, so action proposal and execution are disabled.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "locked"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "audit_refs": [
+          "audit:audit_5df12198fd671735"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [
+          {
+            "code": "CS_ACTION_POLICY_DENIED",
+            "message": "Workspace mode is Locked, so action proposal and execution are disabled.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ]
+          }
+        ],
+        "evidence_refs": [
+          "action:action_a088b3ebf85deb58"
+        ],
+        "ids": {
+          "action_id": "action_a088b3ebf85deb58",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_2b2914399ff06764"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "internal_status_update",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.797368Z",
+            "decision": "deny",
+            "execution_status": "blocked_by_workspace_mode",
+            "id": "policy_2b2914399ff06764",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "workspace_mode_locked",
+            "reason": "Workspace mode is Locked, so action proposal and execution are disabled.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "locked"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "locked_action_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_3fceea91e8d56ebd",
+        "--claim-id",
+        "claim_3263498b4d824c63",
+        "--goal",
+        "Attempt action while locked",
+        "--action-kind",
+        "internal_status_update",
+        "--risk",
+        "low",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_a088b3ebf85deb58",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_54026cab1faf835f",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.740584Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.740560Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_4ad0da913efc9358",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Attempt action while locked",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.740439Z",
+              "decision": "deny",
+              "execution_status": "blocked_by_workspace_mode",
+              "id": "policy_2b2914399ff06764",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "workspace_mode_locked",
+              "reason": "Workspace mode is Locked, so action proposal and execution are disabled.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "locked"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "blocked_by_workspace_mode"
+          },
+          "goal": "Attempt action while locked",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.740439Z",
+            "decision": "deny",
+            "execution_status": "blocked_by_workspace_mode",
+            "id": "policy_2b2914399ff06764",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "workspace_mode_locked",
+            "reason": "Workspace mode is Locked, so action proposal and execution are disabled.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "locked"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "audit_refs": [
+          "audit:audit_54026cab1faf835f"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_a088b3ebf85deb58",
+          "mission:mission_3fceea91e8d56ebd",
+          "claim:claim_3263498b4d824c63",
+          "dry_run:dryrun_4ad0da913efc9358",
+          "evidence_bundle:evb_2ef732f42cb4cf2e",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "action_id": "action_a088b3ebf85deb58",
+          "audit_event_id": "audit_54026cab1faf835f",
+          "claim_id": "claim_3263498b4d824c63",
+          "dry_run_id": "dryrun_4ad0da913efc9358",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_2b2914399ff06764"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "internal_status_update",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.740439Z",
+            "decision": "deny",
+            "execution_status": "blocked_by_workspace_mode",
+            "id": "policy_2b2914399ff06764",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "workspace_mode_locked",
+            "reason": "Workspace mode is Locked, so action proposal and execution are disabled.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "locked"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "low_action_execute": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_14d3a269e4b1efad",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_14d3a269e4b1efad",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": false,
+            "status": "not_required"
+          },
+          "audit_ref": "audit:audit_ad9635e6bd724f05",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.155087Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.155064Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_89e109919f1f7744",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Update the internal mission status",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": false,
+              "can_execute_now": true,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.154957Z",
+              "decision": "allow",
+              "execution_status": "ready_to_execute",
+              "id": "policy_4466a3d169df7b10",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "low_risk_autopilot_allowed",
+              "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": {
+              "action_id": "action_14d3a269e4b1efad",
+              "executed_at": "2026-06-09T12:58:05.205792Z",
+              "external_http_calls": 0,
+              "message": "Action execution was recorded through the governed Workflow/Action path.",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "mock_connector_calls": 0,
+              "schema_version": "cs.action_result.v0",
+              "side_effect_boundary": "local_internal_state",
+              "status": "success"
+            },
+            "status": "executed"
+          },
+          "goal": "Update the internal mission status",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.154957Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_4466a3d169df7b10",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "action_result": {
+          "action_id": "action_14d3a269e4b1efad",
+          "executed_at": "2026-06-09T12:58:05.205792Z",
+          "external_http_calls": 0,
+          "message": "Action execution was recorded through the governed Workflow/Action path.",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "mock_connector_calls": 0,
+          "schema_version": "cs.action_result.v0",
+          "side_effect_boundary": "local_internal_state",
+          "status": "success"
+        },
+        "audit_refs": [
+          "audit:audit_6c3e7cb74a09125e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_14d3a269e4b1efad"
+        ],
+        "ids": {
+          "action_id": "action_14d3a269e4b1efad",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "low_action_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_3fceea91e8d56ebd",
+        "--claim-id",
+        "claim_3263498b4d824c63",
+        "--goal",
+        "Update the internal mission status",
+        "--action-kind",
+        "internal_status_update",
+        "--risk",
+        "low",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_14d3a269e4b1efad",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": false,
+            "status": "not_required"
+          },
+          "audit_ref": "audit:audit_ad9635e6bd724f05",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.155087Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.155064Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_89e109919f1f7744",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Update the internal mission status",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": false,
+              "can_execute_now": true,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.154957Z",
+              "decision": "allow",
+              "execution_status": "ready_to_execute",
+              "id": "policy_4466a3d169df7b10",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "low_risk_autopilot_allowed",
+              "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": true,
+            "result": null,
+            "status": "ready_to_execute"
+          },
+          "goal": "Update the internal mission status",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.154957Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_4466a3d169df7b10",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "audit_refs": [
+          "audit:audit_ad9635e6bd724f05"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_14d3a269e4b1efad",
+          "mission:mission_3fceea91e8d56ebd",
+          "claim:claim_3263498b4d824c63",
+          "dry_run:dryrun_89e109919f1f7744",
+          "evidence_bundle:evb_2ef732f42cb4cf2e",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "action_id": "action_14d3a269e4b1efad",
+          "audit_event_id": "audit_ad9635e6bd724f05",
+          "claim_id": "claim_3263498b4d824c63",
+          "dry_run_id": "dryrun_89e109919f1f7744",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_4466a3d169df7b10"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.154957Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_4466a3d169df7b10",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "manual_action_execute": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_fe7f866e139a2f21",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_fe7f866e139a2f21",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_c4d03f3667530f59",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.596927Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.596901Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_73e1e3daf79655ec",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Attempt low-risk work while manual",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.596792Z",
+              "decision": "deny",
+              "execution_status": "blocked_by_workspace_mode",
+              "id": "policy_e360b77416a6c291",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "workspace_mode_no_autonomous_execution",
+              "reason": "Workspace mode does not allow autonomous execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "manual"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "blocked_by_workspace_mode"
+          },
+          "goal": "Attempt low-risk work while manual",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.596792Z",
+            "decision": "deny",
+            "execution_status": "blocked_by_workspace_mode",
+            "id": "policy_e360b77416a6c291",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "workspace_mode_no_autonomous_execution",
+            "reason": "Workspace mode does not allow autonomous execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "manual"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "audit_refs": [
+          "audit:audit_f295305cb378114e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [
+          {
+            "code": "CS_ACTION_POLICY_DENIED",
+            "message": "Workspace mode does not allow autonomous execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ]
+          }
+        ],
+        "evidence_refs": [
+          "action:action_fe7f866e139a2f21"
+        ],
+        "ids": {
+          "action_id": "action_fe7f866e139a2f21",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_e360b77416a6c291"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "internal_status_update",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.644278Z",
+            "decision": "deny",
+            "execution_status": "blocked_by_workspace_mode",
+            "id": "policy_e360b77416a6c291",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "workspace_mode_no_autonomous_execution",
+            "reason": "Workspace mode does not allow autonomous execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "manual"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "manual_action_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_3fceea91e8d56ebd",
+        "--claim-id",
+        "claim_3263498b4d824c63",
+        "--goal",
+        "Attempt low-risk work while manual",
+        "--action-kind",
+        "internal_status_update",
+        "--risk",
+        "low",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_fe7f866e139a2f21",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_c4d03f3667530f59",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.596927Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.596901Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_73e1e3daf79655ec",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Attempt low-risk work while manual",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.596792Z",
+              "decision": "deny",
+              "execution_status": "blocked_by_workspace_mode",
+              "id": "policy_e360b77416a6c291",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "workspace_mode_no_autonomous_execution",
+              "reason": "Workspace mode does not allow autonomous execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "manual"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "blocked_by_workspace_mode"
+          },
+          "goal": "Attempt low-risk work while manual",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.596792Z",
+            "decision": "deny",
+            "execution_status": "blocked_by_workspace_mode",
+            "id": "policy_e360b77416a6c291",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "workspace_mode_no_autonomous_execution",
+            "reason": "Workspace mode does not allow autonomous execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "manual"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "audit_refs": [
+          "audit:audit_c4d03f3667530f59"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_fe7f866e139a2f21",
+          "mission:mission_3fceea91e8d56ebd",
+          "claim:claim_3263498b4d824c63",
+          "dry_run:dryrun_73e1e3daf79655ec",
+          "evidence_bundle:evb_2ef732f42cb4cf2e",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "action_id": "action_fe7f866e139a2f21",
+          "audit_event_id": "audit_c4d03f3667530f59",
+          "claim_id": "claim_3263498b4d824c63",
+          "dry_run_id": "dryrun_73e1e3daf79655ec",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_e360b77416a6c291"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "internal_status_update",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.596792Z",
+            "decision": "deny",
+            "execution_status": "blocked_by_workspace_mode",
+            "id": "policy_e360b77416a6c291",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "workspace_mode_no_autonomous_execution",
+            "reason": "Workspace mode does not allow autonomous execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "manual"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "mission_activate": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "activate",
+        "mission_3fceea91e8d56ebd",
+        "--mode",
+        "autopilot",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_509ec93b49f36b6c",
+          "audit:audit_b07b9d01b97118ce"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission activate",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_3fceea91e8d56ebd"
+        ],
+        "ids": {
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mission": {
+          "activated_at": "2026-06-09T12:58:05.107844Z",
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "authority_view": {
+            "allowed_actions": [
+              "internal_status_update",
+              "draft_task",
+              "refresh_brief"
+            ],
+            "forbidden_actions": [
+              "external_writeback_without_workflow_action",
+              "cross_namespace_access",
+              "destructive_change",
+              "secret_exfiltration"
+            ],
+            "may_act_in_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "pause_stop_revoke": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T12:58:05.059714Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Keep Alpha evidence review moving safely",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_3263498b4d824c63",
+            "statement": "The Alpha evidence anchor is ready for a governed mission action.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "active",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "autopilot"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": false,
+            "autonomous_execution_allowed": true,
+            "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            "label": "Autopilot"
+          },
+          "mode": "autopilot",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T12:58:05.107440Z"
+        }
+      }
+    },
+    "mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--goal",
+        "Keep Alpha evidence review moving safely",
+        "--claim-id",
+        "claim_3263498b4d824c63",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_9b71a755f3dd51c9"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_3fceea91e8d56ebd",
+          "claim:claim_3263498b4d824c63",
+          "evidence_bundle:evb_2ef732f42cb4cf2e",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_9b71a755f3dd51c9",
+          "claim_id": "claim_3263498b4d824c63",
+          "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T12:58:05.059714Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Keep Alpha evidence review moving safely",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_3263498b4d824c63",
+            "statement": "The Alpha evidence anchor is ready for a governed mission action.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "autopilot"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "mode_set_autopilot": {
+      "command": [
+        "cornerstone",
+        "workspace",
+        "mode",
+        "set",
+        "autopilot",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_d729b7d5a128c40c"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone workspace mode set",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "audit_event_id": "audit_d729b7d5a128c40c",
+          "git_commit": "7cd1d8a",
+          "workspace_id": "default"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": false,
+            "autonomous_execution_allowed": true,
+            "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            "label": "Autopilot"
+          },
+          "mode": "autopilot",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T12:58:04.815781Z"
+        }
+      }
+    },
+    "mode_set_locked": {
+      "command": [
+        "cornerstone",
+        "workspace",
+        "mode",
+        "set",
+        "locked",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_0c4132ee690437b2"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone workspace mode set",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "audit_event_id": "audit_0c4132ee690437b2",
+          "git_commit": "7cd1d8a",
+          "workspace_id": "default"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": false,
+            "approval_required_for_execution": true,
+            "autonomous_execution_allowed": false,
+            "description": "CornerStone records evidence and audit only; action proposal and execution are blocked.",
+            "label": "Locked"
+          },
+          "mode": "locked",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T12:58:04.766202Z"
+        }
+      }
+    },
+    "mode_set_locked_for_denial": {
+      "command": [
+        "cornerstone",
+        "workspace",
+        "mode",
+        "set",
+        "locked",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_6288f836de538aec"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone workspace mode set",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "audit_event_id": "audit_6288f836de538aec",
+          "git_commit": "7cd1d8a",
+          "workspace_id": "default"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": false,
+            "approval_required_for_execution": true,
+            "autonomous_execution_allowed": false,
+            "description": "CornerStone records evidence and audit only; action proposal and execution are blocked.",
+            "label": "Locked"
+          },
+          "mode": "locked",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T12:58:05.690853Z"
+        }
+      }
+    },
+    "mode_set_manual": {
+      "command": [
+        "cornerstone",
+        "workspace",
+        "mode",
+        "set",
+        "manual",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_958f45a00d5a367f"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone workspace mode set",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "audit_event_id": "audit_958f45a00d5a367f",
+          "git_commit": "7cd1d8a",
+          "workspace_id": "default"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": true,
+            "autonomous_execution_allowed": false,
+            "description": "CornerStone may propose work, but execution requires explicit owner action.",
+            "label": "Manual"
+          },
+          "mode": "manual",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T12:58:04.711584Z"
+        }
+      }
+    },
+    "mode_set_manual_for_denial": {
+      "command": [
+        "cornerstone",
+        "workspace",
+        "mode",
+        "set",
+        "manual",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_1bdc0a0433244d0f"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone workspace mode set",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "audit_event_id": "audit_1bdc0a0433244d0f",
+          "git_commit": "7cd1d8a",
+          "workspace_id": "default"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": true,
+            "autonomous_execution_allowed": false,
+            "description": "CornerStone may propose work, but execution requires explicit owner action.",
+            "label": "Manual"
+          },
+          "mode": "manual",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T12:58:05.549395Z"
+        }
+      }
+    },
+    "mode_show_default": {
+      "command": [
+        "cornerstone",
+        "workspace",
+        "mode",
+        "show",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone workspace mode show",
+        "errors": [],
+        "evidence_refs": [
+          "workspace:default"
+        ],
+        "ids": {
+          "git_commit": "7cd1d8a"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": true,
+            "autonomous_execution_allowed": false,
+            "description": "CornerStone can draft briefs, claims, mission contracts, and action cards without autonomous execution.",
+            "label": "Assist"
+          },
+          "mode": "assist",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T12:58:04.664174Z"
+        }
+      }
+    },
+    "other_scope_execute": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_14d3a269e4b1efad",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--owner-id",
+        "other-user",
+        "--json"
+      ],
+      "exit_code": 6,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [
+          {
+            "code": "CS_SCOPE_DENIED",
+            "message": "Action Card is outside the requested scope.",
+            "resource_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "7cd1d8a"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "other-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "out_of_contract_execute": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_53afc93214dd5387",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_53afc93214dd5387",
+          "action_kind": "destructive_change",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_52d6f4fb618e2ef7",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.453215Z",
+          "dry_run": {
+            "action_kind": "destructive_change",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.453192Z",
+            "diff": {
+              "after": "would perform destructive_change against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_72096e5a82939942",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "destructive",
+              "target": "mock://local-target"
+            },
+            "goal": "Delete source material outside the contract",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "destructive_change",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.453081Z",
+              "decision": "escalate",
+              "execution_status": "escalated_out_of_contract",
+              "id": "policy_341c368e0a02e737",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "mission_contract_action_scope",
+              "reason": "Requested action is outside the Mission Goal Contract allowed actions.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "destructive",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "escalated_out_of_contract"
+          },
+          "goal": "Delete source material outside the contract",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "destructive_change",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.453081Z",
+            "decision": "escalate",
+            "execution_status": "escalated_out_of_contract",
+            "id": "policy_341c368e0a02e737",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "mission_contract_action_scope",
+            "reason": "Requested action is outside the Mission Goal Contract allowed actions.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "destructive",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "destructive",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "audit_refs": [
+          "audit:audit_2efc50e219c9e2e9"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [
+          {
+            "code": "CS_ACTION_POLICY_DENIED",
+            "message": "Requested action is outside the Mission Goal Contract allowed actions.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ]
+          }
+        ],
+        "evidence_refs": [
+          "action:action_53afc93214dd5387"
+        ],
+        "ids": {
+          "action_id": "action_53afc93214dd5387",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_341c368e0a02e737"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "destructive_change",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.502260Z",
+            "decision": "escalate",
+            "execution_status": "escalated_out_of_contract",
+            "id": "policy_341c368e0a02e737",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "mission_contract_action_scope",
+            "reason": "Requested action is outside the Mission Goal Contract allowed actions.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "destructive",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "out_of_contract_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_3fceea91e8d56ebd",
+        "--claim-id",
+        "claim_3263498b4d824c63",
+        "--goal",
+        "Delete source material outside the contract",
+        "--action-kind",
+        "destructive_change",
+        "--risk",
+        "destructive",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_53afc93214dd5387",
+          "action_kind": "destructive_change",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_52d6f4fb618e2ef7",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T12:58:05.453215Z",
+          "dry_run": {
+            "action_kind": "destructive_change",
+            "claim_id": "claim_3263498b4d824c63",
+            "created_at": "2026-06-09T12:58:05.453192Z",
+            "diff": {
+              "after": "would perform destructive_change against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_72096e5a82939942",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "destructive",
+              "target": "mock://local-target"
+            },
+            "goal": "Delete source material outside the contract",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy_decision": {
+              "action_kind": "destructive_change",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T12:58:05.453081Z",
+              "decision": "escalate",
+              "execution_status": "escalated_out_of_contract",
+              "id": "policy_341c368e0a02e737",
+              "mission_id": "mission_3fceea91e8d56ebd",
+              "policy": "mission_contract_action_scope",
+              "reason": "Requested action is outside the Mission Goal Contract allowed actions.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "destructive",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ef732f42cb4cf2e",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_35b7a3578453a55b",
+              "evidence_bundle:evb_2ef732f42cb4cf2e"
+            ],
+            "search_snapshot_id": "search_35b7a3578453a55b"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "escalated_out_of_contract"
+          },
+          "goal": "Delete source material outside the contract",
+          "mission_id": "mission_3fceea91e8d56ebd",
+          "policy_decision": {
+            "action_kind": "destructive_change",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.453081Z",
+            "decision": "escalate",
+            "execution_status": "escalated_out_of_contract",
+            "id": "policy_341c368e0a02e737",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "mission_contract_action_scope",
+            "reason": "Requested action is outside the Mission Goal Contract allowed actions.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "destructive",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "destructive",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_3263498b4d824c63"
+        },
+        "audit_refs": [
+          "audit:audit_52d6f4fb618e2ef7"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_53afc93214dd5387",
+          "mission:mission_3fceea91e8d56ebd",
+          "claim:claim_3263498b4d824c63",
+          "dry_run:dryrun_72096e5a82939942",
+          "evidence_bundle:evb_2ef732f42cb4cf2e",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "action_id": "action_53afc93214dd5387",
+          "audit_event_id": "audit_52d6f4fb618e2ef7",
+          "claim_id": "claim_3263498b4d824c63",
+          "dry_run_id": "dryrun_72096e5a82939942",
+          "git_commit": "7cd1d8a",
+          "mission_id": "mission_3fceea91e8d56ebd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_341c368e0a02e737"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "destructive_change",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T12:58:05.453081Z",
+            "decision": "escalate",
+            "execution_status": "escalated_out_of_contract",
+            "id": "policy_341c368e0a02e737",
+            "mission_id": "mission_3fceea91e8d56ebd",
+            "policy": "mission_contract_action_scope",
+            "reason": "Requested action is outside the Mission Goal Contract allowed actions.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "destructive",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "alpha-evidence-anchor",
+        "--state-dir",
+        "tmp/scenario/vs0-mission-action-44506",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_3dd0bf450e625877"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_35b7a3578453a55b",
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "audit_event_id": "audit_3dd0bf450e625877",
+          "git_commit": "7cd1d8a",
+          "search_snapshot_id": "search_35b7a3578453a55b"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T12:58:04.915372Z",
+          "duration_ms": 0.223,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+              ],
+              "match_reasons": [
+                {
+                  "query": "alpha-evidence-anchor",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "alpha-evidence-anchor",
+                  "query_term": "alpha-evidence-anchor",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "alpha-evidence-anchor."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_35b7a3578453a55b"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}
