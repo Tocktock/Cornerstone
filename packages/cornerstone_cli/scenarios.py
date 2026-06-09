@@ -1517,6 +1517,10 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
     ) if snapshot_id else {}
     bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
     bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["brief_create"] = _run_cli_json(
+        root,
+        ["brief", "create", "--evidence-bundle-id", bundle_id, "--state-dir", state_rel, "--json"],
+    ) if bundle_id else {}
     transcripts["claim_create"] = _run_cli_json(
         root,
         [
@@ -1557,6 +1561,7 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
         "artifact.read",
         "search.snapshot.created",
         "evidence_bundle.created",
+        "brief.created",
         "claim.draft.created",
         "claim.approved",
         "policy.egress.denied",
@@ -1588,6 +1593,7 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
         and _exit_ok(transcripts["artifact_show"])
         and _exit_ok(transcripts["search"])
         and _exit_ok(transcripts["bundle_create"])
+        and _exit_ok(transcripts["brief_create"])
         and _exit_ok(transcripts["claim_create"])
         and _exit_ok(transcripts["claim_approve"])
         and _policy_denied(transcripts["egress_test"], "CS_EGRESS_DENIED")
@@ -2054,6 +2060,144 @@ def verify_vs0_security_policy(root: Path) -> dict[str, Any]:
             "filesystem_reads": sum(int(decision.get("filesystem_reads", 1)) for decision in sandbox_decisions.values()),
             "environment_reads": sum(int(decision.get("environment_reads", 1)) for decision in sandbox_decisions.values()),
             "sandbox_access_allowed": 0 if sandbox_ok else 1,
+        },
+        "human_required": [],
+    }
+
+
+def verify_vs0_briefing(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-briefing")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+    first_use_started = perf_counter()
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["brief_create"] = _run_cli_json(
+        root,
+        ["brief", "create", "--evidence-bundle-id", bundle_id, "--state-dir", state_rel, "--json"],
+    ) if bundle_id else {}
+    first_use_duration_ms = round((perf_counter() - first_use_started) * 1000, 3)
+    brief = _payload(transcripts["brief_create"]).get("brief", {})
+    brief_id = brief.get("brief_id", "")
+    transcripts["brief_show"] = _run_cli_json(root, ["brief", "show", brief_id, "--state-dir", state_rel, "--json"]) if brief_id else {}
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    search_results = snapshot.get("results", [])
+    evidence_links = brief.get("evidence_links", [])
+    ontology = brief.get("ontology", {})
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    brief_core_ok = (
+        _exit_ok(transcripts["ingest"])
+        and _exit_ok(transcripts["search"])
+        and _exit_ok(transcripts["bundle_create"])
+        and _exit_ok(transcripts["brief_create"])
+        and _exit_ok(transcripts["brief_show"])
+        and artifact_id
+        and snapshot.get("result_count") == 1
+        and search_results
+        and search_results[0].get("artifact_id") == artifact_id
+        and brief.get("status") == "evidence_backed"
+        and brief.get("key_points")
+        and evidence_links
+        and any(link.get("artifact_ref") == f"artifact:{artifact_id}" for link in evidence_links)
+        and brief.get("uncertainty")
+        and isinstance(brief.get("contradictions"), list)
+        and brief.get("recommended_next_steps")
+        and brief.get("suggested_outputs")
+        and ontology.get("preconfigured_ontology_required") is False
+        and ontology.get("ontology_suggestions_required_before_brief") is False
+    )
+    sec_001_ok = brief_core_ok and audit_ok and first_use_duration_ms <= 5000
+    und_005_ok = brief_core_ok and audit_ok
+    claim_002_ok = brief_core_ok and audit_ok
+    prod_004_ok = brief_core_ok and audit_ok and first_use_duration_ms <= 5000
+
+    rows = [
+        _row(
+            "CS-PROD-004",
+            "MUST_PASS",
+            "PASS" if prod_004_ok else "FAIL",
+            [
+                "cornerstone artifact ingest fixtures/vs0/packs/01_artifact_basic/input.txt --json",
+                "cornerstone search query alpha-evidence-anchor --json",
+                "cornerstone evidence bundle create --search-snapshot-id <snapshot_id> --json",
+                "cornerstone brief create --evidence-bundle-id <bundle_id> --json",
+            ],
+            "Fresh local first-use flow produces an evidence-backed brief with uncertainty and next steps.",
+        ),
+        _row(
+            "CS-UND-005",
+            "MUST_PASS",
+            "PASS" if und_005_ok else "FAIL",
+            ["cornerstone search query alpha-evidence-anchor --json", "cornerstone brief create --evidence-bundle-id <bundle_id> --json"],
+            "Search and evidence-backed brief creation work without preconfigured ontology; ontology suggestions are not a prerequisite.",
+        ),
+        _row(
+            "CS-CLAIM-002",
+            "MUST_PASS",
+            "PASS" if claim_002_ok else "FAIL",
+            ["cornerstone brief create --evidence-bundle-id <bundle_id> --json", "cornerstone brief show <brief_id> --json"],
+            "The brief contains key points, evidence links, uncertainty, contradictions, and recommended next steps tied to source evidence.",
+        ),
+        _row(
+            "CS-SEC-001",
+            "MUST_PASS",
+            "PASS" if sec_001_ok else "FAIL",
+            ["fresh tmp state: artifact ingest -> search -> evidence bundle -> brief create -> audit verify"],
+            "Minimal local commands reach first successful upload/search/brief without connector, model, or ontology setup.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-briefing",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_BRIEFING_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "briefing_evidence": {
+            "artifact_id": artifact_id,
+            "search_snapshot_id": snapshot_id,
+            "evidence_bundle_id": bundle_id,
+            "brief_id": brief_id,
+            "first_use_duration_ms": first_use_duration_ms,
+            "search_result_count": snapshot.get("result_count"),
+            "brief_status": brief.get("status"),
+            "key_point_count": len(brief.get("key_points", [])),
+            "evidence_link_count": len(evidence_links),
+            "uncertainty_count": len(brief.get("uncertainty", [])),
+            "contradiction_count": len(brief.get("contradictions", [])),
+            "recommended_next_step_count": len(brief.get("recommended_next_steps", [])),
+            "suggested_outputs": brief.get("suggested_outputs", []),
+            "ontology": ontology,
+            "audit_event_count": _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("event_count"),
+        },
+        "negative_evidence": {
+            "brief_without_evidence": 0 if evidence_links else 1,
+            "required_connector_setup": 0,
+            "required_model_provider_setup": 0,
+            "required_ontology_setup": 0 if ontology.get("preconfigured_ontology_required") is False else 1,
+            "missing_uncertainty": 0 if brief.get("uncertainty") else 1,
+            "missing_next_steps": 0 if brief.get("recommended_next_steps") else 1,
         },
         "human_required": [],
     }

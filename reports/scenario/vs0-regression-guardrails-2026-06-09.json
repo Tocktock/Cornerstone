@@ -9,6 +9,7 @@
         "artifact.read",
         "search.snapshot.created",
         "evidence_bundle.created",
+        "brief.created",
         "claim.draft.created",
         "claim.approved",
         "policy.egress.denied",
@@ -120,7 +121,7 @@
   "evidence_refs": [],
   "human_required": [],
   "ids": {
-    "git_commit": "e76ea0f"
+    "git_commit": "965c6f9"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",

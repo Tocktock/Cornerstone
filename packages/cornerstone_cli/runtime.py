@@ -159,6 +159,9 @@ class LocalRuntimeStore:
     def evidence_bundle_path(self, bundle_id: str) -> Path:
         return self.state_dir / "evidence" / "bundles" / f"{bundle_id}.json"
 
+    def brief_path(self, brief_id: str) -> Path:
+        return self.state_dir / "briefs" / f"{brief_id}.json"
+
     def claim_path(self, claim_id: str) -> Path:
         return self.state_dir / "claims" / f"{claim_id}.json"
 
@@ -196,6 +199,12 @@ class LocalRuntimeStore:
 
     def get_claim(self, claim_id: str) -> dict[str, Any] | None:
         path = self.claim_path(claim_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_brief(self, brief_id: str) -> dict[str, Any] | None:
+        path = self.brief_path(brief_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -453,6 +462,99 @@ class LocalRuntimeStore:
             {"evidence_bundle_id": bundle_id, "viewer_item_count": len(viewer_items)},
         )
         return {"viewer": viewer, "audit_event": event}
+
+    def create_brief_from_evidence_bundle(self, bundle_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        bundle = self.get_evidence_bundle(bundle_id)
+        if bundle is None:
+            return {"status": "not_found"}
+        if bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+
+        evidence_items = bundle.get("evidence_items", [])
+        if not evidence_items:
+            return {"status": "evidence_required"}
+        key_points = []
+        evidence_links = []
+        for item in evidence_items[:5]:
+            snippet = str(item.get("snippet", "")).strip()
+            if snippet:
+                key_points.append(snippet)
+            evidence_links.append(
+                {
+                    "artifact_ref": f"artifact:{item.get('artifact_id')}",
+                    "evidence_bundle_ref": f"evidence_bundle:{bundle_id}",
+                    "search_snapshot_ref": f"search_snapshot:{bundle.get('search_snapshot_id')}",
+                    "snippet": snippet,
+                    "original_storage_ref": item.get("original_storage_ref"),
+                    "derived_text_ref": item.get("derived_text_ref"),
+                }
+            )
+
+        brief_base = {
+            "schema_version": "cs.brief.v0",
+            "status": "evidence_backed",
+            "scope": scope,
+            "title": f"Brief for {bundle.get('query')}",
+            "evidence_bundle": {
+                "evidence_bundle_id": bundle_id,
+                "search_snapshot_id": bundle.get("search_snapshot_id"),
+                "query": bundle.get("query"),
+                "filters": scope,
+                "evidence_item_count": len(evidence_items),
+                "artifact_refs": [link["artifact_ref"] for link in evidence_links],
+            },
+            "key_points": key_points,
+            "evidence_links": evidence_links,
+            "uncertainty": [
+                "This brief is grounded only in the attached Evidence Bundle.",
+                "Add more sources before using it as broad organizational truth.",
+            ],
+            "contradictions": [],
+            "recommended_next_steps": [
+                "Create a draft claim from this Evidence Bundle if the user wants durable truth work.",
+                "Collect more evidence if the decision requires higher confidence.",
+            ],
+            "suggested_outputs": [
+                {"type": "Claim", "mode": "optional_promotion"},
+                {"type": "Knowledge Capsule", "mode": "optional_promotion"},
+                {"type": "Mission Card", "mode": "optional_promotion"},
+            ],
+            "ontology": {
+                "preconfigured_ontology_required": False,
+                "ontology_suggestions_required_before_brief": False,
+                "suggestions": [],
+            },
+            "created_at": utc_now(),
+        }
+        brief_id = f"brief_{_json_hash(brief_base)[:16]}"
+        brief = dict(brief_base)
+        brief["brief_id"] = brief_id
+        _write_json(self.brief_path(brief_id), brief)
+        event = self.append_audit(
+            "brief.created",
+            scope,
+            {"type": "brief", "id": brief_id},
+            {
+                "evidence_bundle_id": bundle_id,
+                "search_snapshot_id": bundle.get("search_snapshot_id"),
+                "evidence_item_count": len(evidence_items),
+            },
+        )
+        return {"brief": brief, "audit_event": event}
+
+    def show_brief(self, brief_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        brief = self.get_brief(brief_id)
+        if brief is None:
+            return {"status": "not_found"}
+        if brief.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": brief.get("scope")}
+        event = self.append_audit(
+            "brief.read",
+            scope,
+            {"type": "brief", "id": brief_id},
+            {"reason": "cli_brief_show"},
+        )
+        return {"brief": brief, "audit_event": event}
 
     def create_unsupported_claim(self, statement: str, scope: dict[str, str]) -> dict[str, Any]:
         claim_base = {

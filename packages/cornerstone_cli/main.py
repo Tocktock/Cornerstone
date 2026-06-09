@@ -12,6 +12,7 @@ from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
     verify_vs0_audit_ledger,
+    verify_vs0_briefing,
     verify_vs0_claim_evidence,
     verify_vs0_namespace_isolation,
     verify_vs0_regression_guardrails,
@@ -531,6 +532,128 @@ def command_evidence_view(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_brief_create(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_brief_from_evidence_bundle(args.evidence_bundle_id, requested_scope)
+    payload = base_response("cornerstone brief create", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_EVIDENCE_BUNDLE_NOT_FOUND",
+                "message": "Evidence bundle was not found.",
+                "evidence_bundle_id": args.evidence_bundle_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Evidence bundle is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    if result.get("status") == "evidence_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_BRIEF_EVIDENCE_REQUIRED",
+                "message": "Brief creation requires an Evidence Bundle with at least one evidence item.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+
+    brief = result["brief"]
+    audit_event = result["audit_event"]
+    evidence = brief["evidence_bundle"]
+    payload.update(brief["scope"])
+    payload["ids"].update(
+        {
+            "brief_id": brief["brief_id"],
+            "evidence_bundle_id": evidence["evidence_bundle_id"],
+            "search_snapshot_id": evidence["search_snapshot_id"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["brief"] = brief
+    payload["evidence_refs"].extend(
+        [
+            f"brief:{brief['brief_id']}",
+            f"evidence_bundle:{evidence['evidence_bundle_id']}",
+            f"search_snapshot:{evidence['search_snapshot_id']}",
+        ]
+    )
+    payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_brief_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.show_brief(args.brief_id, requested_scope)
+    payload = base_response("cornerstone brief show", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_BRIEF_NOT_FOUND",
+                "message": "Brief was not found.",
+                "brief_id": args.brief_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Brief is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+
+    brief = result["brief"]
+    audit_event = result["audit_event"]
+    evidence = brief["evidence_bundle"]
+    payload.update(brief["scope"])
+    payload["ids"].update(
+        {
+            "brief_id": brief["brief_id"],
+            "evidence_bundle_id": evidence["evidence_bundle_id"],
+            "search_snapshot_id": evidence["search_snapshot_id"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["brief"] = brief
+    payload["evidence_refs"].extend(
+        [
+            f"brief:{brief['brief_id']}",
+            f"evidence_bundle:{evidence['evidence_bundle_id']}",
+            f"search_snapshot:{evidence['search_snapshot_id']}",
+        ]
+    )
+    payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_claim_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -784,6 +907,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_security_policy(root)
     elif args.contract == "vs0-regression-guardrails":
         report = verify_vs0_regression_guardrails(root)
+    elif args.contract == "vs0-briefing":
+        report = verify_vs0_briefing(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -803,6 +928,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-claim-evidence",
                     "vs0-security-policy",
                     "vs0-regression-guardrails",
+                    "vs0-briefing",
                 ],
             }
         )
@@ -975,6 +1101,23 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(evidence_view)
     evidence_view.add_argument("--json", action="store_true", help="Emit JSON output")
     evidence_view.set_defaults(func=command_evidence_view)
+
+    brief = subcommands.add_parser("brief", help="Evidence-backed brief commands")
+    brief_sub = brief.add_subparsers(dest="brief_command")
+
+    brief_create = brief_sub.add_parser("create", help="Create a deterministic brief from an evidence bundle")
+    brief_create.add_argument("--evidence-bundle-id", required=True, help="Evidence bundle ID")
+    add_state_argument(brief_create)
+    add_scope_arguments(brief_create)
+    brief_create.add_argument("--json", action="store_true", help="Emit JSON output")
+    brief_create.set_defaults(func=command_brief_create)
+
+    brief_show = brief_sub.add_parser("show", help="Show an evidence-backed brief")
+    brief_show.add_argument("brief_id", help="Brief ID")
+    add_state_argument(brief_show)
+    add_scope_arguments(brief_show)
+    brief_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    brief_show.set_defaults(func=command_brief_show)
 
     claim = subcommands.add_parser("claim", help="Draft claim commands")
     claim_sub = claim.add_subparsers(dest="claim_command")

@@ -60,8 +60,8 @@ PATH="$PWD:$PATH" cornerstone scenario verify vs0-audit-ledger --json --output r
 # summary.pass: 1
 # summary.blocking: 0
 # summary.product_feature_claims: PARTIAL_VS0_AUDIT_LEDGER_ONLY
-# audit_evidence.clean_audit_event_count: 8
-# audit_evidence.event_types: artifact.ingested, artifact.read, search.snapshot.created, evidence_bundle.created, claim.draft.created, claim.approved, policy.egress.denied, policy.sandbox_access.denied
+# audit_evidence.clean_audit_event_count: 9
+# audit_evidence.event_types: artifact.ingested, artifact.read, search.snapshot.created, evidence_bundle.created, brief.created, claim.draft.created, claim.approved, policy.egress.denied, policy.sandbox_access.denied
 # audit_evidence.event_scopes_complete: true
 # audit_evidence.event_hashes_present: true
 # audit_evidence.event_details_present: true
@@ -76,6 +76,7 @@ PATH="$PWD:$PATH" cornerstone scenario verify vs0-audit-ledger --json --output r
 - Artifact read appends `artifact.read`.
 - Search appends `search.snapshot.created`.
 - Evidence bundle creation appends `evidence_bundle.created`.
+- Brief creation appends `brief.created`.
 - Draft claim creation appends `claim.draft.created`.
 - Claim approval appends `claim.approved`.
 - Default egress denial appends `policy.egress.denied`.

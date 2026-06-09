@@ -496,6 +496,28 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_briefing_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-briefing", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-briefing")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 4)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_BRIEFING_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-PROD-004", "CS-UND-005", "CS-CLAIM-002", "CS-SEC-001"})
+        evidence = payload["briefing_evidence"]
+        self.assertEqual(evidence["search_result_count"], 1)
+        self.assertEqual(evidence["brief_status"], "evidence_backed")
+        self.assertGreaterEqual(evidence["key_point_count"], 1)
+        self.assertGreaterEqual(evidence["evidence_link_count"], 1)
+        self.assertGreaterEqual(evidence["uncertainty_count"], 1)
+        self.assertGreaterEqual(evidence["recommended_next_step_count"], 1)
+        self.assertFalse(evidence["ontology"]["preconfigured_ontology_required"])
+        self.assertFalse(evidence["ontology"]["ontology_suggestions_required_before_brief"])
+        self.assertLessEqual(evidence["first_use_duration_ms"], 5000)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

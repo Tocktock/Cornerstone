@@ -30,7 +30,8 @@ universal_json=$(mktemp)
 claim_json=$(mktemp)
 policy_json=$(mktemp)
 guardrails_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json"' EXIT
+brief_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -210,6 +211,24 @@ grep -q '"audit_guardrail_failed": 0' "$guardrails_json" || fail "vs0-regression
 grep -q '"security_guardrail_failed": 0' "$guardrails_json" || fail "vs0-regression-guardrails failed security guardrail"
 grep -q '"product_feature_claims": "PARTIAL_VS0_REGRESSION_GUARDRAILS_ONLY"' "$guardrails_json" || fail "vs0-regression-guardrails overclaimed product feature scope"
 
+cornerstone scenario verify vs0-briefing --json > "$brief_json"
+python3 -m json.tool "$brief_json" >/dev/null
+grep -q '"scenario_set": "vs0-briefing"' "$brief_json" || fail "vs0-briefing report missing scenario set"
+grep -q '"blocking": 0' "$brief_json" || fail "vs0-briefing report has blocking scenarios"
+grep -q '"pass": 4' "$brief_json" || fail "vs0-briefing did not pass exactly four scenarios"
+grep -q '"id": "CS-PROD-004"' "$brief_json" || fail "vs0-briefing missing CS-PROD-004"
+grep -q '"id": "CS-UND-005"' "$brief_json" || fail "vs0-briefing missing CS-UND-005"
+grep -q '"id": "CS-CLAIM-002"' "$brief_json" || fail "vs0-briefing missing CS-CLAIM-002"
+grep -q '"id": "CS-SEC-001"' "$brief_json" || fail "vs0-briefing missing CS-SEC-001"
+grep -q '"brief_status": "evidence_backed"' "$brief_json" || fail "vs0-briefing missing evidence-backed brief"
+grep -q '"brief_without_evidence": 0' "$brief_json" || fail "vs0-briefing created brief without evidence"
+grep -q '"required_connector_setup": 0' "$brief_json" || fail "vs0-briefing required connector setup"
+grep -q '"required_model_provider_setup": 0' "$brief_json" || fail "vs0-briefing required model provider setup"
+grep -q '"required_ontology_setup": 0' "$brief_json" || fail "vs0-briefing required ontology setup"
+grep -q '"missing_uncertainty": 0' "$brief_json" || fail "vs0-briefing missed uncertainty"
+grep -q '"missing_next_steps": 0' "$brief_json" || fail "vs0-briefing missed next steps"
+grep -q '"product_feature_claims": "PARTIAL_VS0_BRIEFING_ONLY"' "$brief_json" || fail "vs0-briefing overclaimed product feature scope"
+
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, unittest).\n'

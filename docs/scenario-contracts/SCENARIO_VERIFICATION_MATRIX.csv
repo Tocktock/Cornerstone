@@ -2,7 +2,7 @@ scenario_id,type,local_required,verification_class,verification_owner,verificati
 CS-PROD-001,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-001.json,,,,,NOT_VERIFIED
 CS-PROD-002,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-002.json,,,,,NOT_VERIFIED
 CS-PROD-003,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-003.json,,,,,NOT_VERIFIED
-CS-PROD-004,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-004.json,,,,,NOT_VERIFIED
+CS-PROD-004,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
 CS-PROD-005,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-005.json,,,,,NOT_VERIFIED
 CS-PROD-006,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-006 --json,reports/scenario/cs-prod-006.json,,,,,NOT_VERIFIED
 CS-PROD-007,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-007 --json,reports/scenario/cs-prod-007.json,,,,,NOT_VERIFIED
@@ -27,7 +27,7 @@ CS-UND-001,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-evidence
 CS-UND-002,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-understanding --json,reports/scenario/vs0-search-understanding-2026-06-09.json,,,,,PASS
 CS-UND-003,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-understanding --json,reports/scenario/vs0-search-understanding-2026-06-09.json,,,,,PASS
 CS-UND-004,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-004.json,,,,,NOT_VERIFIED
-CS-UND-005,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-005.json,,,,,NOT_VERIFIED
+CS-UND-005,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
 CS-UND-006,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-006 --json,reports/scenario/cs-und-006.json,,,,,NOT_VERIFIED
 CS-UND-007,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-007 --json,reports/scenario/cs-und-007.json,,,,,NOT_VERIFIED
 CS-UND-008,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-008 --json,reports/scenario/cs-und-008.json,,,,,NOT_VERIFIED
@@ -36,7 +36,7 @@ CS-UND-010,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-
 CS-UND-011,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-011 --json,reports/scenario/cs-und-011.json,,,,,NOT_VERIFIED
 CS-UND-012,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-012 --json,reports/scenario/cs-und-012.json,,,,,NOT_VERIFIED
 CS-CLAIM-001,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-001.json,,,,,NOT_VERIFIED
-CS-CLAIM-002,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-002.json,,,,,NOT_VERIFIED
+CS-CLAIM-002,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
 CS-CLAIM-003,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-003.json,,,,,NOT_VERIFIED
 CS-CLAIM-004,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-004.json,,,,,NOT_VERIFIED
 CS-CLAIM-005,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-005.json,,,,,NOT_VERIFIED
@@ -165,7 +165,7 @@ CS-EXT-013,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario C
 CS-EXT-014,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-014 --json,reports/scenario/cs-ext-014.json,,,,,NOT_VERIFIED
 CS-EXT-015,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-015 --json,reports/scenario/cs-ext-015.json,,,,,NOT_VERIFIED
 CS-EXT-016,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-016 --json,reports/scenario/cs-ext-016.json,,,,,NOT_VERIFIED
-CS-SEC-001,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-001.json,,,,,NOT_VERIFIED
+CS-SEC-001,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
 CS-SEC-002,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security-policy --json,reports/scenario/vs0-security-policy-2026-06-09.json,,,,,PASS
 CS-SEC-003,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security-policy --json,reports/scenario/vs0-security-policy-2026-06-09.json,,,,,PASS
 CS-SEC-004,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-004.json,,,,,NOT_VERIFIED
