@@ -11,6 +11,7 @@ from cornerstone_cli import __version__
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_vs0_audit_ledger,
     verify_vs0_namespace_isolation,
     verify_vs0_search_evidence,
     verify_vs0_search_understanding,
@@ -656,6 +657,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_search_understanding(root)
     elif args.contract == "vs0-namespace-isolation":
         report = verify_vs0_namespace_isolation(root)
+    elif args.contract == "vs0-audit-ledger":
+        report = verify_vs0_audit_ledger(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -670,6 +673,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-search-evidence",
                     "vs0-search-understanding",
                     "vs0-namespace-isolation",
+                    "vs0-audit-ledger",
                 ],
             }
         )

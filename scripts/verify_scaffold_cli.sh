@@ -25,7 +25,8 @@ security_json=$(mktemp)
 search_json=$(mktemp)
 understanding_json=$(mktemp)
 namespace_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json"' EXIT
+audit_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -132,6 +133,21 @@ grep -q '"cross_scope_access_allowed": 0' "$namespace_json" || fail "vs0-namespa
 grep -q '"implicit_promotions": 0' "$namespace_json" || fail "vs0-namespace-isolation reported implicit promotions"
 grep -q '"product_feature_claims": "PARTIAL_VS0_NAMESPACE_ISOLATION_ONLY"' "$namespace_json" || fail "vs0-namespace-isolation overclaimed product feature scope"
 
+cornerstone scenario verify vs0-audit-ledger --json > "$audit_json"
+python3 -m json.tool "$audit_json" >/dev/null
+grep -q '"scenario_set": "vs0-audit-ledger"' "$audit_json" || fail "vs0-audit-ledger report missing scenario set"
+grep -q '"blocking": 0' "$audit_json" || fail "vs0-audit-ledger report has blocking scenarios"
+grep -q '"pass": 1' "$audit_json" || fail "vs0-audit-ledger did not pass exactly one scenario"
+grep -q '"id": "CS-SEC-006"' "$audit_json" || fail "vs0-audit-ledger missing CS-SEC-006"
+grep -q '"tamper_detection_exit_code": 5' "$audit_json" || fail "vs0-audit-ledger did not capture tamper failure exit code"
+grep -q '"code": "AUDIT_EVENT_HASH_MISMATCH"' "$audit_json" || fail "vs0-audit-ledger did not detect audit event hash mismatch"
+grep -q '"missing_required_event_types": 0' "$audit_json" || fail "vs0-audit-ledger missed required event types"
+grep -q '"events_without_scope": 0' "$audit_json" || fail "vs0-audit-ledger reported events without scope"
+grep -q '"events_without_hashes": 0' "$audit_json" || fail "vs0-audit-ledger reported events without hashes"
+grep -q '"events_without_review_details": 0' "$audit_json" || fail "vs0-audit-ledger reported events without review details"
+grep -q '"tamper_accepted": 0' "$audit_json" || fail "vs0-audit-ledger accepted tampering"
+grep -q '"product_feature_claims": "PARTIAL_VS0_AUDIT_LEDGER_ONLY"' "$audit_json" || fail "vs0-audit-ledger overclaimed product feature scope"
+
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, unittest).\n'

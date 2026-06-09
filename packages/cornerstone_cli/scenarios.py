@@ -1480,6 +1480,142 @@ def verify_vs0_namespace_isolation(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-audit-ledger")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["artifact_show"] = _run_cli_json(root, ["artifact", "show", artifact_id, "--state-dir", state_rel, "--json"]) if artifact_id else {}
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The alpha evidence anchor is supported by an audit-linked evidence bundle.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    transcripts["audit_verify_clean"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    audit_events_before_tamper = _audit_events(root, state_rel)
+    audit_event_types = [event.get("event_type") for event in audit_events_before_tamper]
+    event_scopes_complete = all(_scope_complete(_event_scope(event)) for event in audit_events_before_tamper)
+    event_hashes_present = all(event.get("event_id") and event.get("event_hash") and event.get("previous_hash") for event in audit_events_before_tamper)
+    event_details_present = all(event.get("subject") and isinstance(event.get("details"), dict) for event in audit_events_before_tamper)
+    required_event_types = {
+        "artifact.ingested",
+        "artifact.read",
+        "search.snapshot.created",
+        "evidence_bundle.created",
+        "claim.draft.created",
+    }
+    missing_event_types = sorted(required_event_types - set(str(event_type) for event_type in audit_event_types))
+
+    audit_path = root / state_rel / "audit" / "events.jsonl"
+    if audit_path.exists():
+        tampered_lines = audit_path.read_text().splitlines()
+        if tampered_lines:
+            tampered_lines[0] = tampered_lines[0].replace("artifact.ingested", "artifact.modified", 1)
+            audit_path.write_text("\n".join(tampered_lines) + "\n")
+    transcripts["audit_verify_tampered"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+    tampered_payload = _payload(transcripts["audit_verify_tampered"])
+    tamper_errors = tampered_payload.get("audit_integrity", {}).get("errors", [])
+    tamper_detected = (
+        transcripts["audit_verify_tampered"].get("exit_code") == 5
+        and tampered_payload.get("status") == "failed"
+        and isinstance(tamper_errors, list)
+        and any(error.get("code") == "AUDIT_EVENT_HASH_MISMATCH" for error in tamper_errors if isinstance(error, dict))
+    )
+    clean_ok = (
+        _exit_ok(transcripts["audit_verify_clean"])
+        and _payload(transcripts["audit_verify_clean"]).get("audit_integrity", {}).get("status") == "success"
+    )
+    sec_006_ok = (
+        _exit_ok(transcripts["ingest"])
+        and _exit_ok(transcripts["artifact_show"])
+        and _exit_ok(transcripts["search"])
+        and _exit_ok(transcripts["bundle_create"])
+        and _exit_ok(transcripts["claim_create"])
+        and clean_ok
+        and tamper_detected
+        and not missing_event_types
+        and event_scopes_complete
+        and event_hashes_present
+        and event_details_present
+    )
+
+    rows = [
+        _row(
+            "CS-SEC-006",
+            "MUST_PASS",
+            "PASS" if sec_006_ok else "FAIL",
+            [
+                "cornerstone artifact ingest fixtures/vs0/packs/01_artifact_basic/input.txt --json",
+                "cornerstone artifact show <artifact_id> --json",
+                "cornerstone search query alpha-evidence-anchor --json",
+                "cornerstone evidence bundle create --search-snapshot-id <snapshot_id> --json",
+                "cornerstone claim create --evidence-bundle-id <bundle_id> --json",
+                "cornerstone audit verify --json",
+                "controlled tamper of tmp audit JSONL followed by cornerstone audit verify --json",
+            ],
+            "Implemented critical events are logged with subject, details, scope, previous hash, and event hash; clean verification passes and controlled tampering is detected.",
+        )
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-audit-ledger",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_AUDIT_LEDGER_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "audit_evidence": {
+            "clean_audit_event_count": len(audit_events_before_tamper),
+            "event_types": audit_event_types,
+            "required_event_types": sorted(required_event_types),
+            "missing_event_types": missing_event_types,
+            "event_scopes_complete": event_scopes_complete,
+            "event_hashes_present": event_hashes_present,
+            "event_details_present": event_details_present,
+            "tamper_detection_exit_code": transcripts["audit_verify_tampered"].get("exit_code"),
+            "tamper_detection_errors": tamper_errors,
+        },
+        "negative_evidence": {
+            "missing_required_event_types": len(missing_event_types),
+            "events_without_scope": 0 if event_scopes_complete else 1,
+            "events_without_hashes": 0 if event_hashes_present else 1,
+            "events_without_review_details": 0 if event_details_present else 1,
+            "tamper_accepted": 0 if tamper_detected else 1,
+        },
+        "human_required": [],
+    }
+
+
 def verify_vs0_scaffold(root: Path) -> dict[str, Any]:
     docs_result = _run_script(root, "scripts/verify_sot_docs.sh")
     cli_result = _run_script(root, "scripts/verify_cli_native_first_docs.sh")

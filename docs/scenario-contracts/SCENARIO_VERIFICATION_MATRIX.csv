@@ -170,7 +170,7 @@ CS-SEC-002,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS
 CS-SEC-003,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-003.json,,,,,NOT_VERIFIED
 CS-SEC-004,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-004.json,,,,,NOT_VERIFIED
 CS-SEC-005,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-005.json,,,,,NOT_VERIFIED
-CS-SEC-006,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-006 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-006.json,,,,,NOT_VERIFIED
+CS-SEC-006,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-audit-ledger --json,reports/scenario/vs0-audit-ledger-2026-06-09.json,,,,,PASS
 CS-SEC-007,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security --json,reports/scenario/vs0-security-2026-06-09.json,,,,,PASS
 CS-SEC-008,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security --json,reports/scenario/vs0-security-2026-06-09.json,,,,,PASS
 CS-SEC-009,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-009 --json,reports/scenario/cs-sec-009.json,,,,,NOT_VERIFIED

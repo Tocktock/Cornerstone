@@ -394,6 +394,28 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_audit_ledger_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-audit-ledger", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-audit-ledger")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 1)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_AUDIT_LEDGER_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-SEC-006"})
+        evidence = payload["audit_evidence"]
+        self.assertGreaterEqual(evidence["clean_audit_event_count"], 5)
+        self.assertFalse(evidence["missing_event_types"])
+        self.assertTrue(evidence["event_scopes_complete"])
+        self.assertTrue(evidence["event_hashes_present"])
+        self.assertTrue(evidence["event_details_present"])
+        self.assertEqual(evidence["tamper_detection_exit_code"], 5)
+        self.assertTrue(
+            any(error["code"] == "AUDIT_EVENT_HASH_MISMATCH" for error in evidence["tamper_detection_errors"])
+        )
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

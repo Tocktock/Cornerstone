@@ -96,10 +96,11 @@ cornerstone scenario verify vs0-security --json
 cornerstone scenario verify vs0-search-evidence --json
 cornerstone scenario verify vs0-search-understanding --json
 cornerstone scenario verify vs0-namespace-isolation --json
+cornerstone scenario verify vs0-audit-ledger --json
 make verify-local-fast
 ```
 
-The current scaffold CLI can verify scaffold readiness, scenario registry coverage, deterministic local fixture-validator readiness, the first CLI-native artifact preservation slice, the first redaction/prompt-injection safety slice, the first search/evidence-bundle/draft-claim/evidence-viewer slice, the first deterministic search-understanding slice, and the first owner/namespace isolation slice. It does not claim the full VS-0 product loop is implemented or passing.
+The current scaffold CLI can verify scaffold readiness, scenario registry coverage, deterministic local fixture-validator readiness, the first CLI-native artifact preservation slice, the first redaction/prompt-injection safety slice, the first search/evidence-bundle/draft-claim/evidence-viewer slice, the first deterministic search-understanding slice, the first owner/namespace isolation slice, and the first tamper-evident audit-ledger slice. It does not claim the full VS-0 product loop is implemented or passing.
 
 ## First Implementation Target
 
