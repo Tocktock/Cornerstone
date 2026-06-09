@@ -16,7 +16,7 @@
     }
   ],
   "ids": {
-    "git_commit": "b791730"
+    "git_commit": "040f294"
   },
   "issues": [],
   "mode": "local_scaffold",
@@ -24,6 +24,7 @@
   "namespace_id": "personal",
   "negative_evidence": {
     "action_cards_created_from_untrusted_artifact": 0,
+    "conflicting_duplicate_truth_records": 0,
     "cross_namespace_results": 0,
     "external_http_calls": 0,
     "lost_originals": 0,
@@ -48,6 +49,31 @@
         "CS-ARCH-002",
         "CS-ARCH-003",
         "CS-ARCH-004",
+        "CS-ARCH-005"
+      ]
+    },
+    {
+      "id": "pack_02_dedup_versioning",
+      "input_count": 2,
+      "issues": [],
+      "negative_evidence": {
+        "conflicting_duplicate_truth_records": 0
+      },
+      "path": "fixtures/vs0/packs/02_dedup_versioning/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-003"
+      ]
+    },
+    {
+      "id": "pack_03_unknown_and_failed_extraction",
+      "input_count": 2,
+      "issues": [],
+      "negative_evidence": {
+        "lost_originals": 0
+      },
+      "path": "fixtures/vs0/packs/03_unknown_and_failed_extraction/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-002",
         "CS-ARCH-005"
       ]
     },
@@ -106,14 +132,14 @@
     "name": "local_test",
     "pass_judge": false,
     "sample_evidence_terms": [
+      "accessible",
       "actions",
       "alpha-evidence-anchor",
+      "application/octet-stream",
       "approve",
+      "artifact",
       "attachment",
-      "candidate",
-      "checklist",
-      "content",
-      "context"
+      "candidate"
     ],
     "supported": true,
     "uses_credentials": false

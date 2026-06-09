@@ -16,6 +16,21 @@
       ]
     },
     {
+      "id": "pack_02_dedup_versioning",
+      "path": "packs/02_dedup_versioning/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-003"
+      ]
+    },
+    {
+      "id": "pack_03_unknown_and_failed_extraction",
+      "path": "packs/03_unknown_and_failed_extraction/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-002",
+        "CS-ARCH-005"
+      ]
+    },
+    {
       "id": "pack_08_namespace_isolation",
       "path": "packs/08_namespace_isolation/pack.json",
       "scenario_ids": [

@@ -1,0 +1,881 @@
+{
+  "artifact_ids": {
+    "basic": "art_2735313e0cb92563",
+    "dedup_v1": "art_3fc9c836117463c2",
+    "dedup_v2": "art_43367f5a85c40e49",
+    "failed_derived": "art_131931452e72a3cb",
+    "unknown_format": "art_54e415937ebeecfc"
+  },
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-artifacts",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "040f294"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "conflicting_duplicate_truth_records": 0,
+    "lost_originals": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-artifacts-2026-06-09.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone artifact ingest fixtures/vs0/packs/01_artifact_basic/input.txt --json"
+      ],
+      "id": "CS-ARCH-001",
+      "notes": "Artifact ingest preserves original content with stable ID, checksum, storage ref, source timestamp, evidence refs, and audit refs.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone artifact ingest ... --derived-mode fail --json",
+        "cornerstone artifact show <artifact_id> --json"
+      ],
+      "id": "CS-ARCH-002",
+      "notes": "Derived processing failure leaves the original artifact stored, discoverable, and retryable.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone artifact ingest <same-content> --json",
+        "cornerstone artifact ingest <changed-content> --lineage-from <artifact_id> --json"
+      ],
+      "id": "CS-ARCH-003",
+      "notes": "Identical content deduplicates to one artifact identity; changed content creates a distinct artifact with lineage.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone artifact show <artifact_id> --json"
+      ],
+      "id": "CS-ARCH-004",
+      "notes": "Artifact detail exposes source, timestamp, provenance transformations, evidence refs, and read audit refs.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone artifact ingest fixtures/vs0/packs/03_unknown_and_failed_extraction/unknown.bin --media-type application/octet-stream --json"
+      ],
+      "id": "CS-ARCH-005",
+      "notes": "Unknown-format content keeps the immutable original and records deferred derived processing.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    }
+  ],
+  "scenario_set": "vs0-artifacts",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/vs0-artifacts",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 5,
+    "product_feature_claims": "PARTIAL_VS0_ARTIFACTS_ONLY",
+    "scenario_count": 5
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/vs0-artifacts",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 9,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "040f294"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "dedup_v1_first": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/02_dedup_versioning/input_v1.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-artifacts",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_3fc9c836117463c2",
+          "checksum_sha256": "3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_3fc9c836117463c2.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 117,
+          "original_storage_ref": "sha256:3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3",
+          "provenance": {
+            "created_at": "2026-06-09T11:13:50.071314Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:13:50.071314Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/02_dedup_versioning/input_v1.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_cec1c209b7cb2935"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_3fc9c836117463c2",
+          "storage:sha256:3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3"
+        ],
+        "ids": {
+          "artifact_id": "art_3fc9c836117463c2",
+          "audit_event_id": "audit_cec1c209b7cb2935",
+          "checksum_sha256": "3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3",
+          "git_commit": "040f294"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "dedup_v1_second": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/02_dedup_versioning/input_v1.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-artifacts",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_3fc9c836117463c2",
+          "checksum_sha256": "3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_3fc9c836117463c2.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 117,
+          "original_storage_ref": "sha256:3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3",
+          "provenance": {
+            "created_at": "2026-06-09T11:13:50.071314Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:13:50.071314Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/02_dedup_versioning/input_v1.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_d32f12296970fc9c"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": true,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_3fc9c836117463c2",
+          "storage:sha256:3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3"
+        ],
+        "ids": {
+          "artifact_id": "art_3fc9c836117463c2",
+          "audit_event_id": "audit_d32f12296970fc9c",
+          "checksum_sha256": "3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3",
+          "git_commit": "040f294"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "dedup_v2": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/02_dedup_versioning/input_v2.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-artifacts",
+        "--lineage-from",
+        "art_3fc9c836117463c2",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_43367f5a85c40e49",
+          "checksum_sha256": "43367f5a85c40e493617c5c21a4c2145ab117117ed82965d6ff9a8e53bd208e3",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "43367f5a85c40e493617c5c21a4c2145ab117117ed82965d6ff9a8e53bd208e3"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_43367f5a85c40e49.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 147,
+          "original_storage_ref": "sha256:43367f5a85c40e493617c5c21a4c2145ab117117ed82965d6ff9a8e53bd208e3",
+          "provenance": {
+            "created_at": "2026-06-09T11:13:50.160782Z",
+            "lineage_from": "art_3fc9c836117463c2",
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:13:50.160782Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/02_dedup_versioning/input_v2.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_d7ac9cf1d8aed9b7"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_43367f5a85c40e49",
+          "storage:sha256:43367f5a85c40e493617c5c21a4c2145ab117117ed82965d6ff9a8e53bd208e3"
+        ],
+        "ids": {
+          "artifact_id": "art_43367f5a85c40e49",
+          "audit_event_id": "audit_d7ac9cf1d8aed9b7",
+          "checksum_sha256": "43367f5a85c40e493617c5c21a4c2145ab117117ed82965d6ff9a8e53bd208e3",
+          "git_commit": "040f294"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_basic": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/01_artifact_basic/input.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-artifacts",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-09T11:13:49.786521Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:13:49.786521Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_918b77b12ec23ba4"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_918b77b12ec23ba4",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "040f294"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_fail": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/03_unknown_and_failed_extraction/fail.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-artifacts",
+        "--derived-mode",
+        "fail",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_131931452e72a3cb",
+          "checksum_sha256": "131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05"
+          },
+          "derived": {
+            "message": "Original artifact is preserved and derived processing can be retried.",
+            "reason": "fixture_derived_processor_failure",
+            "status": "failed"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 116,
+          "original_storage_ref": "sha256:131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05",
+          "provenance": {
+            "created_at": "2026-06-09T11:13:49.885607Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_failed"
+            ]
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:13:49.885607Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/03_unknown_and_failed_extraction/fail.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_13aeca4936a4cc10"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_131931452e72a3cb",
+          "storage:sha256:131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05"
+        ],
+        "ids": {
+          "artifact_id": "art_131931452e72a3cb",
+          "audit_event_id": "audit_13aeca4936a4cc10",
+          "checksum_sha256": "131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05",
+          "git_commit": "040f294"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_unknown": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/03_unknown_and_failed_extraction/unknown.bin",
+        "--state-dir",
+        "tmp/scenario/vs0-artifacts",
+        "--media-type",
+        "application/octet-stream",
+        "--derived-mode",
+        "unsupported",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_54e415937ebeecfc",
+          "checksum_sha256": "54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662"
+          },
+          "derived": {
+            "message": "Original artifact is preserved for future parser support.",
+            "reason": "unsupported_format",
+            "status": "deferred"
+          },
+          "media_type": "application/octet-stream",
+          "original_size_bytes": 112,
+          "original_storage_ref": "sha256:54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662",
+          "provenance": {
+            "created_at": "2026-06-09T11:13:49.981584Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_deferred"
+            ]
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:13:49.981584Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/03_unknown_and_failed_extraction/unknown.bin",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_7d5bd5b327b0cff3"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_54e415937ebeecfc",
+          "storage:sha256:54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662"
+        ],
+        "ids": {
+          "artifact_id": "art_54e415937ebeecfc",
+          "audit_event_id": "audit_7d5bd5b327b0cff3",
+          "checksum_sha256": "54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662",
+          "git_commit": "040f294"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "show_basic": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "show",
+        "art_2735313e0cb92563",
+        "--state-dir",
+        "tmp/scenario/vs0-artifacts",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-09T11:13:49.786521Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:13:49.786521Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_ad023682a2ed50c6"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact show",
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_ad023682a2ed50c6",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "040f294"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "show_fail": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "show",
+        "art_131931452e72a3cb",
+        "--state-dir",
+        "tmp/scenario/vs0-artifacts",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_131931452e72a3cb",
+          "checksum_sha256": "131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05"
+          },
+          "derived": {
+            "message": "Original artifact is preserved and derived processing can be retried.",
+            "reason": "fixture_derived_processor_failure",
+            "status": "failed"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 116,
+          "original_storage_ref": "sha256:131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05",
+          "provenance": {
+            "created_at": "2026-06-09T11:13:49.885607Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_failed"
+            ]
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:13:49.885607Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/03_unknown_and_failed_extraction/fail.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_6c3a11f0286a7071"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact show",
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_131931452e72a3cb"
+        ],
+        "ids": {
+          "artifact_id": "art_131931452e72a3cb",
+          "audit_event_id": "audit_6c3a11f0286a7071",
+          "checksum_sha256": "131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05",
+          "git_commit": "040f294"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "show_unknown": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "show",
+        "art_54e415937ebeecfc",
+        "--state-dir",
+        "tmp/scenario/vs0-artifacts",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_54e415937ebeecfc",
+          "checksum_sha256": "54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662"
+          },
+          "derived": {
+            "message": "Original artifact is preserved for future parser support.",
+            "reason": "unsupported_format",
+            "status": "deferred"
+          },
+          "media_type": "application/octet-stream",
+          "original_size_bytes": 112,
+          "original_storage_ref": "sha256:54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662",
+          "provenance": {
+            "created_at": "2026-06-09T11:13:49.981584Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_deferred"
+            ]
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:13:49.981584Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/03_unknown_and_failed_extraction/unknown.bin",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_68e2f326b9d53812"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact show",
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_54e415937ebeecfc"
+        ],
+        "ids": {
+          "artifact_id": "art_54e415937ebeecfc",
+          "audit_event_id": "audit_68e2f326b9d53812",
+          "checksum_sha256": "54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662",
+          "git_commit": "040f294"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

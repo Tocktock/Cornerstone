@@ -11,15 +11,19 @@ from cornerstone_cli import __version__
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_vs0_artifacts,
     verify_vs0_fixtures,
     verify_vs0_scaffold,
 )
+from cornerstone_cli.runtime import LocalRuntimeStore
 
 
 SCHEMA_VERSION = "cs.cli.v0"
 EXIT_SUCCESS = 0
 EXIT_INVALID = 1
+EXIT_NOT_FOUND = 3
 EXIT_EVIDENCE_MISSING = 4
+EXIT_RUNTIME_FAILURE = 5
 
 
 def repo_root() -> Path:
@@ -70,6 +74,30 @@ def print_payload(payload: dict[str, Any], as_json: bool) -> None:
     print(f"{command}: {status}")
     for error in payload.get("errors", []):
         print(f"- {error.get('code')}: {error.get('message')}")
+
+
+def state_dir(root: Path, args: argparse.Namespace) -> Path:
+    return (root / args.state_dir).resolve()
+
+
+def scope_args(args: argparse.Namespace) -> dict[str, str]:
+    return {
+        "tenant_id": args.tenant_id,
+        "owner_id": args.owner_id,
+        "namespace_id": args.namespace_id,
+        "workspace_id": args.workspace_id,
+    }
+
+
+def add_scope_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--tenant-id", default="local-dev", help="Tenant scope")
+    parser.add_argument("--owner-id", default="local-user", help="Owner scope")
+    parser.add_argument("--namespace-id", default="personal", help="Namespace scope")
+    parser.add_argument("--workspace-id", default="default", help="Workspace scope")
+
+
+def add_state_argument(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--state-dir", default="data/local", help="Local runtime state directory")
 
 
 def command_version(args: argparse.Namespace) -> int:
@@ -131,6 +159,118 @@ def command_ready(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS if not missing else EXIT_EVIDENCE_MISSING
 
 
+def command_artifact_ingest(args: argparse.Namespace) -> int:
+    root = repo_root()
+    input_path = (root / args.path).resolve()
+    payload = base_response("cornerstone artifact ingest", "success", root)
+    if not input_path.exists() or not input_path.is_file():
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ARTIFACT_INPUT_MISSING",
+                "message": "Artifact input file does not exist.",
+                "path": str(input_path),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+
+    store = LocalRuntimeStore(state_dir(root, args))
+    try:
+        result = store.ingest_artifact(
+            input_path,
+            **scope_args(args),
+            source=args.source,
+            media_type=args.media_type,
+            derived_mode=args.derived_mode,
+            trust=args.trust,
+            lineage_from=args.lineage_from,
+        )
+    except OSError as error:
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_ARTIFACT_STORAGE_ERROR", "message": str(error)})
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
+
+    artifact = result["artifact"]
+    audit_event = result["audit_event"]
+    payload.update(artifact["scope"])
+    payload["ids"].update(
+        {
+            "artifact_id": artifact["artifact_id"],
+            "checksum_sha256": artifact["checksum_sha256"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["deduplicated"] = result["deduplicated"]
+    payload["artifact"] = artifact
+    payload["evidence_refs"].extend(
+        [
+            f"artifact:{artifact['artifact_id']}",
+            f"storage:{artifact['original_storage_ref']}",
+        ]
+    )
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_artifact_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    payload = base_response("cornerstone artifact show", "success", root)
+    store = LocalRuntimeStore(state_dir(root, args))
+    artifact = store.get_artifact(args.artifact_id)
+    if artifact is None:
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ARTIFACT_NOT_FOUND",
+                "message": "Artifact record was not found.",
+                "artifact_id": args.artifact_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+
+    audit_event = store.append_audit(
+        "artifact.read",
+        artifact["scope"],
+        {"type": "artifact", "id": artifact["artifact_id"]},
+        {"reason": "cli_artifact_show"},
+    )
+    payload.update(artifact["scope"])
+    payload["ids"].update(
+        {
+            "artifact_id": artifact["artifact_id"],
+            "checksum_sha256": artifact["checksum_sha256"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["artifact"] = artifact
+    payload["evidence_refs"].append(f"artifact:{artifact['artifact_id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_audit_verify(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    report = store.verify_audit()
+    payload = base_response("cornerstone audit verify", report["status"], root)
+    payload["audit_integrity"] = report
+    if report["status"] != "success":
+        payload["errors"].append(
+            {
+                "code": "CS_AUDIT_INTEGRITY_FAILED",
+                "message": "Audit hash-chain verification failed.",
+                "audit_errors": report["errors"],
+            }
+        )
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report["status"] == "success" else EXIT_RUNTIME_FAILURE
+
+
 def command_scenario_list(args: argparse.Namespace) -> int:
     root = repo_root()
     scenarios = list_scenarios(root, args.set)
@@ -190,13 +330,15 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                         "missing": missing,
                     }
                 )
+    elif args.contract == "vs0-artifacts":
+        report = verify_vs0_artifacts(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
             {
                 "code": "CS_SCENARIO_CONTRACT_UNSUPPORTED",
                 "message": "Only scaffold and fixture verification are implemented in this batch.",
-                "supported": ["vs0-scaffold", "vs0-fixtures"],
+                "supported": ["vs0-scaffold", "vs0-fixtures", "vs0-artifacts"],
             }
         )
         print_payload(payload, args.json)
@@ -280,6 +422,35 @@ def build_parser() -> argparse.ArgumentParser:
     ready = subcommands.add_parser("ready", help="Check local runtime readiness")
     ready.add_argument("--json", action="store_true", help="Emit JSON output")
     ready.set_defaults(func=command_ready)
+
+    artifact = subcommands.add_parser("artifact", help="Artifact archive commands")
+    artifact_sub = artifact.add_subparsers(dest="artifact_command")
+
+    artifact_ingest = artifact_sub.add_parser("ingest", help="Ingest an immutable artifact")
+    artifact_ingest.add_argument("path", help="Path to the input artifact")
+    add_state_argument(artifact_ingest)
+    add_scope_arguments(artifact_ingest)
+    artifact_ingest.add_argument("--source", default="local_file", help="Artifact source type")
+    artifact_ingest.add_argument("--media-type", default="text/plain", help="Input media type")
+    artifact_ingest.add_argument("--derived-mode", choices=["auto", "fail", "unsupported"], default="auto")
+    artifact_ingest.add_argument("--trust", choices=["trusted", "untrusted"], default="untrusted")
+    artifact_ingest.add_argument("--lineage-from", help="Previous artifact ID for changed content")
+    artifact_ingest.add_argument("--json", action="store_true", help="Emit JSON output")
+    artifact_ingest.set_defaults(func=command_artifact_ingest)
+
+    artifact_show = artifact_sub.add_parser("show", help="Show artifact metadata and provenance")
+    artifact_show.add_argument("artifact_id", help="Artifact ID")
+    add_state_argument(artifact_show)
+    artifact_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    artifact_show.set_defaults(func=command_artifact_show)
+
+    audit = subcommands.add_parser("audit", help="Audit ledger commands")
+    audit_sub = audit.add_subparsers(dest="audit_command")
+
+    audit_verify = audit_sub.add_parser("verify", help="Verify the local audit hash chain")
+    add_state_argument(audit_verify)
+    audit_verify.add_argument("--json", action="store_true", help="Emit JSON output")
+    audit_verify.set_defaults(func=command_audit_verify)
 
     scenario = subcommands.add_parser("scenario", help="Scenario registry and verification commands")
     scenario_sub = scenario.add_subparsers(dest="scenario_command")

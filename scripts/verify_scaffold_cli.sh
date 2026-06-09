@@ -20,7 +20,8 @@ list_json=$(mktemp)
 coverage_json=$(mktemp)
 verify_json=$(mktemp)
 fixtures_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json"' EXIT
+artifacts_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -60,6 +61,13 @@ grep -q '"blocking": 0' "$fixtures_json" || fail "vs0-fixtures report has blocki
 grep -q '"product_feature_claims": "NOT_VERIFIED"' "$fixtures_json" || fail "vs0-fixtures must not claim product feature PASS"
 grep -q '"external_http_calls": 0' "$fixtures_json" || fail "vs0-fixtures reported external HTTP calls"
 
+cornerstone scenario verify vs0-artifacts --json > "$artifacts_json"
+python3 -m json.tool "$artifacts_json" >/dev/null
+grep -q '"scenario_set": "vs0-artifacts"' "$artifacts_json" || fail "vs0-artifacts report missing scenario set"
+grep -q '"blocking": 0' "$artifacts_json" || fail "vs0-artifacts report has blocking scenarios"
+grep -q '"id": "CS-ARCH-001"' "$artifacts_json" || fail "vs0-artifacts missing CS-ARCH-001"
+grep -q '"product_feature_claims": "PARTIAL_VS0_ARTIFACTS_ONLY"' "$artifacts_json" || fail "vs0-artifacts overclaimed product feature scope"
+
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, unittest).\n'

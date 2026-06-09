@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import sys
 from pathlib import Path
 
@@ -34,6 +35,20 @@ ALLOWED_OWNER = {"AI", "Human", "AI+Human"}
 def fail(message: str) -> int:
     print(f"FAIL: {message}", file=sys.stderr)
     return 1
+
+
+def evidence_contains_pass(scenario_id: str, evidence_artifact: str) -> bool:
+    path = ROOT / evidence_artifact
+    if not path.exists():
+        return False
+    try:
+        data = json.loads(path.read_text())
+    except ValueError:
+        return False
+    for row in data.get("scenario_results", []):
+        if row.get("id") == scenario_id and row.get("status") == "PASS":
+            return True
+    return False
 
 
 def main() -> int:
@@ -73,8 +88,11 @@ def main() -> int:
             return fail(f"{scenario_id} missing evidence artifact")
         if row["status"] not in ALLOWED_STATUS:
             return fail(f"{scenario_id} invalid status {row['status']}")
-        if row["status"] == "PASS" and not row["evidence_artifact"]:
-            return fail(f"{scenario_id} PASS lacks evidence artifact")
+        if row["status"] == "PASS":
+            if not row["evidence_artifact"]:
+                return fail(f"{scenario_id} PASS lacks evidence artifact")
+            if not evidence_contains_pass(scenario_id, row["evidence_artifact"]):
+                return fail(f"{scenario_id} PASS evidence artifact does not contain matching PASS row")
         if row["status"] == "HUMAN_REQUIRED":
             for field in [
                 "human_required_reason",

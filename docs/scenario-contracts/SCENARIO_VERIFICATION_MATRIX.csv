@@ -9,11 +9,11 @@ CS-PROD-007,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS
 CS-PROD-008,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-008 --json,reports/scenario/cs-prod-008.json,,,,,NOT_VERIFIED
 CS-PROD-009,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-009 --json,reports/scenario/cs-prod-009.json,,,,,NOT_VERIFIED
 CS-PROD-010,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-010 --json,reports/scenario/cs-prod-010.json,,,,,NOT_VERIFIED
-CS-ARCH-001,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-001.json,,,,,NOT_VERIFIED
-CS-ARCH-002,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-002.json,,,,,NOT_VERIFIED
-CS-ARCH-003,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-003.json,,,,,NOT_VERIFIED
-CS-ARCH-004,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-004.json,,,,,NOT_VERIFIED
-CS-ARCH-005,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-005.json,,,,,NOT_VERIFIED
+CS-ARCH-001,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-artifacts --json,reports/scenario/vs0-artifacts-2026-06-09.json,,,,,PASS
+CS-ARCH-002,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-artifacts --json,reports/scenario/vs0-artifacts-2026-06-09.json,,,,,PASS
+CS-ARCH-003,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-artifacts --json,reports/scenario/vs0-artifacts-2026-06-09.json,,,,,PASS
+CS-ARCH-004,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-artifacts --json,reports/scenario/vs0-artifacts-2026-06-09.json,,,,,PASS
+CS-ARCH-005,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-artifacts --json,reports/scenario/vs0-artifacts-2026-06-09.json,,,,,PASS
 CS-ARCH-006,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-006 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-006.json,,,,,NOT_VERIFIED
 CS-ARCH-007,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-007 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-007.json,,,,,NOT_VERIFIED
 CS-ARCH-008,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-008 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-008.json,,,,,NOT_VERIFIED

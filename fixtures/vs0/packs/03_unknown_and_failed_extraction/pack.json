@@ -1,0 +1,32 @@
+{
+  "id": "pack_03_unknown_and_failed_extraction",
+  "classes": ["artifact", "derived_failure", "unknown_format"],
+  "scenario_ids": [
+    "CS-ARCH-002",
+    "CS-ARCH-005"
+  ],
+  "inputs": [
+    {
+      "path": "fail.txt",
+      "media_type": "text/plain",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    },
+    {
+      "path": "unknown.bin",
+      "media_type": "application/octet-stream",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    }
+  ],
+  "expected": {
+    "failed_derived_preserves_original": true,
+    "unknown_format_deferred": true,
+    "retry_possible": true
+  },
+  "negative_evidence": {
+    "lost_originals": 0
+  }
+}

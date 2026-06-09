@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import re
+import shutil
 import subprocess
 import csv
 from pathlib import Path
@@ -311,7 +313,14 @@ def verify_vs0_fixtures(root: Path, corpus: str = "fixtures/vs0", model_provider
     if provider["supported"] and not provider["deterministic"]:
         issues.append(ValidationIssue("PROVIDER_NONDETERMINISTIC", "local_test provider returned different outputs for the same input.", model_provider))
 
-    expected_packs = {"pack_01_artifact_basic", "pack_08_namespace_isolation", "pack_09_redaction_secrets", "pack_10_prompt_injection"}
+    expected_packs = {
+        "pack_01_artifact_basic",
+        "pack_02_dedup_versioning",
+        "pack_03_unknown_and_failed_extraction",
+        "pack_08_namespace_isolation",
+        "pack_09_redaction_secrets",
+        "pack_10_prompt_injection",
+    }
     present_packs = {str(report.get("id")) for report in pack_reports}
     missing_expected_packs = sorted(expected_packs - present_packs)
     for pack_id in missing_expected_packs:
@@ -410,6 +419,209 @@ def verify_vs0_fixtures(root: Path, corpus: str = "fixtures/vs0", model_provider
                 "release_impact": "Does not block deterministic fixture validation.",
             }
         ],
+    }
+
+
+def _run_cli_json(root: Path, args: list[str]) -> dict[str, Any]:
+    command = [str(root / "cornerstone"), *args]
+    result = subprocess.run(
+        command,
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    stdout_json: dict[str, Any] | None = None
+    json_error: str | None = None
+    try:
+        stdout_json = json.loads(result.stdout)
+    except ValueError as error:
+        json_error = str(error)
+    return {
+        "schema_version": "cs.cli_transcript.v0",
+        "command": ["cornerstone", *args],
+        "exit_code": result.returncode,
+        "stdout_json": stdout_json,
+        "stderr_redacted": redact_text(result.stderr),
+        "json_error": json_error,
+    }
+
+
+def _payload(transcript: dict[str, Any]) -> dict[str, Any]:
+    return transcript.get("stdout_json") or {}
+
+
+def _artifact(transcript: dict[str, Any]) -> dict[str, Any]:
+    payload = _payload(transcript)
+    artifact = payload.get("artifact")
+    return artifact if isinstance(artifact, dict) else {}
+
+
+def _exit_ok(transcript: dict[str, Any]) -> bool:
+    return transcript.get("exit_code") == 0 and isinstance(transcript.get("stdout_json"), dict)
+
+
+def verify_vs0_artifacts(root: Path) -> dict[str, Any]:
+    state_rel = "tmp/scenario/vs0-artifacts"
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    basic_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    dedup_v1_path = "fixtures/vs0/packs/02_dedup_versioning/input_v1.txt"
+    dedup_v2_path = "fixtures/vs0/packs/02_dedup_versioning/input_v2.txt"
+    fail_path = "fixtures/vs0/packs/03_unknown_and_failed_extraction/fail.txt"
+    unknown_path = "fixtures/vs0/packs/03_unknown_and_failed_extraction/unknown.bin"
+
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["ingest_basic"] = _run_cli_json(root, ["artifact", "ingest", basic_path, "--state-dir", state_rel, "--json"])
+    basic_artifact = _artifact(transcripts["ingest_basic"])
+    basic_id = basic_artifact.get("artifact_id", "")
+    transcripts["show_basic"] = _run_cli_json(root, ["artifact", "show", basic_id, "--state-dir", state_rel, "--json"]) if basic_id else {}
+
+    transcripts["ingest_fail"] = _run_cli_json(root, ["artifact", "ingest", fail_path, "--state-dir", state_rel, "--derived-mode", "fail", "--json"])
+    fail_artifact = _artifact(transcripts["ingest_fail"])
+    fail_id = fail_artifact.get("artifact_id", "")
+    transcripts["show_fail"] = _run_cli_json(root, ["artifact", "show", fail_id, "--state-dir", state_rel, "--json"]) if fail_id else {}
+
+    transcripts["ingest_unknown"] = _run_cli_json(
+        root,
+        [
+            "artifact",
+            "ingest",
+            unknown_path,
+            "--state-dir",
+            state_rel,
+            "--media-type",
+            "application/octet-stream",
+            "--derived-mode",
+            "unsupported",
+            "--json",
+        ],
+    )
+    unknown_artifact = _artifact(transcripts["ingest_unknown"])
+    unknown_id = unknown_artifact.get("artifact_id", "")
+    transcripts["show_unknown"] = _run_cli_json(root, ["artifact", "show", unknown_id, "--state-dir", state_rel, "--json"]) if unknown_id else {}
+
+    transcripts["dedup_v1_first"] = _run_cli_json(root, ["artifact", "ingest", dedup_v1_path, "--state-dir", state_rel, "--json"])
+    dedup_v1_artifact = _artifact(transcripts["dedup_v1_first"])
+    dedup_v1_id = dedup_v1_artifact.get("artifact_id", "")
+    transcripts["dedup_v1_second"] = _run_cli_json(root, ["artifact", "ingest", dedup_v1_path, "--state-dir", state_rel, "--json"])
+    transcripts["dedup_v2"] = _run_cli_json(
+        root,
+        ["artifact", "ingest", dedup_v2_path, "--state-dir", state_rel, "--lineage-from", dedup_v1_id, "--json"],
+    )
+    dedup_v2_artifact = _artifact(transcripts["dedup_v2"])
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    basic_payload = _payload(transcripts["ingest_basic"])
+    show_basic_artifact = _artifact(transcripts["show_basic"])
+    fail_payload = _payload(transcripts["ingest_fail"])
+    unknown_payload = _payload(transcripts["ingest_unknown"])
+    dedup_second_payload = _payload(transcripts["dedup_v1_second"])
+
+    arch_001_ok = (
+        _exit_ok(transcripts["ingest_basic"])
+        and basic_artifact.get("artifact_id")
+        and basic_artifact.get("checksum_sha256")
+        and str(basic_artifact.get("original_storage_ref", "")).startswith("sha256:")
+        and basic_artifact.get("source", {}).get("ingested_at")
+        and basic_payload.get("evidence_refs")
+        and basic_payload.get("audit_refs")
+    )
+    arch_002_ok = (
+        _exit_ok(transcripts["ingest_fail"])
+        and _exit_ok(transcripts["show_fail"])
+        and fail_artifact.get("derived", {}).get("status") == "failed"
+        and str(fail_artifact.get("original_storage_ref", "")).startswith("sha256:")
+    )
+    arch_003_ok = (
+        _exit_ok(transcripts["dedup_v1_first"])
+        and _exit_ok(transcripts["dedup_v1_second"])
+        and _exit_ok(transcripts["dedup_v2"])
+        and dedup_v1_id
+        and _artifact(transcripts["dedup_v1_second"]).get("artifact_id") == dedup_v1_id
+        and dedup_second_payload.get("deduplicated") is True
+        and dedup_v2_artifact.get("artifact_id") != dedup_v1_id
+        and dedup_v2_artifact.get("provenance", {}).get("lineage_from") == dedup_v1_id
+    )
+    arch_004_ok = (
+        _exit_ok(transcripts["show_basic"])
+        and show_basic_artifact.get("source", {}).get("path")
+        and show_basic_artifact.get("provenance", {}).get("transformations")
+        and _payload(transcripts["show_basic"]).get("audit_refs")
+    )
+    arch_005_ok = (
+        _exit_ok(transcripts["ingest_unknown"])
+        and _exit_ok(transcripts["show_unknown"])
+        and unknown_artifact.get("derived", {}).get("status") == "deferred"
+        and unknown_artifact.get("derived", {}).get("reason") == "unsupported_format"
+        and str(unknown_artifact.get("original_storage_ref", "")).startswith("sha256:")
+    )
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+
+    rows = [
+        _row(
+            "CS-ARCH-001",
+            "MUST_PASS",
+            "PASS" if arch_001_ok and audit_ok else "FAIL",
+            ["cornerstone artifact ingest fixtures/vs0/packs/01_artifact_basic/input.txt --json"],
+            "Artifact ingest preserves original content with stable ID, checksum, storage ref, source timestamp, evidence refs, and audit refs.",
+        ),
+        _row(
+            "CS-ARCH-002",
+            "MUST_PASS",
+            "PASS" if arch_002_ok and audit_ok else "FAIL",
+            ["cornerstone artifact ingest ... --derived-mode fail --json", "cornerstone artifact show <artifact_id> --json"],
+            "Derived processing failure leaves the original artifact stored, discoverable, and retryable.",
+        ),
+        _row(
+            "CS-ARCH-003",
+            "MUST_PASS",
+            "PASS" if arch_003_ok and audit_ok else "FAIL",
+            ["cornerstone artifact ingest <same-content> --json", "cornerstone artifact ingest <changed-content> --lineage-from <artifact_id> --json"],
+            "Identical content deduplicates to one artifact identity; changed content creates a distinct artifact with lineage.",
+        ),
+        _row(
+            "CS-ARCH-004",
+            "MUST_PASS",
+            "PASS" if arch_004_ok and audit_ok else "FAIL",
+            ["cornerstone artifact show <artifact_id> --json"],
+            "Artifact detail exposes source, timestamp, provenance transformations, evidence refs, and read audit refs.",
+        ),
+        _row(
+            "CS-ARCH-005",
+            "MUST_PASS",
+            "PASS" if arch_005_ok and audit_ok else "FAIL",
+            ["cornerstone artifact ingest fixtures/vs0/packs/03_unknown_and_failed_extraction/unknown.bin --media-type application/octet-stream --json"],
+            "Unknown-format content keeps the immutable original and records deferred derived processing.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-artifacts",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_ARTIFACTS_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "artifact_ids": {
+            "basic": basic_id,
+            "failed_derived": fail_id,
+            "unknown_format": unknown_id,
+            "dedup_v1": dedup_v1_id,
+            "dedup_v2": dedup_v2_artifact.get("artifact_id"),
+        },
+        "negative_evidence": {
+            "lost_originals": 0 if arch_001_ok and arch_002_ok and arch_005_ok else 1,
+            "conflicting_duplicate_truth_records": 0 if arch_003_ok else 1,
+        },
+        "human_required": [],
     }
 
 

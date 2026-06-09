@@ -1,0 +1,3 @@
+CornerStone derived failure fixture.
+
+The original text must remain accessible even when a derived processor fails.

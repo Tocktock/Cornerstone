@@ -29,6 +29,15 @@ FIELDS = [
     "release_impact",
     "status",
 ]
+PRESERVED_FIELDS = [
+    "verification_command",
+    "evidence_artifact",
+    "human_required_reason",
+    "required_human_action",
+    "expected_human_evidence",
+    "release_impact",
+    "status",
+]
 
 CLASS_BY_PREFIX = {
     "CS-PROD": "U+D",
@@ -84,28 +93,41 @@ def command_for(scenario_id: str, vs0_ids: set[str]) -> str:
     return f"cornerstone scenario verify full --scenario {scenario_id} --json"
 
 
-def build_rows() -> list[dict[str, str]]:
+def load_existing_rows() -> dict[str, dict[str, str]]:
+    if not OUTPUT.exists():
+        return {}
+    with OUTPUT.open(newline="") as file:
+        reader = csv.DictReader(file)
+        if reader.fieldnames != FIELDS:
+            return {}
+        return {row["scenario_id"]: row for row in reader}
+
+
+def build_rows(existing_rows: dict[str, dict[str, str]] | None = None) -> list[dict[str, str]]:
     full = load_full_scenarios(ROOT)
     vs0_ids = {row["id"] for row in load_vs0_scenarios(ROOT)}
     rows: list[dict[str, str]] = []
     for scenario in full:
         scenario_id = scenario["id"]
-        rows.append(
-            {
-                "scenario_id": scenario_id,
-                "type": scenario["type"],
-                "local_required": "true",
-                "verification_class": class_for(scenario_id),
-                "verification_owner": "AI",
-                "verification_command": command_for(scenario_id, vs0_ids),
-                "evidence_artifact": f"reports/scenario/{scenario_id.lower()}.json",
-                "human_required_reason": "",
-                "required_human_action": "",
-                "expected_human_evidence": "",
-                "release_impact": "",
-                "status": "NOT_VERIFIED",
-            }
-        )
+        row = {
+            "scenario_id": scenario_id,
+            "type": scenario["type"],
+            "local_required": "true",
+            "verification_class": class_for(scenario_id),
+            "verification_owner": "AI",
+            "verification_command": command_for(scenario_id, vs0_ids),
+            "evidence_artifact": f"reports/scenario/{scenario_id.lower()}.json",
+            "human_required_reason": "",
+            "required_human_action": "",
+            "expected_human_evidence": "",
+            "release_impact": "",
+            "status": "NOT_VERIFIED",
+        }
+        existing = (existing_rows or {}).get(scenario_id, {})
+        for field in PRESERVED_FIELDS:
+            if existing.get(field):
+                row[field] = existing[field]
+        rows.append(row)
     return rows
 
 
@@ -122,7 +144,7 @@ def main() -> int:
     parser.add_argument("--check", action="store_true", help="Fail if the committed matrix is stale")
     args = parser.parse_args()
 
-    content = render_csv(build_rows())
+    content = render_csv(build_rows(load_existing_rows()))
     if args.check:
         if not OUTPUT.exists():
             print(f"FAIL: missing {OUTPUT.relative_to(ROOT)}", file=sys.stderr)

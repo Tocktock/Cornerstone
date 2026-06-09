@@ -91,10 +91,11 @@ cornerstone scenario coverage --json
 python3 scripts/verify_scenario_matrix.py
 cornerstone scenario verify vs0-scaffold --json
 cornerstone scenario verify vs0-fixtures --corpus fixtures/vs0 --model-provider local_test --json
+cornerstone scenario verify vs0-artifacts --json
 make verify-local-fast
 ```
 
-The current scaffold CLI can verify scaffold readiness, scenario registry coverage, and deterministic local fixture-validator readiness. It does not claim VS-0 product-feature behavior is implemented or passing.
+The current scaffold CLI can verify scaffold readiness, scenario registry coverage, deterministic local fixture-validator readiness, and the first CLI-native artifact preservation slice. It does not claim the full VS-0 product loop is implemented or passing.
 
 ## First Implementation Target
 

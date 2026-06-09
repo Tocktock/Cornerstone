@@ -1,0 +1,31 @@
+{
+  "id": "pack_02_dedup_versioning",
+  "classes": ["artifact", "dedup", "versioning"],
+  "scenario_ids": [
+    "CS-ARCH-003"
+  ],
+  "inputs": [
+    {
+      "path": "input_v1.txt",
+      "media_type": "text/plain",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    },
+    {
+      "path": "input_v2.txt",
+      "media_type": "text/plain",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    }
+  ],
+  "expected": {
+    "same_content_same_artifact_id": true,
+    "changed_content_new_artifact_id": true,
+    "changed_content_lineage_required": true
+  },
+  "negative_evidence": {
+    "conflicting_duplicate_truth_records": 0
+  }
+}

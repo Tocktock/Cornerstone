@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import unittest
 from pathlib import Path
@@ -89,6 +90,89 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertEqual(value, 0)
         self.assertTrue(payload["referenced_product_scenarios"])
         self.assertEqual({row["status"] for row in payload["referenced_product_scenarios"]}, {"NOT_VERIFIED"})
+
+    def test_artifact_ingest_show_and_audit_verify(self) -> None:
+        state_dir = ROOT / "tmp/test-artifact-cli"
+        shutil.rmtree(state_dir, ignore_errors=True)
+        try:
+            ingest = run_cli(
+                "artifact",
+                "ingest",
+                "fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "--state-dir",
+                "tmp/test-artifact-cli",
+                "--json",
+            )
+            self.assertEqual(ingest.returncode, 0, ingest.stdout + ingest.stderr)
+            ingest_payload = json.loads(ingest.stdout)
+            artifact = ingest_payload["artifact"]
+            self.assertTrue(artifact["artifact_id"].startswith("art_"))
+            self.assertTrue(artifact["original_storage_ref"].startswith("sha256:"))
+            self.assertEqual(artifact["derived"]["status"], "ready")
+            self.assertTrue(ingest_payload["evidence_refs"])
+            self.assertTrue(ingest_payload["audit_refs"])
+
+            show = run_cli(
+                "artifact",
+                "show",
+                artifact["artifact_id"],
+                "--state-dir",
+                "tmp/test-artifact-cli",
+                "--json",
+            )
+            self.assertEqual(show.returncode, 0, show.stdout + show.stderr)
+            show_payload = json.loads(show.stdout)
+            self.assertEqual(show_payload["artifact"]["artifact_id"], artifact["artifact_id"])
+            self.assertTrue(show_payload["artifact"]["provenance"]["transformations"])
+            self.assertTrue(show_payload["audit_refs"])
+
+            audit = run_cli("audit", "verify", "--state-dir", "tmp/test-artifact-cli", "--json")
+            self.assertEqual(audit.returncode, 0, audit.stdout + audit.stderr)
+            audit_payload = json.loads(audit.stdout)
+            self.assertEqual(audit_payload["audit_integrity"]["status"], "success")
+            self.assertGreaterEqual(audit_payload["audit_integrity"]["event_count"], 2)
+        finally:
+            shutil.rmtree(state_dir, ignore_errors=True)
+
+    def test_audit_verify_rejects_tampering(self) -> None:
+        state_dir = ROOT / "tmp/test-audit-tamper"
+        shutil.rmtree(state_dir, ignore_errors=True)
+        try:
+            ingest = run_cli(
+                "artifact",
+                "ingest",
+                "fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "--state-dir",
+                "tmp/test-audit-tamper",
+                "--json",
+            )
+            self.assertEqual(ingest.returncode, 0, ingest.stdout + ingest.stderr)
+            audit_path = state_dir / "audit/events.jsonl"
+            lines = audit_path.read_text().splitlines()
+            self.assertTrue(lines)
+            lines[0] = lines[0].replace("artifact.ingested", "artifact.modified")
+            audit_path.write_text("\n".join(lines) + "\n")
+
+            audit = run_cli("audit", "verify", "--state-dir", "tmp/test-audit-tamper", "--json")
+            self.assertEqual(audit.returncode, 5, audit.stdout + audit.stderr)
+            audit_payload = json.loads(audit.stdout)
+            self.assertEqual(audit_payload["status"], "failed")
+            self.assertEqual(audit_payload["errors"][0]["code"], "CS_AUDIT_INTEGRITY_FAILED")
+        finally:
+            shutil.rmtree(state_dir, ignore_errors=True)
+
+    def test_vs0_artifact_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-artifacts", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-artifacts")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 5)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_ARTIFACTS_ONLY")
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {f"CS-ARCH-00{index}" for index in range(1, 6)})
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
 
     def test_scenario_gate_rejects_report_level_errors(self) -> None:
         report_path = ROOT / "reports/scenario/test-failed-report.json"

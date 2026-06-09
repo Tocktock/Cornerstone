@@ -1,0 +1,3 @@
+CornerStone duplicate fixture.
+
+The same content should resolve to one stable artifact identity when ingested twice.
