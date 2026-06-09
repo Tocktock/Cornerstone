@@ -1,5 +1,5 @@
-version: "0.3"
-effective_date: "2026-06-08"
+version: "0.4"
+effective_date: "2026-06-09"
 owner: "JiYong / Tars"
 canonical_spelling: "CornerStone"
 status: "active V2 full MUST-PASS handoff"
@@ -43,6 +43,23 @@ cli_native_first:
   authority: "mandatory execution overlay: no CLI, no feature PASS"
   release_gate: "Every product feature must have a verified native cornerstone CLI path or be explicitly classified as a non-feature implementation internal."
   verification_command: "scripts/verify_cli_native_first_docs.sh"
+
+vs0_scaffold:
+  contract: "docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md"
+  authority: "setup-planning contract before VS-0 scaffold implementation or feature coding"
+  runtime_targets:
+    python: "3.14.x"
+    node: "24.x LTS"
+    postgres: "18.x"
+  dependency_policy: "latest compatible, lockfile-pinned, human approval required before adding production dependencies"
+  cli_requirement: "cornerstone CLI planned from day 0; no CLI, no feature PASS"
+  verification_template: "docs/verification-reports/template.md"
+  adr_files:
+    - "docs/adr/ADR-0002-framework-and-version-policy.md"
+    - "docs/adr/ADR-0003-monorepo-setup.md"
+    - "docs/adr/ADR-0004-cli-native-first-setup.md"
+    - "docs/adr/ADR-0005-domain-boundaries.md"
+    - "docs/adr/ADR-0006-agent-guide.md"
 
 technical_defaults:
   file: "docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md"

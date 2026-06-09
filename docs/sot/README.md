@@ -1,8 +1,8 @@
 # CornerStone SoT Bundle
 
-**Date:** 2026-06-08  
+**Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Active SoT bundle after V2 full MUST-PASS handoff
+**Status:** Active SoT bundle after V2 full MUST-PASS handoff and VS-0 scaffold gate
 
 ## Why This Bundle Exists
 
@@ -14,6 +14,7 @@ This bundle resolves authority:
 - The **MUST-PASS Scenario Standard** is acceptance and release authority.
 - The **Full Scenario Matrix** is the generated index for the 206 scenarios.
 - The **CLI Native-First Contract** is the no-CLI-no-feature-PASS execution gate.
+- The **VS-0 Scaffold Contract** is the setup-planning gate before scaffold or feature coding.
 - The **VS-0 Implementation Contract** is only the first implementation subset.
 - The older technical SoT is no longer product authority; compatible technical defaults are preserved only in `03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`.
 
@@ -26,10 +27,11 @@ This bundle resolves authority:
 5. `docs/scenario-contracts/SCENARIO_MATRIX_FULL.md` - scenario index for planning and verification.
 6. `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md` - mandatory no-CLI-no-feature-PASS execution gate.
 7. `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv` - CLI command coverage by feature family.
-8. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` - first implementation subset when working on VS-0.
-9. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` - implementation defaults where compatible.
-10. Frozen scenario contract for the specific implementation task.
-11. Repository code/docs/tests/logs as implementation evidence.
+8. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` - setup-planning gate before VS-0 scaffold or feature coding.
+9. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` - first implementation subset when working on VS-0.
+10. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` - implementation defaults where compatible.
+11. Frozen scenario contract for the specific implementation task.
+12. Repository code/docs/tests/logs as implementation evidence.
 
 If lower-priority content conflicts with higher-priority content, report the conflict and follow the higher-priority source.
 
@@ -51,8 +53,10 @@ If lower-priority content conflicts with higher-priority content, report the con
 | `../scenario-contracts/SCENARIO_MATRIX_FULL.csv` | CSV scenario index, 206 scenarios |
 | `../scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md` | Mandatory no-CLI-no-feature-PASS execution gate |
 | `../scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv` | Native CLI command coverage by feature family |
+| `../scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` | Setup-planning contract before VS-0 scaffold or feature coding |
 | `../scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` | Strict VS-0 scenario subset, 58 scenarios |
 | `../scenario-contracts/SCENARIO_VERIFICATION_REPORT_TEMPLATE.md` | Required report shape for scenario verification |
+| `../verification-reports/template.md` | Required report shape for scaffold, scenario, CLI, and human-required evidence |
 
 ## New Product Goal
 
@@ -81,6 +85,8 @@ It turns fragmented knowledge into:
 - CLI-native-first for every product feature: no verified native `cornerstone ...` command path means no feature PASS.
 
 ## First Implementation Target
+
+Before feature coding, `../scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` must be accepted as the setup-planning gate.
 
 The first implementation target is VS-0:
 

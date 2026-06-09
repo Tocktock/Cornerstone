@@ -14,10 +14,11 @@ Before non-trivial planning, architecture, migration, or implementation work, re
 4. `docs/scenario-contracts/SCENARIO_MATRIX_FULL.md`
 5. `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md`
 6. `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv`
-7. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` when working on v0.1/VS-0
-8. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-9. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-10. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
+7. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` before VS-0 scaffold or feature coding
+8. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` when working on v0.1/VS-0
+9. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+10. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+11. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
 
 The product SoT is the product authority. Repository files show implementation reality, not permission to drift.
 
@@ -92,7 +93,11 @@ Run `scripts/verify_sot_docs.sh` after documentation edits that touch SoT, scena
 
 ## First Implementation Target
 
-Start with VS-0:
+Start with the VS-0 scaffold contract before feature coding:
+
+`docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`
+
+Then start VS-0:
 
 `Personal messy input -> immutable artifact -> search -> evidence-backed brief -> draft/evidence-backed claim -> action card dry-run -> approval/execution -> audit`
 

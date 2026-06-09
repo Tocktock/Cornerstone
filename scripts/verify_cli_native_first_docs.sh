@@ -15,6 +15,8 @@ require_file() {
 
 require_file "docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md"
 require_file "docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv"
+require_file "docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md"
+require_file "docs/verification-reports/template.md"
 
 grep -q 'No CLI, no feature PASS' docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md || fail "CLI native-first hard gate missing"
 grep -q 'Every shipped CornerStone feature must have a native' docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md || fail "native CLI requirement missing"
@@ -35,5 +37,8 @@ not_blocking_count=$(awk -F, 'NR > 1 && $6 != "true" { count++ } END { print cou
 
 missing_command_count=$(awk -F, 'NR > 1 && ($3 == "" || $4 == "") { count++ } END { print count + 0 }' docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv)
 [ "$missing_command_count" = "0" ] || fail "all CLI parity rows must include command group and example commands"
+
+grep -q 'cornerstone scenario verify vs0-scaffold --json' docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md || fail "VS-0 scaffold contract missing planned CLI verification command"
+grep -q 'CLI Parity Summary' docs/verification-reports/template.md || fail "verification report template missing CLI parity section"
 
 printf 'PASS: CornerStone CLI native-first docs verified (%s feature-family rows; all CLI-required and release-blocking).\n' "$row_count"

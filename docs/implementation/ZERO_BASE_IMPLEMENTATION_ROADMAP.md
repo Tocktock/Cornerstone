@@ -1,6 +1,6 @@
 # Zero-Base CornerStone Implementation Roadmap
 
-**Date:** 2026-06-08  
+**Date:** 2026-06-09
 **Owner:** JiYong / Tars  
 **Status:** Implementation planning document, subordinate to the SoT and scenario standard
 
@@ -20,8 +20,11 @@ Deliverables:
 - Full V2 handoff preserved under `docs/handoff/`.
 - Full scenario matrix installed under `docs/scenario-contracts/`.
 - Old conflicting docs archived, replaced, or explicitly marked superseded.
+- `VS0_SCAFFOLD_CONTRACT.md` frozen.
 - `VS0_IMPLEMENTATION_CONTRACT.md` frozen.
+- Setup/version ADRs added.
 - Scenario report template added.
+- Verification report template added under `docs/verification-reports/`.
 - Local docs verification script added.
 
 Exit criteria:
@@ -29,12 +32,20 @@ Exit criteria:
 - No active doc claims old `project-sot.md` is the only SoT.
 - Product goal points to living evidence-first autonomous operational intelligence.
 - Full scenario standard contains 206 scenarios.
+- VS-0 scaffold contract exists before feature coding.
 - First scenario contract contains 58 VS-0 scenarios.
+- Setup ADRs exist and contain no runtime implementation.
 - `scripts/verify_sot_docs.sh` passes.
 
 ## 3. Milestone 1 - One-Command Product Shell
 
 Goal: one CornerStone app starts locally.
+
+Prerequisites:
+
+- `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` accepted.
+- Production dependency additions approved.
+- Runtime pins and lockfile strategy follow `docs/adr/ADR-0002-framework-and-version-policy.md`.
 
 Deliverables:
 
