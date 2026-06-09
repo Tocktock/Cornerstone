@@ -7494,6 +7494,462 @@ def verify_vs0_tenant_security_boundary(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_full_namespace_governance(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("full-namespace-governance")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    pack_dir = "fixtures/vs0/packs/18_namespace_governance"
+    personal_path = f"{pack_dir}/personal.txt"
+    org_path = f"{pack_dir}/organization.txt"
+    tenant_b_path = f"{pack_dir}/tenant_b.txt"
+    org_scope_args = ["--owner-id", "local-org", "--namespace-id", "organization", "--workspace-id", "ops"]
+    wrong_org_scope_args = ["--owner-id", "local-org", "--namespace-id", "organization", "--workspace-id", "wrong-space"]
+    tenant_b_scope_args = ["--tenant-id", "tenant-b", "--owner-id", "tenant-b-owner", "--namespace-id", "organization", "--workspace-id", "ops"]
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    transcripts["ingest_personal"] = _run_cli_json(root, ["artifact", "ingest", personal_path, "--state-dir", state_rel, "--json"])
+    transcripts["ingest_org"] = _run_cli_json(root, ["artifact", "ingest", org_path, "--source", "mock_readonly_source", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["ingest_tenant_b"] = _run_cli_json(root, ["artifact", "ingest", tenant_b_path, "--state-dir", state_rel, *tenant_b_scope_args, "--json"])
+    personal_artifact = _artifact(transcripts["ingest_personal"])
+    org_artifact = _artifact(transcripts["ingest_org"])
+    tenant_b_artifact = _artifact(transcripts["ingest_tenant_b"])
+    personal_artifact_id = personal_artifact.get("artifact_id", "")
+    org_artifact_id = org_artifact.get("artifact_id", "")
+
+    transcripts["personal_search"] = _run_cli_json(root, ["search", "query", "personal-governance-alpha", "--state-dir", state_rel, "--json"])
+    transcripts["org_search"] = _run_cli_json(root, ["search", "query", "org-governance-beta", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["personal_cross_org_search"] = _run_cli_json(root, ["search", "query", "org-governance-beta", "--state-dir", state_rel, "--json"])
+    transcripts["org_cross_personal_search"] = _run_cli_json(root, ["search", "query", "personal-governance-alpha", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["tenant_b_cross_org_search"] = _run_cli_json(root, ["search", "query", "org-governance-beta", "--state-dir", state_rel, *tenant_b_scope_args, "--json"])
+
+    personal_snapshot = _payload(transcripts["personal_search"]).get("search_snapshot", {})
+    org_snapshot = _payload(transcripts["org_search"]).get("search_snapshot", {})
+    personal_snapshot_id = personal_snapshot.get("search_snapshot_id", "")
+    org_snapshot_id = org_snapshot.get("search_snapshot_id", "")
+    transcripts["personal_bundle_create"] = _run_cli_json(root, ["evidence", "bundle", "create", "--search-snapshot-id", personal_snapshot_id, "--state-dir", state_rel, "--json"]) if personal_snapshot_id else {}
+    transcripts["org_bundle_create"] = _run_cli_json(root, ["evidence", "bundle", "create", "--search-snapshot-id", org_snapshot_id, "--state-dir", state_rel, *org_scope_args, "--json"]) if org_snapshot_id else {}
+    personal_bundle = _payload(transcripts["personal_bundle_create"]).get("evidence_bundle", {})
+    org_bundle = _payload(transcripts["org_bundle_create"]).get("evidence_bundle", {})
+    personal_bundle_id = personal_bundle.get("evidence_bundle_id", "")
+    org_bundle_id = org_bundle.get("evidence_bundle_id", "")
+
+    transcripts["personal_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            personal_bundle_id,
+            "--statement",
+            "Personal governance alpha belongs only to the personal workspace.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if personal_bundle_id else {}
+    transcripts["org_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            org_bundle_id,
+            "--statement",
+            "Organization governance beta belongs only to the organization workspace.",
+            "--state-dir",
+            state_rel,
+            *org_scope_args,
+            "--json",
+        ],
+    ) if org_bundle_id else {}
+    personal_claim = _payload(transcripts["personal_claim_create"]).get("claim", {})
+    org_claim = _payload(transcripts["org_claim_create"]).get("claim", {})
+    personal_claim_id = personal_claim.get("claim_id", "")
+    org_claim_id = org_claim.get("claim_id", "")
+    transcripts["personal_claim_approve"] = _run_cli_json(root, ["claim", "approve", personal_claim_id, "--state-dir", state_rel, "--json"]) if personal_claim_id else {}
+    transcripts["org_claim_approve"] = _run_cli_json(root, ["claim", "approve", org_claim_id, "--state-dir", state_rel, *org_scope_args, "--json"]) if org_claim_id else {}
+    approved_org_claim = _payload(transcripts["org_claim_approve"]).get("claim", {})
+
+    transcripts["personal_memory_create"] = _run_cli_json(
+        root,
+        [
+            "memory",
+            "create",
+            "--evidence-bundle-id",
+            personal_bundle_id,
+            "--statement",
+            "Owner-approved personal memory: personal-governance-alpha remains personal unless explicitly promoted.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if personal_bundle_id else {}
+    transcripts["org_memory_create"] = _run_cli_json(
+        root,
+        [
+            "memory",
+            "create",
+            "--evidence-bundle-id",
+            org_bundle_id,
+            "--statement",
+            "Owner-approved organization memory: org-governance-beta remains organization-only unless explicitly referenced.",
+            "--state-dir",
+            state_rel,
+            *org_scope_args,
+            "--json",
+        ],
+    ) if org_bundle_id else {}
+    personal_memory = _payload(transcripts["personal_memory_create"]).get("memory", {})
+    org_memory = _payload(transcripts["org_memory_create"]).get("memory", {})
+    personal_memory_id = personal_memory.get("memory_id", "")
+    org_memory_id = org_memory.get("memory_id", "")
+
+    transcripts["org_artifact_show"] = _run_cli_json(root, ["artifact", "show", org_artifact_id, "--state-dir", state_rel, *org_scope_args, "--json"]) if org_artifact_id else {}
+    transcripts["org_memory_show"] = _run_cli_json(root, ["memory", "show", org_memory_id, "--state-dir", state_rel, *org_scope_args, "--json"]) if org_memory_id else {}
+    transcripts["claim_basis_export"] = _run_cli_json(root, ["claim", "basis-export", org_claim_id, "--state-dir", state_rel, *org_scope_args, "--json"]) if org_claim_id else {}
+    transcripts["source_readonly_test"] = _run_cli_json(root, ["source", "readonly-test", "--artifact-id", org_artifact_id, "--source-system", "mock://readonly-crm", "--state-dir", state_rel, *org_scope_args, "--json"]) if org_artifact_id else {}
+
+    classification_cases = {
+        "member_search_internal_allowed": ["--principal-id", "member-search", "--principal-role", "org_member", "--action", "search", "--resource-kind", "artifact", "--resource-id", org_artifact_id or "artifact", "--classification", "internal", "--mission-authority", "active"],
+        "approver_summarize_confidential_allowed": ["--principal-id", "approver-summary", "--principal-role", "org_approver", "--action", "summarize", "--resource-kind", "artifact", "--resource-id", org_artifact_id or "artifact", "--classification", "confidential", "--mission-authority", "active"],
+        "admin_extract_restricted_allowed": ["--principal-id", "admin-extract", "--principal-role", "org_admin", "--principal-attributes", "clearance:restricted", "--action", "extract_memory", "--resource-kind", "artifact", "--resource-id", org_artifact_id or "artifact", "--classification", "restricted", "--mission-authority", "active"],
+        "member_use_restricted_denied": ["--principal-id", "member-action", "--principal-role", "org_member", "--action", "use_in_action", "--resource-kind", "artifact", "--resource-id", org_artifact_id or "artifact", "--classification", "restricted", "--mission-authority", "active"],
+        "admin_secret_denied": ["--principal-id", "admin-secret", "--principal-role", "org_admin", "--principal-attributes", "clearance:restricted", "--action", "read", "--resource-kind", "artifact", "--resource-id", org_artifact_id or "artifact", "--classification", "secret", "--mission-authority", "active"],
+    }
+    classification_allow = {"member_search_internal_allowed", "approver_summarize_confidential_allowed", "admin_extract_restricted_allowed"}
+    for name, args in classification_cases.items():
+        transcripts[f"classification_{name}"] = _run_cli_json(root, ["access", "evaluate", *args, "--state-dir", state_rel, *org_scope_args, "--json"])
+
+    org_policy_cases = {
+        "admin_read_restricted_allowed": ["--principal-id", "admin-read", "--principal-role", "org_admin", "--principal-attributes", "clearance:restricted", "--action", "read", "--resource-kind", "memory", "--resource-id", org_memory_id or "memory", "--classification", "restricted", "--mission-authority", "active"],
+        "member_write_internal_allowed": ["--principal-id", "member-write", "--principal-role", "org_member", "--action", "write", "--resource-kind", "memory", "--resource-id", org_memory_id or "memory", "--classification", "internal", "--mission-authority", "active"],
+        "admin_promote_restricted_allowed": ["--principal-id", "admin-promote", "--principal-role", "org_admin", "--principal-attributes", "clearance:restricted", "--action", "promote", "--resource-kind", "memory", "--resource-id", org_memory_id or "memory", "--classification", "restricted", "--mission-authority", "active"],
+        "approver_approve_confidential_allowed": ["--principal-id", "approver-claim", "--principal-role", "org_approver", "--action", "approve", "--resource-kind", "claim", "--resource-id", org_claim_id or "claim", "--classification", "confidential", "--mission-authority", "active"],
+        "member_execute_active_allowed": ["--principal-id", "member-execute", "--principal-role", "org_member", "--action", "execute", "--resource-kind", "action", "--resource-id", "internal-action", "--classification", "internal", "--mission-authority", "active"],
+        "admin_configure_autopilot_allowed": ["--principal-id", "admin-autopilot", "--principal-role", "org_admin", "--action", "configure_autopilot", "--resource-kind", "workspace_policy", "--resource-id", "autopilot", "--classification", "internal", "--mission-authority", "active"],
+        "admin_install_pack_allowed": ["--principal-id", "admin-pack", "--principal-role", "org_admin", "--action", "install_pack", "--resource-kind", "agent_pack", "--resource-id", "pack-local", "--classification", "internal", "--mission-authority", "active"],
+        "admin_aggregate_learning_allowed": ["--principal-id", "admin-learning", "--principal-role", "org_admin", "--action", "aggregate_learning", "--resource-kind", "learning_signal", "--resource-id", "aggregate-local", "--classification", "internal", "--mission-authority", "active"],
+        "member_configure_autopilot_denied": ["--principal-id", "member-autopilot", "--principal-role", "org_member", "--action", "configure_autopilot", "--resource-kind", "workspace_policy", "--resource-id", "autopilot", "--classification", "internal", "--mission-authority", "active"],
+        "member_install_pack_denied": ["--principal-id", "member-pack", "--principal-role", "org_member", "--action", "install_pack", "--resource-kind", "agent_pack", "--resource-id", "pack-local", "--classification", "internal", "--mission-authority", "active"],
+        "member_aggregate_learning_denied": ["--principal-id", "member-learning", "--principal-role", "org_member", "--action", "aggregate_learning", "--resource-kind", "learning_signal", "--resource-id", "aggregate-local", "--classification", "internal", "--mission-authority", "active"],
+    }
+    org_policy_allow = {
+        "admin_read_restricted_allowed",
+        "member_write_internal_allowed",
+        "admin_promote_restricted_allowed",
+        "approver_approve_confidential_allowed",
+        "member_execute_active_allowed",
+        "admin_configure_autopilot_allowed",
+        "admin_install_pack_allowed",
+        "admin_aggregate_learning_allowed",
+    }
+    for name, args in org_policy_cases.items():
+        transcripts[f"org_policy_{name}"] = _run_cli_json(root, ["access", "evaluate", *args, "--state-dir", state_rel, *org_scope_args, "--json"])
+
+    promotion_modes = ["copy_with_provenance", "reference", "share", "promote_to_approved_truth"]
+    for mode in promotion_modes:
+        transcripts[f"namespace_promote_{mode}"] = _run_cli_json(
+            root,
+            [
+                "namespace",
+                "promote",
+                "--source-kind",
+                "memory",
+                "--source-id",
+                personal_memory_id,
+                "--target-owner-id",
+                "local-org",
+                "--target-namespace-id",
+                "organization",
+                "--target-workspace-id",
+                "ops",
+                "--mode",
+                mode,
+                "--state-dir",
+                state_rel,
+                "--json",
+            ],
+        ) if personal_memory_id else {}
+    promotions = {mode: _payload(transcripts[f"namespace_promote_{mode}"]).get("namespace_promotion", {}) for mode in promotion_modes}
+
+    transcripts["org_answer_after_personal_copy"] = _run_cli_json(root, ["memory", "answer", "--question", "What does personal-governance-alpha say?", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["personal_answer"] = _run_cli_json(root, ["memory", "answer", "--question", "What does personal-governance-alpha say?", "--state-dir", state_rel, "--json"])
+    transcripts["personal_answer_org_phrase"] = _run_cli_json(root, ["memory", "answer", "--question", "What does org-governance-beta say?", "--state-dir", state_rel, "--json"])
+
+    transcripts["wrong_namespace_promote"] = _run_cli_json(
+        root,
+        [
+            "namespace",
+            "promote",
+            "--source-kind",
+            "memory",
+            "--source-id",
+            personal_memory_id,
+            "--target-owner-id",
+            "local-org",
+            "--target-namespace-id",
+            "organization",
+            "--target-workspace-id",
+            "wrong-space",
+            "--mode",
+            "copy_with_provenance",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if personal_memory_id else {}
+    wrong_promotion = _payload(transcripts["wrong_namespace_promote"]).get("namespace_promotion", {})
+    wrong_promotion_id = wrong_promotion.get("promotion_id", "")
+    transcripts["namespace_recovery_test"] = _run_cli_json(
+        root,
+        ["namespace", "recovery-test", "--promotion-id", wrong_promotion_id, "--reason", "wrong workspace selected during promotion", "--state-dir", state_rel, *wrong_org_scope_args, "--json"],
+    ) if wrong_promotion_id else {}
+
+    transcripts["tenant_b_show_org_artifact"] = _run_cli_json(root, ["artifact", "show", org_artifact_id, "--state-dir", state_rel, *tenant_b_scope_args, "--json"]) if org_artifact_id else {}
+    transcripts["tenant_b_answer_org_phrase"] = _run_cli_json(root, ["memory", "answer", "--question", "What does org-governance-beta say?", "--state-dir", state_rel, *tenant_b_scope_args, "--json"])
+
+    transcripts["mission_create"] = _run_cli_json(root, ["mission", "create", "--goal", "Record namespace audit action proof", "--claim-id", org_claim_id, "--state-dir", state_rel, *org_scope_args, "--json"]) if org_claim_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["mission_activate"] = _run_cli_json(root, ["mission", "activate", mission_id, "--mode", "autopilot", "--state-dir", state_rel, *org_scope_args, "--json"]) if mission_id else {}
+    transcripts["action_propose"] = _run_cli_json(root, ["action", "propose", "--mission-id", mission_id, "--claim-id", org_claim_id, "--goal", "Update local namespace status", "--action-kind", "internal_status_update", "--risk", "low", "--state-dir", state_rel, *org_scope_args, "--json"]) if mission_id and org_claim_id else {}
+    action_id = _payload(transcripts["action_propose"]).get("ids", {}).get("action_id", "")
+    transcripts["action_execute"] = _run_cli_json(root, ["action", "execute", action_id, "--state-dir", state_rel, *org_scope_args, "--json"]) if action_id else {}
+    transcripts["learning_record"] = _run_cli_json(root, ["learning", "record", "--action-id", action_id, "--lesson", "Namespace audit proof stays local and evidence-backed.", "--state-dir", state_rel, *org_scope_args, "--json"]) if action_id else {}
+    transcripts["brain_route"] = _run_cli_json(root, ["brain", "route", "--task", "namespace audit review", "--task-type", "planning", "--mission-type", "safety_sensitive", "--sensitivity", "restricted", "--risk", "safety_sensitive", "--dry-run", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["agent_list"] = _run_cli_json(root, ["agent", "list", "--state-dir", state_rel, *org_scope_args, "--json"])
+
+    transcripts["product_learning_boundary"] = _run_cli_json(root, ["namespace", "product-learning-boundary-test", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["retention_explain"] = _run_cli_json(root, ["security", "retention-explain", "--resource-type", "workspace", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["namespace_audit_export"] = _run_cli_json(root, ["namespace", "audit-export", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    personal_cross_org = _payload(transcripts["personal_cross_org_search"]).get("search_snapshot", {})
+    org_cross_personal = _payload(transcripts["org_cross_personal_search"]).get("search_snapshot", {})
+    tenant_b_cross_org = _payload(transcripts["tenant_b_cross_org_search"]).get("search_snapshot", {})
+    claim_basis = _payload(transcripts["claim_basis_export"]).get("claim_basis_export", {})
+    source_safety = _payload(transcripts["source_readonly_test"]).get("source_safety", {})
+    classification_decisions = {name: _payload(transcripts[f"classification_{name}"]).get("access_decision", {}) for name in classification_cases}
+    org_policy_decisions = {name: _payload(transcripts[f"org_policy_{name}"]).get("access_decision", {}) for name in org_policy_cases}
+    product_boundary = _payload(transcripts["product_learning_boundary"]).get("product_learning_boundary", {})
+    retention = _payload(transcripts["retention_explain"]).get("retention_explanation", {})
+    recovery = _payload(transcripts["namespace_recovery_test"]).get("namespace_recovery", {})
+    audit_export = _payload(transcripts["namespace_audit_export"]).get("namespace_audit_export", {})
+    audit_events = _audit_events(root, state_rel)
+    event_types = [event.get("event_type") for event in audit_events]
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+
+    arch_010_ok = (
+        _exit_ok(transcripts["ingest_personal"])
+        and _exit_ok(transcripts["ingest_org"])
+        and _exit_ok(transcripts["personal_search"])
+        and _exit_ok(transcripts["org_search"])
+        and personal_artifact.get("scope", {}).get("namespace_id") == "personal"
+        and org_artifact.get("scope", {}).get("namespace_id") == "organization"
+        and personal_snapshot.get("result_count") == 1
+        and org_snapshot.get("result_count") == 1
+        and personal_cross_org.get("result_count") == 0
+        and org_cross_personal.get("result_count") == 0
+        and _exit_ok(transcripts["org_answer_after_personal_copy"])
+        and audit_ok
+    )
+    classification_ok = (
+        all(_exit_ok(transcripts[f"classification_{name}"]) for name in classification_allow)
+        and all(_policy_denied(transcripts[f"classification_{name}"], "CS_ACCESS_POLICY_DENIED") for name in set(classification_cases) - classification_allow)
+        and {decision.get("decision") for name, decision in classification_decisions.items() if name in classification_allow} == {"allow"}
+        and {decision.get("decision") for name, decision in classification_decisions.items() if name not in classification_allow} == {"deny"}
+        and {"search", "summarize", "extract_memory", "use_in_action", "read"}.issubset({decision.get("action") for decision in classification_decisions.values()})
+        and {"internal", "confidential", "restricted", "secret"}.issubset({decision.get("resource", {}).get("classification") for decision in classification_decisions.values()})
+        and all(_payload(transcripts[f"classification_{name}"]).get("audit_refs") for name in classification_cases)
+        and audit_ok
+    )
+    basis_ok = (
+        _exit_ok(transcripts["claim_basis_export"])
+        and claim_basis.get("status") == "ready"
+        and claim_basis.get("owner_approval", {}).get("approved") is True
+        and claim_basis.get("freshness", {}).get("reproducible_from_archive") is True
+        and bool(claim_basis.get("source_artifacts"))
+        and bool(claim_basis.get("search_snapshot", {}).get("search_snapshot_id"))
+        and bool(claim_basis.get("evidence_bundle", {}).get("evidence_bundle_id"))
+        and audit_ok
+    )
+    source_readonly_ok = (
+        _exit_ok(transcripts["source_readonly_test"])
+        and source_safety.get("status") == "verified"
+        and source_safety.get("source_write_events") == 0
+        and source_safety.get("connector_boundary", {}).get("direct_writeback_allowed") is False
+        and source_safety.get("explicit_action_workflow_required_for_mutation") is True
+        and audit_ok
+    )
+    modes_ok = (
+        all(_exit_ok(transcripts[f"namespace_promote_{mode}"]) for mode in promotion_modes)
+        and set(promotions) == set(promotion_modes)
+        and {promotion.get("mode") for promotion in promotions.values()} == set(promotion_modes)
+        and promotions["copy_with_provenance"].get("target", {}).get("materialized") is True
+        and promotions["promote_to_approved_truth"].get("target", {}).get("materialized") is True
+        and promotions["reference"].get("target", {}).get("materialized") is False
+        and promotions["share"].get("target", {}).get("materialized") is False
+        and promotions["reference"].get("mode_behavior", {}).get("source_owner_retains_original") is True
+        and promotions["share"].get("mode_behavior", {}).get("can_influence_answers") is False
+        and audit_ok
+    )
+    required_org_actions = {"read", "write", "promote", "approve", "execute", "configure_autopilot", "install_pack", "aggregate_learning"}
+    org_policy_ok = (
+        all(_exit_ok(transcripts[f"org_policy_{name}"]) for name in org_policy_allow)
+        and all(_policy_denied(transcripts[f"org_policy_{name}"], "CS_ACCESS_POLICY_DENIED") for name in set(org_policy_cases) - org_policy_allow)
+        and required_org_actions.issubset({decision.get("action") for decision in org_policy_decisions.values()})
+        and {decision.get("principal", {}).get("role") for decision in org_policy_decisions.values()}.issuperset({"org_admin", "org_member", "org_approver"})
+        and audit_ok
+    )
+    personal_answer = _payload(transcripts["personal_answer"]).get("memory_answer", {})
+    reverse_leak_answer = _payload(transcripts["personal_answer_org_phrase"]).get("memory_answer", {})
+    personal_ownership_ok = (
+        _exit_ok(transcripts["personal_claim_approve"])
+        and _exit_ok(transcripts["personal_memory_create"])
+        and personal_claim.get("scope", {}).get("namespace_id") == "personal"
+        and personal_memory.get("scope", {}).get("namespace_id") == "personal"
+        and _exit_ok(transcripts["personal_answer"])
+        and personal_answer.get("used_memory_refs") == [f"memory:{personal_memory_id}"]
+        and modes_ok
+        and audit_ok
+    )
+    product_learning_ok = (
+        _exit_ok(transcripts["product_learning_boundary"])
+        and product_boundary.get("status") == "enforced"
+        and {check.get("decision") for check in product_boundary.get("policy_checks", []) if "raw_" in str(check.get("check"))} == {"deny"}
+        and product_boundary.get("raw_truth_records_read") == 0
+        and product_boundary.get("user_or_org_memory_rewrites") == 0
+        and product_boundary.get("proposal_data_only") is True
+        and all(record.get("changes_user_or_org_truth") is False for record in product_boundary.get("learning_records", []))
+        and audit_ok
+    )
+    cross_tenant_ok = (
+        _exit_ok(transcripts["ingest_tenant_b"])
+        and tenant_b_artifact.get("scope", {}).get("tenant_id") == "tenant-b"
+        and tenant_b_cross_org.get("result_count") == 0
+        and transcripts["tenant_b_show_org_artifact"].get("exit_code") == 3
+        and _payload(transcripts["tenant_b_answer_org_phrase"]).get("memory_answer", {}).get("status") == "insufficient_evidence"
+        and _payload(transcripts["tenant_b_answer_org_phrase"]).get("memory_answer", {}).get("used_memory_refs") == []
+        and audit_ok
+    )
+    audit_coverage = audit_export.get("coverage", {})
+    namespace_audit_ok = (
+        _exit_ok(transcripts["namespace_audit_export"])
+        and audit_export.get("status") == "ready"
+        and audit_export.get("event_count", 0) >= 12
+        and all(audit_coverage.get(key) is True for key in ["data_access", "memory_writes", "promotions", "approvals", "actions", "model_routing", "agent_activity", "learning_events"])
+        and audit_ok
+    )
+    retention_ok = (
+        _exit_ok(transcripts["retention_explain"])
+        and retention.get("status") == "explained"
+        and retention.get("dry_run") is True
+        and retention.get("audit_retained") is True
+        and retention.get("immutable_evidence_retained_when_required") is True
+        and {"deleted", "disabled", "retained_for_audit", "retained_as_immutable_evidence", "anonymized", "subject_to_policy"}.issubset(set(retention.get("states", {})))
+        and audit_ok
+    )
+    recovery_ok = (
+        _exit_ok(transcripts["namespace_recovery_test"])
+        and recovery.get("status") == "recovered"
+        and recovery.get("revocation", {}).get("applied") is True
+        and recovery.get("revocation", {}).get("future_answer_use_disabled") is True
+        and recovery.get("retention", {}).get("audit_retained") is True
+        and recovery.get("retention", {}).get("promotion_record_retained") is True
+        and audit_ok
+    )
+    reverse_leak_ok = (
+        transcripts["personal_answer_org_phrase"].get("exit_code") == 4
+        and reverse_leak_answer.get("status") == "insufficient_evidence"
+        and reverse_leak_answer.get("used_memory_refs") == []
+        and reverse_leak_answer.get("context_boundary", {}).get("implicit_cross_namespace_context") is False
+        and audit_ok
+    )
+
+    denied_classification_allows = sum(
+        1
+        for name in set(classification_cases) - classification_allow
+        if classification_decisions[name].get("decision") == "allow"
+    )
+    denied_org_policy_allows = sum(
+        1
+        for name in set(org_policy_cases) - org_policy_allow
+        if org_policy_decisions[name].get("decision") == "allow"
+    )
+    external_calls = sum(int(decision.get("external_http_calls", 0) or 0) for decision in list(classification_decisions.values()) + list(org_policy_decisions.values()))
+    secret_reads = sum(int(decision.get("secret_reads", 0) or 0) for decision in list(classification_decisions.values()) + list(org_policy_decisions.values()))
+    negative_evidence = {
+        "cross_namespace_search_results": int(personal_cross_org.get("result_count", 0) or 0) + int(org_cross_personal.get("result_count", 0) or 0),
+        "classification_denied_access_allowed": denied_classification_allows,
+        "org_policy_denied_access_allowed": denied_org_policy_allows,
+        "source_write_events": int(source_safety.get("source_write_events", 1) or 0),
+        "tenant_b_org_search_results": int(tenant_b_cross_org.get("result_count", 0) or 0),
+        "tenant_b_org_memory_refs_used": len(_payload(transcripts["tenant_b_answer_org_phrase"]).get("memory_answer", {}).get("used_memory_refs", [])),
+        "reverse_org_context_leak_refs": len(reverse_leak_answer.get("used_memory_refs", [])),
+        "product_learning_raw_truth_reads": int(product_boundary.get("raw_truth_records_read", 1) or 0),
+        "product_learning_user_org_rewrites": int(product_boundary.get("user_or_org_memory_rewrites", 1) or 0),
+        "audit_missing_categories": sum(1 for key in ["data_access", "memory_writes", "promotions", "approvals", "actions", "model_routing", "agent_activity", "learning_events"] if audit_coverage.get(key) is not True),
+        "recovery_future_answer_use_enabled": 0 if recovery.get("revocation", {}).get("future_answer_use_disabled") is True else 1,
+        "real_external_http_calls": external_calls,
+        "secret_reads": secret_reads,
+    }
+
+    rows = [
+        _row("CS-ARCH-010", "MUST_PASS", "PASS" if arch_010_ok else "FAIL", ["cornerstone search query <phrase> --owner-id <owner> --namespace-id <namespace> --json", "cornerstone memory answer --question <question> --json"], "Personal and organization artifacts, evidence, memory, and answers stay in the active owner-scoped namespace unless explicitly promoted."),
+        _row("CS-ARCH-011", "MUST_PASS", "PASS" if classification_ok else "FAIL", ["cornerstone access evaluate --action search|summarize|extract_memory|use_in_action --classification <class> --json"], "Classification policy covers read/search/summarize/memory extraction/action-use verbs with allow and deny outcomes plus audit refs."),
+        _row("CS-ARCH-013", "MUST_PASS", "PASS" if basis_ok else "FAIL", ["cornerstone claim basis-export <claim_id> --json"], "Claim basis export includes source artifacts, search snapshot, evidence bundle, transformations, owner approval, and freshness state."),
+        _row("CS-ARCH-014", "MUST_PASS", "PASS" if source_readonly_ok else "FAIL", ["cornerstone source readonly-test --artifact-id <artifact_id> --json"], "Read-only source ingestion records zero source writeback events and requires Workflow/Action for mutation."),
+        _row("CS-NS-005", "MUST_PASS", "PASS" if modes_ok else "FAIL", ["cornerstone namespace promote --mode copy_with_provenance|reference|share|promote_to_approved_truth --json"], "Namespace promotion modes expose distinct ownership, materialization, permission, provenance, evidence, and audit behavior."),
+        _row("CS-NS-006", "MUST_PASS", "PASS" if org_policy_ok else "FAIL", ["cornerstone access evaluate --action read|write|promote|approve|execute|configure_autopilot|install_pack|aggregate_learning --json"], "Organization policy matrix governs organization users across read, write, promote, approve, execute, Autopilot configuration, Agent Pack installation, and learning aggregation."),
+        _row("CS-NS-007", "MUST_PASS", "PASS" if personal_ownership_ok else "FAIL", ["cornerstone memory answer --question <personal_question> --json", "cornerstone namespace promote --source-id <personal_memory_id> --json"], "Personal claim and memory stay personal by default and cross-namespace use requires explicit promotion records."),
+        _row("CS-NS-008", "MUST_PASS", "PASS" if product_learning_ok else "FAIL", ["cornerstone namespace product-learning-boundary-test --json"], "Product learning can use explicit/benchmark/opt-in/redacted inputs but records denied raw user/org truth reads and zero memory rewrites."),
+        _row("CS-NS-011", "MUST_PASS", "PASS" if cross_tenant_ok else "FAIL", ["cornerstone search query ... --tenant-id tenant-b --json", "cornerstone artifact show <org_artifact_id> --tenant-id tenant-b --json"], "Tenant B cannot search, read, answer from, or infer Tenant A organization artifacts/memory."),
+        _row("CS-NS-012", "MUST_PASS", "PASS" if namespace_audit_ok else "FAIL", ["cornerstone namespace audit-export --json"], "Namespace audit export includes data access, memory writes, promotions, approvals, actions, model routing, agent activity, and learning events."),
+        _row("CS-NS-013", "MUST_PASS", "PASS" if retention_ok else "FAIL", ["cornerstone security retention-explain --resource-type workspace --json"], "Workspace deletion/retention dry-run explains delete, disable, audit retention, immutable evidence retention, anonymization, and policy constraints."),
+        _row("CS-NS-014", "MUST_PASS", "PASS" if recovery_ok else "FAIL", ["cornerstone namespace recovery-test --promotion-id <promotion_id> --json"], "Mis-promotion recovery revokes future use, records rollback details, access trail, and retained audit/evidence constraints."),
+        _row("CS-REG-007", "REGRESSION_GUARD", "PASS" if reverse_leak_ok else "FAIL", ["cornerstone memory answer --question <organization_phrase> --json"], "Organization context is not used in personal answers without explicit permission or reference."),
+        _row("CS-REG-008", "REGRESSION_GUARD", "PASS" if product_learning_ok else "FAIL", ["cornerstone namespace product-learning-boundary-test --json"], "Product-learning signals remain proposal/evaluation data and do not rewrite user or organization memory."),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "full-namespace-governance",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_FULL_NAMESPACE_GOVERNANCE_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "namespace_governance_evidence": {
+            "personal_artifact_id": personal_artifact_id,
+            "organization_artifact_id": org_artifact_id,
+            "tenant_b_artifact_id": tenant_b_artifact.get("artifact_id"),
+            "personal_memory_id": personal_memory_id,
+            "organization_memory_id": org_memory_id,
+            "approved_org_claim_id": approved_org_claim.get("claim_id"),
+            "claim_basis_export_id": claim_basis.get("claim_basis_export_id"),
+            "source_safety_id": source_safety.get("source_safety_id"),
+            "promotion_modes": {mode: {"promotion_id": promotions[mode].get("promotion_id"), "materialized": promotions[mode].get("target", {}).get("materialized"), "mode_behavior": promotions[mode].get("mode_behavior")} for mode in promotion_modes},
+            "org_policy_actions": sorted({decision.get("action") for decision in org_policy_decisions.values()}),
+            "classification_actions": sorted({decision.get("action") for decision in classification_decisions.values()}),
+            "product_learning_boundary_id": product_boundary.get("product_learning_boundary_id"),
+            "namespace_audit_export_id": audit_export.get("namespace_audit_export_id"),
+            "audit_coverage": audit_coverage,
+            "retention_id": retention.get("retention_id"),
+            "recovery_id": recovery.get("recovery_id"),
+            "audit_event_count": len(audit_events),
+            "event_types": event_types,
+        },
+        "negative_evidence": negative_evidence,
+        "human_required": [],
+    }
+
+
 def verify_vs0_product_domain_readiness(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-product-domain-readiness")
     state_path = root / state_rel

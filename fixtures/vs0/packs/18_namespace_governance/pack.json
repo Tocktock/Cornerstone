@@ -1,0 +1,80 @@
+{
+  "id": "pack_18_namespace_governance",
+  "scenario_ids": [
+    "CS-ARCH-010",
+    "CS-ARCH-011",
+    "CS-ARCH-013",
+    "CS-ARCH-014",
+    "CS-NS-005",
+    "CS-NS-006",
+    "CS-NS-007",
+    "CS-NS-008",
+    "CS-NS-011",
+    "CS-NS-012",
+    "CS-NS-013",
+    "CS-NS-014",
+    "CS-REG-007",
+    "CS-REG-008"
+  ],
+  "classes": ["namespace", "archive", "access-policy", "audit", "retention", "product-learning"],
+  "inputs": [
+    {
+      "path": "personal.txt",
+      "media_type": "text/plain",
+      "trust": "trusted",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    },
+    {
+      "path": "organization.txt",
+      "media_type": "text/plain",
+      "trust": "trusted",
+      "owner_id": "local-org",
+      "namespace_id": "organization",
+      "workspace_id": "ops",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    },
+    {
+      "path": "tenant_b.txt",
+      "media_type": "text/plain",
+      "trust": "trusted",
+      "tenant_id": "tenant-b",
+      "owner_id": "tenant-b-owner",
+      "namespace_id": "organization",
+      "workspace_id": "ops",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    }
+  ],
+  "negative_evidence": {
+    "cross_namespace_results": 0,
+    "cross_namespace_search_results": 0,
+    "classification_denied_access_allowed": 0,
+    "org_policy_denied_access_allowed": 0,
+    "source_write_events": 0,
+    "tenant_b_org_search_results": 0,
+    "tenant_b_org_memory_refs_used": 0,
+    "reverse_org_context_leak_refs": 0,
+    "product_learning_raw_truth_reads": 0,
+    "product_learning_user_org_rewrites": 0,
+    "audit_missing_categories": 0,
+    "recovery_future_answer_use_enabled": 0,
+    "real_external_http_calls": 0,
+    "secret_reads": 0
+  },
+  "expected": {
+    "personal_and_organization_namespaces_isolated": true,
+    "classification_policy_covers_read_search_summarize_memory_action": true,
+    "claim_basis_reproducible": true,
+    "source_ingestion_read_only": true,
+    "promotion_modes_distinct": true,
+    "organization_policy_matrix_covers_core_actions": true,
+    "personal_spaces_owner_controlled": true,
+    "product_learning_raw_truth_denied_by_default": true,
+    "cross_tenant_isolation_enforced": true,
+    "namespace_audit_export_covers_key_events": true,
+    "retention_dry_run_policy_aware": true,
+    "boundary_recovery_available": true
+  }
+}

@@ -1,0 +1,3 @@
+personal-governance-alpha is a private personal workspace note.
+It should support personal claims and memories only in the personal namespace unless explicitly promoted.
+This fixture is synthetic and contains no secrets or live customer data.

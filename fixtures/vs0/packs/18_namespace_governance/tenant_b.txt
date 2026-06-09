@@ -1,0 +1,3 @@
+tenant-b-governance-gamma is an independent tenant fixture.
+It must not reveal tenant A personal or organization artifacts, memory, claims, missions, logs, or metadata.
+This fixture is synthetic and contains no secrets or live customer data.

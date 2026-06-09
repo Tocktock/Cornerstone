@@ -208,6 +208,26 @@
         "CS-SEC-020",
         "CS-REG-020"
       ]
+    },
+    {
+      "id": "pack_18_namespace_governance",
+      "path": "packs/18_namespace_governance/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-010",
+        "CS-ARCH-011",
+        "CS-ARCH-013",
+        "CS-ARCH-014",
+        "CS-NS-005",
+        "CS-NS-006",
+        "CS-NS-007",
+        "CS-NS-008",
+        "CS-NS-011",
+        "CS-NS-012",
+        "CS-NS-013",
+        "CS-NS-014",
+        "CS-REG-007",
+        "CS-REG-008"
+      ]
     }
   ]
 }

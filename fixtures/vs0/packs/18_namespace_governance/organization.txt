@@ -1,0 +1,3 @@
+org-governance-beta is an organization workspace note captured from a mocked read-only source.
+It should support organization claims, memory, actions, and audit records only in the organization namespace.
+This fixture is synthetic and contains no secrets or live customer data.

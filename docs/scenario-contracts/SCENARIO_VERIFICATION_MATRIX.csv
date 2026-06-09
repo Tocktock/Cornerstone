@@ -18,11 +18,11 @@ CS-ARCH-006,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security --j
 CS-ARCH-007,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security --json,reports/scenario/vs0-security-2026-06-09.json,,,,,PASS
 CS-ARCH-008,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-search-evidence --json,reports/scenario/vs0-search-evidence-2026-06-09.json,,,,,PASS
 CS-ARCH-009,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-search-evidence --json,reports/scenario/vs0-search-evidence-2026-06-09.json,,,,,PASS
-CS-ARCH-010,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-010 --json,reports/scenario/cs-arch-010.json,,,,,NOT_VERIFIED
-CS-ARCH-011,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-011 --json,reports/scenario/cs-arch-011.json,,,,,NOT_VERIFIED
+CS-ARCH-010,MUST_PASS,true,D,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
+CS-ARCH-011,MUST_PASS,true,D,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
 CS-ARCH-012,MUST_PASS,true,D,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
-CS-ARCH-013,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-013 --json,reports/scenario/cs-arch-013.json,,,,,NOT_VERIFIED
-CS-ARCH-014,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-014 --json,reports/scenario/cs-arch-014.json,,,,,NOT_VERIFIED
+CS-ARCH-013,MUST_PASS,true,D,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
+CS-ARCH-014,MUST_PASS,true,D,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
 CS-UND-001,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-evidence --json,reports/scenario/vs0-search-evidence-2026-06-09.json,,,,,PASS
 CS-UND-002,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-understanding --json,reports/scenario/vs0-search-understanding-2026-06-09.json,,,,,PASS
 CS-UND-003,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-understanding --json,reports/scenario/vs0-search-understanding-2026-06-09.json,,,,,PASS
@@ -71,16 +71,16 @@ CS-NS-001,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-namespace-isolat
 CS-NS-002,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-detail-surfaces --json,reports/scenario/vs0-detail-surfaces-2026-06-09.json,,,,,PASS
 CS-NS-003,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-namespace-isolation --json,reports/scenario/vs0-namespace-isolation-2026-06-09.json,,,,,PASS
 CS-NS-004,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-tenant-security-boundary --json,reports/scenario/vs0-tenant-security-boundary-2026-06-09.json,,,,,PASS
-CS-NS-005,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-005 --json,reports/scenario/cs-ns-005.json,,,,,NOT_VERIFIED
-CS-NS-006,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-006 --json,reports/scenario/cs-ns-006.json,,,,,NOT_VERIFIED
-CS-NS-007,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-007 --json,reports/scenario/cs-ns-007.json,,,,,NOT_VERIFIED
-CS-NS-008,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-008 --json,reports/scenario/cs-ns-008.json,,,,,NOT_VERIFIED
+CS-NS-005,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
+CS-NS-006,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
+CS-NS-007,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
+CS-NS-008,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
 CS-NS-009,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
 CS-NS-010,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
-CS-NS-011,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-011 --json,reports/scenario/cs-ns-011.json,,,,,NOT_VERIFIED
-CS-NS-012,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-012 --json,reports/scenario/cs-ns-012.json,,,,,NOT_VERIFIED
-CS-NS-013,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-013 --json,reports/scenario/cs-ns-013.json,,,,,NOT_VERIFIED
-CS-NS-014,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-014 --json,reports/scenario/cs-ns-014.json,,,,,NOT_VERIFIED
+CS-NS-011,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
+CS-NS-012,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
+CS-NS-013,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
+CS-NS-014,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
 CS-AUTO-001,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-AUTO-002,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-product-domain-readiness --json,reports/scenario/vs0-product-domain-readiness-2026-06-09.json,,,,,PASS
 CS-AUTO-003,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
@@ -191,8 +191,8 @@ CS-REG-003,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-missio
 CS-REG-004,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-universal-core --json,reports/scenario/vs0-universal-core-2026-06-09.json,,,,,PASS
 CS-REG-005,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-memory-truth-boundary --json,reports/scenario/vs0-memory-truth-boundary-2026-06-09.json,,,,,PASS
 CS-REG-006,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0-tenant-security-boundary --json,reports/scenario/vs0-tenant-security-boundary-2026-06-09.json,,,,,PASS
-CS-REG-007,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-007 --json,reports/scenario/cs-reg-007.json,,,,,NOT_VERIFIED
-CS-REG-008,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-008 --json,reports/scenario/cs-reg-008.json,,,,,NOT_VERIFIED
+CS-REG-007,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
+CS-REG-008,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full-namespace-governance --json,reports/scenario/full-namespace-governance-2026-06-10.json,,,,,PASS
 CS-REG-009,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
 CS-REG-010,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
 CS-REG-011,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS

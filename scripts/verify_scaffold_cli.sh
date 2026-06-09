@@ -46,7 +46,8 @@ extension_ecosystem_json=$(mktemp)
 agent_orchestration_json=$(mktemp)
 brain_routing_json=$(mktemp)
 security_operations_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json" "$agent_orchestration_json" "$brain_routing_json" "$security_operations_json"' EXIT
+namespace_governance_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json" "$agent_orchestration_json" "$brain_routing_json" "$security_operations_json" "$namespace_governance_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -648,6 +649,51 @@ grep -q '"external_http_calls": 0' "$security_operations_json" || fail "full-sec
 grep -q '"audit_verify_failed": 0' "$security_operations_json" || fail "full-security-operations failed audit verification"
 grep -q '"product_feature_claims": "PARTIAL_FULL_SECURITY_OPERATIONS_ONLY"' "$security_operations_json" || fail "full-security-operations overclaimed product feature scope"
 
+cornerstone scenario verify full-namespace-governance --json > "$namespace_governance_json"
+python3 -m json.tool "$namespace_governance_json" >/dev/null
+grep -q '"scenario_set": "full-namespace-governance"' "$namespace_governance_json" || fail "full-namespace-governance report missing scenario set"
+grep -q '"blocking": 0' "$namespace_governance_json" || fail "full-namespace-governance report has blocking scenarios"
+grep -q '"pass": 14' "$namespace_governance_json" || fail "full-namespace-governance did not pass exactly fourteen scenarios"
+for scenario_id in CS-ARCH-010 CS-ARCH-011 CS-ARCH-013 CS-ARCH-014 CS-NS-005 CS-NS-006 CS-NS-007 CS-NS-008 CS-NS-011 CS-NS-012 CS-NS-013 CS-NS-014 CS-REG-007 CS-REG-008; do
+  grep -q "\"id\": \"$scenario_id\"" "$namespace_governance_json" || fail "full-namespace-governance missing $scenario_id"
+done
+grep -q '"claim_basis_export_id": "claimbasis_' "$namespace_governance_json" || fail "full-namespace-governance missing claim basis export"
+grep -q '"source_safety_id": "srcsafe_' "$namespace_governance_json" || fail "full-namespace-governance missing source safety proof"
+grep -q '"namespace_audit_export_id": "nsaudit_' "$namespace_governance_json" || fail "full-namespace-governance missing namespace audit export"
+grep -q '"retention_id": "retention_' "$namespace_governance_json" || fail "full-namespace-governance missing retention dry-run"
+grep -q '"recovery_id": "nsrecover_' "$namespace_governance_json" || fail "full-namespace-governance missing recovery proof"
+grep -q '"copy_with_provenance"' "$namespace_governance_json" || fail "full-namespace-governance missing copy promotion mode"
+grep -q '"reference"' "$namespace_governance_json" || fail "full-namespace-governance missing reference promotion mode"
+grep -q '"share"' "$namespace_governance_json" || fail "full-namespace-governance missing share promotion mode"
+grep -q '"promote_to_approved_truth"' "$namespace_governance_json" || fail "full-namespace-governance missing approved truth promotion mode"
+grep -q '"configure_autopilot"' "$namespace_governance_json" || fail "full-namespace-governance missing Autopilot policy action"
+grep -q '"install_pack"' "$namespace_governance_json" || fail "full-namespace-governance missing Agent Pack install policy action"
+grep -q '"aggregate_learning"' "$namespace_governance_json" || fail "full-namespace-governance missing learning aggregation policy action"
+grep -q '"extract_memory"' "$namespace_governance_json" || fail "full-namespace-governance missing memory extraction classification action"
+grep -q '"data_access": true' "$namespace_governance_json" || fail "full-namespace-governance missing data access audit coverage"
+grep -q '"memory_writes": true' "$namespace_governance_json" || fail "full-namespace-governance missing memory write audit coverage"
+grep -q '"promotions": true' "$namespace_governance_json" || fail "full-namespace-governance missing promotion audit coverage"
+grep -q '"approvals": true' "$namespace_governance_json" || fail "full-namespace-governance missing approval audit coverage"
+grep -q '"actions": true' "$namespace_governance_json" || fail "full-namespace-governance missing action audit coverage"
+grep -q '"model_routing": true' "$namespace_governance_json" || fail "full-namespace-governance missing model routing audit coverage"
+grep -q '"agent_activity": true' "$namespace_governance_json" || fail "full-namespace-governance missing agent activity audit coverage"
+grep -q '"learning_events": true' "$namespace_governance_json" || fail "full-namespace-governance missing learning audit coverage"
+grep -q '"cross_namespace_search_results": 0' "$namespace_governance_json" || fail "full-namespace-governance reported cross-namespace search results"
+grep -q '"classification_denied_access_allowed": 0' "$namespace_governance_json" || fail "full-namespace-governance allowed denied classification access"
+grep -q '"org_policy_denied_access_allowed": 0' "$namespace_governance_json" || fail "full-namespace-governance allowed denied org policy access"
+grep -q '"source_write_events": 0' "$namespace_governance_json" || fail "full-namespace-governance reported source write events"
+grep -q '"tenant_b_org_search_results": 0' "$namespace_governance_json" || fail "full-namespace-governance leaked org search to tenant B"
+grep -q '"tenant_b_org_memory_refs_used": 0' "$namespace_governance_json" || fail "full-namespace-governance leaked org memory to tenant B"
+grep -q '"reverse_org_context_leak_refs": 0' "$namespace_governance_json" || fail "full-namespace-governance leaked org context into personal"
+grep -q '"product_learning_raw_truth_reads": 0' "$namespace_governance_json" || fail "full-namespace-governance let product learning read raw truth"
+grep -q '"product_learning_user_org_rewrites": 0' "$namespace_governance_json" || fail "full-namespace-governance let product learning rewrite truth"
+grep -q '"audit_missing_categories": 0' "$namespace_governance_json" || fail "full-namespace-governance missed audit categories"
+grep -q '"recovery_future_answer_use_enabled": 0' "$namespace_governance_json" || fail "full-namespace-governance recovery left future answer use enabled"
+grep -q '"real_external_http_calls": 0' "$namespace_governance_json" || fail "full-namespace-governance reported external HTTP calls"
+grep -q '"secret_reads": 0' "$namespace_governance_json" || fail "full-namespace-governance read secrets"
+grep -q '"human_required": \[\]' "$namespace_governance_json" || fail "full-namespace-governance should have no human-required rows"
+grep -q '"product_feature_claims": "PARTIAL_FULL_NAMESPACE_GOVERNANCE_ONLY"' "$namespace_governance_json" || fail "full-namespace-governance overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -677,4 +723,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, full-agent-orchestration verify, full-brain-routing verify, full-security-operations verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, full-agent-orchestration verify, full-brain-routing verify, full-security-operations verify, full-namespace-governance verify, vs0-product-domain-readiness verify, unittest).\n'

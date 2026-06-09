@@ -345,6 +345,11 @@ class LocalRuntimeStore:
         self.staleness_dir = state_dir / "staleness"
         self.ontology_change_dir = state_dir / "ontology_changes"
         self.namespace_promotion_dir = state_dir / "namespace_promotions"
+        self.namespace_recovery_dir = state_dir / "namespace_recoveries"
+        self.namespace_audit_export_dir = state_dir / "namespace_audit_exports"
+        self.claim_basis_export_dir = state_dir / "claim_basis_exports"
+        self.source_safety_dir = state_dir / "source_safety"
+        self.product_learning_boundary_dir = state_dir / "product_learning_boundaries"
         self.access_decision_dir = state_dir / "access_decisions"
         self.learning_dir = state_dir / "learning"
         self.trajectory_dir = state_dir / "mission_trajectories"
@@ -549,6 +554,21 @@ class LocalRuntimeStore:
 
     def namespace_promotion_path(self, promotion_id: str) -> Path:
         return self.namespace_promotion_dir / f"{promotion_id}.json"
+
+    def namespace_recovery_path(self, recovery_id: str) -> Path:
+        return self.namespace_recovery_dir / f"{recovery_id}.json"
+
+    def namespace_audit_export_path(self, export_id: str) -> Path:
+        return self.namespace_audit_export_dir / f"{export_id}.json"
+
+    def claim_basis_export_path(self, export_id: str) -> Path:
+        return self.claim_basis_export_dir / f"{export_id}.json"
+
+    def source_safety_path(self, safety_id: str) -> Path:
+        return self.source_safety_dir / f"{safety_id}.json"
+
+    def product_learning_boundary_path(self, boundary_id: str) -> Path:
+        return self.product_learning_boundary_dir / f"{boundary_id}.json"
 
     def access_decision_path(self, decision_id: str) -> Path:
         return self.access_decision_dir / f"{decision_id}.json"
@@ -1102,6 +1122,20 @@ class LocalRuntimeStore:
             if target_scope == scope:
                 records.append(record)
         return records
+
+    def _all_namespace_promotion_records(self) -> list[dict[str, Any]]:
+        if not self.namespace_promotion_dir.exists():
+            return []
+        return [_read_json(path) for path in sorted(self.namespace_promotion_dir.glob("*.json"))]
+
+    def _all_audit_events(self) -> list[dict[str, Any]]:
+        if not self.audit_path.exists():
+            return []
+        events = []
+        for line in self.audit_path.read_text().splitlines():
+            if line.strip():
+                events.append(json.loads(line))
+        return events
 
     def _learning_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
         if not self.learning_dir.exists():
@@ -4231,7 +4265,8 @@ class LocalRuntimeStore:
         reason = "Access is allowed by the local deterministic RBAC/ABAC matrix."
         resolution_path = ["Proceed through the same scoped CLI path and audit ledger."]
         allowed_org_roles = {"org_admin", "org_approver", "org_member"}
-        read_write_actions = {"read", "write", "promote"}
+        read_write_actions = {"read", "write", "promote", "search", "summarize", "extract_memory", "use_in_action"}
+        admin_actions = {"configure", "configure_autopilot", "install_pack", "aggregate_learning"}
 
         if scope != resource_scope:
             decision = "deny"
@@ -4243,10 +4278,10 @@ class LocalRuntimeStore:
             policy = "organization_membership_required"
             reason = "Organization resources require an organization role in the active organization namespace."
             resolution_path = ["Request organization access or promote only through an approved namespace workflow."]
-        elif action == "configure" and principal_role != "org_admin":
+        elif action in admin_actions and principal_role != "org_admin":
             decision = "deny"
             policy = "configuration_requires_org_admin"
-            reason = "Policy or namespace configuration requires the org_admin role."
+            reason = "Policy, Autopilot, Agent Pack install, or aggregate learning configuration requires the org_admin role."
             resolution_path = ["Ask an organization admin to configure the policy or grant the needed role."]
         elif action == "approve" and principal_role not in {"org_admin", "org_approver"}:
             decision = "deny"
@@ -4270,7 +4305,9 @@ class LocalRuntimeStore:
             resolution_path = ["Request restricted clearance or reduce the resource classification."]
         elif action in read_write_actions and principal_role in allowed_org_roles | {"personal_user"}:
             decision = "allow"
-        elif action not in {"read", "write", "promote", "approve", "execute", "configure"}:
+        elif action in admin_actions and principal_role == "org_admin":
+            decision = "allow"
+        elif action not in {"read", "write", "promote", "search", "summarize", "extract_memory", "use_in_action", "approve", "execute", *admin_actions}:
             decision = "deny"
             policy = "unknown_action_denied"
             reason = "Unknown access actions are denied by default."
@@ -4352,6 +4389,261 @@ class LocalRuntimeStore:
         )
         return {"policy_decision": decision, "audit_event": event}
 
+    def export_claim_basis(self, claim_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        claim = self.get_claim(claim_id)
+        if claim is None:
+            return {"status": "not_found", "resource": "claim"}
+        if claim.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": claim.get("scope")}
+
+        evidence = claim.get("evidence_bundle", {})
+        bundle_id = evidence.get("evidence_bundle_id")
+        snapshot_id = evidence.get("search_snapshot_id")
+        bundle = self.get_evidence_bundle(bundle_id) if bundle_id else None
+        snapshot = self.get_search_snapshot(snapshot_id) if snapshot_id else None
+        artifact_records = []
+        for artifact_ref in evidence.get("artifact_refs", []):
+            artifact_id = str(artifact_ref).split("artifact:", 1)[-1]
+            artifact = self.get_artifact(artifact_id, scope)
+            if artifact is not None:
+                artifact_records.append(
+                    {
+                        "artifact_id": artifact_id,
+                        "scope": artifact.get("scope"),
+                        "source": artifact.get("source"),
+                        "original_storage_ref": artifact.get("original_storage_ref"),
+                        "derived_text_ref": artifact.get("derived", {}).get("text_ref"),
+                        "provenance": artifact.get("provenance"),
+                    }
+                )
+
+        audit_events = [
+            event
+            for event in self._all_audit_events()
+            if event.get("subject", {}).get("id") == claim_id
+            or event.get("details", {}).get("claim_id") == claim_id
+        ]
+        export_base = {
+            "schema_version": "cs.claim_basis_export.v0",
+            "status": "ready",
+            "scope": scope,
+            "claim_id": claim_id,
+            "claim_status": claim.get("status"),
+            "claim_trust_state": claim.get("trust_state"),
+            "statement": claim.get("statement"),
+            "source_artifacts": artifact_records,
+            "search_snapshot": {
+                "search_snapshot_id": snapshot_id,
+                "query": snapshot.get("query") if snapshot else None,
+                "filters": snapshot.get("filters") if snapshot else None,
+                "result_count": snapshot.get("result_count") if snapshot else 0,
+            },
+            "evidence_bundle": {
+                "evidence_bundle_id": bundle_id,
+                "evidence_item_count": len(bundle.get("evidence_items", [])) if bundle else 0,
+                "artifact_refs": evidence.get("artifact_refs", []),
+            },
+            "transformations": [
+                {
+                    "type": "artifact.derived_text",
+                    "status": "preserved",
+                    "artifact_id": artifact["artifact_id"],
+                    "derived_text_ref": artifact.get("derived_text_ref"),
+                }
+                for artifact in artifact_records
+            ],
+            "model_or_judge_records": {
+                "available": False,
+                "reason": "Local deterministic scaffold did not need an LLM judge for this claim.",
+            },
+            "owner_approval": {
+                "approved": claim.get("status") == "approved",
+                "approval_events": [
+                    {"event_id": event.get("event_id"), "event_type": event.get("event_type"), "occurred_at": event.get("occurred_at")}
+                    for event in audit_events
+                    if event.get("event_type") == "claim.approved"
+                ],
+            },
+            "freshness": {
+                "status": "current",
+                "validity_state": "inspectable",
+                "reproducible_from_archive": bool(bundle and snapshot and artifact_records),
+            },
+            "created_at": utc_now(),
+        }
+        export_id = f"claimbasis_{_json_hash(export_base)[:16]}"
+        export = dict(export_base)
+        export["claim_basis_export_id"] = export_id
+        _write_json(self.claim_basis_export_path(export_id), export)
+        event = self.append_audit(
+            "claim.basis.exported",
+            scope,
+            {"type": "claim_basis_export", "id": export_id},
+            {"claim_id": claim_id, "artifact_count": len(artifact_records), "approved": export["owner_approval"]["approved"]},
+        )
+        return {"claim_basis_export": export, "audit_event": event}
+
+    def verify_source_readonly_ingest(self, artifact_id: str, scope: dict[str, str], *, source_system: str) -> dict[str, Any]:
+        artifact = self.get_artifact(artifact_id, scope)
+        if artifact is None:
+            return {"status": "not_found", "resource": "artifact"}
+        if artifact.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": artifact.get("scope")}
+
+        safety_base = {
+            "schema_version": "cs.source_readonly_ingest_test.v0",
+            "status": "verified",
+            "scope": scope,
+            "artifact_id": artifact_id,
+            "source_system": source_system,
+            "source_record_ref": artifact.get("source", {}),
+            "ingestion_path": "archive_capture_only",
+            "source_write_events": 0,
+            "source_mutation_attempts": [],
+            "explicit_action_workflow_required_for_mutation": True,
+            "connector_boundary": {
+                "mocked_source": True,
+                "read_only_adapter": True,
+                "direct_writeback_allowed": False,
+                "workflow_action_required": True,
+                "external_http_calls": 0,
+                "secret_reads": 0,
+            },
+            "created_at": utc_now(),
+        }
+        safety_id = f"srcsafe_{_json_hash(safety_base)[:16]}"
+        safety = dict(safety_base)
+        safety["source_safety_id"] = safety_id
+        _write_json(self.source_safety_path(safety_id), safety)
+        event = self.append_audit(
+            "source.readonly_ingest.verified",
+            scope,
+            {"type": "source_readonly_ingest_test", "id": safety_id},
+            {"artifact_id": artifact_id, "source_write_events": 0, "workflow_action_required": True},
+        )
+        return {"source_safety": safety, "audit_event": event}
+
+    def query_namespace_audit(self, scope: dict[str, str], *, event_types: list[str] | None = None) -> dict[str, Any]:
+        selected = []
+        requested = set(event_types or [])
+        for event in self._all_audit_events():
+            event_scope = {
+                "tenant_id": event.get("tenant_id"),
+                "owner_id": event.get("owner_id"),
+                "namespace_id": event.get("namespace_id"),
+                "workspace_id": event.get("workspace_id"),
+            }
+            if event_scope != scope:
+                continue
+            if requested and event.get("event_type") not in requested:
+                continue
+            selected.append(
+                {
+                    "event_id": event.get("event_id"),
+                    "event_type": event.get("event_type"),
+                    "occurred_at": event.get("occurred_at"),
+                    "subject": event.get("subject"),
+                    "details": event.get("details"),
+                }
+            )
+        counts: dict[str, int] = {}
+        for event in selected:
+            event_type = str(event.get("event_type"))
+            counts[event_type] = counts.get(event_type, 0) + 1
+        export_base = {
+            "schema_version": "cs.namespace_audit_export.v0",
+            "status": "ready",
+            "scope": scope,
+            "format": "json",
+            "event_count": len(selected),
+            "event_type_counts": counts,
+            "events": selected,
+            "coverage": {
+                "data_access": any(event.get("event_type") in {"artifact.read", "evidence_bundle.read", "memory.read"} for event in selected),
+                "memory_writes": any(str(event.get("event_type", "")).startswith("memory.") for event in selected),
+                "promotions": any(event.get("event_type") == "namespace.promotion.created" for event in selected),
+                "approvals": any(event.get("event_type") == "claim.approved" for event in selected),
+                "actions": any(str(event.get("event_type", "")).startswith("action.") for event in selected),
+                "model_routing": any(str(event.get("event_type", "")).startswith("brain.") for event in selected),
+                "agent_activity": any(str(event.get("event_type", "")).startswith("agent.") for event in selected),
+                "learning_events": any("learning" in str(event.get("event_type", "")) for event in selected),
+            },
+            "created_at": utc_now(),
+        }
+        export_id = f"nsaudit_{_json_hash(export_base)[:16]}"
+        export = dict(export_base)
+        export["namespace_audit_export_id"] = export_id
+        _write_json(self.namespace_audit_export_path(export_id), export)
+        event = self.append_audit(
+            "namespace.audit.exported",
+            scope,
+            {"type": "namespace_audit_export", "id": export_id},
+            {"event_count": len(selected), "format": "json"},
+        )
+        return {"namespace_audit_export": export, "audit_event": event}
+
+    def check_product_learning_boundary(self, scope: dict[str, str]) -> dict[str, Any]:
+        scoped_learning = self._learning_records(scope)
+        boundary_base = {
+            "schema_version": "cs.product_learning_boundary.v0",
+            "status": "enforced",
+            "scope": scope,
+            "default_policy": "product_learning_raw_truth_deny_by_default",
+            "allowed_inputs": [
+                "explicit_feedback",
+                "benchmark_results",
+                "opt_in_aggregated_signals",
+                "redacted_approved_data",
+            ],
+            "denied_inputs": [
+                "raw_personal_memory",
+                "raw_organization_memory",
+                "private_artifacts",
+                "unapproved_claims",
+            ],
+            "policy_checks": [
+                {
+                    "check": "raw_personal_truth_read",
+                    "decision": "deny",
+                    "reason": "Product learning cannot silently consume personal truth.",
+                },
+                {
+                    "check": "raw_organization_truth_read",
+                    "decision": "deny",
+                    "reason": "Product learning cannot silently consume organization truth.",
+                },
+                {
+                    "check": "explicit_feedback",
+                    "decision": "allow",
+                    "reason": "Explicit feedback is allowed as proposal/evaluation data.",
+                },
+                {
+                    "check": "redacted_approved_data",
+                    "decision": "allow",
+                    "reason": "Approved redacted data can be used without rewriting user/org truth.",
+                },
+            ],
+            "learning_records": [
+                {"learning_id": record.get("learning_id"), "changes_user_or_org_truth": record.get("learning_boundary", {}).get("changes_user_or_org_truth")}
+                for record in scoped_learning
+            ],
+            "raw_truth_records_read": 0,
+            "user_or_org_memory_rewrites": 0,
+            "proposal_data_only": True,
+            "created_at": utc_now(),
+        }
+        boundary_id = f"plboundary_{_json_hash(boundary_base)[:16]}"
+        boundary = dict(boundary_base)
+        boundary["product_learning_boundary_id"] = boundary_id
+        _write_json(self.product_learning_boundary_path(boundary_id), boundary)
+        event = self.append_audit(
+            "product_learning.boundary.checked",
+            scope,
+            {"type": "product_learning_boundary", "id": boundary_id},
+            {"raw_truth_records_read": 0, "user_or_org_memory_rewrites": 0, "allowed_input_count": len(boundary["allowed_inputs"])},
+        )
+        return {"product_learning_boundary": boundary, "audit_event": event}
+
     def promote_memory_to_namespace(
         self,
         memory_id: str,
@@ -4387,11 +4679,43 @@ class LocalRuntimeStore:
             return {"status": "policy_denied", "policy_decision": decision, "audit_event": policy_result["audit_event"]}
 
         source_evidence_refs = list(source.get("evidence_refs", []))
+        materialized_modes = {"copy_with_provenance", "promote_to_approved_truth"}
+        mode_behaviors = {
+            "copy_with_provenance": {
+                "ownership": "target_namespace_copy",
+                "permission_behavior": "target namespace receives an independent evidence-backed copy with source provenance",
+                "target_materialized": True,
+                "source_owner_retains_original": True,
+                "can_influence_answers": True,
+            },
+            "reference": {
+                "ownership": "source_owner_retained",
+                "permission_behavior": "target namespace receives an auditable pointer that must re-check source permission before use",
+                "target_materialized": False,
+                "source_owner_retains_original": True,
+                "can_influence_answers": False,
+            },
+            "share": {
+                "ownership": "source_owner_retained",
+                "permission_behavior": "target namespace receives a bounded shared-view grant without ownership transfer",
+                "target_materialized": False,
+                "source_owner_retains_original": True,
+                "can_influence_answers": False,
+            },
+            "promote_to_approved_truth": {
+                "ownership": "target_namespace_approved_truth",
+                "permission_behavior": "target namespace receives an owner-approved durable truth candidate with evidence and provenance",
+                "target_materialized": True,
+                "source_owner_retains_original": True,
+                "can_influence_answers": True,
+            },
+        }
+        behavior = mode_behaviors.get(mode, mode_behaviors["copy_with_provenance"])
         target_base = {
             "schema_version": "cs.memory.v0",
             "status": "owner_approved",
-            "trust_state": "evidence_backed",
-            "memory_type": "promoted_durable_fact",
+            "trust_state": "approved" if mode == "promote_to_approved_truth" else "evidence_backed",
+            "memory_type": "promoted_approved_truth" if mode == "promote_to_approved_truth" else "promoted_durable_fact",
             "statement": source.get("statement", ""),
             "scope": target_scope,
             "source": {
@@ -4420,17 +4744,43 @@ class LocalRuntimeStore:
                 "requires_evidence_for_truth_claims": True,
                 "explicitly_promoted": True,
             },
+            "usage_permissions": {
+                "can_influence_answers": behavior["can_influence_answers"],
+                "can_influence_actions": mode == "promote_to_approved_truth",
+                "source_permission_recheck_required": mode in {"reference", "share"},
+            },
             "evidence_refs": [f"memory:{memory_id}", *source_evidence_refs],
             "created_at": utc_now(),
         }
         target_memory_id = f"memory_{_json_hash(target_base)[:16]}"
         target_memory = dict(target_base)
         target_memory["memory_id"] = target_memory_id
+        target_item: dict[str, Any]
+        if mode in materialized_modes:
+            target_item = target_memory
+        else:
+            reference_base = {
+                "schema_version": "cs.namespace_reference.v0",
+                "status": "referenced" if mode == "reference" else "shared",
+                "mode": mode,
+                "scope": target_scope,
+                "source_memory_id": memory_id,
+                "source_scope": source_scope,
+                "target_scope": target_scope,
+                "permission_behavior": behavior["permission_behavior"],
+                "source_permission_recheck_required": True,
+                "can_influence_answers": False,
+                "created_at": utc_now(),
+            }
+            reference_id = f"nsref_{_json_hash(reference_base)[:16]}"
+            target_item = dict(reference_base)
+            target_item["memory_id"] = reference_id
 
         promotion_base = {
             "schema_version": "cs.namespace_promotion.v0",
-            "status": "promoted",
+            "status": "promoted" if mode in materialized_modes else target_item["status"],
             "mode": mode,
+            "mode_behavior": behavior,
             "source": {
                 "kind": "memory",
                 "id": memory_id,
@@ -4439,14 +4789,15 @@ class LocalRuntimeStore:
             },
             "target": {
                 "kind": "memory",
-                "id": target_memory_id,
+                "id": target_item["memory_id"],
                 "scope": target_scope,
+                "materialized": mode in materialized_modes,
             },
             "provenance": {
                 "activity": "explicit_namespace_promotion",
                 "agent": principal_id,
                 "source_entity": f"memory:{memory_id}",
-                "target_entity": f"memory:{target_memory_id}",
+                "target_entity": f"memory:{target_item['memory_id']}",
                 "source_scope": source_scope,
                 "target_scope": target_scope,
                 "mode": mode,
@@ -4460,10 +4811,11 @@ class LocalRuntimeStore:
         promotion["promotion_id"] = promotion_id
         promotion["evidence_refs"] = [f"namespace_promotion:{promotion_id}", *promotion["evidence_refs"]]
 
-        target_memory["source"]["namespace_promotion_id"] = promotion_id
-        target_memory["provenance"]["namespace_promotion_id"] = promotion_id
-        target_memory["evidence_refs"] = [f"namespace_promotion:{promotion_id}", *target_memory["evidence_refs"]]
-        _write_json(self.memory_path(target_memory_id), target_memory)
+        if mode in materialized_modes:
+            target_memory["source"]["namespace_promotion_id"] = promotion_id
+            target_memory["provenance"]["namespace_promotion_id"] = promotion_id
+            target_memory["evidence_refs"] = [f"namespace_promotion:{promotion_id}", *target_memory["evidence_refs"]]
+            _write_json(self.memory_path(target_memory_id), target_memory)
         _write_json(self.namespace_promotion_path(promotion_id), promotion)
 
         promotion_event = self.append_audit(
@@ -4484,10 +4836,82 @@ class LocalRuntimeStore:
         )
         return {
             "promotion": promotion,
-            "promoted_memory": target_memory,
+            "promoted_memory": target_item,
             "policy_decision": decision,
             "audit_events": [policy_result["audit_event"], promotion_event],
         }
+
+    def recover_namespace_boundary(self, promotion_id: str, scope: dict[str, str], *, reason: str) -> dict[str, Any]:
+        promotion = None
+        for record in self._all_namespace_promotion_records():
+            if record.get("promotion_id") == promotion_id:
+                promotion = record
+                break
+        if promotion is None:
+            return {"status": "not_found", "resource": "namespace_promotion"}
+        target_scope = promotion.get("target", {}).get("scope")
+        if target_scope != scope:
+            return {"status": "scope_denied", "resource_scope": target_scope}
+
+        target_id = promotion.get("target", {}).get("id")
+        target_memory = self.get_memory(target_id) if target_id else None
+        if target_memory is not None:
+            updated = dict(target_memory)
+            updated["status"] = "revoked"
+            permissions = dict(updated.get("usage_permissions", {}))
+            permissions["can_influence_answers"] = False
+            permissions["can_influence_actions"] = False
+            updated["usage_permissions"] = permissions
+            updated.setdefault("recovery_history", []).append({"promotion_id": promotion_id, "reason": redact_text(reason), "recovered_at": utc_now()})
+            _write_json(self.memory_path(target_id), updated)
+
+        access_events = [
+            event
+            for event in self._all_audit_events()
+            if event.get("details", {}).get("resource_id") == target_id
+            or event.get("subject", {}).get("id") == target_id
+        ]
+        recovery_base = {
+            "schema_version": "cs.namespace_boundary_recovery.v0",
+            "status": "recovered",
+            "scope": scope,
+            "promotion_id": promotion_id,
+            "reason": redact_text(reason),
+            "target_id": target_id,
+            "target_materialized": promotion.get("target", {}).get("materialized"),
+            "revocation": {
+                "available": True,
+                "applied": True,
+                "future_answer_use_disabled": True,
+                "future_action_use_disabled": True,
+            },
+            "rollback": {
+                "available": True,
+                "source_original_preserved": True,
+                "target_record_status": "revoked" if target_memory is not None else "reference_revoked",
+            },
+            "access_trail": [
+                {"event_id": event.get("event_id"), "event_type": event.get("event_type"), "occurred_at": event.get("occurred_at")}
+                for event in access_events
+            ],
+            "retention": {
+                "audit_retained": True,
+                "promotion_record_retained": True,
+                "original_evidence_retained": True,
+            },
+            "created_at": utc_now(),
+        }
+        recovery_id = f"nsrecover_{_json_hash(recovery_base)[:16]}"
+        recovery = dict(recovery_base)
+        recovery["recovery_id"] = recovery_id
+        _write_json(self.namespace_recovery_path(recovery_id), recovery)
+        event = self.append_audit(
+            "namespace.boundary.recovered",
+            scope,
+            {"type": "namespace_boundary_recovery", "id": recovery_id},
+            {"promotion_id": promotion_id, "target_id": target_id, "future_answer_use_disabled": True},
+        )
+        return {"namespace_recovery": recovery, "audit_event": event}
 
     def answer_from_memory(self, question: str, scope: dict[str, str]) -> dict[str, Any]:
         terms = [term for term in search_terms(question) if term not in ANSWER_STOP_TERMS]

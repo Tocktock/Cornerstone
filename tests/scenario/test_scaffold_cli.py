@@ -1209,6 +1209,54 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_full_namespace_governance_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full-namespace-governance", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "full-namespace-governance")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 14)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_FULL_NAMESPACE_GOVERNANCE_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {
+                "CS-ARCH-010",
+                "CS-ARCH-011",
+                "CS-ARCH-013",
+                "CS-ARCH-014",
+                "CS-NS-005",
+                "CS-NS-006",
+                "CS-NS-007",
+                "CS-NS-008",
+                "CS-NS-011",
+                "CS-NS-012",
+                "CS-NS-013",
+                "CS-NS-014",
+                "CS-REG-007",
+                "CS-REG-008",
+            },
+        )
+        evidence = payload["namespace_governance_evidence"]
+        self.assertTrue(evidence["claim_basis_export_id"].startswith("claimbasis_"))
+        self.assertTrue(evidence["source_safety_id"].startswith("srcsafe_"))
+        self.assertTrue(evidence["namespace_audit_export_id"].startswith("nsaudit_"))
+        self.assertTrue(evidence["retention_id"].startswith("retention_"))
+        self.assertTrue(evidence["recovery_id"].startswith("nsrecover_"))
+        self.assertEqual(set(evidence["promotion_modes"]), {"copy_with_provenance", "reference", "share", "promote_to_approved_truth"})
+        self.assertTrue(evidence["promotion_modes"]["copy_with_provenance"]["materialized"])
+        self.assertFalse(evidence["promotion_modes"]["reference"]["materialized"])
+        self.assertFalse(evidence["promotion_modes"]["share"]["materialized"])
+        self.assertTrue(evidence["promotion_modes"]["promote_to_approved_truth"]["materialized"])
+        self.assertTrue(all(evidence["audit_coverage"].values()))
+        self.assertIn("configure_autopilot", evidence["org_policy_actions"])
+        self.assertIn("install_pack", evidence["org_policy_actions"])
+        self.assertIn("aggregate_learning", evidence["org_policy_actions"])
+        self.assertIn("extract_memory", evidence["classification_actions"])
+        self.assertGreaterEqual(evidence["audit_event_count"], 1)
+        self.assertFalse(payload["human_required"])
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

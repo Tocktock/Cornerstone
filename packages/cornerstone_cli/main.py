@@ -17,6 +17,7 @@ from cornerstone_cli.scenarios import (
     verify_full_extension_ecosystem,
     verify_full_learning_experience,
     verify_full_memory_wiki,
+    verify_full_namespace_governance,
     verify_full_security_operations,
     verify_full_understanding_ontology,
     verify_vs0_audit_ledger,
@@ -878,6 +879,33 @@ def command_claim_show(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_claim_basis_export(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.export_claim_basis(args.claim_id, requested_scope)
+    payload = base_response("cornerstone claim basis-export", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="CLAIM_BASIS")
+        print_payload(payload, args.json)
+        return exit_code
+
+    export = result["claim_basis_export"]
+    payload["claim_basis_export"] = export
+    payload["ids"].update({"claim_id": args.claim_id, "claim_basis_export_id": export["claim_basis_export_id"]})
+    payload["evidence_refs"].append(f"claim:{args.claim_id}")
+    if export.get("evidence_bundle", {}).get("evidence_bundle_id"):
+        payload["evidence_refs"].append(f"evidence_bundle:{export['evidence_bundle']['evidence_bundle_id']}")
+    if export.get("search_snapshot", {}).get("search_snapshot_id"):
+        payload["evidence_refs"].append(f"search_snapshot:{export['search_snapshot']['search_snapshot_id']}")
+    payload["evidence_refs"].extend(f"artifact:{artifact['artifact_id']}" for artifact in export.get("source_artifacts", []))
+    payload["evidence_refs"].append(f"claim_basis_export:{export['claim_basis_export_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def _record_command_failure(payload: dict[str, Any], result: dict[str, Any], *, resource_label: str) -> int:
     status = result.get("status")
     payload["status"] = "failed"
@@ -1734,6 +1762,59 @@ def command_namespace_promote(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_namespace_audit_export(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    event_types = args.event_type or []
+    result = store.query_namespace_audit(requested_scope, event_types=event_types)
+    export = result["namespace_audit_export"]
+    payload = base_response("cornerstone namespace audit-export", "success", root)
+    payload.update(requested_scope)
+    payload["namespace_audit_export"] = export
+    payload["ids"].update({"namespace_audit_export_id": export["namespace_audit_export_id"]})
+    payload["evidence_refs"].append(f"namespace_audit_export:{export['namespace_audit_export_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_namespace_recovery_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.recover_namespace_boundary(args.promotion_id, requested_scope, reason=args.reason)
+    payload = base_response("cornerstone namespace recovery-test", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="NAMESPACE_RECOVERY")
+        print_payload(payload, args.json)
+        return exit_code
+    recovery = result["namespace_recovery"]
+    payload["namespace_recovery"] = recovery
+    payload["ids"].update({"namespace_recovery_id": recovery["recovery_id"], "namespace_promotion_id": args.promotion_id})
+    payload["evidence_refs"].extend([f"namespace_recovery:{recovery['recovery_id']}", f"namespace_promotion:{args.promotion_id}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_namespace_product_learning_boundary_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.check_product_learning_boundary(requested_scope)
+    boundary = result["product_learning_boundary"]
+    payload = base_response("cornerstone namespace product-learning-boundary-test", "success", root)
+    payload.update(requested_scope)
+    payload["product_learning_boundary"] = boundary
+    payload["ids"].update({"product_learning_boundary_id": boundary["product_learning_boundary_id"]})
+    payload["evidence_refs"].append(f"product_learning_boundary:{boundary['product_learning_boundary_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_access_evaluate(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -1776,6 +1857,26 @@ def command_access_evaluate(args: argparse.Namespace) -> int:
         )
     print_payload(payload, args.json)
     return EXIT_SUCCESS if decision["decision"] == "allow" else EXIT_POLICY_DENIED
+
+
+def command_source_readonly_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.verify_source_readonly_ingest(args.artifact_id, requested_scope, source_system=args.source_system)
+    payload = base_response("cornerstone source readonly-test", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="SOURCE_READONLY")
+        print_payload(payload, args.json)
+        return exit_code
+    safety = result["source_safety"]
+    payload["source_safety"] = safety
+    payload["ids"].update({"source_safety_id": safety["source_safety_id"], "artifact_id": args.artifact_id})
+    payload["evidence_refs"].extend([f"source_safety:{safety['source_safety_id']}", f"artifact:{args.artifact_id}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
 
 
 def command_learning_record(args: argparse.Namespace) -> int:
@@ -3626,6 +3727,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_full_brain_routing(root)
     elif args.contract == "full-security-operations":
         report = verify_full_security_operations(root)
+    elif args.contract == "full-namespace-governance":
+        report = verify_full_namespace_governance(root)
     elif args.contract == "full-learning-experience":
         report = verify_full_learning_experience(root)
     elif args.contract == "full-extension-ecosystem":
@@ -3665,6 +3768,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "full-agent-orchestration",
                     "full-brain-routing",
                     "full-security-operations",
+                    "full-namespace-governance",
                     "full-extension-ecosystem",
                     "full-learning-experience",
                     "full-memory-wiki",
@@ -3793,6 +3897,17 @@ def build_parser() -> argparse.ArgumentParser:
     artifact_show.add_argument("--json", action="store_true", help="Emit JSON output")
     artifact_show.set_defaults(func=command_artifact_show)
 
+    source = subcommands.add_parser("source", help="Source-system safety commands")
+    source_sub = source.add_subparsers(dest="source_command")
+
+    source_readonly = source_sub.add_parser("readonly-test", help="Verify source ingestion made no writeback")
+    source_readonly.add_argument("--artifact-id", required=True, help="Ingested artifact ID")
+    source_readonly.add_argument("--source-system", default="mock://readonly-source", help="Mock source system label")
+    add_state_argument(source_readonly)
+    add_scope_arguments(source_readonly)
+    source_readonly.add_argument("--json", action="store_true", help="Emit JSON output")
+    source_readonly.set_defaults(func=command_source_readonly_test)
+
     audit = subcommands.add_parser("audit", help="Audit ledger commands")
     audit_sub = audit.add_subparsers(dest="audit_command")
 
@@ -3900,6 +4015,13 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(claim_show)
     claim_show.add_argument("--json", action="store_true", help="Emit JSON output")
     claim_show.set_defaults(func=command_claim_show)
+
+    claim_basis_export = claim_sub.add_parser("basis-export", help="Export a reproducible evidence basis for a claim")
+    claim_basis_export.add_argument("claim_id", help="Claim ID")
+    add_state_argument(claim_basis_export)
+    add_scope_arguments(claim_basis_export)
+    claim_basis_export.add_argument("--json", action="store_true", help="Emit JSON output")
+    claim_basis_export.set_defaults(func=command_claim_basis_export)
 
     capsule = subcommands.add_parser("capsule", help="Knowledge Capsule commands")
     capsule_sub = capsule.add_subparsers(dest="capsule_command")
@@ -4170,13 +4292,34 @@ def build_parser() -> argparse.ArgumentParser:
     namespace_promote.add_argument("--target-owner-id", required=True, help="Target owner")
     namespace_promote.add_argument("--target-namespace-id", required=True, help="Target namespace")
     namespace_promote.add_argument("--target-workspace-id", required=True, help="Target workspace")
-    namespace_promote.add_argument("--mode", choices=["copy_with_provenance"], default="copy_with_provenance")
+    namespace_promote.add_argument("--mode", choices=["copy_with_provenance", "reference", "share", "promote_to_approved_truth"], default="copy_with_provenance")
     namespace_promote.add_argument("--principal-id", default="local-user", help="Actor requesting promotion")
     namespace_promote.add_argument("--principal-role", choices=["org_admin", "org_approver"], default="org_admin")
     add_state_argument(namespace_promote)
     add_scope_arguments(namespace_promote)
     namespace_promote.add_argument("--json", action="store_true", help="Emit JSON output")
     namespace_promote.set_defaults(func=command_namespace_promote)
+
+    namespace_audit_export = namespace_sub.add_parser("audit-export", help="Export namespace-scoped audit events")
+    namespace_audit_export.add_argument("--event-type", action="append", default=[], help="Optional event type filter")
+    add_state_argument(namespace_audit_export)
+    add_scope_arguments(namespace_audit_export)
+    namespace_audit_export.add_argument("--json", action="store_true", help="Emit JSON output")
+    namespace_audit_export.set_defaults(func=command_namespace_audit_export)
+
+    namespace_recovery = namespace_sub.add_parser("recovery-test", help="Revoke or rollback a mistaken namespace promotion")
+    namespace_recovery.add_argument("--promotion-id", required=True, help="Namespace promotion ID")
+    namespace_recovery.add_argument("--reason", required=True, help="Recovery reason")
+    add_state_argument(namespace_recovery)
+    add_scope_arguments(namespace_recovery)
+    namespace_recovery.add_argument("--json", action="store_true", help="Emit JSON output")
+    namespace_recovery.set_defaults(func=command_namespace_recovery_test)
+
+    namespace_learning_boundary = namespace_sub.add_parser("product-learning-boundary-test", help="Verify product learning cannot consume raw namespace truth by default")
+    add_state_argument(namespace_learning_boundary)
+    add_scope_arguments(namespace_learning_boundary)
+    namespace_learning_boundary.add_argument("--json", action="store_true", help="Emit JSON output")
+    namespace_learning_boundary.set_defaults(func=command_namespace_product_learning_boundary_test)
 
     access = subcommands.add_parser("access", help="Local deterministic access-control commands")
     access_sub = access.add_subparsers(dest="access_command")
@@ -4185,7 +4328,7 @@ def build_parser() -> argparse.ArgumentParser:
     access_evaluate.add_argument("--principal-id", default="local-user", help="Principal identifier")
     access_evaluate.add_argument("--principal-role", choices=["personal_user", "org_member", "org_approver", "org_admin"], default="personal_user")
     access_evaluate.add_argument("--principal-attributes", default="", help="Comma-separated principal attributes")
-    access_evaluate.add_argument("--action", choices=["read", "write", "promote", "approve", "execute", "configure"], required=True)
+    access_evaluate.add_argument("--action", choices=["read", "write", "promote", "search", "summarize", "extract_memory", "use_in_action", "approve", "execute", "configure", "configure_autopilot", "install_pack", "aggregate_learning"], required=True)
     access_evaluate.add_argument("--resource-kind", default="memory")
     access_evaluate.add_argument("--resource-id", default="resource")
     access_evaluate.add_argument("--resource-tenant-id", help="Resource tenant; defaults to active tenant")
