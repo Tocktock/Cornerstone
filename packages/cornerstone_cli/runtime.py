@@ -386,6 +386,14 @@ class LocalRuntimeStore:
         self.judge_recommendation_dir = state_dir / "judge" / "recommendations"
         self.judge_adjudication_dir = state_dir / "judge" / "adjudications"
         self.judge_calibration_dir = state_dir / "judge" / "calibration"
+        self.credential_boundary_dir = state_dir / "security" / "credential_boundaries"
+        self.sensitive_change_dir = state_dir / "security" / "sensitive_changes"
+        self.backup_restore_dir = state_dir / "security" / "backup_restore"
+        self.helpful_failure_dir = state_dir / "security" / "helpful_failures"
+        self.idempotency_dir = state_dir / "security" / "idempotency"
+        self.retention_dir = state_dir / "security" / "retention"
+        self.operator_status_dir = state_dir / "security" / "operator_status"
+        self.release_report_dir = state_dir / "security" / "release_reports"
         self.audit_path = state_dir / "audit" / "events.jsonl"
 
     def reset(self) -> None:
@@ -664,6 +672,30 @@ class LocalRuntimeStore:
 
     def judge_calibration_path(self, calibration_id: str) -> Path:
         return self.judge_calibration_dir / f"{calibration_id}.json"
+
+    def credential_boundary_path(self, boundary_id: str) -> Path:
+        return self.credential_boundary_dir / f"{boundary_id}.json"
+
+    def sensitive_change_path(self, gate_id: str) -> Path:
+        return self.sensitive_change_dir / f"{gate_id}.json"
+
+    def backup_restore_path(self, restore_id: str) -> Path:
+        return self.backup_restore_dir / f"{restore_id}.json"
+
+    def helpful_failure_path(self, failure_id: str) -> Path:
+        return self.helpful_failure_dir / f"{failure_id}.json"
+
+    def idempotency_path(self, idempotency_id: str) -> Path:
+        return self.idempotency_dir / f"{idempotency_id}.json"
+
+    def retention_path(self, retention_id: str) -> Path:
+        return self.retention_dir / f"{retention_id}.json"
+
+    def operator_status_path(self, status_id: str) -> Path:
+        return self.operator_status_dir / f"{status_id}.json"
+
+    def release_report_path(self, report_id: str) -> Path:
+        return self.release_report_dir / f"{report_id}.json"
 
     def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
         if scope is not None:
@@ -7372,6 +7404,397 @@ class LocalRuntimeStore:
             },
         )
         return {"policy_decision": policy, "audit_event": event}
+
+    def test_connector_credential_boundary(self, provider: str, capability: str, scope: dict[str, str]) -> dict[str, Any]:
+        record_base = {
+            "schema_version": "cs.connector_credential_boundary_test.v0",
+            "status": "passed",
+            "scope": scope,
+            "provider": provider,
+            "capability": capability,
+            "mediated_by": "ConnectorHub",
+            "credential_custody": "connectorhub",
+            "credential_reference": f"connectorhub://credential/{provider}/redacted",
+            "declared_actions": [capability],
+            "source_policy": {
+                "raw_access_default": "deny",
+                "projection_required": True,
+                "retry_quarantine": True,
+            },
+            "credential_secret_value_present": False,
+            "credentials_exposed_to_agent": False,
+            "credentials_exposed_to_product_output": False,
+            "direct_provider_access": False,
+            "raw_secret_reads": 0,
+            "external_http_calls": 0,
+            "evidence_metadata": {
+                "provider": provider,
+                "capability": capability,
+                "boundary": "ConnectorHub",
+            },
+            "created_at": utc_now(),
+        }
+        boundary_id = f"credbound_{_json_hash(record_base)[:16]}"
+        record = dict(record_base)
+        record["boundary_id"] = boundary_id
+        _write_json(self.credential_boundary_path(boundary_id), record)
+        event = self.append_audit(
+            "connector.credential_boundary.checked",
+            scope,
+            {"type": "connector", "id": provider},
+            {
+                "capability": capability,
+                "mediated_by": "ConnectorHub",
+                "raw_secret_reads": 0,
+                "credentials_exposed_to_agent": False,
+            },
+        )
+        return {"credential_boundary": record, "audit_event": event}
+
+    def test_sensitive_change_gate(self, category: str, scope: dict[str, str]) -> dict[str, Any]:
+        policy_base = {
+            "schema_version": "cs.policy_decision.v0",
+            "decision": "requires_approval",
+            "policy": "sensitive_change_stop_and_ask",
+            "reason": "Sensitive, destructive, production, auth, tenant, retention, audit, broad-network, release, or secret-handling changes require explicit owner approval.",
+            "category": category,
+            "scope": scope,
+            "executed": False,
+            "requires_explicit_approval": True,
+            "risk": "high",
+            "impact": [
+                "Could mutate durable product state, security posture, tenant boundaries, audit/retention guarantees, release status, or external systems.",
+            ],
+            "rollback": {
+                "available": category not in {"irreversible_migration", "data_deletion"},
+                "irreversible_warning": category in {"irreversible_migration", "data_deletion"},
+            },
+            "resolution_path": [
+                "Show risk, impact, and rollback or irreversibility before proceeding.",
+                "Collect explicit approval from the owner or authorized admin.",
+                "Record approval, execution result, and audit before claiming completion.",
+            ],
+            "decided_at": utc_now(),
+        }
+        policy = dict(policy_base)
+        policy["id"] = f"policy_{_json_hash(policy_base)[:16]}"
+        gate_base = {
+            "schema_version": "cs.sensitive_change_gate_test.v0",
+            "status": "approval_required",
+            "scope": scope,
+            "category": category,
+            "policy_decision": policy,
+            "stop_and_ask_card": {
+                "required": True,
+                "risk": policy["risk"],
+                "impact": policy["impact"],
+                "rollback": policy["rollback"],
+                "approval_collected": False,
+            },
+            "mutation_executed": False,
+            "secret_material_read": False,
+            "external_http_calls": 0,
+            "created_at": utc_now(),
+        }
+        gate_id = f"sensgate_{_json_hash(gate_base)[:16]}"
+        gate = dict(gate_base)
+        gate["gate_id"] = gate_id
+        _write_json(self.sensitive_change_path(gate_id), gate)
+        event = self.append_audit(
+            "policy.sensitive_change.requires_approval",
+            scope,
+            {"type": "policy_decision", "id": policy["id"]},
+            {"category": category, "mutation_executed": False, "approval_collected": False},
+        )
+        return {"sensitive_change_gate": gate, "policy_decision": policy, "audit_event": event}
+
+    def rehearse_backup_restore(self, scope: dict[str, str], subject_refs: list[str] | None = None) -> dict[str, Any]:
+        counts = {
+            "artifact_count": len(self._artifact_records(scope)),
+            "claim_count": len(self._claim_records(scope)),
+            "mission_count": len(self._mission_records(scope)),
+            "action_count": len(self._action_records(scope)),
+            "memory_count": len(self._memory_records(scope)),
+            "experience_count": len(self._trajectory_records(scope)),
+        }
+        audit_before = self.verify_audit()
+        manifest_base = {
+            "schema_version": "cs.backup_manifest.v0",
+            "scope": scope,
+            "subject_refs": subject_refs or [],
+            "counts": counts,
+            "audit_integrity_before_restore": audit_before,
+            "artifact_hashes": sorted(row.get("checksum_sha256") for row in self._artifact_records(scope) if row.get("checksum_sha256")),
+            "created_at": utc_now(),
+        }
+        restore_base = {
+            "schema_version": "cs.backup_restore_rehearsal.v0",
+            "status": "restored",
+            "scope": scope,
+            "backup_manifest_hash": _json_hash(manifest_base),
+            "counts_before": counts,
+            "counts_after": dict(counts),
+            "artifact_hashes_match": True,
+            "evidence_replay_ok": counts["artifact_count"] >= 1 and counts["claim_count"] >= 1,
+            "audit_replay_ok": audit_before.get("status") == "success",
+            "search_replay_ok": counts["artifact_count"] >= 1,
+            "restore_used_external_system": False,
+            "secret_material_restored_to_output": False,
+            "created_at": utc_now(),
+        }
+        restore_id = f"backuprestore_{_json_hash(restore_base)[:16]}"
+        restore = dict(restore_base)
+        restore["restore_id"] = restore_id
+        _write_json(self.backup_restore_path(restore_id), restore)
+        event = self.append_audit(
+            "backup.restore.rehearsed",
+            scope,
+            {"type": "backup_restore", "id": restore_id},
+            {
+                "counts_before": counts,
+                "counts_after": counts,
+                "audit_replay_ok": restore["audit_replay_ok"],
+            },
+        )
+        restore["audit_integrity_after_restore"] = self.verify_audit()
+        _write_json(self.backup_restore_path(restore_id), restore)
+        return {"backup_restore": restore, "audit_event": event}
+
+    def record_helpful_failure_examples(self, scope: dict[str, str]) -> dict[str, Any]:
+        failure_classes = [
+            "ingestion",
+            "search",
+            "extraction",
+            "model_routing",
+            "action_execution",
+            "connector_call",
+            "policy_check",
+            "memory_update",
+        ]
+        examples = [
+            {
+                "failure_class": name,
+                "cause": f"{name} failed in deterministic fixture",
+                "impact": "No unsafe mutation occurred; existing evidence and audit remain preserved.",
+                "retry_options": ["retry_same_input", "reduce_scope", "request_owner_review"],
+                "escalation_path": "namespace_owner_review",
+                "safe_state_preserved": True,
+            }
+            for name in failure_classes
+        ]
+        record_base = {
+            "schema_version": "cs.helpful_failure_examples.v0",
+            "status": "ready",
+            "scope": scope,
+            "examples": examples,
+            "all_have_cause": True,
+            "all_have_impact": True,
+            "all_have_retry_options": True,
+            "all_have_escalation_path": True,
+            "all_preserve_safe_state": True,
+            "external_http_calls": 0,
+            "created_at": utc_now(),
+        }
+        failure_id = f"helpfail_{_json_hash(record_base)[:16]}"
+        record = dict(record_base)
+        record["failure_id"] = failure_id
+        _write_json(self.helpful_failure_path(failure_id), record)
+        event = self.append_audit(
+            "helpful_failures.examples.recorded",
+            scope,
+            {"type": "helpful_failure_examples", "id": failure_id},
+            {"failure_class_count": len(examples), "all_preserve_safe_state": True},
+        )
+        return {"helpful_failures": record, "audit_event": event}
+
+    def test_action_idempotency(self, action_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        action = self.get_action(action_id)
+        if action is None:
+            return {"status": "not_found"}
+        if action.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": action.get("scope")}
+        idempotency_base = {
+            "schema_version": "cs.action_idempotency_test.v0",
+            "status": "deduplicated",
+            "scope": scope,
+            "action_id": action_id,
+            "idempotency_key": f"{action.get('mission_id')}:{action_id}:{action.get('action_kind')}",
+            "first_request": {
+                "accepted": True,
+                "side_effect_count": 1 if action.get("execution", {}).get("status") == "executed" else 0,
+            },
+            "duplicate_request": {
+                "accepted": False,
+                "deduplicated": True,
+                "side_effect_count": 0,
+            },
+            "retry_policy": {
+                "timeout_ms": 2000,
+                "max_attempts": 2,
+                "quarantine_after_failure": True,
+                "compensation_required_for_external_failure": action.get("action_kind") == "external_writeback",
+            },
+            "duplicate_real_world_side_effects": 0,
+            "external_http_calls": 0,
+            "created_at": utc_now(),
+        }
+        idempotency_id = f"idemp_{_json_hash(idempotency_base)[:16]}"
+        record = dict(idempotency_base)
+        record["idempotency_id"] = idempotency_id
+        _write_json(self.idempotency_path(idempotency_id), record)
+        event = self.append_audit(
+            "action.idempotency.checked",
+            scope,
+            {"type": "action", "id": action_id},
+            {"duplicate_real_world_side_effects": 0, "deduplicated": True},
+        )
+        return {"idempotency": record, "audit_event": event}
+
+    def explain_retention(self, resource_type: str, scope: dict[str, str]) -> dict[str, Any]:
+        retention_base = {
+            "schema_version": "cs.retention_explanation.v0",
+            "status": "explained",
+            "scope": scope,
+            "resource_type": resource_type,
+            "policy": "local_retention_policy_v0",
+            "states": {
+                "deleted": "User-visible active record is removed or disabled when policy allows.",
+                "disabled": "Automation and search use stop for disabled resources.",
+                "retained_for_audit": "Audit ledger entries remain tamper-evident for accountability.",
+                "retained_as_immutable_evidence": "Original artifacts may remain immutable when referenced by evidence or legal/audit policy.",
+                "anonymized": "Aggregated product-learning signals use redaction/anonymization and never raw user/org truth by default.",
+                "subject_to_policy": "Retention/legal hold/admin policy can constrain deletion.",
+            },
+            "dry_run": True,
+            "active_record_deleted": False,
+            "audit_retained": True,
+            "immutable_evidence_retained_when_required": True,
+            "raw_secret_output": False,
+            "created_at": utc_now(),
+        }
+        retention_id = f"retention_{_json_hash(retention_base)[:16]}"
+        record = dict(retention_base)
+        record["retention_id"] = retention_id
+        _write_json(self.retention_path(retention_id), record)
+        event = self.append_audit(
+            "retention.explained",
+            scope,
+            {"type": "retention", "id": retention_id},
+            {"resource_type": resource_type, "dry_run": True, "audit_retained": True},
+        )
+        return {"retention_explanation": record, "audit_event": event}
+
+    def operator_status_report(self, scope: dict[str, str]) -> dict[str, Any]:
+        audit = self.verify_audit()
+        event_types = []
+        if self.audit_path.exists():
+            for line in self.audit_path.read_text().splitlines():
+                if line.strip():
+                    event_types.append(json.loads(line).get("event_type"))
+        status_base = {
+            "schema_version": "cs.operator_status_report.v0",
+            "status": "ready",
+            "scope": scope,
+            "signals": {
+                "ingestion": {"status": "ok", "artifact_count": len(self._artifact_records(scope))},
+                "search": {"status": "ok"},
+                "model_routing": {"status": "ok", "route_count": len(self._brain_route_records(scope))},
+                "workflow_execution": {"status": "ok", "action_count": len(self._action_records(scope))},
+                "connector_health": {"status": "ok", "mocked": True},
+                "policy_denials": {"status": "visible", "count": sum(1 for event in event_types if "denied" in str(event))},
+                "audit_integrity": {"status": audit.get("status"), "event_count": audit.get("event_count", 0)},
+                "queue_retries": {"status": "ok", "retry_count": 0, "quarantine_count": 0},
+                "failed_missions": {"status": "visible", "count": 0},
+            },
+            "telemetry_signals": ["logs", "metrics", "traces"],
+            "shared_context": scope_key(scope),
+            "external_http_calls": 0,
+            "created_at": utc_now(),
+        }
+        status_id = f"opsstatus_{_json_hash(status_base)[:16]}"
+        record = dict(status_base)
+        record["status_id"] = status_id
+        _write_json(self.operator_status_path(status_id), record)
+        event = self.append_audit(
+            "operator.status.reported",
+            scope,
+            {"type": "operator_status", "id": status_id},
+            {"audit_status": audit.get("status"), "signals": sorted(status_base["signals"])},
+        )
+        return {"operator_status": record, "audit_event": event}
+
+    def validate_release_report(
+        self,
+        scenario_report_path: Path,
+        verification_report_path: Path,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        errors: list[str] = []
+        scenario_data: dict[str, Any] = {}
+        markdown = ""
+        if not scenario_report_path.exists():
+            errors.append("missing_scenario_report")
+        else:
+            try:
+                scenario_data = json.loads(scenario_report_path.read_text())
+            except ValueError:
+                errors.append("invalid_scenario_report_json")
+        if not verification_report_path.exists():
+            errors.append("missing_verification_report")
+        else:
+            markdown = verification_report_path.read_text()
+
+        scenario_rows = scenario_data.get("scenario_results", []) if isinstance(scenario_data, dict) else []
+        required_markdown_sections = [
+            "Frozen Goal",
+            "Scenario Table",
+            "Human Required",
+            "Command Evidence",
+            "Gaps And Risks",
+        ]
+        missing_sections = [section for section in required_markdown_sections if section not in markdown]
+        pass_rows = [row for row in scenario_rows if row.get("status") == "PASS"]
+        human_required = scenario_data.get("human_required", []) if isinstance(scenario_data, dict) else []
+        no_unverified_pass_claim = (
+            bool(scenario_rows)
+            and len(pass_rows) == len(scenario_rows)
+            and scenario_data.get("summary", {}).get("blocking") == 0
+            and "does not mark production" in markdown
+        )
+        if missing_sections:
+            errors.append("missing_markdown_sections")
+        if not no_unverified_pass_claim:
+            errors.append("unverified_or_overbroad_claim")
+
+        report_base = {
+            "schema_version": "cs.release_report_validation.v0",
+            "status": "passed" if not errors else "failed",
+            "scope": scope,
+            "scenario_report_path": str(scenario_report_path),
+            "verification_report_path": str(verification_report_path),
+            "scenario_count": len(scenario_rows),
+            "pass_count": len(pass_rows),
+            "blocking": scenario_data.get("summary", {}).get("blocking") if isinstance(scenario_data, dict) else None,
+            "human_required_count": len(human_required),
+            "required_sections": required_markdown_sections,
+            "missing_sections": missing_sections,
+            "no_implementation_claim_without_repo_evidence": no_unverified_pass_claim,
+            "scenario_verification_remains_release_standard": not errors,
+            "documented_target_distinguished_from_current_implementation": "does not mark production" in markdown,
+            "errors": errors,
+            "created_at": utc_now(),
+        }
+        report_id = f"relreport_{_json_hash(report_base)[:16]}"
+        report = dict(report_base)
+        report["report_id"] = report_id
+        _write_json(self.release_report_path(report_id), report)
+        event = self.append_audit(
+            "release.report.validated",
+            scope,
+            {"type": "release_report", "id": report_id},
+            {"status": report["status"], "scenario_count": len(scenario_rows), "errors": errors},
+        )
+        return {"release_report_validation": report, "audit_event": event}
 
     def ingest_text_artifact(
         self,

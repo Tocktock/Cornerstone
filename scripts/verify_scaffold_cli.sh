@@ -45,7 +45,8 @@ understanding_ontology_json=$(mktemp)
 extension_ecosystem_json=$(mktemp)
 agent_orchestration_json=$(mktemp)
 brain_routing_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json" "$agent_orchestration_json" "$brain_routing_json"' EXIT
+security_operations_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json" "$agent_orchestration_json" "$brain_routing_json" "$security_operations_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -610,6 +611,43 @@ grep -q '"evidence_unusable_after_switch": 0' "$brain_routing_json" || fail "ful
 grep -q '"audit_verify_failed": 0' "$brain_routing_json" || fail "full-brain-routing failed audit verification"
 grep -q '"product_feature_claims": "PARTIAL_FULL_BRAIN_ROUTING_ONLY"' "$brain_routing_json" || fail "full-brain-routing overclaimed product feature scope"
 
+cornerstone scenario verify full-security-operations --json > "$security_operations_json"
+python3 -m json.tool "$security_operations_json" >/dev/null
+grep -q '"scenario_set": "full-security-operations"' "$security_operations_json" || fail "full-security-operations report missing scenario set"
+grep -q '"blocking": 0' "$security_operations_json" || fail "full-security-operations report has blocking scenarios"
+grep -q '"pass": 11' "$security_operations_json" || fail "full-security-operations did not pass exactly eleven scenarios"
+for scenario_id in CS-SEC-009 CS-SEC-010 CS-SEC-011 CS-SEC-012 CS-SEC-013 CS-SEC-014 CS-SEC-017 CS-SEC-018 CS-SEC-019 CS-SEC-020 CS-REG-020; do
+  grep -q "\"id\": \"$scenario_id\"" "$security_operations_json" || fail "full-security-operations missing $scenario_id"
+done
+grep -q '"credential_boundary_id": "credbound_' "$security_operations_json" || fail "full-security-operations missing credential boundary ID"
+grep -q '"sensitive_gate_id": "sensgate_' "$security_operations_json" || fail "full-security-operations missing sensitive gate ID"
+grep -q '"backup_restore_id": "backuprestore_' "$security_operations_json" || fail "full-security-operations missing backup restore ID"
+grep -q '"helpful_failure_id": "helpfail_' "$security_operations_json" || fail "full-security-operations missing helpful failure ID"
+grep -q '"idempotency_id": "idemp_' "$security_operations_json" || fail "full-security-operations missing idempotency ID"
+grep -q '"retention_id": "retention_' "$security_operations_json" || fail "full-security-operations missing retention ID"
+grep -q '"operator_status_id": "opsstatus_' "$security_operations_json" || fail "full-security-operations missing operator status ID"
+grep -q '"release_report_id": "relreport_' "$security_operations_json" || fail "full-security-operations missing release report ID"
+grep -q '"release_report_scenario_count": 21' "$security_operations_json" || fail "full-security-operations missing release report scenario count"
+grep -q '"human_required": \[' "$security_operations_json" || fail "full-security-operations missing human required table"
+grep -q '"required_human_action"' "$security_operations_json" || fail "full-security-operations missing human required action"
+grep -q '"expected_human_evidence"' "$security_operations_json" || fail "full-security-operations missing expected human evidence"
+grep -q '"credentials_exposed_to_agent": 0' "$security_operations_json" || fail "full-security-operations exposed credentials to agent"
+grep -q '"credentials_exposed_to_product_output": 0' "$security_operations_json" || fail "full-security-operations exposed credentials to output"
+grep -q '"raw_secret_reads": 0' "$security_operations_json" || fail "full-security-operations read raw secrets"
+grep -q '"sensitive_mutation_executed": 0' "$security_operations_json" || fail "full-security-operations executed sensitive mutation"
+grep -q '"human_required_missing_fields": 0' "$security_operations_json" || fail "full-security-operations missed human required fields"
+grep -q '"restore_integrity_failed": 0' "$security_operations_json" || fail "full-security-operations failed restore integrity"
+grep -q '"failure_without_helpful_fields": 0' "$security_operations_json" || fail "full-security-operations missed helpful failure fields"
+grep -q '"duplicate_side_effects": 0' "$security_operations_json" || fail "full-security-operations duplicated side effects"
+grep -q '"retention_unexplained_states": 0' "$security_operations_json" || fail "full-security-operations missed retention states"
+grep -q '"observability_missing_signals": 0' "$security_operations_json" || fail "full-security-operations missed observability signals"
+grep -q '"release_report_without_scenarios": 0' "$security_operations_json" || fail "full-security-operations missed release scenarios"
+grep -q '"implementation_claim_without_repo_evidence": 0' "$security_operations_json" || fail "full-security-operations claimed implementation without evidence"
+grep -q '"scenario_verification_standard_missing": 0' "$security_operations_json" || fail "full-security-operations missed scenario verification standard"
+grep -q '"external_http_calls": 0' "$security_operations_json" || fail "full-security-operations reported external HTTP calls"
+grep -q '"audit_verify_failed": 0' "$security_operations_json" || fail "full-security-operations failed audit verification"
+grep -q '"product_feature_claims": "PARTIAL_FULL_SECURITY_OPERATIONS_ONLY"' "$security_operations_json" || fail "full-security-operations overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -639,4 +677,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, full-agent-orchestration verify, full-brain-routing verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, full-agent-orchestration verify, full-brain-routing verify, full-security-operations verify, vs0-product-domain-readiness verify, unittest).\n'

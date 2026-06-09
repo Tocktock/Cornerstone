@@ -1165,6 +1165,50 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_full_security_operations_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full-security-operations", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "full-security-operations")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 11)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_FULL_SECURITY_OPERATIONS_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {
+                "CS-SEC-009",
+                "CS-SEC-010",
+                "CS-SEC-011",
+                "CS-SEC-012",
+                "CS-SEC-013",
+                "CS-SEC-014",
+                "CS-SEC-017",
+                "CS-SEC-018",
+                "CS-SEC-019",
+                "CS-SEC-020",
+                "CS-REG-020",
+            },
+        )
+        evidence = payload["security_operations_evidence"]
+        self.assertTrue(evidence["credential_boundary_id"].startswith("credbound_"))
+        self.assertTrue(evidence["sensitive_gate_id"].startswith("sensgate_"))
+        self.assertTrue(evidence["backup_restore_id"].startswith("backuprestore_"))
+        self.assertTrue(evidence["helpful_failure_id"].startswith("helpfail_"))
+        self.assertTrue(evidence["idempotency_id"].startswith("idemp_"))
+        self.assertTrue(evidence["retention_id"].startswith("retention_"))
+        self.assertTrue(evidence["operator_status_id"].startswith("opsstatus_"))
+        self.assertTrue(evidence["release_report_id"].startswith("relreport_"))
+        self.assertEqual(evidence["release_report_scenario_count"], 21)
+        self.assertGreaterEqual(evidence["audit_event_count"], 1)
+        self.assertTrue(payload["human_required"])
+        for row in payload["human_required"]:
+            self.assertTrue(row["reason"])
+            self.assertTrue(row["required_human_action"])
+            self.assertTrue(row["expected_human_evidence"])
+            self.assertTrue(row["release_impact"])
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

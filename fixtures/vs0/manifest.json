@@ -191,6 +191,23 @@
         "CS-REG-009",
         "CS-REG-010"
       ]
+    },
+    {
+      "id": "pack_17_security_operations",
+      "path": "packs/17_security_operations/pack.json",
+      "scenario_ids": [
+        "CS-SEC-009",
+        "CS-SEC-010",
+        "CS-SEC-011",
+        "CS-SEC-012",
+        "CS-SEC-013",
+        "CS-SEC-014",
+        "CS-SEC-017",
+        "CS-SEC-018",
+        "CS-SEC-019",
+        "CS-SEC-020",
+        "CS-REG-020"
+      ]
     }
   ]
 }

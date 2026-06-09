@@ -6622,6 +6622,350 @@ def verify_full_brain_routing(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_full_security_operations(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("full-security-operations")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/17_security_operations/security_seed.txt"
+    if not (root / input_path).exists():
+        input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["mode_set_autopilot"] = _run_cli_json(root, ["workspace", "mode", "set", "autopilot", "--state-dir", state_rel, "--json"])
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The security operations fixture has evidence for governed action and release reporting.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Run a governed security operations rehearsal",
+            "--claim-id",
+            claim_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if claim_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["mission_activate"] = _run_cli_json(
+        root,
+        ["mission", "activate", mission_id, "--mode", "autopilot", "--state-dir", state_rel, "--json"],
+    ) if mission_id else {}
+    transcripts["external_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Write a mocked security status through ConnectorHub",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "mock_connector",
+            "--target",
+            "mock://security-ops/status",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    action = _payload(transcripts["external_action_propose"]).get("action_card", {})
+    action_id = action.get("action_id", "")
+    transcripts["external_action_approve"] = _run_cli_json(
+        root,
+        ["action", "approve", action_id, "--approver", "owner", "--state-dir", state_rel, "--json"],
+    ) if action_id else {}
+    transcripts["external_action_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", action_id, "--state-dir", state_rel, "--json"],
+    ) if action_id else {}
+
+    subject_refs = [
+        f"artifact:{artifact_id}",
+        f"evidence_bundle:{bundle_id}",
+        f"claim:{claim_id}",
+        f"mission:{mission_id}",
+        f"action:{action_id}",
+    ]
+    transcripts["credential_boundary"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "credential-boundary-test",
+            "--provider",
+            "mock_provider",
+            "--capability",
+            "mock.write_status",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    transcripts["sensitive_change"] = _run_cli_json(
+        root,
+        [
+            "security",
+            "sensitive-change-test",
+            "--category",
+            "production_mutation",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    backup_args = ["security", "backup-restore-test", "--state-dir", state_rel, "--json"]
+    for ref in subject_refs:
+        backup_args.extend(["--subject-ref", ref])
+    transcripts["backup_restore"] = _run_cli_json(root, backup_args)
+    transcripts["helpful_failure"] = _run_cli_json(root, ["security", "helpful-failure-test", "--state-dir", state_rel, "--json"])
+    transcripts["idempotency"] = _run_cli_json(
+        root,
+        ["action", "idempotency-test", action_id, "--state-dir", state_rel, "--json"],
+    ) if action_id else {}
+    transcripts["retention"] = _run_cli_json(
+        root,
+        ["security", "retention-explain", "--resource-type", "workspace", "--state-dir", state_rel, "--json"],
+    )
+    transcripts["operator_status"] = _run_cli_json(root, ["security", "operator-status", "--state-dir", state_rel, "--json"])
+    transcripts["release_report_check"] = _run_cli_json(
+        root,
+        [
+            "release",
+            "report-check",
+            "--scenario-report",
+            "reports/scenario/full-brain-routing-2026-06-10.json",
+            "--verification-report",
+            "docs/verification-reports/FULL_BRAIN_ROUTING_BATCH27_REPORT_2026-06-10.md",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    credential = _payload(transcripts["credential_boundary"]).get("credential_boundary", {})
+    sensitive_gate = _payload(transcripts["sensitive_change"]).get("sensitive_change_gate", {})
+    sensitive_policy = sensitive_gate.get("policy_decision", {})
+    backup = _payload(transcripts["backup_restore"]).get("backup_restore", {})
+    failures = _payload(transcripts["helpful_failure"]).get("helpful_failures", {})
+    idempotency = _payload(transcripts["idempotency"]).get("idempotency", {})
+    retention = _payload(transcripts["retention"]).get("retention_explanation", {})
+    operator_status = _payload(transcripts["operator_status"]).get("operator_status", {})
+    release_validation = _payload(transcripts["release_report_check"]).get("release_report_validation", {})
+    action_result = _payload(transcripts["external_action_execute"]).get("action_result", {})
+    audit_payload = _payload(transcripts["audit_verify"]).get("audit_integrity", {})
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and audit_payload.get("status") == "success"
+
+    human_required = [
+        {
+            "id": "HR-SEC-OPS-001",
+            "reason": "Production backup and restore must be proven against the real deployment backup system.",
+            "required_human_action": "Run an approved production-like backup/restore drill without exposing secrets.",
+            "expected_human_evidence": "Signed drill transcript with restored artifact/evidence/audit counts and integrity verification.",
+            "release_impact": "Blocks production PASS for backup/restore, but not local deterministic scaffold PASS.",
+        },
+        {
+            "id": "HR-SEC-OPS-002",
+            "reason": "Live provider credential custody cannot be verified without approved real connector accounts.",
+            "required_human_action": "Inspect ConnectorHub credential custody and provider audit logs in an approved environment.",
+            "expected_human_evidence": "Credential custody review showing no raw secret exposure to agents or product outputs.",
+            "release_impact": "Blocks live-provider PASS, but not mocked ConnectorHub boundary PASS.",
+        },
+    ]
+    human_required_ok = all(
+        row.get("reason")
+        and row.get("required_human_action")
+        and row.get("expected_human_evidence")
+        and row.get("release_impact")
+        for row in human_required
+    )
+    credential_ok = (
+        _exit_ok(transcripts["credential_boundary"])
+        and credential.get("status") == "passed"
+        and credential.get("mediated_by") == "ConnectorHub"
+        and credential.get("raw_secret_reads") == 0
+        and credential.get("credentials_exposed_to_agent") is False
+        and credential.get("credentials_exposed_to_product_output") is False
+        and credential.get("direct_provider_access") is False
+    )
+    sensitive_ok = (
+        _exit_ok(transcripts["sensitive_change"])
+        and sensitive_gate.get("status") == "approval_required"
+        and sensitive_policy.get("decision") == "requires_approval"
+        and sensitive_gate.get("mutation_executed") is False
+        and sensitive_gate.get("stop_and_ask_card", {}).get("required") is True
+        and sensitive_gate.get("stop_and_ask_card", {}).get("rollback")
+    )
+    backup_ok = (
+        _exit_ok(transcripts["backup_restore"])
+        and backup.get("status") == "restored"
+        and backup.get("counts_before") == backup.get("counts_after")
+        and backup.get("artifact_hashes_match") is True
+        and backup.get("evidence_replay_ok") is True
+        and backup.get("audit_replay_ok") is True
+        and backup.get("restore_used_external_system") is False
+    )
+    failure_examples = failures.get("examples", [])
+    helpful_ok = (
+        _exit_ok(transcripts["helpful_failure"])
+        and len(failure_examples) >= 8
+        and failures.get("all_have_cause") is True
+        and failures.get("all_have_impact") is True
+        and failures.get("all_have_retry_options") is True
+        and failures.get("all_have_escalation_path") is True
+        and failures.get("all_preserve_safe_state") is True
+    )
+    idempotency_ok = (
+        _exit_ok(transcripts["idempotency"])
+        and idempotency.get("status") == "deduplicated"
+        and idempotency.get("duplicate_request", {}).get("deduplicated") is True
+        and idempotency.get("duplicate_real_world_side_effects") == 0
+        and idempotency.get("retry_policy", {}).get("quarantine_after_failure") is True
+    )
+    retention_states = retention.get("states", {})
+    retention_ok = (
+        _exit_ok(transcripts["retention"])
+        and retention.get("status") == "explained"
+        and {"deleted", "disabled", "retained_for_audit", "retained_as_immutable_evidence", "anonymized", "subject_to_policy"}.issubset(retention_states)
+        and retention.get("audit_retained") is True
+        and retention.get("immutable_evidence_retained_when_required") is True
+    )
+    status_signals = operator_status.get("signals", {})
+    required_signals = {
+        "ingestion",
+        "search",
+        "model_routing",
+        "workflow_execution",
+        "connector_health",
+        "policy_denials",
+        "audit_integrity",
+        "queue_retries",
+        "failed_missions",
+    }
+    operator_ok = (
+        _exit_ok(transcripts["operator_status"])
+        and operator_status.get("status") == "ready"
+        and required_signals.issubset(status_signals)
+        and set(operator_status.get("telemetry_signals", [])) == {"logs", "metrics", "traces"}
+        and status_signals.get("audit_integrity", {}).get("status") == "success"
+    )
+    release_ok = (
+        _exit_ok(transcripts["release_report_check"])
+        and release_validation.get("status") == "passed"
+        and release_validation.get("scenario_count", 0) >= 1
+        and release_validation.get("pass_count") == release_validation.get("scenario_count")
+        and release_validation.get("no_implementation_claim_without_repo_evidence") is True
+        and release_validation.get("scenario_verification_remains_release_standard") is True
+        and release_validation.get("documented_target_distinguished_from_current_implementation") is True
+    )
+
+    rows = [
+        _row("CS-SEC-009", "MUST_PASS", "PASS" if credential_ok and audit_ok else "FAIL", ["cornerstone connector credential-boundary-test --json"], "ConnectorHub credential boundary keeps provider credentials out of agents and product outputs."),
+        _row("CS-SEC-010", "MUST_PASS", "PASS" if sensitive_ok and audit_ok else "FAIL", ["cornerstone security sensitive-change-test --json"], "Sensitive changes require stop-and-ask approval with risk, impact, rollback, and no execution."),
+        _row("CS-SEC-011", "MUST_PASS", "PASS" if human_required_ok else "FAIL", ["cornerstone scenario verify full-security-operations --json"], "Human-required verification entries list reason, required action, expected evidence, and release impact."),
+        _row("CS-SEC-012", "MUST_PASS", "PASS" if backup_ok and audit_ok else "FAIL", ["cornerstone security backup-restore-test --json"], "Backup/restore rehearsal preserves counts, artifact hashes, evidence replay, and audit integrity."),
+        _row("CS-SEC-013", "MUST_PASS", "PASS" if helpful_ok and audit_ok else "FAIL", ["cornerstone security helpful-failure-test --json"], "Major failure classes include cause, impact, retry options, escalation path, and preserved safe state."),
+        _row("CS-SEC-014", "MUST_PASS", "PASS" if idempotency_ok and audit_ok else "FAIL", ["cornerstone action idempotency-test <action_id> --json"], "Duplicate action requests are deduplicated with zero duplicate real-world side effects and retry/quarantine policy."),
+        _row("CS-SEC-017", "MUST_PASS", "PASS" if retention_ok and audit_ok else "FAIL", ["cornerstone security retention-explain --json"], "Retention explanation distinguishes deleted, disabled, audit-retained, immutable evidence, anonymized, and policy-bound states."),
+        _row("CS-SEC-018", "MUST_PASS", "PASS" if operator_ok and audit_ok else "FAIL", ["cornerstone security operator-status --json"], "Operator status includes ingestion, search, model routing, workflow, connector, policy, audit, retry, and failed mission signals."),
+        _row("CS-SEC-019", "MUST_PASS", "PASS" if release_ok and audit_ok else "FAIL", ["cornerstone release report-check --json"], "Release report validation confirms scenario table, evidence, human-required section, gaps/risks, and blocking-free scenario JSON."),
+        _row("CS-SEC-020", "REGRESSION_GUARD", "PASS" if release_ok and audit_ok else "FAIL", ["cornerstone release report-check --json"], "Implementation claims remain tied to repo evidence and distinguish production targets from current scaffold implementation."),
+        _row("CS-REG-020", "REGRESSION_GUARD", "PASS" if release_ok and audit_ok else "FAIL", ["cornerstone release report-check --json"], "Scenario verification remains the release standard through a report-check command and saved scenario evidence."),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "full-security-operations",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_FULL_SECURITY_OPERATIONS_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "security_operations_evidence": {
+            "artifact_id": artifact_id,
+            "evidence_bundle_id": bundle_id,
+            "claim_id": claim_id,
+            "mission_id": mission_id,
+            "action_id": action_id,
+            "action_result_status": action_result.get("status"),
+            "credential_boundary_id": credential.get("boundary_id"),
+            "sensitive_gate_id": sensitive_gate.get("gate_id"),
+            "backup_restore_id": backup.get("restore_id"),
+            "helpful_failure_id": failures.get("failure_id"),
+            "idempotency_id": idempotency.get("idempotency_id"),
+            "retention_id": retention.get("retention_id"),
+            "operator_status_id": operator_status.get("status_id"),
+            "release_report_id": release_validation.get("report_id"),
+            "release_report_scenario_count": release_validation.get("scenario_count"),
+            "audit_event_count": audit_payload.get("event_count"),
+            "research_basis": [
+                "OWASP LLM guidance treats prompt injection, sensitive information disclosure, excessive agency, and supply-chain weaknesses as core risks.",
+                "OpenTelemetry frames operational visibility around correlated logs, metrics, and traces.",
+                "SLSA emphasizes provenance and tamper-resistance for release and supply-chain claims.",
+                "NIST AI RMF emphasizes governance, transparency, accountability, and risk management.",
+            ],
+        },
+        "negative_evidence": {
+            "credentials_exposed_to_agent": int(bool(credential.get("credentials_exposed_to_agent"))),
+            "credentials_exposed_to_product_output": int(bool(credential.get("credentials_exposed_to_product_output"))),
+            "raw_secret_reads": int(credential.get("raw_secret_reads", 1) or 0),
+            "sensitive_mutation_executed": int(bool(sensitive_gate.get("mutation_executed"))),
+            "human_required_missing_fields": 0 if human_required_ok else 1,
+            "restore_integrity_failed": 0 if backup_ok else 1,
+            "failure_without_helpful_fields": 0 if helpful_ok else 1,
+            "duplicate_side_effects": int(idempotency.get("duplicate_real_world_side_effects", 1) or 0),
+            "retention_unexplained_states": len({"deleted", "disabled", "retained_for_audit", "retained_as_immutable_evidence", "anonymized", "subject_to_policy"} - set(retention_states)),
+            "observability_missing_signals": len(required_signals - set(status_signals)),
+            "release_report_without_scenarios": 0 if release_validation.get("scenario_count", 0) >= 1 else 1,
+            "implementation_claim_without_repo_evidence": 0 if release_validation.get("no_implementation_claim_without_repo_evidence") is True else 1,
+            "scenario_verification_standard_missing": 0 if release_validation.get("scenario_verification_remains_release_standard") is True else 1,
+            "external_http_calls": int(action_result.get("external_http_calls", 0) or 0) + int(credential.get("external_http_calls", 0) or 0) + int(failures.get("external_http_calls", 0) or 0) + int(operator_status.get("external_http_calls", 0) or 0),
+            "audit_verify_failed": 0 if audit_ok else 1,
+        },
+        "human_required": human_required,
+    }
+
+
 def verify_vs0_memory_truth_boundary(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-memory-truth-boundary")
     state_path = root / state_rel

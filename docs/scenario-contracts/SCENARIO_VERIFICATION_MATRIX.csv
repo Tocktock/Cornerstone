@@ -173,18 +173,18 @@ CS-SEC-005,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-detail-surfac
 CS-SEC-006,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-audit-ledger --json,reports/scenario/vs0-audit-ledger-2026-06-09.json,,,,,PASS
 CS-SEC-007,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security --json,reports/scenario/vs0-security-2026-06-09.json,,,,,PASS
 CS-SEC-008,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security --json,reports/scenario/vs0-security-2026-06-09.json,,,,,PASS
-CS-SEC-009,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-009 --json,reports/scenario/cs-sec-009.json,,,,,NOT_VERIFIED
-CS-SEC-010,MUST_PASS,true,P+D,AI,cornerstone scenario verify full --scenario CS-SEC-010 --json,reports/scenario/cs-sec-010.json,,,,,NOT_VERIFIED
-CS-SEC-011,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-SEC-011 --json,reports/scenario/cs-sec-011.json,,,,,NOT_VERIFIED
-CS-SEC-012,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-012 --json,reports/scenario/cs-sec-012.json,,,,,NOT_VERIFIED
-CS-SEC-013,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-013 --json,reports/scenario/cs-sec-013.json,,,,,NOT_VERIFIED
-CS-SEC-014,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-014 --json,reports/scenario/cs-sec-014.json,,,,,NOT_VERIFIED
+CS-SEC-009,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS
+CS-SEC-010,MUST_PASS,true,P+D,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS
+CS-SEC-011,MUST_PASS,true,D,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS
+CS-SEC-012,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS
+CS-SEC-013,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS
+CS-SEC-014,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS
 CS-SEC-015,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
 CS-SEC-016,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
-CS-SEC-017,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-017 --json,reports/scenario/cs-sec-017.json,,,,,NOT_VERIFIED
-CS-SEC-018,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-018 --json,reports/scenario/cs-sec-018.json,,,,,NOT_VERIFIED
-CS-SEC-019,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-019 --json,reports/scenario/cs-sec-019.json,,,,,NOT_VERIFIED
-CS-SEC-020,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-020 --json,reports/scenario/cs-sec-020.json,,,,,NOT_VERIFIED
+CS-SEC-017,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS
+CS-SEC-018,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS
+CS-SEC-019,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS
+CS-SEC-020,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS
 CS-REG-001,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-product-loop-identity --json,reports/scenario/vs0-product-loop-identity-2026-06-09.json,,,,,PASS
 CS-REG-002,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-REG-003,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
@@ -204,4 +204,4 @@ CS-REG-016,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-regres
 CS-REG-017,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS
 CS-REG-018,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS
 CS-REG-019,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-019 --json,reports/scenario/cs-reg-019.json,,,,,NOT_VERIFIED
-CS-REG-020,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-020 --json,reports/scenario/cs-reg-020.json,,,,,NOT_VERIFIED
+CS-REG-020,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS

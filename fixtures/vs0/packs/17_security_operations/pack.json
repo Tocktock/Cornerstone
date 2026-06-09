@@ -1,0 +1,55 @@
+{
+  "id": "pack_17_security_operations",
+  "scenario_ids": [
+    "CS-SEC-009",
+    "CS-SEC-010",
+    "CS-SEC-011",
+    "CS-SEC-012",
+    "CS-SEC-013",
+    "CS-SEC-014",
+    "CS-SEC-017",
+    "CS-SEC-018",
+    "CS-SEC-019",
+    "CS-SEC-020",
+    "CS-REG-020"
+  ],
+  "classes": [],
+  "inputs": [
+    {
+      "path": "security_seed.txt",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    }
+  ],
+  "negative_evidence": {
+    "credentials_exposed_to_agent": 0,
+    "credentials_exposed_to_product_output": 0,
+    "raw_secret_reads": 0,
+    "sensitive_mutation_executed": 0,
+    "human_required_missing_fields": 0,
+    "restore_integrity_failed": 0,
+    "failure_without_helpful_fields": 0,
+    "duplicate_side_effects": 0,
+    "retention_unexplained_states": 0,
+    "observability_missing_signals": 0,
+    "release_report_without_scenarios": 0,
+    "implementation_claim_without_repo_evidence": 0,
+    "scenario_verification_standard_missing": 0,
+    "external_http_calls": 0,
+    "audit_verify_failed": 0
+  },
+  "expected": {
+    "connector_credentials_stay_in_connectorhub": true,
+    "sensitive_changes_require_stop_and_ask": true,
+    "human_required_items_are_explicit": true,
+    "backup_restore_preserves_evidence_and_audit": true,
+    "failures_are_helpful_and_safe": true,
+    "external_actions_are_idempotent_where_possible": true,
+    "retention_is_transparent": true,
+    "observability_exposes_operational_status": true,
+    "release_reports_include_scenario_verification": true,
+    "implementation_claims_require_repo_evidence": true,
+    "scenario_verification_remains_release_standard": true
+  }
+}

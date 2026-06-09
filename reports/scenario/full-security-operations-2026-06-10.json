@@ -1,0 +1,2415 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify full-security-operations",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [
+    {
+      "expected_human_evidence": "Signed drill transcript with restored artifact/evidence/audit counts and integrity verification.",
+      "id": "HR-SEC-OPS-001",
+      "reason": "Production backup and restore must be proven against the real deployment backup system.",
+      "release_impact": "Blocks production PASS for backup/restore, but not local deterministic scaffold PASS.",
+      "required_human_action": "Run an approved production-like backup/restore drill without exposing secrets."
+    },
+    {
+      "expected_human_evidence": "Credential custody review showing no raw secret exposure to agents or product outputs.",
+      "id": "HR-SEC-OPS-002",
+      "reason": "Live provider credential custody cannot be verified without approved real connector accounts.",
+      "release_impact": "Blocks live-provider PASS, but not mocked ConnectorHub boundary PASS.",
+      "required_human_action": "Inspect ConnectorHub credential custody and provider audit logs in an approved environment."
+    }
+  ],
+  "ids": {
+    "git_commit": "3510c62"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "audit_verify_failed": 0,
+    "credentials_exposed_to_agent": 0,
+    "credentials_exposed_to_product_output": 0,
+    "duplicate_side_effects": 0,
+    "external_http_calls": 0,
+    "failure_without_helpful_fields": 0,
+    "human_required_missing_fields": 0,
+    "implementation_claim_without_repo_evidence": 0,
+    "observability_missing_signals": 0,
+    "raw_secret_reads": 0,
+    "release_report_without_scenarios": 0,
+    "restore_integrity_failed": 0,
+    "retention_unexplained_states": 0,
+    "scenario_verification_standard_missing": 0,
+    "sensitive_mutation_executed": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/full-security-operations-2026-06-10.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone connector credential-boundary-test --json"
+      ],
+      "id": "CS-SEC-009",
+      "notes": "ConnectorHub credential boundary keeps provider credentials out of agents and product outputs.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone security sensitive-change-test --json"
+      ],
+      "id": "CS-SEC-010",
+      "notes": "Sensitive changes require stop-and-ask approval with risk, impact, rollback, and no execution.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-security-operations --json"
+      ],
+      "id": "CS-SEC-011",
+      "notes": "Human-required verification entries list reason, required action, expected evidence, and release impact.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone security backup-restore-test --json"
+      ],
+      "id": "CS-SEC-012",
+      "notes": "Backup/restore rehearsal preserves counts, artifact hashes, evidence replay, and audit integrity.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone security helpful-failure-test --json"
+      ],
+      "id": "CS-SEC-013",
+      "notes": "Major failure classes include cause, impact, retry options, escalation path, and preserved safe state.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone action idempotency-test <action_id> --json"
+      ],
+      "id": "CS-SEC-014",
+      "notes": "Duplicate action requests are deduplicated with zero duplicate real-world side effects and retry/quarantine policy.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone security retention-explain --json"
+      ],
+      "id": "CS-SEC-017",
+      "notes": "Retention explanation distinguishes deleted, disabled, audit-retained, immutable evidence, anonymized, and policy-bound states.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone security operator-status --json"
+      ],
+      "id": "CS-SEC-018",
+      "notes": "Operator status includes ingestion, search, model routing, workflow, connector, policy, audit, retry, and failed mission signals.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone release report-check --json"
+      ],
+      "id": "CS-SEC-019",
+      "notes": "Release report validation confirms scenario table, evidence, human-required section, gaps/risks, and blocking-free scenario JSON.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone release report-check --json"
+      ],
+      "id": "CS-SEC-020",
+      "notes": "Implementation claims remain tied to repo evidence and distinguish production targets from current scaffold implementation.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "cornerstone release report-check --json"
+      ],
+      "id": "CS-REG-020",
+      "notes": "Scenario verification remains the release standard through a report-check command and saved scenario evidence.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "full-security-operations",
+  "schema_version": "cs.cli.v0",
+  "security_operations_evidence": {
+    "action_id": "action_ed43063be4b1b8a2",
+    "action_result_status": "success",
+    "artifact_id": "art_986da5bb3cbbb028",
+    "audit_event_count": 19,
+    "backup_restore_id": "backuprestore_c821129f013f8ba6",
+    "claim_id": "claim_1c18d5632dada33b",
+    "credential_boundary_id": "credbound_469e320f4bec404e",
+    "evidence_bundle_id": "evb_252814d36352daab",
+    "helpful_failure_id": "helpfail_e82093be36b41184",
+    "idempotency_id": "idemp_25b94e0cc8d3c202",
+    "mission_id": "mission_1f69e7fe23376e55",
+    "operator_status_id": "opsstatus_69e7a6f7a3ec2dd9",
+    "release_report_id": "relreport_c88bc25a27ffd15c",
+    "release_report_scenario_count": 21,
+    "research_basis": [
+      "OWASP LLM guidance treats prompt injection, sensitive information disclosure, excessive agency, and supply-chain weaknesses as core risks.",
+      "OpenTelemetry frames operational visibility around correlated logs, metrics, and traces.",
+      "SLSA emphasizes provenance and tamper-resistance for release and supply-chain claims.",
+      "NIST AI RMF emphasizes governance, transparency, accountability, and risk management."
+    ],
+    "retention_id": "retention_f3569eb9d16f0ec2",
+    "sensitive_gate_id": "sensgate_adf4777fe925b575"
+  },
+  "state_dir": "tmp/scenario/full-security-operations-18891",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 11,
+    "product_feature_claims": "PARTIAL_FULL_SECURITY_OPERATIONS_ONLY",
+    "scenario_count": 11
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 19,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "3510c62"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "backup_restore": {
+      "command": [
+        "cornerstone",
+        "security",
+        "backup-restore-test",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json",
+        "--subject-ref",
+        "artifact:art_986da5bb3cbbb028",
+        "--subject-ref",
+        "evidence_bundle:evb_252814d36352daab",
+        "--subject-ref",
+        "claim:claim_1c18d5632dada33b",
+        "--subject-ref",
+        "mission:mission_1f69e7fe23376e55",
+        "--subject-ref",
+        "action:action_ed43063be4b1b8a2"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_6e1e7bccb92bd9cc"
+        ],
+        "backup_restore": {
+          "artifact_hashes_match": true,
+          "audit_integrity_after_restore": {
+            "errors": [],
+            "event_count": 14,
+            "status": "success"
+          },
+          "audit_replay_ok": true,
+          "backup_manifest_hash": "0d57adcb32348fefc27d8ef854e5b9d4e26fbf898d14c7a15fd7344c35c43e5a",
+          "counts_after": {
+            "action_count": 1,
+            "artifact_count": 1,
+            "claim_count": 1,
+            "experience_count": 0,
+            "memory_count": 0,
+            "mission_count": 1
+          },
+          "counts_before": {
+            "action_count": 1,
+            "artifact_count": 1,
+            "claim_count": 1,
+            "experience_count": 0,
+            "memory_count": 0,
+            "mission_count": 1
+          },
+          "created_at": "2026-06-09T18:01:48.273376Z",
+          "evidence_replay_ok": true,
+          "restore_id": "backuprestore_c821129f013f8ba6",
+          "restore_used_external_system": false,
+          "schema_version": "cs.backup_restore_rehearsal.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "search_replay_ok": true,
+          "secret_material_restored_to_output": false,
+          "status": "restored"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone security backup-restore-test",
+        "errors": [],
+        "evidence_refs": [
+          "backup_restore:backuprestore_c821129f013f8ba6"
+        ],
+        "ids": {
+          "git_commit": "3510c62",
+          "restore_id": "backuprestore_c821129f013f8ba6"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_dedb00d042fec71e",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_77fe975207350461"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T18:01:47.777708Z",
+          "evidence_bundle_id": "evb_252814d36352daab",
+          "evidence_items": [
+            {
+              "artifact_id": "art_986da5bb3cbbb028",
+              "derived_text_ref": "derived/art_986da5bb3cbbb028.txt",
+              "original_storage_ref": "sha256:986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151",
+              "provenance": {
+                "created_at": "2026-06-09T18:01:47.676765Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_dedb00d042fec71e",
+              "snippet": "alpha-evidence-anchor.",
+              "source": {
+                "ingested_at": "2026-06-09T18:01:47.676765Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/17_security_operations/security_seed.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_986da5bb3cbbb028",
+                "derived_text_ref": "derived/art_986da5bb3cbbb028.txt",
+                "evidence_refs": [
+                  "artifact:art_986da5bb3cbbb028",
+                  "storage:sha256:986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "alpha-evidence-anchor",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "alpha-evidence-anchor",
+                    "query_term": "alpha-evidence-anchor",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "alpha-evidence-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_dedb00d042fec71e"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_dedb00d042fec71e"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_252814d36352daab",
+          "search_snapshot:search_dedb00d042fec71e",
+          "artifact:art_986da5bb3cbbb028"
+        ],
+        "ids": {
+          "audit_event_id": "audit_77fe975207350461",
+          "evidence_bundle_id": "evb_252814d36352daab",
+          "git_commit": "3510c62",
+          "search_snapshot_id": "search_dedb00d042fec71e"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_252814d36352daab",
+        "--statement",
+        "The security operations fixture has evidence for governed action and release reporting.",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_61d7c253096182ed"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_1c18d5632dada33b",
+          "created_at": "2026-06-09T18:01:47.834347Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_986da5bb3cbbb028"
+            ],
+            "evidence_bundle_id": "evb_252814d36352daab",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_dedb00d042fec71e",
+              "evidence_bundle:evb_252814d36352daab"
+            ],
+            "search_snapshot_id": "search_dedb00d042fec71e"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The security operations fixture has evidence for governed action and release reporting.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_1c18d5632dada33b",
+          "evidence_bundle:evb_252814d36352daab",
+          "search_snapshot:search_dedb00d042fec71e",
+          "artifact:art_986da5bb3cbbb028"
+        ],
+        "ids": {
+          "audit_event_id": "audit_61d7c253096182ed",
+          "claim_id": "claim_1c18d5632dada33b",
+          "evidence_bundle_id": "evb_252814d36352daab",
+          "git_commit": "3510c62",
+          "search_snapshot_id": "search_dedb00d042fec71e"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "credential_boundary": {
+      "command": [
+        "cornerstone",
+        "connector",
+        "credential-boundary-test",
+        "--provider",
+        "mock_provider",
+        "--capability",
+        "mock.write_status",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_cbd5aecad83ced4c"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone connector credential-boundary-test",
+        "credential_boundary": {
+          "boundary_id": "credbound_469e320f4bec404e",
+          "capability": "mock.write_status",
+          "created_at": "2026-06-09T18:01:48.162830Z",
+          "credential_custody": "connectorhub",
+          "credential_reference": "connectorhub://credential/mock_provider/redacted",
+          "credential_secret_value_present": false,
+          "credentials_exposed_to_agent": false,
+          "credentials_exposed_to_product_output": false,
+          "declared_actions": [
+            "mock.write_status"
+          ],
+          "direct_provider_access": false,
+          "evidence_metadata": {
+            "boundary": "ConnectorHub",
+            "capability": "mock.write_status",
+            "provider": "mock_provider"
+          },
+          "external_http_calls": 0,
+          "mediated_by": "ConnectorHub",
+          "provider": "mock_provider",
+          "raw_secret_reads": 0,
+          "schema_version": "cs.connector_credential_boundary_test.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_policy": {
+            "projection_required": true,
+            "raw_access_default": "deny",
+            "retry_quarantine": true
+          },
+          "status": "passed"
+        },
+        "errors": [],
+        "evidence_refs": [
+          "credential_boundary:credbound_469e320f4bec404e"
+        ],
+        "ids": {
+          "boundary_id": "credbound_469e320f4bec404e",
+          "git_commit": "3510c62"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "external_action_approve": {
+      "command": [
+        "cornerstone",
+        "action",
+        "approve",
+        "action_ed43063be4b1b8a2",
+        "--approver",
+        "owner",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_ed43063be4b1b8a2",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approved_at": "2026-06-09T18:01:48.051808Z",
+            "approver": "owner",
+            "required": true,
+            "status": "approved"
+          },
+          "audit_ref": "audit:audit_2e283d838d737949",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T18:01:47.997599Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_1c18d5632dada33b",
+            "created_at": "2026-06-09T18:01:47.997578Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://security-ops/status",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_0be9aa1234239e26",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 1,
+              "risk": "high",
+              "target": "mock://security-ops/status"
+            },
+            "goal": "Write a mocked security status through ConnectorHub",
+            "mission_id": "mission_1f69e7fe23376e55",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T18:01:47.997452Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_d4256f128bfe06e7",
+              "mission_id": "mission_1f69e7fe23376e55",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_986da5bb3cbbb028"
+            ],
+            "evidence_bundle_id": "evb_252814d36352daab",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_dedb00d042fec71e",
+              "evidence_bundle:evb_252814d36352daab"
+            ],
+            "search_snapshot_id": "search_dedb00d042fec71e"
+          },
+          "execution": {
+            "can_execute_now": true,
+            "result": null,
+            "status": "ready_to_execute"
+          },
+          "goal": "Write a mocked security status through ConnectorHub",
+          "mission_id": "mission_1f69e7fe23376e55",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T18:01:47.997452Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_d4256f128bfe06e7",
+            "mission_id": "mission_1f69e7fe23376e55",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_1c18d5632dada33b"
+        },
+        "audit_refs": [
+          "audit:audit_7f822cde5ba9a10b"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action approve",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_ed43063be4b1b8a2"
+        ],
+        "ids": {
+          "action_id": "action_ed43063be4b1b8a2",
+          "git_commit": "3510c62"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "external_action_execute": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_ed43063be4b1b8a2",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_ed43063be4b1b8a2",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approved_at": "2026-06-09T18:01:48.051808Z",
+            "approver": "owner",
+            "required": true,
+            "status": "approved"
+          },
+          "audit_ref": "audit:audit_2e283d838d737949",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T18:01:47.997599Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_1c18d5632dada33b",
+            "created_at": "2026-06-09T18:01:47.997578Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://security-ops/status",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_0be9aa1234239e26",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 1,
+              "risk": "high",
+              "target": "mock://security-ops/status"
+            },
+            "goal": "Write a mocked security status through ConnectorHub",
+            "mission_id": "mission_1f69e7fe23376e55",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T18:01:47.997452Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_d4256f128bfe06e7",
+              "mission_id": "mission_1f69e7fe23376e55",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_986da5bb3cbbb028"
+            ],
+            "evidence_bundle_id": "evb_252814d36352daab",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_dedb00d042fec71e",
+              "evidence_bundle:evb_252814d36352daab"
+            ],
+            "search_snapshot_id": "search_dedb00d042fec71e"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": {
+              "action_id": "action_ed43063be4b1b8a2",
+              "executed_at": "2026-06-09T18:01:48.107131Z",
+              "external_http_calls": 0,
+              "message": "Action execution was recorded through the governed Workflow/Action path.",
+              "mission_id": "mission_1f69e7fe23376e55",
+              "mock_connector_calls": 1,
+              "schema_version": "cs.action_result.v0",
+              "side_effect_boundary": "mocked_connector",
+              "status": "success"
+            },
+            "status": "executed"
+          },
+          "goal": "Write a mocked security status through ConnectorHub",
+          "mission_id": "mission_1f69e7fe23376e55",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T18:01:47.997452Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_d4256f128bfe06e7",
+            "mission_id": "mission_1f69e7fe23376e55",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_1c18d5632dada33b"
+        },
+        "action_result": {
+          "action_id": "action_ed43063be4b1b8a2",
+          "executed_at": "2026-06-09T18:01:48.107131Z",
+          "external_http_calls": 0,
+          "message": "Action execution was recorded through the governed Workflow/Action path.",
+          "mission_id": "mission_1f69e7fe23376e55",
+          "mock_connector_calls": 1,
+          "schema_version": "cs.action_result.v0",
+          "side_effect_boundary": "mocked_connector",
+          "status": "success"
+        },
+        "audit_refs": [
+          "audit:audit_9f30dd1b080ec7a9"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_ed43063be4b1b8a2"
+        ],
+        "ids": {
+          "action_id": "action_ed43063be4b1b8a2",
+          "git_commit": "3510c62",
+          "mission_id": "mission_1f69e7fe23376e55"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "external_action_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_1f69e7fe23376e55",
+        "--claim-id",
+        "claim_1c18d5632dada33b",
+        "--goal",
+        "Write a mocked security status through ConnectorHub",
+        "--action-kind",
+        "external_writeback",
+        "--risk",
+        "high",
+        "--connector",
+        "mock_connector",
+        "--target",
+        "mock://security-ops/status",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_ed43063be4b1b8a2",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_2e283d838d737949",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T18:01:47.997599Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_1c18d5632dada33b",
+            "created_at": "2026-06-09T18:01:47.997578Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://security-ops/status",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_0be9aa1234239e26",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 1,
+              "risk": "high",
+              "target": "mock://security-ops/status"
+            },
+            "goal": "Write a mocked security status through ConnectorHub",
+            "mission_id": "mission_1f69e7fe23376e55",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T18:01:47.997452Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_d4256f128bfe06e7",
+              "mission_id": "mission_1f69e7fe23376e55",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_986da5bb3cbbb028"
+            ],
+            "evidence_bundle_id": "evb_252814d36352daab",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_dedb00d042fec71e",
+              "evidence_bundle:evb_252814d36352daab"
+            ],
+            "search_snapshot_id": "search_dedb00d042fec71e"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "pending_approval"
+          },
+          "goal": "Write a mocked security status through ConnectorHub",
+          "mission_id": "mission_1f69e7fe23376e55",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T18:01:47.997452Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_d4256f128bfe06e7",
+            "mission_id": "mission_1f69e7fe23376e55",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_1c18d5632dada33b"
+        },
+        "audit_refs": [
+          "audit:audit_2e283d838d737949"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_ed43063be4b1b8a2",
+          "mission:mission_1f69e7fe23376e55",
+          "claim:claim_1c18d5632dada33b",
+          "dry_run:dryrun_0be9aa1234239e26",
+          "evidence_bundle:evb_252814d36352daab",
+          "artifact:art_986da5bb3cbbb028"
+        ],
+        "ids": {
+          "action_id": "action_ed43063be4b1b8a2",
+          "audit_event_id": "audit_2e283d838d737949",
+          "claim_id": "claim_1c18d5632dada33b",
+          "dry_run_id": "dryrun_0be9aa1234239e26",
+          "git_commit": "3510c62",
+          "mission_id": "mission_1f69e7fe23376e55"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_d4256f128bfe06e7"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T18:01:47.997452Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_d4256f128bfe06e7",
+            "mission_id": "mission_1f69e7fe23376e55",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "helpful_failure": {
+      "command": [
+        "cornerstone",
+        "security",
+        "helpful-failure-test",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_fa26bc41b442d31e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone security helpful-failure-test",
+        "errors": [],
+        "evidence_refs": [
+          "helpful_failures:helpfail_e82093be36b41184"
+        ],
+        "helpful_failures": {
+          "all_have_cause": true,
+          "all_have_escalation_path": true,
+          "all_have_impact": true,
+          "all_have_retry_options": true,
+          "all_preserve_safe_state": true,
+          "created_at": "2026-06-09T18:01:48.329236Z",
+          "examples": [
+            {
+              "cause": "ingestion failed in deterministic fixture",
+              "escalation_path": "namespace_owner_review",
+              "failure_class": "ingestion",
+              "impact": "No unsafe mutation occurred; existing evidence and audit remain preserved.",
+              "retry_options": [
+                "retry_same_input",
+                "reduce_scope",
+                "request_owner_review"
+              ],
+              "safe_state_preserved": true
+            },
+            {
+              "cause": "search failed in deterministic fixture",
+              "escalation_path": "namespace_owner_review",
+              "failure_class": "search",
+              "impact": "No unsafe mutation occurred; existing evidence and audit remain preserved.",
+              "retry_options": [
+                "retry_same_input",
+                "reduce_scope",
+                "request_owner_review"
+              ],
+              "safe_state_preserved": true
+            },
+            {
+              "cause": "extraction failed in deterministic fixture",
+              "escalation_path": "namespace_owner_review",
+              "failure_class": "extraction",
+              "impact": "No unsafe mutation occurred; existing evidence and audit remain preserved.",
+              "retry_options": [
+                "retry_same_input",
+                "reduce_scope",
+                "request_owner_review"
+              ],
+              "safe_state_preserved": true
+            },
+            {
+              "cause": "model_routing failed in deterministic fixture",
+              "escalation_path": "namespace_owner_review",
+              "failure_class": "model_routing",
+              "impact": "No unsafe mutation occurred; existing evidence and audit remain preserved.",
+              "retry_options": [
+                "retry_same_input",
+                "reduce_scope",
+                "request_owner_review"
+              ],
+              "safe_state_preserved": true
+            },
+            {
+              "cause": "action_execution failed in deterministic fixture",
+              "escalation_path": "namespace_owner_review",
+              "failure_class": "action_execution",
+              "impact": "No unsafe mutation occurred; existing evidence and audit remain preserved.",
+              "retry_options": [
+                "retry_same_input",
+                "reduce_scope",
+                "request_owner_review"
+              ],
+              "safe_state_preserved": true
+            },
+            {
+              "cause": "connector_call failed in deterministic fixture",
+              "escalation_path": "namespace_owner_review",
+              "failure_class": "connector_call",
+              "impact": "No unsafe mutation occurred; existing evidence and audit remain preserved.",
+              "retry_options": [
+                "retry_same_input",
+                "reduce_scope",
+                "request_owner_review"
+              ],
+              "safe_state_preserved": true
+            },
+            {
+              "cause": "policy_check failed in deterministic fixture",
+              "escalation_path": "namespace_owner_review",
+              "failure_class": "policy_check",
+              "impact": "No unsafe mutation occurred; existing evidence and audit remain preserved.",
+              "retry_options": [
+                "retry_same_input",
+                "reduce_scope",
+                "request_owner_review"
+              ],
+              "safe_state_preserved": true
+            },
+            {
+              "cause": "memory_update failed in deterministic fixture",
+              "escalation_path": "namespace_owner_review",
+              "failure_class": "memory_update",
+              "impact": "No unsafe mutation occurred; existing evidence and audit remain preserved.",
+              "retry_options": [
+                "retry_same_input",
+                "reduce_scope",
+                "request_owner_review"
+              ],
+              "safe_state_preserved": true
+            }
+          ],
+          "external_http_calls": 0,
+          "failure_id": "helpfail_e82093be36b41184",
+          "schema_version": "cs.helpful_failure_examples.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "ready"
+        },
+        "ids": {
+          "failure_id": "helpfail_e82093be36b41184",
+          "git_commit": "3510c62"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "idempotency": {
+      "command": [
+        "cornerstone",
+        "action",
+        "idempotency-test",
+        "action_ed43063be4b1b8a2",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_171c55bdab1dc252"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action idempotency-test",
+        "errors": [],
+        "evidence_refs": [
+          "idempotency:idemp_25b94e0cc8d3c202",
+          "action:action_ed43063be4b1b8a2"
+        ],
+        "idempotency": {
+          "action_id": "action_ed43063be4b1b8a2",
+          "created_at": "2026-06-09T18:01:48.385287Z",
+          "duplicate_real_world_side_effects": 0,
+          "duplicate_request": {
+            "accepted": false,
+            "deduplicated": true,
+            "side_effect_count": 0
+          },
+          "external_http_calls": 0,
+          "first_request": {
+            "accepted": true,
+            "side_effect_count": 1
+          },
+          "idempotency_id": "idemp_25b94e0cc8d3c202",
+          "idempotency_key": "mission_1f69e7fe23376e55:action_ed43063be4b1b8a2:external_writeback",
+          "retry_policy": {
+            "compensation_required_for_external_failure": true,
+            "max_attempts": 2,
+            "quarantine_after_failure": true,
+            "timeout_ms": 2000
+          },
+          "schema_version": "cs.action_idempotency_test.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "deduplicated"
+        },
+        "ids": {
+          "action_id": "action_ed43063be4b1b8a2",
+          "git_commit": "3510c62",
+          "idempotency_id": "idemp_25b94e0cc8d3c202"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/17_security_operations/security_seed.txt",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_986da5bb3cbbb028",
+          "checksum_sha256": "986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_986da5bb3cbbb028.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 293,
+          "original_storage_ref": "sha256:986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151",
+          "provenance": {
+            "created_at": "2026-06-09T18:01:47.676765Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T18:01:47.676765Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/17_security_operations/security_seed.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_70930de3616df8af"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_986da5bb3cbbb028",
+          "storage:sha256:986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151"
+        ],
+        "ids": {
+          "artifact_id": "art_986da5bb3cbbb028",
+          "audit_event_id": "audit_70930de3616df8af",
+          "checksum_sha256": "986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151",
+          "git_commit": "3510c62"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "mission_activate": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "activate",
+        "mission_1f69e7fe23376e55",
+        "--mode",
+        "autopilot",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_371c66a52e5d3fd7",
+          "audit:audit_a9e5b52e639d4caf"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission activate",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_1f69e7fe23376e55"
+        ],
+        "ids": {
+          "git_commit": "3510c62",
+          "mission_id": "mission_1f69e7fe23376e55"
+        },
+        "mission": {
+          "activated_at": "2026-06-09T18:01:47.943408Z",
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "authority_view": {
+            "allowed_actions": [
+              "internal_status_update",
+              "draft_task",
+              "refresh_brief"
+            ],
+            "forbidden_actions": [
+              "external_writeback_without_workflow_action",
+              "cross_namespace_access",
+              "destructive_change",
+              "secret_exfiltration"
+            ],
+            "may_act_in_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "pause_stop_revoke": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T18:01:47.888295Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_986da5bb3cbbb028"
+            ],
+            "evidence_bundle_id": "evb_252814d36352daab",
+            "search_snapshot_id": "search_dedb00d042fec71e"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Run a governed security operations rehearsal",
+          "mission_id": "mission_1f69e7fe23376e55",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_1c18d5632dada33b",
+            "statement": "The security operations fixture has evidence for governed action and release reporting.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "active",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "autopilot"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": false,
+            "autonomous_execution_allowed": true,
+            "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            "label": "Autopilot"
+          },
+          "mode": "autopilot",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T18:01:47.942995Z"
+        }
+      }
+    },
+    "mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--goal",
+        "Run a governed security operations rehearsal",
+        "--claim-id",
+        "claim_1c18d5632dada33b",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_8ba05eb719ff2f3b"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_1f69e7fe23376e55",
+          "claim:claim_1c18d5632dada33b",
+          "evidence_bundle:evb_252814d36352daab",
+          "artifact:art_986da5bb3cbbb028"
+        ],
+        "ids": {
+          "audit_event_id": "audit_8ba05eb719ff2f3b",
+          "claim_id": "claim_1c18d5632dada33b",
+          "evidence_bundle_id": "evb_252814d36352daab",
+          "git_commit": "3510c62",
+          "mission_id": "mission_1f69e7fe23376e55"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T18:01:47.888295Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_986da5bb3cbbb028"
+            ],
+            "evidence_bundle_id": "evb_252814d36352daab",
+            "search_snapshot_id": "search_dedb00d042fec71e"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Run a governed security operations rehearsal",
+          "mission_id": "mission_1f69e7fe23376e55",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_1c18d5632dada33b",
+            "statement": "The security operations fixture has evidence for governed action and release reporting.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "autopilot"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "mode_set_autopilot": {
+      "command": [
+        "cornerstone",
+        "workspace",
+        "mode",
+        "set",
+        "autopilot",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_21d28cce2683abe9"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone workspace mode set",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "audit_event_id": "audit_21d28cce2683abe9",
+          "git_commit": "3510c62",
+          "workspace_id": "default"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": false,
+            "autonomous_execution_allowed": true,
+            "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            "label": "Autopilot"
+          },
+          "mode": "autopilot",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T18:01:47.608943Z"
+        }
+      }
+    },
+    "operator_status": {
+      "command": [
+        "cornerstone",
+        "security",
+        "operator-status",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_70c129bcce11490c"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone security operator-status",
+        "errors": [],
+        "evidence_refs": [
+          "operator_status:opsstatus_69e7a6f7a3ec2dd9"
+        ],
+        "ids": {
+          "git_commit": "3510c62",
+          "status_id": "opsstatus_69e7a6f7a3ec2dd9"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "operator_status": {
+          "created_at": "2026-06-09T18:01:48.497042Z",
+          "external_http_calls": 0,
+          "schema_version": "cs.operator_status_report.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "shared_context": "3e548f87d142e49b",
+          "signals": {
+            "audit_integrity": {
+              "event_count": 17,
+              "status": "success"
+            },
+            "connector_health": {
+              "mocked": true,
+              "status": "ok"
+            },
+            "failed_missions": {
+              "count": 0,
+              "status": "visible"
+            },
+            "ingestion": {
+              "artifact_count": 1,
+              "status": "ok"
+            },
+            "model_routing": {
+              "route_count": 0,
+              "status": "ok"
+            },
+            "policy_denials": {
+              "count": 0,
+              "status": "visible"
+            },
+            "queue_retries": {
+              "quarantine_count": 0,
+              "retry_count": 0,
+              "status": "ok"
+            },
+            "search": {
+              "status": "ok"
+            },
+            "workflow_execution": {
+              "action_count": 1,
+              "status": "ok"
+            }
+          },
+          "status": "ready",
+          "status_id": "opsstatus_69e7a6f7a3ec2dd9",
+          "telemetry_signals": [
+            "logs",
+            "metrics",
+            "traces"
+          ]
+        },
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "release_report_check": {
+      "command": [
+        "cornerstone",
+        "release",
+        "report-check",
+        "--scenario-report",
+        "reports/scenario/full-brain-routing-2026-06-10.json",
+        "--verification-report",
+        "docs/verification-reports/FULL_BRAIN_ROUTING_BATCH27_REPORT_2026-06-10.md",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_bb846bdfa9c23bb1"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone release report-check",
+        "errors": [],
+        "evidence_refs": [
+          "release_report:relreport_c88bc25a27ffd15c"
+        ],
+        "ids": {
+          "git_commit": "3510c62",
+          "report_id": "relreport_c88bc25a27ffd15c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "release_report_validation": {
+          "blocking": 0,
+          "created_at": "2026-06-09T18:01:48.552928Z",
+          "documented_target_distinguished_from_current_implementation": true,
+          "errors": [],
+          "human_required_count": 0,
+          "missing_sections": [],
+          "no_implementation_claim_without_repo_evidence": true,
+          "pass_count": 21,
+          "report_id": "relreport_c88bc25a27ffd15c",
+          "required_sections": [
+            "Frozen Goal",
+            "Scenario Table",
+            "Human Required",
+            "Command Evidence",
+            "Gaps And Risks"
+          ],
+          "scenario_count": 21,
+          "scenario_report_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/full-brain-routing-2026-06-10.json",
+          "scenario_verification_remains_release_standard": true,
+          "schema_version": "cs.release_report_validation.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "passed",
+          "verification_report_path": "/Users/jiyong/playground/Cornerstone/docs/verification-reports/FULL_BRAIN_ROUTING_BATCH27_REPORT_2026-06-10.md"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "retention": {
+      "command": [
+        "cornerstone",
+        "security",
+        "retention-explain",
+        "--resource-type",
+        "workspace",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ff96d193030b4ccb"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone security retention-explain",
+        "errors": [],
+        "evidence_refs": [
+          "retention:retention_f3569eb9d16f0ec2"
+        ],
+        "ids": {
+          "git_commit": "3510c62",
+          "retention_id": "retention_f3569eb9d16f0ec2"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "retention_explanation": {
+          "active_record_deleted": false,
+          "audit_retained": true,
+          "created_at": "2026-06-09T18:01:48.440846Z",
+          "dry_run": true,
+          "immutable_evidence_retained_when_required": true,
+          "policy": "local_retention_policy_v0",
+          "raw_secret_output": false,
+          "resource_type": "workspace",
+          "retention_id": "retention_f3569eb9d16f0ec2",
+          "schema_version": "cs.retention_explanation.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "states": {
+            "anonymized": "Aggregated product-learning signals use redaction/anonymization and never raw user/org truth by default.",
+            "deleted": "User-visible active record is removed or disabled when policy allows.",
+            "disabled": "Automation and search use stop for disabled resources.",
+            "retained_as_immutable_evidence": "Original artifacts may remain immutable when referenced by evidence or legal/audit policy.",
+            "retained_for_audit": "Audit ledger entries remain tamper-evident for accountability.",
+            "subject_to_policy": "Retention/legal hold/admin policy can constrain deletion."
+          },
+          "status": "explained"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "alpha-evidence-anchor",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_d8175ec66066e331"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_dedb00d042fec71e",
+          "artifact:art_986da5bb3cbbb028",
+          "storage:sha256:986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151"
+        ],
+        "ids": {
+          "audit_event_id": "audit_d8175ec66066e331",
+          "git_commit": "3510c62",
+          "search_snapshot_id": "search_dedb00d042fec71e"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T18:01:47.723315Z",
+          "duration_ms": 0.257,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_986da5bb3cbbb028",
+              "derived_text_ref": "derived/art_986da5bb3cbbb028.txt",
+              "evidence_refs": [
+                "artifact:art_986da5bb3cbbb028",
+                "storage:sha256:986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151"
+              ],
+              "match_reasons": [
+                {
+                  "query": "alpha-evidence-anchor",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "alpha-evidence-anchor",
+                  "query_term": "alpha-evidence-anchor",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:986da5bb3cbbb028b9bbc3f0b6862a5777bacfca2b6a0a8d2bd4820017098151",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "alpha-evidence-anchor."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_dedb00d042fec71e"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "sensitive_change": {
+      "command": [
+        "cornerstone",
+        "security",
+        "sensitive-change-test",
+        "--category",
+        "production_mutation",
+        "--state-dir",
+        "tmp/scenario/full-security-operations-18891",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_4130a7105dcfb3ce"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone security sensitive-change-test",
+        "errors": [],
+        "evidence_refs": [
+          "sensitive_change_gate:sensgate_adf4777fe925b575"
+        ],
+        "ids": {
+          "gate_id": "sensgate_adf4777fe925b575",
+          "git_commit": "3510c62"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_585aceca4e792fa2"
+        ],
+        "policy_decisions": [
+          {
+            "category": "production_mutation",
+            "decided_at": "2026-06-09T18:01:48.217053Z",
+            "decision": "requires_approval",
+            "executed": false,
+            "id": "policy_585aceca4e792fa2",
+            "impact": [
+              "Could mutate durable product state, security posture, tenant boundaries, audit/retention guarantees, release status, or external systems."
+            ],
+            "policy": "sensitive_change_stop_and_ask",
+            "reason": "Sensitive, destructive, production, auth, tenant, retention, audit, broad-network, release, or secret-handling changes require explicit owner approval.",
+            "requires_explicit_approval": true,
+            "resolution_path": [
+              "Show risk, impact, and rollback or irreversibility before proceeding.",
+              "Collect explicit approval from the owner or authorized admin.",
+              "Record approval, execution result, and audit before claiming completion."
+            ],
+            "risk": "high",
+            "rollback": {
+              "available": true,
+              "irreversible_warning": false
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "sensitive_change_gate": {
+          "category": "production_mutation",
+          "created_at": "2026-06-09T18:01:48.217198Z",
+          "external_http_calls": 0,
+          "gate_id": "sensgate_adf4777fe925b575",
+          "mutation_executed": false,
+          "policy_decision": {
+            "category": "production_mutation",
+            "decided_at": "2026-06-09T18:01:48.217053Z",
+            "decision": "requires_approval",
+            "executed": false,
+            "id": "policy_585aceca4e792fa2",
+            "impact": [
+              "Could mutate durable product state, security posture, tenant boundaries, audit/retention guarantees, release status, or external systems."
+            ],
+            "policy": "sensitive_change_stop_and_ask",
+            "reason": "Sensitive, destructive, production, auth, tenant, retention, audit, broad-network, release, or secret-handling changes require explicit owner approval.",
+            "requires_explicit_approval": true,
+            "resolution_path": [
+              "Show risk, impact, and rollback or irreversibility before proceeding.",
+              "Collect explicit approval from the owner or authorized admin.",
+              "Record approval, execution result, and audit before claiming completion."
+            ],
+            "risk": "high",
+            "rollback": {
+              "available": true,
+              "irreversible_warning": false
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "schema_version": "cs.sensitive_change_gate_test.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "secret_material_read": false,
+          "status": "approval_required",
+          "stop_and_ask_card": {
+            "approval_collected": false,
+            "impact": [
+              "Could mutate durable product state, security posture, tenant boundaries, audit/retention guarantees, release status, or external systems."
+            ],
+            "required": true,
+            "risk": "high",
+            "rollback": {
+              "available": true,
+              "irreversible_warning": false
+            }
+          }
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

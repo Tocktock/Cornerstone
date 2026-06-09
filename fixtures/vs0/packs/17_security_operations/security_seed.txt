@@ -1,0 +1,5 @@
+CornerStone security operations fixture.
+
+The security operations rehearsal uses ConnectorHub credential custody, stop-and-ask policy gates, backup/restore replay, helpful failures, idempotency, retention, observability, and release-report validation.
+
+Evidence anchor: alpha-evidence-anchor.

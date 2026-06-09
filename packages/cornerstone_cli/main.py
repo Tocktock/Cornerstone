@@ -17,6 +17,7 @@ from cornerstone_cli.scenarios import (
     verify_full_extension_ecosystem,
     verify_full_learning_experience,
     verify_full_memory_wiki,
+    verify_full_security_operations,
     verify_full_understanding_ontology,
     verify_vs0_audit_ledger,
     verify_vs0_briefing,
@@ -3222,6 +3223,161 @@ def command_connector_direct_write_test(args: argparse.Namespace) -> int:
     return EXIT_POLICY_DENIED
 
 
+def command_connector_credential_boundary_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.test_connector_credential_boundary(args.provider, args.capability, requested_scope)
+    boundary = result["credential_boundary"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone connector credential-boundary-test", "success", root)
+    payload.update(requested_scope)
+    payload["credential_boundary"] = boundary
+    payload["ids"].update({"boundary_id": boundary["boundary_id"]})
+    payload["evidence_refs"].append(f"credential_boundary:{boundary['boundary_id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_action_idempotency_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.test_action_idempotency(args.action_id, requested_scope)
+    payload = base_response("cornerstone action idempotency-test", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_ACTION_NOT_FOUND", "message": "Action Card was not found.", "action_id": args.action_id})
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_SCOPE_DENIED", "message": "Action Card is outside the requested scope.", "resource_scope": result.get("resource_scope")})
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    record = result["idempotency"]
+    audit_event = result["audit_event"]
+    payload["idempotency"] = record
+    payload["ids"].update({"idempotency_id": record["idempotency_id"], "action_id": record["action_id"]})
+    payload["evidence_refs"].extend([f"idempotency:{record['idempotency_id']}", f"action:{record['action_id']}"])
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_security_sensitive_change_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.test_sensitive_change_gate(args.category, requested_scope)
+    gate = result["sensitive_change_gate"]
+    decision = result["policy_decision"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone security sensitive-change-test", "success", root)
+    payload.update(requested_scope)
+    payload["sensitive_change_gate"] = gate
+    payload["policy_decisions"] = [decision]
+    payload["policy_decision_refs"].append(f"policy:{decision['id']}")
+    payload["ids"].update({"gate_id": gate["gate_id"]})
+    payload["evidence_refs"].append(f"sensitive_change_gate:{gate['gate_id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_security_backup_restore_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.rehearse_backup_restore(requested_scope, subject_refs=args.subject_ref)
+    record = result["backup_restore"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone security backup-restore-test", "success", root)
+    payload.update(requested_scope)
+    payload["backup_restore"] = record
+    payload["ids"].update({"restore_id": record["restore_id"]})
+    payload["evidence_refs"].append(f"backup_restore:{record['restore_id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_security_helpful_failure_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.record_helpful_failure_examples(requested_scope)
+    record = result["helpful_failures"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone security helpful-failure-test", "success", root)
+    payload.update(requested_scope)
+    payload["helpful_failures"] = record
+    payload["ids"].update({"failure_id": record["failure_id"]})
+    payload["evidence_refs"].append(f"helpful_failures:{record['failure_id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_security_retention_explain(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.explain_retention(args.resource_type, requested_scope)
+    record = result["retention_explanation"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone security retention-explain", "success", root)
+    payload.update(requested_scope)
+    payload["retention_explanation"] = record
+    payload["ids"].update({"retention_id": record["retention_id"]})
+    payload["evidence_refs"].append(f"retention:{record['retention_id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_security_operator_status(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.operator_status_report(requested_scope)
+    record = result["operator_status"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone security operator-status", "success", root)
+    payload.update(requested_scope)
+    payload["operator_status"] = record
+    payload["ids"].update({"status_id": record["status_id"]})
+    payload["evidence_refs"].append(f"operator_status:{record['status_id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_release_report_check(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    scenario_report = (root / args.scenario_report).resolve()
+    verification_report = (root / args.verification_report).resolve()
+    result = store.validate_release_report(scenario_report, verification_report, requested_scope)
+    record = result["release_report_validation"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone release report-check", "success" if record["status"] == "passed" else "failed", root)
+    payload.update(requested_scope)
+    payload["release_report_validation"] = record
+    payload["ids"].update({"report_id": record["report_id"]})
+    payload["evidence_refs"].append(f"release_report:{record['report_id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    if record["status"] != "passed":
+        payload["errors"].append({"code": "CS_RELEASE_REPORT_INVALID", "message": "Release report validation failed.", "details": record["errors"]})
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_conversation_start(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -3468,6 +3624,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_full_agent_orchestration(root)
     elif args.contract == "full-brain-routing":
         report = verify_full_brain_routing(root)
+    elif args.contract == "full-security-operations":
+        report = verify_full_security_operations(root)
     elif args.contract == "full-learning-experience":
         report = verify_full_learning_experience(root)
     elif args.contract == "full-extension-ecosystem":
@@ -3506,6 +3664,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "full-claim-collaboration",
                     "full-agent-orchestration",
                     "full-brain-routing",
+                    "full-security-operations",
                     "full-extension-ecosystem",
                     "full-learning-experience",
                     "full-memory-wiki",
@@ -4559,6 +4718,13 @@ def build_parser() -> argparse.ArgumentParser:
     action_execute.add_argument("--json", action="store_true", help="Emit JSON output")
     action_execute.set_defaults(func=command_action_execute)
 
+    action_idempotency = action_sub.add_parser("idempotency-test", help="Verify duplicate action requests are deduplicated")
+    action_idempotency.add_argument("action_id", help="Action ID")
+    add_state_argument(action_idempotency)
+    add_scope_arguments(action_idempotency)
+    action_idempotency.add_argument("--json", action="store_true", help="Emit JSON output")
+    action_idempotency.set_defaults(func=command_action_idempotency_test)
+
     connector = subcommands.add_parser("connector", help="Connector boundary commands")
     connector_sub = connector.add_subparsers(dest="connector_command")
 
@@ -4569,6 +4735,61 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(direct_write)
     direct_write.add_argument("--json", action="store_true", help="Emit JSON output")
     direct_write.set_defaults(func=command_connector_direct_write_test)
+
+    credential_boundary = connector_sub.add_parser("credential-boundary-test", help="Verify ConnectorHub credential custody without exposing secrets")
+    credential_boundary.add_argument("--provider", default="mock_provider")
+    credential_boundary.add_argument("--capability", default="mock.write_status")
+    add_state_argument(credential_boundary)
+    add_scope_arguments(credential_boundary)
+    credential_boundary.add_argument("--json", action="store_true", help="Emit JSON output")
+    credential_boundary.set_defaults(func=command_connector_credential_boundary_test)
+
+    security = subcommands.add_parser("security", help="Security and operations verification helpers")
+    security_sub = security.add_subparsers(dest="security_command")
+
+    sensitive_change = security_sub.add_parser("sensitive-change-test", help="Verify stop-and-ask gate for sensitive changes")
+    sensitive_change.add_argument("--category", default="production_mutation")
+    add_state_argument(sensitive_change)
+    add_scope_arguments(sensitive_change)
+    sensitive_change.add_argument("--json", action="store_true", help="Emit JSON output")
+    sensitive_change.set_defaults(func=command_security_sensitive_change_test)
+
+    backup_restore = security_sub.add_parser("backup-restore-test", help="Run a deterministic backup/restore rehearsal over local records")
+    backup_restore.add_argument("--subject-ref", action="append", default=[], help="Evidence or product refs expected in the backup")
+    add_state_argument(backup_restore)
+    add_scope_arguments(backup_restore)
+    backup_restore.add_argument("--json", action="store_true", help="Emit JSON output")
+    backup_restore.set_defaults(func=command_security_backup_restore_test)
+
+    helpful_failure = security_sub.add_parser("helpful-failure-test", help="Verify helpful failure records for major failure classes")
+    add_state_argument(helpful_failure)
+    add_scope_arguments(helpful_failure)
+    helpful_failure.add_argument("--json", action="store_true", help="Emit JSON output")
+    helpful_failure.set_defaults(func=command_security_helpful_failure_test)
+
+    retention_explain = security_sub.add_parser("retention-explain", help="Explain retention/deletion outcomes as a dry-run")
+    retention_explain.add_argument("--resource-type", choices=["conversation", "memory", "artifact", "mission", "action", "workspace"], default="workspace")
+    add_state_argument(retention_explain)
+    add_scope_arguments(retention_explain)
+    retention_explain.add_argument("--json", action="store_true", help="Emit JSON output")
+    retention_explain.set_defaults(func=command_security_retention_explain)
+
+    operator_status = security_sub.add_parser("operator-status", help="Show deterministic operator status signals")
+    add_state_argument(operator_status)
+    add_scope_arguments(operator_status)
+    operator_status.add_argument("--json", action="store_true", help="Emit JSON output")
+    operator_status.set_defaults(func=command_security_operator_status)
+
+    release = subcommands.add_parser("release", help="Release verification helpers")
+    release_sub = release.add_subparsers(dest="release_command")
+
+    report_check = release_sub.add_parser("report-check", help="Validate a scenario-backed verification report")
+    report_check.add_argument("--scenario-report", required=True, help="Path to scenario JSON report")
+    report_check.add_argument("--verification-report", required=True, help="Path to markdown verification report")
+    add_state_argument(report_check)
+    add_scope_arguments(report_check)
+    report_check.add_argument("--json", action="store_true", help="Emit JSON output")
+    report_check.set_defaults(func=command_release_report_check)
 
     conversation = subcommands.add_parser("conversation", help="Conversation-first work surface commands")
     conversation_sub = conversation.add_subparsers(dest="conversation_command")
