@@ -13,6 +13,7 @@ from cornerstone_cli.scenarios import (
     list_scenarios,
     verify_vs0_audit_ledger,
     verify_vs0_namespace_isolation,
+    verify_vs0_universal_core,
     verify_vs0_search_evidence,
     verify_vs0_search_understanding,
     verify_vs0_security,
@@ -659,6 +660,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_namespace_isolation(root)
     elif args.contract == "vs0-audit-ledger":
         report = verify_vs0_audit_ledger(root)
+    elif args.contract == "vs0-universal-core":
+        report = verify_vs0_universal_core(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -674,6 +677,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-search-understanding",
                     "vs0-namespace-isolation",
                     "vs0-audit-ledger",
+                    "vs0-universal-core",
                 ],
             }
         )

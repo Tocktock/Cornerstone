@@ -1616,6 +1616,123 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_vs0_universal_core(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-universal-core")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    raw_fixture = (root / input_path).read_text()
+    logistics_terms = [
+        "logistics",
+        "freight",
+        "shipment",
+        "dispatch",
+        "transport request",
+        "carrier",
+        "truck",
+        "warehouse",
+    ]
+    found_logistics_terms = [term for term in logistics_terms if term in raw_fixture.lower()]
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The Alpha research review fixture is supported by non-logistics source evidence.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    search_results = snapshot.get("results", [])
+    bundle_items = bundle.get("evidence_items", [])
+    claim_evidence = claim.get("evidence_bundle", {})
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    reg_004_ok = (
+        not found_logistics_terms
+        and _exit_ok(transcripts["ingest"])
+        and _exit_ok(transcripts["search"])
+        and _exit_ok(transcripts["bundle_create"])
+        and _exit_ok(transcripts["claim_create"])
+        and audit_ok
+        and artifact_id
+        and snapshot.get("result_count") == 1
+        and search_results
+        and search_results[0].get("artifact_id") == artifact_id
+        and bundle_items
+        and bundle_items[0].get("artifact_id") == artifact_id
+        and claim.get("status") == "draft"
+        and f"artifact:{artifact_id}" in claim_evidence.get("artifact_refs", [])
+    )
+
+    rows = [
+        _row(
+            "CS-REG-004",
+            "REGRESSION_GUARD",
+            "PASS" if reg_004_ok else "FAIL",
+            [
+                "cornerstone artifact ingest fixtures/vs0/packs/01_artifact_basic/input.txt --json",
+                "cornerstone search query alpha-evidence-anchor --json",
+                "cornerstone evidence bundle create --search-snapshot-id <snapshot_id> --json",
+                "cornerstone claim create --evidence-bundle-id <bundle_id> --json",
+                "cornerstone audit verify --json",
+            ],
+            "A general-purpose Alpha research fixture with no logistics terms remains usable through the universal artifact, search, evidence, draft claim, and audit path.",
+        )
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-universal-core",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_UNIVERSAL_CORE_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "universal_core_evidence": {
+            "fixture": input_path,
+            "forbidden_logistics_terms": logistics_terms,
+            "found_logistics_terms": found_logistics_terms,
+            "artifact_id": artifact_id,
+            "search_result_count": snapshot.get("result_count"),
+            "evidence_bundle_id": bundle_id,
+            "claim_id": claim.get("claim_id"),
+            "claim_artifact_refs": claim_evidence.get("artifact_refs", []),
+            "audit_event_count": _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("event_count"),
+        },
+        "negative_evidence": {
+            "logistics_terms_found": len(found_logistics_terms),
+            "generic_fixture_failures": 0 if reg_004_ok else 1,
+        },
+        "human_required": [],
+    }
+
+
 def verify_vs0_scaffold(root: Path) -> dict[str, Any]:
     docs_result = _run_script(root, "scripts/verify_sot_docs.sh")
     cli_result = _run_script(root, "scripts/verify_cli_native_first_docs.sh")

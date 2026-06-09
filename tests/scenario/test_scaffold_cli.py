@@ -416,6 +416,25 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_universal_core_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-universal-core", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-universal-core")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 1)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_UNIVERSAL_CORE_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-REG-004"})
+        evidence = payload["universal_core_evidence"]
+        self.assertEqual(evidence["fixture"], "fixtures/vs0/packs/01_artifact_basic/input.txt")
+        self.assertFalse(evidence["found_logistics_terms"])
+        self.assertEqual(evidence["search_result_count"], 1)
+        self.assertTrue(evidence["evidence_bundle_id"].startswith("evb_"))
+        self.assertTrue(evidence["claim_id"].startswith("claim_"))
+        self.assertTrue(any(ref.startswith("artifact:") for ref in evidence["claim_artifact_refs"]))
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)
