@@ -1515,6 +1515,12 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
             "--json",
         ],
     ) if bundle_id else {}
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", claim_id, "--state-dir", state_rel, "--json"],
+    ) if claim_id else {}
     transcripts["audit_verify_clean"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
 
     audit_events_before_tamper = _audit_events(root, state_rel)
@@ -1528,6 +1534,7 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
         "search.snapshot.created",
         "evidence_bundle.created",
         "claim.draft.created",
+        "claim.approved",
     }
     missing_event_types = sorted(required_event_types - set(str(event_type) for event_type in audit_event_types))
 
@@ -1556,6 +1563,7 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
         and _exit_ok(transcripts["search"])
         and _exit_ok(transcripts["bundle_create"])
         and _exit_ok(transcripts["claim_create"])
+        and _exit_ok(transcripts["claim_approve"])
         and clean_ok
         and tamper_detected
         and not missing_event_types
@@ -1728,6 +1736,184 @@ def verify_vs0_universal_core(root: Path) -> dict[str, Any]:
         "negative_evidence": {
             "logistics_terms_found": len(found_logistics_terms),
             "generic_fixture_failures": 0 if reg_004_ok else 1,
+        },
+        "human_required": [],
+    }
+
+
+def _error_codes(transcript: dict[str, Any]) -> list[str]:
+    errors = _payload(transcript).get("errors", [])
+    if not isinstance(errors, list):
+        return []
+    return [str(error.get("code")) for error in errors if isinstance(error, dict)]
+
+
+def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-claim-evidence")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["unsupported_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--statement",
+            "Unsupported draft claim without evidence.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    unsupported_claim = _payload(transcripts["unsupported_claim_create"]).get("claim", {})
+    unsupported_claim_id = unsupported_claim.get("claim_id", "")
+    transcripts["unsupported_claim_show"] = _run_cli_json(
+        root,
+        ["claim", "show", unsupported_claim_id, "--state-dir", state_rel, "--json"],
+    ) if unsupported_claim_id else {}
+    transcripts["unsupported_claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", unsupported_claim_id, "--state-dir", state_rel, "--json"],
+    ) if unsupported_claim_id else {}
+
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["evidence_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "Evidence-backed claim with alpha evidence anchor.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    evidence_claim = _payload(transcripts["evidence_claim_create"]).get("claim", {})
+    evidence_claim_id = evidence_claim.get("claim_id", "")
+    transcripts["evidence_claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", evidence_claim_id, "--state-dir", state_rel, "--json"],
+    ) if evidence_claim_id else {}
+    approved_claim = _payload(transcripts["evidence_claim_approve"]).get("claim", {})
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    unsupported_approval_codes = _error_codes(transcripts["unsupported_claim_approve"])
+    unsupported_show_payload = _payload(transcripts["unsupported_claim_show"])
+    unsupported_approval_payload = _payload(transcripts["unsupported_claim_approve"])
+    unsupported_show_refs = unsupported_show_payload.get("evidence_refs", [])
+    unsupported_denied = (
+        transcripts["unsupported_claim_approve"].get("exit_code") == 4
+        and "CS_CLAIM_EVIDENCE_REQUIRED" in unsupported_approval_codes
+        and unsupported_approval_payload.get("audit_refs")
+    )
+    evidence_approved = (
+        _exit_ok(transcripts["evidence_claim_approve"])
+        and approved_claim.get("status") == "approved"
+        and approved_claim.get("trust_state") == "approved"
+        and approved_claim.get("authority", {}).get("can_publish_shared_truth") is True
+        and approved_claim.get("authority", {}).get("can_drive_autonomous_action") is False
+        and f"artifact:{artifact_id}" in approved_claim.get("evidence_bundle", {}).get("artifact_refs", [])
+        and _payload(transcripts["evidence_claim_approve"]).get("audit_refs")
+    )
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    claim_006_ok = (
+        _exit_ok(transcripts["unsupported_claim_create"])
+        and _exit_ok(transcripts["unsupported_claim_show"])
+        and unsupported_claim.get("status") == "draft"
+        and unsupported_claim.get("trust_state") == "draft"
+        and unsupported_show_refs == [f"claim:{unsupported_claim_id}"]
+        and unsupported_claim.get("authority", {}).get("can_be_approved") is False
+        and unsupported_claim.get("authority", {}).get("can_publish_shared_truth") is False
+        and unsupported_claim.get("authority", {}).get("can_drive_autonomous_action") is False
+        and unsupported_denied
+        and audit_ok
+    )
+    claim_007_ok = (
+        unsupported_denied
+        and _exit_ok(transcripts["ingest"])
+        and _exit_ok(transcripts["search"])
+        and _exit_ok(transcripts["bundle_create"])
+        and _exit_ok(transcripts["evidence_claim_create"])
+        and evidence_claim.get("trust_state") == "evidence_backed"
+        and evidence_claim.get("evidence_bundle", {}).get("evidence_item_count", 0) > 0
+        and evidence_approved
+        and audit_ok
+    )
+
+    rows = [
+        _row(
+            "CS-CLAIM-006",
+            "MUST_PASS",
+            "PASS" if claim_006_ok else "FAIL",
+            [
+                "cornerstone claim create --statement <unsupported> --json",
+                "cornerstone claim approve <unsupported_claim_id> --json",
+            ],
+            "Unsupported drafts can exist, but approval/shared-truth/autonomous-action authority is blocked until evidence is attached.",
+        ),
+        _row(
+            "CS-CLAIM-007",
+            "MUST_PASS",
+            "PASS" if claim_007_ok else "FAIL",
+            [
+                "cornerstone claim approve <unsupported_claim_id> --json",
+                "cornerstone evidence bundle create --search-snapshot-id <snapshot_id> --json",
+                "cornerstone claim create --evidence-bundle-id <bundle_id> --json",
+                "cornerstone claim approve <evidence_claim_id> --json",
+            ],
+            "Claim approval requires an Evidence Bundle; missing evidence is denied and evidence-backed approval succeeds.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-claim-evidence",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_CLAIM_EVIDENCE_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "claim_evidence": {
+            "unsupported_claim_id": unsupported_claim_id,
+            "unsupported_claim_trust_state": unsupported_claim.get("trust_state"),
+            "unsupported_claim_show_evidence_refs": unsupported_show_refs,
+            "unsupported_approval_exit_code": transcripts["unsupported_claim_approve"].get("exit_code"),
+            "unsupported_approval_error_codes": unsupported_approval_codes,
+            "unsupported_resolution_path": (unsupported_approval_payload.get("errors") or [{}])[0].get("resolution_path", []),
+            "artifact_id": artifact_id,
+            "evidence_bundle_id": bundle_id,
+            "evidence_claim_id": evidence_claim_id,
+            "evidence_claim_trust_state": evidence_claim.get("trust_state"),
+            "approved_claim_status": approved_claim.get("status"),
+            "approved_claim_trust_state": approved_claim.get("trust_state"),
+            "approved_claim_authority": approved_claim.get("authority"),
+            "audit_event_count": _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("event_count"),
+        },
+        "negative_evidence": {
+            "unsupported_approval_allowed": 0 if unsupported_denied else 1,
+            "evidence_claim_approval_blocked": 0 if evidence_approved else 1,
+            "autonomous_action_allowed_from_claim": int(bool(approved_claim.get("authority", {}).get("can_drive_autonomous_action", True))),
         },
         "human_required": [],
     }

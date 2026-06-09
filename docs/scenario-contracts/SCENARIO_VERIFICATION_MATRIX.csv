@@ -40,8 +40,8 @@ CS-CLAIM-002,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario 
 CS-CLAIM-003,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-003.json,,,,,NOT_VERIFIED
 CS-CLAIM-004,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-004.json,,,,,NOT_VERIFIED
 CS-CLAIM-005,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-005.json,,,,,NOT_VERIFIED
-CS-CLAIM-006,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-006 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-006.json,,,,,NOT_VERIFIED
-CS-CLAIM-007,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-007 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-007.json,,,,,NOT_VERIFIED
+CS-CLAIM-006,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-claim-evidence --json,reports/scenario/vs0-claim-evidence-2026-06-09.json,,,,,PASS
+CS-CLAIM-007,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-claim-evidence --json,reports/scenario/vs0-claim-evidence-2026-06-09.json,,,,,PASS
 CS-CLAIM-008,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-008 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-008.json,,,,,NOT_VERIFIED
 CS-CLAIM-009,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-009 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-009.json,,,,,NOT_VERIFIED
 CS-CLAIM-010,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-010 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-010.json,,,,,NOT_VERIFIED

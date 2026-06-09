@@ -435,6 +435,28 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_claim_evidence_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-claim-evidence", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-claim-evidence")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 2)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_CLAIM_EVIDENCE_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-CLAIM-006", "CS-CLAIM-007"})
+        evidence = payload["claim_evidence"]
+        self.assertEqual(evidence["unsupported_claim_trust_state"], "draft")
+        self.assertEqual(evidence["unsupported_claim_show_evidence_refs"], [f"claim:{evidence['unsupported_claim_id']}"])
+        self.assertEqual(evidence["unsupported_approval_exit_code"], 4)
+        self.assertIn("CS_CLAIM_EVIDENCE_REQUIRED", evidence["unsupported_approval_error_codes"])
+        self.assertTrue(evidence["unsupported_resolution_path"])
+        self.assertEqual(evidence["evidence_claim_trust_state"], "evidence_backed")
+        self.assertEqual(evidence["approved_claim_status"], "approved")
+        self.assertEqual(evidence["approved_claim_trust_state"], "approved")
+        self.assertFalse(evidence["approved_claim_authority"]["can_drive_autonomous_action"])
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

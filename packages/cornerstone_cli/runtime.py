@@ -454,6 +454,42 @@ class LocalRuntimeStore:
         )
         return {"viewer": viewer, "audit_event": event}
 
+    def create_unsupported_claim(self, statement: str, scope: dict[str, str]) -> dict[str, Any]:
+        claim_base = {
+            "schema_version": "cs.claim.v0",
+            "status": "draft",
+            "trust_state": "draft",
+            "statement": statement,
+            "scope": scope,
+            "evidence_bundle": {
+                "evidence_bundle_id": None,
+                "search_snapshot_id": None,
+                "query": None,
+                "filters": scope,
+                "evidence_item_count": 0,
+                "artifact_refs": [],
+                "result_refs": [],
+            },
+            "authority": {
+                "can_be_approved": False,
+                "can_publish_shared_truth": False,
+                "can_drive_autonomous_action": False,
+                "blocked_reason": "Evidence Bundle is required before approval or authority use.",
+            },
+            "created_at": utc_now(),
+        }
+        claim_id = f"claim_{_json_hash(claim_base)[:16]}"
+        claim = dict(claim_base)
+        claim["claim_id"] = claim_id
+        _write_json(self.claim_path(claim_id), claim)
+        event = self.append_audit(
+            "claim.draft.created",
+            scope,
+            {"type": "claim", "id": claim_id},
+            {"evidence_bundle_id": None, "evidence_item_count": 0},
+        )
+        return {"claim": claim, "audit_event": event}
+
     def create_claim_from_evidence_bundle(self, bundle_id: str, statement: str, scope: dict[str, str]) -> dict[str, Any]:
         bundle = self.get_evidence_bundle(bundle_id)
         if bundle is None:
@@ -464,6 +500,7 @@ class LocalRuntimeStore:
         claim_base = {
             "schema_version": "cs.claim.v0",
             "status": "draft",
+            "trust_state": "evidence_backed",
             "statement": statement,
             "scope": scope,
             "evidence_bundle": {
@@ -478,6 +515,12 @@ class LocalRuntimeStore:
                     f"evidence_bundle:{bundle_id}",
                 ],
             },
+            "authority": {
+                "can_be_approved": True,
+                "can_publish_shared_truth": False,
+                "can_drive_autonomous_action": False,
+                "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            },
             "created_at": utc_now(),
         }
         claim_id = f"claim_{_json_hash(claim_base)[:16]}"
@@ -491,6 +534,51 @@ class LocalRuntimeStore:
             {"evidence_bundle_id": bundle_id, "search_snapshot_id": bundle.get("search_snapshot_id")},
         )
         return {"claim": claim, "audit_event": event}
+
+    def approve_claim(self, claim_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        claim = self.get_claim(claim_id)
+        if claim is None:
+            return {"status": "not_found"}
+        if claim.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": claim.get("scope")}
+
+        evidence = claim.get("evidence_bundle", {})
+        evidence_item_count = int(evidence.get("evidence_item_count", 0) or 0)
+        artifact_refs = evidence.get("artifact_refs", [])
+        if evidence_item_count <= 0 or not artifact_refs:
+            event = self.append_audit(
+                "claim.approval.denied",
+                scope,
+                {"type": "claim", "id": claim_id},
+                {
+                    "reason": "missing_evidence_bundle",
+                    "required": "Attach an Evidence Bundle with at least one artifact reference before approval.",
+                },
+            )
+            return {"status": "evidence_required", "claim": claim, "audit_event": event}
+
+        approved = dict(claim)
+        approved["status"] = "approved"
+        approved["trust_state"] = "approved"
+        approved["approved_at"] = utc_now()
+        approved["authority"] = {
+            "can_be_approved": True,
+            "can_publish_shared_truth": True,
+            "can_drive_autonomous_action": False,
+            "blocked_reason": "Autonomous action still requires a governed action or mission path.",
+        }
+        _write_json(self.claim_path(claim_id), approved)
+        event = self.append_audit(
+            "claim.approved",
+            scope,
+            {"type": "claim", "id": claim_id},
+            {
+                "evidence_bundle_id": evidence.get("evidence_bundle_id"),
+                "evidence_item_count": evidence_item_count,
+                "artifact_refs": artifact_refs,
+            },
+        )
+        return {"status": "approved", "claim": approved, "audit_event": event}
 
     def show_claim(self, claim_id: str, scope: dict[str, str]) -> dict[str, Any]:
         claim = self.get_claim(claim_id)
