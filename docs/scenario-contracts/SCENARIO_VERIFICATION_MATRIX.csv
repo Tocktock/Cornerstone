@@ -149,22 +149,22 @@ CS-LEARN-015,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-exp
 CS-LEARN-016,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
 CS-LEARN-017,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
 CS-LEARN-018,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
-CS-EXT-001,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-001 --json,reports/scenario/cs-ext-001.json,,,,,NOT_VERIFIED
-CS-EXT-002,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-002 --json,reports/scenario/cs-ext-002.json,,,,,NOT_VERIFIED
-CS-EXT-003,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-003 --json,reports/scenario/cs-ext-003.json,,,,,NOT_VERIFIED
-CS-EXT-004,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-004 --json,reports/scenario/cs-ext-004.json,,,,,NOT_VERIFIED
-CS-EXT-005,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-005 --json,reports/scenario/cs-ext-005.json,,,,,NOT_VERIFIED
-CS-EXT-006,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-006 --json,reports/scenario/cs-ext-006.json,,,,,NOT_VERIFIED
-CS-EXT-007,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-007 --json,reports/scenario/cs-ext-007.json,,,,,NOT_VERIFIED
-CS-EXT-008,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-008 --json,reports/scenario/cs-ext-008.json,,,,,NOT_VERIFIED
-CS-EXT-009,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-009 --json,reports/scenario/cs-ext-009.json,,,,,NOT_VERIFIED
-CS-EXT-010,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-010 --json,reports/scenario/cs-ext-010.json,,,,,NOT_VERIFIED
-CS-EXT-011,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-011 --json,reports/scenario/cs-ext-011.json,,,,,NOT_VERIFIED
-CS-EXT-012,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-012 --json,reports/scenario/cs-ext-012.json,,,,,NOT_VERIFIED
-CS-EXT-013,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-013 --json,reports/scenario/cs-ext-013.json,,,,,NOT_VERIFIED
-CS-EXT-014,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-014 --json,reports/scenario/cs-ext-014.json,,,,,NOT_VERIFIED
-CS-EXT-015,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-015 --json,reports/scenario/cs-ext-015.json,,,,,NOT_VERIFIED
-CS-EXT-016,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-016 --json,reports/scenario/cs-ext-016.json,,,,,NOT_VERIFIED
+CS-EXT-001,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-002,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-003,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-004,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-005,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-006,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-007,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-008,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-009,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-010,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-011,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-012,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-013,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-014,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-015,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-EXT-016,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
 CS-SEC-001,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
 CS-SEC-002,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security-policy --json,reports/scenario/vs0-security-policy-2026-06-09.json,,,,,PASS
 CS-SEC-003,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security-policy --json,reports/scenario/vs0-security-policy-2026-06-09.json,,,,,PASS
@@ -179,8 +179,8 @@ CS-SEC-011,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-SE
 CS-SEC-012,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-012 --json,reports/scenario/cs-sec-012.json,,,,,NOT_VERIFIED
 CS-SEC-013,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-013 --json,reports/scenario/cs-sec-013.json,,,,,NOT_VERIFIED
 CS-SEC-014,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-014 --json,reports/scenario/cs-sec-014.json,,,,,NOT_VERIFIED
-CS-SEC-015,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-015 --json,reports/scenario/cs-sec-015.json,,,,,NOT_VERIFIED
-CS-SEC-016,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-016 --json,reports/scenario/cs-sec-016.json,,,,,NOT_VERIFIED
+CS-SEC-015,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-SEC-016,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
 CS-SEC-017,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-017 --json,reports/scenario/cs-sec-017.json,,,,,NOT_VERIFIED
 CS-SEC-018,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-018 --json,reports/scenario/cs-sec-018.json,,,,,NOT_VERIFIED
 CS-SEC-019,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-019 --json,reports/scenario/cs-sec-019.json,,,,,NOT_VERIFIED
@@ -198,8 +198,8 @@ CS-REG-010,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --sce
 CS-REG-011,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-REG-012,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-REG-013,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0-security --json,reports/scenario/vs0-security-2026-06-09.json,,,,,PASS
-CS-REG-014,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-014 --json,reports/scenario/cs-reg-014.json,,,,,NOT_VERIFIED
-CS-REG-015,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-015 --json,reports/scenario/cs-reg-015.json,,,,,NOT_VERIFIED
+CS-REG-014,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
+CS-REG-015,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full-extension-ecosystem --json,reports/scenario/full-extension-ecosystem-2026-06-10.json,,,,,PASS
 CS-REG-016,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS
 CS-REG-017,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS
 CS-REG-018,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS

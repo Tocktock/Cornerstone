@@ -1,0 +1,96 @@
+{
+  "schema_version": "cs.agent_pack_manifest.v0",
+  "pack_id": "pack_public_uncertified_agent",
+  "name": "Public Uncertified Agent Pack",
+  "version": "0.1.0",
+  "role_contract": {
+    "role": "Uncertified helper",
+    "purpose": "Fixture for activation denial."
+  },
+  "role_card": {
+    "display_name": "Uncertified Helper",
+    "summary": "Visible risk-disclosure fixture.",
+    "risk_level": "high",
+    "owner_visible": true
+  },
+  "allowed_capabilities": [
+    "artifact.read"
+  ],
+  "allowed_actions": [
+    "draft_note"
+  ],
+  "connector_requirements": [],
+  "memory_scope": {
+    "default": "workspace",
+    "cross_namespace": false
+  },
+  "model_policy": {
+    "provider": "local_test",
+    "pass_judge": false
+  },
+  "judge_rubric": {
+    "checks": [
+      "risk disclosure"
+    ],
+    "llm_signal_is_supporting_only": true
+  },
+  "playbooks": [
+    {
+      "playbook_id": "pb_uncertified_note",
+      "title": "Uncertified note draft"
+    }
+  ],
+  "after_action_review_template": {
+    "fields": [
+      "outcome"
+    ]
+  },
+  "evaluation_expectations": {
+    "prompt_injection_tests_required": true,
+    "connector_boundary_tests_required": true
+  },
+  "components": {
+    "skill_packs": [],
+    "tool_packs": [],
+    "playbook_packs": [
+      {
+        "id": "playbook_uncertified_note",
+        "top_level_user_object": false
+      }
+    ]
+  },
+  "trust": {
+    "source": "public_marketplace",
+    "publisher": "unknown-fixture",
+    "risk_label": "high",
+    "certified": false,
+    "public_marketplace_default": false
+  },
+  "supply_chain": {
+    "signature": {
+      "verified": false,
+      "scheme": "none"
+    },
+    "attestation": {
+      "verified": false,
+      "predicate_type": ""
+    },
+    "sbom": {
+      "present": false
+    },
+    "provenance": {
+      "predicate_type": "",
+      "builder_id": "",
+      "subject_digest": ""
+    }
+  },
+  "forbidden_runtime": {
+    "provider_clients": false,
+    "extension_owned_credentials": false,
+    "direct_api_writeback": false,
+    "raw_secret_access": false
+  },
+  "certification": {},
+  "updates": {},
+  "security_patches": {}
+}

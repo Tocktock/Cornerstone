@@ -1,0 +1,69 @@
+{
+  "id": "pack_14_extension_ecosystem",
+  "scenario_ids": [
+    "CS-EXT-001",
+    "CS-EXT-002",
+    "CS-EXT-003",
+    "CS-EXT-004",
+    "CS-EXT-005",
+    "CS-EXT-006",
+    "CS-EXT-007",
+    "CS-EXT-008",
+    "CS-EXT-009",
+    "CS-EXT-010",
+    "CS-EXT-011",
+    "CS-EXT-012",
+    "CS-EXT-013",
+    "CS-EXT-014",
+    "CS-EXT-015",
+    "CS-EXT-016",
+    "CS-SEC-015",
+    "CS-SEC-016",
+    "CS-REG-014",
+    "CS-REG-015"
+  ],
+  "classes": [],
+  "inputs": [
+    {
+      "path": "core_only_note.txt",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    },
+    {
+      "path": "trusted_agent_pack_manifest.json",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    },
+    {
+      "path": "untrusted_agent_pack_manifest.json",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    },
+    {
+      "path": "direct_provider_agent_pack_manifest.json",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    }
+  ],
+  "negative_evidence": {
+    "silent_activation": 0,
+    "silent_behavior_update": 0,
+    "direct_provider_access": 0,
+    "extension_owned_credentials": 0,
+    "real_external_http_calls": 0,
+    "secret_reads": 0
+  },
+  "expected": {
+    "trusted_registry_first": true,
+    "install_separate_from_activation": true,
+    "explicit_activation_grants": true,
+    "connectorhub_mediated": true,
+    "versions_pinned_by_default": true,
+    "rollback_available": true,
+    "emergency_patch_policy_governed": true
+  }
+}

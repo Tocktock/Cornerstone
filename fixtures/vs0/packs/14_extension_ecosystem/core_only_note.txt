@@ -1,0 +1,1 @@
+Core-only first value anchor: CornerStone can ingest, search, bundle evidence, and draft a brief without any Agent Pack. Domain packs may add templates, playbooks, evidence expectations, and ConnectorHub-mediated actions, but the universal evidence-first core remains usable by itself.

@@ -60,6 +60,25 @@ STRUCTURE_LABELS = {
     "fact": ("fact", "fact"),
 }
 
+TRUSTED_PACK_SOURCES = {"first_party", "organization_private", "curated_certified"}
+REQUIRED_AGENT_PACK_FIELDS = {
+    "pack_id",
+    "version",
+    "role_contract",
+    "role_card",
+    "allowed_capabilities",
+    "connector_requirements",
+    "memory_scope",
+    "model_policy",
+    "judge_rubric",
+    "playbooks",
+    "after_action_review_template",
+    "evaluation_expectations",
+    "components",
+    "trust",
+    "supply_chain",
+}
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -149,6 +168,15 @@ class LocalRuntimeStore:
         self.outcome_metric_dir = state_dir / "outcome_metrics"
         self.connected_outcome_dir = state_dir / "connected_outcomes"
         self.experience_export_dir = state_dir / "experience_exports"
+        self.pack_registry_dir = state_dir / "packs" / "registry"
+        self.pack_install_dir = state_dir / "packs" / "installs"
+        self.pack_activation_dir = state_dir / "packs" / "activations"
+        self.pack_certification_dir = state_dir / "packs" / "certifications"
+        self.pack_update_dir = state_dir / "packs" / "updates"
+        self.pack_rollback_dir = state_dir / "packs" / "rollbacks"
+        self.pack_patch_dir = state_dir / "packs" / "security_patches"
+        self.pack_quarantine_dir = state_dir / "packs" / "quarantine"
+        self.pack_playbook_proposal_dir = state_dir / "packs" / "playbook_proposals"
         self.audit_path = state_dir / "audit" / "events.jsonl"
 
     def reset(self) -> None:
@@ -344,6 +372,33 @@ class LocalRuntimeStore:
     def experience_export_path(self, export_id: str) -> Path:
         return self.experience_export_dir / f"{export_id}.json"
 
+    def agent_pack_path(self, pack_id: str) -> Path:
+        return self.pack_registry_dir / f"{pack_id}.json"
+
+    def agent_pack_install_path(self, install_id: str) -> Path:
+        return self.pack_install_dir / f"{install_id}.json"
+
+    def agent_pack_activation_path(self, activation_id: str) -> Path:
+        return self.pack_activation_dir / f"{activation_id}.json"
+
+    def agent_pack_certification_path(self, certification_id: str) -> Path:
+        return self.pack_certification_dir / f"{certification_id}.json"
+
+    def agent_pack_update_path(self, update_id: str) -> Path:
+        return self.pack_update_dir / f"{update_id}.json"
+
+    def agent_pack_rollback_path(self, rollback_id: str) -> Path:
+        return self.pack_rollback_dir / f"{rollback_id}.json"
+
+    def agent_pack_patch_path(self, patch_id: str) -> Path:
+        return self.pack_patch_dir / f"{patch_id}.json"
+
+    def agent_pack_quarantine_path(self, quarantine_id: str) -> Path:
+        return self.pack_quarantine_dir / f"{quarantine_id}.json"
+
+    def agent_pack_playbook_proposal_path(self, proposal_id: str) -> Path:
+        return self.pack_playbook_proposal_dir / f"{proposal_id}.json"
+
     def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
         if scope is not None:
             scoped_path = self.artifact_path(artifact_id, scope)
@@ -522,6 +577,30 @@ class LocalRuntimeStore:
 
     def get_connected_outcome(self, outcome_id: str) -> dict[str, Any] | None:
         path = self.connected_outcome_path(outcome_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_agent_pack(self, pack_id: str) -> dict[str, Any] | None:
+        path = self.agent_pack_path(pack_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_agent_pack_install(self, install_id: str) -> dict[str, Any] | None:
+        path = self.agent_pack_install_path(install_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_agent_pack_activation(self, activation_id: str) -> dict[str, Any] | None:
+        path = self.agent_pack_activation_path(activation_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_agent_pack_playbook_proposal(self, proposal_id: str) -> dict[str, Any] | None:
+        path = self.agent_pack_playbook_proposal_path(proposal_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -754,6 +833,801 @@ class LocalRuntimeStore:
             if record.get("scope") == scope:
                 records.append(record)
         return records
+
+    def _agent_pack_records(self) -> list[dict[str, Any]]:
+        if not self.pack_registry_dir.exists():
+            return []
+        return [_read_json(path) for path in sorted(self.pack_registry_dir.glob("*.json"))]
+
+    def _agent_pack_install_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.pack_install_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.pack_install_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _agent_pack_activation_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.pack_activation_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.pack_activation_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _find_agent_pack_install(self, pack_id: str, scope: dict[str, str]) -> dict[str, Any] | None:
+        matches = [
+            record
+            for record in self._agent_pack_install_records(scope)
+            if record.get("pack_id") == pack_id and record.get("status") in {"installed", "active", "rolled_back_to_pinned"}
+        ]
+        return matches[-1] if matches else None
+
+    def _find_agent_pack_activation(self, pack_id: str, scope: dict[str, str]) -> dict[str, Any] | None:
+        matches = [
+            record
+            for record in self._agent_pack_activation_records(scope)
+            if record.get("pack_id") == pack_id and record.get("status") == "active"
+        ]
+        return matches[-1] if matches else None
+
+    def _pack_supply_chain_status(self, manifest: dict[str, Any]) -> dict[str, Any]:
+        trust = manifest.get("trust", {})
+        supply_chain = manifest.get("supply_chain", {})
+        signature = supply_chain.get("signature", {})
+        attestation = supply_chain.get("attestation", {})
+        sbom = supply_chain.get("sbom", {})
+        provenance = supply_chain.get("provenance", {})
+        registry_source = trust.get("source", "unknown")
+        checks = {
+            "trusted_registry_source": registry_source in TRUSTED_PACK_SOURCES,
+            "signature_verified": signature.get("verified") is True,
+            "attestation_verified": attestation.get("verified") is True,
+            "sbom_present": sbom.get("present") is True,
+            "provenance_present": provenance.get("predicate_type") == "https://slsa.dev/provenance/v1",
+            "version_declared": bool(manifest.get("version")),
+            "risk_label_present": bool(trust.get("risk_label")),
+            "update_metadata_present": bool(manifest.get("updates")),
+        }
+        return {
+            "checks": checks,
+            "verified": all(checks.values()),
+            "registry_source": registry_source,
+            "risk_label": trust.get("risk_label", "unknown"),
+            "certified": trust.get("certified") is True,
+        }
+
+    def _pack_policy_decision(
+        self,
+        *,
+        scope: dict[str, str],
+        subject_id: str,
+        decision: str,
+        policy: str,
+        reason: str,
+        resolution_path: list[str],
+    ) -> dict[str, Any]:
+        decision_base = {
+            "schema_version": "cs.policy_decision.v0",
+            "decision": decision,
+            "policy": policy,
+            "reason": redact_text(reason),
+            "resolution_path": resolution_path,
+            "subject": {"type": "agent_pack", "id": subject_id},
+            "scope": scope,
+            "created_at": utc_now(),
+        }
+        decision_id = f"policy_{_json_hash(decision_base)[:16]}"
+        record = dict(decision_base)
+        record["policy_decision_id"] = decision_id
+        return record
+
+    def register_agent_pack(self, manifest_path: Path, scope: dict[str, str]) -> dict[str, Any]:
+        if not manifest_path.exists():
+            return {"status": "not_found", "resource": "manifest"}
+        try:
+            raw = manifest_path.read_bytes()
+            manifest = json.loads(raw.decode())
+        except (OSError, ValueError) as error:
+            return {"status": "invalid", "resource": "manifest", "message": str(error)}
+
+        pack_id = str(manifest.get("pack_id", "unknown_pack"))
+        missing_fields = sorted(
+            field
+            for field in REQUIRED_AGENT_PACK_FIELDS
+            if field not in manifest or manifest.get(field) is None or manifest.get(field) == ""
+        )
+        forbidden_runtime = manifest.get("forbidden_runtime", {})
+        direct_provider_logic = any(
+            bool(forbidden_runtime.get(field))
+            for field in ["provider_clients", "extension_owned_credentials", "direct_api_writeback", "raw_secret_access"]
+        )
+        source_digest = sha256_bytes(raw)
+        supply_chain = self._pack_supply_chain_status(manifest)
+        if missing_fields or direct_provider_logic:
+            decision = self._pack_policy_decision(
+                scope=scope,
+                subject_id=pack_id,
+                decision="deny",
+                policy="agent_pack_registry_validation",
+                reason="Agent Pack registry validation failed before availability.",
+                resolution_path=[
+                    "Remove provider clients, credential handling, direct API writeback, and raw secret access from the pack.",
+                    "Declare connector and action requirements for ConnectorHub mediation.",
+                    "Attach required manifest, provenance, attestation, SBOM, and evaluation metadata.",
+                ],
+            )
+            quarantine_base = {
+                "schema_version": "cs.agent_pack_quarantine.v0",
+                "status": "quarantined",
+                "scope": scope,
+                "pack_id": pack_id,
+                "manifest_path": str(manifest_path),
+                "source_digest": source_digest,
+                "missing_fields": missing_fields,
+                "direct_provider_logic_detected": direct_provider_logic,
+                "forbidden_runtime": forbidden_runtime,
+                "policy_decision": decision,
+                "created_at": utc_now(),
+            }
+            quarantine_id = f"packquar_{_json_hash(quarantine_base)[:16]}"
+            quarantine = dict(quarantine_base)
+            quarantine["quarantine_id"] = quarantine_id
+            _write_json(self.agent_pack_quarantine_path(quarantine_id), quarantine)
+            event = self.append_audit(
+                "pack.registry.quarantined",
+                scope,
+                {"type": "agent_pack", "id": pack_id},
+                {"policy_decision_id": decision["policy_decision_id"], "direct_provider_logic_detected": direct_provider_logic},
+            )
+            return {"status": "quarantined", "quarantine": quarantine, "policy_decision": decision, "audit_event": event}
+
+        record_base = {
+            "schema_version": "cs.agent_pack_registry_record.v0",
+            "status": "available" if supply_chain["verified"] and supply_chain["certified"] else "review_required",
+            "scope": scope,
+            "pack_id": pack_id,
+            "name": manifest.get("name", pack_id),
+            "version": manifest.get("version"),
+            "manifest_path": str(manifest_path),
+            "source_digest": source_digest,
+            "registry_source": supply_chain["registry_source"],
+            "trust": manifest.get("trust", {}),
+            "supply_chain": supply_chain,
+            "manifest": manifest,
+            "install_requires_review": not (supply_chain["verified"] and supply_chain["certified"]),
+            "created_at": utc_now(),
+        }
+        record = dict(record_base)
+        _write_json(self.agent_pack_path(pack_id), record)
+        event = self.append_audit(
+            "pack.registry.imported",
+            scope,
+            {"type": "agent_pack", "id": pack_id},
+            {
+                "registry_source": supply_chain["registry_source"],
+                "supply_chain_verified": supply_chain["verified"],
+                "certified": supply_chain["certified"],
+            },
+        )
+        return {"agent_pack": record, "audit_event": event}
+
+    def list_agent_packs(self, scope: dict[str, str]) -> dict[str, Any]:
+        records = self._agent_pack_records()
+        registry_view = {
+            "schema_version": "cs.agent_pack_registry_view.v0",
+            "status": "ready",
+            "scope": scope,
+            "trust_model": {
+                "default_sources": ["first_party", "organization_private", "curated_certified"],
+                "public_marketplace_default": False,
+                "risk_labels_visible": True,
+            },
+            "packs": [
+                {
+                    "pack_id": record.get("pack_id"),
+                    "name": record.get("name"),
+                    "version": record.get("version"),
+                    "status": record.get("status"),
+                    "registry_source": record.get("registry_source"),
+                    "risk_label": record.get("trust", {}).get("risk_label"),
+                    "certified": record.get("trust", {}).get("certified"),
+                    "supply_chain_verified": record.get("supply_chain", {}).get("verified"),
+                    "install_requires_review": record.get("install_requires_review"),
+                }
+                for record in records
+            ],
+            "created_at": utc_now(),
+        }
+        event = self.append_audit(
+            "pack.registry.listed",
+            scope,
+            {"type": "agent_pack_registry", "id": "local"},
+            {"pack_count": len(records), "public_marketplace_default": False},
+        )
+        return {"registry": registry_view, "audit_event": event}
+
+    def show_agent_pack(self, pack_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        pack = self.get_agent_pack(pack_id)
+        if pack is None:
+            return {"status": "not_found", "resource": "agent_pack"}
+        manifest = pack.get("manifest", {})
+        detail = {
+            "schema_version": "cs.agent_pack_detail.v0",
+            "status": pack.get("status"),
+            "scope": scope,
+            "pack_id": pack_id,
+            "version": pack.get("version"),
+            "top_level_unit": "agent_pack",
+            "role_contract": manifest.get("role_contract"),
+            "role_card": manifest.get("role_card"),
+            "allowed_capabilities": manifest.get("allowed_capabilities", []),
+            "connector_requirements": manifest.get("connector_requirements", []),
+            "memory_scope": manifest.get("memory_scope"),
+            "model_policy": manifest.get("model_policy"),
+            "judge_rubric": manifest.get("judge_rubric"),
+            "playbooks": manifest.get("playbooks", []),
+            "after_action_review_template": manifest.get("after_action_review_template"),
+            "evaluation_expectations": manifest.get("evaluation_expectations"),
+            "components": manifest.get("components", {}),
+            "trust": pack.get("trust"),
+            "supply_chain": pack.get("supply_chain"),
+            "source_digest": pack.get("source_digest"),
+        }
+        event = self.append_audit(
+            "pack.detail.read",
+            scope,
+            {"type": "agent_pack", "id": pack_id},
+            {"top_level_unit": "agent_pack"},
+        )
+        return {"agent_pack_detail": detail, "audit_event": event}
+
+    def install_agent_pack(self, pack_id: str, *, version: str | None, dry_run: bool, scope: dict[str, str]) -> dict[str, Any]:
+        pack = self.get_agent_pack(pack_id)
+        if pack is None:
+            return {"status": "not_found", "resource": "agent_pack"}
+        selected_version = version or pack.get("version")
+        review_required = bool(pack.get("install_requires_review"))
+        install_base = {
+            "schema_version": "cs.agent_pack_install.v0",
+            "status": "install_preview" if dry_run else "installed",
+            "scope": scope,
+            "pack_id": pack_id,
+            "version": selected_version,
+            "pinned_version": selected_version,
+            "version_pinned_by_default": True,
+            "review_required": review_required,
+            "activation_status": "inactive",
+            "can_act": False,
+            "mission_authority": False,
+            "granted_capabilities": [],
+            "supply_chain": pack.get("supply_chain"),
+            "trust": pack.get("trust"),
+            "behavior_changing_updates_apply_silently": False,
+            "created_at": utc_now(),
+        }
+        install_id = f"packinst_{_json_hash(install_base)[:16]}"
+        install = dict(install_base)
+        install["install_id"] = install_id
+        event = self.append_audit(
+            "pack.install.previewed" if dry_run else "pack.installed",
+            scope,
+            {"type": "agent_pack", "id": pack_id},
+            {"version": selected_version, "dry_run": dry_run, "activation_status": "inactive", "can_act": False},
+        )
+        if not dry_run:
+            _write_json(self.agent_pack_install_path(install_id), install)
+        return {"install": install, "audit_event": event}
+
+    def activate_agent_pack(
+        self,
+        pack_id: str,
+        *,
+        grants: list[str],
+        mission_id: str | None,
+        org_admin_shortcut: bool,
+        policy_id: str | None,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        pack = self.get_agent_pack(pack_id)
+        if pack is None:
+            return {"status": "not_found", "resource": "agent_pack"}
+        install = self._find_agent_pack_install(pack_id, scope)
+        if install is None:
+            return {"status": "not_found", "resource": "agent_pack_install"}
+        supply_chain = pack.get("supply_chain", {})
+        manifest = pack.get("manifest", {})
+        allowed_capabilities = list(manifest.get("allowed_capabilities", []))
+        requested_grants = grants or []
+        if pack.get("status") != "available" or supply_chain.get("verified") is not True or pack.get("trust", {}).get("certified") is not True:
+            decision = self._pack_policy_decision(
+                scope=scope,
+                subject_id=pack_id,
+                decision="deny",
+                policy="agent_pack_activation_trust_required",
+                reason="Untrusted or uncertified Agent Pack cannot be activated silently.",
+                resolution_path=[
+                    "Request a reviewed exception with limited capabilities, or use a certified pack.",
+                    "Attach registry source, signature, attestation, SBOM, provenance, risk, and certification evidence.",
+                ],
+            )
+            event = self.append_audit(
+                "pack.activation.denied",
+                scope,
+                {"type": "agent_pack", "id": pack_id},
+                {"policy_decision_id": decision["policy_decision_id"], "silent_activation": False},
+            )
+            return {"status": "policy_denied", "policy_decision": decision, "audit_event": event}
+        unknown_grants = sorted(set(requested_grants) - set(allowed_capabilities))
+        if unknown_grants:
+            decision = self._pack_policy_decision(
+                scope=scope,
+                subject_id=pack_id,
+                decision="deny",
+                policy="agent_pack_capability_grant_boundary",
+                reason="Requested capabilities are outside the Agent Pack contract.",
+                resolution_path=["Grant only declared capabilities or revise and recertify the Agent Pack contract."],
+            )
+            event = self.append_audit(
+                "pack.activation.denied",
+                scope,
+                {"type": "agent_pack", "id": pack_id},
+                {"policy_decision_id": decision["policy_decision_id"], "unknown_grants": unknown_grants},
+            )
+            return {"status": "policy_denied", "policy_decision": decision, "audit_event": event}
+        if org_admin_shortcut and not policy_id:
+            decision = self._pack_policy_decision(
+                scope=scope,
+                subject_id=pack_id,
+                decision="deny",
+                policy="organization_pack_shortcut_policy_required",
+                reason="Organization-admin shortcut requires an explicit organization policy record.",
+                resolution_path=["Attach the organization policy that allows the default permission shortcut."],
+            )
+            event = self.append_audit(
+                "pack.activation.denied",
+                scope,
+                {"type": "agent_pack", "id": pack_id},
+                {"policy_decision_id": decision["policy_decision_id"], "org_admin_shortcut": True},
+            )
+            return {"status": "policy_denied", "policy_decision": decision, "audit_event": event}
+
+        decision = self._pack_policy_decision(
+            scope=scope,
+            subject_id=pack_id,
+            decision="allow",
+            policy="agent_pack_explicit_activation_grants",
+            reason="Certified Agent Pack activation with explicit owner-scoped capability grants.",
+            resolution_path=["Use ConnectorHub-mediated capabilities and audit every action."],
+        )
+        activation_base = {
+            "schema_version": "cs.agent_pack_activation.v0",
+            "status": "active",
+            "scope": scope,
+            "pack_id": pack_id,
+            "install_id": install["install_id"],
+            "version": install.get("pinned_version"),
+            "mission_id": mission_id,
+            "role_card": manifest.get("role_card"),
+            "required_connector_capabilities": manifest.get("connector_requirements", []),
+            "memory_scope": manifest.get("memory_scope"),
+            "allowed_actions": manifest.get("allowed_actions", []),
+            "model_policy": manifest.get("model_policy"),
+            "evaluation_rubric": manifest.get("judge_rubric"),
+            "risk_level": pack.get("trust", {}).get("risk_label"),
+            "requested_permissions": allowed_capabilities,
+            "granted_capabilities": requested_grants,
+            "capability_disclosure_complete": True,
+            "owner_granted_only_needed_capabilities": set(requested_grants).issubset(set(allowed_capabilities)),
+            "connectorhub_boundary": {
+                "mediated_by": "ConnectorHub",
+                "direct_provider_access": False,
+                "credentials_exposed_to_agent": False,
+                "declared_actions_only": True,
+            },
+            "organization_admin_shortcut": {
+                "used": org_admin_shortcut,
+                "policy_id": policy_id,
+                "visible": True,
+                "auditable": True,
+                "bypasses_capability_disclosure": False,
+                "rollback_available": True,
+            },
+            "rollback": {"available": True, "target_version": install.get("pinned_version")},
+            "policy_decision": decision,
+            "silent_activation": False,
+            "created_at": utc_now(),
+        }
+        activation_id = f"packact_{_json_hash(activation_base)[:16]}"
+        activation = dict(activation_base)
+        activation["activation_id"] = activation_id
+        _write_json(self.agent_pack_activation_path(activation_id), activation)
+        updated_install = dict(install)
+        updated_install["status"] = "active"
+        updated_install["activation_status"] = "active"
+        updated_install["activation_id"] = activation_id
+        updated_install["granted_capabilities"] = requested_grants
+        _write_json(self.agent_pack_install_path(install["install_id"]), updated_install)
+        event = self.append_audit(
+            "pack.activated",
+            scope,
+            {"type": "agent_pack", "id": pack_id},
+            {
+                "activation_id": activation_id,
+                "grant_count": len(requested_grants),
+                "org_admin_shortcut": org_admin_shortcut,
+                "policy_decision_id": decision["policy_decision_id"],
+            },
+        )
+        return {"activation": activation, "policy_decision": decision, "audit_event": event}
+
+    def certify_agent_pack(self, pack_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        pack = self.get_agent_pack(pack_id)
+        if pack is None:
+            return {"status": "not_found", "resource": "agent_pack"}
+        manifest = pack.get("manifest", {})
+        card = manifest.get("certification", {})
+        required = [
+            "intended_use",
+            "required_capabilities",
+            "risk_level",
+            "benchmark_scenarios",
+            "prompt_injection_tests",
+            "connector_action_boundary_checks",
+            "llm_judge_rubrics",
+            "model_compatibility",
+            "outcome_history",
+            "audit_coverage",
+            "version_history",
+            "rollback_support",
+            "human_review",
+            "scenario_results",
+            "policy_checks",
+        ]
+        missing = [field for field in required if not card.get(field)]
+        if missing:
+            return {"status": "evidence_required", "resource": "certification", "missing": missing}
+        certification_base = {
+            "schema_version": "cs.agent_pack_certification.v0",
+            "status": "certified",
+            "scope": scope,
+            "pack_id": pack_id,
+            "version": pack.get("version"),
+            "evaluation_card": card,
+            "human_review_is_evidence_input": True,
+            "outcome_history_is_evidence_input": True,
+            "human_review_replaces_scenario_certification": False,
+            "outcome_history_replaces_policy_checks": False,
+            "scenario_certification_required_for_autonomous_action": True,
+            "policy_checks_required_for_autonomous_action": True,
+            "created_at": utc_now(),
+        }
+        certification_id = f"packcert_{_json_hash(certification_base)[:16]}"
+        certification = dict(certification_base)
+        certification["certification_id"] = certification_id
+        _write_json(self.agent_pack_certification_path(certification_id), certification)
+        event = self.append_audit(
+            "pack.certified",
+            scope,
+            {"type": "agent_pack", "id": pack_id},
+            {
+                "certification_id": certification_id,
+                "human_review_replaces_scenario_certification": False,
+                "outcome_history_replaces_policy_checks": False,
+            },
+        )
+        return {"certification": certification, "audit_event": event}
+
+    def request_pack_connector_access(self, pack_id: str, *, capability: str, scope: dict[str, str]) -> dict[str, Any]:
+        activation = self._find_agent_pack_activation(pack_id, scope)
+        if activation is None:
+            decision = self._pack_policy_decision(
+                scope=scope,
+                subject_id=pack_id,
+                decision="deny",
+                policy="agent_pack_install_is_not_activation",
+                reason="Installed Agent Pack has no mission authority until explicit activation grants exist.",
+                resolution_path=["Activate the pack for this workspace or mission with explicit capability grants."],
+            )
+            event = self.append_audit(
+                "pack.connector_request.denied",
+                scope,
+                {"type": "agent_pack", "id": pack_id},
+                {"policy_decision_id": decision["policy_decision_id"], "capability": capability},
+            )
+            return {"status": "policy_denied", "policy_decision": decision, "audit_event": event}
+        if capability not in activation.get("granted_capabilities", []):
+            decision = self._pack_policy_decision(
+                scope=scope,
+                subject_id=pack_id,
+                decision="deny",
+                policy="agent_pack_capability_not_granted",
+                reason="Agent Pack requested a ConnectorHub capability that was not granted.",
+                resolution_path=["Request the minimum capability grant from the namespace owner."],
+            )
+            event = self.append_audit(
+                "pack.connector_request.denied",
+                scope,
+                {"type": "agent_pack", "id": pack_id},
+                {"policy_decision_id": decision["policy_decision_id"], "capability": capability},
+            )
+            return {"status": "policy_denied", "policy_decision": decision, "audit_event": event}
+        request_base = {
+            "schema_version": "cs.agent_pack_connector_request.v0",
+            "status": "mediated",
+            "scope": scope,
+            "pack_id": pack_id,
+            "activation_id": activation["activation_id"],
+            "capability": capability,
+            "connectorhub": {
+                "mediates_provider_access": True,
+                "credential_custody": "ConnectorHub",
+                "credentials_exposed_to_agent": False,
+                "source_policy_enforced": True,
+                "projections_enforced": True,
+                "declared_actions_only": True,
+                "delivery_audited": True,
+                "retry_quarantine_supported": True,
+                "raw_access_controlled": True,
+                "direct_provider_access": False,
+                "external_http_calls": 0,
+            },
+            "created_at": utc_now(),
+        }
+        request_id = f"packconn_{_json_hash(request_base)[:16]}"
+        request = dict(request_base)
+        request["connector_request_id"] = request_id
+        event = self.append_audit(
+            "pack.connector_request.mediated",
+            scope,
+            {"type": "agent_pack", "id": pack_id},
+            {"connector_request_id": request_id, "capability": capability, "direct_provider_access": False},
+        )
+        return {"connector_request": request, "audit_event": event}
+
+    def propose_pack_playbook_update(self, pack_id: str, *, lesson_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        pack = self.get_agent_pack(pack_id)
+        if pack is None:
+            return {"status": "not_found", "resource": "agent_pack"}
+        lesson = self.get_lesson_candidate(lesson_id)
+        if lesson is None:
+            return {"status": "not_found", "resource": "lesson"}
+        if lesson.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": lesson.get("scope")}
+        proposal_base = {
+            "schema_version": "cs.agent_pack_playbook_proposal.v0",
+            "status": "proposed",
+            "scope": scope,
+            "pack_id": pack_id,
+            "lesson_id": lesson_id,
+            "source": "Experience Library",
+            "trajectory_examples": [lesson.get("trajectory_id")],
+            "judge_review": {
+                "provider": "local_test",
+                "rubric": pack.get("manifest", {}).get("judge_rubric"),
+                "pass_judge": False,
+                "result": "review_required_before_activation",
+            },
+            "owner_scope": scope,
+            "risk": pack.get("trust", {}).get("risk_label"),
+            "rollback": {"available": True, "affected_playbooks": [f"pack:{pack_id}:playbooks"]},
+            "approval": {"required": True, "status": "pending", "scope": scope},
+            "auto_globalize": False,
+            "becomes_active_only_after_approval": True,
+            "evidence_refs": [f"lesson:{lesson_id}", *lesson.get("evidence_refs", [])],
+            "created_at": utc_now(),
+        }
+        proposal_id = f"packpb_{_json_hash(proposal_base)[:16]}"
+        proposal = dict(proposal_base)
+        proposal["playbook_proposal_id"] = proposal_id
+        _write_json(self.agent_pack_playbook_proposal_path(proposal_id), proposal)
+        event = self.append_audit(
+            "pack.playbook.proposed",
+            scope,
+            {"type": "agent_pack_playbook_proposal", "id": proposal_id},
+            {"pack_id": pack_id, "lesson_id": lesson_id, "auto_globalize": False},
+        )
+        return {"playbook_proposal": proposal, "audit_event": event}
+
+    def approve_pack_playbook_update(self, proposal_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        proposal = self.get_agent_pack_playbook_proposal(proposal_id)
+        if proposal is None:
+            return {"status": "not_found", "resource": "playbook_proposal"}
+        if proposal.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": proposal.get("scope")}
+        updated = dict(proposal)
+        updated["status"] = "active"
+        updated["approval"] = {**updated.get("approval", {}), "status": "approved", "approved_at": utc_now()}
+        updated["auto_globalize"] = False
+        _write_json(self.agent_pack_playbook_proposal_path(proposal_id), updated)
+        event = self.append_audit(
+            "pack.playbook.approved",
+            scope,
+            {"type": "agent_pack_playbook_proposal", "id": proposal_id},
+            {"pack_id": updated.get("pack_id"), "auto_globalize": False},
+        )
+        return {"playbook_proposal": updated, "audit_event": event}
+
+    def update_agent_pack(
+        self,
+        pack_id: str,
+        *,
+        to_version: str,
+        dry_run: bool,
+        approve: bool,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        pack = self.get_agent_pack(pack_id)
+        if pack is None:
+            return {"status": "not_found", "resource": "agent_pack"}
+        install = self._find_agent_pack_install(pack_id, scope)
+        if install is None:
+            return {"status": "not_found", "resource": "agent_pack_install"}
+        updates = pack.get("manifest", {}).get("updates", {})
+        update_meta = updates.get(to_version)
+        if not update_meta:
+            return {"status": "not_found", "resource": "agent_pack_update"}
+        if not dry_run and not approve:
+            decision = self._pack_policy_decision(
+                scope=scope,
+                subject_id=pack_id,
+                decision="requires_approval",
+                policy="agent_pack_behavior_update_requires_owner_approval",
+                reason="Pack updates do not apply without owner approval.",
+                resolution_path=["Review the diff and evaluation gate, then rerun with explicit approval."],
+            )
+            event = self.append_audit(
+                "pack.update.denied",
+                scope,
+                {"type": "agent_pack", "id": pack_id},
+                {"policy_decision_id": decision["policy_decision_id"], "to_version": to_version},
+            )
+            return {"status": "approval_required", "policy_decision": decision, "audit_event": event}
+        update_base = {
+            "schema_version": "cs.agent_pack_update.v0",
+            "status": "dry_run" if dry_run else "approved_applied",
+            "scope": scope,
+            "pack_id": pack_id,
+            "from_version": install.get("pinned_version"),
+            "to_version": to_version,
+            "diff": update_meta.get("diff", {}),
+            "evaluation_gate": update_meta.get("evaluation_gate", {}),
+            "sandbox_canary_test": update_meta.get("sandbox_canary_test", {}),
+            "migration_notes": update_meta.get("migration_notes", []),
+            "owner_can_test_before_approving": True,
+            "applied": not dry_run,
+            "behavior_changing_update": bool(update_meta.get("behavior_changing")),
+            "behavior_changing_silent_apply": False,
+            "approval": {"required": not dry_run, "status": "approved" if approve and not dry_run else "not_requested"},
+            "created_at": utc_now(),
+        }
+        update_id = f"packupd_{_json_hash(update_base)[:16]}"
+        update = dict(update_base)
+        update["update_id"] = update_id
+        _write_json(self.agent_pack_update_path(update_id), update)
+        if not dry_run:
+            updated_install = dict(install)
+            history = list(updated_install.get("version_history", []))
+            history.append({"from_version": install.get("pinned_version"), "to_version": to_version, "update_id": update_id})
+            updated_install["previous_pinned_version"] = install.get("pinned_version")
+            updated_install["pinned_version"] = to_version
+            updated_install["version_history"] = history
+            _write_json(self.agent_pack_install_path(install["install_id"]), updated_install)
+        event = self.append_audit(
+            "pack.update.dry_run" if dry_run else "pack.update.applied",
+            scope,
+            {"type": "agent_pack", "id": pack_id},
+            {"update_id": update_id, "to_version": to_version, "behavior_changing_silent_apply": False},
+        )
+        return {"pack_update": update, "audit_event": event}
+
+    def rollback_agent_pack(self, pack_id: str, *, to_version: str, reason: str, scope: dict[str, str]) -> dict[str, Any]:
+        install = self._find_agent_pack_install(pack_id, scope)
+        if install is None:
+            return {"status": "not_found", "resource": "agent_pack_install"}
+        rollback_base = {
+            "schema_version": "cs.agent_pack_rollback.v0",
+            "status": "rolled_back",
+            "scope": scope,
+            "pack_id": pack_id,
+            "from_version": install.get("pinned_version"),
+            "to_version": to_version,
+            "reason": redact_text(reason),
+            "affected_missions": [record.get("mission_id") for record in self._agent_pack_activation_records(scope) if record.get("pack_id") == pack_id and record.get("mission_id")],
+            "changes_recorded": True,
+            "created_at": utc_now(),
+        }
+        rollback_id = f"packroll_{_json_hash(rollback_base)[:16]}"
+        rollback = dict(rollback_base)
+        rollback["rollback_id"] = rollback_id
+        _write_json(self.agent_pack_rollback_path(rollback_id), rollback)
+        updated_install = dict(install)
+        history = list(updated_install.get("version_history", []))
+        history.append({"from_version": install.get("pinned_version"), "to_version": to_version, "rollback_id": rollback_id})
+        updated_install["status"] = "rolled_back_to_pinned"
+        updated_install["previous_pinned_version"] = install.get("pinned_version")
+        updated_install["pinned_version"] = to_version
+        updated_install["version_history"] = history
+        _write_json(self.agent_pack_install_path(install["install_id"]), updated_install)
+        event = self.append_audit(
+            "pack.rollback.completed",
+            scope,
+            {"type": "agent_pack", "id": pack_id},
+            {"rollback_id": rollback_id, "to_version": to_version, "changes_recorded": True},
+        )
+        return {"pack_rollback": rollback, "audit_event": event}
+
+    def emergency_patch_agent_pack(
+        self,
+        pack_id: str,
+        *,
+        patch_version: str,
+        behavior_change: bool,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        pack = self.get_agent_pack(pack_id)
+        if pack is None:
+            return {"status": "not_found", "resource": "agent_pack"}
+        install = self._find_agent_pack_install(pack_id, scope)
+        if install is None:
+            return {"status": "not_found", "resource": "agent_pack_install"}
+        patches = pack.get("manifest", {}).get("security_patches", {})
+        patch_meta = patches.get(patch_version)
+        if not patch_meta:
+            return {"status": "not_found", "resource": "agent_pack_security_patch"}
+        if behavior_change:
+            decision = self._pack_policy_decision(
+                scope=scope,
+                subject_id=pack_id,
+                decision="requires_review",
+                policy="agent_pack_emergency_patch_behavior_change_review",
+                reason="Behavior-changing emergency updates still require appropriate review.",
+                resolution_path=["Split the security fix from behavior changes or obtain reviewed approval."],
+            )
+            event = self.append_audit(
+                "pack.security_patch.denied",
+                scope,
+                {"type": "agent_pack", "id": pack_id},
+                {"policy_decision_id": decision["policy_decision_id"], "patch_version": patch_version},
+            )
+            return {"status": "approval_required", "policy_decision": decision, "audit_event": event}
+        patch_base = {
+            "schema_version": "cs.agent_pack_security_patch.v0",
+            "status": "applied",
+            "scope": scope,
+            "pack_id": pack_id,
+            "from_version": install.get("pinned_version"),
+            "patch_version": patch_version,
+            "policy": patch_meta.get("policy", "emergency_security_patch"),
+            "owner_visibility": True,
+            "compatibility_checks": patch_meta.get("compatibility_checks", {}),
+            "rollback": {"available": True, "target_version": install.get("pinned_version")},
+            "behavior_change": False,
+            "behavior_changing_updates_require_review": True,
+            "created_at": utc_now(),
+        }
+        patch_id = f"packpatch_{_json_hash(patch_base)[:16]}"
+        patch = dict(patch_base)
+        patch["security_patch_id"] = patch_id
+        _write_json(self.agent_pack_patch_path(patch_id), patch)
+        updated_install = dict(install)
+        history = list(updated_install.get("version_history", []))
+        history.append({"from_version": install.get("pinned_version"), "to_version": patch_version, "security_patch_id": patch_id})
+        updated_install["previous_pinned_version"] = install.get("pinned_version")
+        updated_install["pinned_version"] = patch_version
+        updated_install["version_history"] = history
+        _write_json(self.agent_pack_install_path(install["install_id"]), updated_install)
+        event = self.append_audit(
+            "pack.security_patch.applied",
+            scope,
+            {"type": "agent_pack", "id": pack_id},
+            {"security_patch_id": patch_id, "owner_visibility": True, "rollback_available": True},
+        )
+        return {"security_patch": patch, "audit_event": event}
 
     def related_claims_for_artifact(self, artifact_id: str, scope: dict[str, str]) -> list[dict[str, Any]]:
         related = []

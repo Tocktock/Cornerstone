@@ -1020,6 +1020,54 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_full_extension_ecosystem_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full-extension-ecosystem", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "full-extension-ecosystem")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 20)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_FULL_EXTENSION_ECOSYSTEM_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {
+                "CS-EXT-001",
+                "CS-EXT-002",
+                "CS-EXT-003",
+                "CS-EXT-004",
+                "CS-EXT-005",
+                "CS-EXT-006",
+                "CS-EXT-007",
+                "CS-EXT-008",
+                "CS-EXT-009",
+                "CS-EXT-010",
+                "CS-EXT-011",
+                "CS-EXT-012",
+                "CS-EXT-013",
+                "CS-EXT-014",
+                "CS-EXT-015",
+                "CS-EXT-016",
+                "CS-SEC-015",
+                "CS-SEC-016",
+                "CS-REG-014",
+                "CS-REG-015",
+            },
+        )
+        evidence = payload["extension_evidence"]
+        self.assertTrue(evidence["core_artifact_id"].startswith("art_"))
+        self.assertEqual(evidence["pack_id"], "pack_ops_recovery_agent")
+        self.assertTrue(evidence["activation_id"].startswith("packact_"))
+        self.assertTrue(evidence["certification_id"].startswith("packcert_"))
+        self.assertTrue(evidence["connector_request_id"].startswith("packconn_"))
+        self.assertTrue(evidence["playbook_proposal_id"].startswith("packpb_"))
+        self.assertTrue(evidence["rollback_id"].startswith("packroll_"))
+        self.assertTrue(evidence["security_patch_id"].startswith("packpatch_"))
+        self.assertEqual(evidence["untrusted_activation_exit_code"], 8)
+        self.assertEqual(evidence["direct_provider_import_exit_code"], 8)
+        self.assertGreaterEqual(evidence["audit_event_count"], 1)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

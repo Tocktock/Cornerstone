@@ -1,0 +1,5061 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify full-extension-ecosystem",
+  "errors": [],
+  "evidence_refs": [],
+  "extension_evidence": {
+    "activation_id": "packact_afef57baeec5412c",
+    "approved_playbook_status": "active",
+    "audit_event_count": 37,
+    "audit_event_types": [
+      "artifact.ingested",
+      "search.snapshot.created",
+      "evidence_bundle.created",
+      "brief.created",
+      "pack.registry.imported",
+      "pack.registry.listed",
+      "pack.detail.read",
+      "pack.certified",
+      "pack.install.previewed",
+      "pack.installed",
+      "pack.connector_request.denied",
+      "pack.activated",
+      "pack.connector_request.mediated",
+      "pack.installed",
+      "pack.activated",
+      "pack.registry.imported",
+      "pack.installed",
+      "pack.activation.denied",
+      "pack.registry.quarantined",
+      "mission.contract.created",
+      "workspace.mode.set",
+      "mission.activated",
+      "claim.draft.created",
+      "claim.approved",
+      "action.card.proposed",
+      "action.executed",
+      "learning.recorded",
+      "experience.trajectory.recorded",
+      "experience.lesson.proposed",
+      "pack.playbook.proposed",
+      "pack.playbook.approved",
+      "pack.update.dry_run",
+      "pack.update.denied",
+      "pack.update.applied",
+      "pack.rollback.completed",
+      "pack.security_patch.applied",
+      "pack.security_patch.denied"
+    ],
+    "certification_id": "packcert_48c520710e2f2c07",
+    "component_counts": {
+      "playbook_packs": 1,
+      "skill_packs": 1,
+      "tool_packs": 1
+    },
+    "connector_request_id": "packconn_1120ec50d9e88010",
+    "core_artifact_id": "art_9f4c9a3433e647fe",
+    "core_brief_id": "brief_b437323e3edd4711",
+    "core_evidence_bundle_id": "evb_46bf9b528be3a164",
+    "direct_provider_import_exit_code": 8,
+    "install_id": "packinst_2bc56220e4f201b1",
+    "org_activation_id": "packact_b54895ff88188bce",
+    "pack_detail_required_fields": {
+      "after_action_review_template": true,
+      "allowed_capabilities": true,
+      "connector_requirements": true,
+      "evaluation_expectations": true,
+      "judge_rubric": true,
+      "memory_scope": true,
+      "model_policy": true,
+      "playbooks": true,
+      "role_card": true,
+      "role_contract": true
+    },
+    "pack_id": "pack_ops_recovery_agent",
+    "playbook_proposal_id": "packpb_df472965514d87bd",
+    "registry_sources": [
+      "curated_certified"
+    ],
+    "research_basis": [
+      "SLSA provenance v1 records build inputs, builder identity, dependencies, and subject artifacts.",
+      "Sigstore/Cosign supports signature and in-toto attestation verification workflows.",
+      "OpenSSF Scorecard treats security scores as heuristic risk inputs rather than definitive trust.",
+      "VS Code extension manifests separate declared contributions and activation events.",
+      "MCP authorization keeps bearer tokens out of query strings and requires authorization per request.",
+      "AgentDojo and recent MCP/tool-security papers motivate deterministic tool-boundary enforcement for prompt/tool attacks."
+    ],
+    "rollback_id": "packroll_09d690d5a417d518",
+    "security_patch_id": "packpatch_2551fcb601c53e25",
+    "untrusted_activation_exit_code": 8,
+    "update_apply_id": "packupd_f0f2ea01603cc66d",
+    "update_dry_run_id": "packupd_289b31e273a82fec"
+  },
+  "human_required": [],
+  "ids": {
+    "git_commit": "0216bf3"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "behavior_patch_applied_without_review": 0,
+    "connector_credentials_exposed": 0,
+    "core_requires_pack": 0,
+    "direct_provider_access": 0,
+    "extension_owned_credentials": 0,
+    "human_review_replaced_scenario_certification": 0,
+    "install_granted_authority": 0,
+    "outcome_history_replaced_policy_checks": 0,
+    "playbook_auto_globalized": 0,
+    "real_external_http_calls": 0,
+    "secret_reads": 0,
+    "silent_activation": 0,
+    "silent_behavior_update": 0,
+    "untrusted_activation_allowed": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/full-extension-ecosystem-2026-06-10.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-001",
+      "notes": "Universal core works without packs while the trusted pack adds domain templates, playbooks, evidence expectations, and actions.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-002",
+      "notes": "Experience-derived playbook proposal includes evidence, trajectory examples, judge review, owner scope, risk, rollback, and approval.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-003",
+      "notes": "Agent Pack detail is the top-level extension unit with role contract/card, capabilities, memory/model policy, rubric, playbooks, AAR, and evaluations.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-004",
+      "notes": "Skill, Tool, and Playbook Packs are internal components under the Agent Pack top-level governance object.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-005",
+      "notes": "Registry defaults to first-party, organization-private, and curated/certified trust labels rather than public marketplace behavior.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-006",
+      "notes": "Install creates an inactive pinned record and cannot request ConnectorHub access before activation.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-007",
+      "notes": "Activation discloses role card, connector requirements, memory scope, actions, model policy, rubric, risk, and grants only requested capabilities.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-008",
+      "notes": "Organization-admin shortcut is visible, policy-controlled, audited, disclosure-preserving, and rollback-capable.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-009",
+      "notes": "Certification card covers intended use, capabilities, risk, benchmark scenarios, prompt-injection tests, connector boundaries, rubrics, model compatibility, outcomes, audit, versions, and rollback.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-010",
+      "notes": "Human review and outcome history are evidence inputs but do not replace scenario certification or policy checks.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-011",
+      "notes": "Workspace pack version is pinned by default and behavior-changing updates do not silently alter missions.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-012",
+      "notes": "Pack update dry-run shows role/capability/playbook/model/risk/connector diff, evaluation gate, migration notes, and sandbox canary before approval.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-013",
+      "notes": "Rollback restores the previous pinned version and records affected missions and changes.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-014",
+      "notes": "ConnectorHub mediates external data/action access with credential custody, source policy, projections, declared actions, delivery audit, retry/quarantine, and raw access control.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-015",
+      "notes": "Pack manifest with provider clients, extension-owned credentials, direct API writeback, or raw secret access is quarantined.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-EXT-016",
+      "notes": "Emergency security patch applies only through policy, owner visibility, compatibility checks, audit, and rollback; behavior changes require review.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-SEC-015",
+      "notes": "Tool/extension supply chain verification checks trusted registry, signature, attestation, SBOM, provenance, version, risk labels, and update metadata before activation.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-SEC-016",
+      "notes": "Untrusted or uncertified Agent Pack activation is denied by default with risk disclosure and a reviewed-exception resolution path.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-REG-014",
+      "notes": "Agent Packs cannot access providers directly and must request granted ConnectorHub-mediated capabilities.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify full-extension-ecosystem --json"
+      ],
+      "id": "CS-REG-015",
+      "notes": "Experience-derived playbooks remain scoped proposals and do not auto-globalize or activate before approval.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "full-extension-ecosystem",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/full-extension-ecosystem-33404",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 20,
+    "product_feature_claims": "PARTIAL_FULL_EXTENSION_ECOSYSTEM_ONLY",
+    "scenario_count": 20
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "action_execute": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_94c495b2a6f88822",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_94c495b2a6f88822",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": false,
+            "status": "not_required"
+          },
+          "audit_ref": "audit:audit_b27104cc70055535",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T16:55:44.949880Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_52e7a9038cefc943",
+            "created_at": "2026-06-09T16:55:44.949857Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_e235588851ed6a92",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Record recovery playbook fixture status.",
+            "mission_id": "mission_d8b69286e34846e5",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": false,
+              "can_execute_now": true,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T16:55:44.949753Z",
+              "decision": "allow",
+              "execution_status": "ready_to_execute",
+              "id": "policy_dadd4c8969aba0a8",
+              "mission_id": "mission_d8b69286e34846e5",
+              "policy": "low_risk_autopilot_allowed",
+              "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_9f4c9a3433e647fe"
+            ],
+            "evidence_bundle_id": "evb_46bf9b528be3a164",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "Core-only first value anchor",
+            "result_refs": [
+              "search_snapshot:search_df12af78dc1c33fb",
+              "evidence_bundle:evb_46bf9b528be3a164"
+            ],
+            "search_snapshot_id": "search_df12af78dc1c33fb"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": {
+              "action_id": "action_94c495b2a6f88822",
+              "executed_at": "2026-06-09T16:55:45.002476Z",
+              "external_http_calls": 0,
+              "message": "Action execution was recorded through the governed Workflow/Action path.",
+              "mission_id": "mission_d8b69286e34846e5",
+              "mock_connector_calls": 0,
+              "schema_version": "cs.action_result.v0",
+              "side_effect_boundary": "local_internal_state",
+              "status": "success"
+            },
+            "status": "executed"
+          },
+          "goal": "Record recovery playbook fixture status.",
+          "mission_id": "mission_d8b69286e34846e5",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T16:55:44.949753Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_dadd4c8969aba0a8",
+            "mission_id": "mission_d8b69286e34846e5",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_52e7a9038cefc943"
+        },
+        "action_result": {
+          "action_id": "action_94c495b2a6f88822",
+          "executed_at": "2026-06-09T16:55:45.002476Z",
+          "external_http_calls": 0,
+          "message": "Action execution was recorded through the governed Workflow/Action path.",
+          "mission_id": "mission_d8b69286e34846e5",
+          "mock_connector_calls": 0,
+          "schema_version": "cs.action_result.v0",
+          "side_effect_boundary": "local_internal_state",
+          "status": "success"
+        },
+        "audit_refs": [
+          "audit:audit_3f32c164356fe728"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_94c495b2a6f88822"
+        ],
+        "ids": {
+          "action_id": "action_94c495b2a6f88822",
+          "git_commit": "0216bf3",
+          "mission_id": "mission_d8b69286e34846e5"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "action_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_d8b69286e34846e5",
+        "--claim-id",
+        "claim_52e7a9038cefc943",
+        "--goal",
+        "Record recovery playbook fixture status.",
+        "--action-kind",
+        "internal_status_update",
+        "--risk",
+        "low",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_94c495b2a6f88822",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": false,
+            "status": "not_required"
+          },
+          "audit_ref": "audit:audit_b27104cc70055535",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T16:55:44.949880Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_52e7a9038cefc943",
+            "created_at": "2026-06-09T16:55:44.949857Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_e235588851ed6a92",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Record recovery playbook fixture status.",
+            "mission_id": "mission_d8b69286e34846e5",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": false,
+              "can_execute_now": true,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T16:55:44.949753Z",
+              "decision": "allow",
+              "execution_status": "ready_to_execute",
+              "id": "policy_dadd4c8969aba0a8",
+              "mission_id": "mission_d8b69286e34846e5",
+              "policy": "low_risk_autopilot_allowed",
+              "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_9f4c9a3433e647fe"
+            ],
+            "evidence_bundle_id": "evb_46bf9b528be3a164",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "Core-only first value anchor",
+            "result_refs": [
+              "search_snapshot:search_df12af78dc1c33fb",
+              "evidence_bundle:evb_46bf9b528be3a164"
+            ],
+            "search_snapshot_id": "search_df12af78dc1c33fb"
+          },
+          "execution": {
+            "can_execute_now": true,
+            "result": null,
+            "status": "ready_to_execute"
+          },
+          "goal": "Record recovery playbook fixture status.",
+          "mission_id": "mission_d8b69286e34846e5",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T16:55:44.949753Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_dadd4c8969aba0a8",
+            "mission_id": "mission_d8b69286e34846e5",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_52e7a9038cefc943"
+        },
+        "audit_refs": [
+          "audit:audit_b27104cc70055535"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_94c495b2a6f88822",
+          "mission:mission_d8b69286e34846e5",
+          "claim:claim_52e7a9038cefc943",
+          "dry_run:dryrun_e235588851ed6a92",
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "artifact:art_9f4c9a3433e647fe"
+        ],
+        "ids": {
+          "action_id": "action_94c495b2a6f88822",
+          "audit_event_id": "audit_b27104cc70055535",
+          "claim_id": "claim_52e7a9038cefc943",
+          "dry_run_id": "dryrun_e235588851ed6a92",
+          "git_commit": "0216bf3",
+          "mission_id": "mission_d8b69286e34846e5"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_dadd4c8969aba0a8"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T16:55:44.949753Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_dadd4c8969aba0a8",
+            "mission_id": "mission_d8b69286e34846e5",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 37,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "0216bf3"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "claim_approve": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "approve",
+        "claim_52e7a9038cefc943",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ee20295c9a8f2fa6"
+        ],
+        "claim": {
+          "approved_at": "2026-06-09T16:55:44.898690Z",
+          "authority": {
+            "blocked_reason": "Autonomous action still requires a governed action or mission path.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": true
+          },
+          "claim_id": "claim_52e7a9038cefc943",
+          "created_at": "2026-06-09T16:55:44.846806Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_9f4c9a3433e647fe"
+            ],
+            "evidence_bundle_id": "evb_46bf9b528be3a164",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "Core-only first value anchor",
+            "result_refs": [
+              "search_snapshot:search_df12af78dc1c33fb",
+              "evidence_bundle:evb_46bf9b528be3a164"
+            ],
+            "search_snapshot_id": "search_df12af78dc1c33fb"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The core-only first value anchor supports a recovery playbook proposal.",
+          "status": "approved",
+          "trust_state": "approved"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim approve",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_52e7a9038cefc943",
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "search_snapshot:search_df12af78dc1c33fb",
+          "artifact:art_9f4c9a3433e647fe"
+        ],
+        "ids": {
+          "audit_event_id": "audit_ee20295c9a8f2fa6",
+          "claim_id": "claim_52e7a9038cefc943",
+          "evidence_bundle_id": "evb_46bf9b528be3a164",
+          "git_commit": "0216bf3",
+          "search_snapshot_id": "search_df12af78dc1c33fb"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_46bf9b528be3a164",
+        "--statement",
+        "The core-only first value anchor supports a recovery playbook proposal.",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_f2c7b9ed98520e4a"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_52e7a9038cefc943",
+          "created_at": "2026-06-09T16:55:44.846806Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_9f4c9a3433e647fe"
+            ],
+            "evidence_bundle_id": "evb_46bf9b528be3a164",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "Core-only first value anchor",
+            "result_refs": [
+              "search_snapshot:search_df12af78dc1c33fb",
+              "evidence_bundle:evb_46bf9b528be3a164"
+            ],
+            "search_snapshot_id": "search_df12af78dc1c33fb"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The core-only first value anchor supports a recovery playbook proposal.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_52e7a9038cefc943",
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "search_snapshot:search_df12af78dc1c33fb",
+          "artifact:art_9f4c9a3433e647fe"
+        ],
+        "ids": {
+          "audit_event_id": "audit_f2c7b9ed98520e4a",
+          "claim_id": "claim_52e7a9038cefc943",
+          "evidence_bundle_id": "evb_46bf9b528be3a164",
+          "git_commit": "0216bf3",
+          "search_snapshot_id": "search_df12af78dc1c33fb"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "connector_after_activation": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "connector-request",
+        "pack_ops_recovery_agent",
+        "--capability",
+        "connector.mock.crm.read",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_e464a9332657e07b"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack connector-request",
+        "connector_request": {
+          "activation_id": "packact_afef57baeec5412c",
+          "capability": "connector.mock.crm.read",
+          "connector_request_id": "packconn_1120ec50d9e88010",
+          "connectorhub": {
+            "credential_custody": "ConnectorHub",
+            "credentials_exposed_to_agent": false,
+            "declared_actions_only": true,
+            "delivery_audited": true,
+            "direct_provider_access": false,
+            "external_http_calls": 0,
+            "mediates_provider_access": true,
+            "projections_enforced": true,
+            "raw_access_controlled": true,
+            "retry_quarantine_supported": true,
+            "source_policy_enforced": true
+          },
+          "created_at": "2026-06-09T16:55:44.376871Z",
+          "pack_id": "pack_ops_recovery_agent",
+          "schema_version": "cs.agent_pack_connector_request.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "mediated"
+        },
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "connector_request_id": "packconn_1120ec50d9e88010",
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "connector_before_activation": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "connector-request",
+        "pack_ops_recovery_agent",
+        "--capability",
+        "connector.mock.crm.read",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_95a8b13515051410"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack connector-request",
+        "errors": [
+          {
+            "code": "CS_PACK_POLICY_DENIED",
+            "message": "Installed Agent Pack has no mission authority until explicit activation grants exist.",
+            "policy": "agent_pack_install_is_not_activation",
+            "resolution_path": [
+              "Activate the pack for this workspace or mission with explicit capability grants."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "0216bf3"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_fe7eba620dc055e3"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T16:55:44.266649Z",
+            "decision": "deny",
+            "policy": "agent_pack_install_is_not_activation",
+            "policy_decision_id": "policy_fe7eba620dc055e3",
+            "reason": "Installed Agent Pack has no mission authority until explicit activation grants exist.",
+            "resolution_path": [
+              "Activate the pack for this workspace or mission with explicit capability grants."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "pack_ops_recovery_agent",
+              "type": "agent_pack"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "core_brief": {
+      "command": [
+        "cornerstone",
+        "brief",
+        "create",
+        "--evidence-bundle-id",
+        "evb_46bf9b528be3a164",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_c1d44bc1ef5c411f"
+        ],
+        "brief": {
+          "brief_id": "brief_b437323e3edd4711",
+          "contradictions": [],
+          "created_at": "2026-06-09T16:55:43.846751Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_9f4c9a3433e647fe"
+            ],
+            "evidence_bundle_id": "evb_46bf9b528be3a164",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "Core-only first value anchor",
+            "search_snapshot_id": "search_df12af78dc1c33fb"
+          },
+          "evidence_links": [
+            {
+              "artifact_ref": "artifact:art_9f4c9a3433e647fe",
+              "derived_text_ref": "derived/art_9f4c9a3433e647fe.txt",
+              "evidence_bundle_ref": "evidence_bundle:evb_46bf9b528be3a164",
+              "original_storage_ref": "sha256:9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb",
+              "search_snapshot_ref": "search_snapshot:search_df12af78dc1c33fb",
+              "snippet": "Core-only first value anchor: CornerStone can ingest, search, bundle evidence, and draft a brief without any Agent Pack. Domain packs may add templates, playbooks, evidence expecta"
+            }
+          ],
+          "key_points": [
+            "Core-only first value anchor: CornerStone can ingest, search, bundle evidence, and draft a brief without any Agent Pack. Domain packs may add templates, playbooks, evidence expecta"
+          ],
+          "ontology": {
+            "ontology_suggestions_required_before_brief": false,
+            "preconfigured_ontology_required": false,
+            "suggestions": []
+          },
+          "recommended_next_steps": [
+            "Create a draft claim from this Evidence Bundle if the user wants durable truth work.",
+            "Collect more evidence if the decision requires higher confidence."
+          ],
+          "schema_version": "cs.brief.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "evidence_backed",
+          "suggested_outputs": [
+            {
+              "mode": "optional_promotion",
+              "type": "Claim"
+            },
+            {
+              "mode": "optional_promotion",
+              "type": "Knowledge Capsule"
+            },
+            {
+              "mode": "optional_promotion",
+              "type": "Mission Card"
+            }
+          ],
+          "title": "Brief for Core-only first value anchor",
+          "uncertainty": [
+            "This brief is grounded only in the attached Evidence Bundle.",
+            "Add more sources before using it as broad organizational truth."
+          ]
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brief create",
+        "errors": [],
+        "evidence_refs": [
+          "brief:brief_b437323e3edd4711",
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "search_snapshot:search_df12af78dc1c33fb",
+          "artifact:art_9f4c9a3433e647fe"
+        ],
+        "ids": {
+          "audit_event_id": "audit_c1d44bc1ef5c411f",
+          "brief_id": "brief_b437323e3edd4711",
+          "evidence_bundle_id": "evb_46bf9b528be3a164",
+          "git_commit": "0216bf3",
+          "search_snapshot_id": "search_df12af78dc1c33fb"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "core_bundle": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_df12af78dc1c33fb",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_97a497a1f3c3e2b8"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T16:55:43.794736Z",
+          "evidence_bundle_id": "evb_46bf9b528be3a164",
+          "evidence_items": [
+            {
+              "artifact_id": "art_9f4c9a3433e647fe",
+              "derived_text_ref": "derived/art_9f4c9a3433e647fe.txt",
+              "original_storage_ref": "sha256:9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb",
+              "provenance": {
+                "created_at": "2026-06-09T16:55:43.696315Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_df12af78dc1c33fb",
+              "snippet": "Core-only first value anchor: CornerStone can ingest, search, bundle evidence, and draft a brief without any Agent Pack. Domain packs may add templates, playbooks, evidence expecta",
+              "source": {
+                "ingested_at": "2026-06-09T16:55:43.696315Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/14_extension_ecosystem/core_only_note.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "Core-only first value anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "Core-only first value anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_9f4c9a3433e647fe",
+                "derived_text_ref": "derived/art_9f4c9a3433e647fe.txt",
+                "evidence_refs": [
+                  "artifact:art_9f4c9a3433e647fe",
+                  "storage:sha256:9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "Core-only first value anchor",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "core-only",
+                    "query_term": "core-only",
+                    "type": "keyword"
+                  },
+                  {
+                    "matched_term": "first",
+                    "query_term": "first",
+                    "type": "keyword"
+                  },
+                  {
+                    "matched_term": "value",
+                    "query_term": "value",
+                    "type": "keyword"
+                  },
+                  {
+                    "matched_term": "anchor",
+                    "query_term": "anchor",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 14,
+                "snippet": "Core-only first value anchor: CornerStone can ingest, search, bundle evidence, and draft a brief without any Agent Pack. Domain packs may add templates, playbooks, evidence expecta"
+              }
+            ],
+            "search_snapshot_id": "search_df12af78dc1c33fb"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_df12af78dc1c33fb"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "search_snapshot:search_df12af78dc1c33fb",
+          "artifact:art_9f4c9a3433e647fe"
+        ],
+        "ids": {
+          "audit_event_id": "audit_97a497a1f3c3e2b8",
+          "evidence_bundle_id": "evb_46bf9b528be3a164",
+          "git_commit": "0216bf3",
+          "search_snapshot_id": "search_df12af78dc1c33fb"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "core_ingest": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/14_extension_ecosystem/core_only_note.txt",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_9f4c9a3433e647fe",
+          "checksum_sha256": "9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_9f4c9a3433e647fe.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 286,
+          "original_storage_ref": "sha256:9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb",
+          "provenance": {
+            "created_at": "2026-06-09T16:55:43.696315Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T16:55:43.696315Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/14_extension_ecosystem/core_only_note.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_c82fb351c1b507df"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_9f4c9a3433e647fe",
+          "storage:sha256:9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb"
+        ],
+        "ids": {
+          "artifact_id": "art_9f4c9a3433e647fe",
+          "audit_event_id": "audit_c82fb351c1b507df",
+          "checksum_sha256": "9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb",
+          "git_commit": "0216bf3"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "core_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "Core-only first value anchor",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_cd8dc31db0070031"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_df12af78dc1c33fb",
+          "artifact:art_9f4c9a3433e647fe",
+          "storage:sha256:9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb"
+        ],
+        "ids": {
+          "audit_event_id": "audit_cd8dc31db0070031",
+          "git_commit": "0216bf3",
+          "search_snapshot_id": "search_df12af78dc1c33fb"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T16:55:43.739152Z",
+          "duration_ms": 0.32,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "Core-only first value anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_9f4c9a3433e647fe",
+              "derived_text_ref": "derived/art_9f4c9a3433e647fe.txt",
+              "evidence_refs": [
+                "artifact:art_9f4c9a3433e647fe",
+                "storage:sha256:9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb"
+              ],
+              "match_reasons": [
+                {
+                  "query": "Core-only first value anchor",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "core-only",
+                  "query_term": "core-only",
+                  "type": "keyword"
+                },
+                {
+                  "matched_term": "first",
+                  "query_term": "first",
+                  "type": "keyword"
+                },
+                {
+                  "matched_term": "value",
+                  "query_term": "value",
+                  "type": "keyword"
+                },
+                {
+                  "matched_term": "anchor",
+                  "query_term": "anchor",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:9f4c9a3433e647fe1ad881f971fa9cbb4a19b1e99cf7cff98281a1606e3dabbb",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 14,
+              "snippet": "Core-only first value anchor: CornerStone can ingest, search, bundle evidence, and draft a brief without any Agent Pack. Domain packs may add templates, playbooks, evidence expecta"
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_df12af78dc1c33fb"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "direct_provider_import": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "import",
+        "--manifest",
+        "fixtures/vs0/packs/14_extension_ecosystem/direct_provider_agent_pack_manifest.json",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_2c2ce37e422aa24e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack import",
+        "errors": [
+          {
+            "code": "CS_PACK_REGISTRY_VALIDATION_FAILED",
+            "message": "Agent Pack was quarantined by registry validation.",
+            "resolution_path": [
+              "Remove provider clients, credential handling, direct API writeback, and raw secret access from the pack.",
+              "Declare connector and action requirements for ConnectorHub mediation.",
+              "Attach required manifest, provenance, attestation, SBOM, and evaluation metadata."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "0216bf3",
+          "pack_id": "pack_direct_provider_blocked",
+          "quarantine_id": "packquar_03fab725887b03a5"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_07cfbb6cd3d29259"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T16:55:44.697479Z",
+            "decision": "deny",
+            "policy": "agent_pack_registry_validation",
+            "policy_decision_id": "policy_07cfbb6cd3d29259",
+            "reason": "Agent Pack registry validation failed before availability.",
+            "resolution_path": [
+              "Remove provider clients, credential handling, direct API writeback, and raw secret access from the pack.",
+              "Declare connector and action requirements for ConnectorHub mediation.",
+              "Attach required manifest, provenance, attestation, SBOM, and evaluation metadata."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "pack_direct_provider_blocked",
+              "type": "agent_pack"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "quarantine": {
+          "created_at": "2026-06-09T16:55:44.697634Z",
+          "direct_provider_logic_detected": true,
+          "forbidden_runtime": {
+            "direct_api_writeback": true,
+            "extension_owned_credentials": true,
+            "provider_clients": true,
+            "raw_secret_access": true
+          },
+          "manifest_path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/14_extension_ecosystem/direct_provider_agent_pack_manifest.json",
+          "missing_fields": [],
+          "pack_id": "pack_direct_provider_blocked",
+          "policy_decision": {
+            "created_at": "2026-06-09T16:55:44.697479Z",
+            "decision": "deny",
+            "policy": "agent_pack_registry_validation",
+            "policy_decision_id": "policy_07cfbb6cd3d29259",
+            "reason": "Agent Pack registry validation failed before availability.",
+            "resolution_path": [
+              "Remove provider clients, credential handling, direct API writeback, and raw secret access from the pack.",
+              "Declare connector and action requirements for ConnectorHub mediation.",
+              "Attach required manifest, provenance, attestation, SBOM, and evaluation metadata."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "pack_direct_provider_blocked",
+              "type": "agent_pack"
+            }
+          },
+          "quarantine_id": "packquar_03fab725887b03a5",
+          "schema_version": "cs.agent_pack_quarantine.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_digest": "85294e5c60f37d86d27306f3110ba2fd87b462573e554d0e444e2fb6d01be7ef",
+          "status": "quarantined"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "emergency_patch": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "emergency-patch",
+        "pack_ops_recovery_agent",
+        "--patch-version",
+        "1.0.1-security",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_474d54f3e1a4d8de"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack emergency-patch",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent",
+          "security_patch_id": "packpatch_2551fcb601c53e25"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "security_patch": {
+          "behavior_change": false,
+          "behavior_changing_updates_require_review": true,
+          "compatibility_checks": {
+            "api_compatible": true,
+            "model_policy_compatible": true,
+            "playbook_compatible": true,
+            "status": "pass"
+          },
+          "created_at": "2026-06-09T16:55:45.530808Z",
+          "from_version": "1.0.0",
+          "owner_visibility": true,
+          "pack_id": "pack_ops_recovery_agent",
+          "patch_version": "1.0.1-security",
+          "policy": "emergency_security_patch",
+          "rollback": {
+            "available": true,
+            "target_version": "1.0.0"
+          },
+          "schema_version": "cs.agent_pack_security_patch.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "security_patch_id": "packpatch_2551fcb601c53e25",
+          "status": "applied"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "emergency_patch_behavior_change": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "emergency-patch",
+        "pack_ops_recovery_agent",
+        "--patch-version",
+        "1.0.1-security",
+        "--behavior-change",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_f8b1810fa8355722"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack emergency-patch",
+        "errors": [
+          {
+            "code": "CS_PACK_APPROVAL_REQUIRED",
+            "message": "Behavior-changing emergency updates still require appropriate review.",
+            "policy": "agent_pack_emergency_patch_behavior_change_review",
+            "resolution_path": [
+              "Split the security fix from behavior changes or obtain reviewed approval."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "0216bf3"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_e70e634033df76d6"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T16:55:45.582593Z",
+            "decision": "requires_review",
+            "policy": "agent_pack_emergency_patch_behavior_change_review",
+            "policy_decision_id": "policy_e70e634033df76d6",
+            "reason": "Behavior-changing emergency updates still require appropriate review.",
+            "resolution_path": [
+              "Split the security fix from behavior changes or obtain reviewed approval."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "pack_ops_recovery_agent",
+              "type": "agent_pack"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "learning_record": {
+      "command": [
+        "cornerstone",
+        "learning",
+        "record",
+        "--action-id",
+        "action_94c495b2a6f88822",
+        "--lesson",
+        "Repeated recovery missions should start from current evidence and only propose pack playbooks after scoped approval.",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_a661d90741741bfd"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone learning record",
+        "errors": [],
+        "evidence_refs": [
+          "learning:learn_5c106adca58ac91a",
+          "action:action_94c495b2a6f88822",
+          "mission:mission_d8b69286e34846e5",
+          "claim:claim_52e7a9038cefc943",
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "artifact:art_9f4c9a3433e647fe"
+        ],
+        "ids": {
+          "action_id": "action_94c495b2a6f88822",
+          "git_commit": "0216bf3",
+          "learning_id": "learn_5c106adca58ac91a"
+        },
+        "learning": {
+          "created_at": "2026-06-09T16:55:45.053851Z",
+          "evidence_refs": [
+            "action:action_94c495b2a6f88822",
+            "mission:mission_d8b69286e34846e5",
+            "claim:claim_52e7a9038cefc943",
+            "evidence_bundle:evb_46bf9b528be3a164",
+            "artifact:art_9f4c9a3433e647fe"
+          ],
+          "learning_boundary": {
+            "changes_user_or_org_truth": false,
+            "requires_review_before_memory_update": true,
+            "source_of_truth": "audit_and_evidence",
+            "updates_product_behavior": false
+          },
+          "learning_id": "learn_5c106adca58ac91a",
+          "lesson": "Repeated recovery missions should start from current evidence and only propose pack playbooks after scoped approval.",
+          "schema_version": "cs.learning_record.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_action": {
+            "action_id": "action_94c495b2a6f88822",
+            "action_kind": "internal_status_update",
+            "execution_status": "executed",
+            "external_http_calls": 0,
+            "mission_id": "mission_d8b69286e34846e5",
+            "result_status": "success",
+            "risk": "low",
+            "side_effect_boundary": "local_internal_state"
+          },
+          "source_dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_52e7a9038cefc943",
+            "created_at": "2026-06-09T16:55:44.949857Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_e235588851ed6a92",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Record recovery playbook fixture status.",
+            "mission_id": "mission_d8b69286e34846e5",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": false,
+              "can_execute_now": true,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T16:55:44.949753Z",
+              "decision": "allow",
+              "execution_status": "ready_to_execute",
+              "id": "policy_dadd4c8969aba0a8",
+              "mission_id": "mission_d8b69286e34846e5",
+              "policy": "low_risk_autopilot_allowed",
+              "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "source_policy": {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T16:55:44.949753Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_dadd4c8969aba0a8",
+            "mission_id": "mission_d8b69286e34846e5",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "status": "recorded"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "lesson_propose": {
+      "command": [
+        "cornerstone",
+        "experience",
+        "lesson",
+        "propose",
+        "--trajectory-id",
+        "traj_e3f08a042921e6a2",
+        "--lesson",
+        "Convert repeated recovery success into a scoped playbook proposal only after owner approval.",
+        "--applies-when",
+        "Same workspace, current evidence, and ConnectorHub-mediated capability grants exist.",
+        "--does-not-apply-when",
+        "Cross-namespace reuse, missing current evidence, or direct provider access is requested.",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_9fc20f6ef983c6a8"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone experience lesson propose",
+        "errors": [],
+        "evidence_refs": [
+          "lesson:lesson_574c8ed39b3f6692",
+          "trajectory:traj_e3f08a042921e6a2",
+          "mission:mission_d8b69286e34846e5",
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "artifact:art_9f4c9a3433e647fe",
+          "action:action_94c495b2a6f88822",
+          "learning:learn_5c106adca58ac91a"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "lesson_id": "lesson_574c8ed39b3f6692",
+          "trajectory_id": "traj_e3f08a042921e6a2"
+        },
+        "lesson": {
+          "applicability": {
+            "applies_when": "Same workspace, current evidence, and ConnectorHub-mediated capability grants exist.",
+            "does_not_apply_when": "Cross-namespace reuse, missing current evidence, or direct provider access is requested.",
+            "evidence_required_before_use": true
+          },
+          "causal_attribution": {
+            "outcome_status": "success",
+            "source": "trajectory:traj_e3f08a042921e6a2",
+            "why_this_helped_or_failed": "Derived from trajectory outcome, action evidence, and owner acceptance."
+          },
+          "confidence": "medium",
+          "created_at": "2026-06-09T16:55:45.167492Z",
+          "evidence_refs": [
+            "trajectory:traj_e3f08a042921e6a2",
+            "mission:mission_d8b69286e34846e5",
+            "evidence_bundle:evb_46bf9b528be3a164",
+            "artifact:art_9f4c9a3433e647fe",
+            "action:action_94c495b2a6f88822",
+            "learning:learn_5c106adca58ac91a"
+          ],
+          "lesson": "Convert repeated recovery success into a scoped playbook proposal only after owner approval.",
+          "lesson_id": "lesson_574c8ed39b3f6692",
+          "promotion_history": [
+            {
+              "created_at": "2026-06-09T16:55:45.167384Z",
+              "ref": "trajectory:traj_e3f08a042921e6a2",
+              "stage": "trajectory"
+            },
+            {
+              "created_at": "2026-06-09T16:55:45.167485Z",
+              "ref": "trajectory:traj_e3f08a042921e6a2",
+              "stage": "observation"
+            },
+            {
+              "created_at": "2026-06-09T16:55:45.167488Z",
+              "stage": "candidate_lesson"
+            }
+          ],
+          "promotion_ladder": [
+            "trajectory",
+            "observation",
+            "candidate_lesson",
+            "workspace_memory",
+            "mission_playbook",
+            "organization_approved_rule",
+            "solution_pack_or_product_learning_proposal"
+          ],
+          "promotion_stage": "candidate_lesson",
+          "review_state": "needs_review",
+          "rollback": {
+            "affected_missions": [
+              "mission_d8b69286e34846e5"
+            ],
+            "affected_playbooks": [],
+            "available": true
+          },
+          "schema_version": "cs.lesson_candidate.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "scope_boundary": {
+            "auto_global_rule": false,
+            "auto_product_default": false,
+            "namespace_local_first": true,
+            "requires_staged_approval_for_broader_reuse": true
+          },
+          "status": "candidate",
+          "trajectory_id": "traj_e3f08a042921e6a2"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "mission_activate": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "activate",
+        "mission_d8b69286e34846e5",
+        "--mode",
+        "autopilot",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ab52cb6e9dd432c7",
+          "audit:audit_a2ef7126556efb7a"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission activate",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_d8b69286e34846e5"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "mission_id": "mission_d8b69286e34846e5"
+        },
+        "mission": {
+          "activated_at": "2026-06-09T16:55:44.792610Z",
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "authority_view": {
+            "allowed_actions": [
+              "internal_status_update",
+              "draft_task",
+              "refresh_brief"
+            ],
+            "forbidden_actions": [
+              "external_writeback_without_workflow_action",
+              "cross_namespace_access",
+              "destructive_change",
+              "secret_exfiltration"
+            ],
+            "may_act_in_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "pause_stop_revoke": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T16:55:44.740449Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_9f4c9a3433e647fe"
+            ],
+            "evidence_bundle_id": "evb_46bf9b528be3a164",
+            "search_snapshot_id": "search_df12af78dc1c33fb"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Create an evidence-backed recovery playbook candidate from the core-only first value anchor.",
+          "mission_id": "mission_d8b69286e34846e5",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": null,
+            "statement": null,
+            "trust_state": null
+          },
+          "status": "active",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "autopilot"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": false,
+            "autonomous_execution_allowed": true,
+            "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            "label": "Autopilot"
+          },
+          "mode": "autopilot",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T16:55:44.792175Z"
+        }
+      }
+    },
+    "mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--goal",
+        "Create an evidence-backed recovery playbook candidate from the core-only first value anchor.",
+        "--evidence-bundle-id",
+        "evb_46bf9b528be3a164",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_7550291d8dc13f9a"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_d8b69286e34846e5",
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "artifact:art_9f4c9a3433e647fe"
+        ],
+        "ids": {
+          "audit_event_id": "audit_7550291d8dc13f9a",
+          "evidence_bundle_id": "evb_46bf9b528be3a164",
+          "git_commit": "0216bf3",
+          "mission_id": "mission_d8b69286e34846e5"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T16:55:44.740449Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_9f4c9a3433e647fe"
+            ],
+            "evidence_bundle_id": "evb_46bf9b528be3a164",
+            "search_snapshot_id": "search_df12af78dc1c33fb"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Create an evidence-backed recovery playbook candidate from the core-only first value anchor.",
+          "mission_id": "mission_d8b69286e34846e5",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": null,
+            "statement": null,
+            "trust_state": null
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "assist"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "org_pack_activate_shortcut": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "activate",
+        "pack_ops_recovery_agent",
+        "--grant",
+        "artifact.read",
+        "--grant",
+        "playbook.propose",
+        "--org-admin-shortcut",
+        "--policy-id",
+        "org_policy_default_pack_activation",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--owner-id",
+        "org-owner",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "activation": {
+          "activation_id": "packact_b54895ff88188bce",
+          "allowed_actions": [
+            "draft_recovery_playbook",
+            "propose_internal_status_update"
+          ],
+          "capability_disclosure_complete": true,
+          "connectorhub_boundary": {
+            "credentials_exposed_to_agent": false,
+            "declared_actions_only": true,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub"
+          },
+          "created_at": "2026-06-09T16:55:44.485090Z",
+          "evaluation_rubric": {
+            "checks": [
+              "evidence coverage",
+              "connector boundary",
+              "owner scope",
+              "rollback readiness"
+            ],
+            "llm_signal_is_supporting_only": true
+          },
+          "granted_capabilities": [
+            "artifact.read",
+            "playbook.propose"
+          ],
+          "install_id": "packinst_1e2d8186844717a2",
+          "memory_scope": {
+            "cross_namespace": false,
+            "default": "workspace",
+            "writes_product_defaults": false
+          },
+          "mission_id": null,
+          "model_policy": {
+            "allowed_models": [
+              "local_test.v0"
+            ],
+            "external_model_required": false,
+            "pass_judge": false,
+            "provider": "local_test"
+          },
+          "organization_admin_shortcut": {
+            "auditable": true,
+            "bypasses_capability_disclosure": false,
+            "policy_id": "org_policy_default_pack_activation",
+            "rollback_available": true,
+            "used": true,
+            "visible": true
+          },
+          "owner_granted_only_needed_capabilities": true,
+          "pack_id": "pack_ops_recovery_agent",
+          "policy_decision": {
+            "created_at": "2026-06-09T16:55:44.484943Z",
+            "decision": "allow",
+            "policy": "agent_pack_explicit_activation_grants",
+            "policy_decision_id": "policy_34ee7d54e76838ae",
+            "reason": "Certified Agent Pack activation with explicit owner-scoped capability grants.",
+            "resolution_path": [
+              "Use ConnectorHub-mediated capabilities and audit every action."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "org-owner",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "subject": {
+              "id": "pack_ops_recovery_agent",
+              "type": "agent_pack"
+            }
+          },
+          "requested_permissions": [
+            "artifact.read",
+            "experience.read",
+            "playbook.propose",
+            "connector.mock.crm.read",
+            "action.internal_status_update"
+          ],
+          "required_connector_capabilities": [
+            {
+              "capability": "connector.mock.crm.read",
+              "declared_actions_only": true,
+              "mediated_by": "ConnectorHub",
+              "provider": "mock_crm"
+            }
+          ],
+          "risk_level": "medium",
+          "role_card": {
+            "display_name": "Recovery Planner",
+            "owner_visible": true,
+            "risk_level": "medium",
+            "summary": "Suggests recovery templates from scoped evidence and approved experience."
+          },
+          "rollback": {
+            "available": true,
+            "target_version": "1.0.0"
+          },
+          "schema_version": "cs.agent_pack_activation.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "org-owner",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "silent_activation": false,
+          "status": "active",
+          "version": "1.0.0"
+        },
+        "audit_refs": [
+          "audit:audit_e558c43246018033"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack activate",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "activation_id": "packact_b54895ff88188bce",
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "org-owner",
+        "policy_decision_refs": [
+          "policy:policy_34ee7d54e76838ae"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T16:55:44.484943Z",
+            "decision": "allow",
+            "policy": "agent_pack_explicit_activation_grants",
+            "policy_decision_id": "policy_34ee7d54e76838ae",
+            "reason": "Certified Agent Pack activation with explicit owner-scoped capability grants.",
+            "resolution_path": [
+              "Use ConnectorHub-mediated capabilities and audit every action."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "org-owner",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "subject": {
+              "id": "pack_ops_recovery_agent",
+              "type": "agent_pack"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "org_pack_install": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "install",
+        "pack_ops_recovery_agent",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--owner-id",
+        "org-owner",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ae1d0117c7faa683"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack install",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "install_id": "packinst_1e2d8186844717a2",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "install": {
+          "activation_status": "inactive",
+          "behavior_changing_updates_apply_silently": false,
+          "can_act": false,
+          "created_at": "2026-06-09T16:55:44.432597Z",
+          "granted_capabilities": [],
+          "install_id": "packinst_1e2d8186844717a2",
+          "mission_authority": false,
+          "pack_id": "pack_ops_recovery_agent",
+          "pinned_version": "1.0.0",
+          "review_required": false,
+          "schema_version": "cs.agent_pack_install.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "org-owner",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "status": "installed",
+          "supply_chain": {
+            "certified": true,
+            "checks": {
+              "attestation_verified": true,
+              "provenance_present": true,
+              "risk_label_present": true,
+              "sbom_present": true,
+              "signature_verified": true,
+              "trusted_registry_source": true,
+              "update_metadata_present": true,
+              "version_declared": true
+            },
+            "registry_source": "curated_certified",
+            "risk_label": "medium",
+            "verified": true
+          },
+          "trust": {
+            "certified": true,
+            "public_marketplace_default": false,
+            "publisher": "cornerstone-first-party-fixture",
+            "risk_label": "medium",
+            "source": "curated_certified"
+          },
+          "version": "1.0.0",
+          "version_pinned_by_default": true
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "org-owner",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "pack_activate": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "activate",
+        "pack_ops_recovery_agent",
+        "--grant",
+        "artifact.read",
+        "--grant",
+        "experience.read",
+        "--grant",
+        "playbook.propose",
+        "--grant",
+        "connector.mock.crm.read",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "activation": {
+          "activation_id": "packact_afef57baeec5412c",
+          "allowed_actions": [
+            "draft_recovery_playbook",
+            "propose_internal_status_update"
+          ],
+          "capability_disclosure_complete": true,
+          "connectorhub_boundary": {
+            "credentials_exposed_to_agent": false,
+            "declared_actions_only": true,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub"
+          },
+          "created_at": "2026-06-09T16:55:44.322435Z",
+          "evaluation_rubric": {
+            "checks": [
+              "evidence coverage",
+              "connector boundary",
+              "owner scope",
+              "rollback readiness"
+            ],
+            "llm_signal_is_supporting_only": true
+          },
+          "granted_capabilities": [
+            "artifact.read",
+            "experience.read",
+            "playbook.propose",
+            "connector.mock.crm.read"
+          ],
+          "install_id": "packinst_2bc56220e4f201b1",
+          "memory_scope": {
+            "cross_namespace": false,
+            "default": "workspace",
+            "writes_product_defaults": false
+          },
+          "mission_id": null,
+          "model_policy": {
+            "allowed_models": [
+              "local_test.v0"
+            ],
+            "external_model_required": false,
+            "pass_judge": false,
+            "provider": "local_test"
+          },
+          "organization_admin_shortcut": {
+            "auditable": true,
+            "bypasses_capability_disclosure": false,
+            "policy_id": null,
+            "rollback_available": true,
+            "used": false,
+            "visible": true
+          },
+          "owner_granted_only_needed_capabilities": true,
+          "pack_id": "pack_ops_recovery_agent",
+          "policy_decision": {
+            "created_at": "2026-06-09T16:55:44.322268Z",
+            "decision": "allow",
+            "policy": "agent_pack_explicit_activation_grants",
+            "policy_decision_id": "policy_258527044aace384",
+            "reason": "Certified Agent Pack activation with explicit owner-scoped capability grants.",
+            "resolution_path": [
+              "Use ConnectorHub-mediated capabilities and audit every action."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "pack_ops_recovery_agent",
+              "type": "agent_pack"
+            }
+          },
+          "requested_permissions": [
+            "artifact.read",
+            "experience.read",
+            "playbook.propose",
+            "connector.mock.crm.read",
+            "action.internal_status_update"
+          ],
+          "required_connector_capabilities": [
+            {
+              "capability": "connector.mock.crm.read",
+              "declared_actions_only": true,
+              "mediated_by": "ConnectorHub",
+              "provider": "mock_crm"
+            }
+          ],
+          "risk_level": "medium",
+          "role_card": {
+            "display_name": "Recovery Planner",
+            "owner_visible": true,
+            "risk_level": "medium",
+            "summary": "Suggests recovery templates from scoped evidence and approved experience."
+          },
+          "rollback": {
+            "available": true,
+            "target_version": "1.0.0"
+          },
+          "schema_version": "cs.agent_pack_activation.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "silent_activation": false,
+          "status": "active",
+          "version": "1.0.0"
+        },
+        "audit_refs": [
+          "audit:audit_b3fc1ae39fbbd56d"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack activate",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "activation_id": "packact_afef57baeec5412c",
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_258527044aace384"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T16:55:44.322268Z",
+            "decision": "allow",
+            "policy": "agent_pack_explicit_activation_grants",
+            "policy_decision_id": "policy_258527044aace384",
+            "reason": "Certified Agent Pack activation with explicit owner-scoped capability grants.",
+            "resolution_path": [
+              "Use ConnectorHub-mediated capabilities and audit every action."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "pack_ops_recovery_agent",
+              "type": "agent_pack"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_certify": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "certify",
+        "pack_ops_recovery_agent",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_46041bfce1005f7d"
+        ],
+        "certification": {
+          "certification_id": "packcert_48c520710e2f2c07",
+          "created_at": "2026-06-09T16:55:44.093492Z",
+          "evaluation_card": {
+            "audit_coverage": {
+              "activation": true,
+              "connector_request": true,
+              "install": true,
+              "registry": true,
+              "rollback": true,
+              "update": true
+            },
+            "benchmark_scenarios": [
+              "CS-EXT-001",
+              "CS-EXT-006",
+              "CS-EXT-014",
+              "CS-SEC-015"
+            ],
+            "connector_action_boundary_checks": {
+              "connectorhub_mediated": true,
+              "credentials_exposed_to_agent": false,
+              "direct_provider_access": false,
+              "status": "pass"
+            },
+            "human_review": {
+              "replaces_policy_checks": false,
+              "reviewer": "fixture-maintainer",
+              "status": "reviewed"
+            },
+            "intended_use": "Workspace-scoped recovery planning from existing CornerStone evidence.",
+            "llm_judge_rubrics": {
+              "pass_judge": false,
+              "provider": "local_test",
+              "supporting_signal_only": true
+            },
+            "model_compatibility": {
+              "external_model_required": false,
+              "local_test.v0": "pass"
+            },
+            "outcome_history": {
+              "replaces_scenario_certification": false,
+              "sample_size": 3,
+              "source": "local fixture trajectory examples"
+            },
+            "policy_checks": {
+              "autonomous_action_requires_activation": true,
+              "connectorhub_boundary_required": true,
+              "status": "pass"
+            },
+            "prompt_injection_tests": {
+              "blocked_tool_hijack": true,
+              "external_http_calls": 0,
+              "status": "pass"
+            },
+            "required_capabilities": [
+              "artifact.read",
+              "experience.read",
+              "playbook.propose",
+              "connector.mock.crm.read"
+            ],
+            "risk_level": "medium",
+            "rollback_support": {
+              "available": true,
+              "tested": true
+            },
+            "scenario_results": {
+              "scenario_ids": [
+                "CS-EXT-001",
+                "CS-EXT-009",
+                "CS-SEC-015"
+              ],
+              "status": "pass"
+            },
+            "version_history": [
+              {
+                "status": "certified",
+                "version": "1.0.0"
+              }
+            ]
+          },
+          "human_review_is_evidence_input": true,
+          "human_review_replaces_scenario_certification": false,
+          "outcome_history_is_evidence_input": true,
+          "outcome_history_replaces_policy_checks": false,
+          "pack_id": "pack_ops_recovery_agent",
+          "policy_checks_required_for_autonomous_action": true,
+          "scenario_certification_required_for_autonomous_action": true,
+          "schema_version": "cs.agent_pack_certification.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "certified",
+          "version": "1.0.0"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack certify",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "certification_id": "packcert_48c520710e2f2c07",
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_import": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "import",
+        "--manifest",
+        "fixtures/vs0/packs/14_extension_ecosystem/trusted_agent_pack_manifest.json",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "agent_pack": {
+          "created_at": "2026-06-09T16:55:43.911117Z",
+          "install_requires_review": false,
+          "manifest": {
+            "after_action_review_template": {
+              "fields": [
+                "outcome",
+                "evidence_refs",
+                "policy_decisions",
+                "owner_acceptance",
+                "rollback_or_followup"
+              ]
+            },
+            "allowed_actions": [
+              "draft_recovery_playbook",
+              "propose_internal_status_update"
+            ],
+            "allowed_capabilities": [
+              "artifact.read",
+              "experience.read",
+              "playbook.propose",
+              "connector.mock.crm.read",
+              "action.internal_status_update"
+            ],
+            "certification": {
+              "audit_coverage": {
+                "activation": true,
+                "connector_request": true,
+                "install": true,
+                "registry": true,
+                "rollback": true,
+                "update": true
+              },
+              "benchmark_scenarios": [
+                "CS-EXT-001",
+                "CS-EXT-006",
+                "CS-EXT-014",
+                "CS-SEC-015"
+              ],
+              "connector_action_boundary_checks": {
+                "connectorhub_mediated": true,
+                "credentials_exposed_to_agent": false,
+                "direct_provider_access": false,
+                "status": "pass"
+              },
+              "human_review": {
+                "replaces_policy_checks": false,
+                "reviewer": "fixture-maintainer",
+                "status": "reviewed"
+              },
+              "intended_use": "Workspace-scoped recovery planning from existing CornerStone evidence.",
+              "llm_judge_rubrics": {
+                "pass_judge": false,
+                "provider": "local_test",
+                "supporting_signal_only": true
+              },
+              "model_compatibility": {
+                "external_model_required": false,
+                "local_test.v0": "pass"
+              },
+              "outcome_history": {
+                "replaces_scenario_certification": false,
+                "sample_size": 3,
+                "source": "local fixture trajectory examples"
+              },
+              "policy_checks": {
+                "autonomous_action_requires_activation": true,
+                "connectorhub_boundary_required": true,
+                "status": "pass"
+              },
+              "prompt_injection_tests": {
+                "blocked_tool_hijack": true,
+                "external_http_calls": 0,
+                "status": "pass"
+              },
+              "required_capabilities": [
+                "artifact.read",
+                "experience.read",
+                "playbook.propose",
+                "connector.mock.crm.read"
+              ],
+              "risk_level": "medium",
+              "rollback_support": {
+                "available": true,
+                "tested": true
+              },
+              "scenario_results": {
+                "scenario_ids": [
+                  "CS-EXT-001",
+                  "CS-EXT-009",
+                  "CS-SEC-015"
+                ],
+                "status": "pass"
+              },
+              "version_history": [
+                {
+                  "status": "certified",
+                  "version": "1.0.0"
+                }
+              ]
+            },
+            "components": {
+              "playbook_packs": [
+                {
+                  "id": "playbook_recovery_templates",
+                  "top_level_user_object": false
+                }
+              ],
+              "skill_packs": [
+                {
+                  "id": "skill_evidence_review",
+                  "top_level_user_object": false
+                }
+              ],
+              "tool_packs": [
+                {
+                  "connectorhub_mediated": true,
+                  "id": "tool_mock_crm_reader",
+                  "top_level_user_object": false
+                }
+              ]
+            },
+            "connector_requirements": [
+              {
+                "capability": "connector.mock.crm.read",
+                "declared_actions_only": true,
+                "mediated_by": "ConnectorHub",
+                "provider": "mock_crm"
+              }
+            ],
+            "evaluation_expectations": {
+              "benchmark_scenarios": [
+                "CS-EXT-001",
+                "CS-EXT-009",
+                "CS-SEC-015"
+              ],
+              "connector_boundary_tests_required": true,
+              "prompt_injection_tests_required": true,
+              "rollback_test_required": true
+            },
+            "forbidden_runtime": {
+              "direct_api_writeback": false,
+              "extension_owned_credentials": false,
+              "provider_clients": false,
+              "raw_secret_access": false
+            },
+            "judge_rubric": {
+              "checks": [
+                "evidence coverage",
+                "connector boundary",
+                "owner scope",
+                "rollback readiness"
+              ],
+              "llm_signal_is_supporting_only": true
+            },
+            "memory_scope": {
+              "cross_namespace": false,
+              "default": "workspace",
+              "writes_product_defaults": false
+            },
+            "model_policy": {
+              "allowed_models": [
+                "local_test.v0"
+              ],
+              "external_model_required": false,
+              "pass_judge": false,
+              "provider": "local_test"
+            },
+            "name": "Ops Recovery Agent Pack",
+            "pack_id": "pack_ops_recovery_agent",
+            "playbooks": [
+              {
+                "evidence_expectations": [
+                  "failed trajectory",
+                  "owner acceptance state",
+                  "current artifact evidence"
+                ],
+                "playbook_id": "pb_recovery_review",
+                "rollback": true,
+                "title": "Evidence-backed recovery review"
+              }
+            ],
+            "role_card": {
+              "display_name": "Recovery Planner",
+              "owner_visible": true,
+              "risk_level": "medium",
+              "summary": "Suggests recovery templates from scoped evidence and approved experience."
+            },
+            "role_contract": {
+              "cannot_do": [
+                "read raw provider credentials",
+                "write directly to provider APIs",
+                "change workspace behavior without activation grants"
+              ],
+              "purpose": "Help a workspace turn failed local missions into evidence-backed recovery playbooks.",
+              "role": "Scoped recovery planner"
+            },
+            "schema_version": "cs.agent_pack_manifest.v0",
+            "security_patches": {
+              "1.0.1-security": {
+                "behavior_changing": false,
+                "compatibility_checks": {
+                  "api_compatible": true,
+                  "model_policy_compatible": true,
+                  "playbook_compatible": true,
+                  "status": "pass"
+                },
+                "policy": "emergency_security_patch"
+              }
+            },
+            "supply_chain": {
+              "attestation": {
+                "builder_id": "https://cornerstone.local/builders/local-fixture",
+                "predicate_type": "https://slsa.dev/provenance/v1",
+                "verified": true
+              },
+              "provenance": {
+                "builder_id": "https://cornerstone.local/builders/local-fixture",
+                "predicate_type": "https://slsa.dev/provenance/v1",
+                "resolved_dependencies": [
+                  "local_test.v0",
+                  "mock_connector.v0"
+                ],
+                "subject_digest": "sha256:fixture-pack-ops-recovery"
+              },
+              "sbom": {
+                "digest": "sha256:fixture-sbom-pack-ops-recovery",
+                "format": "spdx-json-fixture",
+                "present": true
+              },
+              "signature": {
+                "certificate_ref": "rekor://fixture/pack_ops_recovery_agent",
+                "scheme": "sigstore-cosign-fixture",
+                "verified": true
+              }
+            },
+            "trust": {
+              "certified": true,
+              "public_marketplace_default": false,
+              "publisher": "cornerstone-first-party-fixture",
+              "risk_label": "medium",
+              "source": "curated_certified"
+            },
+            "updates": {
+              "1.1.0": {
+                "behavior_changing": true,
+                "diff": {
+                  "capabilities": [
+                    "playbook.propose"
+                  ],
+                  "connector_requirements": [
+                    "connector.mock.crm.read"
+                  ],
+                  "migration_notes": "owner can test in sandbox before approving",
+                  "model_policy": "unchanged local_test",
+                  "playbooks": [
+                    "pb_recovery_review"
+                  ],
+                  "risk": "medium",
+                  "role_contract": "adds recovery severity tags"
+                },
+                "evaluation_gate": {
+                  "connector_boundary": "pass",
+                  "prompt_injection_regression": "pass",
+                  "scenario_results": [
+                    "CS-EXT-012"
+                  ],
+                  "status": "pass"
+                },
+                "migration_notes": [
+                  "No silent behavior change; owner approval required before apply."
+                ],
+                "sandbox_canary_test": {
+                  "credentials_exposed_to_agent": false,
+                  "external_http_calls": 0,
+                  "status": "pass"
+                }
+              }
+            },
+            "version": "1.0.0"
+          },
+          "manifest_path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/14_extension_ecosystem/trusted_agent_pack_manifest.json",
+          "name": "Ops Recovery Agent Pack",
+          "pack_id": "pack_ops_recovery_agent",
+          "registry_source": "curated_certified",
+          "schema_version": "cs.agent_pack_registry_record.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_digest": "ad6fed3bf3ee6c7cf4d02410bbaa0295c886f19ee89cd6fe1dc32e344ea04537",
+          "status": "available",
+          "supply_chain": {
+            "certified": true,
+            "checks": {
+              "attestation_verified": true,
+              "provenance_present": true,
+              "risk_label_present": true,
+              "sbom_present": true,
+              "signature_verified": true,
+              "trusted_registry_source": true,
+              "update_metadata_present": true,
+              "version_declared": true
+            },
+            "registry_source": "curated_certified",
+            "risk_label": "medium",
+            "verified": true
+          },
+          "trust": {
+            "certified": true,
+            "public_marketplace_default": false,
+            "publisher": "cornerstone-first-party-fixture",
+            "risk_label": "medium",
+            "source": "curated_certified"
+          },
+          "version": "1.0.0"
+        },
+        "audit_refs": [
+          "audit:audit_c14cdbb63ac53336"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack import",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent",
+          "manifest:ad6fed3bf3ee6c7cf4d02410bbaa0295c886f19ee89cd6fe1dc32e344ea04537"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_install": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "install",
+        "pack_ops_recovery_agent",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_fa5f4df11d942455"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack install",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "install_id": "packinst_2bc56220e4f201b1",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "install": {
+          "activation_status": "inactive",
+          "behavior_changing_updates_apply_silently": false,
+          "can_act": false,
+          "created_at": "2026-06-09T16:55:44.209719Z",
+          "granted_capabilities": [],
+          "install_id": "packinst_2bc56220e4f201b1",
+          "mission_authority": false,
+          "pack_id": "pack_ops_recovery_agent",
+          "pinned_version": "1.0.0",
+          "review_required": false,
+          "schema_version": "cs.agent_pack_install.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "installed",
+          "supply_chain": {
+            "certified": true,
+            "checks": {
+              "attestation_verified": true,
+              "provenance_present": true,
+              "risk_label_present": true,
+              "sbom_present": true,
+              "signature_verified": true,
+              "trusted_registry_source": true,
+              "update_metadata_present": true,
+              "version_declared": true
+            },
+            "registry_source": "curated_certified",
+            "risk_label": "medium",
+            "verified": true
+          },
+          "trust": {
+            "certified": true,
+            "public_marketplace_default": false,
+            "publisher": "cornerstone-first-party-fixture",
+            "risk_label": "medium",
+            "source": "curated_certified"
+          },
+          "version": "1.0.0",
+          "version_pinned_by_default": true
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_install_dry_run": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "install",
+        "pack_ops_recovery_agent",
+        "--dry-run",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_2ff2ab6e834487a5"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack install",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "install_id": "packinst_eb7df622e0fc67a3",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "install": {
+          "activation_status": "inactive",
+          "behavior_changing_updates_apply_silently": false,
+          "can_act": false,
+          "created_at": "2026-06-09T16:55:44.148612Z",
+          "granted_capabilities": [],
+          "install_id": "packinst_eb7df622e0fc67a3",
+          "mission_authority": false,
+          "pack_id": "pack_ops_recovery_agent",
+          "pinned_version": "1.0.0",
+          "review_required": false,
+          "schema_version": "cs.agent_pack_install.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "install_preview",
+          "supply_chain": {
+            "certified": true,
+            "checks": {
+              "attestation_verified": true,
+              "provenance_present": true,
+              "risk_label_present": true,
+              "sbom_present": true,
+              "signature_verified": true,
+              "trusted_registry_source": true,
+              "update_metadata_present": true,
+              "version_declared": true
+            },
+            "registry_source": "curated_certified",
+            "risk_label": "medium",
+            "verified": true
+          },
+          "trust": {
+            "certified": true,
+            "public_marketplace_default": false,
+            "publisher": "cornerstone-first-party-fixture",
+            "risk_label": "medium",
+            "source": "curated_certified"
+          },
+          "version": "1.0.0",
+          "version_pinned_by_default": true
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_list": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "list",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_fcc1d60306ef9b3f"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack list",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "0216bf3",
+          "registry_id": "local"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "registry": {
+          "created_at": "2026-06-09T16:55:43.977139Z",
+          "packs": [
+            {
+              "certified": true,
+              "install_requires_review": false,
+              "name": "Ops Recovery Agent Pack",
+              "pack_id": "pack_ops_recovery_agent",
+              "registry_source": "curated_certified",
+              "risk_label": "medium",
+              "status": "available",
+              "supply_chain_verified": true,
+              "version": "1.0.0"
+            }
+          ],
+          "schema_version": "cs.agent_pack_registry_view.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "ready",
+          "trust_model": {
+            "default_sources": [
+              "first_party",
+              "organization_private",
+              "curated_certified"
+            ],
+            "public_marketplace_default": false,
+            "risk_labels_visible": true
+          }
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_rollback": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "rollback",
+        "pack_ops_recovery_agent",
+        "--to-version",
+        "1.0.0",
+        "--reason",
+        "Owner rejected behavior-changing severity tags.",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_f411652a333d31e4"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack rollback",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent",
+          "rollback_id": "packroll_09d690d5a417d518"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "pack_rollback": {
+          "affected_missions": [],
+          "changes_recorded": true,
+          "created_at": "2026-06-09T16:55:45.478618Z",
+          "from_version": "1.1.0",
+          "pack_id": "pack_ops_recovery_agent",
+          "reason": "Owner rejected behavior-changing severity tags.",
+          "rollback_id": "packroll_09d690d5a417d518",
+          "schema_version": "cs.agent_pack_rollback.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "rolled_back",
+          "to_version": "1.0.0"
+        },
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_show": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "show",
+        "pack_ops_recovery_agent",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "agent_pack_detail": {
+          "after_action_review_template": {
+            "fields": [
+              "outcome",
+              "evidence_refs",
+              "policy_decisions",
+              "owner_acceptance",
+              "rollback_or_followup"
+            ]
+          },
+          "allowed_capabilities": [
+            "artifact.read",
+            "experience.read",
+            "playbook.propose",
+            "connector.mock.crm.read",
+            "action.internal_status_update"
+          ],
+          "components": {
+            "playbook_packs": [
+              {
+                "id": "playbook_recovery_templates",
+                "top_level_user_object": false
+              }
+            ],
+            "skill_packs": [
+              {
+                "id": "skill_evidence_review",
+                "top_level_user_object": false
+              }
+            ],
+            "tool_packs": [
+              {
+                "connectorhub_mediated": true,
+                "id": "tool_mock_crm_reader",
+                "top_level_user_object": false
+              }
+            ]
+          },
+          "connector_requirements": [
+            {
+              "capability": "connector.mock.crm.read",
+              "declared_actions_only": true,
+              "mediated_by": "ConnectorHub",
+              "provider": "mock_crm"
+            }
+          ],
+          "evaluation_expectations": {
+            "benchmark_scenarios": [
+              "CS-EXT-001",
+              "CS-EXT-009",
+              "CS-SEC-015"
+            ],
+            "connector_boundary_tests_required": true,
+            "prompt_injection_tests_required": true,
+            "rollback_test_required": true
+          },
+          "judge_rubric": {
+            "checks": [
+              "evidence coverage",
+              "connector boundary",
+              "owner scope",
+              "rollback readiness"
+            ],
+            "llm_signal_is_supporting_only": true
+          },
+          "memory_scope": {
+            "cross_namespace": false,
+            "default": "workspace",
+            "writes_product_defaults": false
+          },
+          "model_policy": {
+            "allowed_models": [
+              "local_test.v0"
+            ],
+            "external_model_required": false,
+            "pass_judge": false,
+            "provider": "local_test"
+          },
+          "pack_id": "pack_ops_recovery_agent",
+          "playbooks": [
+            {
+              "evidence_expectations": [
+                "failed trajectory",
+                "owner acceptance state",
+                "current artifact evidence"
+              ],
+              "playbook_id": "pb_recovery_review",
+              "rollback": true,
+              "title": "Evidence-backed recovery review"
+            }
+          ],
+          "role_card": {
+            "display_name": "Recovery Planner",
+            "owner_visible": true,
+            "risk_level": "medium",
+            "summary": "Suggests recovery templates from scoped evidence and approved experience."
+          },
+          "role_contract": {
+            "cannot_do": [
+              "read raw provider credentials",
+              "write directly to provider APIs",
+              "change workspace behavior without activation grants"
+            ],
+            "purpose": "Help a workspace turn failed local missions into evidence-backed recovery playbooks.",
+            "role": "Scoped recovery planner"
+          },
+          "schema_version": "cs.agent_pack_detail.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_digest": "ad6fed3bf3ee6c7cf4d02410bbaa0295c886f19ee89cd6fe1dc32e344ea04537",
+          "status": "available",
+          "supply_chain": {
+            "certified": true,
+            "checks": {
+              "attestation_verified": true,
+              "provenance_present": true,
+              "risk_label_present": true,
+              "sbom_present": true,
+              "signature_verified": true,
+              "trusted_registry_source": true,
+              "update_metadata_present": true,
+              "version_declared": true
+            },
+            "registry_source": "curated_certified",
+            "risk_label": "medium",
+            "verified": true
+          },
+          "top_level_unit": "agent_pack",
+          "trust": {
+            "certified": true,
+            "public_marketplace_default": false,
+            "publisher": "cornerstone-first-party-fixture",
+            "risk_label": "medium",
+            "source": "curated_certified"
+          },
+          "version": "1.0.0"
+        },
+        "audit_refs": [
+          "audit:audit_33c61b179f625f9b"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack show",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_update_approve": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "update",
+        "pack_ops_recovery_agent",
+        "--to-version",
+        "1.1.0",
+        "--approve",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_9e5b3ba0e98b1e98"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack update",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent",
+          "update_id": "packupd_f0f2ea01603cc66d"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "pack_update": {
+          "applied": true,
+          "approval": {
+            "required": true,
+            "status": "approved"
+          },
+          "behavior_changing_silent_apply": false,
+          "behavior_changing_update": true,
+          "created_at": "2026-06-09T16:55:45.426165Z",
+          "diff": {
+            "capabilities": [
+              "playbook.propose"
+            ],
+            "connector_requirements": [
+              "connector.mock.crm.read"
+            ],
+            "migration_notes": "owner can test in sandbox before approving",
+            "model_policy": "unchanged local_test",
+            "playbooks": [
+              "pb_recovery_review"
+            ],
+            "risk": "medium",
+            "role_contract": "adds recovery severity tags"
+          },
+          "evaluation_gate": {
+            "connector_boundary": "pass",
+            "prompt_injection_regression": "pass",
+            "scenario_results": [
+              "CS-EXT-012"
+            ],
+            "status": "pass"
+          },
+          "from_version": "1.0.0",
+          "migration_notes": [
+            "No silent behavior change; owner approval required before apply."
+          ],
+          "owner_can_test_before_approving": true,
+          "pack_id": "pack_ops_recovery_agent",
+          "sandbox_canary_test": {
+            "credentials_exposed_to_agent": false,
+            "external_http_calls": 0,
+            "status": "pass"
+          },
+          "schema_version": "cs.agent_pack_update.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "approved_applied",
+          "to_version": "1.1.0",
+          "update_id": "packupd_f0f2ea01603cc66d"
+        },
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_update_dry_run": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "update",
+        "pack_ops_recovery_agent",
+        "--to-version",
+        "1.1.0",
+        "--dry-run",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_fed1482c179ec635"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack update",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent",
+          "update_id": "packupd_289b31e273a82fec"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "pack_update": {
+          "applied": false,
+          "approval": {
+            "required": false,
+            "status": "not_requested"
+          },
+          "behavior_changing_silent_apply": false,
+          "behavior_changing_update": true,
+          "created_at": "2026-06-09T16:55:45.323052Z",
+          "diff": {
+            "capabilities": [
+              "playbook.propose"
+            ],
+            "connector_requirements": [
+              "connector.mock.crm.read"
+            ],
+            "migration_notes": "owner can test in sandbox before approving",
+            "model_policy": "unchanged local_test",
+            "playbooks": [
+              "pb_recovery_review"
+            ],
+            "risk": "medium",
+            "role_contract": "adds recovery severity tags"
+          },
+          "evaluation_gate": {
+            "connector_boundary": "pass",
+            "prompt_injection_regression": "pass",
+            "scenario_results": [
+              "CS-EXT-012"
+            ],
+            "status": "pass"
+          },
+          "from_version": "1.0.0",
+          "migration_notes": [
+            "No silent behavior change; owner approval required before apply."
+          ],
+          "owner_can_test_before_approving": true,
+          "pack_id": "pack_ops_recovery_agent",
+          "sandbox_canary_test": {
+            "credentials_exposed_to_agent": false,
+            "external_http_calls": 0,
+            "status": "pass"
+          },
+          "schema_version": "cs.agent_pack_update.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "dry_run",
+          "to_version": "1.1.0",
+          "update_id": "packupd_289b31e273a82fec"
+        },
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_update_without_approval": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "update",
+        "pack_ops_recovery_agent",
+        "--to-version",
+        "1.1.0",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_3af1e6d7ba41c785"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack update",
+        "errors": [
+          {
+            "code": "CS_PACK_APPROVAL_REQUIRED",
+            "message": "Pack updates do not apply without owner approval.",
+            "policy": "agent_pack_behavior_update_requires_owner_approval",
+            "resolution_path": [
+              "Review the diff and evaluation gate, then rerun with explicit approval."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "0216bf3"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_dd893d0e953e165e"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T16:55:45.374910Z",
+            "decision": "requires_approval",
+            "policy": "agent_pack_behavior_update_requires_owner_approval",
+            "policy_decision_id": "policy_dd893d0e953e165e",
+            "reason": "Pack updates do not apply without owner approval.",
+            "resolution_path": [
+              "Review the diff and evaluation gate, then rerun with explicit approval."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "pack_ops_recovery_agent",
+              "type": "agent_pack"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "playbook_approve": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "playbook",
+        "approve",
+        "packpb_df472965514d87bd",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_3869bead89007940"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack playbook approve",
+        "errors": [],
+        "evidence_refs": [
+          "lesson:lesson_574c8ed39b3f6692",
+          "trajectory:traj_e3f08a042921e6a2",
+          "mission:mission_d8b69286e34846e5",
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "artifact:art_9f4c9a3433e647fe",
+          "action:action_94c495b2a6f88822",
+          "learning:learn_5c106adca58ac91a"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent",
+          "playbook_proposal_id": "packpb_df472965514d87bd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "playbook_proposal": {
+          "approval": {
+            "approved_at": "2026-06-09T16:55:45.271411Z",
+            "required": true,
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "status": "approved"
+          },
+          "auto_globalize": false,
+          "becomes_active_only_after_approval": true,
+          "created_at": "2026-06-09T16:55:45.219023Z",
+          "evidence_refs": [
+            "lesson:lesson_574c8ed39b3f6692",
+            "trajectory:traj_e3f08a042921e6a2",
+            "mission:mission_d8b69286e34846e5",
+            "evidence_bundle:evb_46bf9b528be3a164",
+            "artifact:art_9f4c9a3433e647fe",
+            "action:action_94c495b2a6f88822",
+            "learning:learn_5c106adca58ac91a"
+          ],
+          "judge_review": {
+            "pass_judge": false,
+            "provider": "local_test",
+            "result": "review_required_before_activation",
+            "rubric": {
+              "checks": [
+                "evidence coverage",
+                "connector boundary",
+                "owner scope",
+                "rollback readiness"
+              ],
+              "llm_signal_is_supporting_only": true
+            }
+          },
+          "lesson_id": "lesson_574c8ed39b3f6692",
+          "owner_scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "pack_id": "pack_ops_recovery_agent",
+          "playbook_proposal_id": "packpb_df472965514d87bd",
+          "risk": "medium",
+          "rollback": {
+            "affected_playbooks": [
+              "pack:pack_ops_recovery_agent:playbooks"
+            ],
+            "available": true
+          },
+          "schema_version": "cs.agent_pack_playbook_proposal.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": "Experience Library",
+          "status": "active",
+          "trajectory_examples": [
+            "traj_e3f08a042921e6a2"
+          ]
+        },
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "playbook_propose": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "playbook",
+        "propose",
+        "--pack-id",
+        "pack_ops_recovery_agent",
+        "--lesson-id",
+        "lesson_574c8ed39b3f6692",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_de5b49206d5fc59d"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack playbook propose",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent",
+          "lesson:lesson_574c8ed39b3f6692",
+          "trajectory:traj_e3f08a042921e6a2",
+          "mission:mission_d8b69286e34846e5",
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "artifact:art_9f4c9a3433e647fe",
+          "action:action_94c495b2a6f88822",
+          "learning:learn_5c106adca58ac91a"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "pack_id": "pack_ops_recovery_agent",
+          "playbook_proposal_id": "packpb_df472965514d87bd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "playbook_proposal": {
+          "approval": {
+            "required": true,
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "status": "pending"
+          },
+          "auto_globalize": false,
+          "becomes_active_only_after_approval": true,
+          "created_at": "2026-06-09T16:55:45.219023Z",
+          "evidence_refs": [
+            "lesson:lesson_574c8ed39b3f6692",
+            "trajectory:traj_e3f08a042921e6a2",
+            "mission:mission_d8b69286e34846e5",
+            "evidence_bundle:evb_46bf9b528be3a164",
+            "artifact:art_9f4c9a3433e647fe",
+            "action:action_94c495b2a6f88822",
+            "learning:learn_5c106adca58ac91a"
+          ],
+          "judge_review": {
+            "pass_judge": false,
+            "provider": "local_test",
+            "result": "review_required_before_activation",
+            "rubric": {
+              "checks": [
+                "evidence coverage",
+                "connector boundary",
+                "owner scope",
+                "rollback readiness"
+              ],
+              "llm_signal_is_supporting_only": true
+            }
+          },
+          "lesson_id": "lesson_574c8ed39b3f6692",
+          "owner_scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "pack_id": "pack_ops_recovery_agent",
+          "playbook_proposal_id": "packpb_df472965514d87bd",
+          "risk": "medium",
+          "rollback": {
+            "affected_playbooks": [
+              "pack:pack_ops_recovery_agent:playbooks"
+            ],
+            "available": true
+          },
+          "schema_version": "cs.agent_pack_playbook_proposal.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": "Experience Library",
+          "status": "proposed",
+          "trajectory_examples": [
+            "traj_e3f08a042921e6a2"
+          ]
+        },
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "trajectory_record": {
+      "command": [
+        "cornerstone",
+        "experience",
+        "trajectory",
+        "record",
+        "--mission-id",
+        "mission_d8b69286e34846e5",
+        "--outcome-status",
+        "success",
+        "--outcome-summary",
+        "core-only first value anchor recovery playbook fixture succeeded with scoped evidence.",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ffbdb60e461964a1"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone experience trajectory record",
+        "errors": [],
+        "evidence_refs": [
+          "trajectory:traj_e3f08a042921e6a2",
+          "mission:mission_d8b69286e34846e5",
+          "evidence_bundle:evb_46bf9b528be3a164",
+          "artifact:art_9f4c9a3433e647fe",
+          "action:action_94c495b2a6f88822",
+          "learning:learn_5c106adca58ac91a"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "mission_id": "mission_d8b69286e34846e5",
+          "trajectory_id": "traj_e3f08a042921e6a2"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "trajectory": {
+          "actions": [
+            {
+              "action_id": "action_94c495b2a6f88822",
+              "action_kind": "internal_status_update",
+              "approval": {
+                "approver": null,
+                "required": false,
+                "status": "not_required"
+              },
+              "dry_run": {
+                "action_kind": "internal_status_update",
+                "claim_id": "claim_52e7a9038cefc943",
+                "created_at": "2026-06-09T16:55:44.949857Z",
+                "diff": {
+                  "after": "would perform internal_status_update against mock://local-target",
+                  "before": "no side effect applied"
+                },
+                "dry_run_id": "dryrun_e235588851ed6a92",
+                "expected_impact": {
+                  "connector": "mock_connector",
+                  "external_calls": 0,
+                  "risk": "low",
+                  "target": "mock://local-target"
+                },
+                "goal": "Record recovery playbook fixture status.",
+                "mission_id": "mission_d8b69286e34846e5",
+                "policy_decision": {
+                  "action_kind": "internal_status_update",
+                  "approval_required": false,
+                  "can_execute_now": true,
+                  "connector": "mock_connector",
+                  "decided_at": "2026-06-09T16:55:44.949753Z",
+                  "decision": "allow",
+                  "execution_status": "ready_to_execute",
+                  "id": "policy_dadd4c8969aba0a8",
+                  "mission_id": "mission_d8b69286e34846e5",
+                  "policy": "low_risk_autopilot_allowed",
+                  "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+                  "resolution_path": [
+                    "Use an active Mission Goal Contract.",
+                    "Keep action inside allowed actions and owner namespace.",
+                    "Run dry-run and request owner approval when policy requires it."
+                  ],
+                  "risk": "low",
+                  "schema_version": "cs.policy_decision.v0",
+                  "scope": {
+                    "namespace_id": "personal",
+                    "owner_id": "local-user",
+                    "tenant_id": "local-dev",
+                    "workspace_id": "default"
+                  },
+                  "workspace_mode": "autopilot"
+                },
+                "schema_version": "cs.action_dry_run.v0",
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                }
+              },
+              "execution": {
+                "can_execute_now": false,
+                "result": {
+                  "action_id": "action_94c495b2a6f88822",
+                  "executed_at": "2026-06-09T16:55:45.002476Z",
+                  "external_http_calls": 0,
+                  "message": "Action execution was recorded through the governed Workflow/Action path.",
+                  "mission_id": "mission_d8b69286e34846e5",
+                  "mock_connector_calls": 0,
+                  "schema_version": "cs.action_result.v0",
+                  "side_effect_boundary": "local_internal_state",
+                  "status": "success"
+                },
+                "status": "executed"
+              },
+              "goal": "Record recovery playbook fixture status.",
+              "policy_decision": {
+                "action_kind": "internal_status_update",
+                "approval_required": false,
+                "can_execute_now": true,
+                "connector": "mock_connector",
+                "decided_at": "2026-06-09T16:55:44.949753Z",
+                "decision": "allow",
+                "execution_status": "ready_to_execute",
+                "id": "policy_dadd4c8969aba0a8",
+                "mission_id": "mission_d8b69286e34846e5",
+                "policy": "low_risk_autopilot_allowed",
+                "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+                "resolution_path": [
+                  "Use an active Mission Goal Contract.",
+                  "Keep action inside allowed actions and owner namespace.",
+                  "Run dry-run and request owner approval when policy requires it."
+                ],
+                "risk": "low",
+                "schema_version": "cs.policy_decision.v0",
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "workspace_mode": "autopilot"
+              },
+              "risk": "low",
+              "tool_results": {
+                "action_id": "action_94c495b2a6f88822",
+                "executed_at": "2026-06-09T16:55:45.002476Z",
+                "external_http_calls": 0,
+                "message": "Action execution was recorded through the governed Workflow/Action path.",
+                "mission_id": "mission_d8b69286e34846e5",
+                "mock_connector_calls": 0,
+                "schema_version": "cs.action_result.v0",
+                "side_effect_boundary": "local_internal_state",
+                "status": "success"
+              }
+            }
+          ],
+          "approvals": [
+            {
+              "approver": null,
+              "required": false,
+              "status": "not_required"
+            }
+          ],
+          "classification": "internal",
+          "contract": {
+            "allowed_actions": [
+              "internal_status_update",
+              "draft_task",
+              "refresh_brief"
+            ],
+            "escalation_rules": [
+              "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+              "Escalate when evidence coverage is insufficient or policy decision is deny."
+            ],
+            "evidence_expectations": [
+              "Evidence Bundle with at least one artifact reference.",
+              "Dry-run diff and expected impact before side-effecting action.",
+              "Audit refs for every policy and action transition."
+            ],
+            "forbidden_actions": [
+              "external_writeback_without_workflow_action",
+              "cross_namespace_access",
+              "destructive_change",
+              "secret_exfiltration"
+            ],
+            "mission_id": "mission_d8b69286e34846e5",
+            "mode": null,
+            "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+            "source_claim": {
+              "claim_id": null,
+              "statement": null,
+              "trust_state": null
+            },
+            "status": "active",
+            "stop_conditions": [
+              "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+              "A required approval is missing.",
+              "A requested action is outside the mission contract."
+            ],
+            "success_criteria": [
+              "Use attached evidence refs for every durable claim or action.",
+              "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+            ]
+          },
+          "corrections": [],
+          "cost_time": {
+            "duration_ms": 0.0,
+            "estimated_cost_usd": 0,
+            "real_external_http_calls": 0
+          },
+          "created_at": "2026-06-09T16:55:45.115481Z",
+          "evidence_refs": [
+            "mission:mission_d8b69286e34846e5",
+            "evidence_bundle:evb_46bf9b528be3a164",
+            "artifact:art_9f4c9a3433e647fe",
+            "action:action_94c495b2a6f88822",
+            "learning:learn_5c106adca58ac91a"
+          ],
+          "exceptions": [],
+          "extracted_lessons": [
+            "learning:learn_5c106adca58ac91a"
+          ],
+          "goal": "Create an evidence-backed recovery playbook candidate from the core-only first value anchor.",
+          "mission_id": "mission_d8b69286e34846e5",
+          "outcome": {
+            "connected_outcome_id": null,
+            "owner_acceptance": "accepted",
+            "status": "success",
+            "summary": "core-only first value anchor recovery playbook fixture succeeded with scoped evidence."
+          },
+          "plan": {
+            "orchestrator_owned": true,
+            "steps": [
+              "collect_evidence",
+              "create_claim_or_decision",
+              "propose_action_card",
+              "execute_or_escalate",
+              "record_outcome",
+              "extract_lessons"
+            ]
+          },
+          "policy_decisions": [
+            {
+              "action_kind": "internal_status_update",
+              "approval_required": false,
+              "can_execute_now": true,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T16:55:44.949753Z",
+              "decision": "allow",
+              "execution_status": "ready_to_execute",
+              "id": "policy_dadd4c8969aba0a8",
+              "mission_id": "mission_d8b69286e34846e5",
+              "policy": "low_risk_autopilot_allowed",
+              "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            }
+          ],
+          "promotion_state": "reference",
+          "reference_corpus": {
+            "auto_converted_to_memory_or_rules": false,
+            "privacy_policy": "active_scope_only",
+            "retention_policy": "owner_scope_required",
+            "stored_as_reference": true
+          },
+          "rollback_events": [],
+          "schema_version": "cs.mission_trajectory.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "reference",
+          "trajectory_id": "traj_e3f08a042921e6a2",
+          "workspace": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          }
+        },
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "untrusted_activate": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "activate",
+        "pack_public_uncertified_agent",
+        "--grant",
+        "artifact.read",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_a1b031d50d0d05b6"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack activate",
+        "errors": [
+          {
+            "code": "CS_PACK_POLICY_DENIED",
+            "message": "Untrusted or uncertified Agent Pack cannot be activated silently.",
+            "policy": "agent_pack_activation_trust_required",
+            "resolution_path": [
+              "Request a reviewed exception with limited capabilities, or use a certified pack.",
+              "Attach registry source, signature, attestation, SBOM, provenance, risk, and certification evidence."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "0216bf3"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_536b59e05af0ff32"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T16:55:44.644011Z",
+            "decision": "deny",
+            "policy": "agent_pack_activation_trust_required",
+            "policy_decision_id": "policy_536b59e05af0ff32",
+            "reason": "Untrusted or uncertified Agent Pack cannot be activated silently.",
+            "resolution_path": [
+              "Request a reviewed exception with limited capabilities, or use a certified pack.",
+              "Attach registry source, signature, attestation, SBOM, provenance, risk, and certification evidence."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "pack_public_uncertified_agent",
+              "type": "agent_pack"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "untrusted_import": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "import",
+        "--manifest",
+        "fixtures/vs0/packs/14_extension_ecosystem/untrusted_agent_pack_manifest.json",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "agent_pack": {
+          "created_at": "2026-06-09T16:55:44.538247Z",
+          "install_requires_review": true,
+          "manifest": {
+            "after_action_review_template": {
+              "fields": [
+                "outcome"
+              ]
+            },
+            "allowed_actions": [
+              "draft_note"
+            ],
+            "allowed_capabilities": [
+              "artifact.read"
+            ],
+            "certification": {},
+            "components": {
+              "playbook_packs": [
+                {
+                  "id": "playbook_uncertified_note",
+                  "top_level_user_object": false
+                }
+              ],
+              "skill_packs": [],
+              "tool_packs": []
+            },
+            "connector_requirements": [],
+            "evaluation_expectations": {
+              "connector_boundary_tests_required": true,
+              "prompt_injection_tests_required": true
+            },
+            "forbidden_runtime": {
+              "direct_api_writeback": false,
+              "extension_owned_credentials": false,
+              "provider_clients": false,
+              "raw_secret_access": false
+            },
+            "judge_rubric": {
+              "checks": [
+                "risk disclosure"
+              ],
+              "llm_signal_is_supporting_only": true
+            },
+            "memory_scope": {
+              "cross_namespace": false,
+              "default": "workspace"
+            },
+            "model_policy": {
+              "pass_judge": false,
+              "provider": "local_test"
+            },
+            "name": "Public Uncertified Agent Pack",
+            "pack_id": "pack_public_uncertified_agent",
+            "playbooks": [
+              {
+                "playbook_id": "pb_uncertified_note",
+                "title": "Uncertified note draft"
+              }
+            ],
+            "role_card": {
+              "display_name": "Uncertified Helper",
+              "owner_visible": true,
+              "risk_level": "high",
+              "summary": "Visible risk-disclosure fixture."
+            },
+            "role_contract": {
+              "purpose": "Fixture for activation denial.",
+              "role": "Uncertified helper"
+            },
+            "schema_version": "cs.agent_pack_manifest.v0",
+            "security_patches": {},
+            "supply_chain": {
+              "attestation": {
+                "predicate_type": "",
+                "verified": false
+              },
+              "provenance": {
+                "builder_id": "",
+                "predicate_type": "",
+                "subject_digest": ""
+              },
+              "sbom": {
+                "present": false
+              },
+              "signature": {
+                "scheme": "none",
+                "verified": false
+              }
+            },
+            "trust": {
+              "certified": false,
+              "public_marketplace_default": false,
+              "publisher": "unknown-fixture",
+              "risk_label": "high",
+              "source": "public_marketplace"
+            },
+            "updates": {},
+            "version": "0.1.0"
+          },
+          "manifest_path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/14_extension_ecosystem/untrusted_agent_pack_manifest.json",
+          "name": "Public Uncertified Agent Pack",
+          "pack_id": "pack_public_uncertified_agent",
+          "registry_source": "public_marketplace",
+          "schema_version": "cs.agent_pack_registry_record.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_digest": "fc9baaed7938361331a8942aea7cdcfc8b4c1e430a811fa1e0e8ce757be2ee58",
+          "status": "review_required",
+          "supply_chain": {
+            "certified": false,
+            "checks": {
+              "attestation_verified": false,
+              "provenance_present": false,
+              "risk_label_present": true,
+              "sbom_present": false,
+              "signature_verified": false,
+              "trusted_registry_source": false,
+              "update_metadata_present": false,
+              "version_declared": true
+            },
+            "registry_source": "public_marketplace",
+            "risk_label": "high",
+            "verified": false
+          },
+          "trust": {
+            "certified": false,
+            "public_marketplace_default": false,
+            "publisher": "unknown-fixture",
+            "risk_label": "high",
+            "source": "public_marketplace"
+          },
+          "version": "0.1.0"
+        },
+        "audit_refs": [
+          "audit:audit_c93f4f01b0c59800"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack import",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_public_uncertified_agent",
+          "manifest:fc9baaed7938361331a8942aea7cdcfc8b4c1e430a811fa1e0e8ce757be2ee58"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "pack_id": "pack_public_uncertified_agent"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "untrusted_install": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "install",
+        "pack_public_uncertified_agent",
+        "--state-dir",
+        "tmp/scenario/full-extension-ecosystem-33404",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_7b2e57f6e17ce572"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack install",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_public_uncertified_agent"
+        ],
+        "ids": {
+          "git_commit": "0216bf3",
+          "install_id": "packinst_d7989f1ca66fe68e",
+          "pack_id": "pack_public_uncertified_agent"
+        },
+        "install": {
+          "activation_status": "inactive",
+          "behavior_changing_updates_apply_silently": false,
+          "can_act": false,
+          "created_at": "2026-06-09T16:55:44.590131Z",
+          "granted_capabilities": [],
+          "install_id": "packinst_d7989f1ca66fe68e",
+          "mission_authority": false,
+          "pack_id": "pack_public_uncertified_agent",
+          "pinned_version": "0.1.0",
+          "review_required": true,
+          "schema_version": "cs.agent_pack_install.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "installed",
+          "supply_chain": {
+            "certified": false,
+            "checks": {
+              "attestation_verified": false,
+              "provenance_present": false,
+              "risk_label_present": true,
+              "sbom_present": false,
+              "signature_verified": false,
+              "trusted_registry_source": false,
+              "update_metadata_present": false,
+              "version_declared": true
+            },
+            "registry_source": "public_marketplace",
+            "risk_label": "high",
+            "verified": false
+          },
+          "trust": {
+            "certified": false,
+            "public_marketplace_default": false,
+            "publisher": "unknown-fixture",
+            "risk_label": "high",
+            "source": "public_marketplace"
+          },
+          "version": "0.1.0",
+          "version_pinned_by_default": true
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

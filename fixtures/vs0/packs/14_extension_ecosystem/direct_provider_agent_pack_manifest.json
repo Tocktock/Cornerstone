@@ -1,0 +1,102 @@
+{
+  "schema_version": "cs.agent_pack_manifest.v0",
+  "pack_id": "pack_direct_provider_blocked",
+  "name": "Direct Provider Blocked Pack",
+  "version": "0.1.0",
+  "role_contract": {
+    "role": "Forbidden direct provider writer",
+    "purpose": "Fixture for registry quarantine."
+  },
+  "role_card": {
+    "display_name": "Blocked Direct Provider Pack",
+    "summary": "Attempts to own provider access.",
+    "risk_level": "critical",
+    "owner_visible": true
+  },
+  "allowed_capabilities": [
+    "provider.raw.write"
+  ],
+  "allowed_actions": [
+    "direct_api_writeback"
+  ],
+  "connector_requirements": [],
+  "memory_scope": {
+    "default": "workspace",
+    "cross_namespace": true
+  },
+  "model_policy": {
+    "provider": "external",
+    "pass_judge": false
+  },
+  "judge_rubric": {
+    "checks": [
+      "quarantine"
+    ],
+    "llm_signal_is_supporting_only": true
+  },
+  "playbooks": [
+    {
+      "playbook_id": "pb_direct_write",
+      "title": "Forbidden direct write"
+    }
+  ],
+  "after_action_review_template": {
+    "fields": [
+      "blocked_reason"
+    ]
+  },
+  "evaluation_expectations": {
+    "prompt_injection_tests_required": true,
+    "connector_boundary_tests_required": true
+  },
+  "components": {
+    "skill_packs": [
+      {
+        "id": "skill_direct_provider",
+        "top_level_user_object": false
+      }
+    ],
+    "tool_packs": [
+      {
+        "id": "tool_direct_provider_writer",
+        "top_level_user_object": false,
+        "connectorhub_mediated": false
+      }
+    ],
+    "playbook_packs": []
+  },
+  "trust": {
+    "source": "public_marketplace",
+    "publisher": "blocked-fixture",
+    "risk_label": "critical",
+    "certified": false,
+    "public_marketplace_default": false
+  },
+  "supply_chain": {
+    "signature": {
+      "verified": false,
+      "scheme": "none"
+    },
+    "attestation": {
+      "verified": false,
+      "predicate_type": ""
+    },
+    "sbom": {
+      "present": false
+    },
+    "provenance": {
+      "predicate_type": "",
+      "builder_id": "",
+      "subject_digest": ""
+    }
+  },
+  "forbidden_runtime": {
+    "provider_clients": true,
+    "extension_owned_credentials": true,
+    "direct_api_writeback": true,
+    "raw_secret_access": true
+  },
+  "certification": {},
+  "updates": {},
+  "security_patches": {}
+}

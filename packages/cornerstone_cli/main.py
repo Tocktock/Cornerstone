@@ -12,6 +12,7 @@ from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
     verify_full_claim_collaboration,
+    verify_full_extension_ecosystem,
     verify_full_learning_experience,
     verify_full_memory_wiki,
     verify_full_understanding_ontology,
@@ -2165,6 +2166,301 @@ def command_experience_export(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def pack_payload(args: argparse.Namespace, command: str) -> tuple[Path, LocalRuntimeStore, dict[str, str], dict[str, Any]]:
+    root = repo_root()
+    requested_scope = scope_args(args)
+    payload = base_response(command, "success", root)
+    payload.update(requested_scope)
+    return root, LocalRuntimeStore(state_dir(root, args)), requested_scope, payload
+
+
+def handle_pack_error(payload: dict[str, Any], result: dict[str, Any], as_json: bool) -> int | None:
+    status = result.get("status")
+    if status is None:
+        return None
+    if status == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_PACK_RESOURCE_NOT_FOUND",
+                "message": "Required Agent Pack resource was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_NOT_FOUND
+    if status == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_PACK_SCOPE_DENIED",
+                "message": "Agent Pack resource is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_SCOPE_DENIED
+    if status == "evidence_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_PACK_EVIDENCE_REQUIRED",
+                "message": "Agent Pack operation requires certification or evidence that is missing.",
+                "resource": result.get("resource"),
+                "missing": result.get("missing", []),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_EVIDENCE_MISSING
+    if status == "policy_denied":
+        payload["status"] = "failed"
+        decision = result.get("policy_decision", {})
+        payload["policy_decisions"] = [decision]
+        payload["policy_decision_refs"].append(f"policy:{decision.get('policy_decision_id')}")
+        if result.get("audit_event"):
+            payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+        payload["errors"].append(
+            {
+                "code": "CS_PACK_POLICY_DENIED",
+                "message": decision.get("reason", "Agent Pack operation denied by policy."),
+                "policy": decision.get("policy"),
+                "resolution_path": decision.get("resolution_path", []),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_POLICY_DENIED
+    if status == "approval_required":
+        payload["status"] = "failed"
+        decision = result.get("policy_decision", {})
+        payload["policy_decisions"] = [decision]
+        payload["policy_decision_refs"].append(f"policy:{decision.get('policy_decision_id')}")
+        if result.get("audit_event"):
+            payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+        payload["errors"].append(
+            {
+                "code": "CS_PACK_APPROVAL_REQUIRED",
+                "message": decision.get("reason", "Agent Pack operation requires approval."),
+                "policy": decision.get("policy"),
+                "resolution_path": decision.get("resolution_path", []),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_POLICY_DENIED
+    if status == "invalid":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_PACK_INVALID",
+                "message": result.get("message", "Agent Pack input is invalid."),
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_INVALID
+    return None
+
+
+def command_pack_import(args: argparse.Namespace) -> int:
+    root, store, requested_scope, payload = pack_payload(args, "cornerstone pack import")
+    result = store.register_agent_pack((root / args.manifest).resolve(), requested_scope)
+    if result.get("status") == "quarantined":
+        payload["status"] = "failed"
+        payload["quarantine"] = result["quarantine"]
+        payload["policy_decisions"] = [result["policy_decision"]]
+        payload["ids"].update({"pack_id": result["quarantine"]["pack_id"], "quarantine_id": result["quarantine"]["quarantine_id"]})
+        payload["policy_decision_refs"].append(f"policy:{result['policy_decision']['policy_decision_id']}")
+        payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+        payload["errors"].append(
+            {
+                "code": "CS_PACK_REGISTRY_VALIDATION_FAILED",
+                "message": "Agent Pack was quarantined by registry validation.",
+                "resolution_path": result["policy_decision"].get("resolution_path", []),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_POLICY_DENIED
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    pack = result["agent_pack"]
+    payload["agent_pack"] = pack
+    payload["ids"].update({"pack_id": pack["pack_id"]})
+    payload["evidence_refs"].extend([f"agent_pack:{pack['pack_id']}", f"manifest:{pack['source_digest']}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_list(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack list")
+    result = store.list_agent_packs(requested_scope)
+    payload["registry"] = result["registry"]
+    payload["ids"].update({"registry_id": "local"})
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_show(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack show")
+    result = store.show_agent_pack(args.pack_id, requested_scope)
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    detail = result["agent_pack_detail"]
+    payload["agent_pack_detail"] = detail
+    payload["ids"].update({"pack_id": args.pack_id})
+    payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_install(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack install")
+    result = store.install_agent_pack(args.pack_id, version=args.version, dry_run=args.dry_run, scope=requested_scope)
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    install = result["install"]
+    payload["install"] = install
+    payload["ids"].update({"pack_id": args.pack_id, "install_id": install["install_id"]})
+    payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_activate(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack activate")
+    result = store.activate_agent_pack(
+        args.pack_id,
+        grants=args.grant or [],
+        mission_id=args.mission_id,
+        org_admin_shortcut=args.org_admin_shortcut,
+        policy_id=args.policy_id,
+        scope=requested_scope,
+    )
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    activation = result["activation"]
+    decision = result["policy_decision"]
+    payload["activation"] = activation
+    payload["ids"].update({"pack_id": args.pack_id, "activation_id": activation["activation_id"]})
+    payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
+    payload["policy_decisions"] = [decision]
+    payload["policy_decision_refs"].append(f"policy:{decision['policy_decision_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_certify(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack certify")
+    result = store.certify_agent_pack(args.pack_id, requested_scope)
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    certification = result["certification"]
+    payload["certification"] = certification
+    payload["ids"].update({"pack_id": args.pack_id, "certification_id": certification["certification_id"]})
+    payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_connector_request(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack connector-request")
+    result = store.request_pack_connector_access(args.pack_id, capability=args.capability, scope=requested_scope)
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    request = result["connector_request"]
+    payload["connector_request"] = request
+    payload["ids"].update({"pack_id": args.pack_id, "connector_request_id": request["connector_request_id"]})
+    payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_playbook_propose(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack playbook propose")
+    result = store.propose_pack_playbook_update(args.pack_id, lesson_id=args.lesson_id, scope=requested_scope)
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    proposal = result["playbook_proposal"]
+    payload["playbook_proposal"] = proposal
+    payload["ids"].update({"pack_id": args.pack_id, "playbook_proposal_id": proposal["playbook_proposal_id"]})
+    payload["evidence_refs"].extend([f"agent_pack:{args.pack_id}", *proposal.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_playbook_approve(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack playbook approve")
+    result = store.approve_pack_playbook_update(args.proposal_id, requested_scope)
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    proposal = result["playbook_proposal"]
+    payload["playbook_proposal"] = proposal
+    payload["ids"].update({"playbook_proposal_id": proposal["playbook_proposal_id"], "pack_id": proposal["pack_id"]})
+    payload["evidence_refs"].extend(proposal.get("evidence_refs", []))
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_update(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack update")
+    result = store.update_agent_pack(args.pack_id, to_version=args.to_version, dry_run=args.dry_run, approve=args.approve, scope=requested_scope)
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    update = result["pack_update"]
+    payload["pack_update"] = update
+    payload["ids"].update({"pack_id": args.pack_id, "update_id": update["update_id"]})
+    payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_rollback(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack rollback")
+    result = store.rollback_agent_pack(args.pack_id, to_version=args.to_version, reason=args.reason, scope=requested_scope)
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    rollback = result["pack_rollback"]
+    payload["pack_rollback"] = rollback
+    payload["ids"].update({"pack_id": args.pack_id, "rollback_id": rollback["rollback_id"]})
+    payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_emergency_patch(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack emergency-patch")
+    result = store.emergency_patch_agent_pack(args.pack_id, patch_version=args.patch_version, behavior_change=args.behavior_change, scope=requested_scope)
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    patch = result["security_patch"]
+    payload["security_patch"] = patch
+    payload["ids"].update({"pack_id": args.pack_id, "security_patch_id": patch["security_patch_id"]})
+    payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_mission_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -2710,6 +3006,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-learning-experience":
         report = verify_full_learning_experience(root)
+    elif args.contract == "full-extension-ecosystem":
+        report = verify_full_extension_ecosystem(root)
     elif args.contract == "full-memory-wiki":
         report = verify_full_memory_wiki(root)
     elif args.contract == "full-understanding-ontology":
@@ -2742,6 +3040,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-product-domain-readiness",
                     "vs0-tenant-security-boundary",
                     "full-claim-collaboration",
+                    "full-extension-ecosystem",
                     "full-learning-experience",
                     "full-memory-wiki",
                     "full-understanding-ontology",
@@ -3439,6 +3738,110 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(experience_export)
     experience_export.add_argument("--json", action="store_true", help="Emit JSON output")
     experience_export.set_defaults(func=command_experience_export)
+
+    pack = subcommands.add_parser("pack", help="Agent Pack registry, install, activation, and rollout commands")
+    pack_sub = pack.add_subparsers(dest="pack_command")
+
+    pack_import = pack_sub.add_parser("import", help="Import a local Agent Pack manifest into the registry")
+    pack_import.add_argument("--manifest", required=True, help="Path to the local Agent Pack manifest")
+    add_state_argument(pack_import)
+    add_scope_arguments(pack_import)
+    pack_import.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_import.set_defaults(func=command_pack_import)
+
+    pack_list = pack_sub.add_parser("list", help="List local registry Agent Packs")
+    add_state_argument(pack_list)
+    add_scope_arguments(pack_list)
+    pack_list.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_list.set_defaults(func=command_pack_list)
+
+    pack_show = pack_sub.add_parser("show", help="Show Agent Pack manifest, trust, and component details")
+    pack_show.add_argument("pack_id", help="Agent Pack ID")
+    add_state_argument(pack_show)
+    add_scope_arguments(pack_show)
+    pack_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_show.set_defaults(func=command_pack_show)
+
+    pack_install = pack_sub.add_parser("install", help="Install an Agent Pack without activation authority")
+    pack_install.add_argument("pack_id", help="Agent Pack ID")
+    pack_install.add_argument("--version", help="Pack version to install; defaults to registry version")
+    pack_install.add_argument("--dry-run", action="store_true", help="Preview install without writing the install record")
+    add_state_argument(pack_install)
+    add_scope_arguments(pack_install)
+    pack_install.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_install.set_defaults(func=command_pack_install)
+
+    pack_activate = pack_sub.add_parser("activate", help="Activate an installed Agent Pack with explicit grants")
+    pack_activate.add_argument("pack_id", help="Agent Pack ID")
+    pack_activate.add_argument("--grant", action="append", help="Capability grant; repeat for multiple grants")
+    pack_activate.add_argument("--mission-id", help="Optional mission activation boundary")
+    pack_activate.add_argument("--org-admin-shortcut", action="store_true", help="Use an organization policy shortcut when allowed")
+    pack_activate.add_argument("--policy-id", help="Organization policy record for shortcut activation")
+    add_state_argument(pack_activate)
+    add_scope_arguments(pack_activate)
+    pack_activate.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_activate.set_defaults(func=command_pack_activate)
+
+    pack_certify = pack_sub.add_parser("certify", help="Generate an evidence-backed Agent Pack certification card")
+    pack_certify.add_argument("pack_id", help="Agent Pack ID")
+    add_state_argument(pack_certify)
+    add_scope_arguments(pack_certify)
+    pack_certify.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_certify.set_defaults(func=command_pack_certify)
+
+    pack_connector = pack_sub.add_parser("connector-request", help="Request a granted ConnectorHub-mediated pack capability")
+    pack_connector.add_argument("pack_id", help="Agent Pack ID")
+    pack_connector.add_argument("--capability", required=True, help="Granted connector/action capability")
+    add_state_argument(pack_connector)
+    add_scope_arguments(pack_connector)
+    pack_connector.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_connector.set_defaults(func=command_pack_connector_request)
+
+    pack_playbook = pack_sub.add_parser("playbook", help="Experience-derived Agent Pack playbook updates")
+    pack_playbook_sub = pack_playbook.add_subparsers(dest="pack_playbook_command")
+
+    pack_playbook_propose = pack_playbook_sub.add_parser("propose", help="Propose a playbook update from a lesson")
+    pack_playbook_propose.add_argument("--pack-id", required=True, help="Agent Pack ID")
+    pack_playbook_propose.add_argument("--lesson-id", required=True, help="Experience lesson ID")
+    add_state_argument(pack_playbook_propose)
+    add_scope_arguments(pack_playbook_propose)
+    pack_playbook_propose.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_playbook_propose.set_defaults(func=command_pack_playbook_propose)
+
+    pack_playbook_approve = pack_playbook_sub.add_parser("approve", help="Approve a scoped playbook proposal")
+    pack_playbook_approve.add_argument("proposal_id", help="Playbook proposal ID")
+    add_state_argument(pack_playbook_approve)
+    add_scope_arguments(pack_playbook_approve)
+    pack_playbook_approve.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_playbook_approve.set_defaults(func=command_pack_playbook_approve)
+
+    pack_update = pack_sub.add_parser("update", help="Preview or approve an Agent Pack version update")
+    pack_update.add_argument("pack_id", help="Agent Pack ID")
+    pack_update.add_argument("--to-version", required=True, help="Candidate pack version")
+    pack_update.add_argument("--dry-run", action="store_true", help="Show diff and evaluation gate without applying")
+    pack_update.add_argument("--approve", action="store_true", help="Approve and apply the candidate version")
+    add_state_argument(pack_update)
+    add_scope_arguments(pack_update)
+    pack_update.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_update.set_defaults(func=command_pack_update)
+
+    pack_rollback = pack_sub.add_parser("rollback", help="Rollback an Agent Pack to a previous pinned version")
+    pack_rollback.add_argument("pack_id", help="Agent Pack ID")
+    pack_rollback.add_argument("--to-version", required=True, help="Pinned version to restore")
+    pack_rollback.add_argument("--reason", required=True, help="Rollback reason")
+    add_state_argument(pack_rollback)
+    add_scope_arguments(pack_rollback)
+    pack_rollback.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_rollback.set_defaults(func=command_pack_rollback)
+
+    pack_patch = pack_sub.add_parser("emergency-patch", help="Apply a policy-governed emergency security patch")
+    pack_patch.add_argument("pack_id", help="Agent Pack ID")
+    pack_patch.add_argument("--patch-version", required=True, help="Security patch version")
+    pack_patch.add_argument("--behavior-change", action="store_true", help="Declare that the patch changes behavior and requires review")
+    add_state_argument(pack_patch)
+    add_scope_arguments(pack_patch)
+    pack_patch.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_patch.set_defaults(func=command_pack_emergency_patch)
 
     mission = subcommands.add_parser("mission", help="Mission Goal Contract commands")
     mission_sub = mission.add_subparsers(dest="mission_command")

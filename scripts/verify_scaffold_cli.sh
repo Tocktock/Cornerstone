@@ -42,7 +42,8 @@ claim_collaboration_json=$(mktemp)
 memory_wiki_json=$(mktemp)
 learning_experience_json=$(mktemp)
 understanding_ontology_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json"' EXIT
+extension_ecosystem_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -513,6 +514,34 @@ grep -q '"real_external_http_calls": 0' "$understanding_ontology_json" || fail "
 grep -q '"secret_reads": 0' "$understanding_ontology_json" || fail "full-understanding-ontology read secrets"
 grep -q '"product_feature_claims": "PARTIAL_FULL_UNDERSTANDING_ONTOLOGY_ONLY"' "$understanding_ontology_json" || fail "full-understanding-ontology overclaimed product feature scope"
 
+cornerstone scenario verify full-extension-ecosystem --json > "$extension_ecosystem_json"
+python3 -m json.tool "$extension_ecosystem_json" >/dev/null
+grep -q '"scenario_set": "full-extension-ecosystem"' "$extension_ecosystem_json" || fail "full-extension-ecosystem report missing scenario set"
+grep -q '"blocking": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem report has blocking scenarios"
+grep -q '"pass": 20' "$extension_ecosystem_json" || fail "full-extension-ecosystem did not pass exactly twenty scenarios"
+grep -q '"id": "CS-EXT-001"' "$extension_ecosystem_json" || fail "full-extension-ecosystem missing CS-EXT-001"
+grep -q '"id": "CS-EXT-016"' "$extension_ecosystem_json" || fail "full-extension-ecosystem missing CS-EXT-016"
+grep -q '"id": "CS-SEC-015"' "$extension_ecosystem_json" || fail "full-extension-ecosystem missing CS-SEC-015"
+grep -q '"id": "CS-SEC-016"' "$extension_ecosystem_json" || fail "full-extension-ecosystem missing CS-SEC-016"
+grep -q '"id": "CS-REG-014"' "$extension_ecosystem_json" || fail "full-extension-ecosystem missing CS-REG-014"
+grep -q '"id": "CS-REG-015"' "$extension_ecosystem_json" || fail "full-extension-ecosystem missing CS-REG-015"
+grep -q '"pack_id": "pack_ops_recovery_agent"' "$extension_ecosystem_json" || fail "full-extension-ecosystem missing trusted Agent Pack"
+grep -q '"registry_sources": \[' "$extension_ecosystem_json" || fail "full-extension-ecosystem missing registry source evidence"
+grep -q '"curated_certified"' "$extension_ecosystem_json" || fail "full-extension-ecosystem missing curated certified registry source"
+grep -q '"untrusted_activation_exit_code": 8' "$extension_ecosystem_json" || fail "full-extension-ecosystem allowed untrusted activation"
+grep -q '"direct_provider_import_exit_code": 8' "$extension_ecosystem_json" || fail "full-extension-ecosystem allowed direct provider pack import"
+grep -q '"core_requires_pack": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem made core depend on pack"
+grep -q '"install_granted_authority": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem install granted authority"
+grep -q '"silent_activation": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem silently activated a pack"
+grep -q '"silent_behavior_update": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem silently changed behavior"
+grep -q '"direct_provider_access": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem allowed direct provider access"
+grep -q '"extension_owned_credentials": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem allowed extension-owned credentials"
+grep -q '"playbook_auto_globalized": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem auto-globalized a playbook"
+grep -q '"behavior_patch_applied_without_review": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem applied behavior patch without review"
+grep -q '"real_external_http_calls": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem reported real external HTTP calls"
+grep -q '"secret_reads": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem read secrets"
+grep -q '"product_feature_claims": "PARTIAL_FULL_EXTENSION_ECOSYSTEM_ONLY"' "$extension_ecosystem_json" || fail "full-extension-ecosystem overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -542,4 +571,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, vs0-product-domain-readiness verify, unittest).\n'

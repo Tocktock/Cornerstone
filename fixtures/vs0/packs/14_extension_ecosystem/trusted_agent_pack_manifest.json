@@ -1,0 +1,278 @@
+{
+  "schema_version": "cs.agent_pack_manifest.v0",
+  "pack_id": "pack_ops_recovery_agent",
+  "name": "Ops Recovery Agent Pack",
+  "version": "1.0.0",
+  "role_contract": {
+    "role": "Scoped recovery planner",
+    "purpose": "Help a workspace turn failed local missions into evidence-backed recovery playbooks.",
+    "cannot_do": [
+      "read raw provider credentials",
+      "write directly to provider APIs",
+      "change workspace behavior without activation grants"
+    ]
+  },
+  "role_card": {
+    "display_name": "Recovery Planner",
+    "summary": "Suggests recovery templates from scoped evidence and approved experience.",
+    "risk_level": "medium",
+    "owner_visible": true
+  },
+  "allowed_capabilities": [
+    "artifact.read",
+    "experience.read",
+    "playbook.propose",
+    "connector.mock.crm.read",
+    "action.internal_status_update"
+  ],
+  "allowed_actions": [
+    "draft_recovery_playbook",
+    "propose_internal_status_update"
+  ],
+  "connector_requirements": [
+    {
+      "capability": "connector.mock.crm.read",
+      "provider": "mock_crm",
+      "mediated_by": "ConnectorHub",
+      "declared_actions_only": true
+    }
+  ],
+  "memory_scope": {
+    "default": "workspace",
+    "cross_namespace": false,
+    "writes_product_defaults": false
+  },
+  "model_policy": {
+    "provider": "local_test",
+    "allowed_models": [
+      "local_test.v0"
+    ],
+    "pass_judge": false,
+    "external_model_required": false
+  },
+  "judge_rubric": {
+    "checks": [
+      "evidence coverage",
+      "connector boundary",
+      "owner scope",
+      "rollback readiness"
+    ],
+    "llm_signal_is_supporting_only": true
+  },
+  "playbooks": [
+    {
+      "playbook_id": "pb_recovery_review",
+      "title": "Evidence-backed recovery review",
+      "evidence_expectations": [
+        "failed trajectory",
+        "owner acceptance state",
+        "current artifact evidence"
+      ],
+      "rollback": true
+    }
+  ],
+  "after_action_review_template": {
+    "fields": [
+      "outcome",
+      "evidence_refs",
+      "policy_decisions",
+      "owner_acceptance",
+      "rollback_or_followup"
+    ]
+  },
+  "evaluation_expectations": {
+    "benchmark_scenarios": [
+      "CS-EXT-001",
+      "CS-EXT-009",
+      "CS-SEC-015"
+    ],
+    "prompt_injection_tests_required": true,
+    "connector_boundary_tests_required": true,
+    "rollback_test_required": true
+  },
+  "components": {
+    "skill_packs": [
+      {
+        "id": "skill_evidence_review",
+        "top_level_user_object": false
+      }
+    ],
+    "tool_packs": [
+      {
+        "id": "tool_mock_crm_reader",
+        "top_level_user_object": false,
+        "connectorhub_mediated": true
+      }
+    ],
+    "playbook_packs": [
+      {
+        "id": "playbook_recovery_templates",
+        "top_level_user_object": false
+      }
+    ]
+  },
+  "trust": {
+    "source": "curated_certified",
+    "publisher": "cornerstone-first-party-fixture",
+    "risk_label": "medium",
+    "certified": true,
+    "public_marketplace_default": false
+  },
+  "supply_chain": {
+    "signature": {
+      "verified": true,
+      "scheme": "sigstore-cosign-fixture",
+      "certificate_ref": "rekor://fixture/pack_ops_recovery_agent"
+    },
+    "attestation": {
+      "verified": true,
+      "predicate_type": "https://slsa.dev/provenance/v1",
+      "builder_id": "https://cornerstone.local/builders/local-fixture"
+    },
+    "sbom": {
+      "present": true,
+      "format": "spdx-json-fixture",
+      "digest": "sha256:fixture-sbom-pack-ops-recovery"
+    },
+    "provenance": {
+      "predicate_type": "https://slsa.dev/provenance/v1",
+      "builder_id": "https://cornerstone.local/builders/local-fixture",
+      "subject_digest": "sha256:fixture-pack-ops-recovery",
+      "resolved_dependencies": [
+        "local_test.v0",
+        "mock_connector.v0"
+      ]
+    }
+  },
+  "forbidden_runtime": {
+    "provider_clients": false,
+    "extension_owned_credentials": false,
+    "direct_api_writeback": false,
+    "raw_secret_access": false
+  },
+  "certification": {
+    "intended_use": "Workspace-scoped recovery planning from existing CornerStone evidence.",
+    "required_capabilities": [
+      "artifact.read",
+      "experience.read",
+      "playbook.propose",
+      "connector.mock.crm.read"
+    ],
+    "risk_level": "medium",
+    "benchmark_scenarios": [
+      "CS-EXT-001",
+      "CS-EXT-006",
+      "CS-EXT-014",
+      "CS-SEC-015"
+    ],
+    "prompt_injection_tests": {
+      "status": "pass",
+      "blocked_tool_hijack": true,
+      "external_http_calls": 0
+    },
+    "connector_action_boundary_checks": {
+      "status": "pass",
+      "connectorhub_mediated": true,
+      "direct_provider_access": false,
+      "credentials_exposed_to_agent": false
+    },
+    "llm_judge_rubrics": {
+      "provider": "local_test",
+      "pass_judge": false,
+      "supporting_signal_only": true
+    },
+    "model_compatibility": {
+      "local_test.v0": "pass",
+      "external_model_required": false
+    },
+    "outcome_history": {
+      "sample_size": 3,
+      "source": "local fixture trajectory examples",
+      "replaces_scenario_certification": false
+    },
+    "audit_coverage": {
+      "registry": true,
+      "install": true,
+      "activation": true,
+      "connector_request": true,
+      "update": true,
+      "rollback": true
+    },
+    "version_history": [
+      {
+        "version": "1.0.0",
+        "status": "certified"
+      }
+    ],
+    "rollback_support": {
+      "available": true,
+      "tested": true
+    },
+    "human_review": {
+      "status": "reviewed",
+      "reviewer": "fixture-maintainer",
+      "replaces_policy_checks": false
+    },
+    "scenario_results": {
+      "status": "pass",
+      "scenario_ids": [
+        "CS-EXT-001",
+        "CS-EXT-009",
+        "CS-SEC-015"
+      ]
+    },
+    "policy_checks": {
+      "status": "pass",
+      "autonomous_action_requires_activation": true,
+      "connectorhub_boundary_required": true
+    }
+  },
+  "updates": {
+    "1.1.0": {
+      "behavior_changing": true,
+      "diff": {
+        "role_contract": "adds recovery severity tags",
+        "capabilities": [
+          "playbook.propose"
+        ],
+        "playbooks": [
+          "pb_recovery_review"
+        ],
+        "model_policy": "unchanged local_test",
+        "risk": "medium",
+        "connector_requirements": [
+          "connector.mock.crm.read"
+        ],
+        "migration_notes": "owner can test in sandbox before approving"
+      },
+      "evaluation_gate": {
+        "status": "pass",
+        "scenario_results": [
+          "CS-EXT-012"
+        ],
+        "prompt_injection_regression": "pass",
+        "connector_boundary": "pass"
+      },
+      "sandbox_canary_test": {
+        "status": "pass",
+        "external_http_calls": 0,
+        "credentials_exposed_to_agent": false
+      },
+      "migration_notes": [
+        "No silent behavior change; owner approval required before apply."
+      ]
+    }
+  },
+  "security_patches": {
+    "1.0.1-security": {
+      "policy": "emergency_security_patch",
+      "behavior_changing": false,
+      "compatibility_checks": {
+        "status": "pass",
+        "api_compatible": true,
+        "playbook_compatible": true,
+        "model_policy_compatible": true
+      }
+    }
+  }
+}

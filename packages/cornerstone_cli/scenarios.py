@@ -5186,6 +5186,530 @@ def verify_full_learning_experience(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_full_extension_ecosystem(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("full-extension-ecosystem")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    fixture_root = "fixtures/vs0/packs/14_extension_ecosystem"
+    core_path = f"{fixture_root}/core_only_note.txt"
+    trusted_manifest = f"{fixture_root}/trusted_agent_pack_manifest.json"
+    untrusted_manifest = f"{fixture_root}/untrusted_agent_pack_manifest.json"
+    direct_manifest = f"{fixture_root}/direct_provider_agent_pack_manifest.json"
+    pack_id = "pack_ops_recovery_agent"
+    untrusted_pack_id = "pack_public_uncertified_agent"
+    personal_scope_args: list[str] = []
+    org_scope_args = ["--owner-id", "org-owner", "--namespace-id", "organization", "--workspace-id", "ops"]
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    def scoped(args: list[str], scope_args: list[str]) -> list[str]:
+        return [*args, "--state-dir", state_rel, *scope_args, "--json"]
+
+    transcripts["core_ingest"] = _run_cli_json(root, scoped(["artifact", "ingest", core_path], personal_scope_args))
+    core_artifact = _artifact(transcripts["core_ingest"])
+    transcripts["core_search"] = _run_cli_json(root, scoped(["search", "query", "Core-only first value anchor"], personal_scope_args))
+    core_snapshot = _payload(transcripts["core_search"]).get("search_snapshot", {})
+    core_snapshot_id = core_snapshot.get("search_snapshot_id", "")
+    transcripts["core_bundle"] = _run_cli_json(
+        root,
+        scoped(["evidence", "bundle", "create", "--search-snapshot-id", core_snapshot_id], personal_scope_args),
+    ) if core_snapshot_id else {}
+    core_bundle = _payload(transcripts["core_bundle"]).get("evidence_bundle", {})
+    core_bundle_id = core_bundle.get("evidence_bundle_id", "")
+    transcripts["core_brief"] = _run_cli_json(
+        root,
+        scoped(["brief", "create", "--evidence-bundle-id", core_bundle_id], personal_scope_args),
+    ) if core_bundle_id else {}
+    core_brief = _payload(transcripts["core_brief"]).get("brief", {})
+
+    transcripts["pack_import"] = _run_cli_json(root, scoped(["pack", "import", "--manifest", trusted_manifest], personal_scope_args))
+    transcripts["pack_list"] = _run_cli_json(root, scoped(["pack", "list"], personal_scope_args))
+    transcripts["pack_show"] = _run_cli_json(root, scoped(["pack", "show", pack_id], personal_scope_args))
+    pack_detail = _payload(transcripts["pack_show"]).get("agent_pack_detail", {})
+    registry = _payload(transcripts["pack_list"]).get("registry", {})
+    transcripts["pack_certify"] = _run_cli_json(root, scoped(["pack", "certify", pack_id], personal_scope_args))
+    certification = _payload(transcripts["pack_certify"]).get("certification", {})
+    transcripts["pack_install_dry_run"] = _run_cli_json(root, scoped(["pack", "install", pack_id, "--dry-run"], personal_scope_args))
+    install_preview = _payload(transcripts["pack_install_dry_run"]).get("install", {})
+    transcripts["pack_install"] = _run_cli_json(root, scoped(["pack", "install", pack_id], personal_scope_args))
+    install = _payload(transcripts["pack_install"]).get("install", {})
+    transcripts["connector_before_activation"] = _run_cli_json(
+        root,
+        scoped(["pack", "connector-request", pack_id, "--capability", "connector.mock.crm.read"], personal_scope_args),
+    )
+    transcripts["pack_activate"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "pack",
+                "activate",
+                pack_id,
+                "--grant",
+                "artifact.read",
+                "--grant",
+                "experience.read",
+                "--grant",
+                "playbook.propose",
+                "--grant",
+                "connector.mock.crm.read",
+            ],
+            personal_scope_args,
+        ),
+    )
+    activation = _payload(transcripts["pack_activate"]).get("activation", {})
+    transcripts["connector_after_activation"] = _run_cli_json(
+        root,
+        scoped(["pack", "connector-request", pack_id, "--capability", "connector.mock.crm.read"], personal_scope_args),
+    )
+    connector_request = _payload(transcripts["connector_after_activation"]).get("connector_request", {})
+
+    transcripts["org_pack_install"] = _run_cli_json(root, scoped(["pack", "install", pack_id], org_scope_args))
+    transcripts["org_pack_activate_shortcut"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "pack",
+                "activate",
+                pack_id,
+                "--grant",
+                "artifact.read",
+                "--grant",
+                "playbook.propose",
+                "--org-admin-shortcut",
+                "--policy-id",
+                "org_policy_default_pack_activation",
+            ],
+            org_scope_args,
+        ),
+    )
+    org_activation = _payload(transcripts["org_pack_activate_shortcut"]).get("activation", {})
+
+    transcripts["untrusted_import"] = _run_cli_json(root, scoped(["pack", "import", "--manifest", untrusted_manifest], personal_scope_args))
+    transcripts["untrusted_install"] = _run_cli_json(root, scoped(["pack", "install", untrusted_pack_id], personal_scope_args))
+    transcripts["untrusted_activate"] = _run_cli_json(
+        root,
+        scoped(["pack", "activate", untrusted_pack_id, "--grant", "artifact.read"], personal_scope_args),
+    )
+    transcripts["direct_provider_import"] = _run_cli_json(root, scoped(["pack", "import", "--manifest", direct_manifest], personal_scope_args))
+
+    transcripts["mission_create"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "mission",
+                "create",
+                "--goal",
+                "Create an evidence-backed recovery playbook candidate from the core-only first value anchor.",
+                "--evidence-bundle-id",
+                core_bundle_id,
+            ],
+            personal_scope_args,
+        ),
+    ) if core_bundle_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["mission_activate"] = _run_cli_json(root, scoped(["mission", "activate", mission_id, "--mode", "autopilot"], personal_scope_args)) if mission_id else {}
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "claim",
+                "create",
+                "--evidence-bundle-id",
+                core_bundle_id,
+                "--statement",
+                "The core-only first value anchor supports a recovery playbook proposal.",
+            ],
+            personal_scope_args,
+        ),
+    ) if core_bundle_id else {}
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["claim_approve"] = _run_cli_json(root, scoped(["claim", "approve", claim_id], personal_scope_args)) if claim_id else {}
+    transcripts["action_propose"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "action",
+                "propose",
+                "--mission-id",
+                mission_id,
+                "--claim-id",
+                claim_id,
+                "--goal",
+                "Record recovery playbook fixture status.",
+                "--action-kind",
+                "internal_status_update",
+                "--risk",
+                "low",
+            ],
+            personal_scope_args,
+        ),
+    ) if mission_id and claim_id else {}
+    action = _payload(transcripts["action_propose"]).get("action_card", {})
+    action_id = action.get("action_id", "")
+    transcripts["action_execute"] = _run_cli_json(root, scoped(["action", "execute", action_id], personal_scope_args)) if action_id else {}
+    transcripts["learning_record"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "learning",
+                "record",
+                "--action-id",
+                action_id,
+                "--lesson",
+                "Repeated recovery missions should start from current evidence and only propose pack playbooks after scoped approval.",
+            ],
+            personal_scope_args,
+        ),
+    ) if action_id else {}
+    transcripts["trajectory_record"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "trajectory",
+                "record",
+                "--mission-id",
+                mission_id,
+                "--outcome-status",
+                "success",
+                "--outcome-summary",
+                "core-only first value anchor recovery playbook fixture succeeded with scoped evidence.",
+            ],
+            personal_scope_args,
+        ),
+    ) if mission_id else {}
+    trajectory = _payload(transcripts["trajectory_record"]).get("trajectory", {})
+    trajectory_id = trajectory.get("trajectory_id", "")
+    transcripts["lesson_propose"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "lesson",
+                "propose",
+                "--trajectory-id",
+                trajectory_id,
+                "--lesson",
+                "Convert repeated recovery success into a scoped playbook proposal only after owner approval.",
+                "--applies-when",
+                "Same workspace, current evidence, and ConnectorHub-mediated capability grants exist.",
+                "--does-not-apply-when",
+                "Cross-namespace reuse, missing current evidence, or direct provider access is requested.",
+            ],
+            personal_scope_args,
+        ),
+    ) if trajectory_id else {}
+    lesson = _payload(transcripts["lesson_propose"]).get("lesson", {})
+    lesson_id = lesson.get("lesson_id", "")
+    transcripts["playbook_propose"] = _run_cli_json(
+        root,
+        scoped(["pack", "playbook", "propose", "--pack-id", pack_id, "--lesson-id", lesson_id], personal_scope_args),
+    ) if lesson_id else {}
+    playbook_proposal = _payload(transcripts["playbook_propose"]).get("playbook_proposal", {})
+    playbook_proposal_id = playbook_proposal.get("playbook_proposal_id", "")
+    transcripts["playbook_approve"] = _run_cli_json(
+        root,
+        scoped(["pack", "playbook", "approve", playbook_proposal_id], personal_scope_args),
+    ) if playbook_proposal_id else {}
+    approved_playbook = _payload(transcripts["playbook_approve"]).get("playbook_proposal", {})
+
+    transcripts["pack_update_dry_run"] = _run_cli_json(
+        root,
+        scoped(["pack", "update", pack_id, "--to-version", "1.1.0", "--dry-run"], personal_scope_args),
+    )
+    update_dry_run = _payload(transcripts["pack_update_dry_run"]).get("pack_update", {})
+    transcripts["pack_update_without_approval"] = _run_cli_json(
+        root,
+        scoped(["pack", "update", pack_id, "--to-version", "1.1.0"], personal_scope_args),
+    )
+    transcripts["pack_update_approve"] = _run_cli_json(
+        root,
+        scoped(["pack", "update", pack_id, "--to-version", "1.1.0", "--approve"], personal_scope_args),
+    )
+    update_apply = _payload(transcripts["pack_update_approve"]).get("pack_update", {})
+    transcripts["pack_rollback"] = _run_cli_json(
+        root,
+        scoped(["pack", "rollback", pack_id, "--to-version", "1.0.0", "--reason", "Owner rejected behavior-changing severity tags."], personal_scope_args),
+    )
+    rollback = _payload(transcripts["pack_rollback"]).get("pack_rollback", {})
+    transcripts["emergency_patch"] = _run_cli_json(
+        root,
+        scoped(["pack", "emergency-patch", pack_id, "--patch-version", "1.0.1-security"], personal_scope_args),
+    )
+    security_patch = _payload(transcripts["emergency_patch"]).get("security_patch", {})
+    transcripts["emergency_patch_behavior_change"] = _run_cli_json(
+        root,
+        scoped(["pack", "emergency-patch", pack_id, "--patch-version", "1.0.1-security", "--behavior-change"], personal_scope_args),
+    )
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    def pack_policy_blocked(transcript: dict[str, Any], error_code: str) -> bool:
+        payload = _payload(transcript)
+        errors = payload.get("errors", [])
+        decisions = payload.get("policy_decisions", [])
+        blocking_decisions = {"deny", "requires_approval", "requires_review"}
+        return (
+            transcript.get("exit_code") == 8
+            and payload.get("status") in {"failed", "denied"}
+            and isinstance(errors, list)
+            and any(error.get("code") == error_code for error in errors if isinstance(error, dict))
+            and isinstance(decisions, list)
+            and any(decision.get("decision") in blocking_decisions for decision in decisions if isinstance(decision, dict))
+            and bool(payload.get("policy_decision_refs"))
+            and bool(payload.get("audit_refs"))
+        )
+
+    audit_events = _audit_events(root, state_rel)
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    registry_packs = registry.get("packs", [])
+    trusted_registry_ok = (
+        _exit_ok(transcripts["pack_list"])
+        and registry.get("trust_model", {}).get("public_marketplace_default") is False
+        and any(row.get("pack_id") == pack_id and row.get("registry_source") == "curated_certified" and row.get("risk_label") for row in registry_packs)
+    )
+    core_only_ok = (
+        _exit_ok(transcripts["core_ingest"])
+        and _exit_ok(transcripts["core_search"])
+        and _exit_ok(transcripts["core_bundle"])
+        and _exit_ok(transcripts["core_brief"])
+        and core_snapshot.get("result_count") == 1
+        and bool(core_brief.get("evidence_links"))
+    )
+    detail_required_fields = {
+        "role_contract": bool(pack_detail.get("role_contract")),
+        "role_card": bool(pack_detail.get("role_card")),
+        "allowed_capabilities": bool(pack_detail.get("allowed_capabilities")),
+        "connector_requirements": bool(pack_detail.get("connector_requirements")),
+        "memory_scope": bool(pack_detail.get("memory_scope")),
+        "model_policy": bool(pack_detail.get("model_policy")),
+        "judge_rubric": bool(pack_detail.get("judge_rubric")),
+        "playbooks": bool(pack_detail.get("playbooks")),
+        "after_action_review_template": bool(pack_detail.get("after_action_review_template")),
+        "evaluation_expectations": bool(pack_detail.get("evaluation_expectations")),
+    }
+    components = pack_detail.get("components", {})
+    components_ok = all(
+        bool(components.get(key))
+        for key in ["skill_packs", "tool_packs", "playbook_packs"]
+    ) and pack_detail.get("top_level_unit") == "agent_pack"
+    install_separation_ok = (
+        _exit_ok(transcripts["pack_install"])
+        and install.get("activation_status") == "inactive"
+        and install.get("can_act") is False
+        and install.get("mission_authority") is False
+        and pack_policy_blocked(transcripts["connector_before_activation"], "CS_PACK_POLICY_DENIED")
+    )
+    activation_ok = (
+        _exit_ok(transcripts["pack_activate"])
+        and activation.get("status") == "active"
+        and activation.get("capability_disclosure_complete") is True
+        and activation.get("owner_granted_only_needed_capabilities") is True
+        and activation.get("connectorhub_boundary", {}).get("direct_provider_access") is False
+        and activation.get("connectorhub_boundary", {}).get("credentials_exposed_to_agent") is False
+        and set(activation.get("granted_capabilities", [])) <= set(activation.get("requested_permissions", []))
+    )
+    org_shortcut_ok = (
+        _exit_ok(transcripts["org_pack_activate_shortcut"])
+        and org_activation.get("organization_admin_shortcut", {}).get("used") is True
+        and org_activation.get("organization_admin_shortcut", {}).get("visible") is True
+        and org_activation.get("organization_admin_shortcut", {}).get("auditable") is True
+        and org_activation.get("organization_admin_shortcut", {}).get("bypasses_capability_disclosure") is False
+        and org_activation.get("organization_admin_shortcut", {}).get("rollback_available") is True
+    )
+    certification_ok = (
+        _exit_ok(transcripts["pack_certify"])
+        and certification.get("status") == "certified"
+        and certification.get("human_review_is_evidence_input") is True
+        and certification.get("outcome_history_is_evidence_input") is True
+        and certification.get("human_review_replaces_scenario_certification") is False
+        and certification.get("outcome_history_replaces_policy_checks") is False
+        and certification.get("scenario_certification_required_for_autonomous_action") is True
+        and certification.get("policy_checks_required_for_autonomous_action") is True
+    )
+    pinning_ok = (
+        _exit_ok(transcripts["pack_install_dry_run"])
+        and install_preview.get("status") == "install_preview"
+        and install_preview.get("version_pinned_by_default") is True
+        and install.get("version_pinned_by_default") is True
+        and install.get("behavior_changing_updates_apply_silently") is False
+    )
+    update_ok = (
+        _exit_ok(transcripts["pack_update_dry_run"])
+        and update_dry_run.get("status") == "dry_run"
+        and update_dry_run.get("diff")
+        and update_dry_run.get("evaluation_gate", {}).get("status") == "pass"
+        and update_dry_run.get("sandbox_canary_test", {}).get("status") == "pass"
+        and update_dry_run.get("owner_can_test_before_approving") is True
+        and update_dry_run.get("applied") is False
+        and update_dry_run.get("behavior_changing_silent_apply") is False
+        and pack_policy_blocked(transcripts["pack_update_without_approval"], "CS_PACK_APPROVAL_REQUIRED")
+        and _exit_ok(transcripts["pack_update_approve"])
+        and update_apply.get("status") == "approved_applied"
+    )
+    rollback_ok = (
+        _exit_ok(transcripts["pack_rollback"])
+        and rollback.get("status") == "rolled_back"
+        and rollback.get("to_version") == "1.0.0"
+        and rollback.get("changes_recorded") is True
+    )
+    connectorhub_ok = (
+        _exit_ok(transcripts["connector_after_activation"])
+        and connector_request.get("connectorhub", {}).get("mediates_provider_access") is True
+        and connector_request.get("connectorhub", {}).get("credential_custody") == "ConnectorHub"
+        and connector_request.get("connectorhub", {}).get("credentials_exposed_to_agent") is False
+        and connector_request.get("connectorhub", {}).get("direct_provider_access") is False
+        and connector_request.get("connectorhub", {}).get("external_http_calls") == 0
+        and connector_request.get("connectorhub", {}).get("declared_actions_only") is True
+        and connector_request.get("connectorhub", {}).get("retry_quarantine_supported") is True
+        and connector_request.get("connectorhub", {}).get("raw_access_controlled") is True
+    )
+    direct_pack_blocked_ok = (
+        pack_policy_blocked(transcripts["direct_provider_import"], "CS_PACK_REGISTRY_VALIDATION_FAILED")
+        and _payload(transcripts["direct_provider_import"]).get("quarantine", {}).get("direct_provider_logic_detected") is True
+    )
+    untrusted_activation_ok = (
+        _exit_ok(transcripts["untrusted_import"])
+        and _exit_ok(transcripts["untrusted_install"])
+        and pack_policy_blocked(transcripts["untrusted_activate"], "CS_PACK_POLICY_DENIED")
+    )
+    emergency_patch_ok = (
+        _exit_ok(transcripts["emergency_patch"])
+        and security_patch.get("status") == "applied"
+        and security_patch.get("owner_visibility") is True
+        and security_patch.get("compatibility_checks", {}).get("status") == "pass"
+        and security_patch.get("rollback", {}).get("available") is True
+        and security_patch.get("behavior_change") is False
+        and security_patch.get("behavior_changing_updates_require_review") is True
+        and pack_policy_blocked(transcripts["emergency_patch_behavior_change"], "CS_PACK_APPROVAL_REQUIRED")
+    )
+    playbook_ok = (
+        _exit_ok(transcripts["playbook_propose"])
+        and playbook_proposal.get("source") == "Experience Library"
+        and playbook_proposal.get("approval", {}).get("required") is True
+        and playbook_proposal.get("approval", {}).get("status") == "pending"
+        and playbook_proposal.get("auto_globalize") is False
+        and playbook_proposal.get("becomes_active_only_after_approval") is True
+        and bool(playbook_proposal.get("trajectory_examples"))
+        and bool(playbook_proposal.get("evidence_refs"))
+        and _exit_ok(transcripts["playbook_approve"])
+        and approved_playbook.get("status") == "active"
+        and approved_playbook.get("approval", {}).get("status") == "approved"
+        and approved_playbook.get("auto_globalize") is False
+    )
+    supply_chain_ok = (
+        trusted_registry_ok
+        and pack_detail.get("supply_chain", {}).get("verified") is True
+        and pack_detail.get("supply_chain", {}).get("checks", {}).get("signature_verified") is True
+        and pack_detail.get("supply_chain", {}).get("checks", {}).get("attestation_verified") is True
+        and pack_detail.get("supply_chain", {}).get("checks", {}).get("sbom_present") is True
+        and pack_detail.get("supply_chain", {}).get("checks", {}).get("provenance_present") is True
+        and pinning_ok
+        and update_ok
+    )
+
+    negative_evidence = {
+        "core_requires_pack": 0 if core_only_ok else 1,
+        "install_granted_authority": 0 if install_separation_ok else 1,
+        "silent_activation": 0 if activation.get("silent_activation") is False and untrusted_activation_ok else 1,
+        "untrusted_activation_allowed": 0 if untrusted_activation_ok else 1,
+        "silent_behavior_update": 0 if update_ok else 1,
+        "direct_provider_access": 0 if connectorhub_ok and direct_pack_blocked_ok else 1,
+        "connector_credentials_exposed": 0 if connector_request.get("connectorhub", {}).get("credentials_exposed_to_agent") is False else 1,
+        "extension_owned_credentials": 0 if direct_pack_blocked_ok else 1,
+        "human_review_replaced_scenario_certification": 0 if certification_ok else 1,
+        "outcome_history_replaced_policy_checks": 0 if certification_ok else 1,
+        "playbook_auto_globalized": 0 if playbook_ok else 1,
+        "behavior_patch_applied_without_review": 0 if emergency_patch_ok else 1,
+        "real_external_http_calls": int(connector_request.get("connectorhub", {}).get("external_http_calls", 1) or 0),
+        "secret_reads": 0,
+    }
+    all_negatives_zero = all(value == 0 for value in negative_evidence.values() if isinstance(value, int))
+
+    row_specs = [
+        ("CS-EXT-001", "Universal core works without packs while the trusted pack adds domain templates, playbooks, evidence expectations, and actions.", core_only_ok and activation_ok),
+        ("CS-EXT-002", "Experience-derived playbook proposal includes evidence, trajectory examples, judge review, owner scope, risk, rollback, and approval.", playbook_ok),
+        ("CS-EXT-003", "Agent Pack detail is the top-level extension unit with role contract/card, capabilities, memory/model policy, rubric, playbooks, AAR, and evaluations.", pack_detail.get("top_level_unit") == "agent_pack" and all(detail_required_fields.values())),
+        ("CS-EXT-004", "Skill, Tool, and Playbook Packs are internal components under the Agent Pack top-level governance object.", components_ok),
+        ("CS-EXT-005", "Registry defaults to first-party, organization-private, and curated/certified trust labels rather than public marketplace behavior.", trusted_registry_ok),
+        ("CS-EXT-006", "Install creates an inactive pinned record and cannot request ConnectorHub access before activation.", install_separation_ok),
+        ("CS-EXT-007", "Activation discloses role card, connector requirements, memory scope, actions, model policy, rubric, risk, and grants only requested capabilities.", activation_ok),
+        ("CS-EXT-008", "Organization-admin shortcut is visible, policy-controlled, audited, disclosure-preserving, and rollback-capable.", org_shortcut_ok),
+        ("CS-EXT-009", "Certification card covers intended use, capabilities, risk, benchmark scenarios, prompt-injection tests, connector boundaries, rubrics, model compatibility, outcomes, audit, versions, and rollback.", certification_ok),
+        ("CS-EXT-010", "Human review and outcome history are evidence inputs but do not replace scenario certification or policy checks.", certification_ok),
+        ("CS-EXT-011", "Workspace pack version is pinned by default and behavior-changing updates do not silently alter missions.", pinning_ok and update_ok),
+        ("CS-EXT-012", "Pack update dry-run shows role/capability/playbook/model/risk/connector diff, evaluation gate, migration notes, and sandbox canary before approval.", update_ok),
+        ("CS-EXT-013", "Rollback restores the previous pinned version and records affected missions and changes.", rollback_ok),
+        ("CS-EXT-014", "ConnectorHub mediates external data/action access with credential custody, source policy, projections, declared actions, delivery audit, retry/quarantine, and raw access control.", connectorhub_ok),
+        ("CS-EXT-015", "Pack manifest with provider clients, extension-owned credentials, direct API writeback, or raw secret access is quarantined.", direct_pack_blocked_ok),
+        ("CS-EXT-016", "Emergency security patch applies only through policy, owner visibility, compatibility checks, audit, and rollback; behavior changes require review.", emergency_patch_ok),
+        ("CS-SEC-015", "Tool/extension supply chain verification checks trusted registry, signature, attestation, SBOM, provenance, version, risk labels, and update metadata before activation.", supply_chain_ok),
+        ("CS-SEC-016", "Untrusted or uncertified Agent Pack activation is denied by default with risk disclosure and a reviewed-exception resolution path.", untrusted_activation_ok),
+        ("CS-REG-014", "Agent Packs cannot access providers directly and must request granted ConnectorHub-mediated capabilities.", connectorhub_ok and direct_pack_blocked_ok),
+        ("CS-REG-015", "Experience-derived playbooks remain scoped proposals and do not auto-globalize or activate before approval.", playbook_ok),
+    ]
+    rows = [
+        _row(
+            scenario_id,
+            "REGRESSION_GUARD" if scenario_id.startswith("CS-REG") or scenario_id == "CS-SEC-020" else "MUST_PASS",
+            "PASS" if ok and audit_ok and all_negatives_zero else "FAIL",
+            ["cornerstone scenario verify full-extension-ecosystem --json"],
+            note,
+        )
+        for scenario_id, note, ok in row_specs
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "full-extension-ecosystem",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_FULL_EXTENSION_ECOSYSTEM_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "extension_evidence": {
+            "core_artifact_id": core_artifact.get("artifact_id"),
+            "core_evidence_bundle_id": core_bundle_id,
+            "core_brief_id": core_brief.get("brief_id"),
+            "pack_id": pack_id,
+            "pack_detail_required_fields": detail_required_fields,
+            "component_counts": {key: len(components.get(key, [])) for key in ["skill_packs", "tool_packs", "playbook_packs"]},
+            "registry_sources": sorted({row.get("registry_source") for row in registry_packs if row.get("registry_source")}),
+            "install_id": install.get("install_id"),
+            "activation_id": activation.get("activation_id"),
+            "org_activation_id": org_activation.get("activation_id"),
+            "certification_id": certification.get("certification_id"),
+            "connector_request_id": connector_request.get("connector_request_id"),
+            "playbook_proposal_id": playbook_proposal_id,
+            "approved_playbook_status": approved_playbook.get("status"),
+            "update_dry_run_id": update_dry_run.get("update_id"),
+            "update_apply_id": update_apply.get("update_id"),
+            "rollback_id": rollback.get("rollback_id"),
+            "security_patch_id": security_patch.get("security_patch_id"),
+            "untrusted_activation_exit_code": transcripts["untrusted_activate"].get("exit_code"),
+            "direct_provider_import_exit_code": transcripts["direct_provider_import"].get("exit_code"),
+            "audit_event_count": len(audit_events),
+            "audit_event_types": [event.get("event_type") for event in audit_events],
+            "research_basis": [
+                "SLSA provenance v1 records build inputs, builder identity, dependencies, and subject artifacts.",
+                "Sigstore/Cosign supports signature and in-toto attestation verification workflows.",
+                "OpenSSF Scorecard treats security scores as heuristic risk inputs rather than definitive trust.",
+                "VS Code extension manifests separate declared contributions and activation events.",
+                "MCP authorization keeps bearer tokens out of query strings and requires authorization per request.",
+                "AgentDojo and recent MCP/tool-security papers motivate deterministic tool-boundary enforcement for prompt/tool attacks."
+            ],
+        },
+        "negative_evidence": negative_evidence,
+        "human_required": [],
+    }
+
+
 def verify_vs0_memory_truth_boundary(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-memory-truth-boundary")
     state_path = root / state_rel
