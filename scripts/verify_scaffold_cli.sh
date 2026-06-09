@@ -19,7 +19,8 @@ ready_json=$(mktemp)
 list_json=$(mktemp)
 coverage_json=$(mktemp)
 verify_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json"' EXIT
+fixtures_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -52,6 +53,13 @@ python3 -m json.tool "$verify_json" >/dev/null
 grep -q '"scenario_set": "vs0-scaffold"' "$verify_json" || fail "vs0-scaffold report missing scenario set"
 grep -q '"blocking": 0' "$verify_json" || fail "vs0-scaffold report has blocking scenarios"
 
+cornerstone scenario verify vs0-fixtures --corpus fixtures/vs0 --model-provider local_test --json > "$fixtures_json"
+python3 -m json.tool "$fixtures_json" >/dev/null
+grep -q '"scenario_set": "vs0-fixtures"' "$fixtures_json" || fail "vs0-fixtures report missing scenario set"
+grep -q '"blocking": 0' "$fixtures_json" || fail "vs0-fixtures report has blocking scenarios"
+grep -q '"product_feature_claims": "NOT_VERIFIED"' "$fixtures_json" || fail "vs0-fixtures must not claim product feature PASS"
+grep -q '"external_http_calls": 0' "$fixtures_json" || fail "vs0-fixtures reported external HTTP calls"
+
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, unittest).\n'

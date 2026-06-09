@@ -1,0 +1,4 @@
+Personal workspace note.
+
+Private phrase: personal-only-alpha.
+This should not appear in organization workspace search without explicit promotion.

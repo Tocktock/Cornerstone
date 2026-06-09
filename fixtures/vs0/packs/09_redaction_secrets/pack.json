@@ -1,0 +1,28 @@
+{
+  "id": "pack_09_redaction_secrets",
+  "classes": ["security", "redaction"],
+  "scenario_ids": [
+    "CS-ARCH-006",
+    "CS-SEC-008"
+  ],
+  "inputs": [
+    {
+      "path": "input.txt",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    }
+  ],
+  "expected": {
+    "raw_original_controlled": true,
+    "generated_outputs_redacted": true,
+    "redaction_marker": "[REDACTED]"
+  },
+  "forbidden_outputs": [
+    "sk-test-1234567890abcdef",
+    "ghp_fakeSecretTokenForLocalFixtureOnly"
+  ],
+  "negative_evidence": {
+    "unredacted_secret_occurrences": 0
+  }
+}

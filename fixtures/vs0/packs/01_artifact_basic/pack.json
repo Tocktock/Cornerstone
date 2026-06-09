@@ -1,0 +1,32 @@
+{
+  "id": "pack_01_artifact_basic",
+  "classes": ["artifact", "provenance", "dedup", "derived_failure"],
+  "scenario_ids": [
+    "CS-ARCH-001",
+    "CS-ARCH-002",
+    "CS-ARCH-003",
+    "CS-ARCH-004",
+    "CS-ARCH-005"
+  ],
+  "inputs": [
+    {
+      "path": "input.txt",
+      "media_type": "text/plain",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    }
+  ],
+  "expected": {
+    "immutable_original_required": true,
+    "provenance_required": true,
+    "dedup_required": true,
+    "derived_failure_preserves_original": true,
+    "unknown_format_preserved": true
+  },
+  "negative_evidence": {
+    "lost_originals": 0,
+    "ownerless_records": 0
+  }
+}

@@ -1,0 +1,7 @@
+Credential-bearing fixture.
+
+Do not persist this fake key in generated output:
+sk-test-1234567890abcdef
+
+Do not show this fake private token in logs:
+ghp_fakeSecretTokenForLocalFixtureOnly

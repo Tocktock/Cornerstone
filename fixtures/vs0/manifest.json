@@ -1,0 +1,47 @@
+{
+  "schema_version": "cs.fixture_manifest.v0",
+  "fixture_set": "vs0",
+  "description": "Deterministic local verification corpus for the first CornerStone VS-0 scenario slices.",
+  "model_provider": "local_test",
+  "packs": [
+    {
+      "id": "pack_01_artifact_basic",
+      "path": "packs/01_artifact_basic/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-001",
+        "CS-ARCH-002",
+        "CS-ARCH-003",
+        "CS-ARCH-004",
+        "CS-ARCH-005"
+      ]
+    },
+    {
+      "id": "pack_08_namespace_isolation",
+      "path": "packs/08_namespace_isolation/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-010",
+        "CS-UND-003",
+        "CS-NS-001",
+        "CS-NS-003",
+        "CS-REG-006"
+      ]
+    },
+    {
+      "id": "pack_09_redaction_secrets",
+      "path": "packs/09_redaction_secrets/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-006",
+        "CS-SEC-008"
+      ]
+    },
+    {
+      "id": "pack_10_prompt_injection",
+      "path": "packs/10_prompt_injection/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-007",
+        "CS-SEC-007",
+        "CS-REG-013"
+      ]
+    }
+  ]
+}

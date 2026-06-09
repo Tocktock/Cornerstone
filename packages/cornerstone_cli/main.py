@@ -11,6 +11,7 @@ from cornerstone_cli import __version__
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_vs0_fixtures,
     verify_vs0_scaffold,
 )
 
@@ -171,26 +172,43 @@ def command_scenario_coverage(args: argparse.Namespace) -> int:
 
 def command_scenario_verify(args: argparse.Namespace) -> int:
     root = repo_root()
-    if args.contract != "vs0-scaffold":
+    if args.contract == "vs0-scaffold":
+        report = verify_vs0_scaffold(root)
+    elif args.contract == "vs0-fixtures":
+        report = verify_vs0_fixtures(root, corpus=args.corpus, model_provider=args.model_provider)
+        if args.scenario:
+            requested = set(args.scenario)
+            referenced = {row["id"] for row in report.get("referenced_product_scenarios", [])}
+            missing = sorted(requested - referenced)
+            report["scenario_filter"] = sorted(requested)
+            if missing:
+                report["status"] = "failed"
+                report.setdefault("errors", []).append(
+                    {
+                        "code": "CS_SCENARIO_FILTER_MISSING",
+                        "message": "Requested product scenario is not referenced by the fixture corpus.",
+                        "missing": missing,
+                    }
+                )
+    else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
             {
                 "code": "CS_SCENARIO_CONTRACT_UNSUPPORTED",
-                "message": "Only vs0-scaffold verification is implemented in this scaffold batch.",
-                "supported": ["vs0-scaffold"],
+                "message": "Only scaffold and fixture verification are implemented in this batch.",
+                "supported": ["vs0-scaffold", "vs0-fixtures"],
             }
         )
         print_payload(payload, args.json)
         return EXIT_INVALID
 
-    report = verify_vs0_scaffold(root)
-    payload = base_response("cornerstone scenario verify vs0-scaffold", report["status"], root)
+    payload = base_response(f"cornerstone scenario verify {args.contract}", report["status"], root)
     payload.update(report)
     if args.output:
         output_path = (root / args.output).resolve()
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
         payload["output_path"] = str(output_path)
+        output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
     print_payload(payload, args.json)
     return EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
@@ -214,6 +232,7 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
 
     data = json.loads(report_path.read_text())
     rows = data.get("scenario_results", [])
+    report_errors = data.get("errors", [])
     blocking = [
         row
         for row in rows
@@ -224,6 +243,16 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
     payload["scenario_count"] = len(rows)
     payload["blocking_count"] = len(blocking)
     payload["blocking"] = blocking
+    if data.get("status") != "success" or report_errors:
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCENARIO_REPORT_FAILED",
+                "message": "Scenario report status is not success or report-level errors are present.",
+                "report_status": data.get("status"),
+                "report_errors": report_errors,
+            }
+        )
     if blocking:
         payload["status"] = "failed"
         payload["errors"].append(
@@ -233,7 +262,7 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
             }
         )
     print_payload(payload, args.json)
-    return EXIT_SUCCESS if not blocking else EXIT_EVIDENCE_MISSING
+    return EXIT_SUCCESS if payload["status"] == "success" else EXIT_EVIDENCE_MISSING
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -266,6 +295,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     verify = scenario_sub.add_parser("verify", help="Verify a scenario contract")
     verify.add_argument("contract", help="Scenario contract name")
+    verify.add_argument("--scenario", action="append", help="Optional product scenario ID to require in the fixture corpus")
+    verify.add_argument("--corpus", default="fixtures/vs0", help="Fixture corpus path for fixture verification")
+    verify.add_argument("--model-provider", default="local_test", help="Deterministic local model provider")
     verify.add_argument("--json", action="store_true", help="Emit JSON output")
     verify.add_argument("--output", help="Optional path to write the JSON report")
     verify.set_defaults(func=command_scenario_verify)

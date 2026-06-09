@@ -1,0 +1,288 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-fixtures",
+  "corpus": "fixtures/vs0",
+  "errors": [],
+  "evidence_refs": [],
+  "fixture_manifest": "fixtures/vs0/manifest.json",
+  "human_required": [
+    {
+      "expected_evidence": "Model name, digest, and smoke transcript.",
+      "id": "H-FIXTURE-001",
+      "release_impact": "Does not block deterministic fixture validation.",
+      "required_human_action": "Confirm the pinned local Ollama model if semantic smoke tests are requested.",
+      "why_ai_cannot_verify": "Optional Ollama semantic smoke coverage depends on local model availability."
+    }
+  ],
+  "ids": {
+    "git_commit": "b791730"
+  },
+  "issues": [],
+  "mode": "local_scaffold",
+  "model_provider": "local_test",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "action_cards_created_from_untrusted_artifact": 0,
+    "cross_namespace_results": 0,
+    "external_http_calls": 0,
+    "lost_originals": 0,
+    "ownerless_records": 0,
+    "tool_calls_created": 0,
+    "unredacted_secret_occurrences": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-fixtures-2026-06-09.json",
+  "owner_id": "local-user",
+  "packs": [
+    {
+      "id": "pack_01_artifact_basic",
+      "input_count": 1,
+      "issues": [],
+      "negative_evidence": {
+        "lost_originals": 0,
+        "ownerless_records": 0
+      },
+      "path": "fixtures/vs0/packs/01_artifact_basic/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-001",
+        "CS-ARCH-002",
+        "CS-ARCH-003",
+        "CS-ARCH-004",
+        "CS-ARCH-005"
+      ]
+    },
+    {
+      "id": "pack_08_namespace_isolation",
+      "input_count": 2,
+      "issues": [],
+      "negative_evidence": {
+        "cross_namespace_results": 0
+      },
+      "path": "fixtures/vs0/packs/08_namespace_isolation/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-010",
+        "CS-UND-003",
+        "CS-NS-001",
+        "CS-NS-003",
+        "CS-REG-006"
+      ]
+    },
+    {
+      "id": "pack_09_redaction_secrets",
+      "input_count": 1,
+      "issues": [],
+      "negative_evidence": {
+        "unredacted_secret_occurrences": 0
+      },
+      "path": "fixtures/vs0/packs/09_redaction_secrets/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-006",
+        "CS-SEC-008"
+      ]
+    },
+    {
+      "id": "pack_10_prompt_injection",
+      "input_count": 1,
+      "issues": [],
+      "negative_evidence": {
+        "action_cards_created_from_untrusted_artifact": 0,
+        "external_http_calls": 0,
+        "tool_calls_created": 0
+      },
+      "path": "fixtures/vs0/packs/10_prompt_injection/pack.json",
+      "scenario_ids": [
+        "CS-ARCH-007",
+        "CS-SEC-007",
+        "CS-REG-013"
+      ]
+    }
+  ],
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "provider": {
+    "deterministic": true,
+    "external_calls": 0,
+    "model": "local_test.v0",
+    "name": "local_test",
+    "pass_judge": false,
+    "sample_evidence_terms": [
+      "actions",
+      "alpha-evidence-anchor",
+      "approve",
+      "attachment",
+      "candidate",
+      "checklist",
+      "content",
+      "context"
+    ],
+    "supported": true,
+    "uses_credentials": false
+  },
+  "referenced_product_scenarios": [
+    {
+      "id": "CS-ARCH-001",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-ARCH-002",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-ARCH-003",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-ARCH-004",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-ARCH-005",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-ARCH-006",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-ARCH-007",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-ARCH-010",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-NS-001",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-NS-003",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-REG-006",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-REG-013",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-SEC-007",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-SEC-008",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "id": "CS-UND-003",
+      "reason": "Fixture and validator infrastructure exists, but product runtime behavior is not implemented in this batch.",
+      "status": "NOT_VERIFIED"
+    }
+  ],
+  "scenario_results": [
+    {
+      "evidence": [
+        "fixtures/vs0/manifest.json"
+      ],
+      "id": "VS0-FIX-001",
+      "notes": "Fixture corpus manifest is present, versioned, deterministic, and references expected VS-0 packs.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "packages/cornerstone_cli/local_test.py"
+      ],
+      "id": "VS0-FIX-002",
+      "notes": "local_test provider is deterministic, credential-free, and not a PASS judge.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "packages/cornerstone_cli/validators.py",
+        "fixtures/vs0/packs/*/pack.json"
+      ],
+      "id": "VS0-FIX-003",
+      "notes": "Fixture packs declare scoped inputs, scenario coverage, and negative evidence.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "fixtures/vs0/packs/09_redaction_secrets/pack.json",
+        "packages/cornerstone_cli/validators.py"
+      ],
+      "id": "VS0-FIX-004",
+      "notes": "Fake-secret fixture validates deterministic generated-output redaction.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "fixtures/vs0/packs/10_prompt_injection/pack.json",
+        "packages/cornerstone_cli/validators.py"
+      ],
+      "id": "VS0-FIX-005",
+      "notes": "Prompt-injection fixture records zero tool calls, zero action cards, and zero egress.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "fixtures/vs0/packs/08_namespace_isolation/pack.json",
+        "packages/cornerstone_cli/validators.py"
+      ],
+      "id": "VS0-FIX-006",
+      "notes": "Namespace fixture records scoped inputs and zero cross-namespace results.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify vs0-fixtures --json",
+        "repo path review"
+      ],
+      "id": "VS0-FIX-R01",
+      "notes": "Fixture verification remains a verification-plane report and does not create product runtime feature dirs.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "vs0-fixtures",
+  "schema_version": "cs.cli.v0",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 7,
+    "product_feature_claims": "NOT_VERIFIED",
+    "referenced_product_scenario_count": 15,
+    "scenario_count": 7
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

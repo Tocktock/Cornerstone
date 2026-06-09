@@ -1,0 +1,33 @@
+{
+  "id": "pack_08_namespace_isolation",
+  "classes": ["namespace", "policy", "regression"],
+  "scenario_ids": [
+    "CS-ARCH-010",
+    "CS-UND-003",
+    "CS-NS-001",
+    "CS-NS-003",
+    "CS-REG-006"
+  ],
+  "inputs": [
+    {
+      "path": "personal.txt",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    },
+    {
+      "path": "org.txt",
+      "owner_id": "local-org",
+      "namespace_id": "organization",
+      "workspace_id": "ops"
+    }
+  ],
+  "expected": {
+    "owner_required": true,
+    "namespace_required": true,
+    "cross_namespace_default_deny": true
+  },
+  "negative_evidence": {
+    "cross_namespace_results": 0
+  }
+}

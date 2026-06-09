@@ -1,0 +1,6 @@
+CornerStone fixture note.
+
+Project: Alpha research review.
+Decision candidate: Keep original source material before derived summaries.
+Known risk: extraction may fail for an unknown binary attachment.
+Search phrase: alpha-evidence-anchor.

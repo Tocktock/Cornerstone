@@ -1,0 +1,4 @@
+Organization workspace note.
+
+Shared phrase: org-visible-beta.
+This should remain separate from personal-only context.
