@@ -12,6 +12,7 @@ from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
     verify_full_agent_orchestration,
+    verify_full_brain_routing,
     verify_full_claim_collaboration,
     verify_full_extension_ecosystem,
     verify_full_learning_experience,
@@ -2666,6 +2667,260 @@ def command_agent_replay(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def brain_payload(args: argparse.Namespace, command: str) -> tuple[Path, LocalRuntimeStore, dict[str, str], dict[str, Any]]:
+    root = repo_root()
+    requested_scope = scope_args(args)
+    payload = base_response(command, "success", root)
+    payload.update(requested_scope)
+    return root, LocalRuntimeStore(state_dir(root, args)), requested_scope, payload
+
+
+def handle_brain_error(payload: dict[str, Any], result: dict[str, Any], as_json: bool) -> int | None:
+    status = result.get("status")
+    if status is None:
+        return None
+    if status == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_BRAIN_RESOURCE_NOT_FOUND",
+                "message": "Required model, brain, judge, or evidence resource was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_NOT_FOUND
+    if status == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_BRAIN_SCOPE_DENIED",
+                "message": "Brain or judge resource is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_SCOPE_DENIED
+    if status == "policy_denied":
+        payload["status"] = "denied"
+        decision = result.get("policy_decision", {})
+        payload["policy_decisions"] = [decision]
+        if decision.get("policy_decision_id"):
+            payload["policy_decision_refs"].append(f"policy:{decision['policy_decision_id']}")
+        for key in ("aggregation",):
+            if key in result:
+                payload[key] = result[key]
+                record_id = result[key].get("aggregation_id")
+                if record_id:
+                    payload["ids"][key] = record_id
+        if result.get("audit_event"):
+            payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+        payload["errors"].append(
+            {
+                "code": "CS_BRAIN_POLICY_DENIED",
+                "message": decision.get("reason", "Brain or judge operation denied by policy."),
+                "policy": decision.get("policy"),
+                "resolution_path": decision.get("resolution_path", []),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_POLICY_DENIED
+    return None
+
+
+def command_model_list(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone model list")
+    result = store.list_models(requested_scope)
+    registry = result["model_registry"]
+    payload["model_registry"] = registry
+    payload["ids"].update({"model_registry_id": "local"})
+    payload["evidence_refs"].append("model_registry:local")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_brain_route(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone brain route")
+    result = store.route_brain(
+        task_ref=args.task,
+        task_type=args.task_type,
+        mission_type=args.mission_type,
+        sensitivity=args.sensitivity,
+        risk=args.risk,
+        owner_preference=args.owner_preference,
+        max_cost_usd=args.max_cost_usd,
+        max_latency_ms=args.max_latency_ms,
+        override_provider=args.override_provider,
+        override_model=args.override_model,
+        dry_run=args.dry_run,
+        scope=requested_scope,
+    )
+    error_exit = handle_brain_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    route = result["routing_decision"]
+    ledger = result["ledger_entry"]
+    payload["routing_decision"] = route
+    payload["ledger_entry"] = ledger
+    payload["ids"].update({"route_id": route["route_id"], "ledger_id": ledger["ledger_id"]})
+    payload["evidence_refs"].extend([f"brain_route:{route['route_id']}", f"brain_ledger:{ledger['ledger_id']}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    payload["audit_refs"].append(f"audit:{result['ledger_audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_brain_switch(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone brain switch")
+    result = store.switch_workspace_brain(
+        provider=args.provider,
+        model=args.model,
+        evidence_bundle_id=args.evidence_bundle_id,
+        mission_id=args.mission_id,
+        scope=requested_scope,
+    )
+    error_exit = handle_brain_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    switch = result["brain_switch"]
+    payload["brain_switch"] = switch
+    payload["ids"].update({"switch_id": switch["switch_id"]})
+    payload["evidence_refs"].append(f"brain_switch:{switch['switch_id']}")
+    if args.evidence_bundle_id:
+        payload["evidence_refs"].append(f"evidence_bundle:{args.evidence_bundle_id}")
+    if args.mission_id:
+        payload["evidence_refs"].append(f"mission:{args.mission_id}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_brain_ledger(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone brain ledger")
+    result = store.list_brain_ledger(requested_scope)
+    ledger = result["brain_ledger"]
+    payload["brain_ledger"] = ledger
+    payload["ids"].update({"brain_ledger_scope": requested_scope["namespace_id"]})
+    payload["evidence_refs"].extend([f"brain_ledger:{entry['ledger_id']}" for entry in ledger.get("entries", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_brain_aggregate_test(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone brain aggregate-test")
+    result = store.test_brain_aggregation(
+        source_namespace=args.source_namespace,
+        target_namespace=args.target_namespace,
+        opt_in=args.opt_in,
+        scope=requested_scope,
+    )
+    error_exit = handle_brain_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    aggregation = result["aggregation"]
+    payload["aggregation"] = aggregation
+    payload["ids"].update({"aggregation_id": aggregation["aggregation_id"]})
+    payload["evidence_refs"].append(f"brain_aggregation:{aggregation['aggregation_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_judge_run(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone judge run")
+    result = store.run_judge(
+        route_id=args.route_id,
+        subject=args.subject,
+        rubric=args.rubric,
+        evidence_ref=args.evidence_ref,
+        ambiguity=args.ambiguity,
+        scope=requested_scope,
+    )
+    error_exit = handle_brain_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    judge = result["judge_record"]
+    ledger = result["ledger_entry"]
+    payload["judge_record"] = judge
+    payload["ledger_entry"] = ledger
+    payload["ids"].update({"judge_record_id": judge["judge_record_id"], "ledger_id": ledger["ledger_id"]})
+    payload["evidence_refs"].extend([f"judge_record:{judge['judge_record_id']}", f"brain_ledger:{ledger['ledger_id']}", *judge.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_judge_conflict(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone judge conflict")
+    result = store.record_judge_conflict(args.judge_record_id, objective_evidence=args.objective_evidence, scope=requested_scope)
+    error_exit = handle_brain_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    conflict = result["judge_conflict"]
+    payload["judge_conflict"] = conflict
+    payload["ids"].update({"conflict_id": conflict["conflict_id"], "judge_record_id": args.judge_record_id})
+    payload["evidence_refs"].append(f"judge_conflict:{conflict['conflict_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_judge_accept(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone judge accept")
+    result = store.record_owner_acceptance(args.judge_record_id, acceptance=args.acceptance, scope=requested_scope)
+    error_exit = handle_brain_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    acceptance = result["owner_acceptance"]
+    payload["owner_acceptance"] = acceptance
+    payload["ids"].update({"acceptance_id": acceptance["acceptance_id"], "judge_record_id": args.judge_record_id})
+    payload["evidence_refs"].append(f"owner_acceptance:{acceptance['acceptance_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_judge_recommend(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone judge recommend")
+    result = store.recommend_from_judge(args.judge_record_id, recommendation=args.recommendation, scope=requested_scope)
+    error_exit = handle_brain_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    recommendation = result["judge_recommendation"]
+    payload["judge_recommendation"] = recommendation
+    payload["ids"].update({"recommendation_id": recommendation["recommendation_id"], "judge_record_id": args.judge_record_id})
+    payload["evidence_refs"].extend([f"judge_recommendation:{recommendation['recommendation_id']}", *recommendation.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_judge_disagreement_test(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone judge disagreement-test")
+    result = store.test_judge_disagreement(risk=args.risk, scope=requested_scope)
+    adjudication = result["adjudication"]
+    payload["adjudication"] = adjudication
+    payload["ids"].update({"adjudication_id": adjudication["adjudication_id"]})
+    payload["evidence_refs"].append(f"judge_adjudication:{adjudication['adjudication_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_judge_calibration(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = brain_payload(args, "cornerstone judge calibration")
+    result = store.judge_calibration_report(requested_scope)
+    report = result["calibration_report"]
+    payload["calibration_report"] = report
+    payload["ids"].update({"calibration_id": report["calibration_id"]})
+    payload["evidence_refs"].extend([f"judge_calibration:{report['calibration_id']}", *report.get("ledger_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_mission_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -3211,6 +3466,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-agent-orchestration":
         report = verify_full_agent_orchestration(root)
+    elif args.contract == "full-brain-routing":
+        report = verify_full_brain_routing(root)
     elif args.contract == "full-learning-experience":
         report = verify_full_learning_experience(root)
     elif args.contract == "full-extension-ecosystem":
@@ -3248,6 +3505,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-tenant-security-boundary",
                     "full-claim-collaboration",
                     "full-agent-orchestration",
+                    "full-brain-routing",
                     "full-extension-ecosystem",
                     "full-learning-experience",
                     "full-memory-wiki",
@@ -3946,6 +4204,111 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(experience_export)
     experience_export.add_argument("--json", action="store_true", help="Emit JSON output")
     experience_export.set_defaults(func=command_experience_export)
+
+    model = subcommands.add_parser("model", help="Model capability registry commands")
+    model_sub = model.add_subparsers(dest="model_command")
+
+    model_list = model_sub.add_parser("list", help="List local deterministic and registry-only model capabilities")
+    add_state_argument(model_list)
+    add_scope_arguments(model_list)
+    model_list.add_argument("--json", action="store_true", help="Emit JSON output")
+    model_list.set_defaults(func=command_model_list)
+
+    brain = subcommands.add_parser("brain", help="Replaceable brain routing and ledger commands")
+    brain_sub = brain.add_subparsers(dest="brain_command")
+
+    brain_route = brain_sub.add_parser("route", help="Dry-run a policy-aware model routing decision")
+    brain_route.add_argument("--task", required=True, help="Task file, ref, or short task descriptor")
+    brain_route.add_argument("--task-type", choices=["planning", "judge", "retrieval", "extraction", "tool_use"], default="planning")
+    brain_route.add_argument("--mission-type", choices=["routine", "ambiguous_research", "externally_impactful", "safety_sensitive"], default="routine")
+    brain_route.add_argument("--sensitivity", choices=["public", "internal", "confidential", "restricted"], default="internal")
+    brain_route.add_argument("--risk", choices=["low", "medium", "high", "safety_sensitive"], default="low")
+    brain_route.add_argument("--owner-preference", choices=["local_test", "local_semantic", "lowest_cost", "highest_grounding"], default="local_test")
+    brain_route.add_argument("--max-cost-usd", type=float, default=0.0, help="Maximum route cost per 1k tokens")
+    brain_route.add_argument("--max-latency-ms", type=int, default=2000, help="Maximum acceptable route latency")
+    brain_route.add_argument("--override-provider", help="Requested override provider")
+    brain_route.add_argument("--override-model", help="Requested override model")
+    brain_route.add_argument("--dry-run", action="store_true", help="Required dry-run for routing decisions")
+    add_state_argument(brain_route)
+    add_scope_arguments(brain_route)
+    brain_route.add_argument("--json", action="store_true", help="Emit JSON output")
+    brain_route.set_defaults(func=command_brain_route)
+
+    brain_switch = brain_sub.add_parser("switch", help="Record a workspace provider/model switch without changing durable product state")
+    brain_switch.add_argument("--provider", required=True, help="Replacement provider")
+    brain_switch.add_argument("--model", required=True, help="Replacement model")
+    brain_switch.add_argument("--evidence-bundle-id", help="Existing Evidence Bundle to verify after switch")
+    brain_switch.add_argument("--mission-id", help="Existing mission to verify after switch")
+    add_state_argument(brain_switch)
+    add_scope_arguments(brain_switch)
+    brain_switch.add_argument("--json", action="store_true", help="Emit JSON output")
+    brain_switch.set_defaults(func=command_brain_switch)
+
+    brain_ledger = brain_sub.add_parser("ledger", help="Show namespace-local Brain Performance Ledger")
+    add_state_argument(brain_ledger)
+    add_scope_arguments(brain_ledger)
+    brain_ledger.add_argument("--json", action="store_true", help="Emit JSON output")
+    brain_ledger.set_defaults(func=command_brain_ledger)
+
+    brain_aggregate = brain_sub.add_parser("aggregate-test", help="Test cross-namespace Brain Performance Ledger aggregation policy")
+    brain_aggregate.add_argument("--source-namespace", required=True, help="Source namespace")
+    brain_aggregate.add_argument("--target-namespace", required=True, help="Target namespace")
+    brain_aggregate.add_argument("--opt-in", action="store_true", help="Record explicit opt-in for aggregation")
+    add_state_argument(brain_aggregate)
+    add_scope_arguments(brain_aggregate)
+    brain_aggregate.add_argument("--json", action="store_true", help="Emit JSON output")
+    brain_aggregate.set_defaults(func=command_brain_aggregate_test)
+
+    judge = subcommands.add_parser("judge", help="LLM-as-judge, adjudication, and calibration commands")
+    judge_sub = judge.add_subparsers(dest="judge_command")
+
+    judge_run = judge_sub.add_parser("run", help="Record a rubric-bound judge assessment")
+    judge_run.add_argument("--route-id", required=True, help="Brain route ID used for judging")
+    judge_run.add_argument("--subject", required=True, help="Subject being judged")
+    judge_run.add_argument("--rubric", required=True, help="Rubric description")
+    judge_run.add_argument("--evidence-ref", required=True, help="Evidence ref supporting the judgment")
+    judge_run.add_argument("--ambiguity", choices=["low", "medium", "high"], default="high")
+    add_state_argument(judge_run)
+    add_scope_arguments(judge_run)
+    judge_run.add_argument("--json", action="store_true", help="Emit JSON output")
+    judge_run.set_defaults(func=command_judge_run)
+
+    judge_conflict = judge_sub.add_parser("conflict", help="Record objective evidence overriding a judge result")
+    judge_conflict.add_argument("--judge-record-id", required=True, help="Judge record ID")
+    judge_conflict.add_argument("--objective-evidence", required=True, help="Objective failure or success evidence")
+    add_state_argument(judge_conflict)
+    add_scope_arguments(judge_conflict)
+    judge_conflict.add_argument("--json", action="store_true", help="Emit JSON output")
+    judge_conflict.set_defaults(func=command_judge_conflict)
+
+    judge_accept = judge_sub.add_parser("accept", help="Record owner acceptance or rejection as a grounding signal")
+    judge_accept.add_argument("--judge-record-id", required=True, help="Judge record ID")
+    judge_accept.add_argument("--acceptance", choices=["accepted", "rejected"], required=True)
+    add_state_argument(judge_accept)
+    add_scope_arguments(judge_accept)
+    judge_accept.add_argument("--json", action="store_true", help="Emit JSON output")
+    judge_accept.set_defaults(func=command_judge_accept)
+
+    judge_recommend = judge_sub.add_parser("recommend", help="Create a governed candidate lesson from a judge recommendation")
+    judge_recommend.add_argument("--judge-record-id", required=True, help="Judge record ID")
+    judge_recommend.add_argument("--recommendation", required=True, help="Recommendation text")
+    add_state_argument(judge_recommend)
+    add_scope_arguments(judge_recommend)
+    judge_recommend.add_argument("--json", action="store_true", help="Emit JSON output")
+    judge_recommend.set_defaults(func=command_judge_recommend)
+
+    judge_disagreement = judge_sub.add_parser("disagreement-test", help="Record evidence-weighted disagreement adjudication")
+    judge_disagreement.add_argument("--risk", choices=["low", "medium", "high", "safety_sensitive"], default="high")
+    add_state_argument(judge_disagreement)
+    add_scope_arguments(judge_disagreement)
+    judge_disagreement.add_argument("--json", action="store_true", help="Emit JSON output")
+    judge_disagreement.set_defaults(func=command_judge_disagreement_test)
+
+    judge_calibration = judge_sub.add_parser("calibration", help="Generate judge calibration and bias report")
+    add_state_argument(judge_calibration)
+    add_scope_arguments(judge_calibration)
+    judge_calibration.add_argument("--json", action="store_true", help="Emit JSON output")
+    judge_calibration.set_defaults(func=command_judge_calibration)
 
     agent = subcommands.add_parser("agent", help="Agent role, orchestration, diagnosis, and replay commands")
     agent_sub = agent.add_subparsers(dest="agent_command")

@@ -164,6 +164,33 @@
         "CS-AGENT-013",
         "CS-AGENT-014"
       ]
+    },
+    {
+      "id": "pack_16_brain_routing",
+      "path": "packs/16_brain_routing/pack.json",
+      "scenario_ids": [
+        "CS-BRAIN-001",
+        "CS-BRAIN-002",
+        "CS-BRAIN-003",
+        "CS-BRAIN-004",
+        "CS-BRAIN-005",
+        "CS-BRAIN-006",
+        "CS-BRAIN-007",
+        "CS-BRAIN-008",
+        "CS-BRAIN-009",
+        "CS-BRAIN-010",
+        "CS-BRAIN-011",
+        "CS-BRAIN-012",
+        "CS-BRAIN-013",
+        "CS-BRAIN-014",
+        "CS-BRAIN-015",
+        "CS-BRAIN-016",
+        "CS-ARCH-012",
+        "CS-NS-009",
+        "CS-NS-010",
+        "CS-REG-009",
+        "CS-REG-010"
+      ]
     }
   ]
 }

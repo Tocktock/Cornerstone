@@ -20,7 +20,7 @@ CS-ARCH-008,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-search-evidence 
 CS-ARCH-009,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-search-evidence --json,reports/scenario/vs0-search-evidence-2026-06-09.json,,,,,PASS
 CS-ARCH-010,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-010 --json,reports/scenario/cs-arch-010.json,,,,,NOT_VERIFIED
 CS-ARCH-011,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-011 --json,reports/scenario/cs-arch-011.json,,,,,NOT_VERIFIED
-CS-ARCH-012,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-012 --json,reports/scenario/cs-arch-012.json,,,,,NOT_VERIFIED
+CS-ARCH-012,MUST_PASS,true,D,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
 CS-ARCH-013,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-013 --json,reports/scenario/cs-arch-013.json,,,,,NOT_VERIFIED
 CS-ARCH-014,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-014 --json,reports/scenario/cs-arch-014.json,,,,,NOT_VERIFIED
 CS-UND-001,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-evidence --json,reports/scenario/vs0-search-evidence-2026-06-09.json,,,,,PASS
@@ -75,8 +75,8 @@ CS-NS-005,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-N
 CS-NS-006,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-006 --json,reports/scenario/cs-ns-006.json,,,,,NOT_VERIFIED
 CS-NS-007,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-007 --json,reports/scenario/cs-ns-007.json,,,,,NOT_VERIFIED
 CS-NS-008,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-008 --json,reports/scenario/cs-ns-008.json,,,,,NOT_VERIFIED
-CS-NS-009,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-009 --json,reports/scenario/cs-ns-009.json,,,,,NOT_VERIFIED
-CS-NS-010,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-010 --json,reports/scenario/cs-ns-010.json,,,,,NOT_VERIFIED
+CS-NS-009,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-NS-010,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
 CS-NS-011,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-011 --json,reports/scenario/cs-ns-011.json,,,,,NOT_VERIFIED
 CS-NS-012,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-012 --json,reports/scenario/cs-ns-012.json,,,,,NOT_VERIFIED
 CS-NS-013,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-013 --json,reports/scenario/cs-ns-013.json,,,,,NOT_VERIFIED
@@ -115,22 +115,22 @@ CS-AGENT-011,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orches
 CS-AGENT-012,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
 CS-AGENT-013,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
 CS-AGENT-014,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
-CS-BRAIN-001,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-001 --json,reports/scenario/cs-brain-001.json,,,,,NOT_VERIFIED
-CS-BRAIN-002,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-002 --json,reports/scenario/cs-brain-002.json,,,,,NOT_VERIFIED
-CS-BRAIN-003,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-003 --json,reports/scenario/cs-brain-003.json,,,,,NOT_VERIFIED
-CS-BRAIN-004,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-004 --json,reports/scenario/cs-brain-004.json,,,,,NOT_VERIFIED
-CS-BRAIN-005,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-005 --json,reports/scenario/cs-brain-005.json,,,,,NOT_VERIFIED
-CS-BRAIN-006,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-006 --json,reports/scenario/cs-brain-006.json,,,,,NOT_VERIFIED
-CS-BRAIN-007,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-007 --json,reports/scenario/cs-brain-007.json,,,,,NOT_VERIFIED
-CS-BRAIN-008,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-008 --json,reports/scenario/cs-brain-008.json,,,,,NOT_VERIFIED
-CS-BRAIN-009,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-009 --json,reports/scenario/cs-brain-009.json,,,,,NOT_VERIFIED
-CS-BRAIN-010,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-010 --json,reports/scenario/cs-brain-010.json,,,,,NOT_VERIFIED
-CS-BRAIN-011,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-011 --json,reports/scenario/cs-brain-011.json,,,,,NOT_VERIFIED
-CS-BRAIN-012,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-012 --json,reports/scenario/cs-brain-012.json,,,,,NOT_VERIFIED
-CS-BRAIN-013,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-013 --json,reports/scenario/cs-brain-013.json,,,,,NOT_VERIFIED
-CS-BRAIN-014,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-014 --json,reports/scenario/cs-brain-014.json,,,,,NOT_VERIFIED
-CS-BRAIN-015,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-015 --json,reports/scenario/cs-brain-015.json,,,,,NOT_VERIFIED
-CS-BRAIN-016,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-016 --json,reports/scenario/cs-brain-016.json,,,,,NOT_VERIFIED
+CS-BRAIN-001,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-002,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-003,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-004,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-005,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-006,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-007,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-008,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-009,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-010,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-011,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-012,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-013,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-014,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-015,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-BRAIN-016,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
 CS-LEARN-001,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
 CS-LEARN-002,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
 CS-LEARN-003,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
@@ -193,8 +193,8 @@ CS-REG-005,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-memory
 CS-REG-006,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0-tenant-security-boundary --json,reports/scenario/vs0-tenant-security-boundary-2026-06-09.json,,,,,PASS
 CS-REG-007,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-007 --json,reports/scenario/cs-reg-007.json,,,,,NOT_VERIFIED
 CS-REG-008,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-008 --json,reports/scenario/cs-reg-008.json,,,,,NOT_VERIFIED
-CS-REG-009,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-009 --json,reports/scenario/cs-reg-009.json,,,,,NOT_VERIFIED
-CS-REG-010,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-010 --json,reports/scenario/cs-reg-010.json,,,,,NOT_VERIFIED
+CS-REG-009,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
+CS-REG-010,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full-brain-routing --json,reports/scenario/full-brain-routing-2026-06-10.json,,,,,PASS
 CS-REG-011,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-REG-012,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-REG-013,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0-security --json,reports/scenario/vs0-security-2026-06-09.json,,,,,PASS

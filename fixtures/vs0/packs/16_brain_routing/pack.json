@@ -1,0 +1,65 @@
+{
+  "id": "pack_16_brain_routing",
+  "scenario_ids": [
+    "CS-BRAIN-001",
+    "CS-BRAIN-002",
+    "CS-BRAIN-003",
+    "CS-BRAIN-004",
+    "CS-BRAIN-005",
+    "CS-BRAIN-006",
+    "CS-BRAIN-007",
+    "CS-BRAIN-008",
+    "CS-BRAIN-009",
+    "CS-BRAIN-010",
+    "CS-BRAIN-011",
+    "CS-BRAIN-012",
+    "CS-BRAIN-013",
+    "CS-BRAIN-014",
+    "CS-BRAIN-015",
+    "CS-BRAIN-016",
+    "CS-ARCH-012",
+    "CS-NS-009",
+    "CS-NS-010",
+    "CS-REG-009",
+    "CS-REG-010"
+  ],
+  "classes": [],
+  "inputs": [
+    {
+      "path": "routing_task.txt",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    }
+  ],
+  "negative_evidence": {
+    "real_external_provider_calls": 0,
+    "secret_reads": 0,
+    "external_models_invoked": 0,
+    "route_without_policy_factors": 0,
+    "override_policy_bypass": 0,
+    "cross_namespace_ledger_without_opt_in": 0,
+    "ensemble_used_for_routine": 0,
+    "judge_overrode_objective": 0,
+    "judge_direct_memory_or_rule_mutation": 0,
+    "high_risk_disagreement_proceeded_silently": 0,
+    "evidence_unusable_after_switch": 0,
+    "audit_verify_failed": 0
+  },
+  "expected": {
+    "replaceable_brain_preserves_product_state": true,
+    "routing_records_policy_sensitivity_cost_latency_capability_history_and_preference": true,
+    "override_is_policy_gated": true,
+    "brain_performance_ledger_namespace_local": true,
+    "cross_namespace_aggregation_requires_opt_in": true,
+    "ensemble_only_for_high_risk_or_high_value": true,
+    "routine_work_uses_single_policy_routed_brain": true,
+    "llm_judge_is_supporting_evidence_not_pass_authority": true,
+    "objective_outcomes_override_judge": true,
+    "owner_acceptance_can_ground_ambiguous_success": true,
+    "judge_recommendations_require_governance": true,
+    "disagreement_preserves_dissent_and_escalates_high_risk": true,
+    "calibration_tracks_bias_confidence_and_reversals": true,
+    "provider_switch_preserves_evidence_and_mission_records": true
+  }
+}

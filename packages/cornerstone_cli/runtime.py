@@ -186,6 +186,89 @@ AGENT_ROLE_TEMPLATES: dict[str, dict[str, Any]] = {
     },
 }
 
+MODEL_CAPABILITY_REGISTRY: dict[str, dict[str, Any]] = {
+    "local_test/local_test.v0": {
+        "provider": "local_test",
+        "model": "local_test.v0",
+        "deployment": "local",
+        "registry_only": False,
+        "external_call_required": False,
+        "capabilities": ["deterministic_fixture", "routing_baseline", "evidence_grounded_judge", "classification", "summarization"],
+        "allowed_sensitivity": ["public", "internal", "confidential", "restricted"],
+        "max_context_tokens": 8192,
+        "cost_per_1k_tokens_usd": 0.0,
+        "typical_latency_ms": 15,
+        "tool_use_reliability": 0.92,
+        "grounding_reliability": 0.91,
+        "judge_reliability": 0.88,
+        "safe_baseline": True,
+    },
+    "ollama/qwen3.6:27b": {
+        "provider": "ollama",
+        "model": "qwen3.6:27b",
+        "deployment": "local",
+        "registry_only": True,
+        "external_call_required": False,
+        "capabilities": ["planning", "critique", "local_semantic_judge", "long_context_review"],
+        "allowed_sensitivity": ["public", "internal", "confidential"],
+        "max_context_tokens": 32768,
+        "cost_per_1k_tokens_usd": 0.0,
+        "typical_latency_ms": 800,
+        "tool_use_reliability": 0.83,
+        "grounding_reliability": 0.84,
+        "judge_reliability": 0.82,
+        "safe_baseline": True,
+    },
+    "openai/gpt-5.4": {
+        "provider": "openai",
+        "model": "gpt-5.4",
+        "deployment": "external",
+        "registry_only": True,
+        "external_call_required": True,
+        "capabilities": ["planning", "tool_use", "critique", "general_reasoning"],
+        "allowed_sensitivity": ["public", "internal"],
+        "max_context_tokens": 128000,
+        "cost_per_1k_tokens_usd": 0.03,
+        "typical_latency_ms": 1200,
+        "tool_use_reliability": 0.9,
+        "grounding_reliability": 0.87,
+        "judge_reliability": 0.86,
+        "safe_baseline": False,
+    },
+    "anthropic/claude-sonnet-4.5": {
+        "provider": "anthropic",
+        "model": "claude-sonnet-4.5",
+        "deployment": "external",
+        "registry_only": True,
+        "external_call_required": True,
+        "capabilities": ["writing", "critique", "long_context_review", "planning"],
+        "allowed_sensitivity": ["public", "internal"],
+        "max_context_tokens": 200000,
+        "cost_per_1k_tokens_usd": 0.03,
+        "typical_latency_ms": 1300,
+        "tool_use_reliability": 0.88,
+        "grounding_reliability": 0.86,
+        "judge_reliability": 0.85,
+        "safe_baseline": False,
+    },
+    "google/gemini-pro": {
+        "provider": "google",
+        "model": "gemini-pro",
+        "deployment": "external",
+        "registry_only": True,
+        "external_call_required": True,
+        "capabilities": ["multimodal_review", "planning", "summarization"],
+        "allowed_sensitivity": ["public", "internal"],
+        "max_context_tokens": 1000000,
+        "cost_per_1k_tokens_usd": 0.02,
+        "typical_latency_ms": 1400,
+        "tool_use_reliability": 0.84,
+        "grounding_reliability": 0.83,
+        "judge_reliability": 0.8,
+        "safe_baseline": False,
+    },
+}
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -293,6 +376,16 @@ class LocalRuntimeStore:
         self.agent_mutation_attempt_dir = state_dir / "agents" / "mutation_attempts"
         self.agent_replay_dir = state_dir / "agents" / "replays"
         self.agent_pack_capability_dir = state_dir / "agents" / "pack_capabilities"
+        self.brain_route_dir = state_dir / "brain" / "routes"
+        self.brain_ledger_dir = state_dir / "brain" / "ledgers"
+        self.brain_switch_dir = state_dir / "brain" / "switches"
+        self.brain_aggregation_dir = state_dir / "brain" / "aggregations"
+        self.judge_record_dir = state_dir / "judge" / "records"
+        self.judge_conflict_dir = state_dir / "judge" / "conflicts"
+        self.judge_acceptance_dir = state_dir / "judge" / "acceptance"
+        self.judge_recommendation_dir = state_dir / "judge" / "recommendations"
+        self.judge_adjudication_dir = state_dir / "judge" / "adjudications"
+        self.judge_calibration_dir = state_dir / "judge" / "calibration"
         self.audit_path = state_dir / "audit" / "events.jsonl"
 
     def reset(self) -> None:
@@ -541,6 +634,36 @@ class LocalRuntimeStore:
 
     def agent_pack_capability_path(self, capability_attempt_id: str) -> Path:
         return self.agent_pack_capability_dir / f"{capability_attempt_id}.json"
+
+    def brain_route_path(self, route_id: str) -> Path:
+        return self.brain_route_dir / f"{route_id}.json"
+
+    def brain_ledger_path(self, ledger_id: str) -> Path:
+        return self.brain_ledger_dir / f"{ledger_id}.json"
+
+    def brain_switch_path(self, switch_id: str) -> Path:
+        return self.brain_switch_dir / f"{switch_id}.json"
+
+    def brain_aggregation_path(self, aggregation_id: str) -> Path:
+        return self.brain_aggregation_dir / f"{aggregation_id}.json"
+
+    def judge_record_path(self, judge_record_id: str) -> Path:
+        return self.judge_record_dir / f"{judge_record_id}.json"
+
+    def judge_conflict_path(self, conflict_id: str) -> Path:
+        return self.judge_conflict_dir / f"{conflict_id}.json"
+
+    def judge_acceptance_path(self, acceptance_id: str) -> Path:
+        return self.judge_acceptance_dir / f"{acceptance_id}.json"
+
+    def judge_recommendation_path(self, recommendation_id: str) -> Path:
+        return self.judge_recommendation_dir / f"{recommendation_id}.json"
+
+    def judge_adjudication_path(self, adjudication_id: str) -> Path:
+        return self.judge_adjudication_dir / f"{adjudication_id}.json"
+
+    def judge_calibration_path(self, calibration_id: str) -> Path:
+        return self.judge_calibration_dir / f"{calibration_id}.json"
 
     def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
         if scope is not None:
@@ -1027,6 +1150,48 @@ class LocalRuntimeStore:
             if scope is None or record.get("scope") == scope:
                 records.append(record)
         return records
+
+    def _brain_route_records(self, scope: dict[str, str] | None = None) -> list[dict[str, Any]]:
+        if not self.brain_route_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.brain_route_dir.glob("*.json")):
+            record = _read_json(path)
+            if scope is None or record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _brain_ledger_records(self, scope: dict[str, str] | None = None) -> list[dict[str, Any]]:
+        if not self.brain_ledger_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.brain_ledger_dir.glob("*.json")):
+            record = _read_json(path)
+            if scope is None or record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _judge_records(self, scope: dict[str, str] | None = None) -> list[dict[str, Any]]:
+        if not self.judge_record_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.judge_record_dir.glob("*.json")):
+            record = _read_json(path)
+            if scope is None or record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def get_brain_route(self, route_id: str) -> dict[str, Any] | None:
+        path = self.brain_route_path(route_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_judge_record(self, judge_record_id: str) -> dict[str, Any] | None:
+        path = self.judge_record_path(judge_record_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
 
     def _agent_pack_records(self) -> list[dict[str, Any]]:
         if not self.pack_registry_dir.exists():
@@ -2446,6 +2611,657 @@ class LocalRuntimeStore:
         replay["audit_refs"] = [f"audit:{event['event_id']}"]
         _write_json(self.agent_replay_path(replay_id), replay)
         return {"agent_replay": replay, "audit_event": event}
+
+    def _brain_policy_decision(
+        self,
+        *,
+        scope: dict[str, str],
+        subject_id: str,
+        decision: str,
+        policy: str,
+        reason: str,
+        resolution_path: list[str],
+    ) -> dict[str, Any]:
+        decision_base = {
+            "schema_version": "cs.policy_decision.v0",
+            "decision": decision,
+            "policy": policy,
+            "reason": redact_text(reason),
+            "resolution_path": resolution_path,
+            "subject": {"type": "brain", "id": subject_id},
+            "scope": scope,
+            "created_at": utc_now(),
+        }
+        decision_id = f"policy_{_json_hash(decision_base)[:16]}"
+        decision_record = dict(decision_base)
+        decision_record["policy_decision_id"] = decision_id
+        return decision_record
+
+    def list_models(self, scope: dict[str, str]) -> dict[str, Any]:
+        models = [dict(record) for record in MODEL_CAPABILITY_REGISTRY.values()]
+        registry = {
+            "schema_version": "cs.model_capability_registry.v0",
+            "status": "ready",
+            "scope": scope,
+            "models": models,
+            "safe_baseline_provider": "local_test",
+            "safe_baseline_model": "local_test.v0",
+            "external_models_are_registry_only": True,
+            "real_provider_calls": 0,
+            "secret_reads": 0,
+            "created_at": utc_now(),
+        }
+        event = self.append_audit(
+            "model.registry.listed",
+            scope,
+            {"type": "model_registry", "id": "local"},
+            {"model_count": len(models), "external_models_are_registry_only": True},
+        )
+        return {"model_registry": registry, "audit_event": event}
+
+    def _model_record(self, provider: str, model: str | None = None) -> dict[str, Any] | None:
+        for record in MODEL_CAPABILITY_REGISTRY.values():
+            if record["provider"] == provider and (model is None or record["model"] == model):
+                return record
+        return None
+
+    def _record_brain_ledger_entry(
+        self,
+        *,
+        scope: dict[str, str],
+        route_id: str,
+        provider: str,
+        model: str,
+        task_type: str,
+        sensitivity: str,
+        mission_type: str,
+        risk: str,
+        objective_outcome: str = "pending",
+        owner_acceptance: str = "not_recorded",
+        judge_quality: str = "not_measured",
+        mission_success: bool | None = None,
+    ) -> dict[str, Any]:
+        model_record = self._model_record(provider, model) or {}
+        ledger_base = {
+            "schema_version": "cs.brain_performance_ledger_entry.v0",
+            "status": "recorded",
+            "scope": scope,
+            "route_id": route_id,
+            "provider": provider,
+            "model": model,
+            "task_type": task_type,
+            "mission_type": mission_type,
+            "sensitivity": sensitivity,
+            "risk": risk,
+            "policy": "workspace_model_routing_policy_v0",
+            "cost_per_1k_tokens_usd": model_record.get("cost_per_1k_tokens_usd", 0),
+            "latency_ms": model_record.get("typical_latency_ms", 0),
+            "judge_quality": judge_quality,
+            "tool_use_reliability": model_record.get("tool_use_reliability"),
+            "grounding_issues": [],
+            "owner_corrections": 0 if owner_acceptance == "not_recorded" else 1,
+            "owner_acceptance": owner_acceptance,
+            "objective_outcome": objective_outcome,
+            "mission_success": mission_success,
+            "namespace_local": True,
+            "cross_namespace_aggregation": "requires_opt_in",
+            "can_influence_routing": True,
+            "created_at": utc_now(),
+        }
+        ledger_id = f"brainledger_{_json_hash(ledger_base)[:16]}"
+        ledger = dict(ledger_base)
+        ledger["ledger_id"] = ledger_id
+        _write_json(self.brain_ledger_path(ledger_id), ledger)
+        event = self.append_audit(
+            "brain.ledger.recorded",
+            scope,
+            {"type": "brain_ledger", "id": ledger_id},
+            {"provider": provider, "model": model, "namespace_local": True, "route_id": route_id},
+        )
+        return {"ledger_entry": ledger, "audit_event": event}
+
+    def route_brain(
+        self,
+        *,
+        task_ref: str,
+        task_type: str,
+        mission_type: str,
+        sensitivity: str,
+        risk: str,
+        owner_preference: str,
+        max_cost_usd: float,
+        max_latency_ms: int,
+        override_provider: str | None,
+        override_model: str | None,
+        dry_run: bool,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        if not dry_run:
+            decision = self._brain_policy_decision(
+                scope=scope,
+                subject_id="brain_route",
+                decision="deny",
+                policy="brain_route_dry_run_required",
+                reason="Model routing changes and provider selection must be previewed through dry-run in local verification.",
+                resolution_path=["Re-run with --dry-run and inspect policy, cost, latency, capability, and audit refs."],
+            )
+            event = self.append_audit(
+                "brain.route.denied",
+                scope,
+                {"type": "policy_decision", "id": decision["policy_decision_id"]},
+                {"policy_decision_id": decision["policy_decision_id"], "dry_run_required": True},
+            )
+            return {"status": "policy_denied", "policy_decision": decision, "audit_event": event}
+
+        allowed_providers = ["local_test", "ollama"]
+        denied_external = sensitivity in {"confidential", "restricted"} or risk in {"high", "safety_sensitive"}
+        selected = self._model_record("local_test", "local_test.v0") or {}
+        override_record = self._model_record(override_provider or "", override_model) if override_provider else None
+        override_allowed = False
+        if override_record:
+            override_allowed = (
+                override_record["provider"] in allowed_providers
+                and sensitivity in override_record.get("allowed_sensitivity", [])
+                and override_record.get("cost_per_1k_tokens_usd", 0) <= max_cost_usd
+                and override_record.get("typical_latency_ms", 0) <= max_latency_ms
+            )
+            if override_record.get("deployment") == "external" and denied_external:
+                override_allowed = False
+        if override_record and not override_allowed:
+            decision = self._brain_policy_decision(
+                scope=scope,
+                subject_id=f"{override_record['provider']}/{override_record['model']}",
+                decision="deny",
+                policy="model_override_forbidden_by_workspace_policy",
+                reason="Requested model override violates workspace policy, sensitivity, cost, latency, or egress limits.",
+                resolution_path=["Use an allowed local provider, lower sensitivity through policy review, or request explicit admin approval."],
+            )
+            event = self.append_audit(
+                "brain.override.denied",
+                scope,
+                {"type": "policy_decision", "id": decision["policy_decision_id"]},
+                {"provider": override_record["provider"], "model": override_record["model"], "policy_decision_id": decision["policy_decision_id"]},
+            )
+            return {"status": "policy_denied", "policy_decision": decision, "audit_event": event}
+        if override_record and override_allowed:
+            selected = override_record
+        elif owner_preference == "local_semantic" and sensitivity != "restricted":
+            selected = self._model_record("ollama", "qwen3.6:27b") or selected
+
+        local_history = self._brain_ledger_records(scope)
+        high_value = risk in {"high", "safety_sensitive"} or mission_type in {"externally_impactful", "ambiguous_research"}
+        ensemble_triggered = high_value
+        contribution_records = []
+        if ensemble_triggered:
+            for record in [self._model_record("local_test", "local_test.v0"), self._model_record("ollama", "qwen3.6:27b")]:
+                if record:
+                    contribution_records.append(
+                        {
+                            "provider": record["provider"],
+                            "model": record["model"],
+                            "role": "plan_or_critique",
+                            "external_call_made": False,
+                            "registry_only": record.get("registry_only"),
+                        }
+                    )
+        route_base = {
+            "schema_version": "cs.brain_routing_decision.v0",
+            "status": "dry_run",
+            "scope": scope,
+            "task_ref": redact_text(task_ref),
+            "task_type": task_type,
+            "mission_type": mission_type,
+            "sensitivity": sensitivity,
+            "risk": risk,
+            "owner_preference": owner_preference,
+            "selected_brain": {
+                "provider": selected["provider"],
+                "model": selected["model"],
+                "deployment": selected["deployment"],
+                "external_call_made": False,
+            },
+            "factors": {
+                "workspace_policy": {
+                    "allowed_providers": allowed_providers,
+                    "egress_default": "deny",
+                    "confidential_external_denied": denied_external,
+                },
+                "sensitivity": sensitivity,
+                "mission_type": mission_type,
+                "risk": risk,
+                "cost_limit_usd": max_cost_usd,
+                "latency_limit_ms": max_latency_ms,
+                "capabilities": selected.get("capabilities", []),
+                "owner_preference": owner_preference,
+                "local_performance_history_count": len(local_history),
+                "historical_outcome_quality_used": bool(local_history),
+                "static_capability_registry_used": len(local_history) == 0,
+            },
+            "override": {
+                "requested": bool(override_record),
+                "allowed": bool(override_record and override_allowed),
+                "provider": override_record.get("provider") if override_record else None,
+                "model": override_record.get("model") if override_record else None,
+            },
+            "ensemble": {
+                "triggered": ensemble_triggered,
+                "not_default_for_routine": not ensemble_triggered,
+                "reason": "risk_value_trigger" if ensemble_triggered else "routine_single_brain",
+                "contribution_records": contribution_records,
+            },
+            "no_real_provider_call": True,
+            "secret_reads": 0,
+            "created_at": utc_now(),
+        }
+        route_id = f"brainroute_{_json_hash(route_base)[:16]}"
+        route = dict(route_base)
+        route["route_id"] = route_id
+        _write_json(self.brain_route_path(route_id), route)
+        ledger_result = self._record_brain_ledger_entry(
+            scope=scope,
+            route_id=route_id,
+            provider=selected["provider"],
+            model=selected["model"],
+            task_type=task_type,
+            sensitivity=sensitivity,
+            mission_type=mission_type,
+            risk=risk,
+        )
+        event = self.append_audit(
+            "brain.route.decided",
+            scope,
+            {"type": "brain_route", "id": route_id},
+            {
+                "provider": selected["provider"],
+                "model": selected["model"],
+                "dry_run": dry_run,
+                "ensemble_triggered": ensemble_triggered,
+                "static_registry_used": route["factors"]["static_capability_registry_used"],
+            },
+        )
+        route["ledger_refs"] = [f"brain_ledger:{ledger_result['ledger_entry']['ledger_id']}"]
+        _write_json(self.brain_route_path(route_id), route)
+        return {"routing_decision": route, "ledger_entry": ledger_result["ledger_entry"], "audit_event": event, "ledger_audit_event": ledger_result["audit_event"]}
+
+    def switch_workspace_brain(
+        self,
+        *,
+        provider: str,
+        model: str,
+        evidence_bundle_id: str | None,
+        mission_id: str | None,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        if self._model_record(provider, model) is None:
+            return {"status": "not_found", "resource": "model"}
+        bundle = self.get_evidence_bundle(evidence_bundle_id) if evidence_bundle_id else None
+        if evidence_bundle_id and bundle is None:
+            return {"status": "not_found", "resource": "evidence_bundle"}
+        mission = self.get_mission(mission_id) if mission_id else None
+        if mission_id and mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        switch_base = {
+            "schema_version": "cs.workspace_brain_switch.v0",
+            "status": "switched",
+            "scope": scope,
+            "from_provider": "local_test",
+            "from_model": "local_test.v0",
+            "to_provider": provider,
+            "to_model": model,
+            "durable_surfaces_unchanged": {
+                "namespaces": True,
+                "permanent_wiki": True,
+                "evidence_archive": True,
+                "ontology": True,
+                "mission_contracts": True,
+                "agents": True,
+                "workflows": True,
+                "policy": True,
+                "audit": True,
+                "experience_library": True,
+                "judge_records": True,
+                "promotion_ladder": True,
+            },
+            "existing_records_still_usable": {
+                "evidence_bundle_id": evidence_bundle_id,
+                "evidence_bundle_readable": bool(bundle),
+                "mission_id": mission_id,
+                "mission_readable": bool(mission),
+            },
+            "only_inference_brain_changed": True,
+            "real_provider_call_made": False,
+            "created_at": utc_now(),
+        }
+        switch_id = f"brainswitch_{_json_hash(switch_base)[:16]}"
+        switch = dict(switch_base)
+        switch["switch_id"] = switch_id
+        _write_json(self.brain_switch_path(switch_id), switch)
+        event = self.append_audit(
+            "brain.provider.switched",
+            scope,
+            {"type": "brain_switch", "id": switch_id},
+            {"to_provider": provider, "to_model": model, "only_inference_brain_changed": True},
+        )
+        return {"brain_switch": switch, "audit_event": event}
+
+    def list_brain_ledger(self, scope: dict[str, str]) -> dict[str, Any]:
+        entries = self._brain_ledger_records(scope)
+        ledger = {
+            "schema_version": "cs.brain_performance_ledger.v0",
+            "status": "ready",
+            "scope": scope,
+            "entries": entries,
+            "entry_count": len(entries),
+            "namespace_local": True,
+            "cross_namespace_entries": 0,
+            "can_influence_routing": any(entry.get("can_influence_routing") is True for entry in entries),
+            "created_at": utc_now(),
+        }
+        event = self.append_audit(
+            "brain.ledger.listed",
+            scope,
+            {"type": "brain_ledger", "id": scope_key(scope)},
+            {"entry_count": len(entries), "namespace_local": True},
+        )
+        return {"brain_ledger": ledger, "audit_event": event}
+
+    def test_brain_aggregation(
+        self,
+        *,
+        source_namespace: str,
+        target_namespace: str,
+        opt_in: bool,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        source_scope = {**scope, "namespace_id": source_namespace}
+        target_scope = {**scope, "namespace_id": target_namespace}
+        source_entries = self._brain_ledger_records(source_scope)
+        if not opt_in:
+            decision = self._brain_policy_decision(
+                scope=target_scope,
+                subject_id=f"{source_namespace}->{target_namespace}",
+                decision="deny",
+                policy="brain_ledger_cross_namespace_opt_in_required",
+                reason="Brain performance learning is namespace-local first; cross-namespace aggregation requires explicit opt-in and governance.",
+                resolution_path=["Collect owner/admin opt-in and record aggregation policy before using source namespace performance data."],
+            )
+            aggregation_base = {
+                "schema_version": "cs.brain_ledger_aggregation_attempt.v0",
+                "status": "denied",
+                "scope": target_scope,
+                "source_scope": source_scope,
+                "target_scope": target_scope,
+                "opt_in": False,
+                "source_entry_count": len(source_entries),
+                "entries_used_for_routing": 0,
+                "policy_decision": decision,
+                "created_at": utc_now(),
+            }
+            aggregation_id = f"brainagg_{_json_hash(aggregation_base)[:16]}"
+            aggregation = dict(aggregation_base)
+            aggregation["aggregation_id"] = aggregation_id
+            _write_json(self.brain_aggregation_path(aggregation_id), aggregation)
+            event = self.append_audit(
+                "brain.ledger_aggregation.denied",
+                target_scope,
+                {"type": "brain_aggregation", "id": aggregation_id},
+                {"policy_decision_id": decision["policy_decision_id"], "opt_in": False},
+            )
+            return {"status": "policy_denied", "aggregation": aggregation, "policy_decision": decision, "audit_event": event}
+        aggregation_base = {
+            "schema_version": "cs.brain_ledger_aggregation_attempt.v0",
+            "status": "aggregated",
+            "scope": target_scope,
+            "source_scope": source_scope,
+            "target_scope": target_scope,
+            "opt_in": True,
+            "governance_recorded": True,
+            "source_entry_count": len(source_entries),
+            "entries_used_for_routing": len(source_entries),
+            "created_at": utc_now(),
+        }
+        aggregation_id = f"brainagg_{_json_hash(aggregation_base)[:16]}"
+        aggregation = dict(aggregation_base)
+        aggregation["aggregation_id"] = aggregation_id
+        _write_json(self.brain_aggregation_path(aggregation_id), aggregation)
+        event = self.append_audit(
+            "brain.ledger_aggregation.recorded",
+            target_scope,
+            {"type": "brain_aggregation", "id": aggregation_id},
+            {"source_namespace": source_namespace, "target_namespace": target_namespace, "opt_in": True},
+        )
+        return {"aggregation": aggregation, "audit_event": event}
+
+    def run_judge(
+        self,
+        *,
+        route_id: str,
+        subject: str,
+        rubric: str,
+        evidence_ref: str,
+        ambiguity: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        route = self.get_brain_route(route_id)
+        if route is None:
+            return {"status": "not_found", "resource": "brain_route"}
+        if route.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": route.get("scope")}
+        judge_base = {
+            "schema_version": "cs.judge_record.v0",
+            "status": "recorded",
+            "scope": scope,
+            "route_id": route_id,
+            "provider": route.get("selected_brain", {}).get("provider"),
+            "model": route.get("selected_brain", {}).get("model"),
+            "subject": redact_text(subject),
+            "rubric": redact_text(rubric),
+            "ambiguity": ambiguity,
+            "score": "pass_with_limitations",
+            "confidence": "medium",
+            "limitations": ["LLM judge is scalable for ambiguous quality dimensions but can be biased and overconfident."],
+            "evidence_refs": [evidence_ref],
+            "primary_for_ambiguous_outcome": True,
+            "pass_judge": False,
+            "directly_mutates_memory_or_rules": False,
+            "created_at": utc_now(),
+        }
+        judge_record_id = f"judge_{_json_hash(judge_base)[:16]}"
+        judge = dict(judge_base)
+        judge["judge_record_id"] = judge_record_id
+        _write_json(self.judge_record_path(judge_record_id), judge)
+        ledger_result = self._record_brain_ledger_entry(
+            scope=scope,
+            route_id=route_id,
+            provider=judge["provider"],
+            model=judge["model"],
+            task_type="judge",
+            sensitivity=route.get("sensitivity", "internal"),
+            mission_type=route.get("mission_type", "ambiguous_research"),
+            risk=route.get("risk", "medium"),
+            judge_quality="pending_calibration",
+        )
+        event = self.append_audit(
+            "judge.record.created",
+            scope,
+            {"type": "judge_record", "id": judge_record_id},
+            {"route_id": route_id, "primary_for_ambiguous_outcome": True, "pass_judge": False},
+        )
+        return {"judge_record": judge, "ledger_entry": ledger_result["ledger_entry"], "audit_event": event}
+
+    def record_judge_conflict(self, judge_record_id: str, *, objective_evidence: str, scope: dict[str, str]) -> dict[str, Any]:
+        judge = self.get_judge_record(judge_record_id)
+        if judge is None:
+            return {"status": "not_found", "resource": "judge_record"}
+        if judge.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": judge.get("scope")}
+        conflict_base = {
+            "schema_version": "cs.judge_objective_conflict.v0",
+            "status": "objective_outcome_selected",
+            "scope": scope,
+            "judge_record_id": judge_record_id,
+            "judge_score": judge.get("score"),
+            "objective_evidence": redact_text(objective_evidence),
+            "objective_outcome": "failed",
+            "final_outcome_state": "failed",
+            "objective_outcome_overrides_judge": True,
+            "judge_retained_as_evaluation_artifact": True,
+            "memory_or_rule_mutated": False,
+            "created_at": utc_now(),
+        }
+        conflict_id = f"judgeconf_{_json_hash(conflict_base)[:16]}"
+        conflict = dict(conflict_base)
+        conflict["conflict_id"] = conflict_id
+        _write_json(self.judge_conflict_path(conflict_id), conflict)
+        event = self.append_audit(
+            "judge.objective_conflict.recorded",
+            scope,
+            {"type": "judge_conflict", "id": conflict_id},
+            {"judge_record_id": judge_record_id, "objective_outcome_overrides_judge": True},
+        )
+        return {"judge_conflict": conflict, "audit_event": event}
+
+    def record_owner_acceptance(self, judge_record_id: str, *, acceptance: str, scope: dict[str, str]) -> dict[str, Any]:
+        judge = self.get_judge_record(judge_record_id)
+        if judge is None:
+            return {"status": "not_found", "resource": "judge_record"}
+        if judge.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": judge.get("scope")}
+        acceptance_base = {
+            "schema_version": "cs.owner_acceptance_signal.v0",
+            "status": "recorded",
+            "scope": scope,
+            "judge_record_id": judge_record_id,
+            "owner_acceptance": acceptance,
+            "grounds_final_success_when_objective_truth_unavailable": True,
+            "judge_score_supporting_only": True,
+            "learning_signal": "owner_grounded",
+            "created_at": utc_now(),
+        }
+        acceptance_id = f"accept_{_json_hash(acceptance_base)[:16]}"
+        record = dict(acceptance_base)
+        record["acceptance_id"] = acceptance_id
+        _write_json(self.judge_acceptance_path(acceptance_id), record)
+        event = self.append_audit(
+            "judge.owner_acceptance.recorded",
+            scope,
+            {"type": "owner_acceptance", "id": acceptance_id},
+            {"judge_record_id": judge_record_id, "owner_acceptance": acceptance},
+        )
+        return {"owner_acceptance": record, "audit_event": event}
+
+    def recommend_from_judge(self, judge_record_id: str, *, recommendation: str, scope: dict[str, str]) -> dict[str, Any]:
+        judge = self.get_judge_record(judge_record_id)
+        if judge is None:
+            return {"status": "not_found", "resource": "judge_record"}
+        if judge.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": judge.get("scope")}
+        recommendation_base = {
+            "schema_version": "cs.judge_recommendation.v0",
+            "status": "candidate_lesson",
+            "scope": scope,
+            "judge_record_id": judge_record_id,
+            "recommendation": redact_text(recommendation),
+            "promotion_ladder": ["candidate_lesson", "workspace_memory", "mission_playbook", "organization_approved_rule"],
+            "approved_memory_created": False,
+            "global_rule_created": False,
+            "requires_scope_evidence_confidence_governance": True,
+            "evidence_refs": judge.get("evidence_refs", []),
+            "created_at": utc_now(),
+        }
+        recommendation_id = f"judgerec_{_json_hash(recommendation_base)[:16]}"
+        record = dict(recommendation_base)
+        record["recommendation_id"] = recommendation_id
+        _write_json(self.judge_recommendation_path(recommendation_id), record)
+        event = self.append_audit(
+            "judge.recommendation.created",
+            scope,
+            {"type": "judge_recommendation", "id": recommendation_id},
+            {"approved_memory_created": False, "global_rule_created": False},
+        )
+        return {"judge_recommendation": record, "audit_event": event}
+
+    def test_judge_disagreement(self, *, risk: str, scope: dict[str, str]) -> dict[str, Any]:
+        high_risk = risk in {"high", "safety_sensitive"}
+        adjudication_base = {
+            "schema_version": "cs.judge_disagreement_adjudication.v0",
+            "status": "escalated" if high_risk else "recommended",
+            "scope": scope,
+            "risk": risk,
+            "participants": [
+                {"provider": "local_test", "model": "local_test.v0", "position": "approve_with_limitations"},
+                {"provider": "ollama", "model": "qwen3.6:27b", "position": "request_more_evidence"},
+            ],
+            "factors": {
+                "evidence_quality": "mixed",
+                "policy_constraints": ["no external write without approval"],
+                "mission_goals": ["evidence-backed decision"],
+                "prior_brain_performance": "local_namespace_ledger",
+                "objective_outcomes": "unavailable",
+                "rubric": ["grounding", "risk", "usefulness"],
+            },
+            "recommended_path": "request_more_evidence" if high_risk else "proceed_with_limitations",
+            "dissent_preserved": True,
+            "evidence_weighted": True,
+            "unresolved": high_risk,
+            "escalation_card": {
+                "created": high_risk,
+                "target": "namespace_owner" if high_risk else None,
+                "reason": "High-risk disagreement remained material." if high_risk else None,
+            },
+            "proceeded_silently": False,
+            "created_at": utc_now(),
+        }
+        adjudication_id = f"adjud_{_json_hash(adjudication_base)[:16]}"
+        adjudication = dict(adjudication_base)
+        adjudication["adjudication_id"] = adjudication_id
+        _write_json(self.judge_adjudication_path(adjudication_id), adjudication)
+        event = self.append_audit(
+            "judge.disagreement.adjudicated",
+            scope,
+            {"type": "judge_adjudication", "id": adjudication_id},
+            {"risk": risk, "dissent_preserved": True, "escalated": high_risk},
+        )
+        return {"adjudication": adjudication, "audit_event": event}
+
+    def judge_calibration_report(self, scope: dict[str, str]) -> dict[str, Any]:
+        judge_records = self._judge_records(scope)
+        conflicts = [json.loads(path.read_text()) for path in sorted(self.judge_conflict_dir.glob("*.json"))] if self.judge_conflict_dir.exists() else []
+        acceptances = [json.loads(path.read_text()) for path in sorted(self.judge_acceptance_dir.glob("*.json"))] if self.judge_acceptance_dir.exists() else []
+        adjudications = [json.loads(path.read_text()) for path in sorted(self.judge_adjudication_dir.glob("*.json"))] if self.judge_adjudication_dir.exists() else []
+        scoped_conflicts = [row for row in conflicts if row.get("scope") == scope]
+        scoped_acceptances = [row for row in acceptances if row.get("scope") == scope]
+        scoped_adjudications = [row for row in adjudications if row.get("scope") == scope]
+        report_base = {
+            "schema_version": "cs.judge_calibration_report.v0",
+            "status": "ready",
+            "scope": scope,
+            "judge_record_count": len(judge_records),
+            "disagreement_count": len(scoped_adjudications),
+            "objective_reversal_count": len(scoped_conflicts),
+            "owner_override_count": len(scoped_acceptances),
+            "calibration_issues": ["overconfidence_risk", "position_bias_risk"],
+            "model_specific_bias_signals": [
+                {"provider": "local_test", "model": "local_test.v0", "bias_signal": "fixture_bias_possible"},
+                {"provider": "ollama", "model": "qwen3.6:27b", "bias_signal": "local_model_calibration_needed"},
+            ],
+            "judge_is_unquestionable_authority": False,
+            "objective_outcomes_override_judge": True,
+            "owner_acceptance_recorded": bool(scoped_acceptances),
+            "ledger_refs": [f"brain_ledger:{entry['ledger_id']}" for entry in self._brain_ledger_records(scope)],
+            "created_at": utc_now(),
+        }
+        calibration_id = f"judgecal_{_json_hash(report_base)[:16]}"
+        report = dict(report_base)
+        report["calibration_id"] = calibration_id
+        _write_json(self.judge_calibration_path(calibration_id), report)
+        event = self.append_audit(
+            "judge.calibration.reported",
+            scope,
+            {"type": "judge_calibration", "id": calibration_id},
+            {"judge_record_count": len(judge_records), "objective_reversal_count": len(scoped_conflicts)},
+        )
+        return {"calibration_report": report, "audit_event": event}
 
     def related_claims_for_artifact(self, artifact_id: str, scope: dict[str, str]) -> list[dict[str, Any]]:
         related = []

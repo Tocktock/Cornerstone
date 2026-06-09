@@ -44,7 +44,8 @@ learning_experience_json=$(mktemp)
 understanding_ontology_json=$(mktemp)
 extension_ecosystem_json=$(mktemp)
 agent_orchestration_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json" "$agent_orchestration_json"' EXIT
+brain_routing_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json" "$agent_orchestration_json" "$brain_routing_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -571,6 +572,44 @@ grep -q '"audit_verify_failed": 0' "$agent_orchestration_json" || fail "full-age
 grep -q '"real_external_http_calls": 0' "$agent_orchestration_json" || fail "full-agent-orchestration reported real external HTTP calls"
 grep -q '"product_feature_claims": "PARTIAL_FULL_AGENT_ORCHESTRATION_ONLY"' "$agent_orchestration_json" || fail "full-agent-orchestration overclaimed product feature scope"
 
+cornerstone scenario verify full-brain-routing --json > "$brain_routing_json"
+python3 -m json.tool "$brain_routing_json" >/dev/null
+grep -q '"scenario_set": "full-brain-routing"' "$brain_routing_json" || fail "full-brain-routing report missing scenario set"
+grep -q '"blocking": 0' "$brain_routing_json" || fail "full-brain-routing report has blocking scenarios"
+grep -q '"pass": 21' "$brain_routing_json" || fail "full-brain-routing did not pass exactly twenty-one scenarios"
+grep -q '"id": "CS-BRAIN-001"' "$brain_routing_json" || fail "full-brain-routing missing CS-BRAIN-001"
+grep -q '"id": "CS-BRAIN-016"' "$brain_routing_json" || fail "full-brain-routing missing CS-BRAIN-016"
+grep -q '"id": "CS-ARCH-012"' "$brain_routing_json" || fail "full-brain-routing missing CS-ARCH-012"
+grep -q '"id": "CS-NS-009"' "$brain_routing_json" || fail "full-brain-routing missing CS-NS-009"
+grep -q '"id": "CS-NS-010"' "$brain_routing_json" || fail "full-brain-routing missing CS-NS-010"
+grep -q '"id": "CS-REG-009"' "$brain_routing_json" || fail "full-brain-routing missing CS-REG-009"
+grep -q '"id": "CS-REG-010"' "$brain_routing_json" || fail "full-brain-routing missing CS-REG-010"
+grep -q '"model_count": 5' "$brain_routing_json" || fail "full-brain-routing missing model registry evidence"
+grep -q '"routine_route_id": "brainroute_' "$brain_routing_json" || fail "full-brain-routing missing routine route ID"
+grep -q '"high_risk_route_id": "brainroute_' "$brain_routing_json" || fail "full-brain-routing missing high-risk route ID"
+grep -q '"brain_switch_id": "brainswitch_' "$brain_routing_json" || fail "full-brain-routing missing brain switch ID"
+grep -q '"judge_record_id": "judge_' "$brain_routing_json" || fail "full-brain-routing missing judge record ID"
+grep -q '"judge_conflict_id": "judgeconf_' "$brain_routing_json" || fail "full-brain-routing missing judge conflict ID"
+grep -q '"owner_acceptance_id": "accept_' "$brain_routing_json" || fail "full-brain-routing missing owner acceptance ID"
+grep -q '"judge_recommendation_id": "judgerec_' "$brain_routing_json" || fail "full-brain-routing missing judge recommendation ID"
+grep -q '"adjudication_id": "adjud_' "$brain_routing_json" || fail "full-brain-routing missing adjudication ID"
+grep -q '"calibration_id": "judgecal_' "$brain_routing_json" || fail "full-brain-routing missing calibration ID"
+grep -q '"override_denied_exit_code": 8' "$brain_routing_json" || fail "full-brain-routing allowed forbidden provider override"
+grep -q '"aggregation_denied_exit_code": 8' "$brain_routing_json" || fail "full-brain-routing allowed cross-namespace aggregation without opt-in"
+grep -q '"real_external_provider_calls": 0' "$brain_routing_json" || fail "full-brain-routing reported real external provider calls"
+grep -q '"secret_reads": 0' "$brain_routing_json" || fail "full-brain-routing read secrets"
+grep -q '"external_models_invoked": 0' "$brain_routing_json" || fail "full-brain-routing invoked external models"
+grep -q '"route_without_policy_factors": 0' "$brain_routing_json" || fail "full-brain-routing missed policy factors"
+grep -q '"override_policy_bypass": 0' "$brain_routing_json" || fail "full-brain-routing bypassed override policy"
+grep -q '"cross_namespace_ledger_without_opt_in": 0' "$brain_routing_json" || fail "full-brain-routing used cross-namespace ledger without opt-in"
+grep -q '"ensemble_used_for_routine": 0' "$brain_routing_json" || fail "full-brain-routing used ensemble for routine route"
+grep -q '"judge_overrode_objective": 0' "$brain_routing_json" || fail "full-brain-routing let judge override objective evidence"
+grep -q '"judge_direct_memory_or_rule_mutation": 0' "$brain_routing_json" || fail "full-brain-routing let judge mutate memory or rules"
+grep -q '"high_risk_disagreement_proceeded_silently": 0' "$brain_routing_json" || fail "full-brain-routing silently proceeded on high-risk disagreement"
+grep -q '"evidence_unusable_after_switch": 0' "$brain_routing_json" || fail "full-brain-routing lost evidence after brain switch"
+grep -q '"audit_verify_failed": 0' "$brain_routing_json" || fail "full-brain-routing failed audit verification"
+grep -q '"product_feature_claims": "PARTIAL_FULL_BRAIN_ROUTING_ONLY"' "$brain_routing_json" || fail "full-brain-routing overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -600,4 +639,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, full-agent-orchestration verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, full-agent-orchestration verify, full-brain-routing verify, vs0-product-domain-readiness verify, unittest).\n'

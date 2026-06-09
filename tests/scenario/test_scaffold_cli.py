@@ -1111,6 +1111,60 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_full_brain_routing_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full-brain-routing", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "full-brain-routing")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 21)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_FULL_BRAIN_ROUTING_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {
+                "CS-BRAIN-001",
+                "CS-BRAIN-002",
+                "CS-BRAIN-003",
+                "CS-BRAIN-004",
+                "CS-BRAIN-005",
+                "CS-BRAIN-006",
+                "CS-BRAIN-007",
+                "CS-BRAIN-008",
+                "CS-BRAIN-009",
+                "CS-BRAIN-010",
+                "CS-BRAIN-011",
+                "CS-BRAIN-012",
+                "CS-BRAIN-013",
+                "CS-BRAIN-014",
+                "CS-BRAIN-015",
+                "CS-BRAIN-016",
+                "CS-ARCH-012",
+                "CS-NS-009",
+                "CS-NS-010",
+                "CS-REG-009",
+                "CS-REG-010",
+            },
+        )
+        evidence = payload["brain_evidence"]
+        self.assertEqual(evidence["model_count"], 5)
+        self.assertTrue(evidence["routine_route_id"].startswith("brainroute_"))
+        self.assertTrue(evidence["high_risk_route_id"].startswith("brainroute_"))
+        self.assertTrue(evidence["override_allowed_route_id"].startswith("brainroute_"))
+        self.assertTrue(evidence["brain_switch_id"].startswith("brainswitch_"))
+        self.assertTrue(evidence["judge_record_id"].startswith("judge_"))
+        self.assertTrue(evidence["judge_conflict_id"].startswith("judgeconf_"))
+        self.assertTrue(evidence["owner_acceptance_id"].startswith("accept_"))
+        self.assertTrue(evidence["judge_recommendation_id"].startswith("judgerec_"))
+        self.assertTrue(evidence["adjudication_id"].startswith("adjud_"))
+        self.assertTrue(evidence["calibration_id"].startswith("judgecal_"))
+        self.assertEqual(evidence["override_denied_exit_code"], 8)
+        self.assertEqual(evidence["aggregation_denied_exit_code"], 8)
+        self.assertGreaterEqual(evidence["personal_ledger_entry_count"], 3)
+        self.assertGreaterEqual(evidence["org_ledger_entry_count"], 1)
+        self.assertGreaterEqual(evidence["audit_event_count"], 1)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

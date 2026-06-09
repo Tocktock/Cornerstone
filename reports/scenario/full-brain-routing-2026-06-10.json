@@ -1,0 +1,2826 @@
+{
+  "audit_refs": [],
+  "brain_evidence": {
+    "adjudication_id": "adjud_55611cfc37625cbf",
+    "aggregation_allowed_id": "brainagg_58153ccec835aa03",
+    "aggregation_denied_exit_code": 8,
+    "artifact_id": "art_2735313e0cb92563",
+    "audit_event_count": 27,
+    "audit_event_types": [
+      "artifact.ingested",
+      "search.snapshot.created",
+      "evidence_bundle.created",
+      "claim.draft.created",
+      "mission.contract.created",
+      "model.registry.listed",
+      "brain.ledger.recorded",
+      "brain.route.decided",
+      "brain.ledger.recorded",
+      "brain.route.decided",
+      "brain.ledger.recorded",
+      "brain.route.decided",
+      "brain.override.denied",
+      "brain.provider.switched",
+      "brain.ledger.recorded",
+      "brain.route.decided",
+      "brain.ledger.listed",
+      "brain.ledger.listed",
+      "brain.ledger_aggregation.denied",
+      "brain.ledger_aggregation.recorded",
+      "brain.ledger.recorded",
+      "judge.record.created",
+      "judge.objective_conflict.recorded",
+      "judge.owner_acceptance.recorded",
+      "judge.recommendation.created",
+      "judge.disagreement.adjudicated",
+      "judge.calibration.reported"
+    ],
+    "brain_switch_id": "brainswitch_13d7936fcf45e9f2",
+    "calibration_id": "judgecal_07a5cb7bc95b2151",
+    "claim_id": "claim_44b27efa617dfc37",
+    "evidence_bundle_id": "evb_2ec7b2f4bc2fd2d4",
+    "high_risk_route_id": "brainroute_ae5217ea2978527a",
+    "judge_conflict_id": "judgeconf_78ae2b283d055431",
+    "judge_recommendation_id": "judgerec_ab9d5509bb3d04cd",
+    "judge_record_id": "judge_1eb9ec2c03940e5e",
+    "mission_id": "mission_d1858fae8b99346a",
+    "model_count": 5,
+    "org_ledger_entry_count": 1,
+    "override_allowed_route_id": "brainroute_635fbb445efaca46",
+    "override_denied_exit_code": 8,
+    "owner_acceptance_id": "accept_f14ce5acb1f7656e",
+    "personal_ledger_entry_count": 3,
+    "research_basis": [
+      "Recent LLM routing work treats model selection as a cost, latency, quality, and policy tradeoff rather than hard-coding one provider.",
+      "OpenAI Agents SDK tracing and guardrail patterns support application-owned orchestration, validation, and reviewable events.",
+      "LangGraph workflow guidance favors deterministic code paths for predictable workflows and dynamic agents only where needed.",
+      "LLM-as-judge research and practice highlight calibration, confidence, bias tracking, human corrections, and objective outcome precedence.",
+      "CornerStone local verification keeps local_test deterministic and forbids model output from being the scenario PASS judge."
+    ],
+    "routine_route_id": "brainroute_da17d30339bb7607",
+    "search_snapshot_id": "search_1ef1dab8de96ab59"
+  },
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify full-brain-routing",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "abf0882"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "audit_verify_failed": 0,
+    "cross_namespace_ledger_without_opt_in": 0,
+    "ensemble_used_for_routine": 0,
+    "evidence_unusable_after_switch": 0,
+    "external_models_invoked": 0,
+    "high_risk_disagreement_proceeded_silently": 0,
+    "judge_direct_memory_or_rule_mutation": 0,
+    "judge_overrode_objective": 0,
+    "override_policy_bypass": 0,
+    "real_external_provider_calls": 0,
+    "route_without_policy_factors": 0,
+    "secret_reads": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/full-brain-routing-2026-06-10.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone brain switch --provider ollama --model qwen3.6:27b --json"
+      ],
+      "id": "CS-BRAIN-001",
+      "notes": "Provider switch leaves durable namespaces, wiki, evidence, ontology, missions, agents, workflows, policy, audit, experience, judge records, and promotion ladder intact.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain route --task <fixture> --dry-run --json"
+      ],
+      "id": "CS-BRAIN-002",
+      "notes": "Routing decision records workspace policy, sensitivity, mission type, cost, latency, capability, historical outcome quality, and owner preference.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain route --override-provider <provider> --dry-run --json"
+      ],
+      "id": "CS-BRAIN-003",
+      "notes": "Allowed local override succeeds; forbidden external/restricted override is denied with policy reason and resolution.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain ledger --json"
+      ],
+      "id": "CS-BRAIN-004",
+      "notes": "Brain Performance Ledger records provider/model, task, policy, sensitivity, cost, latency, judge quality, reliability, outcomes, corrections, success, and routing influence.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone model list --json",
+        "cornerstone brain route --dry-run --json"
+      ],
+      "id": "CS-BRAIN-005",
+      "notes": "Static model capability registry provides safe local_test baseline when local history is empty.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain ledger --json",
+        "cornerstone brain aggregate-test --json"
+      ],
+      "id": "CS-BRAIN-006",
+      "notes": "Brain performance learning stays namespace-local; cross-namespace aggregation is denied without opt-in and allowed only with opt-in governance.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain route --mission-type externally_impactful --risk high --dry-run --json"
+      ],
+      "id": "CS-BRAIN-007",
+      "notes": "High-risk/high-value route triggers multi-brain contribution records without real provider calls.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain route --mission-type routine --risk low --dry-run --json"
+      ],
+      "id": "CS-BRAIN-008",
+      "notes": "Routine route uses a single policy-routed brain and records that ensemble is not default.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone judge run --route-id <route_id> --json"
+      ],
+      "id": "CS-BRAIN-009",
+      "notes": "Ambiguous outcome judge record includes rubric, evidence, confidence, limitations, and supporting-not-PASS-judge status.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone judge conflict --judge-record-id <judge_id> --json"
+      ],
+      "id": "CS-BRAIN-010",
+      "notes": "Objective evidence overrides judge opinion while retaining judge as evaluation artifact.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone judge accept --judge-record-id <judge_id> --json"
+      ],
+      "id": "CS-BRAIN-011",
+      "notes": "Owner acceptance grounds final success when objective truth is unavailable and judge remains supporting evidence.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone judge recommend --judge-record-id <judge_id> --json"
+      ],
+      "id": "CS-BRAIN-012",
+      "notes": "Judge recommendation creates a governed candidate lesson, not approved memory or a global rule.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone judge disagreement-test --risk high --json"
+      ],
+      "id": "CS-BRAIN-013",
+      "notes": "Disagreement adjudication uses evidence, policy, mission goals, prior performance, objective outcomes, and rubric, preserving dissent.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone judge disagreement-test --risk high --json"
+      ],
+      "id": "CS-BRAIN-014",
+      "notes": "High-risk unresolved disagreement creates an escalation card for the namespace owner instead of proceeding silently.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone judge calibration --json"
+      ],
+      "id": "CS-BRAIN-015",
+      "notes": "Calibration report tracks disagreements, reversals, owner overrides, calibration issues, and model-specific bias signals.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain route --dry-run --json",
+        "cornerstone audit verify --json"
+      ],
+      "id": "CS-BRAIN-016",
+      "notes": "Provider routing is auditable with policy, sensitivity, cost/latency, capability, local performance, and owner preference factors.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain switch --provider ollama --model qwen3.6:27b --json"
+      ],
+      "id": "CS-ARCH-012",
+      "notes": "Evidence bundle and mission remain readable before and after provider switch.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain ledger --json"
+      ],
+      "id": "CS-NS-009",
+      "notes": "Brain Performance Ledger entries are isolated per namespace, with opt-in aggregation only.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain route --dry-run --json"
+      ],
+      "id": "CS-NS-010",
+      "notes": "Workspace policy controls model routing and disallows forbidden provider overrides.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone brain switch --provider ollama --model qwen3.6:27b --json"
+      ],
+      "id": "CS-REG-009",
+      "notes": "Provider swap does not break evidence or durable mission records.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "cornerstone judge conflict --json",
+        "cornerstone judge calibration --json"
+      ],
+      "id": "CS-REG-010",
+      "notes": "LLM judge cannot become unquestionable authority; objective outcomes and owner acceptance remain stronger signals.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "full-brain-routing",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/full-brain-routing-97977",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 21,
+    "product_feature_claims": "PARTIAL_FULL_BRAIN_ROUTING_ONLY",
+    "scenario_count": 21
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "aggregation_allowed": {
+      "command": [
+        "cornerstone",
+        "brain",
+        "aggregate-test",
+        "--source-namespace",
+        "organization",
+        "--target-namespace",
+        "personal",
+        "--opt-in",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "aggregation": {
+          "aggregation_id": "brainagg_58153ccec835aa03",
+          "created_at": "2026-06-09T17:46:16.588679Z",
+          "entries_used_for_routing": 1,
+          "governance_recorded": true,
+          "opt_in": true,
+          "schema_version": "cs.brain_ledger_aggregation_attempt.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_entry_count": 1,
+          "source_scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "aggregated",
+          "target_scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          }
+        },
+        "audit_refs": [
+          "audit:audit_f4bf9bc29ab88b24"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brain aggregate-test",
+        "errors": [],
+        "evidence_refs": [
+          "brain_aggregation:brainagg_58153ccec835aa03"
+        ],
+        "ids": {
+          "aggregation_id": "brainagg_58153ccec835aa03",
+          "git_commit": "abf0882"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "aggregation_denied": {
+      "command": [
+        "cornerstone",
+        "brain",
+        "aggregate-test",
+        "--source-namespace",
+        "organization",
+        "--target-namespace",
+        "personal",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "aggregation": {
+          "aggregation_id": "brainagg_4a2d58eaa8ea66c8",
+          "created_at": "2026-06-09T17:46:16.532892Z",
+          "entries_used_for_routing": 0,
+          "opt_in": false,
+          "policy_decision": {
+            "created_at": "2026-06-09T17:46:16.532726Z",
+            "decision": "deny",
+            "policy": "brain_ledger_cross_namespace_opt_in_required",
+            "policy_decision_id": "policy_cbf0320934c27a73",
+            "reason": "Brain performance learning is namespace-local first; cross-namespace aggregation requires explicit opt-in and governance.",
+            "resolution_path": [
+              "Collect owner/admin opt-in and record aggregation policy before using source namespace performance data."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "organization->personal",
+              "type": "brain"
+            }
+          },
+          "schema_version": "cs.brain_ledger_aggregation_attempt.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_entry_count": 1,
+          "source_scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "denied",
+          "target_scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          }
+        },
+        "audit_refs": [
+          "audit:audit_5cb097f492fc52f3"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brain aggregate-test",
+        "errors": [
+          {
+            "code": "CS_BRAIN_POLICY_DENIED",
+            "message": "Brain performance learning is namespace-local first; cross-namespace aggregation requires explicit opt-in and governance.",
+            "policy": "brain_ledger_cross_namespace_opt_in_required",
+            "resolution_path": [
+              "Collect owner/admin opt-in and record aggregation policy before using source namespace performance data."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "aggregation": "brainagg_4a2d58eaa8ea66c8",
+          "git_commit": "abf0882"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_cbf0320934c27a73"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T17:46:16.532726Z",
+            "decision": "deny",
+            "policy": "brain_ledger_cross_namespace_opt_in_required",
+            "policy_decision_id": "policy_cbf0320934c27a73",
+            "reason": "Brain performance learning is namespace-local first; cross-namespace aggregation requires explicit opt-in and governance.",
+            "resolution_path": [
+              "Collect owner/admin opt-in and record aggregation policy before using source namespace performance data."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "organization->personal",
+              "type": "brain"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 27,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "abf0882"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "brain_switch": {
+      "command": [
+        "cornerstone",
+        "brain",
+        "switch",
+        "--provider",
+        "ollama",
+        "--model",
+        "qwen3.6:27b",
+        "--evidence-bundle-id",
+        "evb_2ec7b2f4bc2fd2d4",
+        "--mission-id",
+        "mission_d1858fae8b99346a",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_53e7542ed5170345"
+        ],
+        "brain_switch": {
+          "created_at": "2026-06-09T17:46:16.311019Z",
+          "durable_surfaces_unchanged": {
+            "agents": true,
+            "audit": true,
+            "evidence_archive": true,
+            "experience_library": true,
+            "judge_records": true,
+            "mission_contracts": true,
+            "namespaces": true,
+            "ontology": true,
+            "permanent_wiki": true,
+            "policy": true,
+            "promotion_ladder": true,
+            "workflows": true
+          },
+          "existing_records_still_usable": {
+            "evidence_bundle_id": "evb_2ec7b2f4bc2fd2d4",
+            "evidence_bundle_readable": true,
+            "mission_id": "mission_d1858fae8b99346a",
+            "mission_readable": true
+          },
+          "from_model": "local_test.v0",
+          "from_provider": "local_test",
+          "only_inference_brain_changed": true,
+          "real_provider_call_made": false,
+          "schema_version": "cs.workspace_brain_switch.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "switched",
+          "switch_id": "brainswitch_13d7936fcf45e9f2",
+          "to_model": "qwen3.6:27b",
+          "to_provider": "ollama"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brain switch",
+        "errors": [],
+        "evidence_refs": [
+          "brain_switch:brainswitch_13d7936fcf45e9f2",
+          "evidence_bundle:evb_2ec7b2f4bc2fd2d4",
+          "mission:mission_d1858fae8b99346a"
+        ],
+        "ids": {
+          "git_commit": "abf0882",
+          "switch_id": "brainswitch_13d7936fcf45e9f2"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_1ef1dab8de96ab59",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_7a6caf5263735346"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T17:46:15.870006Z",
+          "evidence_bundle_id": "evb_2ec7b2f4bc2fd2d4",
+          "evidence_items": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "provenance": {
+                "created_at": "2026-06-09T17:46:15.758524Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_1ef1dab8de96ab59",
+              "snippet": "alpha-evidence-anchor.",
+              "source": {
+                "ingested_at": "2026-06-09T17:46:15.758524Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_2735313e0cb92563",
+                "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+                "evidence_refs": [
+                  "artifact:art_2735313e0cb92563",
+                  "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "alpha-evidence-anchor",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "alpha-evidence-anchor",
+                    "query_term": "alpha-evidence-anchor",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "alpha-evidence-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_1ef1dab8de96ab59"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_1ef1dab8de96ab59"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_2ec7b2f4bc2fd2d4",
+          "search_snapshot:search_1ef1dab8de96ab59",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_7a6caf5263735346",
+          "evidence_bundle_id": "evb_2ec7b2f4bc2fd2d4",
+          "git_commit": "abf0882",
+          "search_snapshot_id": "search_1ef1dab8de96ab59"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_2ec7b2f4bc2fd2d4",
+        "--statement",
+        "The Alpha evidence anchor needs a policy-aware model routing and judge review.",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_fcdcb3318f827de6"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_44b27efa617dfc37",
+          "created_at": "2026-06-09T17:46:15.924816Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ec7b2f4bc2fd2d4",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_1ef1dab8de96ab59",
+              "evidence_bundle:evb_2ec7b2f4bc2fd2d4"
+            ],
+            "search_snapshot_id": "search_1ef1dab8de96ab59"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The Alpha evidence anchor needs a policy-aware model routing and judge review.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_44b27efa617dfc37",
+          "evidence_bundle:evb_2ec7b2f4bc2fd2d4",
+          "search_snapshot:search_1ef1dab8de96ab59",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_fcdcb3318f827de6",
+          "claim_id": "claim_44b27efa617dfc37",
+          "evidence_bundle_id": "evb_2ec7b2f4bc2fd2d4",
+          "git_commit": "abf0882",
+          "search_snapshot_id": "search_1ef1dab8de96ab59"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "high_risk_route": {
+      "command": [
+        "cornerstone",
+        "brain",
+        "route",
+        "--task",
+        "fixtures/vs0/packs/16_brain_routing/routing_task.txt",
+        "--task-type",
+        "planning",
+        "--mission-type",
+        "externally_impactful",
+        "--sensitivity",
+        "confidential",
+        "--risk",
+        "high",
+        "--owner-preference",
+        "local_semantic",
+        "--max-cost-usd",
+        "0",
+        "--max-latency-ms",
+        "2000",
+        "--dry-run",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_3c73cfeeca778c2f",
+          "audit:audit_ce7b07bf58d87334"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brain route",
+        "errors": [],
+        "evidence_refs": [
+          "brain_route:brainroute_ae5217ea2978527a",
+          "brain_ledger:brainledger_929bc25c76d15b1a"
+        ],
+        "ids": {
+          "git_commit": "abf0882",
+          "ledger_id": "brainledger_929bc25c76d15b1a",
+          "route_id": "brainroute_ae5217ea2978527a"
+        },
+        "ledger_entry": {
+          "can_influence_routing": true,
+          "cost_per_1k_tokens_usd": 0.0,
+          "created_at": "2026-06-09T17:46:16.148031Z",
+          "cross_namespace_aggregation": "requires_opt_in",
+          "grounding_issues": [],
+          "judge_quality": "not_measured",
+          "latency_ms": 800,
+          "ledger_id": "brainledger_929bc25c76d15b1a",
+          "mission_success": null,
+          "mission_type": "externally_impactful",
+          "model": "qwen3.6:27b",
+          "namespace_local": true,
+          "objective_outcome": "pending",
+          "owner_acceptance": "not_recorded",
+          "owner_corrections": 0,
+          "policy": "workspace_model_routing_policy_v0",
+          "provider": "ollama",
+          "risk": "high",
+          "route_id": "brainroute_ae5217ea2978527a",
+          "schema_version": "cs.brain_performance_ledger_entry.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "sensitivity": "confidential",
+          "status": "recorded",
+          "task_type": "planning",
+          "tool_use_reliability": 0.83
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "routing_decision": {
+          "created_at": "2026-06-09T17:46:16.147684Z",
+          "ensemble": {
+            "contribution_records": [
+              {
+                "external_call_made": false,
+                "model": "local_test.v0",
+                "provider": "local_test",
+                "registry_only": false,
+                "role": "plan_or_critique"
+              },
+              {
+                "external_call_made": false,
+                "model": "qwen3.6:27b",
+                "provider": "ollama",
+                "registry_only": true,
+                "role": "plan_or_critique"
+              }
+            ],
+            "not_default_for_routine": false,
+            "reason": "risk_value_trigger",
+            "triggered": true
+          },
+          "factors": {
+            "capabilities": [
+              "planning",
+              "critique",
+              "local_semantic_judge",
+              "long_context_review"
+            ],
+            "cost_limit_usd": 0.0,
+            "historical_outcome_quality_used": true,
+            "latency_limit_ms": 2000,
+            "local_performance_history_count": 1,
+            "mission_type": "externally_impactful",
+            "owner_preference": "local_semantic",
+            "risk": "high",
+            "sensitivity": "confidential",
+            "static_capability_registry_used": false,
+            "workspace_policy": {
+              "allowed_providers": [
+                "local_test",
+                "ollama"
+              ],
+              "confidential_external_denied": true,
+              "egress_default": "deny"
+            }
+          },
+          "ledger_refs": [
+            "brain_ledger:brainledger_929bc25c76d15b1a"
+          ],
+          "mission_type": "externally_impactful",
+          "no_real_provider_call": true,
+          "override": {
+            "allowed": false,
+            "model": null,
+            "provider": null,
+            "requested": false
+          },
+          "owner_preference": "local_semantic",
+          "risk": "high",
+          "route_id": "brainroute_ae5217ea2978527a",
+          "schema_version": "cs.brain_routing_decision.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "secret_reads": 0,
+          "selected_brain": {
+            "deployment": "local",
+            "external_call_made": false,
+            "model": "qwen3.6:27b",
+            "provider": "ollama"
+          },
+          "sensitivity": "confidential",
+          "status": "dry_run",
+          "task_ref": "fixtures/vs0/packs/16_brain_routing/routing_task.txt",
+          "task_type": "planning"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/01_artifact_basic/input.txt",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-09T17:46:15.758524Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T17:46:15.758524Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_6ce45922374d5521"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_6ce45922374d5521",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "abf0882"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "judge_accept": {
+      "command": [
+        "cornerstone",
+        "judge",
+        "accept",
+        "--judge-record-id",
+        "judge_1eb9ec2c03940e5e",
+        "--acceptance",
+        "accepted",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_fd79ad05745ed1d9"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone judge accept",
+        "errors": [],
+        "evidence_refs": [
+          "owner_acceptance:accept_f14ce5acb1f7656e"
+        ],
+        "ids": {
+          "acceptance_id": "accept_f14ce5acb1f7656e",
+          "git_commit": "abf0882",
+          "judge_record_id": "judge_1eb9ec2c03940e5e"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_acceptance": {
+          "acceptance_id": "accept_f14ce5acb1f7656e",
+          "created_at": "2026-06-09T17:46:16.749775Z",
+          "grounds_final_success_when_objective_truth_unavailable": true,
+          "judge_record_id": "judge_1eb9ec2c03940e5e",
+          "judge_score_supporting_only": true,
+          "learning_signal": "owner_grounded",
+          "owner_acceptance": "accepted",
+          "schema_version": "cs.owner_acceptance_signal.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "recorded"
+        },
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "judge_calibration": {
+      "command": [
+        "cornerstone",
+        "judge",
+        "calibration",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_b3fd1bfe9657d09a"
+        ],
+        "calibration_report": {
+          "calibration_id": "judgecal_07a5cb7bc95b2151",
+          "calibration_issues": [
+            "overconfidence_risk",
+            "position_bias_risk"
+          ],
+          "created_at": "2026-06-09T17:46:16.916502Z",
+          "disagreement_count": 1,
+          "judge_is_unquestionable_authority": false,
+          "judge_record_count": 1,
+          "ledger_refs": [
+            "brain_ledger:brainledger_929bc25c76d15b1a",
+            "brain_ledger:brainledger_b2693f690a1a8fe9",
+            "brain_ledger:brainledger_b990e14ce701f9e9",
+            "brain_ledger:brainledger_db50f98dbb423950"
+          ],
+          "model_specific_bias_signals": [
+            {
+              "bias_signal": "fixture_bias_possible",
+              "model": "local_test.v0",
+              "provider": "local_test"
+            },
+            {
+              "bias_signal": "local_model_calibration_needed",
+              "model": "qwen3.6:27b",
+              "provider": "ollama"
+            }
+          ],
+          "objective_outcomes_override_judge": true,
+          "objective_reversal_count": 1,
+          "owner_acceptance_recorded": true,
+          "owner_override_count": 1,
+          "schema_version": "cs.judge_calibration_report.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "ready"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone judge calibration",
+        "errors": [],
+        "evidence_refs": [
+          "judge_calibration:judgecal_07a5cb7bc95b2151",
+          "brain_ledger:brainledger_929bc25c76d15b1a",
+          "brain_ledger:brainledger_b2693f690a1a8fe9",
+          "brain_ledger:brainledger_b990e14ce701f9e9",
+          "brain_ledger:brainledger_db50f98dbb423950"
+        ],
+        "ids": {
+          "calibration_id": "judgecal_07a5cb7bc95b2151",
+          "git_commit": "abf0882"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "judge_conflict": {
+      "command": [
+        "cornerstone",
+        "judge",
+        "conflict",
+        "--judge-record-id",
+        "judge_1eb9ec2c03940e5e",
+        "--objective-evidence",
+        "deterministic validator failed required evidence coverage",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_778ab7775e149ca9"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone judge conflict",
+        "errors": [],
+        "evidence_refs": [
+          "judge_conflict:judgeconf_78ae2b283d055431"
+        ],
+        "ids": {
+          "conflict_id": "judgeconf_78ae2b283d055431",
+          "git_commit": "abf0882",
+          "judge_record_id": "judge_1eb9ec2c03940e5e"
+        },
+        "judge_conflict": {
+          "conflict_id": "judgeconf_78ae2b283d055431",
+          "created_at": "2026-06-09T17:46:16.696866Z",
+          "final_outcome_state": "failed",
+          "judge_record_id": "judge_1eb9ec2c03940e5e",
+          "judge_retained_as_evaluation_artifact": true,
+          "judge_score": "pass_with_limitations",
+          "memory_or_rule_mutated": false,
+          "objective_evidence": "deterministic validator failed required evidence coverage",
+          "objective_outcome": "failed",
+          "objective_outcome_overrides_judge": true,
+          "schema_version": "cs.judge_objective_conflict.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "objective_outcome_selected"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "judge_disagreement": {
+      "command": [
+        "cornerstone",
+        "judge",
+        "disagreement-test",
+        "--risk",
+        "high",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "adjudication": {
+          "adjudication_id": "adjud_55611cfc37625cbf",
+          "created_at": "2026-06-09T17:46:16.862929Z",
+          "dissent_preserved": true,
+          "escalation_card": {
+            "created": true,
+            "reason": "High-risk disagreement remained material.",
+            "target": "namespace_owner"
+          },
+          "evidence_weighted": true,
+          "factors": {
+            "evidence_quality": "mixed",
+            "mission_goals": [
+              "evidence-backed decision"
+            ],
+            "objective_outcomes": "unavailable",
+            "policy_constraints": [
+              "no external write without approval"
+            ],
+            "prior_brain_performance": "local_namespace_ledger",
+            "rubric": [
+              "grounding",
+              "risk",
+              "usefulness"
+            ]
+          },
+          "participants": [
+            {
+              "model": "local_test.v0",
+              "position": "approve_with_limitations",
+              "provider": "local_test"
+            },
+            {
+              "model": "qwen3.6:27b",
+              "position": "request_more_evidence",
+              "provider": "ollama"
+            }
+          ],
+          "proceeded_silently": false,
+          "recommended_path": "request_more_evidence",
+          "risk": "high",
+          "schema_version": "cs.judge_disagreement_adjudication.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "escalated",
+          "unresolved": true
+        },
+        "audit_refs": [
+          "audit:audit_8a8f8192ccf5122c"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone judge disagreement-test",
+        "errors": [],
+        "evidence_refs": [
+          "judge_adjudication:adjud_55611cfc37625cbf"
+        ],
+        "ids": {
+          "adjudication_id": "adjud_55611cfc37625cbf",
+          "git_commit": "abf0882"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "judge_recommend": {
+      "command": [
+        "cornerstone",
+        "judge",
+        "recommend",
+        "--judge-record-id",
+        "judge_1eb9ec2c03940e5e",
+        "--recommendation",
+        "Create a candidate lesson to require objective validator checks before mission success.",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_263486d40a041e40"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone judge recommend",
+        "errors": [],
+        "evidence_refs": [
+          "judge_recommendation:judgerec_ab9d5509bb3d04cd",
+          "evidence_bundle:evb_2ec7b2f4bc2fd2d4"
+        ],
+        "ids": {
+          "git_commit": "abf0882",
+          "judge_record_id": "judge_1eb9ec2c03940e5e",
+          "recommendation_id": "judgerec_ab9d5509bb3d04cd"
+        },
+        "judge_recommendation": {
+          "approved_memory_created": false,
+          "created_at": "2026-06-09T17:46:16.807665Z",
+          "evidence_refs": [
+            "evidence_bundle:evb_2ec7b2f4bc2fd2d4"
+          ],
+          "global_rule_created": false,
+          "judge_record_id": "judge_1eb9ec2c03940e5e",
+          "promotion_ladder": [
+            "candidate_lesson",
+            "workspace_memory",
+            "mission_playbook",
+            "organization_approved_rule"
+          ],
+          "recommendation": "Create a candidate lesson to require objective validator checks before mission success.",
+          "recommendation_id": "judgerec_ab9d5509bb3d04cd",
+          "requires_scope_evidence_confidence_governance": true,
+          "schema_version": "cs.judge_recommendation.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "candidate_lesson"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "judge_run": {
+      "command": [
+        "cornerstone",
+        "judge",
+        "run",
+        "--route-id",
+        "brainroute_ae5217ea2978527a",
+        "--subject",
+        "Evaluate whether the Alpha evidence brief is decision-ready",
+        "--rubric",
+        "grounding,usefulness,risk-awareness,limitations",
+        "--evidence-ref",
+        "evidence_bundle:evb_2ec7b2f4bc2fd2d4",
+        "--ambiguity",
+        "high",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_8aeed153ef56fd32"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone judge run",
+        "errors": [],
+        "evidence_refs": [
+          "judge_record:judge_1eb9ec2c03940e5e",
+          "brain_ledger:brainledger_db50f98dbb423950",
+          "evidence_bundle:evb_2ec7b2f4bc2fd2d4"
+        ],
+        "ids": {
+          "git_commit": "abf0882",
+          "judge_record_id": "judge_1eb9ec2c03940e5e",
+          "ledger_id": "brainledger_db50f98dbb423950"
+        },
+        "judge_record": {
+          "ambiguity": "high",
+          "confidence": "medium",
+          "created_at": "2026-06-09T17:46:16.643677Z",
+          "directly_mutates_memory_or_rules": false,
+          "evidence_refs": [
+            "evidence_bundle:evb_2ec7b2f4bc2fd2d4"
+          ],
+          "judge_record_id": "judge_1eb9ec2c03940e5e",
+          "limitations": [
+            "LLM judge is scalable for ambiguous quality dimensions but can be biased and overconfident."
+          ],
+          "model": "qwen3.6:27b",
+          "pass_judge": false,
+          "primary_for_ambiguous_outcome": true,
+          "provider": "ollama",
+          "route_id": "brainroute_ae5217ea2978527a",
+          "rubric": "grounding,usefulness,ri[REDACTED],limitations",
+          "schema_version": "cs.judge_record.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "score": "pass_with_limitations",
+          "status": "recorded",
+          "subject": "Evaluate whether the Alpha evidence brief is decision-ready"
+        },
+        "ledger_entry": {
+          "can_influence_routing": true,
+          "cost_per_1k_tokens_usd": 0.0,
+          "created_at": "2026-06-09T17:46:16.644061Z",
+          "cross_namespace_aggregation": "requires_opt_in",
+          "grounding_issues": [],
+          "judge_quality": "pending_calibration",
+          "latency_ms": 800,
+          "ledger_id": "brainledger_db50f98dbb423950",
+          "mission_success": null,
+          "mission_type": "externally_impactful",
+          "model": "qwen3.6:27b",
+          "namespace_local": true,
+          "objective_outcome": "pending",
+          "owner_acceptance": "not_recorded",
+          "owner_corrections": 0,
+          "policy": "workspace_model_routing_policy_v0",
+          "provider": "ollama",
+          "risk": "high",
+          "route_id": "brainroute_ae5217ea2978527a",
+          "schema_version": "cs.brain_performance_ledger_entry.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "sensitivity": "confidential",
+          "status": "recorded",
+          "task_type": "judge",
+          "tool_use_reliability": 0.83
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ledger_org": {
+      "command": [
+        "cornerstone",
+        "brain",
+        "ledger",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--namespace-id",
+        "organization",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_f3c2bd2ab6927212"
+        ],
+        "brain_ledger": {
+          "can_influence_routing": true,
+          "created_at": "2026-06-09T17:46:16.477121Z",
+          "cross_namespace_entries": 0,
+          "entries": [
+            {
+              "can_influence_routing": true,
+              "cost_per_1k_tokens_usd": 0.0,
+              "created_at": "2026-06-09T17:46:16.366073Z",
+              "cross_namespace_aggregation": "requires_opt_in",
+              "grounding_issues": [],
+              "judge_quality": "not_measured",
+              "latency_ms": 15,
+              "ledger_id": "brainledger_131da66bab0c7965",
+              "mission_success": null,
+              "mission_type": "routine",
+              "model": "local_test.v0",
+              "namespace_local": true,
+              "objective_outcome": "pending",
+              "owner_acceptance": "not_recorded",
+              "owner_corrections": 0,
+              "policy": "workspace_model_routing_policy_v0",
+              "provider": "local_test",
+              "risk": "low",
+              "route_id": "brainroute_441189b34efcc50a",
+              "schema_version": "cs.brain_performance_ledger_entry.v0",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "sensitivity": "internal",
+              "status": "recorded",
+              "task_type": "judge",
+              "tool_use_reliability": 0.92
+            }
+          ],
+          "entry_count": 1,
+          "namespace_local": true,
+          "schema_version": "cs.brain_performance_ledger.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "ready"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brain ledger",
+        "errors": [],
+        "evidence_refs": [
+          "brain_ledger:brainledger_131da66bab0c7965"
+        ],
+        "ids": {
+          "brain_ledger_scope": "organization",
+          "git_commit": "abf0882"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ledger_personal": {
+      "command": [
+        "cornerstone",
+        "brain",
+        "ledger",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_6f41931483f06c84"
+        ],
+        "brain_ledger": {
+          "can_influence_routing": true,
+          "created_at": "2026-06-09T17:46:16.421327Z",
+          "cross_namespace_entries": 0,
+          "entries": [
+            {
+              "can_influence_routing": true,
+              "cost_per_1k_tokens_usd": 0.0,
+              "created_at": "2026-06-09T17:46:16.148031Z",
+              "cross_namespace_aggregation": "requires_opt_in",
+              "grounding_issues": [],
+              "judge_quality": "not_measured",
+              "latency_ms": 800,
+              "ledger_id": "brainledger_929bc25c76d15b1a",
+              "mission_success": null,
+              "mission_type": "externally_impactful",
+              "model": "qwen3.6:27b",
+              "namespace_local": true,
+              "objective_outcome": "pending",
+              "owner_acceptance": "not_recorded",
+              "owner_corrections": 0,
+              "policy": "workspace_model_routing_policy_v0",
+              "provider": "ollama",
+              "risk": "high",
+              "route_id": "brainroute_ae5217ea2978527a",
+              "schema_version": "cs.brain_performance_ledger_entry.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "sensitivity": "confidential",
+              "status": "recorded",
+              "task_type": "planning",
+              "tool_use_reliability": 0.83
+            },
+            {
+              "can_influence_routing": true,
+              "cost_per_1k_tokens_usd": 0.0,
+              "created_at": "2026-06-09T17:46:16.205019Z",
+              "cross_namespace_aggregation": "requires_opt_in",
+              "grounding_issues": [],
+              "judge_quality": "not_measured",
+              "latency_ms": 800,
+              "ledger_id": "brainledger_b2693f690a1a8fe9",
+              "mission_success": null,
+              "mission_type": "routine",
+              "model": "qwen3.6:27b",
+              "namespace_local": true,
+              "objective_outcome": "pending",
+              "owner_acceptance": "not_recorded",
+              "owner_corrections": 0,
+              "policy": "workspace_model_routing_policy_v0",
+              "provider": "ollama",
+              "risk": "medium",
+              "route_id": "brainroute_635fbb445efaca46",
+              "schema_version": "cs.brain_performance_ledger_entry.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "sensitivity": "internal",
+              "status": "recorded",
+              "task_type": "planning",
+              "tool_use_reliability": 0.83
+            },
+            {
+              "can_influence_routing": true,
+              "cost_per_1k_tokens_usd": 0.0,
+              "created_at": "2026-06-09T17:46:16.094486Z",
+              "cross_namespace_aggregation": "requires_opt_in",
+              "grounding_issues": [],
+              "judge_quality": "not_measured",
+              "latency_ms": 15,
+              "ledger_id": "brainledger_b990e14ce701f9e9",
+              "mission_success": null,
+              "mission_type": "routine",
+              "model": "local_test.v0",
+              "namespace_local": true,
+              "objective_outcome": "pending",
+              "owner_acceptance": "not_recorded",
+              "owner_corrections": 0,
+              "policy": "workspace_model_routing_policy_v0",
+              "provider": "local_test",
+              "risk": "low",
+              "route_id": "brainroute_da17d30339bb7607",
+              "schema_version": "cs.brain_performance_ledger_entry.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "sensitivity": "internal",
+              "status": "recorded",
+              "task_type": "planning",
+              "tool_use_reliability": 0.92
+            }
+          ],
+          "entry_count": 3,
+          "namespace_local": true,
+          "schema_version": "cs.brain_performance_ledger.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "ready"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brain ledger",
+        "errors": [],
+        "evidence_refs": [
+          "brain_ledger:brainledger_929bc25c76d15b1a",
+          "brain_ledger:brainledger_b2693f690a1a8fe9",
+          "brain_ledger:brainledger_b990e14ce701f9e9"
+        ],
+        "ids": {
+          "brain_ledger_scope": "personal",
+          "git_commit": "abf0882"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--goal",
+        "Evaluate model routing, judging, and disagreement without external provider calls",
+        "--claim-id",
+        "claim_44b27efa617dfc37",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ed2ab64733397c15"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_d1858fae8b99346a",
+          "claim:claim_44b27efa617dfc37",
+          "evidence_bundle:evb_2ec7b2f4bc2fd2d4",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_ed2ab64733397c15",
+          "claim_id": "claim_44b27efa617dfc37",
+          "evidence_bundle_id": "evb_2ec7b2f4bc2fd2d4",
+          "git_commit": "abf0882",
+          "mission_id": "mission_d1858fae8b99346a"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T17:46:15.978461Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_2ec7b2f4bc2fd2d4",
+            "search_snapshot_id": "search_1ef1dab8de96ab59"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Evaluate model routing, judging, and disagreement without external provider calls",
+          "mission_id": "mission_d1858fae8b99346a",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_44b27efa617dfc37",
+            "statement": "The Alpha evidence anchor needs a policy-aware model routing and judge review.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "assist"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "model_list": {
+      "command": [
+        "cornerstone",
+        "model",
+        "list",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_9de478d6483e393c"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone model list",
+        "errors": [],
+        "evidence_refs": [
+          "model_registry:local"
+        ],
+        "ids": {
+          "git_commit": "abf0882",
+          "model_registry_id": "local"
+        },
+        "mode": "local_scaffold",
+        "model_registry": {
+          "created_at": "2026-06-09T17:46:16.040840Z",
+          "external_models_are_registry_only": true,
+          "models": [
+            {
+              "allowed_sensitivity": [
+                "public",
+                "internal",
+                "confidential",
+                "restricted"
+              ],
+              "capabilities": [
+                "deterministic_fixture",
+                "routing_baseline",
+                "evidence_grounded_judge",
+                "classification",
+                "summarization"
+              ],
+              "cost_per_1k_tokens_usd": 0.0,
+              "deployment": "local",
+              "external_call_required": false,
+              "grounding_reliability": 0.91,
+              "judge_reliability": 0.88,
+              "max_context_tokens": 8192,
+              "model": "local_test.v0",
+              "provider": "local_test",
+              "registry_only": false,
+              "safe_baseline": true,
+              "tool_use_reliability": 0.92,
+              "typical_latency_ms": 15
+            },
+            {
+              "allowed_sensitivity": [
+                "public",
+                "internal",
+                "confidential"
+              ],
+              "capabilities": [
+                "planning",
+                "critique",
+                "local_semantic_judge",
+                "long_context_review"
+              ],
+              "cost_per_1k_tokens_usd": 0.0,
+              "deployment": "local",
+              "external_call_required": false,
+              "grounding_reliability": 0.84,
+              "judge_reliability": 0.82,
+              "max_context_tokens": 32768,
+              "model": "qwen3.6:27b",
+              "provider": "ollama",
+              "registry_only": true,
+              "safe_baseline": true,
+              "tool_use_reliability": 0.83,
+              "typical_latency_ms": 800
+            },
+            {
+              "allowed_sensitivity": [
+                "public",
+                "internal"
+              ],
+              "capabilities": [
+                "planning",
+                "tool_use",
+                "critique",
+                "general_reasoning"
+              ],
+              "cost_per_1k_tokens_usd": 0.03,
+              "deployment": "external",
+              "external_call_required": true,
+              "grounding_reliability": 0.87,
+              "judge_reliability": 0.86,
+              "max_context_tokens": 128000,
+              "model": "gpt-5.4",
+              "provider": "openai",
+              "registry_only": true,
+              "safe_baseline": false,
+              "tool_use_reliability": 0.9,
+              "typical_latency_ms": 1200
+            },
+            {
+              "allowed_sensitivity": [
+                "public",
+                "internal"
+              ],
+              "capabilities": [
+                "writing",
+                "critique",
+                "long_context_review",
+                "planning"
+              ],
+              "cost_per_1k_tokens_usd": 0.03,
+              "deployment": "external",
+              "external_call_required": true,
+              "grounding_reliability": 0.86,
+              "judge_reliability": 0.85,
+              "max_context_tokens": 200000,
+              "model": "claude-sonnet-4.5",
+              "provider": "anthropic",
+              "registry_only": true,
+              "safe_baseline": false,
+              "tool_use_reliability": 0.88,
+              "typical_latency_ms": 1300
+            },
+            {
+              "allowed_sensitivity": [
+                "public",
+                "internal"
+              ],
+              "capabilities": [
+                "multimodal_review",
+                "planning",
+                "summarization"
+              ],
+              "cost_per_1k_tokens_usd": 0.02,
+              "deployment": "external",
+              "external_call_required": true,
+              "grounding_reliability": 0.83,
+              "judge_reliability": 0.8,
+              "max_context_tokens": 1000000,
+              "model": "gemini-pro",
+              "provider": "google",
+              "registry_only": true,
+              "safe_baseline": false,
+              "tool_use_reliability": 0.84,
+              "typical_latency_ms": 1400
+            }
+          ],
+          "real_provider_calls": 0,
+          "safe_baseline_model": "local_test.v0",
+          "safe_baseline_provider": "local_test",
+          "schema_version": "cs.model_capability_registry.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "secret_reads": 0,
+          "status": "ready"
+        },
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "org_route": {
+      "command": [
+        "cornerstone",
+        "brain",
+        "route",
+        "--task",
+        "fixtures/vs0/packs/16_brain_routing/routing_task.txt",
+        "--task-type",
+        "judge",
+        "--mission-type",
+        "routine",
+        "--sensitivity",
+        "internal",
+        "--risk",
+        "low",
+        "--owner-preference",
+        "local_test",
+        "--max-cost-usd",
+        "0",
+        "--max-latency-ms",
+        "2000",
+        "--dry-run",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--namespace-id",
+        "organization",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_30f19a922f53c101",
+          "audit:audit_2b4c3f622722ad24"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brain route",
+        "errors": [],
+        "evidence_refs": [
+          "brain_route:brainroute_441189b34efcc50a",
+          "brain_ledger:brainledger_131da66bab0c7965"
+        ],
+        "ids": {
+          "git_commit": "abf0882",
+          "ledger_id": "brainledger_131da66bab0c7965",
+          "route_id": "brainroute_441189b34efcc50a"
+        },
+        "ledger_entry": {
+          "can_influence_routing": true,
+          "cost_per_1k_tokens_usd": 0.0,
+          "created_at": "2026-06-09T17:46:16.366073Z",
+          "cross_namespace_aggregation": "requires_opt_in",
+          "grounding_issues": [],
+          "judge_quality": "not_measured",
+          "latency_ms": 15,
+          "ledger_id": "brainledger_131da66bab0c7965",
+          "mission_success": null,
+          "mission_type": "routine",
+          "model": "local_test.v0",
+          "namespace_local": true,
+          "objective_outcome": "pending",
+          "owner_acceptance": "not_recorded",
+          "owner_corrections": 0,
+          "policy": "workspace_model_routing_policy_v0",
+          "provider": "local_test",
+          "risk": "low",
+          "route_id": "brainroute_441189b34efcc50a",
+          "schema_version": "cs.brain_performance_ledger_entry.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "sensitivity": "internal",
+          "status": "recorded",
+          "task_type": "judge",
+          "tool_use_reliability": 0.92
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "routing_decision": {
+          "created_at": "2026-06-09T17:46:16.365689Z",
+          "ensemble": {
+            "contribution_records": [],
+            "not_default_for_routine": true,
+            "reason": "routine_single_brain",
+            "triggered": false
+          },
+          "factors": {
+            "capabilities": [
+              "deterministic_fixture",
+              "routing_baseline",
+              "evidence_grounded_judge",
+              "classification",
+              "summarization"
+            ],
+            "cost_limit_usd": 0.0,
+            "historical_outcome_quality_used": false,
+            "latency_limit_ms": 2000,
+            "local_performance_history_count": 0,
+            "mission_type": "routine",
+            "owner_preference": "local_test",
+            "risk": "low",
+            "sensitivity": "internal",
+            "static_capability_registry_used": true,
+            "workspace_policy": {
+              "allowed_providers": [
+                "local_test",
+                "ollama"
+              ],
+              "confidential_external_denied": false,
+              "egress_default": "deny"
+            }
+          },
+          "ledger_refs": [
+            "brain_ledger:brainledger_131da66bab0c7965"
+          ],
+          "mission_type": "routine",
+          "no_real_provider_call": true,
+          "override": {
+            "allowed": false,
+            "model": null,
+            "provider": null,
+            "requested": false
+          },
+          "owner_preference": "local_test",
+          "risk": "low",
+          "route_id": "brainroute_441189b34efcc50a",
+          "schema_version": "cs.brain_routing_decision.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "secret_reads": 0,
+          "selected_brain": {
+            "deployment": "local",
+            "external_call_made": false,
+            "model": "local_test.v0",
+            "provider": "local_test"
+          },
+          "sensitivity": "internal",
+          "status": "dry_run",
+          "task_ref": "fixtures/vs0/packs/16_brain_routing/routing_task.txt",
+          "task_type": "judge"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "override_allowed": {
+      "command": [
+        "cornerstone",
+        "brain",
+        "route",
+        "--task",
+        "fixtures/vs0/packs/16_brain_routing/routing_task.txt",
+        "--task-type",
+        "planning",
+        "--mission-type",
+        "routine",
+        "--sensitivity",
+        "internal",
+        "--risk",
+        "medium",
+        "--owner-preference",
+        "local_semantic",
+        "--override-provider",
+        "ollama",
+        "--override-model",
+        "qwen3.6:27b",
+        "--max-cost-usd",
+        "0",
+        "--max-latency-ms",
+        "2000",
+        "--dry-run",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_b75ad5841aea2e9e",
+          "audit:audit_e9b65707abde19b5"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brain route",
+        "errors": [],
+        "evidence_refs": [
+          "brain_route:brainroute_635fbb445efaca46",
+          "brain_ledger:brainledger_b2693f690a1a8fe9"
+        ],
+        "ids": {
+          "git_commit": "abf0882",
+          "ledger_id": "brainledger_b2693f690a1a8fe9",
+          "route_id": "brainroute_635fbb445efaca46"
+        },
+        "ledger_entry": {
+          "can_influence_routing": true,
+          "cost_per_1k_tokens_usd": 0.0,
+          "created_at": "2026-06-09T17:46:16.205019Z",
+          "cross_namespace_aggregation": "requires_opt_in",
+          "grounding_issues": [],
+          "judge_quality": "not_measured",
+          "latency_ms": 800,
+          "ledger_id": "brainledger_b2693f690a1a8fe9",
+          "mission_success": null,
+          "mission_type": "routine",
+          "model": "qwen3.6:27b",
+          "namespace_local": true,
+          "objective_outcome": "pending",
+          "owner_acceptance": "not_recorded",
+          "owner_corrections": 0,
+          "policy": "workspace_model_routing_policy_v0",
+          "provider": "ollama",
+          "risk": "medium",
+          "route_id": "brainroute_635fbb445efaca46",
+          "schema_version": "cs.brain_performance_ledger_entry.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "sensitivity": "internal",
+          "status": "recorded",
+          "task_type": "planning",
+          "tool_use_reliability": 0.83
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "routing_decision": {
+          "created_at": "2026-06-09T17:46:16.204695Z",
+          "ensemble": {
+            "contribution_records": [],
+            "not_default_for_routine": true,
+            "reason": "routine_single_brain",
+            "triggered": false
+          },
+          "factors": {
+            "capabilities": [
+              "planning",
+              "critique",
+              "local_semantic_judge",
+              "long_context_review"
+            ],
+            "cost_limit_usd": 0.0,
+            "historical_outcome_quality_used": true,
+            "latency_limit_ms": 2000,
+            "local_performance_history_count": 2,
+            "mission_type": "routine",
+            "owner_preference": "local_semantic",
+            "risk": "medium",
+            "sensitivity": "internal",
+            "static_capability_registry_used": false,
+            "workspace_policy": {
+              "allowed_providers": [
+                "local_test",
+                "ollama"
+              ],
+              "confidential_external_denied": false,
+              "egress_default": "deny"
+            }
+          },
+          "ledger_refs": [
+            "brain_ledger:brainledger_b2693f690a1a8fe9"
+          ],
+          "mission_type": "routine",
+          "no_real_provider_call": true,
+          "override": {
+            "allowed": true,
+            "model": "qwen3.6:27b",
+            "provider": "ollama",
+            "requested": true
+          },
+          "owner_preference": "local_semantic",
+          "risk": "medium",
+          "route_id": "brainroute_635fbb445efaca46",
+          "schema_version": "cs.brain_routing_decision.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "secret_reads": 0,
+          "selected_brain": {
+            "deployment": "local",
+            "external_call_made": false,
+            "model": "qwen3.6:27b",
+            "provider": "ollama"
+          },
+          "sensitivity": "internal",
+          "status": "dry_run",
+          "task_ref": "fixtures/vs0/packs/16_brain_routing/routing_task.txt",
+          "task_type": "planning"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "override_denied": {
+      "command": [
+        "cornerstone",
+        "brain",
+        "route",
+        "--task",
+        "fixtures/vs0/packs/16_brain_routing/routing_task.txt",
+        "--task-type",
+        "planning",
+        "--mission-type",
+        "externally_impactful",
+        "--sensitivity",
+        "restricted",
+        "--risk",
+        "high",
+        "--owner-preference",
+        "local_test",
+        "--override-provider",
+        "openai",
+        "--override-model",
+        "gpt-5.4",
+        "--max-cost-usd",
+        "0",
+        "--max-latency-ms",
+        "2000",
+        "--dry-run",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_b9c0b6101bffd60a"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brain route",
+        "errors": [
+          {
+            "code": "CS_BRAIN_POLICY_DENIED",
+            "message": "Requested model override violates workspace policy, sensitivity, cost, latency, or egress limits.",
+            "policy": "model_override_forbidden_by_workspace_policy",
+            "resolution_path": [
+              "Use an allowed local provider, lower sensitivity through policy review, or request explicit admin approval."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "abf0882"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_d3efda2d3ab7de2e"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T17:46:16.257881Z",
+            "decision": "deny",
+            "policy": "model_override_forbidden_by_workspace_policy",
+            "policy_decision_id": "policy_d3efda2d3ab7de2e",
+            "reason": "Requested model override violates workspace policy, sensitivity, cost, latency, or egress limits.",
+            "resolution_path": [
+              "Use an allowed local provider, lower sensitivity through policy review, or request explicit admin approval."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "openai/gpt-5.4",
+              "type": "brain"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "routine_route": {
+      "command": [
+        "cornerstone",
+        "brain",
+        "route",
+        "--task",
+        "fixtures/vs0/packs/16_brain_routing/routing_task.txt",
+        "--task-type",
+        "planning",
+        "--mission-type",
+        "routine",
+        "--sensitivity",
+        "internal",
+        "--risk",
+        "low",
+        "--owner-preference",
+        "local_test",
+        "--max-cost-usd",
+        "0",
+        "--max-latency-ms",
+        "2000",
+        "--dry-run",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_d1784ac50574f222",
+          "audit:audit_8d57f1fe14bef1fb"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brain route",
+        "errors": [],
+        "evidence_refs": [
+          "brain_route:brainroute_da17d30339bb7607",
+          "brain_ledger:brainledger_b990e14ce701f9e9"
+        ],
+        "ids": {
+          "git_commit": "abf0882",
+          "ledger_id": "brainledger_b990e14ce701f9e9",
+          "route_id": "brainroute_da17d30339bb7607"
+        },
+        "ledger_entry": {
+          "can_influence_routing": true,
+          "cost_per_1k_tokens_usd": 0.0,
+          "created_at": "2026-06-09T17:46:16.094486Z",
+          "cross_namespace_aggregation": "requires_opt_in",
+          "grounding_issues": [],
+          "judge_quality": "not_measured",
+          "latency_ms": 15,
+          "ledger_id": "brainledger_b990e14ce701f9e9",
+          "mission_success": null,
+          "mission_type": "routine",
+          "model": "local_test.v0",
+          "namespace_local": true,
+          "objective_outcome": "pending",
+          "owner_acceptance": "not_recorded",
+          "owner_corrections": 0,
+          "policy": "workspace_model_routing_policy_v0",
+          "provider": "local_test",
+          "risk": "low",
+          "route_id": "brainroute_da17d30339bb7607",
+          "schema_version": "cs.brain_performance_ledger_entry.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "sensitivity": "internal",
+          "status": "recorded",
+          "task_type": "planning",
+          "tool_use_reliability": 0.92
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "routing_decision": {
+          "created_at": "2026-06-09T17:46:16.094085Z",
+          "ensemble": {
+            "contribution_records": [],
+            "not_default_for_routine": true,
+            "reason": "routine_single_brain",
+            "triggered": false
+          },
+          "factors": {
+            "capabilities": [
+              "deterministic_fixture",
+              "routing_baseline",
+              "evidence_grounded_judge",
+              "classification",
+              "summarization"
+            ],
+            "cost_limit_usd": 0.0,
+            "historical_outcome_quality_used": false,
+            "latency_limit_ms": 2000,
+            "local_performance_history_count": 0,
+            "mission_type": "routine",
+            "owner_preference": "local_test",
+            "risk": "low",
+            "sensitivity": "internal",
+            "static_capability_registry_used": true,
+            "workspace_policy": {
+              "allowed_providers": [
+                "local_test",
+                "ollama"
+              ],
+              "confidential_external_denied": false,
+              "egress_default": "deny"
+            }
+          },
+          "ledger_refs": [
+            "brain_ledger:brainledger_b990e14ce701f9e9"
+          ],
+          "mission_type": "routine",
+          "no_real_provider_call": true,
+          "override": {
+            "allowed": false,
+            "model": null,
+            "provider": null,
+            "requested": false
+          },
+          "owner_preference": "local_test",
+          "risk": "low",
+          "route_id": "brainroute_da17d30339bb7607",
+          "schema_version": "cs.brain_routing_decision.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "secret_reads": 0,
+          "selected_brain": {
+            "deployment": "local",
+            "external_call_made": false,
+            "model": "local_test.v0",
+            "provider": "local_test"
+          },
+          "sensitivity": "internal",
+          "status": "dry_run",
+          "task_ref": "fixtures/vs0/packs/16_brain_routing/routing_task.txt",
+          "task_type": "planning"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "alpha-evidence-anchor",
+        "--state-dir",
+        "tmp/scenario/full-brain-routing-97977",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_d8401c7ba2623477"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_1ef1dab8de96ab59",
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "audit_event_id": "audit_d8401c7ba2623477",
+          "git_commit": "abf0882",
+          "search_snapshot_id": "search_1ef1dab8de96ab59"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T17:46:15.809234Z",
+          "duration_ms": 0.262,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+              ],
+              "match_reasons": [
+                {
+                  "query": "alpha-evidence-anchor",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "alpha-evidence-anchor",
+                  "query_term": "alpha-evidence-anchor",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "alpha-evidence-anchor."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_1ef1dab8de96ab59"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

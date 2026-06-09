@@ -6091,6 +6091,537 @@ def verify_full_agent_orchestration(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_full_brain_routing(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("full-brain-routing")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    task_path = "fixtures/vs0/packs/16_brain_routing/routing_task.txt"
+    personal_scope_args: list[str] = []
+    org_scope_args = ["--namespace-id", "organization"]
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(root, ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"]) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The Alpha evidence anchor needs a policy-aware model routing and judge review.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Evaluate model routing, judging, and disagreement without external provider calls",
+            "--claim-id",
+            claim_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if claim_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+
+    transcripts["model_list"] = _run_cli_json(root, ["model", "list", "--state-dir", state_rel, "--json"])
+    transcripts["routine_route"] = _run_cli_json(
+        root,
+        [
+            "brain",
+            "route",
+            "--task",
+            task_path,
+            "--task-type",
+            "planning",
+            "--mission-type",
+            "routine",
+            "--sensitivity",
+            "internal",
+            "--risk",
+            "low",
+            "--owner-preference",
+            "local_test",
+            "--max-cost-usd",
+            "0",
+            "--max-latency-ms",
+            "2000",
+            "--dry-run",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    routine_route = _payload(transcripts["routine_route"]).get("routing_decision", {})
+    route_id = routine_route.get("route_id", "")
+    transcripts["high_risk_route"] = _run_cli_json(
+        root,
+        [
+            "brain",
+            "route",
+            "--task",
+            task_path,
+            "--task-type",
+            "planning",
+            "--mission-type",
+            "externally_impactful",
+            "--sensitivity",
+            "confidential",
+            "--risk",
+            "high",
+            "--owner-preference",
+            "local_semantic",
+            "--max-cost-usd",
+            "0",
+            "--max-latency-ms",
+            "2000",
+            "--dry-run",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    high_route = _payload(transcripts["high_risk_route"]).get("routing_decision", {})
+    high_route_id = high_route.get("route_id", route_id)
+    transcripts["override_allowed"] = _run_cli_json(
+        root,
+        [
+            "brain",
+            "route",
+            "--task",
+            task_path,
+            "--task-type",
+            "planning",
+            "--mission-type",
+            "routine",
+            "--sensitivity",
+            "internal",
+            "--risk",
+            "medium",
+            "--owner-preference",
+            "local_semantic",
+            "--override-provider",
+            "ollama",
+            "--override-model",
+            "qwen3.6:27b",
+            "--max-cost-usd",
+            "0",
+            "--max-latency-ms",
+            "2000",
+            "--dry-run",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    transcripts["override_denied"] = _run_cli_json(
+        root,
+        [
+            "brain",
+            "route",
+            "--task",
+            task_path,
+            "--task-type",
+            "planning",
+            "--mission-type",
+            "externally_impactful",
+            "--sensitivity",
+            "restricted",
+            "--risk",
+            "high",
+            "--owner-preference",
+            "local_test",
+            "--override-provider",
+            "openai",
+            "--override-model",
+            "gpt-5.4",
+            "--max-cost-usd",
+            "0",
+            "--max-latency-ms",
+            "2000",
+            "--dry-run",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    transcripts["brain_switch"] = _run_cli_json(
+        root,
+        [
+            "brain",
+            "switch",
+            "--provider",
+            "ollama",
+            "--model",
+            "qwen3.6:27b",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--mission-id",
+            mission_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id and mission_id else {}
+    transcripts["org_route"] = _run_cli_json(
+        root,
+        [
+            "brain",
+            "route",
+            "--task",
+            task_path,
+            "--task-type",
+            "judge",
+            "--mission-type",
+            "routine",
+            "--sensitivity",
+            "internal",
+            "--risk",
+            "low",
+            "--owner-preference",
+            "local_test",
+            "--max-cost-usd",
+            "0",
+            "--max-latency-ms",
+            "2000",
+            "--dry-run",
+            "--state-dir",
+            state_rel,
+            *org_scope_args,
+            "--json",
+        ],
+    )
+    transcripts["ledger_personal"] = _run_cli_json(root, ["brain", "ledger", "--state-dir", state_rel, *personal_scope_args, "--json"])
+    transcripts["ledger_org"] = _run_cli_json(root, ["brain", "ledger", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["aggregation_denied"] = _run_cli_json(
+        root,
+        [
+            "brain",
+            "aggregate-test",
+            "--source-namespace",
+            "organization",
+            "--target-namespace",
+            "personal",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    transcripts["aggregation_allowed"] = _run_cli_json(
+        root,
+        [
+            "brain",
+            "aggregate-test",
+            "--source-namespace",
+            "organization",
+            "--target-namespace",
+            "personal",
+            "--opt-in",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    transcripts["judge_run"] = _run_cli_json(
+        root,
+        [
+            "judge",
+            "run",
+            "--route-id",
+            high_route_id,
+            "--subject",
+            "Evaluate whether the Alpha evidence brief is decision-ready",
+            "--rubric",
+            "grounding,usefulness,risk-awareness,limitations",
+            "--evidence-ref",
+            f"evidence_bundle:{bundle_id}",
+            "--ambiguity",
+            "high",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if high_route_id and bundle_id else {}
+    judge_record = _payload(transcripts["judge_run"]).get("judge_record", {})
+    judge_record_id = judge_record.get("judge_record_id", "")
+    transcripts["judge_conflict"] = _run_cli_json(
+        root,
+        [
+            "judge",
+            "conflict",
+            "--judge-record-id",
+            judge_record_id,
+            "--objective-evidence",
+            "deterministic validator failed required evidence coverage",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if judge_record_id else {}
+    transcripts["judge_accept"] = _run_cli_json(
+        root,
+        [
+            "judge",
+            "accept",
+            "--judge-record-id",
+            judge_record_id,
+            "--acceptance",
+            "accepted",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if judge_record_id else {}
+    transcripts["judge_recommend"] = _run_cli_json(
+        root,
+        [
+            "judge",
+            "recommend",
+            "--judge-record-id",
+            judge_record_id,
+            "--recommendation",
+            "Create a candidate lesson to require objective validator checks before mission success.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if judge_record_id else {}
+    transcripts["judge_disagreement"] = _run_cli_json(root, ["judge", "disagreement-test", "--risk", "high", "--state-dir", state_rel, "--json"])
+    transcripts["judge_calibration"] = _run_cli_json(root, ["judge", "calibration", "--state-dir", state_rel, "--json"])
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    model_registry = _payload(transcripts["model_list"]).get("model_registry", {})
+    override_allowed = _payload(transcripts["override_allowed"]).get("routing_decision", {})
+    switch = _payload(transcripts["brain_switch"]).get("brain_switch", {})
+    personal_ledger = _payload(transcripts["ledger_personal"]).get("brain_ledger", {})
+    org_ledger = _payload(transcripts["ledger_org"]).get("brain_ledger", {})
+    aggregation_denied = _payload(transcripts["aggregation_denied"]).get("aggregation", {})
+    aggregation_allowed = _payload(transcripts["aggregation_allowed"]).get("aggregation", {})
+    conflict = _payload(transcripts["judge_conflict"]).get("judge_conflict", {})
+    acceptance = _payload(transcripts["judge_accept"]).get("owner_acceptance", {})
+    recommendation = _payload(transcripts["judge_recommend"]).get("judge_recommendation", {})
+    adjudication = _payload(transcripts["judge_disagreement"]).get("adjudication", {})
+    calibration = _payload(transcripts["judge_calibration"]).get("calibration_report", {})
+    audit_events = _audit_events(root, state_rel)
+    event_types = [event.get("event_type") for event in audit_events]
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+
+    registry_ok = (
+        _exit_ok(transcripts["model_list"])
+        and model_registry.get("safe_baseline_provider") == "local_test"
+        and model_registry.get("external_models_are_registry_only") is True
+        and model_registry.get("real_provider_calls") == 0
+    )
+    routine_route_ok = (
+        _exit_ok(transcripts["routine_route"])
+        and routine_route.get("selected_brain", {}).get("provider") == "local_test"
+        and routine_route.get("factors", {}).get("static_capability_registry_used") is True
+        and routine_route.get("ensemble", {}).get("triggered") is False
+        and routine_route.get("ensemble", {}).get("not_default_for_routine") is True
+        and routine_route.get("no_real_provider_call") is True
+    )
+    route_factors_ok = (
+        _exit_ok(transcripts["high_risk_route"])
+        and all(
+            key in high_route.get("factors", {})
+            for key in ["workspace_policy", "sensitivity", "mission_type", "risk", "cost_limit_usd", "latency_limit_ms", "capabilities", "owner_preference", "local_performance_history_count"]
+        )
+        and high_route.get("selected_brain", {}).get("external_call_made") is False
+    )
+    override_ok = (
+        _exit_ok(transcripts["override_allowed"])
+        and override_allowed.get("override", {}).get("requested") is True
+        and override_allowed.get("override", {}).get("allowed") is True
+        and _policy_denied(transcripts["override_denied"], "CS_BRAIN_POLICY_DENIED")
+        and _payload(transcripts["override_denied"]).get("policy_decisions", [{}])[0].get("policy") == "model_override_forbidden_by_workspace_policy"
+    )
+    switch_ok = (
+        _exit_ok(transcripts["brain_switch"])
+        and switch.get("only_inference_brain_changed") is True
+        and all(switch.get("durable_surfaces_unchanged", {}).values())
+        and switch.get("existing_records_still_usable", {}).get("evidence_bundle_readable") is True
+        and switch.get("existing_records_still_usable", {}).get("mission_readable") is True
+        and switch.get("real_provider_call_made") is False
+    )
+    ledger_ok = (
+        _exit_ok(transcripts["ledger_personal"])
+        and personal_ledger.get("entry_count", 0) >= 3
+        and personal_ledger.get("namespace_local") is True
+        and personal_ledger.get("cross_namespace_entries") == 0
+        and personal_ledger.get("can_influence_routing") is True
+        and all(entry.get("scope", {}).get("namespace_id") == "personal" for entry in personal_ledger.get("entries", []))
+    )
+    namespace_ledger_ok = (
+        ledger_ok
+        and _exit_ok(transcripts["ledger_org"])
+        and org_ledger.get("entry_count", 0) >= 1
+        and all(entry.get("scope", {}).get("namespace_id") == "organization" for entry in org_ledger.get("entries", []))
+        and _policy_denied(transcripts["aggregation_denied"], "CS_BRAIN_POLICY_DENIED")
+        and aggregation_denied.get("entries_used_for_routing") == 0
+        and _exit_ok(transcripts["aggregation_allowed"])
+        and aggregation_allowed.get("opt_in") is True
+        and aggregation_allowed.get("entries_used_for_routing", 0) >= 1
+    )
+    ensemble_ok = (
+        _exit_ok(transcripts["high_risk_route"])
+        and high_route.get("ensemble", {}).get("triggered") is True
+        and len(high_route.get("ensemble", {}).get("contribution_records", [])) >= 2
+        and all(row.get("external_call_made") is False for row in high_route.get("ensemble", {}).get("contribution_records", []))
+    )
+    judge_ok = (
+        _exit_ok(transcripts["judge_run"])
+        and judge_record.get("primary_for_ambiguous_outcome") is True
+        and judge_record.get("rubric")
+        and judge_record.get("evidence_refs")
+        and judge_record.get("confidence")
+        and judge_record.get("limitations")
+        and judge_record.get("pass_judge") is False
+    )
+    conflict_ok = (
+        _exit_ok(transcripts["judge_conflict"])
+        and conflict.get("objective_outcome_overrides_judge") is True
+        and conflict.get("judge_retained_as_evaluation_artifact") is True
+        and conflict.get("final_outcome_state") == "failed"
+    )
+    acceptance_ok = (
+        _exit_ok(transcripts["judge_accept"])
+        and acceptance.get("grounds_final_success_when_objective_truth_unavailable") is True
+        and acceptance.get("judge_score_supporting_only") is True
+        and acceptance.get("learning_signal") == "owner_grounded"
+    )
+    recommendation_ok = (
+        _exit_ok(transcripts["judge_recommend"])
+        and recommendation.get("status") == "candidate_lesson"
+        and recommendation.get("approved_memory_created") is False
+        and recommendation.get("global_rule_created") is False
+        and recommendation.get("requires_scope_evidence_confidence_governance") is True
+    )
+    adjudication_ok = (
+        _exit_ok(transcripts["judge_disagreement"])
+        and adjudication.get("evidence_weighted") is True
+        and adjudication.get("dissent_preserved") is True
+        and adjudication.get("escalation_card", {}).get("created") is True
+        and adjudication.get("proceeded_silently") is False
+    )
+    calibration_ok = (
+        _exit_ok(transcripts["judge_calibration"])
+        and calibration.get("judge_record_count", 0) >= 1
+        and calibration.get("disagreement_count", 0) >= 1
+        and calibration.get("objective_reversal_count", 0) >= 1
+        and calibration.get("owner_override_count", 0) >= 1
+        and calibration.get("model_specific_bias_signals")
+        and calibration.get("judge_is_unquestionable_authority") is False
+        and calibration.get("objective_outcomes_override_judge") is True
+    )
+    routing_audit_ok = "brain.route.decided" in event_types and route_factors_ok and audit_ok
+
+    rows = [
+        _row("CS-BRAIN-001", "MUST_PASS", "PASS" if switch_ok and audit_ok else "FAIL", ["cornerstone brain switch --provider ollama --model qwen3.6:27b --json"], "Provider switch leaves durable namespaces, wiki, evidence, ontology, missions, agents, workflows, policy, audit, experience, judge records, and promotion ladder intact."),
+        _row("CS-BRAIN-002", "MUST_PASS", "PASS" if route_factors_ok and audit_ok else "FAIL", ["cornerstone brain route --task <fixture> --dry-run --json"], "Routing decision records workspace policy, sensitivity, mission type, cost, latency, capability, historical outcome quality, and owner preference."),
+        _row("CS-BRAIN-003", "MUST_PASS", "PASS" if override_ok and audit_ok else "FAIL", ["cornerstone brain route --override-provider <provider> --dry-run --json"], "Allowed local override succeeds; forbidden external/restricted override is denied with policy reason and resolution."),
+        _row("CS-BRAIN-004", "MUST_PASS", "PASS" if ledger_ok and audit_ok else "FAIL", ["cornerstone brain ledger --json"], "Brain Performance Ledger records provider/model, task, policy, sensitivity, cost, latency, judge quality, reliability, outcomes, corrections, success, and routing influence."),
+        _row("CS-BRAIN-005", "MUST_PASS", "PASS" if registry_ok and routine_route_ok and audit_ok else "FAIL", ["cornerstone model list --json", "cornerstone brain route --dry-run --json"], "Static model capability registry provides safe local_test baseline when local history is empty."),
+        _row("CS-BRAIN-006", "MUST_PASS", "PASS" if namespace_ledger_ok and audit_ok else "FAIL", ["cornerstone brain ledger --json", "cornerstone brain aggregate-test --json"], "Brain performance learning stays namespace-local; cross-namespace aggregation is denied without opt-in and allowed only with opt-in governance."),
+        _row("CS-BRAIN-007", "MUST_PASS", "PASS" if ensemble_ok and audit_ok else "FAIL", ["cornerstone brain route --mission-type externally_impactful --risk high --dry-run --json"], "High-risk/high-value route triggers multi-brain contribution records without real provider calls."),
+        _row("CS-BRAIN-008", "MUST_PASS", "PASS" if routine_route_ok and audit_ok else "FAIL", ["cornerstone brain route --mission-type routine --risk low --dry-run --json"], "Routine route uses a single policy-routed brain and records that ensemble is not default."),
+        _row("CS-BRAIN-009", "MUST_PASS", "PASS" if judge_ok and audit_ok else "FAIL", ["cornerstone judge run --route-id <route_id> --json"], "Ambiguous outcome judge record includes rubric, evidence, confidence, limitations, and supporting-not-PASS-judge status."),
+        _row("CS-BRAIN-010", "MUST_PASS", "PASS" if conflict_ok and audit_ok else "FAIL", ["cornerstone judge conflict --judge-record-id <judge_id> --json"], "Objective evidence overrides judge opinion while retaining judge as evaluation artifact."),
+        _row("CS-BRAIN-011", "MUST_PASS", "PASS" if acceptance_ok and audit_ok else "FAIL", ["cornerstone judge accept --judge-record-id <judge_id> --json"], "Owner acceptance grounds final success when objective truth is unavailable and judge remains supporting evidence."),
+        _row("CS-BRAIN-012", "MUST_PASS", "PASS" if recommendation_ok and audit_ok else "FAIL", ["cornerstone judge recommend --judge-record-id <judge_id> --json"], "Judge recommendation creates a governed candidate lesson, not approved memory or a global rule."),
+        _row("CS-BRAIN-013", "MUST_PASS", "PASS" if adjudication_ok and audit_ok else "FAIL", ["cornerstone judge disagreement-test --risk high --json"], "Disagreement adjudication uses evidence, policy, mission goals, prior performance, objective outcomes, and rubric, preserving dissent."),
+        _row("CS-BRAIN-014", "MUST_PASS", "PASS" if adjudication_ok and audit_ok else "FAIL", ["cornerstone judge disagreement-test --risk high --json"], "High-risk unresolved disagreement creates an escalation card for the namespace owner instead of proceeding silently."),
+        _row("CS-BRAIN-015", "MUST_PASS", "PASS" if calibration_ok and audit_ok else "FAIL", ["cornerstone judge calibration --json"], "Calibration report tracks disagreements, reversals, owner overrides, calibration issues, and model-specific bias signals."),
+        _row("CS-BRAIN-016", "MUST_PASS", "PASS" if routing_audit_ok else "FAIL", ["cornerstone brain route --dry-run --json", "cornerstone audit verify --json"], "Provider routing is auditable with policy, sensitivity, cost/latency, capability, local performance, and owner preference factors."),
+        _row("CS-ARCH-012", "MUST_PASS", "PASS" if switch_ok and audit_ok else "FAIL", ["cornerstone brain switch --provider ollama --model qwen3.6:27b --json"], "Evidence bundle and mission remain readable before and after provider switch."),
+        _row("CS-NS-009", "MUST_PASS", "PASS" if namespace_ledger_ok and audit_ok else "FAIL", ["cornerstone brain ledger --json"], "Brain Performance Ledger entries are isolated per namespace, with opt-in aggregation only."),
+        _row("CS-NS-010", "MUST_PASS", "PASS" if route_factors_ok and override_ok and audit_ok else "FAIL", ["cornerstone brain route --dry-run --json"], "Workspace policy controls model routing and disallows forbidden provider overrides."),
+        _row("CS-REG-009", "REGRESSION_GUARD", "PASS" if switch_ok and audit_ok else "FAIL", ["cornerstone brain switch --provider ollama --model qwen3.6:27b --json"], "Provider swap does not break evidence or durable mission records."),
+        _row("CS-REG-010", "REGRESSION_GUARD", "PASS" if conflict_ok and calibration_ok and audit_ok else "FAIL", ["cornerstone judge conflict --json", "cornerstone judge calibration --json"], "LLM judge cannot become unquestionable authority; objective outcomes and owner acceptance remain stronger signals."),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "full-brain-routing",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_FULL_BRAIN_ROUTING_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "brain_evidence": {
+            "artifact_id": artifact_id,
+            "search_snapshot_id": snapshot_id,
+            "evidence_bundle_id": bundle_id,
+            "claim_id": claim_id,
+            "mission_id": mission_id,
+            "model_count": len(model_registry.get("models", [])),
+            "routine_route_id": routine_route.get("route_id"),
+            "high_risk_route_id": high_route.get("route_id"),
+            "override_allowed_route_id": override_allowed.get("route_id"),
+            "brain_switch_id": switch.get("switch_id"),
+            "personal_ledger_entry_count": personal_ledger.get("entry_count"),
+            "org_ledger_entry_count": org_ledger.get("entry_count"),
+            "aggregation_denied_exit_code": transcripts["aggregation_denied"].get("exit_code"),
+            "override_denied_exit_code": transcripts["override_denied"].get("exit_code"),
+            "aggregation_allowed_id": aggregation_allowed.get("aggregation_id"),
+            "judge_record_id": judge_record_id,
+            "judge_conflict_id": conflict.get("conflict_id"),
+            "owner_acceptance_id": acceptance.get("acceptance_id"),
+            "judge_recommendation_id": recommendation.get("recommendation_id"),
+            "adjudication_id": adjudication.get("adjudication_id"),
+            "calibration_id": calibration.get("calibration_id"),
+            "audit_event_types": event_types,
+            "audit_event_count": len(audit_events),
+            "research_basis": [
+                "Recent LLM routing work treats model selection as a cost, latency, quality, and policy tradeoff rather than hard-coding one provider.",
+                "OpenAI Agents SDK tracing and guardrail patterns support application-owned orchestration, validation, and reviewable events.",
+                "LangGraph workflow guidance favors deterministic code paths for predictable workflows and dynamic agents only where needed.",
+                "LLM-as-judge research and practice highlight calibration, confidence, bias tracking, human corrections, and objective outcome precedence.",
+                "CornerStone local verification keeps local_test deterministic and forbids model output from being the scenario PASS judge.",
+            ],
+        },
+        "negative_evidence": {
+            "real_external_provider_calls": 0,
+            "secret_reads": 0,
+            "external_models_invoked": 0 if model_registry.get("external_models_are_registry_only") is True else 1,
+            "route_without_policy_factors": 0 if route_factors_ok else 1,
+            "override_policy_bypass": 0 if _policy_denied(transcripts["override_denied"], "CS_BRAIN_POLICY_DENIED") else 1,
+            "cross_namespace_ledger_without_opt_in": 0 if aggregation_denied.get("entries_used_for_routing") == 0 else 1,
+            "ensemble_used_for_routine": 0 if routine_route.get("ensemble", {}).get("triggered") is False else 1,
+            "judge_overrode_objective": 0 if conflict.get("objective_outcome_overrides_judge") is True and calibration.get("objective_outcomes_override_judge") is True else 1,
+            "judge_direct_memory_or_rule_mutation": 0 if recommendation.get("approved_memory_created") is False and recommendation.get("global_rule_created") is False else 1,
+            "high_risk_disagreement_proceeded_silently": 0 if adjudication.get("proceeded_silently") is False else 1,
+            "evidence_unusable_after_switch": 0 if switch.get("existing_records_still_usable", {}).get("evidence_bundle_readable") is True else 1,
+            "audit_verify_failed": 0 if audit_ok else 1,
+        },
+        "human_required": [],
+    }
+
+
 def verify_vs0_memory_truth_boundary(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-memory-truth-boundary")
     state_path = root / state_rel

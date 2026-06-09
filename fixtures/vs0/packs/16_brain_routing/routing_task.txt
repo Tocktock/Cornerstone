@@ -1,0 +1,5 @@
+CornerStone brain routing fixture.
+
+Task: Choose the safest model brain for an evidence-backed operational mission while preserving artifact, evidence, policy, workflow, action, and audit boundaries.
+
+Evidence anchor: alpha-evidence-anchor.
