@@ -12,6 +12,7 @@ from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
     verify_vs0_search_evidence,
+    verify_vs0_search_understanding,
     verify_vs0_security,
     verify_vs0_artifacts,
     verify_vs0_fixtures,
@@ -227,7 +228,8 @@ def command_artifact_show(args: argparse.Namespace) -> int:
     root = repo_root()
     payload = base_response("cornerstone artifact show", "success", root)
     store = LocalRuntimeStore(state_dir(root, args))
-    artifact = store.get_artifact(args.artifact_id)
+    requested_scope = scope_args(args)
+    artifact = store.get_artifact(args.artifact_id, requested_scope)
     if artifact is None:
         payload["status"] = "failed"
         payload["errors"].append(
@@ -242,11 +244,15 @@ def command_artifact_show(args: argparse.Namespace) -> int:
 
     audit_event = store.append_audit(
         "artifact.read",
-        artifact["scope"],
+        requested_scope,
         {"type": "artifact", "id": artifact["artifact_id"]},
         {"reason": "cli_artifact_show"},
     )
-    payload.update(artifact["scope"])
+    artifact_detail = dict(artifact)
+    artifact_detail["derived_text_preview"] = store.derived_text_preview(artifact)
+    artifact_detail["related_claims"] = store.related_claims_for_artifact(artifact["artifact_id"], requested_scope)
+    artifact_detail["related_missions"] = []
+    payload.update(requested_scope)
     payload["ids"].update(
         {
             "artifact_id": artifact["artifact_id"],
@@ -254,8 +260,9 @@ def command_artifact_show(args: argparse.Namespace) -> int:
             "audit_event_id": audit_event["event_id"],
         }
     )
-    payload["artifact"] = artifact
+    payload["artifact"] = artifact_detail
     payload["evidence_refs"].append(f"artifact:{artifact['artifact_id']}")
+    payload["evidence_refs"].extend(f"claim:{claim['claim_id']}" for claim in artifact_detail["related_claims"])
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -631,13 +638,15 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_security(root)
     elif args.contract == "vs0-search-evidence":
         report = verify_vs0_search_evidence(root)
+    elif args.contract == "vs0-search-understanding":
+        report = verify_vs0_search_understanding(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
             {
                 "code": "CS_SCENARIO_CONTRACT_UNSUPPORTED",
                 "message": "Only scaffold and fixture verification are implemented in this batch.",
-                "supported": ["vs0-scaffold", "vs0-fixtures", "vs0-artifacts", "vs0-security", "vs0-search-evidence"],
+                "supported": ["vs0-scaffold", "vs0-fixtures", "vs0-artifacts", "vs0-security", "vs0-search-evidence", "vs0-search-understanding"],
             }
         )
         print_payload(payload, args.json)
@@ -740,6 +749,7 @@ def build_parser() -> argparse.ArgumentParser:
     artifact_show = artifact_sub.add_parser("show", help="Show artifact metadata and provenance")
     artifact_show.add_argument("artifact_id", help="Artifact ID")
     add_state_argument(artifact_show)
+    add_scope_arguments(artifact_show)
     artifact_show.add_argument("--json", action="store_true", help="Emit JSON output")
     artifact_show.set_defaults(func=command_artifact_show)
 

@@ -917,6 +917,338 @@ def verify_vs0_search_evidence(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_vs0_search_understanding(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-search-understanding")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    basic_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    personal_path = "fixtures/vs0/packs/08_namespace_isolation/personal.txt"
+    org_path = "fixtures/vs0/packs/08_namespace_isolation/org.txt"
+    project_path = "fixtures/vs0/packs/02_dedup_versioning/input_v2.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    transcripts["ingest_basic"] = _run_cli_json(root, ["artifact", "ingest", basic_path, "--state-dir", state_rel, "--json"])
+    basic_artifact = _artifact(transcripts["ingest_basic"])
+    basic_id = basic_artifact.get("artifact_id", "")
+    transcripts["exact_search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    transcripts["semantic_search"] = _run_cli_json(root, ["search", "query", "retain raw proof", "--state-dir", state_rel, "--json"])
+
+    exact_snapshot = _payload(transcripts["exact_search"]).get("search_snapshot", {})
+    semantic_snapshot = _payload(transcripts["semantic_search"]).get("search_snapshot", {})
+    exact_first = (exact_snapshot.get("results") or [{}])[0]
+    semantic_first = (semantic_snapshot.get("results") or [{}])[0]
+
+    transcripts["ingest_personal"] = _run_cli_json(root, ["artifact", "ingest", personal_path, "--state-dir", state_rel, "--json"])
+    personal_artifact = _artifact(transcripts["ingest_personal"])
+    personal_id = personal_artifact.get("artifact_id", "")
+    transcripts["ingest_org"] = _run_cli_json(
+        root,
+        [
+            "artifact",
+            "ingest",
+            org_path,
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-org",
+            "--namespace-id",
+            "organization",
+            "--workspace-id",
+            "ops",
+            "--json",
+        ],
+    )
+    org_artifact = _artifact(transcripts["ingest_org"])
+    org_id = org_artifact.get("artifact_id", "")
+    transcripts["ingest_project"] = _run_cli_json(
+        root,
+        [
+            "artifact",
+            "ingest",
+            project_path,
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-project",
+            "--namespace-id",
+            "project",
+            "--workspace-id",
+            "alpha-project",
+            "--json",
+        ],
+    )
+    project_artifact = _artifact(transcripts["ingest_project"])
+    project_id = project_artifact.get("artifact_id", "")
+    transcripts["ingest_same_content_org"] = _run_cli_json(
+        root,
+        [
+            "artifact",
+            "ingest",
+            basic_path,
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-org",
+            "--namespace-id",
+            "organization",
+            "--workspace-id",
+            "ops",
+            "--json",
+        ],
+    )
+    transcripts["personal_search"] = _run_cli_json(root, ["search", "query", "personal-only-alpha", "--state-dir", state_rel, "--json"])
+    transcripts["personal_cross_org_search"] = _run_cli_json(root, ["search", "query", "org-visible-beta", "--state-dir", state_rel, "--json"])
+    transcripts["personal_cross_project_search"] = _run_cli_json(root, ["search", "query", "distinct artifact", "--state-dir", state_rel, "--json"])
+    transcripts["org_search"] = _run_cli_json(
+        root,
+        [
+            "search",
+            "query",
+            "org-visible-beta",
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-org",
+            "--namespace-id",
+            "organization",
+            "--workspace-id",
+            "ops",
+            "--json",
+        ],
+    )
+    transcripts["org_cross_personal_search"] = _run_cli_json(
+        root,
+        [
+            "search",
+            "query",
+            "personal-only-alpha",
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-org",
+            "--namespace-id",
+            "organization",
+            "--workspace-id",
+            "ops",
+            "--json",
+        ],
+    )
+    transcripts["org_cross_project_search"] = _run_cli_json(
+        root,
+        [
+            "search",
+            "query",
+            "distinct artifact",
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-org",
+            "--namespace-id",
+            "organization",
+            "--workspace-id",
+            "ops",
+            "--json",
+        ],
+    )
+    transcripts["project_search"] = _run_cli_json(
+        root,
+        [
+            "search",
+            "query",
+            "distinct artifact",
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-project",
+            "--namespace-id",
+            "project",
+            "--workspace-id",
+            "alpha-project",
+            "--json",
+        ],
+    )
+    transcripts["project_cross_personal_search"] = _run_cli_json(
+        root,
+        [
+            "search",
+            "query",
+            "personal-only-alpha",
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-project",
+            "--namespace-id",
+            "project",
+            "--workspace-id",
+            "alpha-project",
+            "--json",
+        ],
+    )
+    transcripts["project_cross_org_search"] = _run_cli_json(
+        root,
+        [
+            "search",
+            "query",
+            "org-visible-beta",
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-project",
+            "--namespace-id",
+            "project",
+            "--workspace-id",
+            "alpha-project",
+            "--json",
+        ],
+    )
+    transcripts["same_content_personal_search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    transcripts["same_content_org_search"] = _run_cli_json(
+        root,
+        [
+            "search",
+            "query",
+            "alpha-evidence-anchor",
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-org",
+            "--namespace-id",
+            "organization",
+            "--workspace-id",
+            "ops",
+            "--json",
+        ],
+    )
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    personal_snapshot = _payload(transcripts["personal_search"]).get("search_snapshot", {})
+    personal_cross_org_snapshot = _payload(transcripts["personal_cross_org_search"]).get("search_snapshot", {})
+    personal_cross_project_snapshot = _payload(transcripts["personal_cross_project_search"]).get("search_snapshot", {})
+    org_snapshot = _payload(transcripts["org_search"]).get("search_snapshot", {})
+    org_cross_personal_snapshot = _payload(transcripts["org_cross_personal_search"]).get("search_snapshot", {})
+    org_cross_project_snapshot = _payload(transcripts["org_cross_project_search"]).get("search_snapshot", {})
+    project_snapshot = _payload(transcripts["project_search"]).get("search_snapshot", {})
+    project_cross_personal_snapshot = _payload(transcripts["project_cross_personal_search"]).get("search_snapshot", {})
+    project_cross_org_snapshot = _payload(transcripts["project_cross_org_search"]).get("search_snapshot", {})
+    same_content_personal_snapshot = _payload(transcripts["same_content_personal_search"]).get("search_snapshot", {})
+    same_content_org_snapshot = _payload(transcripts["same_content_org_search"]).get("search_snapshot", {})
+    personal_first = (personal_snapshot.get("results") or [{}])[0]
+    org_first = (org_snapshot.get("results") or [{}])[0]
+    project_first = (project_snapshot.get("results") or [{}])[0]
+    same_content_personal_first = (same_content_personal_snapshot.get("results") or [{}])[0]
+    same_content_org_first = (same_content_org_snapshot.get("results") or [{}])[0]
+
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    und_002_ok = (
+        _exit_ok(transcripts["exact_search"])
+        and _exit_ok(transcripts["semantic_search"])
+        and exact_first.get("artifact_id") == basic_id
+        and semantic_first.get("artifact_id") == basic_id
+        and "alpha-evidence-anchor" in exact_first.get("snippet", "")
+        and "semantic" in semantic_first.get("retrieval_modes", [])
+        and any(reason.get("type") == "semantic_alias" for reason in semantic_first.get("match_reasons", []))
+        and _payload(transcripts["semantic_search"]).get("evidence_refs")
+    )
+    und_003_ok = (
+        _exit_ok(transcripts["personal_search"])
+        and _exit_ok(transcripts["personal_cross_org_search"])
+        and _exit_ok(transcripts["personal_cross_project_search"])
+        and _exit_ok(transcripts["org_search"])
+        and _exit_ok(transcripts["org_cross_personal_search"])
+        and _exit_ok(transcripts["org_cross_project_search"])
+        and _exit_ok(transcripts["project_search"])
+        and _exit_ok(transcripts["project_cross_personal_search"])
+        and _exit_ok(transcripts["project_cross_org_search"])
+        and _exit_ok(transcripts["same_content_personal_search"])
+        and _exit_ok(transcripts["same_content_org_search"])
+        and personal_snapshot.get("result_count") == 1
+        and personal_first.get("artifact_id") == personal_id
+        and personal_first.get("scope", {}).get("namespace_id") == "personal"
+        and personal_cross_org_snapshot.get("result_count") == 0
+        and personal_cross_project_snapshot.get("result_count") == 0
+        and org_snapshot.get("result_count") == 1
+        and org_first.get("artifact_id") == org_id
+        and org_first.get("scope", {}).get("namespace_id") == "organization"
+        and org_cross_personal_snapshot.get("result_count") == 0
+        and org_cross_project_snapshot.get("result_count") == 0
+        and project_snapshot.get("result_count") == 1
+        and project_first.get("artifact_id") == project_id
+        and project_first.get("scope", {}).get("namespace_id") == "project"
+        and project_cross_personal_snapshot.get("result_count") == 0
+        and project_cross_org_snapshot.get("result_count") == 0
+        and same_content_personal_snapshot.get("result_count") == 1
+        and same_content_org_snapshot.get("result_count") == 1
+        and same_content_personal_first.get("scope", {}).get("owner_id") == "local-user"
+        and same_content_org_first.get("scope", {}).get("owner_id") == "local-org"
+    )
+
+    rows = [
+        _row(
+            "CS-UND-002",
+            "MUST_PASS",
+            "PASS" if und_002_ok and audit_ok else "FAIL",
+            ["cornerstone search query alpha-evidence-anchor --json", "cornerstone search query 'retain raw proof' --json"],
+            "Keyword and deterministic semantic-alias retrieval both return the artifact with evidence refs and inspectable match reasons.",
+        ),
+        _row(
+            "CS-UND-003",
+            "MUST_PASS",
+            "PASS" if und_003_ok and audit_ok else "FAIL",
+            [
+                "cornerstone search query personal-only-alpha --json",
+                "cornerstone search query org-visible-beta --namespace-id organization --json",
+                "cornerstone search query 'distinct artifact' --namespace-id project --json",
+            ],
+            "Search results stay inside the active owner/namespace/workspace scope in controlled personal, organization, and project fixtures.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-search-understanding",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_SEARCH_UNDERSTANDING_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "search_understanding": {
+            "keyword_artifact_id": exact_first.get("artifact_id"),
+            "semantic_artifact_id": semantic_first.get("artifact_id"),
+            "semantic_match_reasons": semantic_first.get("match_reasons", []),
+            "personal_result_count": personal_snapshot.get("result_count"),
+            "personal_cross_org_result_count": personal_cross_org_snapshot.get("result_count"),
+            "personal_cross_project_result_count": personal_cross_project_snapshot.get("result_count"),
+            "organization_result_count": org_snapshot.get("result_count"),
+            "organization_cross_personal_result_count": org_cross_personal_snapshot.get("result_count"),
+            "organization_cross_project_result_count": org_cross_project_snapshot.get("result_count"),
+            "project_result_count": project_snapshot.get("result_count"),
+            "project_cross_personal_result_count": project_cross_personal_snapshot.get("result_count"),
+            "project_cross_org_result_count": project_cross_org_snapshot.get("result_count"),
+            "same_content_personal_scope": same_content_personal_first.get("scope"),
+            "same_content_organization_scope": same_content_org_first.get("scope"),
+        },
+        "negative_evidence": {
+            "cross_workspace_results": (
+                int(personal_cross_org_snapshot.get("result_count", 1))
+                + int(personal_cross_project_snapshot.get("result_count", 1))
+                + int(org_cross_personal_snapshot.get("result_count", 1))
+                + int(org_cross_project_snapshot.get("result_count", 1))
+                + int(project_cross_personal_snapshot.get("result_count", 1))
+                + int(project_cross_org_snapshot.get("result_count", 1))
+            ),
+            "semantic_unexplained_results": 0 if any(reason.get("type") == "semantic_alias" for reason in semantic_first.get("match_reasons", [])) else 1,
+            "same_content_scope_collisions": 0 if same_content_personal_first.get("scope", {}).get("owner_id") == "local-user" and same_content_org_first.get("scope", {}).get("owner_id") == "local-org" else 1,
+        },
+        "human_required": [],
+    }
+
+
 def verify_vs0_scaffold(root: Path) -> dict[str, Any]:
     docs_result = _run_script(root, "scripts/verify_sot_docs.sh")
     cli_result = _run_script(root, "scripts/verify_cli_native_first_docs.sh")

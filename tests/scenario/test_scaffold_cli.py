@@ -270,6 +270,20 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertIn(f"artifact:{item['artifact_id']}", claim_payload["claim"]["evidence_bundle"]["artifact_refs"])
             self.assertTrue(claim_payload["audit_refs"])
 
+            artifact_show = run_cli(
+                "artifact",
+                "show",
+                item["artifact_id"],
+                "--state-dir",
+                "tmp/test-search-evidence",
+                "--json",
+            )
+            self.assertEqual(artifact_show.returncode, 0, artifact_show.stdout + artifact_show.stderr)
+            artifact_show_payload = json.loads(artifact_show.stdout)
+            self.assertEqual(artifact_show_payload["artifact"]["related_claims"][0]["claim_id"], claim_payload["claim"]["claim_id"])
+            self.assertEqual(artifact_show_payload["artifact"]["related_missions"], [])
+            self.assertIn("alpha-evidence-anchor", artifact_show_payload["artifact"]["derived_text_preview"])
+
             denied = run_cli(
                 "evidence",
                 "bundle",
@@ -333,6 +347,89 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(payload["search_evidence"]["claim_id"].startswith("claim_"))
         self.assertTrue(payload["search_evidence"]["evidence_viewer_id"].startswith("viewer_"))
         self.assertLessEqual(payload["search_evidence"]["first_use_duration_ms"], 5000)
+
+    def test_vs0_search_understanding_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-search-understanding", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-search-understanding")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 2)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_SEARCH_UNDERSTANDING_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-UND-002", "CS-UND-003"})
+        self.assertTrue(
+            any(reason["type"] == "semantic_alias" for reason in payload["search_understanding"]["semantic_match_reasons"])
+        )
+        self.assertEqual(payload["search_understanding"]["personal_cross_org_result_count"], 0)
+        self.assertEqual(payload["search_understanding"]["personal_cross_project_result_count"], 0)
+        self.assertEqual(payload["search_understanding"]["organization_cross_personal_result_count"], 0)
+        self.assertEqual(payload["search_understanding"]["organization_cross_project_result_count"], 0)
+        self.assertEqual(payload["search_understanding"]["project_cross_personal_result_count"], 0)
+        self.assertEqual(payload["search_understanding"]["project_cross_org_result_count"], 0)
+        self.assertEqual(payload["search_understanding"]["project_result_count"], 1)
+        self.assertEqual(payload["search_understanding"]["same_content_personal_scope"]["owner_id"], "local-user")
+        self.assertEqual(payload["search_understanding"]["same_content_organization_scope"]["owner_id"], "local-org")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
+    def test_same_content_isolation_across_scopes(self) -> None:
+        state_dir = ROOT / "tmp/test-same-content-scope"
+        shutil.rmtree(state_dir, ignore_errors=True)
+        try:
+            personal = run_cli(
+                "artifact",
+                "ingest",
+                "fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "--state-dir",
+                "tmp/test-same-content-scope",
+                "--json",
+            )
+            self.assertEqual(personal.returncode, 0, personal.stdout + personal.stderr)
+            org = run_cli(
+                "artifact",
+                "ingest",
+                "fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "--state-dir",
+                "tmp/test-same-content-scope",
+                "--owner-id",
+                "local-org",
+                "--namespace-id",
+                "organization",
+                "--workspace-id",
+                "ops",
+                "--json",
+            )
+            self.assertEqual(org.returncode, 0, org.stdout + org.stderr)
+            personal_payload = json.loads(personal.stdout)
+            org_payload = json.loads(org.stdout)
+            self.assertEqual(personal_payload["artifact"]["artifact_id"], org_payload["artifact"]["artifact_id"])
+
+            personal_search = run_cli("search", "query", "alpha-evidence-anchor", "--state-dir", "tmp/test-same-content-scope", "--json")
+            self.assertEqual(personal_search.returncode, 0, personal_search.stdout + personal_search.stderr)
+            personal_search_payload = json.loads(personal_search.stdout)
+            self.assertEqual(personal_search_payload["search_snapshot"]["result_count"], 1)
+            self.assertEqual(personal_search_payload["search_snapshot"]["results"][0]["scope"]["owner_id"], "local-user")
+
+            org_search = run_cli(
+                "search",
+                "query",
+                "alpha-evidence-anchor",
+                "--state-dir",
+                "tmp/test-same-content-scope",
+                "--owner-id",
+                "local-org",
+                "--namespace-id",
+                "organization",
+                "--workspace-id",
+                "ops",
+                "--json",
+            )
+            self.assertEqual(org_search.returncode, 0, org_search.stdout + org_search.stderr)
+            org_search_payload = json.loads(org_search.stdout)
+            self.assertEqual(org_search_payload["search_snapshot"]["result_count"], 1)
+            self.assertEqual(org_search_payload["search_snapshot"]["results"][0]["scope"]["owner_id"], "local-org")
+        finally:
+            shutil.rmtree(state_dir, ignore_errors=True)
 
     def test_scenario_gate_rejects_report_level_errors(self) -> None:
         report_path = ROOT / "reports/scenario/test-failed-report.json"

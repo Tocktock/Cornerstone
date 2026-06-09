@@ -23,7 +23,8 @@ fixtures_json=$(mktemp)
 artifacts_json=$(mktemp)
 security_json=$(mktemp)
 search_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json"' EXIT
+understanding_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -89,6 +90,22 @@ grep -q '"claim_id": "claim_' "$search_json" || fail "vs0-search-evidence missin
 grep -q '"evidence_viewer_id": "viewer_' "$search_json" || fail "vs0-search-evidence missing evidence viewer"
 grep -q '"product_feature_claims": "PARTIAL_VS0_SEARCH_EVIDENCE_ONLY"' "$search_json" || fail "vs0-search-evidence overclaimed product feature scope"
 
+cornerstone scenario verify vs0-search-understanding --json > "$understanding_json"
+python3 -m json.tool "$understanding_json" >/dev/null
+grep -q '"scenario_set": "vs0-search-understanding"' "$understanding_json" || fail "vs0-search-understanding report missing scenario set"
+grep -q '"blocking": 0' "$understanding_json" || fail "vs0-search-understanding report has blocking scenarios"
+grep -q '"pass": 2' "$understanding_json" || fail "vs0-search-understanding did not pass exactly two scenarios"
+grep -q '"id": "CS-UND-002"' "$understanding_json" || fail "vs0-search-understanding missing CS-UND-002"
+grep -q '"id": "CS-UND-003"' "$understanding_json" || fail "vs0-search-understanding missing CS-UND-003"
+if grep -q '"id": "CS-UND-004"' "$understanding_json"; then
+  fail "vs0-search-understanding must not claim CS-UND-004"
+fi
+grep -q '"type": "semantic_alias"' "$understanding_json" || fail "vs0-search-understanding missing semantic match reason"
+grep -q '"cross_workspace_results": 0' "$understanding_json" || fail "vs0-search-understanding reported cross-workspace results"
+grep -q '"project_result_count": 1' "$understanding_json" || fail "vs0-search-understanding missing project workspace result"
+grep -q '"same_content_scope_collisions": 0' "$understanding_json" || fail "vs0-search-understanding reported same-content scope collision"
+grep -q '"product_feature_claims": "PARTIAL_VS0_SEARCH_UNDERSTANDING_ONLY"' "$understanding_json" || fail "vs0-search-understanding overclaimed product feature scope"
+
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, unittest).\n'

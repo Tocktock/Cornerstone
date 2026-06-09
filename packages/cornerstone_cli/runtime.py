@@ -18,6 +18,17 @@ UNSAFE_INSTRUCTION_PATTERNS = [
     re.compile(r"\b(authority|permission|approval)\b.*\b(now|granted|expanded|bypass)\b", re.IGNORECASE),
 ]
 
+SEMANTIC_ALIASES = {
+    "retain": ["keep", "preserve", "stored"],
+    "retained": ["keep", "preserve", "stored"],
+    "raw": ["original", "source"],
+    "evidence": ["source", "material", "artifact"],
+    "proof": ["evidence", "source", "material"],
+    "source": ["original", "material"],
+    "preserve": ["keep", "stored", "original"],
+    "preserved": ["keep", "stored", "original"],
+}
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -47,6 +58,21 @@ def detect_unsafe_instructions(text: str) -> list[str]:
         if pattern.search(text):
             blocked.append(pattern.pattern)
     return blocked
+
+
+def search_terms(text: str) -> list[str]:
+    return [term for term in re.findall(r"[a-z0-9-]+", text.lower()) if term]
+
+
+def scope_key(scope: dict[str, str]) -> str:
+    return _json_hash(
+        {
+            "tenant_id": scope["tenant_id"],
+            "owner_id": scope["owner_id"],
+            "namespace_id": scope["namespace_id"],
+            "workspace_id": scope["workspace_id"],
+        }
+    )[:16]
 
 
 class LocalRuntimeStore:
@@ -122,8 +148,10 @@ class LocalRuntimeStore:
             previous_hash = event_hash or ""
         return {"status": "success" if not errors else "failed", "event_count": event_count, "errors": errors}
 
-    def artifact_path(self, artifact_id: str) -> Path:
-        return self.record_dir / f"{artifact_id}.json"
+    def artifact_path(self, artifact_id: str, scope: dict[str, str] | None = None) -> Path:
+        if scope is None:
+            return self.record_dir / f"{artifact_id}.json"
+        return self.record_dir / scope_key(scope) / f"{artifact_id}.json"
 
     def search_snapshot_path(self, snapshot_id: str) -> Path:
         return self.state_dir / "search" / "snapshots" / f"{snapshot_id}.json"
@@ -134,11 +162,25 @@ class LocalRuntimeStore:
     def claim_path(self, claim_id: str) -> Path:
         return self.state_dir / "claims" / f"{claim_id}.json"
 
-    def get_artifact(self, artifact_id: str) -> dict[str, Any] | None:
-        path = self.artifact_path(artifact_id)
-        if not path.exists():
+    def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
+        if scope is not None:
+            scoped_path = self.artifact_path(artifact_id, scope)
+            if scoped_path.exists():
+                return _read_json(scoped_path)
+            legacy_path = self.artifact_path(artifact_id)
+            if legacy_path.exists():
+                legacy = _read_json(legacy_path)
+                if legacy.get("scope") == scope:
+                    return legacy
             return None
-        return _read_json(path)
+
+        candidate_paths = sorted(self.record_dir.glob(f"*/{artifact_id}.json")) if self.record_dir.exists() else []
+        legacy_path = self.artifact_path(artifact_id)
+        if legacy_path.exists():
+            candidate_paths.append(legacy_path)
+        if not candidate_paths:
+            return None
+        return _read_json(candidate_paths[0])
 
     def get_search_snapshot(self, snapshot_id: str) -> dict[str, Any] | None:
         path = self.search_snapshot_path(snapshot_id)
@@ -162,11 +204,38 @@ class LocalRuntimeStore:
         if not self.record_dir.exists():
             return []
         records = []
-        for path in sorted(self.record_dir.glob("*.json")):
+        for path in sorted(self.record_dir.glob("**/*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
                 records.append(record)
         return records
+
+    def _claim_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        claim_dir = self.state_dir / "claims"
+        if not claim_dir.exists():
+            return []
+        records = []
+        for path in sorted(claim_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def related_claims_for_artifact(self, artifact_id: str, scope: dict[str, str]) -> list[dict[str, Any]]:
+        related = []
+        artifact_ref = f"artifact:{artifact_id}"
+        for claim in self._claim_records(scope):
+            evidence = claim.get("evidence_bundle", {})
+            if artifact_ref in evidence.get("artifact_refs", []):
+                related.append(
+                    {
+                        "claim_id": claim["claim_id"],
+                        "status": claim.get("status"),
+                        "statement": claim.get("statement"),
+                        "evidence_bundle_id": evidence.get("evidence_bundle_id"),
+                    }
+                )
+        return related
 
     def _derived_text(self, artifact: dict[str, Any]) -> str:
         text_ref = artifact.get("derived", {}).get("text_ref")
@@ -177,6 +246,9 @@ class LocalRuntimeStore:
             return ""
         return path.read_text()
 
+    def derived_text_preview(self, artifact: dict[str, Any], limit: int = 500) -> str:
+        return self._derived_text(artifact)[:limit].replace("\n", " ").strip()
+
     def search(self, query: str, *, tenant_id: str, owner_id: str, namespace_id: str, workspace_id: str) -> dict[str, Any]:
         started = perf_counter()
         scope = {
@@ -185,18 +257,36 @@ class LocalRuntimeStore:
             "namespace_id": namespace_id,
             "workspace_id": workspace_id,
         }
-        query_terms = [term for term in re.findall(r"[a-z0-9-]+", query.lower()) if term]
+        query_terms = search_terms(query)
         results: list[dict[str, Any]] = []
         for artifact in self._artifact_records(scope):
             text = self._derived_text(artifact)
             haystack = text.lower()
             score = 0
+            match_reasons: list[dict[str, str]] = []
+            retrieval_modes: set[str] = set()
             if query.lower() in haystack:
                 score += 10
-            score += sum(1 for term in query_terms if term in haystack)
+                retrieval_modes.add("exact")
+                match_reasons.append({"type": "exact", "query": query})
+            for term in query_terms:
+                if term in haystack:
+                    score += 1
+                    retrieval_modes.add("keyword")
+                    match_reasons.append({"type": "keyword", "query_term": term, "matched_term": term})
+                for alias in SEMANTIC_ALIASES.get(term, []):
+                    if alias in haystack and alias != term:
+                        score += 2
+                        retrieval_modes.add("semantic")
+                        match_reasons.append({"type": "semantic_alias", "query_term": term, "matched_term": alias})
             if score <= 0:
                 continue
-            first_term = next((term for term in query_terms if term in haystack), "")
+            first_term = ""
+            for reason in match_reasons:
+                candidate = reason.get("matched_term") or reason.get("query_term") or reason.get("query")
+                if isinstance(candidate, str) and candidate.lower() in haystack:
+                    first_term = candidate.lower()
+                    break
             start = haystack.find(first_term) if first_term else 0
             start = max(start, 0)
             snippet = text[start : start + 180].replace("\n", " ").strip()
@@ -207,6 +297,9 @@ class LocalRuntimeStore:
                     "snippet": snippet,
                     "derived_text_ref": artifact.get("derived", {}).get("text_ref"),
                     "original_storage_ref": artifact.get("original_storage_ref"),
+                    "scope": artifact.get("scope"),
+                    "retrieval_modes": sorted(retrieval_modes),
+                    "match_reasons": match_reasons,
                     "evidence_refs": [
                         f"artifact:{artifact['artifact_id']}",
                         f"storage:{artifact['original_storage_ref']}",
@@ -244,7 +337,7 @@ class LocalRuntimeStore:
             return {"status": "scope_denied", "resource_scope": snapshot.get("filters")}
         evidence_items = []
         for result in snapshot.get("results", []):
-            artifact = self.get_artifact(result["artifact_id"])
+            artifact = self.get_artifact(result["artifact_id"], scope)
             if artifact is None:
                 return {"status": "not_found", "artifact_id": result["artifact_id"]}
             if artifact.get("scope") != scope:
@@ -314,7 +407,7 @@ class LocalRuntimeStore:
 
         viewer_items = []
         for item in bundle.get("evidence_items", []):
-            artifact = self.get_artifact(item["artifact_id"])
+            artifact = self.get_artifact(item["artifact_id"], scope)
             if artifact is None:
                 return {"status": "not_found", "artifact_id": item["artifact_id"]}
             if artifact.get("scope") != scope:
@@ -436,13 +529,13 @@ class LocalRuntimeStore:
         if not original_path.exists():
             original_path.write_bytes(data)
 
-        existing = self.get_artifact(artifact_id)
         scope = {
             "tenant_id": tenant_id,
             "owner_id": owner_id,
             "namespace_id": namespace_id,
             "workspace_id": workspace_id,
         }
+        existing = self.get_artifact(artifact_id, scope)
         if existing and existing.get("scope") == scope:
             event = self.append_audit(
                 "artifact.deduplicated",
@@ -524,7 +617,7 @@ class LocalRuntimeStore:
             },
             "derived": derived,
         }
-        _write_json(self.artifact_path(artifact_id), record)
+        _write_json(self.artifact_path(artifact_id, scope), record)
         event = self.append_audit(
             "artifact.ingested",
             scope,

@@ -24,8 +24,8 @@ CS-ARCH-012,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-A
 CS-ARCH-013,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-013 --json,reports/scenario/cs-arch-013.json,,,,,NOT_VERIFIED
 CS-ARCH-014,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-014 --json,reports/scenario/cs-arch-014.json,,,,,NOT_VERIFIED
 CS-UND-001,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-evidence --json,reports/scenario/vs0-search-evidence-2026-06-09.json,,,,,PASS
-CS-UND-002,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-002.json,,,,,NOT_VERIFIED
-CS-UND-003,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-003.json,,,,,NOT_VERIFIED
+CS-UND-002,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-understanding --json,reports/scenario/vs0-search-understanding-2026-06-09.json,,,,,PASS
+CS-UND-003,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-understanding --json,reports/scenario/vs0-search-understanding-2026-06-09.json,,,,,PASS
 CS-UND-004,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-004.json,,,,,NOT_VERIFIED
 CS-UND-005,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-005.json,,,,,NOT_VERIFIED
 CS-UND-006,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-006 --json,reports/scenario/cs-und-006.json,,,,,NOT_VERIFIED
