@@ -34,8 +34,9 @@ brief_json=$(mktemp)
 mission_action_json=$(mktemp)
 detail_json=$(mktemp)
 conversation_json=$(mktemp)
+product_loop_json=$(mktemp)
 product_domain_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_domain_json"' EXIT
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$product_domain_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -318,6 +319,29 @@ grep -q '"unsupported_assertions_presented_as_fact": 0' "$conversation_json" || 
 grep -q '"real_external_http_calls": 0' "$conversation_json" || fail "vs0-conversation-onboarding reported real external HTTP calls"
 grep -q '"product_feature_claims": "PARTIAL_VS0_CONVERSATION_ONBOARDING_ONLY"' "$conversation_json" || fail "vs0-conversation-onboarding overclaimed product feature scope"
 
+cornerstone scenario verify vs0-product-loop-identity --json > "$product_loop_json"
+python3 -m json.tool "$product_loop_json" >/dev/null
+grep -q '"scenario_set": "vs0-product-loop-identity"' "$product_loop_json" || fail "vs0-product-loop-identity report missing scenario set"
+grep -q '"blocking": 0' "$product_loop_json" || fail "vs0-product-loop-identity report has blocking scenarios"
+grep -q '"pass": 2' "$product_loop_json" || fail "vs0-product-loop-identity did not pass exactly two scenarios"
+grep -q '"id": "CS-PROD-002"' "$product_loop_json" || fail "vs0-product-loop-identity missing CS-PROD-002"
+grep -q '"id": "CS-REG-001"' "$product_loop_json" || fail "vs0-product-loop-identity missing CS-REG-001"
+grep -q '"memory_status": "owner_approved"' "$product_loop_json" || fail "vs0-product-loop-identity missing owner-approved memory"
+grep -q '"memory_truth_foundation": "archive_evidence"' "$product_loop_json" || fail "vs0-product-loop-identity missing archive evidence truth foundation"
+grep -q '"learning_status": "recorded"' "$product_loop_json" || fail "vs0-product-loop-identity missing learning record"
+grep -q '"learning_changes_user_or_org_truth": false' "$product_loop_json" || fail "vs0-product-loop-identity learning changed truth"
+grep -q '"action_policy": "low_risk_autopilot_allowed"' "$product_loop_json" || fail "vs0-product-loop-identity missing governed action policy"
+grep -q '"action_result_status": "success"' "$product_loop_json" || fail "vs0-product-loop-identity missing successful action"
+grep -q '"missing_product_loop_surfaces": 0' "$product_loop_json" || fail "vs0-product-loop-identity missing product loop surfaces"
+grep -q '"chatbot_only": 0' "$product_loop_json" || fail "vs0-product-loop-identity regressed to chatbot only"
+grep -q '"file_search_only": 0' "$product_loop_json" || fail "vs0-product-loop-identity regressed to file search only"
+grep -q '"connector_framework_only": 0' "$product_loop_json" || fail "vs0-product-loop-identity regressed to connector framework only"
+grep -q '"automation_script_runner_only": 0' "$product_loop_json" || fail "vs0-product-loop-identity regressed to automation script runner only"
+grep -q '"memory_without_evidence": 0' "$product_loop_json" || fail "vs0-product-loop-identity created memory without evidence"
+grep -q '"learning_without_action_result": 0' "$product_loop_json" || fail "vs0-product-loop-identity recorded learning without action result"
+grep -q '"real_external_http_calls": 0' "$product_loop_json" || fail "vs0-product-loop-identity reported real external HTTP calls"
+grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_LOOP_IDENTITY_ONLY"' "$product_loop_json" || fail "vs0-product-loop-identity overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -347,4 +371,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-product-domain-readiness verify, unittest).\n'

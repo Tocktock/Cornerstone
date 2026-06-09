@@ -678,6 +678,48 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_product_loop_identity_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-product-loop-identity", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-product-loop-identity")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 2)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_PRODUCT_LOOP_IDENTITY_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-PROD-002", "CS-REG-001"})
+        evidence = payload["product_loop_evidence"]
+        self.assertEqual(evidence["walkthrough_product_name"], "CornerStone")
+        self.assertIn("Learn", evidence["walkthrough_first_run_path"])
+        expected_surfaces = {
+            "conversation",
+            "artifact",
+            "search",
+            "evidence_bundle",
+            "evidence_viewer",
+            "brief",
+            "claim",
+            "approved_claim",
+            "mission",
+            "action_card",
+            "action_result",
+            "memory",
+            "learning",
+            "audit",
+        }
+        self.assertEqual(set(evidence["present_surfaces"]), expected_surfaces)
+        self.assertEqual(evidence["missing_surfaces"], [])
+        self.assertEqual(evidence["brief_status"], "evidence_backed")
+        self.assertEqual(evidence["approved_claim_trust_state"], "approved")
+        self.assertEqual(evidence["memory_status"], "owner_approved")
+        self.assertEqual(evidence["memory_truth_foundation"], "archive_evidence")
+        self.assertEqual(evidence["action_policy"], "low_risk_autopilot_allowed")
+        self.assertEqual(evidence["action_result_status"], "success")
+        self.assertEqual(evidence["learning_status"], "recorded")
+        self.assertFalse(evidence["learning_changes_user_or_org_truth"])
+        self.assertGreaterEqual(evidence["audit_event_count"], 1)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

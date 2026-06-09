@@ -2839,6 +2839,317 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_vs0_product_loop_identity(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-product-loop-identity")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    message = (
+        "Product loop identity note: CornerStone should preserve this messy source, "
+        "produce an evidence-backed brief and claim, create durable memory, run a governed internal action, "
+        "and record learning after the action. Anchor: product-loop-anchor."
+    )
+    claim_statement = "The product loop identity note requires evidence, claim, memory, governed action, and learning surfaces."
+
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["product_walkthrough"] = _run_cli_json(root, ["product", "walkthrough", "--json"])
+    transcripts["conversation_start"] = _run_cli_json(
+        root,
+        ["conversation", "start", "--message", message, "--state-dir", state_rel, "--json"],
+    )
+    start_payload = _payload(transcripts["conversation_start"])
+    conversation = start_payload.get("conversation", {})
+    source_artifact = start_payload.get("artifact", {})
+    conversation_id = conversation.get("conversation_id", "")
+    artifact_id = source_artifact.get("artifact_id", "")
+
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "product-loop-anchor", "--state-dir", state_rel, "--json"])
+    search_snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = search_snapshot.get("search_snapshot_id", "")
+    transcripts["evidence_bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    evidence_bundle = _payload(transcripts["evidence_bundle_create"]).get("evidence_bundle", {})
+    evidence_bundle_id = evidence_bundle.get("evidence_bundle_id", "")
+    transcripts["evidence_view"] = _run_cli_json(
+        root,
+        ["evidence", "view", evidence_bundle_id, "--state-dir", state_rel, "--json"],
+    ) if evidence_bundle_id else {}
+    evidence_viewer = _payload(transcripts["evidence_view"]).get("evidence_viewer", {})
+    transcripts["brief_create"] = _run_cli_json(
+        root,
+        ["brief", "create", "--evidence-bundle-id", evidence_bundle_id, "--state-dir", state_rel, "--json"],
+    ) if evidence_bundle_id else {}
+    brief = _payload(transcripts["brief_create"]).get("brief", {})
+
+    transcripts["conversation_promote_claim"] = _run_cli_json(
+        root,
+        [
+            "conversation",
+            "promote",
+            conversation_id,
+            "--kind",
+            "claim",
+            "--statement",
+            claim_statement,
+            "--evidence-bundle-id",
+            evidence_bundle_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if conversation_id and evidence_bundle_id else {}
+    claim = _payload(transcripts["conversation_promote_claim"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", claim_id, "--state-dir", state_rel, "--json"],
+    ) if claim_id else {}
+    approved_claim = _payload(transcripts["claim_approve"]).get("claim", {})
+
+    transcripts["memory_create"] = _run_cli_json(
+        root,
+        [
+            "memory",
+            "create",
+            "--evidence-bundle-id",
+            evidence_bundle_id,
+            "--statement",
+            "Owner-approved memory: the product loop uses evidence, claim, action, audit, and learning surfaces.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if evidence_bundle_id else {}
+    memory = _payload(transcripts["memory_create"]).get("memory", {})
+    memory_id = memory.get("memory_id", "")
+    transcripts["memory_show"] = _run_cli_json(
+        root,
+        ["memory", "show", memory_id, "--state-dir", state_rel, "--json"],
+    ) if memory_id else {}
+    shown_memory = _payload(transcripts["memory_show"]).get("memory", {})
+
+    transcripts["mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Complete a governed internal follow-up for the product loop identity fixture.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if claim_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["mission_activate"] = _run_cli_json(
+        root,
+        ["mission", "activate", mission_id, "--mode", "autopilot", "--state-dir", state_rel, "--json"],
+    ) if mission_id else {}
+    transcripts["action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Record product loop identity fixture status.",
+            "--action-kind",
+            "internal_status_update",
+            "--risk",
+            "low",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    action_card = _payload(transcripts["action_propose"]).get("action_card", {})
+    action_id = action_card.get("action_id", "")
+    transcripts["action_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", action_id, "--state-dir", state_rel, "--json"],
+    ) if action_id else {}
+    executed_action = _payload(transcripts["action_execute"]).get("action_card", {})
+    action_result = _payload(transcripts["action_execute"]).get("action_result", {})
+
+    transcripts["learning_record"] = _run_cli_json(
+        root,
+        [
+            "learning",
+            "record",
+            "--action-id",
+            action_id,
+            "--lesson",
+            "Low-risk internal action completed with evidence and audit links; keep future loop summaries evidence-first.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if action_id else {}
+    learning = _payload(transcripts["learning_record"]).get("learning", {})
+    learning_id = learning.get("learning_id", "")
+    transcripts["learning_show"] = _run_cli_json(
+        root,
+        ["learning", "show", learning_id, "--state-dir", state_rel, "--json"],
+    ) if learning_id else {}
+    shown_learning = _payload(transcripts["learning_show"]).get("learning", {})
+
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    walkthrough = _payload(transcripts["product_walkthrough"]).get("walkthrough", {})
+    walkthrough_path = walkthrough.get("first_run_path", [])
+    walkthrough_language = " ".join(walkthrough.get("capability_language", [])).lower()
+    evidence_items = evidence_bundle.get("evidence_items", [])
+    viewer_items = evidence_viewer.get("viewer_items", [])
+
+    surface_status = {
+        "conversation": _exit_ok(transcripts["conversation_start"]) and bool(conversation_id),
+        "artifact": source_artifact.get("source", {}).get("type") == "conversation_turn" and bool(artifact_id),
+        "search": _exit_ok(transcripts["search"]) and search_snapshot.get("result_count") == 1,
+        "evidence_bundle": _exit_ok(transcripts["evidence_bundle_create"]) and evidence_bundle.get("evidence_bundle_id") == evidence_bundle_id and len(evidence_items) >= 1,
+        "evidence_viewer": _exit_ok(transcripts["evidence_view"]) and len(viewer_items) >= 1,
+        "brief": _exit_ok(transcripts["brief_create"]) and brief.get("status") == "evidence_backed",
+        "claim": _exit_ok(transcripts["conversation_promote_claim"]) and claim.get("trust_state") == "evidence_backed",
+        "approved_claim": _exit_ok(transcripts["claim_approve"]) and approved_claim.get("trust_state") == "approved",
+        "mission": _exit_ok(transcripts["mission_create"]) and mission.get("schema_version") == "cs.mission_goal_contract.v0",
+        "action_card": _exit_ok(transcripts["action_propose"]) and action_card.get("schema_version") == "cs.action_card.v0",
+        "action_result": _exit_ok(transcripts["action_execute"]) and action_result.get("status") == "success",
+        "memory": _exit_ok(transcripts["memory_create"]) and memory.get("status") == "owner_approved",
+        "learning": _exit_ok(transcripts["learning_record"]) and learning.get("status") == "recorded",
+        "audit": _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success",
+    }
+    expected_surfaces = set(surface_status)
+    present_surfaces = {name for name, ok in surface_status.items() if ok}
+    missing_surfaces = sorted(expected_surfaces - present_surfaces)
+    audit_ok = surface_status["audit"]
+
+    memory_ok = (
+        surface_status["memory"]
+        and shown_memory.get("memory_id") == memory_id
+        and shown_memory.get("canonicality", {}).get("canonical_truth_foundation") == "archive_evidence"
+        and shown_memory.get("canonicality", {}).get("raw_agent_memory_canonical") is False
+        and shown_memory.get("canonicality", {}).get("owner_approved") is True
+        and f"evidence_bundle:{evidence_bundle_id}" in shown_memory.get("evidence_refs", [])
+        and f"artifact:{artifact_id}" in shown_memory.get("evidence_refs", [])
+    )
+    learning_ok = (
+        surface_status["learning"]
+        and shown_learning.get("learning_id") == learning_id
+        and shown_learning.get("source_action", {}).get("action_id") == action_id
+        and shown_learning.get("learning_boundary", {}).get("changes_user_or_org_truth") is False
+        and shown_learning.get("learning_boundary", {}).get("requires_review_before_memory_update") is True
+        and f"action:{action_id}" in shown_learning.get("evidence_refs", [])
+    )
+    action_ok = (
+        surface_status["action_card"]
+        and surface_status["action_result"]
+        and action_card.get("dry_run", {}).get("dry_run_id", "").startswith("dryrun_")
+        and action_card.get("policy_decision", {}).get("policy") == "low_risk_autopilot_allowed"
+        and action_result.get("external_http_calls") == 0
+    )
+    product_identity_ok = (
+        _exit_ok(transcripts["product_walkthrough"])
+        and walkthrough.get("product_name") == "CornerStone"
+        and walkthrough.get("one_service") is True
+        and "Learn" in walkthrough_path
+        and "evidence" in walkthrough_language
+        and "claims" in walkthrough_language
+        and "action" in walkthrough_language
+        and "learning" in walkthrough_language
+        and len(missing_surfaces) == 0
+        and memory_ok
+        and learning_ok
+        and action_ok
+    )
+    regression_guard_ok = (
+        product_identity_ok
+        and len(present_surfaces - {"conversation"}) >= 11
+        and memory_ok
+        and learning_ok
+        and action_ok
+        and audit_ok
+    )
+
+    negative_evidence = {
+        "missing_product_loop_surfaces": len(missing_surfaces),
+        "chatbot_only": 0 if len(present_surfaces - {"conversation"}) >= 11 else 1,
+        "file_search_only": 0 if {"claim", "mission", "action_card", "memory", "learning"}.issubset(present_surfaces) else 1,
+        "connector_framework_only": 0 if action_card.get("connector_boundary", {}).get("direct_provider_access") is False else 1,
+        "automation_script_runner_only": 0 if action_ok and bool(_payload(transcripts["action_execute"]).get("audit_refs")) else 1,
+        "memory_without_evidence": 0 if memory_ok else 1,
+        "learning_without_action_result": 0 if learning_ok else 1,
+        "real_external_http_calls": int(action_result.get("external_http_calls", 1) or 0),
+    }
+    rows = [
+        _row(
+            "CS-PROD-002",
+            "MUST_PASS",
+            "PASS" if product_identity_ok and audit_ok and sum(negative_evidence.values()) == 0 else "FAIL",
+            ["cornerstone scenario verify vs0-product-loop-identity --json"],
+            "End-to-end walkthrough shows evidence, claim, action, durable memory, learning, and audit surfaces.",
+        ),
+        _row(
+            "CS-REG-001",
+            "REGRESSION_GUARD",
+            "PASS" if regression_guard_ok and audit_ok and sum(negative_evidence.values()) == 0 else "FAIL",
+            ["cornerstone scenario verify vs0-product-loop-identity --json"],
+            "Release walkthrough includes non-chat durable outputs: evidence, memory, claims, missions, actions, audit, and learning.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-product-loop-identity",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_PRODUCT_LOOP_IDENTITY_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "product_loop_evidence": {
+            "walkthrough_product_name": walkthrough.get("product_name"),
+            "walkthrough_first_run_path": walkthrough_path,
+            "surface_status": surface_status,
+            "present_surfaces": sorted(present_surfaces),
+            "missing_surfaces": missing_surfaces,
+            "conversation_id": conversation_id,
+            "artifact_id": artifact_id,
+            "search_result_count": search_snapshot.get("result_count"),
+            "evidence_bundle_id": evidence_bundle_id,
+            "evidence_item_count": len(evidence_items),
+            "evidence_viewer_item_count": len(viewer_items),
+            "brief_id": brief.get("brief_id"),
+            "brief_status": brief.get("status"),
+            "claim_id": claim_id,
+            "approved_claim_trust_state": approved_claim.get("trust_state"),
+            "memory_id": memory_id,
+            "memory_status": shown_memory.get("status"),
+            "memory_truth_foundation": shown_memory.get("canonicality", {}).get("canonical_truth_foundation"),
+            "mission_id": mission_id,
+            "action_id": action_id,
+            "action_policy": action_card.get("policy_decision", {}).get("policy"),
+            "action_result_status": action_result.get("status"),
+            "learning_id": learning_id,
+            "learning_status": shown_learning.get("status"),
+            "learning_changes_user_or_org_truth": shown_learning.get("learning_boundary", {}).get("changes_user_or_org_truth"),
+            "audit_event_count": _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("event_count"),
+        },
+        "negative_evidence": negative_evidence,
+        "human_required": [],
+    }
+
+
 def verify_vs0_product_domain_readiness(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-product-domain-readiness")
     state_path = root / state_rel

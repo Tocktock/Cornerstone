@@ -17,6 +17,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_conversation_onboarding,
     verify_vs0_detail_surfaces,
     verify_vs0_mission_action,
+    verify_vs0_product_loop_identity,
     verify_vs0_product_domain_readiness,
     verify_vs0_namespace_isolation,
     verify_vs0_regression_guardrails,
@@ -924,6 +925,161 @@ def command_autopilot_readiness(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_memory_create(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_memory_from_evidence_bundle(args.evidence_bundle_id, args.statement, requested_scope)
+    payload = base_response("cornerstone memory create", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_MEMORY_EVIDENCE_NOT_FOUND",
+                "message": "Evidence Bundle for memory creation was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Evidence Bundle for memory creation is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    if result.get("status") == "evidence_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_MEMORY_EVIDENCE_REQUIRED",
+                "message": "Owner-approved memory requires an Evidence Bundle with at least one artifact reference.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+
+    memory = result["memory"]
+    payload.update(memory["scope"])
+    payload["memory"] = memory
+    payload["ids"].update({"memory_id": memory["memory_id"], "evidence_bundle_id": args.evidence_bundle_id})
+    payload["evidence_refs"].extend([f"memory:{memory['memory_id']}", *memory.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_memory_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.show_memory(args.memory_id, requested_scope)
+    payload = base_response("cornerstone memory show", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_MEMORY_NOT_FOUND", "message": "Memory record was not found.", "memory_id": args.memory_id})
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_SCOPE_DENIED", "message": "Memory record is outside the requested scope.", "resource_scope": result.get("resource_scope")})
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    memory = result["memory"]
+    payload.update(memory["scope"])
+    payload["memory"] = memory
+    payload["ids"].update({"memory_id": memory["memory_id"]})
+    payload["evidence_refs"].extend([f"memory:{memory['memory_id']}", *memory.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_learning_record(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.record_learning_from_action(args.action_id, args.lesson, requested_scope)
+    payload = base_response("cornerstone learning record", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_LEARNING_SOURCE_NOT_FOUND",
+                "message": "Executed Action source for learning was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Executed Action source for learning is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    if result.get("status") == "evidence_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_LEARNING_ACTION_RESULT_REQUIRED",
+                "message": "Learning record requires a successfully executed Action result.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+
+    learning = result["learning"]
+    payload.update(learning["scope"])
+    payload["learning"] = learning
+    payload["ids"].update({"learning_id": learning["learning_id"], "action_id": args.action_id})
+    payload["evidence_refs"].extend([f"learning:{learning['learning_id']}", *learning.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_learning_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.show_learning(args.learning_id, requested_scope)
+    payload = base_response("cornerstone learning show", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_LEARNING_NOT_FOUND", "message": "Learning record was not found.", "learning_id": args.learning_id})
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_SCOPE_DENIED", "message": "Learning record is outside the requested scope.", "resource_scope": result.get("resource_scope")})
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    learning = result["learning"]
+    payload.update(learning["scope"])
+    payload["learning"] = learning
+    payload["ids"].update({"learning_id": learning["learning_id"]})
+    payload["evidence_refs"].extend([f"learning:{learning['learning_id']}", *learning.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_mission_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -1457,6 +1613,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_detail_surfaces(root)
     elif args.contract == "vs0-conversation-onboarding":
         report = verify_vs0_conversation_onboarding(root)
+    elif args.contract == "vs0-product-loop-identity":
+        report = verify_vs0_product_loop_identity(root)
     elif args.contract == "vs0-product-domain-readiness":
         report = verify_vs0_product_domain_readiness(root)
     else:
@@ -1482,6 +1640,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-mission-action",
                     "vs0-detail-surfaces",
                     "vs0-conversation-onboarding",
+                    "vs0-product-loop-identity",
                     "vs0-product-domain-readiness",
                 ],
             }
@@ -1738,6 +1897,42 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(autopilot_readiness)
     autopilot_readiness.add_argument("--json", action="store_true", help="Emit JSON output")
     autopilot_readiness.set_defaults(func=command_autopilot_readiness)
+
+    memory = subcommands.add_parser("memory", help="Durable owner-approved memory commands")
+    memory_sub = memory.add_subparsers(dest="memory_command")
+
+    memory_create = memory_sub.add_parser("create", help="Create owner-approved memory from an Evidence Bundle")
+    memory_create.add_argument("--evidence-bundle-id", required=True, help="Evidence Bundle ID")
+    memory_create.add_argument("--statement", required=True, help="Memory statement")
+    add_state_argument(memory_create)
+    add_scope_arguments(memory_create)
+    memory_create.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_create.set_defaults(func=command_memory_create)
+
+    memory_show = memory_sub.add_parser("show", help="Show an owner-approved memory record")
+    memory_show.add_argument("memory_id", help="Memory ID")
+    add_state_argument(memory_show)
+    add_scope_arguments(memory_show)
+    memory_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_show.set_defaults(func=command_memory_show)
+
+    learning = subcommands.add_parser("learning", help="Action outcome learning commands")
+    learning_sub = learning.add_subparsers(dest="learning_command")
+
+    learning_record = learning_sub.add_parser("record", help="Record a learning item from an executed Action")
+    learning_record.add_argument("--action-id", required=True, help="Executed Action ID")
+    learning_record.add_argument("--lesson", required=True, help="Learning note")
+    add_state_argument(learning_record)
+    add_scope_arguments(learning_record)
+    learning_record.add_argument("--json", action="store_true", help="Emit JSON output")
+    learning_record.set_defaults(func=command_learning_record)
+
+    learning_show = learning_sub.add_parser("show", help="Show a learning record")
+    learning_show.add_argument("learning_id", help="Learning ID")
+    add_state_argument(learning_show)
+    add_scope_arguments(learning_show)
+    learning_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    learning_show.set_defaults(func=command_learning_show)
 
     mission = subcommands.add_parser("mission", help="Mission Goal Contract commands")
     mission_sub = mission.add_subparsers(dest="mission_command")

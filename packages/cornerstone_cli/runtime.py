@@ -106,6 +106,8 @@ class LocalRuntimeStore:
         self.mission_dir = state_dir / "missions"
         self.action_dir = state_dir / "actions"
         self.answer_dir = state_dir / "answers"
+        self.memory_dir = state_dir / "memories"
+        self.learning_dir = state_dir / "learning"
         self.audit_path = state_dir / "audit" / "events.jsonl"
 
     def reset(self) -> None:
@@ -205,6 +207,12 @@ class LocalRuntimeStore:
     def answer_path(self, answer_id: str) -> Path:
         return self.answer_dir / f"{answer_id}.json"
 
+    def memory_path(self, memory_id: str) -> Path:
+        return self.memory_dir / f"{memory_id}.json"
+
+    def learning_path(self, learning_id: str) -> Path:
+        return self.learning_dir / f"{learning_id}.json"
+
     def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
         if scope is not None:
             scoped_path = self.artifact_path(artifact_id, scope)
@@ -263,6 +271,18 @@ class LocalRuntimeStore:
 
     def get_action(self, action_id: str) -> dict[str, Any] | None:
         path = self.action_path(action_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_memory(self, memory_id: str) -> dict[str, Any] | None:
+        path = self.memory_path(memory_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_learning(self, learning_id: str) -> dict[str, Any] | None:
+        path = self.learning_path(learning_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -330,6 +350,26 @@ class LocalRuntimeStore:
             return []
         records = []
         for path in sorted(self.action_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _memory_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.memory_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.memory_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _learning_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.learning_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.learning_dir.glob("*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
                 records.append(record)
@@ -459,6 +499,157 @@ class LocalRuntimeStore:
             "approval_boundary": "Recommendation does not grant authority; a Mission Goal Contract and policy still control execution.",
             "generated_at": utc_now(),
         }
+
+    def create_memory_from_evidence_bundle(self, bundle_id: str, statement: str, scope: dict[str, str]) -> dict[str, Any]:
+        bundle = self.get_evidence_bundle(bundle_id)
+        if bundle is None:
+            return {"status": "not_found", "resource": "evidence_bundle"}
+        if bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+
+        evidence_items = bundle.get("evidence_items", [])
+        artifact_refs = [f"artifact:{item['artifact_id']}" for item in evidence_items]
+        if not evidence_items or not artifact_refs:
+            return {"status": "evidence_required"}
+
+        memory_base = {
+            "schema_version": "cs.memory.v0",
+            "status": "owner_approved",
+            "trust_state": "evidence_backed",
+            "memory_type": "durable_fact",
+            "statement": redact_text(statement),
+            "scope": scope,
+            "source": {
+                "created_from": "memory.create",
+                "source_type": "evidence_bundle",
+                "evidence_bundle_id": bundle_id,
+                "search_snapshot_id": bundle.get("search_snapshot_id"),
+                "artifact_refs": artifact_refs,
+            },
+            "provenance": {
+                "source_evidence_bundle_id": bundle_id,
+                "source_search_snapshot_id": bundle.get("search_snapshot_id"),
+                "source_artifact_refs": artifact_refs,
+                "created_from": "owner_approved_memory_create",
+            },
+            "canonicality": {
+                "canonical_truth_foundation": "archive_evidence",
+                "raw_agent_memory_canonical": False,
+                "owner_approved": True,
+                "requires_evidence_for_truth_claims": True,
+            },
+            "evidence_refs": [
+                f"evidence_bundle:{bundle_id}",
+                f"search_snapshot:{bundle.get('search_snapshot_id')}",
+                *artifact_refs,
+            ],
+            "created_at": utc_now(),
+        }
+        memory_id = f"memory_{_json_hash(memory_base)[:16]}"
+        memory = dict(memory_base)
+        memory["memory_id"] = memory_id
+        _write_json(self.memory_path(memory_id), memory)
+        event = self.append_audit(
+            "memory.owner_approved.created",
+            scope,
+            {"type": "memory", "id": memory_id},
+            {
+                "evidence_bundle_id": bundle_id,
+                "artifact_refs": artifact_refs,
+                "canonical_truth_foundation": memory["canonicality"]["canonical_truth_foundation"],
+            },
+        )
+        return {"memory": memory, "audit_event": event}
+
+    def show_memory(self, memory_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        memory = self.get_memory(memory_id)
+        if memory is None:
+            return {"status": "not_found"}
+        if memory.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": memory.get("scope")}
+        event = self.append_audit(
+            "memory.read",
+            scope,
+            {"type": "memory", "id": memory_id},
+            {"reason": "cli_memory_show"},
+        )
+        return {"memory": memory, "audit_event": event}
+
+    def record_learning_from_action(self, action_id: str, lesson: str, scope: dict[str, str]) -> dict[str, Any]:
+        action = self.get_action(action_id)
+        if action is None:
+            return {"status": "not_found", "resource": "action"}
+        if action.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": action.get("scope")}
+        execution = action.get("execution", {})
+        result = execution.get("result") or {}
+        if execution.get("status") != "executed" or result.get("status") != "success":
+            return {"status": "evidence_required", "resource": "executed_action"}
+
+        evidence = action.get("evidence", {})
+        artifact_refs = evidence.get("artifact_refs", [])
+        evidence_bundle_id = evidence.get("evidence_bundle_id")
+        learning_base = {
+            "schema_version": "cs.learning_record.v0",
+            "status": "recorded",
+            "scope": scope,
+            "lesson": redact_text(lesson),
+            "source_action": {
+                "action_id": action_id,
+                "mission_id": action.get("mission_id"),
+                "action_kind": action.get("action_kind"),
+                "risk": action.get("risk"),
+                "execution_status": execution.get("status"),
+                "result_status": result.get("status"),
+                "side_effect_boundary": result.get("side_effect_boundary"),
+                "external_http_calls": result.get("external_http_calls"),
+            },
+            "source_policy": action.get("policy_decision"),
+            "source_dry_run": action.get("dry_run"),
+            "evidence_refs": [
+                f"action:{action_id}",
+                f"mission:{action.get('mission_id')}",
+                f"claim:{action.get('source_claim_id')}",
+                *([f"evidence_bundle:{evidence_bundle_id}"] if evidence_bundle_id else []),
+                *artifact_refs,
+            ],
+            "learning_boundary": {
+                "updates_product_behavior": False,
+                "changes_user_or_org_truth": False,
+                "requires_review_before_memory_update": True,
+                "source_of_truth": "audit_and_evidence",
+            },
+            "created_at": utc_now(),
+        }
+        learning_id = f"learn_{_json_hash(learning_base)[:16]}"
+        learning = dict(learning_base)
+        learning["learning_id"] = learning_id
+        _write_json(self.learning_path(learning_id), learning)
+        event = self.append_audit(
+            "learning.recorded",
+            scope,
+            {"type": "learning_record", "id": learning_id},
+            {
+                "action_id": action_id,
+                "mission_id": action.get("mission_id"),
+                "changes_user_or_org_truth": False,
+            },
+        )
+        return {"learning": learning, "audit_event": event}
+
+    def show_learning(self, learning_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        learning = self.get_learning(learning_id)
+        if learning is None:
+            return {"status": "not_found"}
+        if learning.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": learning.get("scope")}
+        event = self.append_audit(
+            "learning.read",
+            scope,
+            {"type": "learning_record", "id": learning_id},
+            {"reason": "cli_learning_show"},
+        )
+        return {"learning": learning, "audit_event": event}
 
     def _derived_text(self, artifact: dict[str, Any]) -> str:
         text_ref = artifact.get("derived", {}).get("text_ref")
