@@ -45,10 +45,10 @@ CS-CLAIM-007,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-claim-evide
 CS-CLAIM-008,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-detail-surfaces --json,reports/scenario/vs0-detail-surfaces-2026-06-09.json,,,,,PASS
 CS-CLAIM-009,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-conversation-onboarding --json,reports/scenario/vs0-conversation-onboarding-2026-06-09.json,,,,,PASS
 CS-CLAIM-010,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
-CS-CLAIM-011,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-CLAIM-011 --json,reports/scenario/cs-claim-011.json,,,,,NOT_VERIFIED
-CS-CLAIM-012,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-CLAIM-012 --json,reports/scenario/cs-claim-012.json,,,,,NOT_VERIFIED
-CS-CLAIM-013,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-CLAIM-013 --json,reports/scenario/cs-claim-013.json,,,,,NOT_VERIFIED
-CS-CLAIM-014,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-CLAIM-014 --json,reports/scenario/cs-claim-014.json,,,,,NOT_VERIFIED
+CS-CLAIM-011,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-claim-collaboration --json,reports/scenario/full-claim-collaboration-2026-06-09.json,,,,,PASS
+CS-CLAIM-012,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-claim-collaboration --json,reports/scenario/full-claim-collaboration-2026-06-09.json,,,,,PASS
+CS-CLAIM-013,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-claim-collaboration --json,reports/scenario/full-claim-collaboration-2026-06-09.json,,,,,PASS
+CS-CLAIM-014,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-claim-collaboration --json,reports/scenario/full-claim-collaboration-2026-06-09.json,,,,,PASS
 CS-MEM-001,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-001 --json,reports/scenario/cs-mem-001.json,,,,,NOT_VERIFIED
 CS-MEM-002,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-002 --json,reports/scenario/cs-mem-002.json,,,,,NOT_VERIFIED
 CS-MEM-003,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-003 --json,reports/scenario/cs-mem-003.json,,,,,NOT_VERIFIED

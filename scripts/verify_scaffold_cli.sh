@@ -38,7 +38,8 @@ product_loop_json=$(mktemp)
 memory_truth_json=$(mktemp)
 tenant_security_json=$(mktemp)
 product_domain_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json"' EXIT
+claim_collaboration_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -394,6 +395,35 @@ grep -q '"real_external_http_calls": 0' "$tenant_security_json" || fail "vs0-ten
 grep -q '"secret_reads": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary read secrets"
 grep -q '"product_feature_claims": "PARTIAL_VS0_TENANT_SECURITY_BOUNDARY_ONLY"' "$tenant_security_json" || fail "vs0-tenant-security-boundary overclaimed product feature scope"
 
+cornerstone scenario verify full-claim-collaboration --json > "$claim_collaboration_json"
+python3 -m json.tool "$claim_collaboration_json" >/dev/null
+grep -q '"scenario_set": "full-claim-collaboration"' "$claim_collaboration_json" || fail "full-claim-collaboration report missing scenario set"
+grep -q '"blocking": 0' "$claim_collaboration_json" || fail "full-claim-collaboration report has blocking scenarios"
+grep -q '"pass": 4' "$claim_collaboration_json" || fail "full-claim-collaboration did not pass exactly four scenarios"
+grep -q '"id": "CS-CLAIM-011"' "$claim_collaboration_json" || fail "full-claim-collaboration missing CS-CLAIM-011"
+grep -q '"id": "CS-CLAIM-012"' "$claim_collaboration_json" || fail "full-claim-collaboration missing CS-CLAIM-012"
+grep -q '"id": "CS-CLAIM-013"' "$claim_collaboration_json" || fail "full-claim-collaboration missing CS-CLAIM-013"
+grep -q '"id": "CS-CLAIM-014"' "$claim_collaboration_json" || fail "full-claim-collaboration missing CS-CLAIM-014"
+grep -q '"claim_trust_state": "approved"' "$claim_collaboration_json" || fail "full-claim-collaboration missing approved claim"
+grep -q '"capsule_trust_state": "approved"' "$claim_collaboration_json" || fail "full-claim-collaboration missing approved capsule trust state"
+grep -q '"capsule_freshness_status": "current"' "$claim_collaboration_json" || fail "full-claim-collaboration missing capsule freshness"
+grep -q '"decision_action_count": 1' "$claim_collaboration_json" || fail "full-claim-collaboration missing decision action"
+grep -q '"decision_learning_history_count": 1' "$claim_collaboration_json" || fail "full-claim-collaboration missing decision learning history"
+grep -q '"correction_source_type": "evidence_bundle"' "$claim_collaboration_json" || fail "full-claim-collaboration missing evidence-aware correction"
+grep -q '"correction_provenance_preserved": true' "$claim_collaboration_json" || fail "full-claim-collaboration did not preserve provenance"
+grep -q '"share_trust_state": "approved"' "$claim_collaboration_json" || fail "full-claim-collaboration missing approved share trust state"
+grep -q '"capsule_without_evidence": 0' "$claim_collaboration_json" || fail "full-claim-collaboration reported capsule without evidence"
+grep -q '"capsule_without_namespace": 0' "$claim_collaboration_json" || fail "full-claim-collaboration reported capsule without namespace"
+grep -q '"decision_card_missing_required_fields": 0' "$claim_collaboration_json" || fail "full-claim-collaboration missing decision fields"
+grep -q '"correction_silent_overwrite": 0' "$claim_collaboration_json" || fail "full-claim-collaboration silently overwrote correction target"
+grep -q '"correction_without_learning_signal": 0' "$claim_collaboration_json" || fail "full-claim-collaboration missed correction learning signal"
+grep -q '"share_hidden_trust_state": 0' "$claim_collaboration_json" || fail "full-claim-collaboration hid share trust state"
+grep -q '"share_hidden_evidence": 0' "$claim_collaboration_json" || fail "full-claim-collaboration hid share evidence"
+grep -q '"share_hidden_owner_or_scope": 0' "$claim_collaboration_json" || fail "full-claim-collaboration hid owner or scope"
+grep -q '"real_external_http_calls": 0' "$claim_collaboration_json" || fail "full-claim-collaboration reported real external HTTP calls"
+grep -q '"secret_reads": 0' "$claim_collaboration_json" || fail "full-claim-collaboration read secrets"
+grep -q '"product_feature_claims": "PARTIAL_FULL_CLAIM_COLLABORATION_ONLY"' "$claim_collaboration_json" || fail "full-claim-collaboration overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -423,4 +453,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, vs0-product-domain-readiness verify, unittest).\n'

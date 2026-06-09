@@ -865,6 +865,37 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["blocking_count"], 0)
         self.assertEqual(payload["errors"][0]["code"], "CS_SCENARIO_REPORT_FAILED")
 
+    def test_full_claim_collaboration_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full-claim-collaboration", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "full-claim-collaboration")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 4)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_FULL_CLAIM_COLLABORATION_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {"CS-CLAIM-011", "CS-CLAIM-012", "CS-CLAIM-013", "CS-CLAIM-014"},
+        )
+        evidence = payload["claim_collaboration_evidence"]
+        self.assertEqual(evidence["claim_trust_state"], "approved")
+        self.assertEqual(evidence["capsule_trust_state"], "approved")
+        self.assertEqual(evidence["capsule_freshness_status"], "current")
+        self.assertGreaterEqual(evidence["capsule_evidence_ref_count"], 1)
+        self.assertTrue(all(evidence["decision_required_fields"].values()))
+        self.assertGreaterEqual(evidence["decision_action_count"], 1)
+        self.assertGreaterEqual(evidence["decision_learning_history_count"], 1)
+        self.assertEqual(evidence["correction_source_type"], "evidence_bundle")
+        self.assertTrue(evidence["correction_provenance_preserved"])
+        self.assertGreaterEqual(evidence["correction_history_count"], 1)
+        self.assertEqual(evidence["share_trust_state"], "approved")
+        self.assertTrue(evidence["share_visibility"]["trust_state_visible"])
+        self.assertTrue(evidence["share_visibility"]["evidence_visible"])
+        self.assertTrue(evidence["share_visibility"]["owner_visible"])
+        self.assertTrue(evidence["share_visibility"]["scope_visible"])
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -108,6 +108,10 @@ class LocalRuntimeStore:
         self.answer_dir = state_dir / "answers"
         self.memory_dir = state_dir / "memories"
         self.memory_conflict_dir = state_dir / "memory_conflicts"
+        self.knowledge_capsule_dir = state_dir / "knowledge_capsules"
+        self.decision_card_dir = state_dir / "decision_cards"
+        self.correction_dir = state_dir / "corrections"
+        self.share_dir = state_dir / "shares"
         self.namespace_promotion_dir = state_dir / "namespace_promotions"
         self.access_decision_dir = state_dir / "access_decisions"
         self.learning_dir = state_dir / "learning"
@@ -216,6 +220,18 @@ class LocalRuntimeStore:
     def memory_conflict_path(self, conflict_id: str) -> Path:
         return self.memory_conflict_dir / f"{conflict_id}.json"
 
+    def knowledge_capsule_path(self, capsule_id: str) -> Path:
+        return self.knowledge_capsule_dir / f"{capsule_id}.json"
+
+    def decision_card_path(self, card_id: str) -> Path:
+        return self.decision_card_dir / f"{card_id}.json"
+
+    def correction_path(self, correction_id: str) -> Path:
+        return self.correction_dir / f"{correction_id}.json"
+
+    def share_path(self, share_id: str) -> Path:
+        return self.share_dir / f"{share_id}.json"
+
     def namespace_promotion_path(self, promotion_id: str) -> Path:
         return self.namespace_promotion_dir / f"{promotion_id}.json"
 
@@ -295,6 +311,30 @@ class LocalRuntimeStore:
 
     def get_memory_conflict(self, conflict_id: str) -> dict[str, Any] | None:
         path = self.memory_conflict_path(conflict_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_knowledge_capsule(self, capsule_id: str) -> dict[str, Any] | None:
+        path = self.knowledge_capsule_path(capsule_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_decision_card(self, card_id: str) -> dict[str, Any] | None:
+        path = self.decision_card_path(card_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_correction(self, correction_id: str) -> dict[str, Any] | None:
+        path = self.correction_path(correction_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_share(self, share_id: str) -> dict[str, Any] | None:
+        path = self.share_path(share_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -384,6 +424,46 @@ class LocalRuntimeStore:
             return []
         records = []
         for path in sorted(self.memory_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _knowledge_capsule_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.knowledge_capsule_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.knowledge_capsule_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _decision_card_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.decision_card_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.decision_card_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _correction_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.correction_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.correction_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _share_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.share_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.share_dir.glob("*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
                 records.append(record)
@@ -1658,6 +1738,422 @@ class LocalRuntimeStore:
             {"reason": "cli_claim_show"},
         )
         return {"claim": claim, "audit_event": event}
+
+    def _claim_evidence_refs(self, claim: dict[str, Any]) -> list[str]:
+        evidence = claim.get("evidence_bundle", {})
+        refs = [f"claim:{claim['claim_id']}"]
+        if evidence.get("evidence_bundle_id"):
+            refs.append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
+        if evidence.get("search_snapshot_id"):
+            refs.append(f"search_snapshot:{evidence['search_snapshot_id']}")
+        refs.extend(evidence.get("artifact_refs", []))
+        return refs
+
+    def _scoped_target(self, target_kind: str, target_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        getters = {
+            "brief": self.get_brief,
+            "claim": self.get_claim,
+            "knowledge_capsule": self.get_knowledge_capsule,
+            "decision_card": self.get_decision_card,
+            "memory": self.get_memory,
+        }
+        getter = getters.get(target_kind)
+        if getter is None:
+            return {"status": "unsupported_kind"}
+        record = getter(target_id)
+        if record is None:
+            return {"status": "not_found"}
+        if record.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": record.get("scope")}
+        return {"record": record}
+
+    def create_knowledge_capsule(
+        self,
+        *,
+        claim_id: str,
+        title: str,
+        summary: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        claim = self.get_claim(claim_id)
+        if claim is None:
+            return {"status": "not_found", "resource": "claim"}
+        if claim.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": claim.get("scope")}
+        evidence = claim.get("evidence_bundle", {})
+        artifact_refs = evidence.get("artifact_refs", [])
+        if not evidence.get("evidence_bundle_id") or not artifact_refs:
+            return {"status": "evidence_required", "resource": "claim"}
+
+        related_missions = [
+            f"mission:{mission['mission_id']}"
+            for mission in self._mission_records(scope)
+            if mission.get("source_claim", {}).get("claim_id") == claim_id
+        ]
+        capsule_base = {
+            "schema_version": "cs.knowledge_capsule.v0",
+            "status": "active",
+            "title": redact_text(title),
+            "summary": redact_text(summary),
+            "scope": scope,
+            "trust_state": claim.get("trust_state"),
+            "freshness": {
+                "status": "current",
+                "source_created_at": claim.get("created_at"),
+                "last_reviewed_at": utc_now(),
+                "stale_after_days": 90,
+            },
+            "source": {
+                "created_from": "claim.capsule.create",
+                "source_claim_id": claim_id,
+                "source_statement": claim.get("statement"),
+                "evidence_bundle_id": evidence.get("evidence_bundle_id"),
+                "search_snapshot_id": evidence.get("search_snapshot_id"),
+                "artifact_refs": artifact_refs,
+            },
+            "related_claim_refs": [f"claim:{claim_id}"],
+            "related_mission_refs": related_missions,
+            "evidence_refs": self._claim_evidence_refs(claim),
+            "created_at": utc_now(),
+        }
+        capsule_id = f"capsule_{_json_hash(capsule_base)[:16]}"
+        capsule = dict(capsule_base)
+        capsule["capsule_id"] = capsule_id
+        _write_json(self.knowledge_capsule_path(capsule_id), capsule)
+        event = self.append_audit(
+            "knowledge_capsule.created",
+            scope,
+            {"type": "knowledge_capsule", "id": capsule_id},
+            {
+                "claim_id": claim_id,
+                "trust_state": capsule["trust_state"],
+                "evidence_bundle_id": evidence.get("evidence_bundle_id"),
+                "artifact_refs": artifact_refs,
+            },
+        )
+        return {"capsule": capsule, "audit_event": event}
+
+    def show_knowledge_capsule(self, capsule_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        capsule = self.get_knowledge_capsule(capsule_id)
+        if capsule is None:
+            return {"status": "not_found"}
+        if capsule.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": capsule.get("scope")}
+        event = self.append_audit(
+            "knowledge_capsule.read",
+            scope,
+            {"type": "knowledge_capsule", "id": capsule_id},
+            {"reason": "cli_capsule_show"},
+        )
+        return {"capsule": capsule, "audit_event": event}
+
+    def create_decision_card(
+        self,
+        *,
+        goal: str,
+        claim_id: str,
+        mission_id: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        claim = self.get_claim(claim_id)
+        if claim is None:
+            return {"status": "not_found", "resource": "claim"}
+        mission = self.get_mission(mission_id)
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if claim.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": claim.get("scope")}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+        evidence = claim.get("evidence_bundle", {})
+        artifact_refs = evidence.get("artifact_refs", [])
+        if not evidence.get("evidence_bundle_id") or not artifact_refs:
+            return {"status": "evidence_required", "resource": "claim"}
+
+        actions = [
+            {
+                "action_id": action["action_id"],
+                "status": action.get("status"),
+                "action_kind": action.get("action_kind"),
+                "risk": action.get("risk"),
+                "approval_required": action.get("policy_decision", {}).get("approval_required"),
+                "policy": action.get("policy_decision", {}).get("policy"),
+                "result_status": action.get("execution", {}).get("result", {}).get("status"),
+            }
+            for action in self._action_records(scope)
+            if action.get("mission_id") == mission_id
+        ]
+        mission_action_ids = {action["action_id"] for action in self._action_records(scope) if action.get("mission_id") == mission_id}
+        learning_history = [
+            f"learning:{learning['learning_id']}"
+            for learning in self._learning_records(scope)
+            if learning.get("source_action", {}).get("action_id") in mission_action_ids
+        ]
+        card_base = {
+            "schema_version": "cs.decision_card.v0",
+            "status": "active",
+            "scope": scope,
+            "goal": redact_text(goal),
+            "context": {
+                "source_mission_id": mission_id,
+                "source_claim_id": claim_id,
+                "mission_status": mission.get("status"),
+                "workspace_mode": mission.get("workspace_mode"),
+                "claim_statement": claim.get("statement"),
+                "claim_trust_state": claim.get("trust_state"),
+            },
+            "evidence": {
+                "evidence_bundle_id": evidence.get("evidence_bundle_id"),
+                "search_snapshot_id": evidence.get("search_snapshot_id"),
+                "artifact_refs": artifact_refs,
+                "evidence_refs": self._claim_evidence_refs(claim),
+            },
+            "claims": [
+                {
+                    "claim_id": claim_id,
+                    "statement": claim.get("statement"),
+                    "trust_state": claim.get("trust_state"),
+                    "status": claim.get("status"),
+                }
+            ],
+            "open_questions": [
+                "What additional evidence would raise confidence before broader publication?",
+                "Which owner should approve any external-facing action?",
+            ],
+            "actions": actions,
+            "approvals": {
+                "claim_status": claim.get("status"),
+                "claim_can_publish_shared_truth": claim.get("authority", {}).get("can_publish_shared_truth"),
+                "mission_mode": mission.get("workspace_mode"),
+            },
+            "outcomes": [
+                {
+                    "source": "local_scaffold",
+                    "status": "pending_human_outcome",
+                    "evidence_required": True,
+                }
+            ],
+            "learning_history": learning_history,
+            "created_at": utc_now(),
+        }
+        card_id = f"decision_{_json_hash(card_base)[:16]}"
+        card = dict(card_base)
+        card["decision_card_id"] = card_id
+        _write_json(self.decision_card_path(card_id), card)
+        event = self.append_audit(
+            "decision_card.created",
+            scope,
+            {"type": "decision_card", "id": card_id},
+            {
+                "mission_id": mission_id,
+                "claim_id": claim_id,
+                "action_count": len(actions),
+                "evidence_bundle_id": evidence.get("evidence_bundle_id"),
+            },
+        )
+        return {"decision_card": card, "audit_event": event}
+
+    def show_decision_card(self, card_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        card = self.get_decision_card(card_id)
+        if card is None:
+            return {"status": "not_found"}
+        if card.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": card.get("scope")}
+        event = self.append_audit(
+            "decision_card.read",
+            scope,
+            {"type": "decision_card", "id": card_id},
+            {"reason": "cli_decision_card_show"},
+        )
+        return {"decision_card": card, "audit_event": event}
+
+    def record_correction(
+        self,
+        *,
+        target_kind: str,
+        target_id: str,
+        corrected_text: str,
+        rationale: str,
+        evidence_bundle_id: str | None,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        target_result = self._scoped_target(target_kind, target_id, scope)
+        if target_result.get("status"):
+            return target_result
+        target = target_result["record"]
+        bundle = self.get_evidence_bundle(evidence_bundle_id) if evidence_bundle_id else None
+        if evidence_bundle_id and bundle is None:
+            return {"status": "not_found", "resource": "evidence_bundle"}
+        if bundle and bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        evidence_refs = [f"{target_kind}:{target_id}"]
+        if bundle:
+            evidence_refs.append(f"evidence_bundle:{evidence_bundle_id}")
+            evidence_refs.append(f"search_snapshot:{bundle.get('search_snapshot_id')}")
+            evidence_refs.extend(f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", []))
+        else:
+            evidence_refs.append("owner_judgment:local-user")
+
+        correction_base = {
+            "schema_version": "cs.correction.v0",
+            "status": "recorded",
+            "scope": scope,
+            "target": {
+                "kind": target_kind,
+                "id": target_id,
+                "original_trust_state": target.get("trust_state"),
+                "original_provenance": target.get("provenance") or target.get("source"),
+            },
+            "correction": {
+                "corrected_text": redact_text(corrected_text),
+                "rationale": redact_text(rationale),
+                "source_type": "evidence_bundle" if bundle else "owner_judgment",
+            },
+            "learning_signal": {
+                "signal_type": "human_evidence_aware_correction",
+                "used_for_silent_overwrite": False,
+                "requires_review_before_memory_update": True,
+            },
+            "evidence_refs": evidence_refs,
+            "provenance_preserved": True,
+            "created_at": utc_now(),
+        }
+        correction_id = f"correction_{_json_hash(correction_base)[:16]}"
+        correction = dict(correction_base)
+        correction["correction_id"] = correction_id
+        _write_json(self.correction_path(correction_id), correction)
+
+        updated_target = dict(target)
+        history = list(updated_target.get("correction_history", []))
+        history.append(
+            {
+                "correction_id": correction_id,
+                "corrected_at": correction["created_at"],
+                "evidence_refs": evidence_refs,
+                "silent_overwrite": False,
+            }
+        )
+        updated_target["correction_history"] = history
+        if target_kind == "claim":
+            _write_json(self.claim_path(target_id), updated_target)
+        elif target_kind == "brief":
+            _write_json(self.brief_path(target_id), updated_target)
+        elif target_kind == "knowledge_capsule":
+            _write_json(self.knowledge_capsule_path(target_id), updated_target)
+        elif target_kind == "decision_card":
+            _write_json(self.decision_card_path(target_id), updated_target)
+        elif target_kind == "memory":
+            _write_json(self.memory_path(target_id), updated_target)
+
+        event = self.append_audit(
+            "correction.recorded",
+            scope,
+            {"type": "correction", "id": correction_id},
+            {
+                "target_kind": target_kind,
+                "target_id": target_id,
+                "source_type": correction["correction"]["source_type"],
+                "silent_overwrite": False,
+                "provenance_preserved": True,
+            },
+        )
+        return {"correction": correction, "target": updated_target, "audit_event": event}
+
+    def create_share_view(
+        self,
+        *,
+        item_kind: str,
+        item_id: str,
+        audience: str,
+        channel: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        target_result = self._scoped_target(item_kind, item_id, scope)
+        if target_result.get("status"):
+            return target_result
+        item = target_result["record"]
+        trust_state = item.get("trust_state") or item.get("context", {}).get("claim_trust_state")
+        if item_kind == "knowledge_capsule":
+            evidence_refs = list(item.get("evidence_refs", []))
+            owner_label = scope["owner_id"]
+        elif item_kind == "claim":
+            evidence_refs = self._claim_evidence_refs(item)
+            owner_label = scope["owner_id"]
+        elif item_kind == "decision_card":
+            evidence_refs = list(item.get("evidence", {}).get("evidence_refs", []))
+            owner_label = scope["owner_id"]
+        else:
+            evidence_refs = [f"{item_kind}:{item_id}"]
+            owner_label = scope["owner_id"]
+        publish_state = "organization_approved" if trust_state == "approved" and scope["namespace_id"] == "organization" else "shared"
+        if scope["namespace_id"] == "personal" and trust_state != "approved":
+            publish_state = "personal_shared_preview"
+
+        share_base = {
+            "schema_version": "cs.shared_item_view.v0",
+            "status": "shared",
+            "scope": scope,
+            "item": {
+                "kind": item_kind,
+                "id": item_id,
+                "trust_state": trust_state,
+                "status": item.get("status"),
+                "owner_id": owner_label,
+                "namespace_id": scope["namespace_id"],
+                "workspace_id": scope["workspace_id"],
+            },
+            "audience": audience,
+            "channel": channel,
+            "visibility": {
+                "state": publish_state,
+                "trust_state_visible": True,
+                "evidence_visible": bool(evidence_refs),
+                "owner_visible": True,
+                "scope_visible": True,
+                "approved_for_shared_truth": bool(item.get("authority", {}).get("can_publish_shared_truth") or trust_state == "approved"),
+            },
+            "recipient_view": {
+                "trust_state": trust_state,
+                "evidence_refs": evidence_refs,
+                "owner": owner_label,
+                "scope": scope,
+                "personal_shared_or_org_approved": publish_state,
+            },
+            "evidence_refs": evidence_refs,
+            "created_at": utc_now(),
+        }
+        share_id = f"share_{_json_hash(share_base)[:16]}"
+        share = dict(share_base)
+        share["share_id"] = share_id
+        _write_json(self.share_path(share_id), share)
+        event = self.append_audit(
+            "share_view.created",
+            scope,
+            {"type": "share", "id": share_id},
+            {
+                "item_kind": item_kind,
+                "item_id": item_id,
+                "trust_state": trust_state,
+                "audience": audience,
+                "channel": channel,
+                "evidence_ref_count": len(evidence_refs),
+            },
+        )
+        return {"share": share, "audit_event": event}
+
+    def show_share_view(self, share_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        share = self.get_share(share_id)
+        if share is None:
+            return {"status": "not_found"}
+        if share.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": share.get("scope")}
+        event = self.append_audit(
+            "share_view.read",
+            scope,
+            {"type": "share", "id": share_id},
+            {"reason": "cli_share_show"},
+        )
+        return {"share": share, "audit_event": event}
 
     def deny_egress_attempt(self, target_url: str, scope: dict[str, str]) -> dict[str, Any]:
         decision_base = {

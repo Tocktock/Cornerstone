@@ -11,6 +11,7 @@ from cornerstone_cli import __version__
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_full_claim_collaboration,
     verify_vs0_audit_ledger,
     verify_vs0_briefing,
     verify_vs0_claim_evidence,
@@ -865,6 +866,218 @@ def command_claim_show(args: argparse.Namespace) -> int:
     if evidence.get("search_snapshot_id"):
         payload["evidence_refs"].append(f"search_snapshot:{evidence['search_snapshot_id']}")
     payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def _record_command_failure(payload: dict[str, Any], result: dict[str, Any], *, resource_label: str) -> int:
+    status = result.get("status")
+    payload["status"] = "failed"
+    if status == "not_found":
+        payload["errors"].append(
+            {
+                "code": f"CS_{resource_label}_NOT_FOUND",
+                "message": "Required source record was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        return EXIT_NOT_FOUND
+    if status == "scope_denied":
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Required source record is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        return EXIT_SCOPE_DENIED
+    if status == "evidence_required":
+        payload["errors"].append(
+            {
+                "code": f"CS_{resource_label}_EVIDENCE_REQUIRED",
+                "message": "This record requires evidence-backed source material.",
+                "resource": result.get("resource"),
+            }
+        )
+        return EXIT_EVIDENCE_MISSING
+    payload["errors"].append(
+        {
+            "code": f"CS_{resource_label}_INVALID",
+            "message": "The requested operation is not supported by the local scaffold.",
+        }
+    )
+    return EXIT_INVALID
+
+
+def command_capsule_create(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_knowledge_capsule(
+        claim_id=args.claim_id,
+        title=args.title,
+        summary=args.summary,
+        scope=requested_scope,
+    )
+    payload = base_response("cornerstone capsule create", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="CAPSULE")
+        print_payload(payload, args.json)
+        return exit_code
+    capsule = result["capsule"]
+    audit_event = result["audit_event"]
+    payload["knowledge_capsule"] = capsule
+    payload["ids"].update({"capsule_id": capsule["capsule_id"], "claim_id": args.claim_id, "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].extend([f"knowledge_capsule:{capsule['capsule_id']}", *capsule.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_capsule_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.show_knowledge_capsule(args.capsule_id, requested_scope)
+    payload = base_response("cornerstone capsule show", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="CAPSULE")
+        print_payload(payload, args.json)
+        return exit_code
+    capsule = result["capsule"]
+    audit_event = result["audit_event"]
+    payload["knowledge_capsule"] = capsule
+    payload["ids"].update({"capsule_id": capsule["capsule_id"], "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].extend([f"knowledge_capsule:{capsule['capsule_id']}", *capsule.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_decision_card_create(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_decision_card(
+        goal=args.goal,
+        claim_id=args.claim_id,
+        mission_id=args.mission_id,
+        scope=requested_scope,
+    )
+    payload = base_response("cornerstone decision-card create", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="DECISION_CARD")
+        print_payload(payload, args.json)
+        return exit_code
+    card = result["decision_card"]
+    audit_event = result["audit_event"]
+    payload["decision_card"] = card
+    payload["ids"].update({"decision_card_id": card["decision_card_id"], "claim_id": args.claim_id, "mission_id": args.mission_id, "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].append(f"decision_card:{card['decision_card_id']}")
+    payload["evidence_refs"].extend(card.get("evidence", {}).get("evidence_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_decision_card_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.show_decision_card(args.decision_card_id, requested_scope)
+    payload = base_response("cornerstone decision-card show", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="DECISION_CARD")
+        print_payload(payload, args.json)
+        return exit_code
+    card = result["decision_card"]
+    audit_event = result["audit_event"]
+    payload["decision_card"] = card
+    payload["ids"].update({"decision_card_id": card["decision_card_id"], "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].append(f"decision_card:{card['decision_card_id']}")
+    payload["evidence_refs"].extend(card.get("evidence", {}).get("evidence_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_correction_record(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.record_correction(
+        target_kind=args.target_kind,
+        target_id=args.target_id,
+        corrected_text=args.corrected_text,
+        rationale=args.rationale,
+        evidence_bundle_id=args.evidence_bundle_id,
+        scope=requested_scope,
+    )
+    payload = base_response("cornerstone correction record", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="CORRECTION")
+        print_payload(payload, args.json)
+        return exit_code
+    correction = result["correction"]
+    audit_event = result["audit_event"]
+    payload["correction"] = correction
+    payload["target"] = result["target"]
+    payload["ids"].update({"correction_id": correction["correction_id"], "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].extend([f"correction:{correction['correction_id']}", *correction.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_share_create(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_share_view(
+        item_kind=args.item_kind,
+        item_id=args.item_id,
+        audience=args.audience,
+        channel=args.channel,
+        scope=requested_scope,
+    )
+    payload = base_response("cornerstone share create", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="SHARE")
+        print_payload(payload, args.json)
+        return exit_code
+    share = result["share"]
+    audit_event = result["audit_event"]
+    payload["shared_item_view"] = share
+    payload["ids"].update({"share_id": share["share_id"], "item_id": args.item_id, "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].extend([f"share:{share['share_id']}", *share.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_share_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.show_share_view(args.share_id, requested_scope)
+    payload = base_response("cornerstone share show", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="SHARE")
+        print_payload(payload, args.json)
+        return exit_code
+    share = result["share"]
+    audit_event = result["audit_event"]
+    payload["shared_item_view"] = share
+    payload["ids"].update({"share_id": share["share_id"], "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].extend([f"share:{share['share_id']}", *share.get("evidence_refs", [])])
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -1875,6 +2088,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_product_domain_readiness(root)
     elif args.contract == "vs0-tenant-security-boundary":
         report = verify_vs0_tenant_security_boundary(root)
+    elif args.contract == "full-claim-collaboration":
+        report = verify_full_claim_collaboration(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -1902,6 +2117,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-memory-truth-boundary",
                     "vs0-product-domain-readiness",
                     "vs0-tenant-security-boundary",
+                    "full-claim-collaboration",
                 ],
             }
         )
@@ -2123,6 +2339,78 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(claim_show)
     claim_show.add_argument("--json", action="store_true", help="Emit JSON output")
     claim_show.set_defaults(func=command_claim_show)
+
+    capsule = subcommands.add_parser("capsule", help="Knowledge Capsule commands")
+    capsule_sub = capsule.add_subparsers(dest="capsule_command")
+
+    capsule_create = capsule_sub.add_parser("create", help="Create a Knowledge Capsule from an evidence-backed claim")
+    capsule_create.add_argument("--claim-id", required=True, help="Source claim ID")
+    capsule_create.add_argument("--title", required=True, help="Capsule title")
+    capsule_create.add_argument("--summary", required=True, help="Reusable understanding summary")
+    add_state_argument(capsule_create)
+    add_scope_arguments(capsule_create)
+    capsule_create.add_argument("--json", action="store_true", help="Emit JSON output")
+    capsule_create.set_defaults(func=command_capsule_create)
+
+    capsule_show = capsule_sub.add_parser("show", help="Show a Knowledge Capsule")
+    capsule_show.add_argument("capsule_id", help="Capsule ID")
+    add_state_argument(capsule_show)
+    add_scope_arguments(capsule_show)
+    capsule_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    capsule_show.set_defaults(func=command_capsule_show)
+
+    decision_card = subcommands.add_parser("decision-card", help="Mission / Decision Card commands")
+    decision_card_sub = decision_card.add_subparsers(dest="decision_card_command")
+
+    decision_card_create = decision_card_sub.add_parser("create", help="Create a Decision Card from a mission and claim")
+    decision_card_create.add_argument("--goal", required=True, help="Outcome-oriented decision or mission goal")
+    decision_card_create.add_argument("--claim-id", required=True, help="Source claim ID")
+    decision_card_create.add_argument("--mission-id", required=True, help="Source mission ID")
+    add_state_argument(decision_card_create)
+    add_scope_arguments(decision_card_create)
+    decision_card_create.add_argument("--json", action="store_true", help="Emit JSON output")
+    decision_card_create.set_defaults(func=command_decision_card_create)
+
+    decision_card_show = decision_card_sub.add_parser("show", help="Show a Decision Card")
+    decision_card_show.add_argument("decision_card_id", help="Decision Card ID")
+    add_state_argument(decision_card_show)
+    add_scope_arguments(decision_card_show)
+    decision_card_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    decision_card_show.set_defaults(func=command_decision_card_show)
+
+    correction = subcommands.add_parser("correction", help="Evidence-aware correction commands")
+    correction_sub = correction.add_subparsers(dest="correction_command")
+
+    correction_record = correction_sub.add_parser("record", help="Record an evidence-aware human correction")
+    correction_record.add_argument("--target-kind", choices=["brief", "claim", "knowledge_capsule", "decision_card", "memory"], required=True)
+    correction_record.add_argument("--target-id", required=True, help="Target record ID")
+    correction_record.add_argument("--corrected-text", required=True, help="Corrected text or owner judgment")
+    correction_record.add_argument("--rationale", required=True, help="Correction rationale")
+    correction_record.add_argument("--evidence-bundle-id", help="Optional supporting Evidence Bundle ID")
+    add_state_argument(correction_record)
+    add_scope_arguments(correction_record)
+    correction_record.add_argument("--json", action="store_true", help="Emit JSON output")
+    correction_record.set_defaults(func=command_correction_record)
+
+    share = subcommands.add_parser("share", help="Shared item view commands")
+    share_sub = share.add_subparsers(dest="share_command")
+
+    share_create = share_sub.add_parser("create", help="Create a trust-state-aware shared view")
+    share_create.add_argument("--item-kind", choices=["claim", "knowledge_capsule", "decision_card"], required=True)
+    share_create.add_argument("--item-id", required=True, help="Item ID")
+    share_create.add_argument("--audience", default="reviewer", help="Recipient role or audience")
+    share_create.add_argument("--channel", default="local_share", help="Local sharing channel label")
+    add_state_argument(share_create)
+    add_scope_arguments(share_create)
+    share_create.add_argument("--json", action="store_true", help="Emit JSON output")
+    share_create.set_defaults(func=command_share_create)
+
+    share_show = share_sub.add_parser("show", help="Show a shared item view")
+    share_show.add_argument("share_id", help="Share ID")
+    add_state_argument(share_show)
+    add_scope_arguments(share_show)
+    share_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    share_show.set_defaults(func=command_share_show)
 
     workspace = subcommands.add_parser("workspace", help="Workspace governance commands")
     workspace_sub = workspace.add_subparsers(dest="workspace_command")

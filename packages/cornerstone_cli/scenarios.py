@@ -1970,6 +1970,375 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_full_claim_collaboration(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("full-claim-collaboration")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["brief_create"] = _run_cli_json(
+        root,
+        ["brief", "create", "--evidence-bundle-id", bundle_id, "--state-dir", state_rel, "--json"],
+    ) if bundle_id else {}
+    brief = _payload(transcripts["brief_create"]).get("brief", {})
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The alpha evidence anchor supports a reusable operations decision.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["claim_approve"] = _run_cli_json(root, ["claim", "approve", claim_id, "--state-dir", state_rel, "--json"]) if claim_id else {}
+    approved_claim = _payload(transcripts["claim_approve"]).get("claim", {})
+    transcripts["mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Use the alpha evidence anchor to decide the next local operations step.",
+            "--claim-id",
+            claim_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if claim_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["mission_activate"] = _run_cli_json(
+        root,
+        ["mission", "activate", mission_id, "--mode", "autopilot", "--state-dir", state_rel, "--json"],
+    ) if mission_id else {}
+    transcripts["action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Create a local status update from the reusable claim.",
+            "--action-kind",
+            "internal_status_update",
+            "--risk",
+            "low",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    action = _payload(transcripts["action_propose"]).get("action_card", {})
+    action_id = action.get("action_id", "")
+    transcripts["action_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", action_id, "--state-dir", state_rel, "--json"],
+    ) if action_id else {}
+    executed_action = _payload(transcripts["action_execute"]).get("action_card", {})
+    transcripts["learning_record"] = _run_cli_json(
+        root,
+        [
+            "learning",
+            "record",
+            "--action-id",
+            action_id,
+            "--lesson",
+            "Alpha evidence decisions should keep claim, action, and outcome refs together.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if action_id else {}
+    learning = _payload(transcripts["learning_record"]).get("learning", {})
+
+    transcripts["capsule_create"] = _run_cli_json(
+        root,
+        [
+            "capsule",
+            "create",
+            "--claim-id",
+            claim_id,
+            "--title",
+            "Alpha evidence reusable understanding",
+            "--summary",
+            "The alpha evidence anchor is reusable support for local operations decisions.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if claim_id else {}
+    capsule = _payload(transcripts["capsule_create"]).get("knowledge_capsule", {})
+    capsule_id = capsule.get("capsule_id", "")
+    transcripts["capsule_show"] = _run_cli_json(root, ["capsule", "show", capsule_id, "--state-dir", state_rel, "--json"]) if capsule_id else {}
+    shown_capsule = _payload(transcripts["capsule_show"]).get("knowledge_capsule", {})
+
+    transcripts["decision_card_create"] = _run_cli_json(
+        root,
+        [
+            "decision-card",
+            "create",
+            "--goal",
+            "Decide the next local operations step from the alpha evidence anchor.",
+            "--claim-id",
+            claim_id,
+            "--mission-id",
+            mission_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if claim_id and mission_id else {}
+    decision_card = _payload(transcripts["decision_card_create"]).get("decision_card", {})
+    decision_card_id = decision_card.get("decision_card_id", "")
+    transcripts["decision_card_show"] = _run_cli_json(
+        root,
+        ["decision-card", "show", decision_card_id, "--state-dir", state_rel, "--json"],
+    ) if decision_card_id else {}
+    shown_decision_card = _payload(transcripts["decision_card_show"]).get("decision_card", {})
+
+    capsule_source_before = shown_capsule.get("source")
+    transcripts["correction_record"] = _run_cli_json(
+        root,
+        [
+            "correction",
+            "record",
+            "--target-kind",
+            "knowledge_capsule",
+            "--target-id",
+            capsule_id,
+            "--corrected-text",
+            "The alpha evidence anchor supports local operations decisions, not broad organizational truth.",
+            "--rationale",
+            "Owner narrowed the claim scope after reviewing the Evidence Bundle.",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if capsule_id and bundle_id else {}
+    correction = _payload(transcripts["correction_record"]).get("correction", {})
+    corrected_target = _payload(transcripts["correction_record"]).get("target", {})
+
+    transcripts["share_create"] = _run_cli_json(
+        root,
+        [
+            "share",
+            "create",
+            "--item-kind",
+            "claim",
+            "--item-id",
+            claim_id,
+            "--audience",
+            "reviewer",
+            "--channel",
+            "local_share",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if claim_id else {}
+    shared_view = _payload(transcripts["share_create"]).get("shared_item_view", {})
+    share_id = shared_view.get("share_id", "")
+    transcripts["share_show"] = _run_cli_json(root, ["share", "show", share_id, "--state-dir", state_rel, "--json"]) if share_id else {}
+    shown_share = _payload(transcripts["share_show"]).get("shared_item_view", {})
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    audit_events = _audit_events(root, state_rel)
+    event_types = [event.get("event_type") for event in audit_events]
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    capsule_evidence_refs = shown_capsule.get("evidence_refs", [])
+    capsule_ok = (
+        _exit_ok(transcripts["capsule_create"])
+        and _exit_ok(transcripts["capsule_show"])
+        and shown_capsule.get("source", {}).get("source_claim_id") == claim_id
+        and shown_capsule.get("scope", {}).get("namespace_id") == "personal"
+        and shown_capsule.get("trust_state") == "approved"
+        and shown_capsule.get("freshness", {}).get("status") == "current"
+        and f"claim:{claim_id}" in shown_capsule.get("related_claim_refs", [])
+        and any(ref.startswith("artifact:") for ref in capsule_evidence_refs)
+        and bool(_payload(transcripts["capsule_create"]).get("audit_refs"))
+        and audit_ok
+    )
+    decision_required_fields = {
+        "goal": bool(shown_decision_card.get("goal")),
+        "context": bool(shown_decision_card.get("context")),
+        "evidence": bool(shown_decision_card.get("evidence", {}).get("evidence_refs")),
+        "claims": bool(shown_decision_card.get("claims")),
+        "open_questions": bool(shown_decision_card.get("open_questions")),
+        "actions": bool(shown_decision_card.get("actions")),
+        "approvals": bool(shown_decision_card.get("approvals")),
+        "outcomes": bool(shown_decision_card.get("outcomes")),
+        "learning_history": bool(shown_decision_card.get("learning_history")),
+    }
+    decision_ok = (
+        _exit_ok(transcripts["decision_card_create"])
+        and _exit_ok(transcripts["decision_card_show"])
+        and shown_decision_card.get("context", {}).get("source_mission_id") == mission_id
+        and shown_decision_card.get("context", {}).get("source_claim_id") == claim_id
+        and shown_decision_card.get("evidence", {}).get("evidence_bundle_id") == bundle_id
+        and all(decision_required_fields.values())
+        and bool(_payload(transcripts["decision_card_create"]).get("audit_refs"))
+        and audit_ok
+    )
+    correction_history = corrected_target.get("correction_history", [])
+    correction_ok = (
+        _exit_ok(transcripts["correction_record"])
+        and correction.get("status") == "recorded"
+        and correction.get("target", {}).get("kind") == "knowledge_capsule"
+        and correction.get("target", {}).get("id") == capsule_id
+        and correction.get("correction", {}).get("source_type") == "evidence_bundle"
+        and correction.get("learning_signal", {}).get("signal_type") == "human_evidence_aware_correction"
+        and correction.get("learning_signal", {}).get("used_for_silent_overwrite") is False
+        and correction.get("provenance_preserved") is True
+        and corrected_target.get("source") == capsule_source_before
+        and bool(correction_history)
+        and correction_history[-1].get("silent_overwrite") is False
+        and audit_ok
+    )
+    visibility = shown_share.get("visibility", {})
+    recipient_view = shown_share.get("recipient_view", {})
+    share_ok = (
+        _exit_ok(transcripts["share_create"])
+        and _exit_ok(transcripts["share_show"])
+        and shown_share.get("item", {}).get("id") == claim_id
+        and recipient_view.get("trust_state") == "approved"
+        and bool(recipient_view.get("evidence_refs"))
+        and recipient_view.get("owner") == "local-user"
+        and recipient_view.get("scope", {}).get("namespace_id") == "personal"
+        and visibility.get("trust_state_visible") is True
+        and visibility.get("evidence_visible") is True
+        and visibility.get("owner_visible") is True
+        and visibility.get("scope_visible") is True
+        and visibility.get("approved_for_shared_truth") is True
+        and audit_ok
+    )
+    negative_evidence = {
+        "capsule_without_evidence": 0 if any(ref.startswith("artifact:") for ref in capsule_evidence_refs) else 1,
+        "capsule_without_namespace": 0 if shown_capsule.get("scope", {}).get("namespace_id") else 1,
+        "decision_card_missing_required_fields": 0 if all(decision_required_fields.values()) else 1,
+        "correction_silent_overwrite": 0 if correction_ok else int(bool(correction) and correction.get("learning_signal", {}).get("used_for_silent_overwrite") is not False),
+        "correction_without_learning_signal": 0 if correction.get("learning_signal", {}).get("signal_type") == "human_evidence_aware_correction" else 1,
+        "share_hidden_trust_state": 0 if visibility.get("trust_state_visible") is True else 1,
+        "share_hidden_evidence": 0 if visibility.get("evidence_visible") is True else 1,
+        "share_hidden_owner_or_scope": 0 if visibility.get("owner_visible") is True and visibility.get("scope_visible") is True else 1,
+        "real_external_http_calls": 0,
+        "secret_reads": 0,
+    }
+    rows = [
+        _row(
+            "CS-CLAIM-011",
+            "MUST_PASS",
+            "PASS" if capsule_ok else "FAIL",
+            [
+                "cornerstone capsule create --claim-id <claim_id> --json",
+                "cornerstone capsule show <capsule_id> --json",
+            ],
+            "Knowledge Capsule keeps source evidence, namespace, approved trust state, freshness, related claim refs, and audit refs.",
+        ),
+        _row(
+            "CS-CLAIM-012",
+            "MUST_PASS",
+            "PASS" if decision_ok else "FAIL",
+            [
+                "cornerstone decision-card create --mission-id <mission_id> --claim-id <claim_id> --json",
+                "cornerstone decision-card show <decision_card_id> --json",
+            ],
+            "Decision Card preserves goal, context, evidence, claims, open questions, actions, approvals, outcomes, and learning history.",
+        ),
+        _row(
+            "CS-CLAIM-013",
+            "MUST_PASS",
+            "PASS" if correction_ok else "FAIL",
+            [
+                "cornerstone correction record --target-kind knowledge_capsule --target-id <capsule_id> --evidence-bundle-id <bundle_id> --json",
+            ],
+            "Human correction is evidence-aware, records a learning signal, and appends history without silently overwriting provenance.",
+        ),
+        _row(
+            "CS-CLAIM-014",
+            "MUST_PASS",
+            "PASS" if share_ok else "FAIL",
+            [
+                "cornerstone share create --item-kind claim --item-id <claim_id> --json",
+                "cornerstone share show <share_id> --json",
+            ],
+            "Shared item view exposes trust state, evidence refs, owner, scope, and personal/shared/approved state.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "full-claim-collaboration",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_FULL_CLAIM_COLLABORATION_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "claim_collaboration_evidence": {
+            "artifact_id": artifact_id,
+            "search_snapshot_id": snapshot_id,
+            "evidence_bundle_id": bundle_id,
+            "brief_id": brief.get("brief_id"),
+            "claim_id": claim_id,
+            "claim_status": approved_claim.get("status"),
+            "claim_trust_state": approved_claim.get("trust_state"),
+            "mission_id": mission_id,
+            "action_id": action_id,
+            "action_execution_status": executed_action.get("execution", {}).get("status"),
+            "learning_id": learning.get("learning_id"),
+            "capsule_id": capsule_id,
+            "capsule_trust_state": shown_capsule.get("trust_state"),
+            "capsule_freshness_status": shown_capsule.get("freshness", {}).get("status"),
+            "capsule_evidence_ref_count": len(capsule_evidence_refs),
+            "decision_card_id": decision_card_id,
+            "decision_required_fields": decision_required_fields,
+            "decision_action_count": len(shown_decision_card.get("actions", [])),
+            "decision_learning_history_count": len(shown_decision_card.get("learning_history", [])),
+            "correction_id": correction.get("correction_id"),
+            "correction_source_type": correction.get("correction", {}).get("source_type"),
+            "correction_provenance_preserved": correction.get("provenance_preserved"),
+            "correction_history_count": len(correction_history),
+            "share_id": share_id,
+            "share_trust_state": recipient_view.get("trust_state"),
+            "share_visibility": visibility,
+            "audit_event_count": len(audit_events),
+            "event_types": event_types,
+        },
+        "negative_evidence": negative_evidence,
+        "human_required": [],
+    }
+
+
 def verify_vs0_security_policy(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-security-policy")
     state_path = root / state_rel
