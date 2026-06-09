@@ -1,0 +1,90 @@
+{
+  "id": "pack_13_learning_experience",
+  "classes": ["learning", "trajectory", "experience", "policy", "audit"],
+  "scenario_ids": [
+    "CS-LEARN-001",
+    "CS-LEARN-002",
+    "CS-LEARN-003",
+    "CS-LEARN-004",
+    "CS-LEARN-005",
+    "CS-LEARN-006",
+    "CS-LEARN-007",
+    "CS-LEARN-008",
+    "CS-LEARN-009",
+    "CS-LEARN-010",
+    "CS-LEARN-011",
+    "CS-LEARN-012",
+    "CS-LEARN-013",
+    "CS-LEARN-014",
+    "CS-LEARN-015",
+    "CS-LEARN-016",
+    "CS-LEARN-017",
+    "CS-LEARN-018"
+  ],
+  "inputs": [
+    {
+      "path": "successful_mission_note.txt",
+      "media_type": "text/plain",
+      "trust": "trusted",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    },
+    {
+      "path": "failed_mission_note.txt",
+      "media_type": "text/plain",
+      "trust": "trusted",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    },
+    {
+      "path": "connected_outcome_note.txt",
+      "media_type": "text/plain",
+      "trust": "trusted",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    },
+    {
+      "path": "private_org_experience_note.txt",
+      "media_type": "text/plain",
+      "trust": "trusted",
+      "owner_id": "org-owner",
+      "namespace_id": "organization",
+      "workspace_id": "ops",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    }
+  ],
+  "expected": {
+    "trajectory_ledger_required": true,
+    "experience_library_scoped": true,
+    "lesson_promotion_ladder_required": true,
+    "behavior_and_model_signals_supporting_only": true,
+    "product_improvement_proposal_only": true,
+    "failure_retained_as_learning_material": true,
+    "connected_outcome_reingested_as_evidence": true,
+    "export_permission_aware": true
+  },
+  "negative_evidence": {
+    "trajectory_without_owner": 0,
+    "trajectory_without_audit": 0,
+    "failed_trajectory_hidden": 0,
+    "experience_cross_namespace_results": 0,
+    "lesson_auto_global_rule": 0,
+    "promotion_ladder_skipped": 0,
+    "broader_reuse_without_approval": 0,
+    "behavior_signal_overrode_outcome": 0,
+    "model_eval_overrode_outcome": 0,
+    "product_global_mutation": 0,
+    "local_adaptation_cross_namespace": 0,
+    "bad_lesson_still_active": 0,
+    "experience_export_unredacted_raw": 0,
+    "connected_outcome_without_evidence": 0,
+    "real_external_http_calls": 0,
+    "secret_reads": 0
+  }
+}

@@ -94,6 +94,30 @@
         "CS-MEM-017",
         "CS-MEM-018"
       ]
+    },
+    {
+      "id": "pack_13_learning_experience",
+      "path": "packs/13_learning_experience/pack.json",
+      "scenario_ids": [
+        "CS-LEARN-001",
+        "CS-LEARN-002",
+        "CS-LEARN-003",
+        "CS-LEARN-004",
+        "CS-LEARN-005",
+        "CS-LEARN-006",
+        "CS-LEARN-007",
+        "CS-LEARN-008",
+        "CS-LEARN-009",
+        "CS-LEARN-010",
+        "CS-LEARN-011",
+        "CS-LEARN-012",
+        "CS-LEARN-013",
+        "CS-LEARN-014",
+        "CS-LEARN-015",
+        "CS-LEARN-016",
+        "CS-LEARN-017",
+        "CS-LEARN-018"
+      ]
     }
   ]
 }

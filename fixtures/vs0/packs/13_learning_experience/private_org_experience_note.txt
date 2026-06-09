@@ -1,0 +1,5 @@
+Learning experience fixture: org-experience-private-anchor.
+
+This organization workspace trajectory belongs to org-owner in the organization namespace and ops workspace.
+The org-experience-private-anchor result must be searchable only inside that organization scope.
+Personal namespace searches must not return this private organization experience.

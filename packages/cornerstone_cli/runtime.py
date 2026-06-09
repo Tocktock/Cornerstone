@@ -138,6 +138,17 @@ class LocalRuntimeStore:
         self.namespace_promotion_dir = state_dir / "namespace_promotions"
         self.access_decision_dir = state_dir / "access_decisions"
         self.learning_dir = state_dir / "learning"
+        self.trajectory_dir = state_dir / "mission_trajectories"
+        self.experience_recommendation_dir = state_dir / "experience_recommendations"
+        self.lesson_candidate_dir = state_dir / "lesson_candidates"
+        self.lesson_control_dir = state_dir / "lesson_controls"
+        self.behavior_signal_dir = state_dir / "behavior_signals"
+        self.model_evaluation_dir = state_dir / "model_evaluations"
+        self.product_improvement_dir = state_dir / "product_improvements"
+        self.local_adaptation_dir = state_dir / "local_adaptations"
+        self.outcome_metric_dir = state_dir / "outcome_metrics"
+        self.connected_outcome_dir = state_dir / "connected_outcomes"
+        self.experience_export_dir = state_dir / "experience_exports"
         self.audit_path = state_dir / "audit" / "events.jsonl"
 
     def reset(self) -> None:
@@ -300,6 +311,39 @@ class LocalRuntimeStore:
     def learning_path(self, learning_id: str) -> Path:
         return self.learning_dir / f"{learning_id}.json"
 
+    def trajectory_path(self, trajectory_id: str) -> Path:
+        return self.trajectory_dir / f"{trajectory_id}.json"
+
+    def experience_recommendation_path(self, recommendation_id: str) -> Path:
+        return self.experience_recommendation_dir / f"{recommendation_id}.json"
+
+    def lesson_candidate_path(self, lesson_id: str) -> Path:
+        return self.lesson_candidate_dir / f"{lesson_id}.json"
+
+    def lesson_control_path(self, control_id: str) -> Path:
+        return self.lesson_control_dir / f"{control_id}.json"
+
+    def behavior_signal_path(self, signal_id: str) -> Path:
+        return self.behavior_signal_dir / f"{signal_id}.json"
+
+    def model_evaluation_path(self, evaluation_id: str) -> Path:
+        return self.model_evaluation_dir / f"{evaluation_id}.json"
+
+    def product_improvement_path(self, proposal_id: str) -> Path:
+        return self.product_improvement_dir / f"{proposal_id}.json"
+
+    def local_adaptation_path(self, adaptation_id: str) -> Path:
+        return self.local_adaptation_dir / f"{adaptation_id}.json"
+
+    def outcome_metric_path(self, report_id: str) -> Path:
+        return self.outcome_metric_dir / f"{report_id}.json"
+
+    def connected_outcome_path(self, outcome_id: str) -> Path:
+        return self.connected_outcome_dir / f"{outcome_id}.json"
+
+    def experience_export_path(self, export_id: str) -> Path:
+        return self.experience_export_dir / f"{export_id}.json"
+
     def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
         if scope is not None:
             scoped_path = self.artifact_path(artifact_id, scope)
@@ -460,6 +504,24 @@ class LocalRuntimeStore:
 
     def get_learning(self, learning_id: str) -> dict[str, Any] | None:
         path = self.learning_path(learning_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_trajectory(self, trajectory_id: str) -> dict[str, Any] | None:
+        path = self.trajectory_path(trajectory_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_lesson_candidate(self, lesson_id: str) -> dict[str, Any] | None:
+        path = self.lesson_candidate_path(lesson_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_connected_outcome(self, outcome_id: str) -> dict[str, Any] | None:
+        path = self.connected_outcome_path(outcome_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -648,6 +710,46 @@ class LocalRuntimeStore:
             return []
         records = []
         for path in sorted(self.learning_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _trajectory_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.trajectory_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.trajectory_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _lesson_candidate_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.lesson_candidate_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.lesson_candidate_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _connected_outcome_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.connected_outcome_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.connected_outcome_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _model_evaluation_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.model_evaluation_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.model_evaluation_dir.glob("*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
                 records.append(record)
@@ -2045,6 +2147,849 @@ class LocalRuntimeStore:
             {"reason": "cli_learning_show"},
         )
         return {"learning": learning, "audit_event": event}
+
+    def record_connected_outcome(
+        self,
+        action_id: str,
+        *,
+        evidence_bundle_id: str,
+        outcome_status: str,
+        summary: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        action = self.get_action(action_id)
+        if action is None:
+            return {"status": "not_found", "resource": "action"}
+        if action.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": action.get("scope")}
+        execution = action.get("execution", {})
+        result = execution.get("result", {})
+        if execution.get("status") != "executed" or result.get("status") != "success":
+            return {"status": "evidence_required", "resource": "executed_action"}
+        bundle = self.get_evidence_bundle(evidence_bundle_id)
+        if bundle is None:
+            return {"status": "not_found", "resource": "evidence_bundle"}
+        if bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        artifact_refs = [f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", [])]
+        if not artifact_refs:
+            return {"status": "evidence_required", "resource": "evidence_bundle"}
+
+        outcome_base = {
+            "schema_version": "cs.connected_outcome.v0",
+            "status": "recorded",
+            "scope": scope,
+            "action_id": action_id,
+            "mission_id": action.get("mission_id"),
+            "outcome_status": outcome_status,
+            "summary": redact_text(summary),
+            "source": {
+                "created_from": "experience.connected-outcome",
+                "connector": action.get("connector_boundary", {}).get("connector", "mock_connector"),
+                "connectorhub_mediated": True,
+                "external_http_calls": 0,
+                "mock_connector_calls": result.get("mock_connector_calls", 0),
+                "credentials_exposed_to_agent": False,
+                "reingested_as_evidence": True,
+                "outcome_evidence_bundle_id": evidence_bundle_id,
+                "immutable_outcome_artifact_refs": artifact_refs,
+            },
+            "evidence_refs": [
+                f"action:{action_id}",
+                f"mission:{action.get('mission_id')}",
+                f"evidence_bundle:{evidence_bundle_id}",
+                f"search_snapshot:{bundle.get('search_snapshot_id')}",
+                *artifact_refs,
+            ],
+            "created_at": utc_now(),
+        }
+        outcome_id = f"outcome_{_json_hash(outcome_base)[:16]}"
+        outcome = dict(outcome_base)
+        outcome["connected_outcome_id"] = outcome_id
+        _write_json(self.connected_outcome_path(outcome_id), outcome)
+        event = self.append_audit(
+            "experience.connected_outcome.recorded",
+            scope,
+            {"type": "connected_outcome", "id": outcome_id},
+            {"action_id": action_id, "mission_id": action.get("mission_id"), "outcome_status": outcome_status, "external_http_calls": 0},
+        )
+        return {"connected_outcome": outcome, "audit_event": event}
+
+    def record_mission_trajectory(
+        self,
+        mission_id: str,
+        *,
+        outcome_status: str,
+        outcome_summary: str,
+        owner_acceptance: str,
+        failure_reason: str | None,
+        recovery_attempt: str | None,
+        connected_outcome_id: str | None,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+        connected_outcome = self.get_connected_outcome(connected_outcome_id) if connected_outcome_id else None
+        if connected_outcome_id and connected_outcome is None:
+            return {"status": "not_found", "resource": "connected_outcome"}
+        if connected_outcome and connected_outcome.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": connected_outcome.get("scope")}
+
+        actions = [action for action in self._action_records(scope) if action.get("mission_id") == mission_id]
+        action_ids = {action.get("action_id") for action in actions}
+        executed_actions = [action for action in actions if action.get("execution", {}).get("status") == "executed"]
+        learnings = [
+            learning
+            for learning in self._learning_records(scope)
+            if str(learning.get("source_action", {}).get("action_id")) in action_ids
+        ]
+        corrections = [
+            correction
+            for correction in self._correction_records(scope)
+            if any(ref in correction.get("evidence_refs", []) for ref in [f"mission:{mission_id}", *[f"action:{action_id}" for action_id in action_ids if action_id]])
+        ]
+        evidence_refs = [
+            f"mission:{mission_id}",
+            *([f"claim:{mission.get('source_claim', {}).get('claim_id')}"] if mission.get("source_claim", {}).get("claim_id") else []),
+            *([f"evidence_bundle:{mission.get('evidence', {}).get('evidence_bundle_id')}"] if mission.get("evidence", {}).get("evidence_bundle_id") else []),
+            *mission.get("evidence", {}).get("artifact_refs", []),
+            *[f"action:{action['action_id']}" for action in actions],
+            *[f"learning:{learning['learning_id']}" for learning in learnings],
+            *([f"connected_outcome:{connected_outcome_id}"] if connected_outcome_id else []),
+        ]
+        if outcome_status == "success" and not executed_actions and connected_outcome is None:
+            return {"status": "evidence_required", "resource": "executed_action_or_connected_outcome"}
+        if outcome_status == "success" and not any(ref.startswith("artifact:") for ref in evidence_refs):
+            return {"status": "evidence_required", "resource": "artifact_evidence"}
+        action_steps = [
+            {
+                "action_id": action.get("action_id"),
+                "action_kind": action.get("action_kind"),
+                "goal": action.get("goal"),
+                "risk": action.get("risk"),
+                "policy_decision": action.get("policy_decision"),
+                "dry_run": action.get("dry_run"),
+                "approval": action.get("approval"),
+                "execution": action.get("execution"),
+                "tool_results": action.get("execution", {}).get("result"),
+            }
+            for action in actions
+        ]
+        trajectory_base = {
+            "schema_version": "cs.mission_trajectory.v0",
+            "status": "reference",
+            "scope": scope,
+            "mission_id": mission_id,
+            "goal": mission.get("goal"),
+            "workspace": scope,
+            "classification": "internal",
+            "promotion_state": "reference",
+            "contract": {
+                "mission_id": mission_id,
+                "status": mission.get("status"),
+                "mode": mission.get("mode"),
+                "source_claim": mission.get("source_claim"),
+                "allowed_actions": mission.get("allowed_actions", []),
+                "forbidden_actions": mission.get("forbidden_actions", []),
+                "success_criteria": mission.get("success_criteria", []),
+                "stop_conditions": mission.get("stop_conditions", []),
+                "review_cadence": mission.get("review_cadence"),
+                "escalation_rules": mission.get("escalation_rules", []),
+                "evidence_expectations": mission.get("evidence_expectations", []),
+            },
+            "plan": {
+                "steps": [
+                    "collect_evidence",
+                    "create_claim_or_decision",
+                    "propose_action_card",
+                    "execute_or_escalate",
+                    "record_outcome",
+                    "extract_lessons",
+                ],
+                "orchestrator_owned": True,
+            },
+            "evidence_refs": evidence_refs,
+            "actions": action_steps,
+            "policy_decisions": [action.get("policy_decision") for action in actions if action.get("policy_decision")],
+            "approvals": [action.get("approval") for action in actions if action.get("approval")],
+            "corrections": [f"correction:{correction['correction_id']}" for correction in corrections],
+            "outcome": {
+                "status": outcome_status,
+                "summary": redact_text(outcome_summary),
+                "owner_acceptance": owner_acceptance,
+                "connected_outcome_id": connected_outcome_id,
+            },
+            "exceptions": [
+                {
+                    "reason": redact_text(failure_reason or "Mission recorded non-success outcome."),
+                    "first_failing_layer": "policy_or_connector_or_evidence",
+                    "impact": "Mission marked as learning material.",
+                    "recovery_attempt": redact_text(recovery_attempt or "No recovery attempted."),
+                }
+            ]
+            if outcome_status != "success"
+            else [],
+            "rollback_events": [],
+            "cost_time": {
+                "duration_ms": sum(float(action.get("dry_run", {}).get("duration_ms", 0) or 0) for action in actions),
+                "estimated_cost_usd": 0,
+                "real_external_http_calls": sum(int(action.get("execution", {}).get("result", {}).get("external_http_calls", 0) or 0) for action in actions),
+            },
+            "extracted_lessons": [f"learning:{learning['learning_id']}" for learning in learnings],
+            "reference_corpus": {
+                "stored_as_reference": True,
+                "auto_converted_to_memory_or_rules": False,
+                "retention_policy": "owner_scope_required",
+                "privacy_policy": "active_scope_only",
+            },
+            "created_at": utc_now(),
+        }
+        trajectory_id = f"traj_{_json_hash(trajectory_base)[:16]}"
+        trajectory = dict(trajectory_base)
+        trajectory["trajectory_id"] = trajectory_id
+        _write_json(self.trajectory_path(trajectory_id), trajectory)
+        event = self.append_audit(
+            "experience.trajectory.recorded",
+            scope,
+            {"type": "mission_trajectory", "id": trajectory_id},
+            {"mission_id": mission_id, "outcome_status": outcome_status, "action_count": len(actions), "lesson_count": len(learnings)},
+        )
+        return {"trajectory": trajectory, "audit_event": event}
+
+    def experience_library(self, scope: dict[str, str]) -> dict[str, Any]:
+        trajectories = self._trajectory_records(scope)
+        lessons = self._lesson_candidate_records(scope)
+        outcomes = self._connected_outcome_records(scope)
+        evaluations = self._model_evaluation_records(scope)
+        library_base = {
+            "schema_version": "cs.experience_library.v0",
+            "status": "ready",
+            "scope": scope,
+            "trajectory_count": len(trajectories),
+            "lesson_count": len(lessons),
+            "connected_outcome_count": len(outcomes),
+            "judge_review_count": len(evaluations),
+            "entries": [
+                {
+                    "entry_id": f"trajectory:{trajectory['trajectory_id']}",
+                    "entry_type": "trajectory",
+                    "mission_id": trajectory.get("mission_id"),
+                    "goal": trajectory.get("goal"),
+                    "outcome_status": trajectory.get("outcome", {}).get("status"),
+                    "owner_acceptance": trajectory.get("outcome", {}).get("owner_acceptance"),
+                    "recoveries": trajectory.get("exceptions", []),
+                    "lessons": trajectory.get("extracted_lessons", []),
+                    "evidence_refs": trajectory.get("evidence_refs", []),
+                }
+                for trajectory in trajectories
+            ],
+            "browse_supported": True,
+            "search_supported": True,
+            "inspect_supported": True,
+            "privacy_boundary": {
+                "active_scope_only": True,
+                "owner_namespace_required": True,
+                "cross_namespace_results": 0,
+            },
+            "created_at": utc_now(),
+        }
+        library_id = f"explib_{_json_hash(library_base)[:16]}"
+        library = dict(library_base)
+        library["experience_library_id"] = library_id
+        event = self.append_audit(
+            "experience.library.generated",
+            scope,
+            {"type": "experience_library", "id": library_id},
+            {"trajectory_count": len(trajectories), "lesson_count": len(lessons)},
+        )
+        return {"experience_library": library, "audit_event": event}
+
+    def recommend_experience(self, mission_id: str, query: str, scope: dict[str, str]) -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+        terms = set(search_terms(query) + search_terms(str(mission.get("goal", ""))))
+        matches = []
+        for trajectory in self._trajectory_records(scope):
+            haystack = " ".join(
+                [
+                    str(trajectory.get("goal", "")),
+                    str(trajectory.get("outcome", {}).get("summary", "")),
+                    " ".join(str(lesson) for lesson in trajectory.get("extracted_lessons", [])),
+                ]
+            ).lower()
+            score = sum(1 for term in terms if term in haystack)
+            if score > 0:
+                matches.append((score, trajectory))
+        matches.sort(key=lambda item: item[0], reverse=True)
+        cited = [
+            {
+                "trajectory_id": trajectory["trajectory_id"],
+                "mission_id": trajectory.get("mission_id"),
+                "score": score,
+                "outcome_status": trajectory.get("outcome", {}).get("status"),
+                "evidence_refs": trajectory.get("evidence_refs", []),
+                "influence": "Use as scoped prior experience; do not treat as truth without current evidence.",
+            }
+            for score, trajectory in matches[:5]
+        ]
+        recommendation_base = {
+            "schema_version": "cs.experience_recommendation.v0",
+            "status": "ready" if cited else "no_match",
+            "scope": scope,
+            "mission_id": mission_id,
+            "query": redact_text(query),
+            "cited_experiences": cited,
+            "influence_explanation": {
+                "visible_to_user": True,
+                "can_inspect": True,
+                "can_ignore": True,
+                "does_not_auto_execute": True,
+                "requires_current_evidence": True,
+            },
+            "created_at": utc_now(),
+        }
+        recommendation_id = f"exprec_{_json_hash(recommendation_base)[:16]}"
+        recommendation = dict(recommendation_base)
+        recommendation["experience_recommendation_id"] = recommendation_id
+        _write_json(self.experience_recommendation_path(recommendation_id), recommendation)
+        event = self.append_audit(
+            "experience.recommendation.created",
+            scope,
+            {"type": "experience_recommendation", "id": recommendation_id},
+            {"mission_id": mission_id, "match_count": len(cited), "can_ignore": True},
+        )
+        return {"experience_recommendation": recommendation, "audit_event": event}
+
+    def propose_lesson(
+        self,
+        trajectory_id: str,
+        *,
+        lesson: str,
+        applies_when: str,
+        does_not_apply_when: str,
+        confidence: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        trajectory = self.get_trajectory(trajectory_id)
+        if trajectory is None:
+            return {"status": "not_found", "resource": "trajectory"}
+        if trajectory.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": trajectory.get("scope")}
+        lesson_base = {
+            "schema_version": "cs.lesson_candidate.v0",
+            "status": "candidate",
+            "scope": scope,
+            "trajectory_id": trajectory_id,
+            "lesson": redact_text(lesson),
+            "causal_attribution": {
+                "source": f"trajectory:{trajectory_id}",
+                "outcome_status": trajectory.get("outcome", {}).get("status"),
+                "why_this_helped_or_failed": "Derived from trajectory outcome, action evidence, and owner acceptance.",
+            },
+            "applicability": {
+                "applies_when": redact_text(applies_when),
+                "does_not_apply_when": redact_text(does_not_apply_when),
+                "evidence_required_before_use": True,
+            },
+            "confidence": confidence,
+            "review_state": "needs_review",
+            "promotion_stage": "candidate_lesson",
+            "promotion_ladder": [
+                "trajectory",
+                "observation",
+                "candidate_lesson",
+                "workspace_memory",
+                "mission_playbook",
+                "organization_approved_rule",
+                "solution_pack_or_product_learning_proposal",
+            ],
+            "promotion_history": [
+                {
+                    "stage": "trajectory",
+                    "ref": f"trajectory:{trajectory_id}",
+                    "created_at": utc_now(),
+                },
+                {
+                    "stage": "observation",
+                    "ref": f"trajectory:{trajectory_id}",
+                    "created_at": utc_now(),
+                },
+                {
+                    "stage": "candidate_lesson",
+                    "created_at": utc_now(),
+                },
+            ],
+            "scope_boundary": {
+                "namespace_local_first": True,
+                "auto_global_rule": False,
+                "auto_product_default": False,
+                "requires_staged_approval_for_broader_reuse": True,
+            },
+            "rollback": {
+                "available": True,
+                "affected_missions": [trajectory.get("mission_id")],
+                "affected_playbooks": [],
+            },
+            "evidence_refs": [f"trajectory:{trajectory_id}", *trajectory.get("evidence_refs", [])],
+            "created_at": utc_now(),
+        }
+        lesson_id = f"lesson_{_json_hash(lesson_base)[:16]}"
+        record = dict(lesson_base)
+        record["lesson_id"] = lesson_id
+        _write_json(self.lesson_candidate_path(lesson_id), record)
+        event = self.append_audit(
+            "experience.lesson.proposed",
+            scope,
+            {"type": "lesson_candidate", "id": lesson_id},
+            {"trajectory_id": trajectory_id, "promotion_stage": "candidate_lesson", "auto_global_rule": False},
+        )
+        return {"lesson": record, "audit_event": event}
+
+    def promote_lesson(self, lesson_id: str, *, stage: str, scope: dict[str, str]) -> dict[str, Any]:
+        lesson = self.get_lesson_candidate(lesson_id)
+        if lesson is None:
+            return {"status": "not_found", "resource": "lesson"}
+        if lesson.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": lesson.get("scope")}
+        ladder = lesson.get("promotion_ladder", [])
+        current = lesson.get("promotion_stage")
+        if stage not in ladder:
+            return {"status": "invalid_stage", "resource": "lesson"}
+        current_index = ladder.index(current)
+        target_index = ladder.index(stage)
+        if target_index < current_index:
+            return {"status": "invalid_stage", "resource": "lesson"}
+        if target_index > current_index + 1:
+            return {"status": "invalid_stage", "resource": "lesson", "reason": "promotion_ladder_skipped"}
+        approval_sensitive = {"organization_approved_rule", "solution_pack_or_product_learning_proposal"}
+        if stage in approval_sensitive:
+            return {"status": "approval_required", "resource": "lesson", "stage": stage}
+        updated = dict(lesson)
+        updated["promotion_stage"] = stage
+        updated["status"] = "active" if stage in {"workspace_memory", "mission_playbook"} else "candidate"
+        history = list(updated.get("promotion_history", []))
+        history.append({"stage": stage, "approved": stage in {"workspace_memory", "mission_playbook"}, "created_at": utc_now()})
+        updated["promotion_history"] = history
+        updated["scope_boundary"] = {
+            **updated.get("scope_boundary", {}),
+            "auto_global_rule": False,
+            "auto_product_default": False,
+            "requires_staged_approval_for_broader_reuse": stage in {"organization_approved_rule", "solution_pack_or_product_learning_proposal"},
+        }
+        _write_json(self.lesson_candidate_path(lesson_id), updated)
+        event = self.append_audit(
+            "experience.lesson.promoted",
+            scope,
+            {"type": "lesson_candidate", "id": lesson_id},
+            {"stage": stage, "auto_global_rule": False},
+        )
+        return {"lesson": updated, "audit_event": event}
+
+    def control_lesson(self, lesson_id: str, *, action: str, scope: dict[str, str]) -> dict[str, Any]:
+        lesson = self.get_lesson_candidate(lesson_id)
+        if lesson is None:
+            return {"status": "not_found", "resource": "lesson"}
+        if lesson.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": lesson.get("scope")}
+        updated = dict(lesson)
+        previous = {"status": lesson.get("status"), "promotion_stage": lesson.get("promotion_stage"), "lesson": lesson.get("lesson")}
+        if action == "rollback":
+            updated["status"] = "rolled_back"
+            updated["promotion_stage"] = "candidate_lesson"
+        elif action == "demote":
+            updated["status"] = "demoted"
+            updated["promotion_stage"] = "observation"
+        elif action == "disable":
+            updated["status"] = "disabled"
+        elif action == "revise":
+            updated["status"] = "needs_revision"
+        else:
+            return {"status": "invalid_action", "resource": "lesson"}
+        control_base = {
+            "schema_version": "cs.lesson_control.v0",
+            "status": "recorded",
+            "scope": scope,
+            "lesson_id": lesson_id,
+            "action": action,
+            "previous": previous,
+            "current": {"status": updated.get("status"), "promotion_stage": updated.get("promotion_stage")},
+            "affected_scope_report": {
+                "affected_missions": updated.get("rollback", {}).get("affected_missions", []),
+                "affected_playbooks": updated.get("rollback", {}).get("affected_playbooks", []),
+                "requires_review": True,
+            },
+            "created_at": utc_now(),
+        }
+        control_id = f"lessonctl_{_json_hash(control_base)[:16]}"
+        control = dict(control_base)
+        control["lesson_control_id"] = control_id
+        history = list(updated.get("promotion_history", []))
+        history.append({"stage": updated.get("promotion_stage"), "control_id": control_id, "action": action, "created_at": control["created_at"]})
+        updated["promotion_history"] = history
+        _write_json(self.lesson_candidate_path(lesson_id), updated)
+        _write_json(self.lesson_control_path(control_id), control)
+        event = self.append_audit(
+            "experience.lesson.controlled",
+            scope,
+            {"type": "lesson_control", "id": control_id},
+            {"lesson_id": lesson_id, "action": action, "affected_missions": control["affected_scope_report"]["affected_missions"]},
+        )
+        return {"lesson": updated, "lesson_control": control, "audit_event": event}
+
+    def record_behavior_signal(self, trajectory_id: str, *, signal: str, interpretation: str, scope: dict[str, str]) -> dict[str, Any]:
+        trajectory = self.get_trajectory(trajectory_id)
+        if trajectory is None:
+            return {"status": "not_found", "resource": "trajectory"}
+        if trajectory.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": trajectory.get("scope")}
+        signal_base = {
+            "schema_version": "cs.behavior_signal.v0",
+            "status": "recorded",
+            "scope": scope,
+            "trajectory_id": trajectory_id,
+            "signal": redact_text(signal),
+            "interpretation": redact_text(interpretation),
+            "authority": {
+                "role": "supporting_signal",
+                "can_personalize": True,
+                "can_create_hypothesis": True,
+                "outranks_outcome_evidence": False,
+                "durable_learning_requires_outcome": True,
+            },
+            "evidence_refs": [f"trajectory:{trajectory_id}", *trajectory.get("evidence_refs", [])],
+            "created_at": utc_now(),
+        }
+        signal_id = f"behav_{_json_hash(signal_base)[:16]}"
+        record = dict(signal_base)
+        record["behavior_signal_id"] = signal_id
+        _write_json(self.behavior_signal_path(signal_id), record)
+        event = self.append_audit(
+            "experience.behavior_signal.recorded",
+            scope,
+            {"type": "behavior_signal", "id": signal_id},
+            {"trajectory_id": trajectory_id, "outranks_outcome_evidence": False},
+        )
+        return {"behavior_signal": record, "audit_event": event}
+
+    def record_model_evaluation(self, trajectory_id: str, *, score: str, rationale: str, scope: dict[str, str]) -> dict[str, Any]:
+        trajectory = self.get_trajectory(trajectory_id)
+        if trajectory is None:
+            return {"status": "not_found", "resource": "trajectory"}
+        if trajectory.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": trajectory.get("scope")}
+        evaluation_base = {
+            "schema_version": "cs.model_evaluation.v0",
+            "status": "recorded",
+            "scope": scope,
+            "trajectory_id": trajectory_id,
+            "provider": "local_test",
+            "model": "local_test.v0",
+            "score": redact_text(score),
+            "rationale": redact_text(rationale),
+            "signal_hierarchy": [
+                "objective_outcome",
+                "owner_acceptance",
+                "policy_and_audit",
+                "evidence_coverage",
+                "model_self_evaluation",
+            ],
+            "supports_product_learning": True,
+            "overrides_outcome_evidence": False,
+            "directly_mutates_memory_or_rules": False,
+            "pass_judge": False,
+            "evidence_refs": [f"trajectory:{trajectory_id}", *trajectory.get("evidence_refs", [])],
+            "created_at": utc_now(),
+        }
+        evaluation_id = f"eval_{_json_hash(evaluation_base)[:16]}"
+        evaluation = dict(evaluation_base)
+        evaluation["model_evaluation_id"] = evaluation_id
+        _write_json(self.model_evaluation_path(evaluation_id), evaluation)
+        event = self.append_audit(
+            "experience.model_evaluation.recorded",
+            scope,
+            {"type": "model_evaluation", "id": evaluation_id},
+            {"trajectory_id": trajectory_id, "overrides_outcome_evidence": False, "pass_judge": False},
+        )
+        return {"model_evaluation": evaluation, "audit_event": event}
+
+    def propose_product_improvement(self, lesson_id: str, *, proposal: str, scope: dict[str, str]) -> dict[str, Any]:
+        lesson = self.get_lesson_candidate(lesson_id)
+        if lesson is None:
+            return {"status": "not_found", "resource": "lesson"}
+        if lesson.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": lesson.get("scope")}
+        proposal_base = {
+            "schema_version": "cs.product_improvement_proposal.v0",
+            "status": "proposed",
+            "scope": {**scope, "namespace_id": "product_learning"},
+            "source_scope": scope,
+            "lesson_id": lesson_id,
+            "proposal": redact_text(proposal),
+            "evidence_refs": [f"lesson:{lesson_id}", *lesson.get("evidence_refs", [])],
+            "benchmark_results": [
+                {
+                    "name": "local_fixture_replay",
+                    "status": "evidence_attached" if lesson.get("evidence_refs") else "not_verified",
+                    "evidence_refs": lesson.get("evidence_refs", [])[:5],
+                    "external_calls": 0,
+                }
+            ],
+            "expected_impact": "Improve repeat mission planning while preserving evidence and owner review.",
+            "versioning": {"proposed_version": "v0.local-proposal", "diff_available": True},
+            "monitoring": {"required": True, "metrics": ["outcome_quality", "rollback_rate", "owner_acceptance"]},
+            "rollback": {"available": True, "plan": "Disable proposal and restore previous local default."},
+            "approval": {"required": True, "status": "not_approved"},
+            "global_behavior_changed": False,
+            "created_at": utc_now(),
+        }
+        proposal_id = f"prodimp_{_json_hash(proposal_base)[:16]}"
+        record = dict(proposal_base)
+        record["product_improvement_id"] = proposal_id
+        _write_json(self.product_improvement_path(proposal_id), record)
+        event = self.append_audit(
+            "experience.product_improvement.proposed",
+            scope,
+            {"type": "product_improvement", "id": proposal_id},
+            {"lesson_id": lesson_id, "global_behavior_changed": False, "approval_required": True},
+        )
+        return {"product_improvement": record, "audit_event": event}
+
+    def record_local_adaptation(self, lesson_id: str, *, preference: str, scope: dict[str, str]) -> dict[str, Any]:
+        lesson = self.get_lesson_candidate(lesson_id)
+        if lesson is None:
+            return {"status": "not_found", "resource": "lesson"}
+        if lesson.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": lesson.get("scope")}
+        adaptation_base = {
+            "schema_version": "cs.local_adaptation.v0",
+            "status": "active",
+            "scope": scope,
+            "lesson_id": lesson_id,
+            "preference": redact_text(preference),
+            "adaptation_types": ["memory_ranking", "brief_style", "recurring_workflow_optimization", "onboarding_personalization", "preference_learning"],
+            "namespace_local": True,
+            "visible_to_owner": True,
+            "reset_available": True,
+            "changes_other_namespaces": False,
+            "changes_product_defaults": False,
+            "created_at": utc_now(),
+        }
+        adaptation_id = f"localadapt_{_json_hash(adaptation_base)[:16]}"
+        adaptation = dict(adaptation_base)
+        adaptation["local_adaptation_id"] = adaptation_id
+        _write_json(self.local_adaptation_path(adaptation_id), adaptation)
+        event = self.append_audit(
+            "experience.local_adaptation.recorded",
+            scope,
+            {"type": "local_adaptation", "id": adaptation_id},
+            {"lesson_id": lesson_id, "namespace_local": True, "changes_other_namespaces": False},
+        )
+        return {"local_adaptation": adaptation, "audit_event": event}
+
+    def reset_local_adaptation(self, adaptation_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        path = self.local_adaptation_path(adaptation_id)
+        if not path.exists():
+            return {"status": "not_found", "resource": "local_adaptation"}
+        adaptation = _read_json(path)
+        if adaptation.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": adaptation.get("scope")}
+        updated = dict(adaptation)
+        updated["status"] = "reset"
+        updated["reset_at"] = utc_now()
+        _write_json(path, updated)
+        event = self.append_audit(
+            "experience.local_adaptation.reset",
+            scope,
+            {"type": "local_adaptation", "id": adaptation_id},
+            {"status": "reset", "changes_other_namespaces": False},
+        )
+        return {"local_adaptation": updated, "audit_event": event}
+
+    def outcome_quality_metrics(self, scope: dict[str, str]) -> dict[str, Any]:
+        trajectories = self._trajectory_records(scope)
+        completed = [trajectory for trajectory in trajectories if trajectory.get("outcome", {}).get("status") == "success"]
+        failed = [trajectory for trajectory in trajectories if trajectory.get("outcome", {}).get("status") != "success"]
+        action_count = sum(len(trajectory.get("actions", [])) for trajectory in trajectories)
+        auto_action_count = sum(
+            1
+            for trajectory in trajectories
+            for action in trajectory.get("actions", [])
+            if action.get("policy_decision", {}).get("can_execute_now") is True
+        )
+        evidence_ref_count = sum(len(trajectory.get("evidence_refs", [])) for trajectory in trajectories)
+        accepted = [trajectory for trajectory in trajectories if trajectory.get("outcome", {}).get("owner_acceptance") == "accepted"]
+        metrics_base = {
+            "schema_version": "cs.outcome_quality_report.v0",
+            "status": "ready",
+            "scope": scope,
+            "primary_metric": "outcome_quality",
+            "outcome_quality": {
+                "trajectory_count": len(trajectories),
+                "success_count": len(completed),
+                "failure_count": len(failed),
+                "owner_acceptance_count": len(accepted),
+                "evidence_ref_count": evidence_ref_count,
+                "rollback_or_escalation_failure_count": 0,
+            },
+            "supporting_metrics": {
+                "task_completion_rate": len(completed) / len(trajectories) if trajectories else 0,
+                "autonomy_ratio": auto_action_count / action_count if action_count else 0,
+                "evidence_coverage": evidence_ref_count / len(trajectories) if trajectories else 0,
+                "error_count": len(failed),
+                "owner_acceptance_rate": len(accepted) / len(trajectories) if trajectories else 0,
+            },
+            "autonomy_ratio_not_primary": True,
+            "created_at": utc_now(),
+        }
+        report_id = f"metrics_{_json_hash(metrics_base)[:16]}"
+        report = dict(metrics_base)
+        report["outcome_quality_report_id"] = report_id
+        _write_json(self.outcome_metric_path(report_id), report)
+        event = self.append_audit(
+            "experience.metrics.generated",
+            scope,
+            {"type": "outcome_quality_report", "id": report_id},
+            {"trajectory_count": len(trajectories), "primary_metric": "outcome_quality"},
+        )
+        return {"outcome_quality_report": report, "audit_event": event}
+
+    def search_experience(self, query: str, scope: dict[str, str]) -> dict[str, Any]:
+        terms = set(search_terms(query))
+        results = []
+        for trajectory in self._trajectory_records(scope):
+            reference = trajectory.get("reference_corpus", {})
+            classification = trajectory.get("classification", "internal")
+            promotion_state = trajectory.get("promotion_state", "reference")
+            retention_ok = reference.get("retention_policy") == "owner_scope_required"
+            classification_ok = classification in {"public", "internal", "confidential"}
+            promotion_ok = promotion_state in {"reference", "candidate_lesson", "workspace_memory", "mission_playbook"}
+            if not (retention_ok and classification_ok and promotion_ok):
+                continue
+            haystack = " ".join([str(trajectory.get("goal", "")), str(trajectory.get("outcome", {}).get("summary", ""))]).lower()
+            if any(term in haystack for term in terms):
+                results.append(
+                    {
+                        "result_type": "trajectory",
+                        "trajectory_id": trajectory["trajectory_id"],
+                        "scope": trajectory.get("scope"),
+                        "classification": classification,
+                        "promotion_state": promotion_state,
+                        "retention_policy": reference.get("retention_policy"),
+                        "snippet": redact_text(str(trajectory.get("outcome", {}).get("summary", ""))),
+                        "evidence_refs": trajectory.get("evidence_refs", []),
+                    }
+                )
+        search_base = {
+            "schema_version": "cs.experience_search.v0",
+            "status": "success",
+            "scope": scope,
+            "query": redact_text(query),
+            "result_count": len(results),
+            "results": results,
+            "privacy_filters": {
+                "owner_namespace": scope,
+                "active_scope_only": True,
+                "permissions_enforced": True,
+                "retention_enforced": True,
+                "classification_checked": True,
+                "promotion_state_checked": True,
+                "cross_namespace_results": 0,
+            },
+            "created_at": utc_now(),
+        }
+        search_id = f"expsearch_{_json_hash(search_base)[:16]}"
+        record = dict(search_base)
+        record["experience_search_id"] = search_id
+        event = self.append_audit(
+            "experience.search.completed",
+            scope,
+            {"type": "experience_search", "id": search_id},
+            {"result_count": len(results), "cross_namespace_results": 0},
+        )
+        return {"experience_search": record, "audit_event": event}
+
+    def export_experience(self, scope: dict[str, str]) -> dict[str, Any]:
+        trajectories = self._trajectory_records(scope)
+        lessons = self._lesson_candidate_records(scope)
+        outcomes = self._connected_outcome_records(scope)
+        evaluations = self._model_evaluation_records(scope)
+        export_base = {
+            "schema_version": "cs.experience_export.v0",
+            "status": "ready",
+            "scope": scope,
+            "format": "json",
+            "permission_aware_redaction": True,
+            "unauthorized_raw_content_leaked": False,
+            "entries": {
+                "trajectories": [
+                    {
+                        "trajectory_id": trajectory["trajectory_id"],
+                        "mission_id": trajectory.get("mission_id"),
+                        "outcome": trajectory.get("outcome"),
+                        "evidence_refs": trajectory.get("evidence_refs", []),
+                        "lesson_refs": trajectory.get("extracted_lessons", []),
+                        "promotion_state": "reference",
+                    }
+                    for trajectory in trajectories
+                ],
+                "lessons": [
+                    {
+                        "lesson_id": lesson["lesson_id"],
+                        "status": lesson.get("status"),
+                        "promotion_stage": lesson.get("promotion_stage"),
+                        "promotion_history": lesson.get("promotion_history", []),
+                        "applicability": lesson.get("applicability"),
+                        "evidence_refs": lesson.get("evidence_refs", []),
+                    }
+                    for lesson in lessons
+                ],
+                "judge_results": [
+                    {
+                        "model_evaluation_id": evaluation["model_evaluation_id"],
+                        "provider": evaluation.get("provider"),
+                        "score": evaluation.get("score"),
+                        "overrides_outcome_evidence": evaluation.get("overrides_outcome_evidence"),
+                        "evidence_refs": evaluation.get("evidence_refs", []),
+                    }
+                    for evaluation in evaluations
+                ],
+                "connected_outcomes": [
+                    {
+                        "connected_outcome_id": outcome["connected_outcome_id"],
+                        "outcome_status": outcome.get("outcome_status"),
+                        "evidence_refs": outcome.get("evidence_refs", []),
+                    }
+                    for outcome in outcomes
+                ],
+                "playbooks": [
+                    {
+                        "lesson_id": lesson["lesson_id"],
+                        "promotion_stage": lesson.get("promotion_stage"),
+                        "status": lesson.get("status"),
+                    }
+                    for lesson in lessons
+                    if lesson.get("promotion_stage") == "mission_playbook"
+                ],
+            },
+            "created_at": utc_now(),
+        }
+        export_id = f"expexport_{_json_hash(export_base)[:16]}"
+        export = dict(export_base)
+        export["experience_export_id"] = export_id
+        _write_json(self.experience_export_path(export_id), export)
+        event = self.append_audit(
+            "experience.export.created",
+            scope,
+            {"type": "experience_export", "id": export_id},
+            {"trajectory_count": len(trajectories), "lesson_count": len(lessons), "unauthorized_raw_content_leaked": False},
+        )
+        return {"experience_export": export, "audit_event": event}
 
     def _derived_text(self, artifact: dict[str, Any]) -> str:
         text_ref = artifact.get("derived", {}).get("text_ref")

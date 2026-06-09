@@ -131,24 +131,24 @@ CS-BRAIN-013,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario
 CS-BRAIN-014,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-014 --json,reports/scenario/cs-brain-014.json,,,,,NOT_VERIFIED
 CS-BRAIN-015,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-015 --json,reports/scenario/cs-brain-015.json,,,,,NOT_VERIFIED
 CS-BRAIN-016,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-016 --json,reports/scenario/cs-brain-016.json,,,,,NOT_VERIFIED
-CS-LEARN-001,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-001 --json,reports/scenario/cs-learn-001.json,,,,,NOT_VERIFIED
-CS-LEARN-002,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-002 --json,reports/scenario/cs-learn-002.json,,,,,NOT_VERIFIED
-CS-LEARN-003,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-003 --json,reports/scenario/cs-learn-003.json,,,,,NOT_VERIFIED
-CS-LEARN-004,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-004 --json,reports/scenario/cs-learn-004.json,,,,,NOT_VERIFIED
-CS-LEARN-005,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-005 --json,reports/scenario/cs-learn-005.json,,,,,NOT_VERIFIED
-CS-LEARN-006,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-006 --json,reports/scenario/cs-learn-006.json,,,,,NOT_VERIFIED
-CS-LEARN-007,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-007 --json,reports/scenario/cs-learn-007.json,,,,,NOT_VERIFIED
-CS-LEARN-008,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-008 --json,reports/scenario/cs-learn-008.json,,,,,NOT_VERIFIED
-CS-LEARN-009,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-009 --json,reports/scenario/cs-learn-009.json,,,,,NOT_VERIFIED
-CS-LEARN-010,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-010 --json,reports/scenario/cs-learn-010.json,,,,,NOT_VERIFIED
-CS-LEARN-011,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-011 --json,reports/scenario/cs-learn-011.json,,,,,NOT_VERIFIED
-CS-LEARN-012,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-012 --json,reports/scenario/cs-learn-012.json,,,,,NOT_VERIFIED
-CS-LEARN-013,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-013 --json,reports/scenario/cs-learn-013.json,,,,,NOT_VERIFIED
-CS-LEARN-014,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-014 --json,reports/scenario/cs-learn-014.json,,,,,NOT_VERIFIED
-CS-LEARN-015,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-015 --json,reports/scenario/cs-learn-015.json,,,,,NOT_VERIFIED
-CS-LEARN-016,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-016 --json,reports/scenario/cs-learn-016.json,,,,,NOT_VERIFIED
-CS-LEARN-017,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-017 --json,reports/scenario/cs-learn-017.json,,,,,NOT_VERIFIED
-CS-LEARN-018,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-018 --json,reports/scenario/cs-learn-018.json,,,,,NOT_VERIFIED
+CS-LEARN-001,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-002,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-003,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-004,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-005,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-006,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-007,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-008,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-009,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-010,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-011,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-012,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-013,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-014,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-015,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-016,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-017,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
+CS-LEARN-018,MUST_PASS,true,M+D,AI,cornerstone scenario verify full-learning-experience --json,reports/scenario/full-learning-experience-2026-06-10.json,,,,,PASS
 CS-EXT-001,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-001 --json,reports/scenario/cs-ext-001.json,,,,,NOT_VERIFIED
 CS-EXT-002,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-002 --json,reports/scenario/cs-ext-002.json,,,,,NOT_VERIFIED
 CS-EXT-003,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-003 --json,reports/scenario/cs-ext-003.json,,,,,NOT_VERIFIED

@@ -12,6 +12,7 @@ from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
     verify_full_claim_collaboration,
+    verify_full_learning_experience,
     verify_full_memory_wiki,
     verify_full_understanding_ontology,
     verify_vs0_audit_ledger,
@@ -1851,6 +1852,319 @@ def command_learning_show(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def experience_payload(args: argparse.Namespace, command: str) -> tuple[Path, LocalRuntimeStore, dict[str, str], dict[str, Any]]:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    payload = base_response(command, "success", root)
+    payload.update(requested_scope)
+    return root, store, requested_scope, payload
+
+
+def handle_experience_error(payload: dict[str, Any], result: dict[str, Any], as_json: bool) -> int | None:
+    status = result.get("status")
+    if not status:
+        return None
+    payload["status"] = "failed"
+    if status == "not_found":
+        payload["errors"].append(
+            {
+                "code": "CS_EXPERIENCE_RESOURCE_NOT_FOUND",
+                "message": "Required experience resource was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_NOT_FOUND
+    if status == "scope_denied":
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Experience resource is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_SCOPE_DENIED
+    if status == "evidence_required":
+        payload["errors"].append(
+            {
+                "code": "CS_EXPERIENCE_EVIDENCE_REQUIRED",
+                "message": "Experience operation requires evidence-backed source data.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_EVIDENCE_MISSING
+    if status == "invalid_stage":
+        payload["errors"].append(
+            {
+                "code": "CS_EXPERIENCE_INVALID_PROMOTION_STAGE",
+                "message": "Lesson promotion must follow the declared promotion ladder.",
+                "resource": result.get("resource"),
+                "reason": result.get("reason"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_INVALID
+    if status == "invalid_action":
+        payload["errors"].append(
+            {
+                "code": "CS_EXPERIENCE_INVALID_CONTROL_ACTION",
+                "message": "Lesson control action is not supported.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_INVALID
+    if status == "approval_required":
+        payload["errors"].append(
+            {
+                "code": "CS_EXPERIENCE_APPROVAL_REQUIRED",
+                "message": "Broader lesson reuse requires an explicit staged approval record.",
+                "resource": result.get("resource"),
+                "stage": result.get("stage"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_POLICY_DENIED
+    payload["errors"].append({"code": "CS_EXPERIENCE_RUNTIME_ERROR", "message": "Experience operation failed.", "status": status})
+    print_payload(payload, as_json)
+    return EXIT_RUNTIME_FAILURE
+
+
+def command_experience_connected_outcome(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience connected-outcome")
+    result = store.record_connected_outcome(
+        args.action_id,
+        evidence_bundle_id=args.evidence_bundle_id,
+        outcome_status=args.outcome_status,
+        summary=args.summary,
+        scope=requested_scope,
+    )
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    connected_outcome = result["connected_outcome"]
+    payload["connected_outcome"] = connected_outcome
+    payload["ids"].update({"connected_outcome_id": connected_outcome["connected_outcome_id"], "action_id": args.action_id})
+    payload["evidence_refs"].extend([f"connected_outcome:{connected_outcome['connected_outcome_id']}", *connected_outcome.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_trajectory_record(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience trajectory record")
+    result = store.record_mission_trajectory(
+        args.mission_id,
+        outcome_status=args.outcome_status,
+        outcome_summary=args.outcome_summary,
+        owner_acceptance=args.owner_acceptance,
+        failure_reason=args.failure_reason,
+        recovery_attempt=args.recovery_attempt,
+        connected_outcome_id=args.connected_outcome_id,
+        scope=requested_scope,
+    )
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    trajectory = result["trajectory"]
+    payload["trajectory"] = trajectory
+    payload["ids"].update({"trajectory_id": trajectory["trajectory_id"], "mission_id": args.mission_id})
+    payload["evidence_refs"].extend([f"trajectory:{trajectory['trajectory_id']}", *trajectory.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_library(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience library")
+    result = store.experience_library(requested_scope)
+    library = result["experience_library"]
+    payload["experience_library"] = library
+    payload["ids"].update({"experience_library_id": library["experience_library_id"]})
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_search(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience search")
+    result = store.search_experience(args.query, requested_scope)
+    search = result["experience_search"]
+    payload["experience_search"] = search
+    payload["ids"].update({"experience_search_id": search["experience_search_id"]})
+    payload["evidence_refs"].extend(ref for row in search.get("results", []) for ref in row.get("evidence_refs", []))
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_recommend(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience recommend")
+    result = store.recommend_experience(args.mission_id, args.query, requested_scope)
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    recommendation = result["experience_recommendation"]
+    payload["experience_recommendation"] = recommendation
+    payload["ids"].update({"experience_recommendation_id": recommendation["experience_recommendation_id"], "mission_id": args.mission_id})
+    payload["evidence_refs"].extend(ref for row in recommendation.get("cited_experiences", []) for ref in row.get("evidence_refs", []))
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_lesson_propose(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience lesson propose")
+    result = store.propose_lesson(
+        args.trajectory_id,
+        lesson=args.lesson,
+        applies_when=args.applies_when,
+        does_not_apply_when=args.does_not_apply_when,
+        confidence=args.confidence,
+        scope=requested_scope,
+    )
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    lesson = result["lesson"]
+    payload["lesson"] = lesson
+    payload["ids"].update({"lesson_id": lesson["lesson_id"], "trajectory_id": args.trajectory_id})
+    payload["evidence_refs"].extend([f"lesson:{lesson['lesson_id']}", *lesson.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_lesson_promote(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience lesson promote")
+    result = store.promote_lesson(args.lesson_id, stage=args.stage, scope=requested_scope)
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    lesson = result["lesson"]
+    payload["lesson"] = lesson
+    payload["ids"].update({"lesson_id": lesson["lesson_id"]})
+    payload["evidence_refs"].extend([f"lesson:{lesson['lesson_id']}", *lesson.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_lesson_control(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience lesson control")
+    result = store.control_lesson(args.lesson_id, action=args.action, scope=requested_scope)
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    lesson = result["lesson"]
+    control = result["lesson_control"]
+    payload["lesson"] = lesson
+    payload["lesson_control"] = control
+    payload["ids"].update({"lesson_id": lesson["lesson_id"], "lesson_control_id": control["lesson_control_id"]})
+    payload["evidence_refs"].extend([f"lesson:{lesson['lesson_id']}", f"lesson_control:{control['lesson_control_id']}", *lesson.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_behavior_signal(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience behavior-signal")
+    result = store.record_behavior_signal(args.trajectory_id, signal=args.signal, interpretation=args.interpretation, scope=requested_scope)
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    signal = result["behavior_signal"]
+    payload["behavior_signal"] = signal
+    payload["ids"].update({"behavior_signal_id": signal["behavior_signal_id"], "trajectory_id": args.trajectory_id})
+    payload["evidence_refs"].extend([f"behavior_signal:{signal['behavior_signal_id']}", *signal.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_model_eval(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience model-eval")
+    result = store.record_model_evaluation(args.trajectory_id, score=args.score, rationale=args.rationale, scope=requested_scope)
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    evaluation = result["model_evaluation"]
+    payload["model_evaluation"] = evaluation
+    payload["ids"].update({"model_evaluation_id": evaluation["model_evaluation_id"], "trajectory_id": args.trajectory_id})
+    payload["evidence_refs"].extend([f"model_evaluation:{evaluation['model_evaluation_id']}", *evaluation.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_product_improvement_propose(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience product-improvement propose")
+    result = store.propose_product_improvement(args.lesson_id, proposal=args.proposal, scope=requested_scope)
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    improvement = result["product_improvement"]
+    payload["product_improvement"] = improvement
+    payload["ids"].update({"product_improvement_id": improvement["product_improvement_id"], "lesson_id": args.lesson_id})
+    payload["evidence_refs"].extend([f"product_improvement:{improvement['product_improvement_id']}", *improvement.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_local_adapt(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience local-adapt")
+    result = store.record_local_adaptation(args.lesson_id, preference=args.preference, scope=requested_scope)
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    adaptation = result["local_adaptation"]
+    payload["local_adaptation"] = adaptation
+    payload["ids"].update({"local_adaptation_id": adaptation["local_adaptation_id"], "lesson_id": args.lesson_id})
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_local_adapt_reset(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience local-adapt-reset")
+    result = store.reset_local_adaptation(args.adaptation_id, requested_scope)
+    error_exit = handle_experience_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    adaptation = result["local_adaptation"]
+    payload["local_adaptation"] = adaptation
+    payload["ids"].update({"local_adaptation_id": adaptation["local_adaptation_id"]})
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_metrics(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience metrics")
+    result = store.outcome_quality_metrics(requested_scope)
+    report = result["outcome_quality_report"]
+    payload["outcome_quality_report"] = report
+    payload["ids"].update({"outcome_quality_report_id": report["outcome_quality_report_id"]})
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_experience_export(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = experience_payload(args, "cornerstone experience export")
+    result = store.export_experience(requested_scope)
+    export = result["experience_export"]
+    payload["experience_export"] = export
+    payload["ids"].update({"experience_export_id": export["experience_export_id"]})
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_mission_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -2394,6 +2708,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_tenant_security_boundary(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
+    elif args.contract == "full-learning-experience":
+        report = verify_full_learning_experience(root)
     elif args.contract == "full-memory-wiki":
         report = verify_full_memory_wiki(root)
     elif args.contract == "full-understanding-ontology":
@@ -2426,6 +2742,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-product-domain-readiness",
                     "vs0-tenant-security-boundary",
                     "full-claim-collaboration",
+                    "full-learning-experience",
                     "full-memory-wiki",
                     "full-understanding-ontology",
                 ],
@@ -2975,6 +3292,153 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(learning_show)
     learning_show.add_argument("--json", action="store_true", help="Emit JSON output")
     learning_show.set_defaults(func=command_learning_show)
+
+    experience = subcommands.add_parser("experience", help="Mission trajectory and experience learning commands")
+    experience_sub = experience.add_subparsers(dest="experience_command")
+
+    connected_outcome = experience_sub.add_parser("connected-outcome", help="Record a connected-system outcome as evidence-backed experience")
+    connected_outcome.add_argument("--action-id", required=True, help="Executed Action ID")
+    connected_outcome.add_argument("--evidence-bundle-id", required=True, help="Evidence Bundle ID for the observed outcome")
+    connected_outcome.add_argument("--outcome-status", choices=["success", "failed", "cancelled", "rolled_back"], required=True)
+    connected_outcome.add_argument("--summary", required=True, help="Outcome summary")
+    add_state_argument(connected_outcome)
+    add_scope_arguments(connected_outcome)
+    connected_outcome.add_argument("--json", action="store_true", help="Emit JSON output")
+    connected_outcome.set_defaults(func=command_experience_connected_outcome)
+
+    trajectory = experience_sub.add_parser("trajectory", help="Mission trajectory commands")
+    trajectory_sub = trajectory.add_subparsers(dest="trajectory_command")
+
+    trajectory_record = trajectory_sub.add_parser("record", help="Record a Mission Trajectory Ledger item")
+    trajectory_record.add_argument("--mission-id", required=True, help="Mission ID")
+    trajectory_record.add_argument("--outcome-status", choices=["success", "failed", "cancelled", "rolled_back"], required=True)
+    trajectory_record.add_argument("--outcome-summary", required=True, help="Outcome summary")
+    trajectory_record.add_argument("--owner-acceptance", choices=["accepted", "rejected", "pending"], default="accepted")
+    trajectory_record.add_argument("--failure-reason", help="Failure or rollback reason")
+    trajectory_record.add_argument("--recovery-attempt", help="Recovery or escalation attempt")
+    trajectory_record.add_argument("--connected-outcome-id", help="Connected outcome ID")
+    add_state_argument(trajectory_record)
+    add_scope_arguments(trajectory_record)
+    trajectory_record.add_argument("--json", action="store_true", help="Emit JSON output")
+    trajectory_record.set_defaults(func=command_experience_trajectory_record)
+
+    library = experience_sub.add_parser("library", help="Browse scoped Experience Library")
+    add_state_argument(library)
+    add_scope_arguments(library)
+    library.add_argument("--json", action="store_true", help="Emit JSON output")
+    library.set_defaults(func=command_experience_library)
+
+    experience_search = experience_sub.add_parser("search", help="Search scoped experience")
+    experience_search.add_argument("--query", required=True, help="Experience search query")
+    add_state_argument(experience_search)
+    add_scope_arguments(experience_search)
+    experience_search.add_argument("--json", action="store_true", help="Emit JSON output")
+    experience_search.set_defaults(func=command_experience_search)
+
+    recommend = experience_sub.add_parser("recommend", help="Recommend scoped experience for a new mission")
+    recommend.add_argument("--mission-id", required=True, help="Mission ID receiving recommendations")
+    recommend.add_argument("--query", required=True, help="Recommendation query")
+    add_state_argument(recommend)
+    add_scope_arguments(recommend)
+    recommend.add_argument("--json", action="store_true", help="Emit JSON output")
+    recommend.set_defaults(func=command_experience_recommend)
+
+    lesson = experience_sub.add_parser("lesson", help="Lesson candidate commands")
+    lesson_sub = lesson.add_subparsers(dest="lesson_command")
+
+    lesson_propose = lesson_sub.add_parser("propose", help="Propose a lesson from a trajectory")
+    lesson_propose.add_argument("--trajectory-id", required=True, help="Trajectory ID")
+    lesson_propose.add_argument("--lesson", required=True, help="Lesson text")
+    lesson_propose.add_argument("--applies-when", required=True, help="Applicability boundary")
+    lesson_propose.add_argument("--does-not-apply-when", required=True, help="Non-applicability boundary")
+    lesson_propose.add_argument("--confidence", choices=["low", "medium", "high"], default="medium")
+    add_state_argument(lesson_propose)
+    add_scope_arguments(lesson_propose)
+    lesson_propose.add_argument("--json", action="store_true", help="Emit JSON output")
+    lesson_propose.set_defaults(func=command_experience_lesson_propose)
+
+    lesson_promote = lesson_sub.add_parser("promote", help="Promote a lesson one ladder step")
+    lesson_promote.add_argument("lesson_id", help="Lesson ID")
+    lesson_promote.add_argument(
+        "--stage",
+        choices=[
+            "observation",
+            "candidate_lesson",
+            "workspace_memory",
+            "mission_playbook",
+            "organization_approved_rule",
+            "solution_pack_or_product_learning_proposal",
+        ],
+        required=True,
+    )
+    add_state_argument(lesson_promote)
+    add_scope_arguments(lesson_promote)
+    lesson_promote.add_argument("--json", action="store_true", help="Emit JSON output")
+    lesson_promote.set_defaults(func=command_experience_lesson_promote)
+
+    lesson_control = lesson_sub.add_parser("control", help="Demote, rollback, disable, or revise a lesson")
+    lesson_control.add_argument("lesson_id", help="Lesson ID")
+    lesson_control.add_argument("--action", choices=["demote", "rollback", "disable", "revise"], required=True)
+    add_state_argument(lesson_control)
+    add_scope_arguments(lesson_control)
+    lesson_control.add_argument("--json", action="store_true", help="Emit JSON output")
+    lesson_control.set_defaults(func=command_experience_lesson_control)
+
+    behavior_signal = experience_sub.add_parser("behavior-signal", help="Record a supporting behavior signal")
+    behavior_signal.add_argument("--trajectory-id", required=True, help="Trajectory ID")
+    behavior_signal.add_argument("--signal", required=True, help="Behavior signal")
+    behavior_signal.add_argument("--interpretation", required=True, help="Signal interpretation")
+    add_state_argument(behavior_signal)
+    add_scope_arguments(behavior_signal)
+    behavior_signal.add_argument("--json", action="store_true", help="Emit JSON output")
+    behavior_signal.set_defaults(func=command_experience_behavior_signal)
+
+    model_eval = experience_sub.add_parser("model-eval", help="Record a local_test model self-evaluation")
+    model_eval.add_argument("--trajectory-id", required=True, help="Trajectory ID")
+    model_eval.add_argument("--score", required=True, help="Model self-evaluation score")
+    model_eval.add_argument("--rationale", required=True, help="Model self-evaluation rationale")
+    add_state_argument(model_eval)
+    add_scope_arguments(model_eval)
+    model_eval.add_argument("--json", action="store_true", help="Emit JSON output")
+    model_eval.set_defaults(func=command_experience_model_eval)
+
+    product_improvement = experience_sub.add_parser("product-improvement", help="Product improvement proposal commands")
+    product_improvement_sub = product_improvement.add_subparsers(dest="product_improvement_command")
+
+    product_improvement_propose = product_improvement_sub.add_parser("propose", help="Propose a product improvement from a lesson")
+    product_improvement_propose.add_argument("--lesson-id", required=True, help="Lesson ID")
+    product_improvement_propose.add_argument("--proposal", required=True, help="Proposal text")
+    add_state_argument(product_improvement_propose)
+    add_scope_arguments(product_improvement_propose)
+    product_improvement_propose.add_argument("--json", action="store_true", help="Emit JSON output")
+    product_improvement_propose.set_defaults(func=command_experience_product_improvement_propose)
+
+    local_adapt = experience_sub.add_parser("local-adapt", help="Record namespace-local adaptation")
+    local_adapt.add_argument("--lesson-id", required=True, help="Lesson ID")
+    local_adapt.add_argument("--preference", required=True, help="Local preference")
+    add_state_argument(local_adapt)
+    add_scope_arguments(local_adapt)
+    local_adapt.add_argument("--json", action="store_true", help="Emit JSON output")
+    local_adapt.set_defaults(func=command_experience_local_adapt)
+
+    local_adapt_reset = experience_sub.add_parser("local-adapt-reset", help="Reset namespace-local adaptation")
+    local_adapt_reset.add_argument("adaptation_id", help="Local adaptation ID")
+    add_state_argument(local_adapt_reset)
+    add_scope_arguments(local_adapt_reset)
+    local_adapt_reset.add_argument("--json", action="store_true", help="Emit JSON output")
+    local_adapt_reset.set_defaults(func=command_experience_local_adapt_reset)
+
+    metrics = experience_sub.add_parser("metrics", help="Generate outcome quality metrics")
+    add_state_argument(metrics)
+    add_scope_arguments(metrics)
+    metrics.add_argument("--json", action="store_true", help="Emit JSON output")
+    metrics.set_defaults(func=command_experience_metrics)
+
+    experience_export = experience_sub.add_parser("export", help="Export scoped experience with redaction")
+    add_state_argument(experience_export)
+    add_scope_arguments(experience_export)
+    experience_export.add_argument("--json", action="store_true", help="Emit JSON output")
+    experience_export.set_defaults(func=command_experience_export)
 
     mission = subcommands.add_parser("mission", help="Mission Goal Contract commands")
     mission_sub = mission.add_subparsers(dest="mission_command")

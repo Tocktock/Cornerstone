@@ -40,8 +40,9 @@ tenant_security_json=$(mktemp)
 product_domain_json=$(mktemp)
 claim_collaboration_json=$(mktemp)
 memory_wiki_json=$(mktemp)
+learning_experience_json=$(mktemp)
 understanding_ontology_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$understanding_ontology_json"' EXIT
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -452,6 +453,36 @@ grep -q '"real_external_http_calls": 0' "$memory_wiki_json" || fail "full-memory
 grep -q '"secret_reads": 0' "$memory_wiki_json" || fail "full-memory-wiki read secrets"
 grep -q '"product_feature_claims": "PARTIAL_FULL_MEMORY_WIKI_ONLY"' "$memory_wiki_json" || fail "full-memory-wiki overclaimed product feature scope"
 
+cornerstone scenario verify full-learning-experience --json > "$learning_experience_json"
+python3 -m json.tool "$learning_experience_json" >/dev/null
+grep -q '"scenario_set": "full-learning-experience"' "$learning_experience_json" || fail "full-learning-experience report missing scenario set"
+grep -q '"blocking": 0' "$learning_experience_json" || fail "full-learning-experience report has blocking scenarios"
+grep -q '"pass": 18' "$learning_experience_json" || fail "full-learning-experience did not pass exactly eighteen scenarios"
+for scenario_id in CS-LEARN-001 CS-LEARN-002 CS-LEARN-003 CS-LEARN-004 CS-LEARN-005 CS-LEARN-006 CS-LEARN-007 CS-LEARN-008 CS-LEARN-009 CS-LEARN-010 CS-LEARN-011 CS-LEARN-012 CS-LEARN-013 CS-LEARN-014 CS-LEARN-015 CS-LEARN-016 CS-LEARN-017 CS-LEARN-018; do
+  grep -q "\"id\": \"$scenario_id\"" "$learning_experience_json" || fail "full-learning-experience missing $scenario_id"
+done
+grep -q '"experience_search_result_count": 1' "$learning_experience_json" || fail "full-learning-experience missing scoped experience search result"
+grep -q '"recommendation_count": 1' "$learning_experience_json" || fail "full-learning-experience missing prior experience recommendation"
+grep -q '"personal_org_search_result_count": 0' "$learning_experience_json" || fail "full-learning-experience leaked organization experience to personal scope"
+grep -q '"org_search_result_count": 1' "$learning_experience_json" || fail "full-learning-experience missing organization scoped experience result"
+grep -q '"trajectory_without_owner": 0' "$learning_experience_json" || fail "full-learning-experience recorded ownerless trajectory"
+grep -q '"trajectory_without_audit": 0' "$learning_experience_json" || fail "full-learning-experience missed trajectory audit"
+grep -q '"failed_trajectory_hidden": 0' "$learning_experience_json" || fail "full-learning-experience hid failed trajectory"
+grep -q '"experience_cross_namespace_results": 0' "$learning_experience_json" || fail "full-learning-experience leaked cross-namespace experience"
+grep -q '"lesson_auto_global_rule": 0' "$learning_experience_json" || fail "full-learning-experience auto-promoted lesson globally"
+grep -q '"promotion_ladder_skipped": 0' "$learning_experience_json" || fail "full-learning-experience skipped promotion ladder"
+grep -q '"broader_reuse_without_approval": 0' "$learning_experience_json" || fail "full-learning-experience allowed broader reuse without approval"
+grep -q '"behavior_signal_overrode_outcome": 0' "$learning_experience_json" || fail "full-learning-experience let behavior signal override outcome"
+grep -q '"model_eval_overrode_outcome": 0' "$learning_experience_json" || fail "full-learning-experience let model eval override outcome"
+grep -q '"product_global_mutation": 0' "$learning_experience_json" || fail "full-learning-experience mutated product defaults"
+grep -q '"local_adaptation_cross_namespace": 0' "$learning_experience_json" || fail "full-learning-experience adapted across namespaces"
+grep -q '"bad_lesson_still_active": 0' "$learning_experience_json" || fail "full-learning-experience left bad lesson active"
+grep -q '"experience_export_unredacted_raw": 0' "$learning_experience_json" || fail "full-learning-experience leaked raw export content"
+grep -q '"connected_outcome_without_evidence": 0' "$learning_experience_json" || fail "full-learning-experience recorded connected outcome without evidence"
+grep -q '"real_external_http_calls": 0' "$learning_experience_json" || fail "full-learning-experience reported real external HTTP calls"
+grep -q '"secret_reads": 0' "$learning_experience_json" || fail "full-learning-experience read secrets"
+grep -q '"product_feature_claims": "PARTIAL_FULL_LEARNING_EXPERIENCE_ONLY"' "$learning_experience_json" || fail "full-learning-experience overclaimed product feature scope"
+
 cornerstone scenario verify full-understanding-ontology --json > "$understanding_ontology_json"
 python3 -m json.tool "$understanding_ontology_json" >/dev/null
 grep -q '"scenario_set": "full-understanding-ontology"' "$understanding_ontology_json" || fail "full-understanding-ontology report missing scenario set"
@@ -511,4 +542,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-understanding-ontology verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, vs0-product-domain-readiness verify, unittest).\n'

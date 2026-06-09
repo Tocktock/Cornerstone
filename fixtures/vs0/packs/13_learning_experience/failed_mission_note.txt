@@ -1,0 +1,5 @@
+Learning experience fixture: learning-failure-anchor.
+
+The mission failed because evidence coverage was incomplete and the owner chose to pause rather than let the agent guess.
+The failure should be retained as learning material with root-cause hypothesis, recovery attempt, and candidate improvement.
+The failed learning-failure-anchor trajectory must remain searchable in the scoped Experience Library instead of being hidden.

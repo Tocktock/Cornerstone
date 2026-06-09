@@ -1,0 +1,5 @@
+Learning experience fixture: connected-outcome-anchor.
+
+A mocked connected system reported that the governed action result was accepted.
+The connected-outcome-anchor event is re-ingested as evidence and linked to the mission trajectory, action, and learning record.
+No direct provider credential, direct write bypass, or real external HTTP call is allowed for this fixture.

@@ -4562,6 +4562,630 @@ def verify_full_memory_wiki(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_full_learning_experience(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("full-learning-experience")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    success_path = "fixtures/vs0/packs/13_learning_experience/successful_mission_note.txt"
+    failure_path = "fixtures/vs0/packs/13_learning_experience/failed_mission_note.txt"
+    connected_path = "fixtures/vs0/packs/13_learning_experience/connected_outcome_note.txt"
+    org_path = "fixtures/vs0/packs/13_learning_experience/private_org_experience_note.txt"
+    personal_scope_args: list[str] = []
+    org_scope_args = ["--owner-id", "org-owner", "--namespace-id", "organization", "--workspace-id", "ops"]
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    def scoped(args: list[str], scope_args: list[str]) -> list[str]:
+        return [*args, "--state-dir", state_rel, *scope_args, "--json"]
+
+    def build_mission(label: str, input_path: str, query: str, claim_statement: str, mission_goal: str, scope_args: list[str]) -> dict[str, Any]:
+        transcripts[f"{label}_ingest"] = _run_cli_json(root, scoped(["artifact", "ingest", input_path], scope_args))
+        artifact = _artifact(transcripts[f"{label}_ingest"])
+        artifact_id = artifact.get("artifact_id", "")
+        transcripts[f"{label}_search"] = _run_cli_json(root, scoped(["search", "query", query], scope_args))
+        snapshot = _payload(transcripts[f"{label}_search"]).get("search_snapshot", {})
+        snapshot_id = snapshot.get("search_snapshot_id", "")
+        transcripts[f"{label}_bundle_create"] = _run_cli_json(root, scoped(["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id], scope_args)) if snapshot_id else {}
+        bundle = _payload(transcripts[f"{label}_bundle_create"]).get("evidence_bundle", {})
+        bundle_id = bundle.get("evidence_bundle_id", "")
+        transcripts[f"{label}_claim_create"] = _run_cli_json(
+            root,
+            scoped(
+                [
+                    "claim",
+                    "create",
+                    "--evidence-bundle-id",
+                    bundle_id,
+                    "--statement",
+                    claim_statement,
+                ],
+                scope_args,
+            ),
+        ) if bundle_id else {}
+        claim = _payload(transcripts[f"{label}_claim_create"]).get("claim", {})
+        claim_id = claim.get("claim_id", "")
+        transcripts[f"{label}_claim_approve"] = _run_cli_json(root, scoped(["claim", "approve", claim_id], scope_args)) if claim_id else {}
+        transcripts[f"{label}_mission_create"] = _run_cli_json(
+            root,
+            scoped(["mission", "create", "--goal", mission_goal, "--claim-id", claim_id, "--evidence-bundle-id", bundle_id], scope_args),
+        ) if claim_id and bundle_id else {}
+        mission = _payload(transcripts[f"{label}_mission_create"]).get("mission", {})
+        mission_id = mission.get("mission_id", "")
+        transcripts[f"{label}_mission_activate"] = _run_cli_json(root, scoped(["mission", "activate", mission_id, "--mode", "autopilot"], scope_args)) if mission_id else {}
+        return {
+            "artifact": artifact,
+            "artifact_id": artifact_id,
+            "snapshot": snapshot,
+            "snapshot_id": snapshot_id,
+            "bundle": bundle,
+            "bundle_id": bundle_id,
+            "claim": claim,
+            "claim_id": claim_id,
+            "mission": mission,
+            "mission_id": mission_id,
+        }
+
+    success = build_mission(
+        "success",
+        success_path,
+        "learning-success-anchor",
+        "The learning success anchor supports a repeatable evidence-first mission pattern.",
+        "Complete a learning-success-anchor follow-up with evidence, action, and lessons.",
+        personal_scope_args,
+    )
+    success_mission_id = success["mission_id"]
+    success_claim_id = success["claim_id"]
+    transcripts["success_action_propose"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "action",
+                "propose",
+                "--mission-id",
+                success_mission_id,
+                "--claim-id",
+                success_claim_id,
+                "--goal",
+                "Record learning-success-anchor local status.",
+                "--action-kind",
+                "internal_status_update",
+                "--risk",
+                "low",
+            ],
+            personal_scope_args,
+        ),
+    ) if success_mission_id and success_claim_id else {}
+    success_action = _payload(transcripts["success_action_propose"]).get("action_card", {})
+    success_action_id = success_action.get("action_id", "")
+    transcripts["success_action_execute"] = _run_cli_json(root, scoped(["action", "execute", success_action_id], personal_scope_args)) if success_action_id else {}
+    success_result = _payload(transcripts["success_action_execute"]).get("action_result", {})
+    transcripts["success_learning_record"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "learning",
+                "record",
+                "--action-id",
+                success_action_id,
+                "--lesson",
+                "Repeat missions should cite trajectory evidence and keep action outcomes separate from durable truth.",
+            ],
+            personal_scope_args,
+        ),
+    ) if success_action_id else {}
+    learning = _payload(transcripts["success_learning_record"]).get("learning", {})
+
+    connected = build_mission(
+        "connected",
+        connected_path,
+        "connected-outcome-anchor",
+        "The connected outcome anchor is evidence for a mocked connected-system result.",
+        "Record a connected-outcome-anchor result through a governed action path.",
+        personal_scope_args,
+    )
+    connected_mission_id = connected["mission_id"]
+    connected_claim_id = connected["claim_id"]
+    transcripts["connected_action_propose"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "action",
+                "propose",
+                "--mission-id",
+                connected_mission_id,
+                "--claim-id",
+                connected_claim_id,
+                "--goal",
+                "Write connected-outcome-anchor status to a mocked connected source.",
+                "--action-kind",
+                "external_writeback",
+                "--risk",
+                "high",
+                "--connector",
+                "mock_connector",
+                "--target",
+                "mock://connected-source/learning",
+            ],
+            personal_scope_args,
+        ),
+    ) if connected_mission_id and connected_claim_id else {}
+    connected_action = _payload(transcripts["connected_action_propose"]).get("action_card", {})
+    connected_action_id = connected_action.get("action_id", "")
+    transcripts["connected_action_execute_before_approval"] = _run_cli_json(root, scoped(["action", "execute", connected_action_id], personal_scope_args)) if connected_action_id else {}
+    transcripts["connected_action_approve"] = _run_cli_json(root, scoped(["action", "approve", connected_action_id, "--approver", "owner"], personal_scope_args)) if connected_action_id else {}
+    transcripts["connected_action_execute_after_approval"] = _run_cli_json(root, scoped(["action", "execute", connected_action_id], personal_scope_args)) if connected_action_id else {}
+    connected_result = _payload(transcripts["connected_action_execute_after_approval"]).get("action_result", {})
+    transcripts["connected_outcome"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "connected-outcome",
+                "--action-id",
+                connected_action_id,
+                "--evidence-bundle-id",
+                connected["bundle_id"],
+                "--outcome-status",
+                "success",
+                "--summary",
+                "Mocked connected system accepted connected-outcome-anchor update and was re-ingested as evidence.",
+            ],
+            personal_scope_args,
+        ),
+    ) if connected_action_id and connected["bundle_id"] else {}
+    connected_outcome = _payload(transcripts["connected_outcome"]).get("connected_outcome", {})
+    connected_outcome_id = connected_outcome.get("connected_outcome_id", "")
+
+    transcripts["success_trajectory_record"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "trajectory",
+                "record",
+                "--mission-id",
+                success_mission_id,
+                "--outcome-status",
+                "success",
+                "--outcome-summary",
+                "learning-success-anchor mission succeeded with evidence, local action, connected-outcome-anchor context, and owner acceptance.",
+                "--connected-outcome-id",
+                connected_outcome_id,
+            ],
+            personal_scope_args,
+        ),
+    ) if success_mission_id and connected_outcome_id else {}
+    success_trajectory = _payload(transcripts["success_trajectory_record"]).get("trajectory", {})
+    success_trajectory_id = success_trajectory.get("trajectory_id", "")
+    transcripts["experience_library"] = _run_cli_json(root, scoped(["experience", "library"], personal_scope_args))
+    experience_library = _payload(transcripts["experience_library"]).get("experience_library", {})
+    transcripts["experience_search_success"] = _run_cli_json(root, scoped(["experience", "search", "--query", "learning-success-anchor"], personal_scope_args))
+    experience_search = _payload(transcripts["experience_search_success"]).get("experience_search", {})
+
+    new_mission = build_mission(
+        "new",
+        success_path,
+        "learning-success-anchor",
+        "A new mission should visibly inspect prior scoped experience before acting.",
+        "Plan another learning-success-anchor mission with visible prior experience.",
+        personal_scope_args,
+    )
+    transcripts["experience_recommend"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "recommend",
+                "--mission-id",
+                new_mission["mission_id"],
+                "--query",
+                "learning-success-anchor",
+            ],
+            personal_scope_args,
+        ),
+    ) if new_mission["mission_id"] else {}
+    recommendation = _payload(transcripts["experience_recommend"]).get("experience_recommendation", {})
+
+    transcripts["lesson_propose"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "lesson",
+                "propose",
+                "--trajectory-id",
+                success_trajectory_id,
+                "--lesson",
+                "For repeat evidence missions, start from current evidence and use prior trajectory only as scoped context.",
+                "--applies-when",
+                "A new mission shares the same owner namespace and has current evidence for the same operational anchor.",
+                "--does-not-apply-when",
+                "The mission is cross-namespace, lacks current evidence, or asks for global product behavior.",
+                "--confidence",
+                "medium",
+            ],
+            personal_scope_args,
+        ),
+    ) if success_trajectory_id else {}
+    lesson = _payload(transcripts["lesson_propose"]).get("lesson", {})
+    lesson_id = lesson.get("lesson_id", "")
+    transcripts["lesson_promote_skip"] = _run_cli_json(root, scoped(["experience", "lesson", "promote", lesson_id, "--stage", "mission_playbook"], personal_scope_args)) if lesson_id else {}
+    transcripts["lesson_promote_workspace"] = _run_cli_json(root, scoped(["experience", "lesson", "promote", lesson_id, "--stage", "workspace_memory"], personal_scope_args)) if lesson_id else {}
+    workspace_lesson = _payload(transcripts["lesson_promote_workspace"]).get("lesson", {})
+    transcripts["lesson_promote_playbook"] = _run_cli_json(root, scoped(["experience", "lesson", "promote", lesson_id, "--stage", "mission_playbook"], personal_scope_args)) if lesson_id else {}
+    playbook_lesson = _payload(transcripts["lesson_promote_playbook"]).get("lesson", {})
+    transcripts["lesson_promote_org_rule_without_approval"] = _run_cli_json(root, scoped(["experience", "lesson", "promote", lesson_id, "--stage", "organization_approved_rule"], personal_scope_args)) if lesson_id else {}
+    transcripts["behavior_signal"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "behavior-signal",
+                "--trajectory-id",
+                success_trajectory_id,
+                "--signal",
+                "Owner ignored optional prior experience once, then accepted evidence-backed recommendation.",
+                "--interpretation",
+                "Behavior can personalize ranking but cannot outrank objective outcome evidence.",
+            ],
+            personal_scope_args,
+        ),
+    ) if success_trajectory_id else {}
+    behavior_signal = _payload(transcripts["behavior_signal"]).get("behavior_signal", {})
+    transcripts["model_eval"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "model-eval",
+                "--trajectory-id",
+                success_trajectory_id,
+                "--score",
+                "useful_with_boundaries",
+                "--rationale",
+                "local_test self-evaluation supports review but is not a PASS judge.",
+            ],
+            personal_scope_args,
+        ),
+    ) if success_trajectory_id else {}
+    model_evaluation = _payload(transcripts["model_eval"]).get("model_evaluation", {})
+    transcripts["lesson_control_rollback"] = _run_cli_json(root, scoped(["experience", "lesson", "control", lesson_id, "--action", "rollback"], personal_scope_args)) if lesson_id else {}
+    rollback_lesson = _payload(transcripts["lesson_control_rollback"]).get("lesson", {})
+    lesson_control = _payload(transcripts["lesson_control_rollback"]).get("lesson_control", {})
+    transcripts["product_improvement_propose"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "product-improvement",
+                "propose",
+                "--lesson-id",
+                lesson_id,
+                "--proposal",
+                "Add a local replay evaluator for repeat mission experience recommendations.",
+            ],
+            personal_scope_args,
+        ),
+    ) if lesson_id else {}
+    product_improvement = _payload(transcripts["product_improvement_propose"]).get("product_improvement", {})
+    transcripts["local_adapt"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "local-adapt",
+                "--lesson-id",
+                lesson_id,
+                "--preference",
+                "Rank same-workspace successful trajectories above generic recommendations.",
+            ],
+            personal_scope_args,
+        ),
+    ) if lesson_id else {}
+    local_adaptation = _payload(transcripts["local_adapt"]).get("local_adaptation", {})
+    local_adaptation_id = local_adaptation.get("local_adaptation_id", "")
+    transcripts["local_adapt_reset"] = _run_cli_json(root, scoped(["experience", "local-adapt-reset", local_adaptation_id], personal_scope_args)) if local_adaptation_id else {}
+    reset_adaptation = _payload(transcripts["local_adapt_reset"]).get("local_adaptation", {})
+
+    failure = build_mission(
+        "failure",
+        failure_path,
+        "learning-failure-anchor",
+        "The learning failure anchor records a failed mission as reusable learning material.",
+        "Attempt learning-failure-anchor mission and preserve the failure as experience.",
+        personal_scope_args,
+    )
+    transcripts["failure_trajectory_record"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "trajectory",
+                "record",
+                "--mission-id",
+                failure["mission_id"],
+                "--outcome-status",
+                "failed",
+                "--outcome-summary",
+                "learning-failure-anchor mission failed because evidence coverage was insufficient.",
+                "--failure-reason",
+                "Evidence bundle did not cover requested external confirmation.",
+                "--recovery-attempt",
+                "Kept the failed mission searchable and escalated to owner review before retry.",
+                "--owner-acceptance",
+                "pending",
+            ],
+            personal_scope_args,
+        ),
+    ) if failure["mission_id"] else {}
+    failure_trajectory = _payload(transcripts["failure_trajectory_record"]).get("trajectory", {})
+
+    org = build_mission(
+        "org",
+        org_path,
+        "org-experience-private-anchor",
+        "The organization private experience anchor must stay inside organization scope.",
+        "Record org-experience-private-anchor as organization-only experience.",
+        org_scope_args,
+    )
+    transcripts["org_trajectory_record"] = _run_cli_json(
+        root,
+        scoped(
+            [
+                "experience",
+                "trajectory",
+                "record",
+                "--mission-id",
+                org["mission_id"],
+                "--outcome-status",
+                "failed",
+                "--outcome-summary",
+                "org-experience-private-anchor stayed inside organization namespace after a policy-scoped privacy check.",
+                "--failure-reason",
+                "Organization privacy fixture intentionally avoided cross-namespace action execution.",
+                "--recovery-attempt",
+                "Kept the organization-only trajectory searchable inside the organization scope.",
+            ],
+            org_scope_args,
+        ),
+    ) if org["mission_id"] else {}
+    org_trajectory = _payload(transcripts["org_trajectory_record"]).get("trajectory", {})
+    transcripts["personal_search_org_anchor"] = _run_cli_json(root, scoped(["experience", "search", "--query", "org-experience-private-anchor"], personal_scope_args))
+    personal_org_search = _payload(transcripts["personal_search_org_anchor"]).get("experience_search", {})
+    transcripts["org_search_org_anchor"] = _run_cli_json(root, scoped(["experience", "search", "--query", "org-experience-private-anchor"], org_scope_args))
+    org_search = _payload(transcripts["org_search_org_anchor"]).get("experience_search", {})
+
+    transcripts["experience_library_after_failure"] = _run_cli_json(root, scoped(["experience", "library"], personal_scope_args))
+    final_library = _payload(transcripts["experience_library_after_failure"]).get("experience_library", {})
+    transcripts["experience_metrics"] = _run_cli_json(root, scoped(["experience", "metrics"], personal_scope_args))
+    metrics = _payload(transcripts["experience_metrics"]).get("outcome_quality_report", {})
+    transcripts["experience_export"] = _run_cli_json(root, scoped(["experience", "export"], personal_scope_args))
+    experience_export = _payload(transcripts["experience_export"]).get("experience_export", {})
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    audit_events = _audit_events(root, state_rel)
+    audit_event_types = [event.get("event_type") for event in audit_events]
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    trajectory_events = [event for event in audit_events if event.get("event_type") == "experience.trajectory.recorded"]
+
+    trajectory_ok = (
+        _exit_ok(transcripts["success_trajectory_record"])
+        and success_trajectory.get("schema_version") == "cs.mission_trajectory.v0"
+        and _scope_complete(success_trajectory.get("scope"))
+        and success_trajectory.get("reference_corpus", {}).get("stored_as_reference") is True
+        and bool(success_trajectory.get("actions"))
+        and bool(success_trajectory.get("evidence_refs"))
+        and len(trajectory_events) >= 3
+    )
+    library_ok = (
+        _exit_ok(transcripts["experience_library"])
+        and experience_library.get("trajectory_count", 0) >= 1
+        and experience_library.get("browse_supported") is True
+        and experience_library.get("search_supported") is True
+        and experience_library.get("inspect_supported") is True
+    )
+    influence_ok = (
+        _exit_ok(transcripts["experience_recommend"])
+        and recommendation.get("status") == "ready"
+        and recommendation.get("influence_explanation", {}).get("visible_to_user") is True
+        and recommendation.get("influence_explanation", {}).get("does_not_auto_execute") is True
+        and bool(recommendation.get("cited_experiences"))
+    )
+    corpus_ok = final_library.get("trajectory_count", 0) >= 2 and final_library.get("privacy_boundary", {}).get("active_scope_only") is True
+    selective_conversion_ok = (
+        _exit_ok(transcripts["lesson_propose"])
+        and lesson.get("promotion_stage") == "candidate_lesson"
+        and lesson.get("scope_boundary", {}).get("auto_global_rule") is False
+        and success_trajectory.get("reference_corpus", {}).get("auto_converted_to_memory_or_rules") is False
+    )
+    scoped_truth_ok = (
+        selective_conversion_ok
+        and product_improvement.get("global_behavior_changed") is False
+        and product_improvement.get("approval", {}).get("required") is True
+        and product_improvement.get("approval", {}).get("status") == "not_approved"
+    )
+    promotion_ok = (
+        transcripts["lesson_promote_skip"].get("exit_code") == 1
+        and _exit_ok(transcripts["lesson_promote_workspace"])
+        and _exit_ok(transcripts["lesson_promote_playbook"])
+        and workspace_lesson.get("promotion_stage") == "workspace_memory"
+        and playbook_lesson.get("promotion_stage") == "mission_playbook"
+        and playbook_lesson.get("scope_boundary", {}).get("auto_global_rule") is False
+        and transcripts["lesson_promote_org_rule_without_approval"].get("exit_code") == 8
+    )
+    behavior_ok = (
+        _exit_ok(transcripts["behavior_signal"])
+        and behavior_signal.get("authority", {}).get("outranks_outcome_evidence") is False
+        and behavior_signal.get("authority", {}).get("durable_learning_requires_outcome") is True
+    )
+    model_eval_ok = (
+        _exit_ok(transcripts["model_eval"])
+        and model_evaluation.get("provider") == "local_test"
+        and model_evaluation.get("overrides_outcome_evidence") is False
+        and model_evaluation.get("pass_judge") is False
+    )
+    applicability_ok = (
+        lesson.get("applicability", {}).get("applies_when")
+        and lesson.get("applicability", {}).get("does_not_apply_when")
+        and lesson.get("applicability", {}).get("evidence_required_before_use") is True
+    )
+    rollback_ok = (
+        _exit_ok(transcripts["lesson_control_rollback"])
+        and rollback_lesson.get("status") == "rolled_back"
+        and rollback_lesson.get("promotion_stage") == "candidate_lesson"
+        and lesson_control.get("affected_scope_report", {}).get("requires_review") is True
+    )
+    product_proposal_ok = (
+        _exit_ok(transcripts["product_improvement_propose"])
+        and product_improvement.get("status") == "proposed"
+        and product_improvement.get("global_behavior_changed") is False
+        and product_improvement.get("approval", {}).get("required") is True
+        and product_improvement.get("benchmark_results", [{}])[0].get("status") == "evidence_attached"
+        and bool(product_improvement.get("benchmark_results", [{}])[0].get("evidence_refs"))
+        and product_improvement.get("benchmark_results", [{}])[0].get("external_calls") == 0
+    )
+    local_adaptation_ok = (
+        _exit_ok(transcripts["local_adapt"])
+        and _exit_ok(transcripts["local_adapt_reset"])
+        and local_adaptation.get("namespace_local") is True
+        and local_adaptation.get("changes_other_namespaces") is False
+        and local_adaptation.get("changes_product_defaults") is False
+        and reset_adaptation.get("status") == "reset"
+    )
+    metrics_ok = (
+        _exit_ok(transcripts["experience_metrics"])
+        and metrics.get("primary_metric") == "outcome_quality"
+        and metrics.get("outcome_quality", {}).get("trajectory_count", 0) >= 2
+        and metrics.get("outcome_quality", {}).get("failure_count", 0) >= 1
+        and metrics.get("autonomy_ratio_not_primary") is True
+    )
+    failure_ok = (
+        _exit_ok(transcripts["failure_trajectory_record"])
+        and failure_trajectory.get("outcome", {}).get("status") == "failed"
+        and bool(failure_trajectory.get("exceptions"))
+        and final_library.get("trajectory_count", 0) >= 2
+        and any(entry.get("outcome_status") == "failed" for entry in final_library.get("entries", []))
+    )
+    privacy_ok = (
+        _exit_ok(transcripts["personal_search_org_anchor"])
+        and _exit_ok(transcripts["org_search_org_anchor"])
+        and personal_org_search.get("result_count") == 0
+        and org_search.get("result_count") == 1
+        and org_trajectory.get("scope", {}).get("namespace_id") == "organization"
+    )
+    connected_ok = (
+        _exit_ok(transcripts["connected_outcome"])
+        and connected_outcome.get("source", {}).get("connectorhub_mediated") is True
+        and connected_outcome.get("source", {}).get("external_http_calls") == 0
+        and connected_outcome.get("source", {}).get("reingested_as_evidence") is True
+        and bool(connected_outcome.get("evidence_refs"))
+        and connected_result.get("mock_connector_calls") == 1
+        and connected_result.get("external_http_calls") == 0
+    )
+    export_ok = (
+        _exit_ok(transcripts["experience_export"])
+        and experience_export.get("permission_aware_redaction") is True
+        and experience_export.get("unauthorized_raw_content_leaked") is False
+        and len(experience_export.get("entries", {}).get("trajectories", [])) >= 2
+        and len(experience_export.get("entries", {}).get("lessons", [])) >= 1
+        and len(experience_export.get("entries", {}).get("connected_outcomes", [])) >= 1
+    )
+    search_ok = _exit_ok(transcripts["experience_search_success"]) and experience_search.get("result_count") >= 1
+
+    negative_evidence = {
+        "trajectory_without_owner": 0 if _scope_complete(success_trajectory.get("scope")) and _scope_complete(failure_trajectory.get("scope")) else 1,
+        "trajectory_without_audit": 0 if len(trajectory_events) >= 3 else 1,
+        "failed_trajectory_hidden": 0 if failure_ok else 1,
+        "experience_cross_namespace_results": int(personal_org_search.get("result_count", 1) or 0),
+        "lesson_auto_global_rule": int(bool(playbook_lesson.get("scope_boundary", {}).get("auto_global_rule", True))),
+        "promotion_ladder_skipped": 0 if transcripts["lesson_promote_skip"].get("exit_code") == 1 else 1,
+        "broader_reuse_without_approval": 0 if transcripts["lesson_promote_org_rule_without_approval"].get("exit_code") == 8 else 1,
+        "behavior_signal_overrode_outcome": int(bool(behavior_signal.get("authority", {}).get("outranks_outcome_evidence", True))),
+        "model_eval_overrode_outcome": int(bool(model_evaluation.get("overrides_outcome_evidence", True))),
+        "product_global_mutation": int(bool(product_improvement.get("global_behavior_changed", True))),
+        "local_adaptation_cross_namespace": int(bool(local_adaptation.get("changes_other_namespaces", True))),
+        "bad_lesson_still_active": 0 if rollback_lesson.get("status") == "rolled_back" else 1,
+        "experience_export_unredacted_raw": int(bool(experience_export.get("unauthorized_raw_content_leaked", True))),
+        "connected_outcome_without_evidence": 0 if connected_outcome.get("evidence_refs") else 1,
+        "real_external_http_calls": int(success_result.get("external_http_calls", 1) or 0) + int(connected_result.get("external_http_calls", 1) or 0),
+        "secret_reads": 0,
+    }
+    all_negatives_zero = all(value == 0 for value in negative_evidence.values() if isinstance(value, int))
+
+    row_specs = [
+        ("CS-LEARN-001", "Full Mission Trajectory Ledger captures mission, plan, evidence, actions, policy, approvals, outcome, exceptions, cost/time, rollback, and lessons.", trajectory_ok),
+        ("CS-LEARN-002", "Experience Library allows browsing, search, and inspection per scoped workspace.", library_ok and search_ok),
+        ("CS-LEARN-003", "Past experience visibly influences a new mission through cited, inspectable recommendations without auto-execution.", influence_ok),
+        ("CS-LEARN-004", "All mission trajectories are stored as reference corpus rather than silently converted to truth.", corpus_ok),
+        ("CS-LEARN-005", "Selective conversion into memory/rules requires explicit lesson proposal and promotion state.", selective_conversion_ok),
+        ("CS-LEARN-006", "Local experience remains local and cannot become global product truth automatically.", scoped_truth_ok),
+        ("CS-LEARN-007", "Promotion ladder is enforced and skips are rejected before workspace/playbook promotion.", promotion_ok),
+        ("CS-LEARN-008", "Behavior signals support personalization but cannot outrank outcome evidence.", behavior_ok),
+        ("CS-LEARN-009", "Model self-evaluation is recorded as local_test support and never replaces outcome evidence or deterministic PASS.", model_eval_ok),
+        ("CS-LEARN-010", "Lessons include applicability and non-applicability boundaries with evidence required before use.", applicability_ok),
+        ("CS-LEARN-011", "Bad or over-broad lessons can be rolled back with affected-scope reporting.", rollback_ok),
+        ("CS-LEARN-012", "Product self-improvement is proposal-first with benchmarks, approval, monitoring, rollback, and no global mutation.", product_proposal_ok),
+        ("CS-LEARN-013", "Namespace-local self-improvement can run and reset without changing other namespaces or product defaults.", local_adaptation_ok),
+        ("CS-LEARN-014", "Outcome quality metrics are visible and prioritize outcome quality over autonomy ratio.", metrics_ok),
+        ("CS-LEARN-015", "Failure is preserved as searchable learning material with reason and recovery attempt.", failure_ok),
+        ("CS-LEARN-016", "Experience search enforces privacy boundaries across personal and organization scopes.", privacy_ok),
+        ("CS-LEARN-017", "Connected-system outcome learning is re-ingested as evidence and tied to governed action/audit.", connected_ok),
+        ("CS-LEARN-018", "Experience export supports audit/migration with redaction and trajectories, lessons, judge results, outcomes, and playbooks.", export_ok),
+    ]
+    rows = [
+        _row(
+            scenario_id,
+            "MUST_PASS",
+            "PASS" if ok and audit_ok and all_negatives_zero else "FAIL",
+            ["cornerstone scenario verify full-learning-experience --json"],
+            note,
+        )
+        for scenario_id, note, ok in row_specs
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "full-learning-experience",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_FULL_LEARNING_EXPERIENCE_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "learning_experience_evidence": {
+            "success_trajectory_id": success_trajectory_id,
+            "failure_trajectory_id": failure_trajectory.get("trajectory_id"),
+            "org_trajectory_id": org_trajectory.get("trajectory_id"),
+            "learning_id": learning.get("learning_id"),
+            "connected_outcome_id": connected_outcome_id,
+            "lesson_id": lesson_id,
+            "local_adaptation_id": local_adaptation_id,
+            "product_improvement_id": product_improvement.get("product_improvement_id"),
+            "experience_export_id": experience_export.get("experience_export_id"),
+            "outcome_quality_report_id": metrics.get("outcome_quality_report_id"),
+            "personal_library_trajectory_count": final_library.get("trajectory_count"),
+            "experience_search_result_count": experience_search.get("result_count"),
+            "recommendation_count": len(recommendation.get("cited_experiences", [])),
+            "personal_org_search_result_count": personal_org_search.get("result_count"),
+            "org_search_result_count": org_search.get("result_count"),
+            "audit_event_count": len(audit_events),
+            "audit_event_types": audit_event_types,
+            "research_basis": [
+                "Reflexion episodic verbal memory from feedback",
+                "Voyager skill library and environment-feedback loop",
+                "OpenTelemetry trace/span/event model",
+                "LangSmith offline/online evaluation and trace-to-dataset feedback loop",
+            ],
+        },
+        "negative_evidence": negative_evidence,
+        "human_required": [],
+    }
+
+
 def verify_vs0_memory_truth_boundary(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-memory-truth-boundary")
     state_path = root / state_rel

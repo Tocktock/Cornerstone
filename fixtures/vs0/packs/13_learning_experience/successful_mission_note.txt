@@ -1,0 +1,5 @@
+Learning experience fixture: learning-success-anchor.
+
+The owner completed a mission that preserved evidence, created a governed local action, recorded an outcome, and extracted a bounded lesson.
+The useful lesson was not promoted as global truth. It should remain scoped to the current owner namespace unless an approval ladder is followed.
+Future missions that mention learning-success-anchor may inspect this trajectory as prior experience, but they must still use current evidence.

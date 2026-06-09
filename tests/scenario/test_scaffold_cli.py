@@ -943,6 +943,52 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_full_learning_experience_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full-learning-experience", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "full-learning-experience")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 18)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_FULL_LEARNING_EXPERIENCE_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {
+                "CS-LEARN-001",
+                "CS-LEARN-002",
+                "CS-LEARN-003",
+                "CS-LEARN-004",
+                "CS-LEARN-005",
+                "CS-LEARN-006",
+                "CS-LEARN-007",
+                "CS-LEARN-008",
+                "CS-LEARN-009",
+                "CS-LEARN-010",
+                "CS-LEARN-011",
+                "CS-LEARN-012",
+                "CS-LEARN-013",
+                "CS-LEARN-014",
+                "CS-LEARN-015",
+                "CS-LEARN-016",
+                "CS-LEARN-017",
+                "CS-LEARN-018",
+            },
+        )
+        evidence = payload["learning_experience_evidence"]
+        self.assertTrue(evidence["success_trajectory_id"].startswith("traj_"))
+        self.assertTrue(evidence["failure_trajectory_id"].startswith("traj_"))
+        self.assertTrue(evidence["org_trajectory_id"].startswith("traj_"))
+        self.assertTrue(evidence["connected_outcome_id"].startswith("outcome_"))
+        self.assertTrue(evidence["lesson_id"].startswith("lesson_"))
+        self.assertGreaterEqual(evidence["personal_library_trajectory_count"], 2)
+        self.assertEqual(evidence["experience_search_result_count"], 1)
+        self.assertEqual(evidence["recommendation_count"], 1)
+        self.assertEqual(evidence["personal_org_search_result_count"], 0)
+        self.assertEqual(evidence["org_search_result_count"], 1)
+        self.assertGreaterEqual(evidence["audit_event_count"], 1)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_full_understanding_ontology_verify(self) -> None:
         result = run_cli("scenario", "verify", "full-understanding-ontology", "--json")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
