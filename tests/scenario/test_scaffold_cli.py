@@ -720,6 +720,29 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_memory_truth_boundary_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-memory-truth-boundary", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-memory-truth-boundary")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 1)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_MEMORY_TRUTH_BOUNDARY_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-REG-005"})
+        evidence = payload["memory_truth_evidence"]
+        self.assertEqual(evidence["search_result_count"], 1)
+        self.assertGreaterEqual(evidence["evidence_item_count"], 1)
+        self.assertEqual(evidence["owner_memory_status"], "owner_approved")
+        self.assertEqual(evidence["owner_memory_truth_foundation"], "archive_evidence")
+        self.assertEqual(evidence["raw_memory_status"], "raw_agent_memory")
+        self.assertFalse(evidence["raw_memory_canonical"])
+        self.assertEqual(evidence["conflict_selected_truth_foundation"], "archive_evidence")
+        self.assertFalse(evidence["conflict_raw_memory_used_as_truth"])
+        self.assertEqual(evidence["conflict_answer_based_on"], "archive_evidence")
+        self.assertGreaterEqual(evidence["audit_event_count"], 1)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

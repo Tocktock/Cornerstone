@@ -107,6 +107,7 @@ class LocalRuntimeStore:
         self.action_dir = state_dir / "actions"
         self.answer_dir = state_dir / "answers"
         self.memory_dir = state_dir / "memories"
+        self.memory_conflict_dir = state_dir / "memory_conflicts"
         self.learning_dir = state_dir / "learning"
         self.audit_path = state_dir / "audit" / "events.jsonl"
 
@@ -210,6 +211,9 @@ class LocalRuntimeStore:
     def memory_path(self, memory_id: str) -> Path:
         return self.memory_dir / f"{memory_id}.json"
 
+    def memory_conflict_path(self, conflict_id: str) -> Path:
+        return self.memory_conflict_dir / f"{conflict_id}.json"
+
     def learning_path(self, learning_id: str) -> Path:
         return self.learning_dir / f"{learning_id}.json"
 
@@ -277,6 +281,12 @@ class LocalRuntimeStore:
 
     def get_memory(self, memory_id: str) -> dict[str, Any] | None:
         path = self.memory_path(memory_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_memory_conflict(self, conflict_id: str) -> dict[str, Any] | None:
+        path = self.memory_conflict_path(conflict_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -560,6 +570,138 @@ class LocalRuntimeStore:
             },
         )
         return {"memory": memory, "audit_event": event}
+
+    def create_raw_agent_memory(self, statement: str, scope: dict[str, str]) -> dict[str, Any]:
+        memory_base = {
+            "schema_version": "cs.memory.v0",
+            "status": "raw_agent_memory",
+            "trust_state": "unverified",
+            "memory_type": "agent_recall_candidate",
+            "statement": redact_text(statement),
+            "scope": scope,
+            "source": {
+                "created_from": "agent.raw_memory",
+                "source_type": "agent_inference",
+                "evidence_bundle_id": None,
+                "search_snapshot_id": None,
+                "artifact_refs": [],
+            },
+            "provenance": {
+                "created_from": "agent_memory_candidate",
+                "verified_against_archive": False,
+                "source_artifact_refs": [],
+            },
+            "canonicality": {
+                "canonical_truth_foundation": "none",
+                "raw_agent_memory_canonical": False,
+                "owner_approved": False,
+                "requires_evidence_for_truth_claims": True,
+            },
+            "evidence_refs": [],
+            "created_at": utc_now(),
+        }
+        memory_id = f"memory_{_json_hash(memory_base)[:16]}"
+        memory = dict(memory_base)
+        memory["memory_id"] = memory_id
+        _write_json(self.memory_path(memory_id), memory)
+        event = self.append_audit(
+            "memory.raw_agent.created",
+            scope,
+            {"type": "memory", "id": memory_id},
+            {
+                "raw_agent_memory_canonical": False,
+                "owner_approved": False,
+                "evidence_ref_count": 0,
+            },
+        )
+        return {"memory": memory, "audit_event": event}
+
+    def resolve_memory_conflict(
+        self,
+        raw_memory_id: str,
+        evidence_bundle_id: str,
+        question: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        raw_memory = self.get_memory(raw_memory_id)
+        if raw_memory is None:
+            return {"status": "not_found", "resource": "raw_memory"}
+        if raw_memory.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": raw_memory.get("scope")}
+        bundle = self.get_evidence_bundle(evidence_bundle_id)
+        if bundle is None:
+            return {"status": "not_found", "resource": "evidence_bundle"}
+        if bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        evidence_items = bundle.get("evidence_items", [])
+        artifact_refs = [f"artifact:{item['artifact_id']}" for item in evidence_items]
+        if not evidence_items or not artifact_refs:
+            return {"status": "evidence_required"}
+
+        owner_memory_refs = [
+            f"memory:{memory['memory_id']}"
+            for memory in self._memory_records(scope)
+            if memory.get("status") == "owner_approved"
+            and memory.get("source", {}).get("evidence_bundle_id") == evidence_bundle_id
+        ]
+        evidence_refs = [
+            f"evidence_bundle:{evidence_bundle_id}",
+            f"search_snapshot:{bundle.get('search_snapshot_id')}",
+            *artifact_refs,
+            *owner_memory_refs,
+        ]
+        conflict_base = {
+            "schema_version": "cs.memory_conflict_resolution.v0",
+            "status": "resolved",
+            "scope": scope,
+            "question": redact_text(question),
+            "raw_memory": {
+                "memory_id": raw_memory_id,
+                "status": raw_memory.get("status"),
+                "trust_state": raw_memory.get("trust_state"),
+                "statement": raw_memory.get("statement"),
+                "raw_agent_memory_canonical": raw_memory.get("canonicality", {}).get("raw_agent_memory_canonical"),
+                "owner_approved": raw_memory.get("canonicality", {}).get("owner_approved"),
+            },
+            "evidence_bundle": {
+                "evidence_bundle_id": evidence_bundle_id,
+                "search_snapshot_id": bundle.get("search_snapshot_id"),
+                "evidence_item_count": len(evidence_items),
+                "artifact_refs": artifact_refs,
+                "snippets": [str(item.get("snippet", "")).strip() for item in evidence_items if str(item.get("snippet", "")).strip()],
+            },
+            "owner_approved_memory_refs": owner_memory_refs,
+            "decision": {
+                "selected_truth_foundation": "archive_evidence",
+                "raw_agent_memory_used_as_truth": False,
+                "owner_approved_memory_requires_evidence": True,
+                "answer_label": "evidence_backed",
+                "reason": "Archive evidence and owner-approved evidence-backed memory outrank raw agent recall.",
+            },
+            "answer": {
+                "presented_as_fact": True,
+                "based_on": "archive_evidence",
+                "evidence_refs": evidence_refs,
+                "raw_memory_ref": f"memory:{raw_memory_id}",
+            },
+            "created_at": utc_now(),
+        }
+        conflict_id = f"memconf_{_json_hash(conflict_base)[:16]}"
+        conflict = dict(conflict_base)
+        conflict["conflict_id"] = conflict_id
+        _write_json(self.memory_conflict_path(conflict_id), conflict)
+        event = self.append_audit(
+            "memory.conflict.resolved",
+            scope,
+            {"type": "memory_conflict_resolution", "id": conflict_id},
+            {
+                "raw_memory_id": raw_memory_id,
+                "evidence_bundle_id": evidence_bundle_id,
+                "selected_truth_foundation": conflict["decision"]["selected_truth_foundation"],
+                "raw_agent_memory_used_as_truth": False,
+            },
+        )
+        return {"conflict": conflict, "audit_event": event}
 
     def show_memory(self, memory_id: str, scope: dict[str, str]) -> dict[str, Any]:
         memory = self.get_memory(memory_id)

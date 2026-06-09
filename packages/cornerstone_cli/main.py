@@ -17,6 +17,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_conversation_onboarding,
     verify_vs0_detail_surfaces,
     verify_vs0_mission_action,
+    verify_vs0_memory_truth_boundary,
     verify_vs0_product_loop_identity,
     verify_vs0_product_domain_readiness,
     verify_vs0_namespace_isolation,
@@ -1002,6 +1003,83 @@ def command_memory_show(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_memory_raw_agent_note(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_raw_agent_memory(args.statement, requested_scope)
+    memory = result["memory"]
+    payload = base_response("cornerstone memory raw-agent-note", "success", root)
+    payload.update(memory["scope"])
+    payload["memory"] = memory
+    payload["ids"].update({"memory_id": memory["memory_id"]})
+    payload["evidence_refs"].append(f"memory:{memory['memory_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_memory_conflict_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.resolve_memory_conflict(
+        args.raw_memory_id,
+        args.evidence_bundle_id,
+        args.question,
+        requested_scope,
+    )
+    payload = base_response("cornerstone memory conflict-test", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_MEMORY_CONFLICT_SOURCE_NOT_FOUND",
+                "message": "Raw memory or Evidence Bundle for conflict resolution was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Memory conflict source is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    if result.get("status") == "evidence_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_MEMORY_CONFLICT_EVIDENCE_REQUIRED",
+                "message": "Memory conflict resolution requires archive evidence.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+
+    conflict = result["conflict"]
+    payload.update(conflict["scope"])
+    payload["memory_conflict_resolution"] = conflict
+    payload["ids"].update(
+        {
+            "memory_conflict_id": conflict["conflict_id"],
+            "raw_memory_id": args.raw_memory_id,
+            "evidence_bundle_id": args.evidence_bundle_id,
+        }
+    )
+    payload["evidence_refs"].extend([f"memory_conflict:{conflict['conflict_id']}", *conflict.get("answer", {}).get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_learning_record(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -1615,6 +1693,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_conversation_onboarding(root)
     elif args.contract == "vs0-product-loop-identity":
         report = verify_vs0_product_loop_identity(root)
+    elif args.contract == "vs0-memory-truth-boundary":
+        report = verify_vs0_memory_truth_boundary(root)
     elif args.contract == "vs0-product-domain-readiness":
         report = verify_vs0_product_domain_readiness(root)
     else:
@@ -1641,6 +1721,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-detail-surfaces",
                     "vs0-conversation-onboarding",
                     "vs0-product-loop-identity",
+                    "vs0-memory-truth-boundary",
                     "vs0-product-domain-readiness",
                 ],
             }
@@ -1915,6 +1996,22 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(memory_show)
     memory_show.add_argument("--json", action="store_true", help="Emit JSON output")
     memory_show.set_defaults(func=command_memory_show)
+
+    memory_raw = memory_sub.add_parser("raw-agent-note", help="Create a non-canonical raw agent memory candidate")
+    memory_raw.add_argument("--statement", required=True, help="Raw agent memory statement")
+    add_state_argument(memory_raw)
+    add_scope_arguments(memory_raw)
+    memory_raw.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_raw.set_defaults(func=command_memory_raw_agent_note)
+
+    memory_conflict = memory_sub.add_parser("conflict-test", help="Resolve raw-memory conflict against archive evidence")
+    memory_conflict.add_argument("--raw-memory-id", required=True, help="Raw agent memory ID")
+    memory_conflict.add_argument("--evidence-bundle-id", required=True, help="Evidence Bundle ID")
+    memory_conflict.add_argument("--question", required=True, help="Question being answered")
+    add_state_argument(memory_conflict)
+    add_scope_arguments(memory_conflict)
+    memory_conflict.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_conflict.set_defaults(func=command_memory_conflict_test)
 
     learning = subcommands.add_parser("learning", help="Action outcome learning commands")
     learning_sub = learning.add_subparsers(dest="learning_command")

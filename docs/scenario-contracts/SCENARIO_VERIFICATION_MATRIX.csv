@@ -189,7 +189,7 @@ CS-REG-001,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-produc
 CS-REG-002,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-REG-003,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-REG-004,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-universal-core --json,reports/scenario/vs0-universal-core-2026-06-09.json,,,,,PASS
-CS-REG-005,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0 --scenario CS-REG-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-reg-005.json,,,,,NOT_VERIFIED
+CS-REG-005,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-memory-truth-boundary --json,reports/scenario/vs0-memory-truth-boundary-2026-06-09.json,,,,,PASS
 CS-REG-006,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-REG-006 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-reg-006.json,,,,,NOT_VERIFIED
 CS-REG-007,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-007 --json,reports/scenario/cs-reg-007.json,,,,,NOT_VERIFIED
 CS-REG-008,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-008 --json,reports/scenario/cs-reg-008.json,,,,,NOT_VERIFIED

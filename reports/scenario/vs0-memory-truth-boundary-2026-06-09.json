@@ -1,0 +1,756 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-memory-truth-boundary",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "ecf29ea"
+  },
+  "memory_truth_evidence": {
+    "artifact_id": "art_d6a9238e4b103434",
+    "audit_event_count": 7,
+    "conflict_answer_based_on": "archive_evidence",
+    "conflict_id": "memconf_6b1e884e1630d168",
+    "conflict_raw_memory_used_as_truth": false,
+    "conflict_selected_truth_foundation": "archive_evidence",
+    "evidence_bundle_id": "evb_d763955af12f0bf3",
+    "evidence_item_count": 1,
+    "owner_memory_id": "memory_aac08960af3ba20d",
+    "owner_memory_status": "owner_approved",
+    "owner_memory_truth_foundation": "archive_evidence",
+    "raw_memory_canonical": false,
+    "raw_memory_id": "memory_9c64300cad91f8eb",
+    "raw_memory_status": "raw_agent_memory",
+    "search_result_count": 1
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "conflict_selected_raw_memory": 0,
+    "conflict_truth_foundation_not_archive_evidence": 0,
+    "conflict_without_audit": 0,
+    "owner_memory_without_evidence": 0,
+    "raw_agent_memory_canonical": 0,
+    "raw_agent_memory_owner_approved": 0,
+    "real_external_http_calls": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-memory-truth-boundary-2026-06-09.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone scenario verify vs0-memory-truth-boundary --json"
+      ],
+      "id": "CS-REG-005",
+      "notes": "Raw agent memory remains non-canonical when it conflicts with durable archive evidence and owner-approved evidence-backed memory.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "vs0-memory-truth-boundary",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/vs0-memory-truth-boundary-9234",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 1,
+    "product_feature_claims": "PARTIAL_VS0_MEMORY_TRUTH_BOUNDARY_ONLY",
+    "scenario_count": 1
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/vs0-memory-truth-boundary-9234",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 7,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "ecf29ea"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "conversation_start": {
+      "command": [
+        "cornerstone",
+        "conversation",
+        "start",
+        "--message",
+        "Archive evidence: Project Atlas launch date is Friday and the owner-approved plan should cite this source. Anchor: atlas-launch-evidence.",
+        "--state-dir",
+        "tmp/scenario/vs0-memory-truth-boundary-9234",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_d6a9238e4b103434",
+          "checksum_sha256": "d6a9238e4b103434bdb9004f44fad39c84b577240a85fc6c0347e4c5ea538539",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "d6a9238e4b103434bdb9004f44fad39c84b577240a85fc6c0347e4c5ea538539"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_d6a9238e4b103434.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 137,
+          "original_storage_ref": "sha256:d6a9238e4b103434bdb9004f44fad39c84b577240a85fc6c0347e4c5ea538539",
+          "provenance": {
+            "created_at": "2026-06-09T13:45:15.487626Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T13:45:15.487626Z",
+            "ref": "conv_2490f65a437c9596",
+            "type": "conversation_turn"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_dd52374daf7d9279",
+          "audit:audit_67ab8974bf752cb8"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone conversation start",
+        "conversation": {
+          "conversation_id": "conv_2490f65a437c9596",
+          "created_at": "2026-06-09T13:45:15.487103Z",
+          "pre_modeling_required": false,
+          "required_setup": {
+            "connector_setup": false,
+            "model_provider_setup": false,
+            "ontology_setup": false,
+            "organization_policy_setup": false
+          },
+          "schema_version": "cs.conversation.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_artifact_id": "art_d6a9238e4b103434",
+          "started_from": "natural_message",
+          "suggested_outputs": [
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Mission Card"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Knowledge Capsule"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Claim"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Action Card"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Memory"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Playbook Candidate"
+            }
+          ],
+          "turns": [
+            {
+              "artifact_ref": "artifact:art_d6a9238e4b103434",
+              "content": "Archive evidence: Project Atlas launch date is Friday and the owner-approved plan should cite this source. Anchor: atlas-launch-evidence.",
+              "created_at": "2026-06-09T13:45:15.488151Z",
+              "role": "user",
+              "turn_id": "turn_2ae08a565a19614a"
+            }
+          ],
+          "user_can_continue_without_conversion": true
+        },
+        "errors": [],
+        "evidence_refs": [
+          "conversation:conv_2490f65a437c9596",
+          "artifact:art_d6a9238e4b103434",
+          "storage:sha256:d6a9238e4b103434bdb9004f44fad39c84b577240a85fc6c0347e4c5ea538539"
+        ],
+        "ids": {
+          "artifact_id": "art_d6a9238e4b103434",
+          "conversation_id": "conv_2490f65a437c9596",
+          "git_commit": "ecf29ea"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "evidence_bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_cfe026b5cde22150",
+        "--state-dir",
+        "tmp/scenario/vs0-memory-truth-boundary-9234",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_a778dfe2b5dcd420"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T13:45:15.615409Z",
+          "evidence_bundle_id": "evb_d763955af12f0bf3",
+          "evidence_items": [
+            {
+              "artifact_id": "art_d6a9238e4b103434",
+              "derived_text_ref": "derived/art_d6a9238e4b103434.txt",
+              "original_storage_ref": "sha256:d6a9238e4b103434bdb9004f44fad39c84b577240a85fc6c0347e4c5ea538539",
+              "provenance": {
+                "created_at": "2026-06-09T13:45:15.487626Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_cfe026b5cde22150",
+              "snippet": "Friday and the owner-approved plan should cite this source. Anchor: atlas-launch-evidence.",
+              "source": {
+                "ingested_at": "2026-06-09T13:45:15.487626Z",
+                "ref": "conv_2490f65a437c9596",
+                "type": "conversation_turn"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "Friday",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "Friday",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_d6a9238e4b103434",
+                "derived_text_ref": "derived/art_d6a9238e4b103434.txt",
+                "evidence_refs": [
+                  "artifact:art_d6a9238e4b103434",
+                  "storage:sha256:d6a9238e4b103434bdb9004f44fad39c84b577240a85fc6c0347e4c5ea538539"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "Friday",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "friday",
+                    "query_term": "friday",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:d6a9238e4b103434bdb9004f44fad39c84b577240a85fc6c0347e4c5ea538539",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "Friday and the owner-approved plan should cite this source. Anchor: atlas-launch-evidence."
+              }
+            ],
+            "search_snapshot_id": "search_cfe026b5cde22150"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_cfe026b5cde22150"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_d763955af12f0bf3",
+          "search_snapshot:search_cfe026b5cde22150",
+          "artifact:art_d6a9238e4b103434"
+        ],
+        "ids": {
+          "audit_event_id": "audit_a778dfe2b5dcd420",
+          "evidence_bundle_id": "evb_d763955af12f0bf3",
+          "git_commit": "ecf29ea",
+          "search_snapshot_id": "search_cfe026b5cde22150"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "memory_conflict_test": {
+      "command": [
+        "cornerstone",
+        "memory",
+        "conflict-test",
+        "--raw-memory-id",
+        "memory_9c64300cad91f8eb",
+        "--evidence-bundle-id",
+        "evb_d763955af12f0bf3",
+        "--question",
+        "What is the Project Atlas launch date?",
+        "--state-dir",
+        "tmp/scenario/vs0-memory-truth-boundary-9234",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_a848c0ee07b2ecd7"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone memory conflict-test",
+        "errors": [],
+        "evidence_refs": [
+          "memory_conflict:memconf_6b1e884e1630d168",
+          "evidence_bundle:evb_d763955af12f0bf3",
+          "search_snapshot:search_cfe026b5cde22150",
+          "artifact:art_d6a9238e4b103434",
+          "memory:memory_aac08960af3ba20d"
+        ],
+        "ids": {
+          "evidence_bundle_id": "evb_d763955af12f0bf3",
+          "git_commit": "ecf29ea",
+          "memory_conflict_id": "memconf_6b1e884e1630d168",
+          "raw_memory_id": "memory_9c64300cad91f8eb"
+        },
+        "memory_conflict_resolution": {
+          "answer": {
+            "based_on": "archive_evidence",
+            "evidence_refs": [
+              "evidence_bundle:evb_d763955af12f0bf3",
+              "search_snapshot:search_cfe026b5cde22150",
+              "artifact:art_d6a9238e4b103434",
+              "memory:memory_aac08960af3ba20d"
+            ],
+            "presented_as_fact": true,
+            "raw_memory_ref": "memory:memory_9c64300cad91f8eb"
+          },
+          "conflict_id": "memconf_6b1e884e1630d168",
+          "created_at": "2026-06-09T13:45:15.805731Z",
+          "decision": {
+            "answer_label": "evidence_backed",
+            "owner_approved_memory_requires_evidence": true,
+            "raw_agent_memory_used_as_truth": false,
+            "reason": "Archive evidence and owner-approved evidence-backed memory outrank raw agent recall.",
+            "selected_truth_foundation": "archive_evidence"
+          },
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_d6a9238e4b103434"
+            ],
+            "evidence_bundle_id": "evb_d763955af12f0bf3",
+            "evidence_item_count": 1,
+            "search_snapshot_id": "search_cfe026b5cde22150",
+            "snippets": [
+              "Friday and the owner-approved plan should cite this source. Anchor: atlas-launch-evidence."
+            ]
+          },
+          "owner_approved_memory_refs": [
+            "memory:memory_aac08960af3ba20d"
+          ],
+          "question": "What is the Project Atlas launch date?",
+          "raw_memory": {
+            "memory_id": "memory_9c64300cad91f8eb",
+            "owner_approved": false,
+            "raw_agent_memory_canonical": false,
+            "statement": "Raw agent memory candidate: Project Atlas launch date is Monday.",
+            "status": "raw_agent_memory",
+            "trust_state": "unverified"
+          },
+          "schema_version": "cs.memory_conflict_resolution.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "resolved"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "owner_memory_create": {
+      "command": [
+        "cornerstone",
+        "memory",
+        "create",
+        "--evidence-bundle-id",
+        "evb_d763955af12f0bf3",
+        "--statement",
+        "Owner-approved memory: Project Atlas launch date is Friday.",
+        "--state-dir",
+        "tmp/scenario/vs0-memory-truth-boundary-9234",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_c5dbb994e58d49d8"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone memory create",
+        "errors": [],
+        "evidence_refs": [
+          "memory:memory_aac08960af3ba20d",
+          "evidence_bundle:evb_d763955af12f0bf3",
+          "search_snapshot:search_cfe026b5cde22150",
+          "artifact:art_d6a9238e4b103434"
+        ],
+        "ids": {
+          "evidence_bundle_id": "evb_d763955af12f0bf3",
+          "git_commit": "ecf29ea",
+          "memory_id": "memory_aac08960af3ba20d"
+        },
+        "memory": {
+          "canonicality": {
+            "canonical_truth_foundation": "archive_evidence",
+            "owner_approved": true,
+            "raw_agent_memory_canonical": false,
+            "requires_evidence_for_truth_claims": true
+          },
+          "created_at": "2026-06-09T13:45:15.679443Z",
+          "evidence_refs": [
+            "evidence_bundle:evb_d763955af12f0bf3",
+            "search_snapshot:search_cfe026b5cde22150",
+            "artifact:art_d6a9238e4b103434"
+          ],
+          "memory_id": "memory_aac08960af3ba20d",
+          "memory_type": "durable_fact",
+          "provenance": {
+            "created_from": "owner_approved_memory_create",
+            "source_artifact_refs": [
+              "artifact:art_d6a9238e4b103434"
+            ],
+            "source_evidence_bundle_id": "evb_d763955af12f0bf3",
+            "source_search_snapshot_id": "search_cfe026b5cde22150"
+          },
+          "schema_version": "cs.memory.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "artifact_refs": [
+              "artifact:art_d6a9238e4b103434"
+            ],
+            "created_from": "memory.create",
+            "evidence_bundle_id": "evb_d763955af12f0bf3",
+            "search_snapshot_id": "search_cfe026b5cde22150",
+            "source_type": "evidence_bundle"
+          },
+          "statement": "Owner-approved memory: Project Atlas launch date is Friday.",
+          "status": "owner_approved",
+          "trust_state": "evidence_backed"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "raw_memory_create": {
+      "command": [
+        "cornerstone",
+        "memory",
+        "raw-agent-note",
+        "--statement",
+        "Raw agent memory candidate: Project Atlas launch date is Monday.",
+        "--state-dir",
+        "tmp/scenario/vs0-memory-truth-boundary-9234",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_f0869af5fa1d3c28"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone memory raw-agent-note",
+        "errors": [],
+        "evidence_refs": [
+          "memory:memory_9c64300cad91f8eb"
+        ],
+        "ids": {
+          "git_commit": "ecf29ea",
+          "memory_id": "memory_9c64300cad91f8eb"
+        },
+        "memory": {
+          "canonicality": {
+            "canonical_truth_foundation": "none",
+            "owner_approved": false,
+            "raw_agent_memory_canonical": false,
+            "requires_evidence_for_truth_claims": true
+          },
+          "created_at": "2026-06-09T13:45:15.743843Z",
+          "evidence_refs": [],
+          "memory_id": "memory_9c64300cad91f8eb",
+          "memory_type": "agent_recall_candidate",
+          "provenance": {
+            "created_from": "agent_memory_candidate",
+            "source_artifact_refs": [],
+            "verified_against_archive": false
+          },
+          "schema_version": "cs.memory.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "artifact_refs": [],
+            "created_from": "agent.raw_memory",
+            "evidence_bundle_id": null,
+            "search_snapshot_id": null,
+            "source_type": "agent_inference"
+          },
+          "statement": "Raw agent memory candidate: Project Atlas launch date is Monday.",
+          "status": "raw_agent_memory",
+          "trust_state": "unverified"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "Friday",
+        "--state-dir",
+        "tmp/scenario/vs0-memory-truth-boundary-9234",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_a3222670dff6ce99"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_cfe026b5cde22150",
+          "artifact:art_d6a9238e4b103434",
+          "storage:sha256:d6a9238e4b103434bdb9004f44fad39c84b577240a85fc6c0347e4c5ea538539"
+        ],
+        "ids": {
+          "audit_event_id": "audit_a3222670dff6ce99",
+          "git_commit": "ecf29ea",
+          "search_snapshot_id": "search_cfe026b5cde22150"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T13:45:15.549647Z",
+          "duration_ms": 0.322,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "Friday",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_d6a9238e4b103434",
+              "derived_text_ref": "derived/art_d6a9238e4b103434.txt",
+              "evidence_refs": [
+                "artifact:art_d6a9238e4b103434",
+                "storage:sha256:d6a9238e4b103434bdb9004f44fad39c84b577240a85fc6c0347e4c5ea538539"
+              ],
+              "match_reasons": [
+                {
+                  "query": "Friday",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "friday",
+                  "query_term": "friday",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:d6a9238e4b103434bdb9004f44fad39c84b577240a85fc6c0347e4c5ea538539",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "Friday and the owner-approved plan should cite this source. Anchor: atlas-launch-evidence."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_cfe026b5cde22150"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

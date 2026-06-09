@@ -35,8 +35,9 @@ mission_action_json=$(mktemp)
 detail_json=$(mktemp)
 conversation_json=$(mktemp)
 product_loop_json=$(mktemp)
+memory_truth_json=$(mktemp)
 product_domain_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$product_domain_json"' EXIT
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$product_domain_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -342,6 +343,28 @@ grep -q '"learning_without_action_result": 0' "$product_loop_json" || fail "vs0-
 grep -q '"real_external_http_calls": 0' "$product_loop_json" || fail "vs0-product-loop-identity reported real external HTTP calls"
 grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_LOOP_IDENTITY_ONLY"' "$product_loop_json" || fail "vs0-product-loop-identity overclaimed product feature scope"
 
+cornerstone scenario verify vs0-memory-truth-boundary --json > "$memory_truth_json"
+python3 -m json.tool "$memory_truth_json" >/dev/null
+grep -q '"scenario_set": "vs0-memory-truth-boundary"' "$memory_truth_json" || fail "vs0-memory-truth-boundary report missing scenario set"
+grep -q '"blocking": 0' "$memory_truth_json" || fail "vs0-memory-truth-boundary report has blocking scenarios"
+grep -q '"pass": 1' "$memory_truth_json" || fail "vs0-memory-truth-boundary did not pass exactly one scenario"
+grep -q '"id": "CS-REG-005"' "$memory_truth_json" || fail "vs0-memory-truth-boundary missing CS-REG-005"
+grep -q '"owner_memory_status": "owner_approved"' "$memory_truth_json" || fail "vs0-memory-truth-boundary missing owner-approved memory"
+grep -q '"owner_memory_truth_foundation": "archive_evidence"' "$memory_truth_json" || fail "vs0-memory-truth-boundary missing archive evidence foundation"
+grep -q '"raw_memory_status": "raw_agent_memory"' "$memory_truth_json" || fail "vs0-memory-truth-boundary missing raw agent memory"
+grep -q '"raw_memory_canonical": false' "$memory_truth_json" || fail "vs0-memory-truth-boundary made raw memory canonical"
+grep -q '"conflict_selected_truth_foundation": "archive_evidence"' "$memory_truth_json" || fail "vs0-memory-truth-boundary did not choose archive evidence"
+grep -q '"conflict_raw_memory_used_as_truth": false' "$memory_truth_json" || fail "vs0-memory-truth-boundary used raw memory as truth"
+grep -q '"conflict_answer_based_on": "archive_evidence"' "$memory_truth_json" || fail "vs0-memory-truth-boundary answer was not evidence based"
+grep -q '"owner_memory_without_evidence": 0' "$memory_truth_json" || fail "vs0-memory-truth-boundary created owner memory without evidence"
+grep -q '"raw_agent_memory_canonical": 0' "$memory_truth_json" || fail "vs0-memory-truth-boundary reported canonical raw memory"
+grep -q '"raw_agent_memory_owner_approved": 0' "$memory_truth_json" || fail "vs0-memory-truth-boundary owner-approved raw memory"
+grep -q '"conflict_selected_raw_memory": 0' "$memory_truth_json" || fail "vs0-memory-truth-boundary selected raw memory"
+grep -q '"conflict_truth_foundation_not_archive_evidence": 0' "$memory_truth_json" || fail "vs0-memory-truth-boundary missed archive evidence truth foundation"
+grep -q '"conflict_without_audit": 0' "$memory_truth_json" || fail "vs0-memory-truth-boundary missed audit"
+grep -q '"real_external_http_calls": 0' "$memory_truth_json" || fail "vs0-memory-truth-boundary reported real external HTTP calls"
+grep -q '"product_feature_claims": "PARTIAL_VS0_MEMORY_TRUTH_BOUNDARY_ONLY"' "$memory_truth_json" || fail "vs0-memory-truth-boundary overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -371,4 +394,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-product-domain-readiness verify, unittest).\n'

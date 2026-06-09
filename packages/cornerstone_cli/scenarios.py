@@ -3150,6 +3150,175 @@ def verify_vs0_product_loop_identity(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_vs0_memory_truth_boundary(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-memory-truth-boundary")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    message = (
+        "Archive evidence: Project Atlas launch date is Friday and the owner-approved plan should cite this source. "
+        "Anchor: atlas-launch-evidence."
+    )
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["conversation_start"] = _run_cli_json(
+        root,
+        ["conversation", "start", "--message", message, "--state-dir", state_rel, "--json"],
+    )
+    source_artifact = _payload(transcripts["conversation_start"]).get("artifact", {})
+    artifact_id = source_artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "Friday", "--state-dir", state_rel, "--json"])
+    search_snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = search_snapshot.get("search_snapshot_id", "")
+    transcripts["evidence_bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    evidence_bundle = _payload(transcripts["evidence_bundle_create"]).get("evidence_bundle", {})
+    evidence_bundle_id = evidence_bundle.get("evidence_bundle_id", "")
+    transcripts["owner_memory_create"] = _run_cli_json(
+        root,
+        [
+            "memory",
+            "create",
+            "--evidence-bundle-id",
+            evidence_bundle_id,
+            "--statement",
+            "Owner-approved memory: Project Atlas launch date is Friday.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if evidence_bundle_id else {}
+    owner_memory = _payload(transcripts["owner_memory_create"]).get("memory", {})
+    owner_memory_id = owner_memory.get("memory_id", "")
+    transcripts["raw_memory_create"] = _run_cli_json(
+        root,
+        [
+            "memory",
+            "raw-agent-note",
+            "--statement",
+            "Raw agent memory candidate: Project Atlas launch date is Monday.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    raw_memory = _payload(transcripts["raw_memory_create"]).get("memory", {})
+    raw_memory_id = raw_memory.get("memory_id", "")
+    transcripts["memory_conflict_test"] = _run_cli_json(
+        root,
+        [
+            "memory",
+            "conflict-test",
+            "--raw-memory-id",
+            raw_memory_id,
+            "--evidence-bundle-id",
+            evidence_bundle_id,
+            "--question",
+            "What is the Project Atlas launch date?",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if raw_memory_id and evidence_bundle_id else {}
+    conflict = _payload(transcripts["memory_conflict_test"]).get("memory_conflict_resolution", {})
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    owner_memory_ok = (
+        _exit_ok(transcripts["owner_memory_create"])
+        and owner_memory.get("status") == "owner_approved"
+        and owner_memory.get("canonicality", {}).get("canonical_truth_foundation") == "archive_evidence"
+        and owner_memory.get("canonicality", {}).get("owner_approved") is True
+        and f"evidence_bundle:{evidence_bundle_id}" in owner_memory.get("evidence_refs", [])
+        and f"artifact:{artifact_id}" in owner_memory.get("evidence_refs", [])
+    )
+    raw_memory_ok = (
+        _exit_ok(transcripts["raw_memory_create"])
+        and raw_memory.get("status") == "raw_agent_memory"
+        and raw_memory.get("trust_state") == "unverified"
+        and raw_memory.get("canonicality", {}).get("raw_agent_memory_canonical") is False
+        and raw_memory.get("canonicality", {}).get("owner_approved") is False
+        and raw_memory.get("evidence_refs") == []
+    )
+    conflict_ok = (
+        _exit_ok(transcripts["memory_conflict_test"])
+        and conflict.get("status") == "resolved"
+        and conflict.get("raw_memory", {}).get("memory_id") == raw_memory_id
+        and conflict.get("decision", {}).get("selected_truth_foundation") == "archive_evidence"
+        and conflict.get("decision", {}).get("raw_agent_memory_used_as_truth") is False
+        and conflict.get("decision", {}).get("owner_approved_memory_requires_evidence") is True
+        and conflict.get("answer", {}).get("based_on") == "archive_evidence"
+        and f"evidence_bundle:{evidence_bundle_id}" in conflict.get("answer", {}).get("evidence_refs", [])
+        and f"memory:{owner_memory_id}" in conflict.get("answer", {}).get("evidence_refs", [])
+    )
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    negative_evidence = {
+        "owner_memory_without_evidence": 0 if owner_memory_ok else 1,
+        "raw_agent_memory_canonical": int(bool(raw_memory.get("canonicality", {}).get("raw_agent_memory_canonical"))),
+        "raw_agent_memory_owner_approved": int(bool(raw_memory.get("canonicality", {}).get("owner_approved"))),
+        "conflict_selected_raw_memory": int(bool(conflict.get("decision", {}).get("raw_agent_memory_used_as_truth", True))),
+        "conflict_truth_foundation_not_archive_evidence": 0 if conflict.get("decision", {}).get("selected_truth_foundation") == "archive_evidence" else 1,
+        "conflict_without_audit": 0 if _payload(transcripts["memory_conflict_test"]).get("audit_refs") else 1,
+        "real_external_http_calls": 0,
+    }
+    reg_005_ok = (
+        _exit_ok(transcripts["conversation_start"])
+        and source_artifact.get("source", {}).get("type") == "conversation_turn"
+        and _exit_ok(transcripts["search"])
+        and search_snapshot.get("result_count") == 1
+        and _exit_ok(transcripts["evidence_bundle_create"])
+        and len(evidence_bundle.get("evidence_items", [])) >= 1
+        and owner_memory_ok
+        and raw_memory_ok
+        and conflict_ok
+        and audit_ok
+        and sum(negative_evidence.values()) == 0
+    )
+    rows = [
+        _row(
+            "CS-REG-005",
+            "REGRESSION_GUARD",
+            "PASS" if reg_005_ok else "FAIL",
+            ["cornerstone scenario verify vs0-memory-truth-boundary --json"],
+            "Raw agent memory remains non-canonical when it conflicts with durable archive evidence and owner-approved evidence-backed memory.",
+        )
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-memory-truth-boundary",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_MEMORY_TRUTH_BOUNDARY_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "memory_truth_evidence": {
+            "artifact_id": artifact_id,
+            "search_result_count": search_snapshot.get("result_count"),
+            "evidence_bundle_id": evidence_bundle_id,
+            "evidence_item_count": len(evidence_bundle.get("evidence_items", [])),
+            "owner_memory_id": owner_memory_id,
+            "owner_memory_status": owner_memory.get("status"),
+            "owner_memory_truth_foundation": owner_memory.get("canonicality", {}).get("canonical_truth_foundation"),
+            "raw_memory_id": raw_memory_id,
+            "raw_memory_status": raw_memory.get("status"),
+            "raw_memory_canonical": raw_memory.get("canonicality", {}).get("raw_agent_memory_canonical"),
+            "conflict_id": conflict.get("conflict_id"),
+            "conflict_selected_truth_foundation": conflict.get("decision", {}).get("selected_truth_foundation"),
+            "conflict_raw_memory_used_as_truth": conflict.get("decision", {}).get("raw_agent_memory_used_as_truth"),
+            "conflict_answer_based_on": conflict.get("answer", {}).get("based_on"),
+            "audit_event_count": _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("event_count"),
+        },
+        "negative_evidence": negative_evidence,
+        "human_required": [],
+    }
+
+
 def verify_vs0_product_domain_readiness(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-product-domain-readiness")
     state_path = root / state_rel
