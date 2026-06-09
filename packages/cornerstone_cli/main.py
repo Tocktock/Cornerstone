@@ -11,6 +11,7 @@ from cornerstone_cli import __version__
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_full_agent_orchestration,
     verify_full_claim_collaboration,
     verify_full_extension_ecosystem,
     verify_full_learning_experience,
@@ -2213,7 +2214,7 @@ def handle_pack_error(payload: dict[str, Any], result: dict[str, Any], as_json: 
         print_payload(payload, as_json)
         return EXIT_EVIDENCE_MISSING
     if status == "policy_denied":
-        payload["status"] = "failed"
+        payload["status"] = "denied"
         decision = result.get("policy_decision", {})
         payload["policy_decisions"] = [decision]
         payload["policy_decision_refs"].append(f"policy:{decision.get('policy_decision_id')}")
@@ -2456,6 +2457,210 @@ def command_pack_emergency_patch(args: argparse.Namespace) -> int:
     payload["security_patch"] = patch
     payload["ids"].update({"pack_id": args.pack_id, "security_patch_id": patch["security_patch_id"]})
     payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def agent_payload(args: argparse.Namespace, command: str) -> tuple[Path, LocalRuntimeStore, dict[str, str], dict[str, Any]]:
+    root = repo_root()
+    requested_scope = scope_args(args)
+    payload = base_response(command, "success", root)
+    payload.update(requested_scope)
+    return root, LocalRuntimeStore(state_dir(root, args)), requested_scope, payload
+
+
+def handle_agent_error(payload: dict[str, Any], result: dict[str, Any], as_json: bool) -> int | None:
+    status = result.get("status")
+    if status is None:
+        return None
+    if status == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_AGENT_RESOURCE_NOT_FOUND",
+                "message": "Required agent resource was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_NOT_FOUND
+    if status == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_AGENT_SCOPE_DENIED",
+                "message": "Agent resource is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_SCOPE_DENIED
+    if status == "policy_denied":
+        payload["status"] = "denied"
+        decision = result.get("policy_decision", {})
+        payload["policy_decisions"] = [decision]
+        payload["policy_decision_refs"].append(f"policy:{decision.get('policy_decision_id')}")
+        for key in ("mutation_attempt", "authority_attempt", "capability_attempt"):
+            if key in result:
+                payload[key] = result[key]
+                record_id = result[key].get("attempt_id") or result[key].get("capability_attempt_id")
+                if record_id:
+                    payload["ids"][key] = record_id
+        if result.get("audit_event"):
+            payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+        payload["errors"].append(
+            {
+                "code": "CS_AGENT_POLICY_DENIED",
+                "message": decision.get("reason", "Agent operation denied by policy."),
+                "policy": decision.get("policy"),
+                "resolution_path": decision.get("resolution_path", []),
+            }
+        )
+        print_payload(payload, as_json)
+        return EXIT_POLICY_DENIED
+    return None
+
+
+def command_agent_list(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = agent_payload(args, "cornerstone agent list")
+    result = store.list_agent_roles(requested_scope)
+    payload["agent_roles"] = result["agent_roles"]
+    payload["ids"].update({"agent_role_registry_id": "local"})
+    payload["evidence_refs"].extend([f"agent_role:{role['role_id']}" for role in result["agent_roles"].get("roles", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_role_show(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = agent_payload(args, "cornerstone role show")
+    result = store.show_agent_role(args.role_id, requested_scope, view=args.view)
+    error_exit = handle_agent_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    role_view = result["agent_role_view"]
+    payload["agent_role_view"] = role_view
+    payload["ids"].update({"role_id": role_view["role_id"]})
+    payload["evidence_refs"].append(f"agent_role:{role_view['role_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_agent_orchestrate(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = agent_payload(args, "cornerstone agent orchestrate")
+    result = store.create_agent_mission_trace(args.mission_id, requested_scope)
+    error_exit = handle_agent_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    trace = result["agent_trace"]
+    payload["agent_trace"] = trace
+    payload["ids"].update({"trace_id": trace["trace_id"], "mission_id": trace["mission_id"]})
+    payload["evidence_refs"].extend([f"mission:{trace['mission_id']}", f"agent_trace:{trace['trace_id']}", *trace.get("outputs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    payload["audit_refs"].append(f"audit:{result['review_audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_agent_direct_mutation_test(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = agent_payload(args, "cornerstone agent direct-mutation-test")
+    result = store.test_agent_direct_mutation(args.role_id, target=args.target, scope=requested_scope)
+    error_exit = handle_agent_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_agent_brain_switch(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = agent_payload(args, "cornerstone agent brain-switch")
+    result = store.switch_agent_brain(args.role_id, provider=args.provider, model=args.model, scope=requested_scope)
+    error_exit = handle_agent_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    switch = result["brain_switch"]
+    payload["brain_switch"] = switch
+    payload["ids"].update({"role_id": switch["role_id"], "switch_id": switch["switch_id"]})
+    payload["evidence_refs"].append(f"agent_role:{switch['role_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_agent_contract_update(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = agent_payload(args, "cornerstone agent contract-update")
+    result = store.update_agent_contract(args.role_id, change_summary=args.change_summary, scope=requested_scope)
+    error_exit = handle_agent_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    update = result["contract_update"]
+    payload["contract_update"] = update
+    payload["agent_role"] = result["agent_role"]
+    payload["ids"].update({"role_id": update["role_id"], "contract_update_id": update["update_id"]})
+    payload["evidence_refs"].append(f"agent_role:{update['role_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_agent_prompt_authority_test(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = agent_payload(args, "cornerstone agent prompt-authority-test")
+    result = store.test_agent_prompt_authority_expansion(
+        args.role_id,
+        requested_tool=args.requested_tool,
+        requested_memory_scope=args.requested_memory_scope,
+        requested_authority=args.requested_authority,
+        scope=requested_scope,
+    )
+    error_exit = handle_agent_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_agent_diagnose(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = agent_payload(args, "cornerstone agent diagnose")
+    result = store.record_agent_failure(args.trace_id, args.role_id, failure_kind=args.failure_kind, scope=requested_scope)
+    error_exit = handle_agent_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    diagnosis = result["diagnosis"]
+    payload["diagnosis"] = diagnosis
+    payload["ids"].update({"trace_id": diagnosis["trace_id"], "diagnosis_id": diagnosis["diagnosis_id"], "role_id": diagnosis["role_id"]})
+    payload["evidence_refs"].extend([f"agent_trace:{diagnosis['trace_id']}", f"agent_diagnosis:{diagnosis['diagnosis_id']}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_agent_pack_capability_test(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = agent_payload(args, "cornerstone agent pack-capability-test")
+    result = store.test_agent_pack_capability(args.role_id, pack_id=args.pack_id, capability=args.capability, scope=requested_scope)
+    error_exit = handle_agent_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    attempt = result["capability_attempt"]
+    payload["capability_attempt"] = attempt
+    payload["ids"].update({"role_id": attempt["role_id"], "pack_id": attempt["pack_id"], "capability_attempt_id": attempt["capability_attempt_id"]})
+    payload["evidence_refs"].extend([f"agent_role:{attempt['role_id']}", f"agent_pack:{attempt['pack_id']}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_agent_replay(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = agent_payload(args, "cornerstone agent replay")
+    result = store.replay_agent_mission(args.trace_id, requested_scope)
+    error_exit = handle_agent_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    replay = result["agent_replay"]
+    payload["agent_replay"] = replay
+    payload["ids"].update({"trace_id": replay["trace_id"], "replay_id": replay["replay_id"], "mission_id": replay["mission_id"]})
+    payload["evidence_refs"].extend([*replay.get("trace_refs", []), *replay.get("role_contract_refs", []), *replay.get("output_refs", [])])
     payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -3004,6 +3209,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_tenant_security_boundary(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
+    elif args.contract == "full-agent-orchestration":
+        report = verify_full_agent_orchestration(root)
     elif args.contract == "full-learning-experience":
         report = verify_full_learning_experience(root)
     elif args.contract == "full-extension-ecosystem":
@@ -3040,6 +3247,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-product-domain-readiness",
                     "vs0-tenant-security-boundary",
                     "full-claim-collaboration",
+                    "full-agent-orchestration",
                     "full-extension-ecosystem",
                     "full-learning-experience",
                     "full-memory-wiki",
@@ -3738,6 +3946,93 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(experience_export)
     experience_export.add_argument("--json", action="store_true", help="Emit JSON output")
     experience_export.set_defaults(func=command_experience_export)
+
+    agent = subcommands.add_parser("agent", help="Agent role, orchestration, diagnosis, and replay commands")
+    agent_sub = agent.add_subparsers(dest="agent_command")
+
+    agent_list = agent_sub.add_parser("list", help="List Orchestrator and specialist agent roles")
+    add_state_argument(agent_list)
+    add_scope_arguments(agent_list)
+    agent_list.add_argument("--json", action="store_true", help="Emit JSON output")
+    agent_list.set_defaults(func=command_agent_list)
+
+    agent_orchestrate = agent_sub.add_parser("orchestrate", help="Create an Orchestrator-led mission trace")
+    agent_orchestrate.add_argument("--mission-id", required=True, help="Mission ID")
+    add_state_argument(agent_orchestrate)
+    add_scope_arguments(agent_orchestrate)
+    agent_orchestrate.add_argument("--json", action="store_true", help="Emit JSON output")
+    agent_orchestrate.set_defaults(func=command_agent_orchestrate)
+
+    agent_mutation = agent_sub.add_parser("direct-mutation-test", help="Verify agents cannot directly mutate truth or source systems")
+    agent_mutation.add_argument("--role-id", required=True, help="Agent role ID or role key")
+    agent_mutation.add_argument("--target", required=True, help="Denied mutation target")
+    add_state_argument(agent_mutation)
+    add_scope_arguments(agent_mutation)
+    agent_mutation.add_argument("--json", action="store_true", help="Emit JSON output")
+    agent_mutation.set_defaults(func=command_agent_direct_mutation_test)
+
+    agent_brain = agent_sub.add_parser("brain-switch", help="Record a provider/model switch without changing the role contract")
+    agent_brain.add_argument("--role-id", required=True, help="Agent role ID or role key")
+    agent_brain.add_argument("--provider", required=True, help="Replacement model provider")
+    agent_brain.add_argument("--model", required=True, help="Replacement model name")
+    add_state_argument(agent_brain)
+    add_scope_arguments(agent_brain)
+    agent_brain.add_argument("--json", action="store_true", help="Emit JSON output")
+    agent_brain.set_defaults(func=command_agent_brain_switch)
+
+    agent_contract = agent_sub.add_parser("contract-update", help="Record a versioned Agent Role Contract update")
+    agent_contract.add_argument("--role-id", required=True, help="Agent role ID or role key")
+    agent_contract.add_argument("--change-summary", required=True, help="Operator-visible change summary")
+    add_state_argument(agent_contract)
+    add_scope_arguments(agent_contract)
+    agent_contract.add_argument("--json", action="store_true", help="Emit JSON output")
+    agent_contract.set_defaults(func=command_agent_contract_update)
+
+    agent_prompt = agent_sub.add_parser("prompt-authority-test", help="Verify prompt-only changes cannot expand authority")
+    agent_prompt.add_argument("--role-id", required=True, help="Agent role ID or role key")
+    agent_prompt.add_argument("--requested-tool", required=True, help="Tool the prompt tried to add")
+    agent_prompt.add_argument("--requested-memory-scope", required=True, help="Memory scope the prompt tried to add")
+    agent_prompt.add_argument("--requested-authority", required=True, help="Authority the prompt tried to add")
+    add_state_argument(agent_prompt)
+    add_scope_arguments(agent_prompt)
+    agent_prompt.add_argument("--json", action="store_true", help="Emit JSON output")
+    agent_prompt.set_defaults(func=command_agent_prompt_authority_test)
+
+    agent_diagnose = agent_sub.add_parser("diagnose", help="Record useful diagnosis for an agent failure")
+    agent_diagnose.add_argument("trace_id", help="Agent mission trace ID")
+    agent_diagnose.add_argument("--role-id", required=True, help="Agent role ID or role key")
+    agent_diagnose.add_argument("--failure-kind", default="timeout", help="Failure kind")
+    add_state_argument(agent_diagnose)
+    add_scope_arguments(agent_diagnose)
+    agent_diagnose.add_argument("--json", action="store_true", help="Emit JSON output")
+    agent_diagnose.set_defaults(func=command_agent_diagnose)
+
+    agent_pack_capability = agent_sub.add_parser("pack-capability-test", help="Verify Agent Pack supplied agents obey activation grants")
+    agent_pack_capability.add_argument("--role-id", required=True, help="Agent role ID or role key")
+    agent_pack_capability.add_argument("--pack-id", required=True, help="Agent Pack ID")
+    agent_pack_capability.add_argument("--capability", required=True, help="Capability to test")
+    add_state_argument(agent_pack_capability)
+    add_scope_arguments(agent_pack_capability)
+    agent_pack_capability.add_argument("--json", action="store_true", help="Emit JSON output")
+    agent_pack_capability.set_defaults(func=command_agent_pack_capability_test)
+
+    agent_replay = agent_sub.add_parser("replay", help="Create a reviewable agent mission replay")
+    agent_replay.add_argument("trace_id", help="Agent mission trace ID")
+    add_state_argument(agent_replay)
+    add_scope_arguments(agent_replay)
+    agent_replay.add_argument("--json", action="store_true", help="Emit JSON output")
+    agent_replay.set_defaults(func=command_agent_replay)
+
+    role = subcommands.add_parser("role", help="Agent Role Contract commands")
+    role_sub = role.add_subparsers(dest="role_command")
+
+    role_show = role_sub.add_parser("show", help="Show daily-user role card or operator contract")
+    role_show.add_argument("role_id", help="Agent role ID or role key")
+    role_show.add_argument("--view", choices=["user", "operator", "both"], default="user")
+    add_state_argument(role_show)
+    add_scope_arguments(role_show)
+    role_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    role_show.set_defaults(func=command_role_show)
 
     pack = subcommands.add_parser("pack", help="Agent Pack registry, install, activation, and rollout commands")
     pack_sub = pack.add_subparsers(dest="pack_command")

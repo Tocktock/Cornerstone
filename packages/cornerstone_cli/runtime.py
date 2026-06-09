@@ -79,6 +79,113 @@ REQUIRED_AGENT_PACK_FIELDS = {
     "supply_chain",
 }
 
+AGENT_ROLE_TEMPLATES: dict[str, dict[str, Any]] = {
+    "orchestrator": {
+        "display_name": "Orchestrator Agent",
+        "purpose": "Own mission planning, delegation, synthesis, authority gaps, and after-action review.",
+        "responsibilities": ["plan_mission", "delegate_specialists", "merge_results", "ask_for_missing_authority", "produce_after_action_review"],
+        "allowed_tools": ["mission.read", "evidence.read", "policy.evaluate", "workflow.propose", "audit.read"],
+        "forbidden_actions": ["direct_truth_mutation", "direct_source_write", "cross_namespace_access", "silent_authority_expansion"],
+        "memory_scope": "active_workspace_only",
+        "evidence_requirements": ["delegation rationale", "evidence refs for durable outputs", "gap label when evidence is insufficient"],
+        "escalation_rules": ["escalate missing authority", "escalate high-risk or external action", "escalate unresolved specialist conflict"],
+        "model_policy": {"provider": "local_test", "replaceable_brain": True, "contract_controls_authority": True},
+        "judge_rubric": {"checks": ["evidence coverage", "policy compliance", "mission outcome quality"], "llm_signal_is_supporting_only": True},
+        "audit_expectations": ["agent.orchestrated", "agent.delegated", "agent.after_action_review.created"],
+    },
+    "evidence": {
+        "display_name": "Evidence Agent",
+        "purpose": "Review artifacts, search snapshots, and evidence bundles without mutating truth.",
+        "responsibilities": ["inspect_artifacts", "check_evidence_refs", "label_evidence_gaps"],
+        "allowed_tools": ["artifact.read", "search.read", "evidence.read"],
+        "forbidden_actions": ["claim.approve", "memory.write", "source.write"],
+        "memory_scope": "none",
+        "evidence_requirements": ["source refs", "uncertainty label"],
+        "escalation_rules": ["escalate missing source", "escalate contradiction"],
+        "model_policy": {"provider": "local_test", "replaceable_brain": True, "contract_controls_authority": True},
+        "judge_rubric": {"checks": ["source coverage", "uncertainty"], "llm_signal_is_supporting_only": True},
+        "audit_expectations": ["agent.output.created"],
+    },
+    "memory": {
+        "display_name": "Memory Agent",
+        "purpose": "Draft memory candidates from evidence while leaving approval to governed memory paths.",
+        "responsibilities": ["draft_memory_candidate", "explain_source_basis", "flag_poisoning_risk"],
+        "allowed_tools": ["memory.propose", "evidence.read", "wiki.read"],
+        "forbidden_actions": ["memory.approve", "raw_memory_as_truth", "cross_namespace_memory_read"],
+        "memory_scope": "active_workspace_only",
+        "evidence_requirements": ["source evidence bundle", "trust-state label"],
+        "escalation_rules": ["escalate approval need", "escalate poisoning risk"],
+        "model_policy": {"provider": "local_test", "replaceable_brain": True, "contract_controls_authority": True},
+        "judge_rubric": {"checks": ["archive foundation", "owner scope"], "llm_signal_is_supporting_only": True},
+        "audit_expectations": ["agent.output.created", "memory.proposal.created"],
+    },
+    "workflow": {
+        "display_name": "Workflow Agent",
+        "purpose": "Prepare Workflow/Action proposals, dry-runs, and rollback-aware execution plans.",
+        "responsibilities": ["prepare_action_card", "check_dry_run", "record_expected_impact"],
+        "allowed_tools": ["action.propose", "action.dry_run", "workflow.read"],
+        "forbidden_actions": ["direct_external_write", "execute_without_policy", "execute_without_required_approval"],
+        "memory_scope": "active_mission_only",
+        "evidence_requirements": ["claim refs", "policy refs", "dry-run diff"],
+        "escalation_rules": ["escalate high-risk", "escalate missing approval"],
+        "model_policy": {"provider": "local_test", "replaceable_brain": True, "contract_controls_authority": True},
+        "judge_rubric": {"checks": ["dry-run present", "approval boundary"], "llm_signal_is_supporting_only": True},
+        "audit_expectations": ["action.card.proposed", "policy.decision.created"],
+    },
+    "judge": {
+        "display_name": "Judge Agent",
+        "purpose": "Evaluate ambiguous outputs as a supporting signal without mutating memory or rules.",
+        "responsibilities": ["score_output", "explain_disagreement", "recommend_escalation"],
+        "allowed_tools": ["evidence.read", "trajectory.read", "rubric.evaluate"],
+        "forbidden_actions": ["memory.write", "policy.write", "final_success_override"],
+        "memory_scope": "active_mission_only",
+        "evidence_requirements": ["rubric refs", "outcome refs"],
+        "escalation_rules": ["escalate unresolved high-risk disagreement"],
+        "model_policy": {"provider": "local_test", "replaceable_brain": True, "contract_controls_authority": True},
+        "judge_rubric": {"checks": ["rubric coverage", "objective outcome precedence"], "llm_signal_is_supporting_only": True},
+        "audit_expectations": ["agent.judge_result.recorded"],
+    },
+    "connector": {
+        "display_name": "Connector Agent",
+        "purpose": "Request ConnectorHub-mediated capabilities and never hold credentials or provider clients.",
+        "responsibilities": ["request_capability", "check_source_policy", "report_connector_boundary"],
+        "allowed_tools": ["connector.request", "capability.read", "action.propose"],
+        "forbidden_actions": ["provider_client", "credential_read", "direct_api_writeback", "raw_secret_access"],
+        "memory_scope": "none",
+        "evidence_requirements": ["connector capability ref", "policy decision ref"],
+        "escalation_rules": ["escalate unavailable connector", "escalate ungranted capability"],
+        "model_policy": {"provider": "local_test", "replaceable_brain": True, "contract_controls_authority": True},
+        "judge_rubric": {"checks": ["ConnectorHub boundary", "credential custody"], "llm_signal_is_supporting_only": True},
+        "audit_expectations": ["agent.connector_request.denied", "agent.connector_request.mediated"],
+    },
+    "policy": {
+        "display_name": "Policy Agent",
+        "purpose": "Evaluate scope, risk, approval, egress, and authority boundaries.",
+        "responsibilities": ["evaluate_scope", "evaluate_risk", "record_resolution_path"],
+        "allowed_tools": ["policy.evaluate", "access.check", "audit.write"],
+        "forbidden_actions": ["grant_authority_without_contract", "bypass_approval"],
+        "memory_scope": "none",
+        "evidence_requirements": ["policy decision refs"],
+        "escalation_rules": ["escalate deny", "escalate human approval required"],
+        "model_policy": {"provider": "local_test", "replaceable_brain": True, "contract_controls_authority": True},
+        "judge_rubric": {"checks": ["policy cause", "resolution path"], "llm_signal_is_supporting_only": True},
+        "audit_expectations": ["policy.decision.created"],
+    },
+    "playbook": {
+        "display_name": "Playbook Agent",
+        "purpose": "Suggest reusable playbooks from approved experience without auto-globalizing behavior.",
+        "responsibilities": ["compare_experience", "draft_playbook_candidate", "require_owner_approval"],
+        "allowed_tools": ["experience.read", "lesson.propose", "pack.playbook.propose"],
+        "forbidden_actions": ["auto_globalize", "activate_without_approval", "expand_pack_authority"],
+        "memory_scope": "active_workspace_only",
+        "evidence_requirements": ["trajectory refs", "lesson refs", "approval state"],
+        "escalation_rules": ["escalate approval need", "escalate behavior change"],
+        "model_policy": {"provider": "local_test", "replaceable_brain": True, "contract_controls_authority": True},
+        "judge_rubric": {"checks": ["applicability boundary", "rollback"], "llm_signal_is_supporting_only": True},
+        "audit_expectations": ["agent.output.created", "pack.playbook.proposed"],
+    },
+}
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -177,6 +284,15 @@ class LocalRuntimeStore:
         self.pack_patch_dir = state_dir / "packs" / "security_patches"
         self.pack_quarantine_dir = state_dir / "packs" / "quarantine"
         self.pack_playbook_proposal_dir = state_dir / "packs" / "playbook_proposals"
+        self.agent_role_dir = state_dir / "agents" / "roles"
+        self.agent_trace_dir = state_dir / "agents" / "mission_traces"
+        self.agent_output_dir = state_dir / "agents" / "outputs"
+        self.agent_diagnosis_dir = state_dir / "agents" / "diagnoses"
+        self.agent_contract_update_dir = state_dir / "agents" / "contract_updates"
+        self.agent_brain_switch_dir = state_dir / "agents" / "brain_switches"
+        self.agent_mutation_attempt_dir = state_dir / "agents" / "mutation_attempts"
+        self.agent_replay_dir = state_dir / "agents" / "replays"
+        self.agent_pack_capability_dir = state_dir / "agents" / "pack_capabilities"
         self.audit_path = state_dir / "audit" / "events.jsonl"
 
     def reset(self) -> None:
@@ -399,6 +515,33 @@ class LocalRuntimeStore:
     def agent_pack_playbook_proposal_path(self, proposal_id: str) -> Path:
         return self.pack_playbook_proposal_dir / f"{proposal_id}.json"
 
+    def agent_role_path(self, role_id: str) -> Path:
+        return self.agent_role_dir / f"{role_id}.json"
+
+    def agent_trace_path(self, trace_id: str) -> Path:
+        return self.agent_trace_dir / f"{trace_id}.json"
+
+    def agent_output_path(self, output_id: str) -> Path:
+        return self.agent_output_dir / f"{output_id}.json"
+
+    def agent_diagnosis_path(self, diagnosis_id: str) -> Path:
+        return self.agent_diagnosis_dir / f"{diagnosis_id}.json"
+
+    def agent_contract_update_path(self, update_id: str) -> Path:
+        return self.agent_contract_update_dir / f"{update_id}.json"
+
+    def agent_brain_switch_path(self, switch_id: str) -> Path:
+        return self.agent_brain_switch_dir / f"{switch_id}.json"
+
+    def agent_mutation_attempt_path(self, attempt_id: str) -> Path:
+        return self.agent_mutation_attempt_dir / f"{attempt_id}.json"
+
+    def agent_replay_path(self, replay_id: str) -> Path:
+        return self.agent_replay_dir / f"{replay_id}.json"
+
+    def agent_pack_capability_path(self, capability_attempt_id: str) -> Path:
+        return self.agent_pack_capability_dir / f"{capability_attempt_id}.json"
+
     def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
         if scope is not None:
             scoped_path = self.artifact_path(artifact_id, scope)
@@ -457,6 +600,27 @@ class LocalRuntimeStore:
 
     def get_action(self, action_id: str) -> dict[str, Any] | None:
         path = self.action_path(action_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_agent_role(self, role_id: str) -> dict[str, Any] | None:
+        path = self.agent_role_path(role_id)
+        if path.exists():
+            return _read_json(path)
+        for candidate in self._agent_role_records():
+            if candidate.get("role_key") == role_id or candidate.get("role_id") == role_id:
+                return candidate
+        return None
+
+    def get_agent_trace(self, trace_id: str) -> dict[str, Any] | None:
+        path = self.agent_trace_path(trace_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_agent_diagnosis(self, diagnosis_id: str) -> dict[str, Any] | None:
+        path = self.agent_diagnosis_path(diagnosis_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -831,6 +995,36 @@ class LocalRuntimeStore:
         for path in sorted(self.model_evaluation_dir.glob("*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _agent_role_records(self, scope: dict[str, str] | None = None) -> list[dict[str, Any]]:
+        if not self.agent_role_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.agent_role_dir.glob("*.json")):
+            record = _read_json(path)
+            if scope is None or record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _agent_output_records(self, scope: dict[str, str] | None = None) -> list[dict[str, Any]]:
+        if not self.agent_output_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.agent_output_dir.glob("*.json")):
+            record = _read_json(path)
+            if scope is None or record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _agent_diagnosis_records(self, scope: dict[str, str] | None = None) -> list[dict[str, Any]]:
+        if not self.agent_diagnosis_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.agent_diagnosis_dir.glob("*.json")):
+            record = _read_json(path)
+            if scope is None or record.get("scope") == scope:
                 records.append(record)
         return records
 
@@ -1628,6 +1822,630 @@ class LocalRuntimeStore:
             {"security_patch_id": patch_id, "owner_visibility": True, "rollback_available": True},
         )
         return {"security_patch": patch, "audit_event": event}
+
+    def _agent_role_id(self, role_key: str, scope: dict[str, str]) -> str:
+        return f"role_{role_key}_{scope_key(scope)}"
+
+    def _agent_role_record(self, role_key: str, scope: dict[str, str]) -> dict[str, Any]:
+        template = AGENT_ROLE_TEMPLATES[role_key]
+        role_contract = {
+            "schema_version": "cs.agent_role_contract.v0",
+            "role_key": role_key,
+            "purpose": template["purpose"],
+            "responsibilities": template["responsibilities"],
+            "allowed_tools": template["allowed_tools"],
+            "forbidden_actions": template["forbidden_actions"],
+            "memory_scope": template["memory_scope"],
+            "evidence_requirements": template["evidence_requirements"],
+            "escalation_rules": template["escalation_rules"],
+            "model_policy": template["model_policy"],
+            "judge_rubric": template["judge_rubric"],
+            "audit_expectations": template["audit_expectations"],
+        }
+        role_card = {
+            "schema_version": "cs.agent_role_card.v0",
+            "display_name": template["display_name"],
+            "purpose": template["purpose"],
+            "visible_to_daily_user": True,
+            "summary": f"{template['display_name']} helps the Orchestrator with bounded, evidence-labeled work.",
+            "risk_boundary": "cannot directly mutate truth or source systems",
+        }
+        role_id = self._agent_role_id(role_key, scope)
+        record = {
+            "schema_version": "cs.agent_role_record.v0",
+            "role_id": role_id,
+            "role_key": role_key,
+            "status": "active",
+            "scope": scope,
+            "version": 1,
+            "role_card": role_card,
+            "role_contract": role_contract,
+            "operator_contract_visible": True,
+            "daily_user_card_visible": True,
+            "contract_hash": _json_hash(role_contract),
+            "created_at": utc_now(),
+        }
+        return record
+
+    def ensure_agent_roles(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        records = []
+        for role_key in AGENT_ROLE_TEMPLATES:
+            role_id = self._agent_role_id(role_key, scope)
+            path = self.agent_role_path(role_id)
+            if path.exists():
+                records.append(_read_json(path))
+                continue
+            record = self._agent_role_record(role_key, scope)
+            _write_json(path, record)
+            self.append_audit(
+                "agent.role_contract.created",
+                scope,
+                {"type": "agent_role", "id": role_id},
+                {"role_key": role_key, "contract_hash": record["contract_hash"], "version": record["version"]},
+            )
+            records.append(record)
+        return records
+
+    def list_agent_roles(self, scope: dict[str, str]) -> dict[str, Any]:
+        roles = self.ensure_agent_roles(scope)
+        view = {
+            "schema_version": "cs.agent_role_registry_view.v0",
+            "status": "ready",
+            "scope": scope,
+            "orchestrator_led": True,
+            "daily_users_manage_specialists_directly": False,
+            "roles": [
+                {
+                    "role_id": role["role_id"],
+                    "role_key": role["role_key"],
+                    "display_name": role["role_card"]["display_name"],
+                    "purpose": role["role_card"]["purpose"],
+                    "contract_hash": role["contract_hash"],
+                    "version": role["version"],
+                }
+                for role in roles
+            ],
+        }
+        event = self.append_audit(
+            "agent.roles.listed",
+            scope,
+            {"type": "agent_role_registry", "id": "local"},
+            {"role_count": len(roles), "orchestrator_led": True},
+        )
+        return {"agent_roles": view, "audit_event": event}
+
+    def show_agent_role(self, role_id: str, scope: dict[str, str], *, view: str) -> dict[str, Any]:
+        self.ensure_agent_roles(scope)
+        role = self.get_agent_role(role_id)
+        if role is None:
+            return {"status": "not_found", "resource": "agent_role"}
+        if role.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": role.get("scope")}
+        detail = {
+            "schema_version": "cs.agent_role_view.v0",
+            "status": "ready",
+            "scope": scope,
+            "role_id": role["role_id"],
+            "role_key": role["role_key"],
+            "view": view,
+            "role_card": role["role_card"],
+            "operator_contract": role["role_contract"] if view in {"operator", "both"} else None,
+            "operator_contract_visible": view in {"operator", "both"},
+            "daily_user_card_visible": True,
+            "contract_hash": role["contract_hash"],
+            "version": role["version"],
+        }
+        event = self.append_audit(
+            "agent.role.read",
+            scope,
+            {"type": "agent_role", "id": role["role_id"]},
+            {"view": view, "operator_contract_visible": detail["operator_contract_visible"]},
+        )
+        return {"agent_role_view": detail, "audit_event": event}
+
+    def _agent_policy_decision(
+        self,
+        *,
+        scope: dict[str, str],
+        subject_id: str,
+        decision: str,
+        policy: str,
+        reason: str,
+        resolution_path: list[str],
+    ) -> dict[str, Any]:
+        decision_base = {
+            "schema_version": "cs.policy_decision.v0",
+            "decision": decision,
+            "policy": policy,
+            "reason": redact_text(reason),
+            "resolution_path": resolution_path,
+            "subject": {"type": "agent", "id": subject_id},
+            "scope": scope,
+            "created_at": utc_now(),
+        }
+        decision_id = f"policy_{_json_hash(decision_base)[:16]}"
+        decision_record = dict(decision_base)
+        decision_record["policy_decision_id"] = decision_id
+        return decision_record
+
+    def create_agent_mission_trace(self, mission_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+        roles = {role["role_key"]: role for role in self.ensure_agent_roles(scope)}
+        evidence = mission.get("evidence", {})
+        evidence_refs = list(evidence.get("artifact_refs") or [])
+        if evidence.get("evidence_bundle_id"):
+            evidence_refs.append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
+        trace_base = {
+            "schema_version": "cs.agent_mission_trace.v0",
+            "status": "completed_with_review",
+            "scope": scope,
+            "mission_id": mission_id,
+            "orchestrator_role_id": roles["orchestrator"]["role_id"],
+            "orchestrator_plan": {
+                "goal": mission.get("goal"),
+                "steps": [
+                    "review evidence",
+                    "draft memory candidate",
+                    "prepare workflow path",
+                    "evaluate policy",
+                    "check connector boundary",
+                    "judge outcome quality",
+                    "capture playbook candidate",
+                    "produce after-action review",
+                ],
+                "delegation_model": "orchestrator_as_controller_specialists_as_tools",
+                "asks_for_missing_authority": True,
+            },
+            "delegations": [],
+            "agent_activity_view": [],
+            "outputs": [],
+            "after_action_review": {
+                "status": "complete",
+                "owner_visible": True,
+                "evidence_refs": evidence_refs,
+                "missing_authority_questions": ["External action approval remains required before provider writeback."],
+                "next_steps": ["Review evidence gaps before promoting memory or executing external actions."],
+            },
+            "accountability": {
+                "namespace_owner": scope["owner_id"],
+                "authority_grant_visible": True,
+                "correction_and_rollback_visible": True,
+                "agents_accountable_to_owner_scope": True,
+            },
+            "hidden_chain_of_thought_captured": False,
+            "replay_without_hidden_chain_of_thought": True,
+            "created_at": utc_now(),
+        }
+        trace_id = f"agenttrace_{_json_hash(trace_base)[:16]}"
+        trace = dict(trace_base)
+        trace["trace_id"] = trace_id
+
+        delegation_specs = [
+            ("evidence", "reviewed artifact and evidence bundle coverage", "summary"),
+            ("memory", "drafted memory candidate with owner approval still required", "memory_candidate"),
+            ("workflow", "prepared governed Action Card path instead of direct mutation", "action_proposal"),
+            ("policy", "checked scope, risk, approval, and authority boundaries", "policy_review"),
+            ("connector", "verified ConnectorHub mediation and credential custody boundary", "connector_review"),
+            ("judge", "scored outcome quality as supporting signal only", "judgment"),
+            ("playbook", "identified reusable playbook candidate requiring approval", "playbook_candidate"),
+        ]
+        for role_key, rationale, output_type in delegation_specs:
+            role = roles[role_key]
+            output_base = {
+                "schema_version": "cs.agent_output.v0",
+                "status": "evidence_labeled",
+                "scope": scope,
+                "trace_id": trace_id,
+                "mission_id": mission_id,
+                "role_id": role["role_id"],
+                "role_key": role_key,
+                "output_type": output_type,
+                "summary": rationale,
+                "evidence_refs": evidence_refs,
+                "uncertainty": "medium" if evidence_refs else "high",
+                "insufficient_evidence_label": not bool(evidence_refs),
+                "source_refs_or_gap_label_present": True,
+                "direct_mutation_performed": False,
+                "created_at": utc_now(),
+            }
+            output_id = f"agentout_{_json_hash(output_base)[:16]}"
+            output = dict(output_base)
+            output["output_id"] = output_id
+            _write_json(self.agent_output_path(output_id), output)
+            delegation = {
+                "role_id": role["role_id"],
+                "role_key": role_key,
+                "display_name": role["role_card"]["display_name"],
+                "rationale": rationale,
+                "handled_evidence_refs": evidence_refs,
+                "tool_refs": role["role_contract"]["allowed_tools"],
+                "result_output_id": output_id,
+                "influenced_final_outcome": True,
+            }
+            trace["delegations"].append(delegation)
+            trace["agent_activity_view"].append(
+                {
+                    "role_id": role["role_id"],
+                    "display_name": role["role_card"]["display_name"],
+                    "visible_when_useful": True,
+                    "result_output_id": output_id,
+                }
+            )
+            trace["outputs"].append(f"agent_output:{output_id}")
+            self.append_audit(
+                "agent.delegated",
+                scope,
+                {"type": "agent_role", "id": role["role_id"]},
+                {"trace_id": trace_id, "mission_id": mission_id, "rationale": rationale},
+            )
+
+        _write_json(self.agent_trace_path(trace_id), trace)
+        event = self.append_audit(
+            "agent.orchestrated",
+            scope,
+            {"type": "agent_mission_trace", "id": trace_id},
+            {"mission_id": mission_id, "delegation_count": len(trace["delegations"]), "after_action_review": True},
+        )
+        review_event = self.append_audit(
+            "agent.after_action_review.created",
+            scope,
+            {"type": "agent_mission_trace", "id": trace_id},
+            {"mission_id": mission_id, "evidence_ref_count": len(evidence_refs)},
+        )
+        return {"agent_trace": trace, "audit_event": event, "review_audit_event": review_event}
+
+    def test_agent_direct_mutation(self, role_id: str, *, target: str, scope: dict[str, str]) -> dict[str, Any]:
+        self.ensure_agent_roles(scope)
+        role = self.get_agent_role(role_id)
+        if role is None:
+            return {"status": "not_found", "resource": "agent_role"}
+        if role.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": role.get("scope")}
+        decision = self._agent_policy_decision(
+            scope=scope,
+            subject_id=role["role_id"],
+            decision="deny",
+            policy="agent_workflow_path_required",
+            reason="Agents cannot directly mutate durable truth, memory, source systems, or external systems.",
+            resolution_path=["Use governed claim, memory, Workflow/Action, ConnectorHub, and approval paths."],
+        )
+        attempt_base = {
+            "schema_version": "cs.agent_mutation_attempt.v0",
+            "status": "denied",
+            "scope": scope,
+            "role_id": role["role_id"],
+            "target": redact_text(target),
+            "direct_mutation_performed": False,
+            "governed_paths_required": ["claim", "memory", "workflow_action", "connectorhub", "audit"],
+            "policy_decision": decision,
+            "created_at": utc_now(),
+        }
+        attempt_id = f"agentmut_{_json_hash(attempt_base)[:16]}"
+        attempt = dict(attempt_base)
+        attempt["attempt_id"] = attempt_id
+        _write_json(self.agent_mutation_attempt_path(attempt_id), attempt)
+        event = self.append_audit(
+            "agent.direct_mutation.denied",
+            scope,
+            {"type": "agent_role", "id": role["role_id"]},
+            {"attempt_id": attempt_id, "target": target, "policy_decision_id": decision["policy_decision_id"]},
+        )
+        return {"status": "policy_denied", "mutation_attempt": attempt, "policy_decision": decision, "audit_event": event}
+
+    def switch_agent_brain(self, role_id: str, *, provider: str, model: str, scope: dict[str, str]) -> dict[str, Any]:
+        self.ensure_agent_roles(scope)
+        role = self.get_agent_role(role_id)
+        if role is None:
+            return {"status": "not_found", "resource": "agent_role"}
+        if role.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": role.get("scope")}
+        switch_base = {
+            "schema_version": "cs.agent_brain_switch.v0",
+            "status": "switched",
+            "scope": scope,
+            "role_id": role["role_id"],
+            "from_provider": role["role_contract"]["model_policy"].get("provider"),
+            "to_provider": provider,
+            "to_model": model,
+            "contract_hash_before": role["contract_hash"],
+            "contract_hash_after": role["contract_hash"],
+            "allowed_tools_unchanged": True,
+            "memory_scope_unchanged": True,
+            "evidence_rules_unchanged": True,
+            "audit_expectations_unchanged": True,
+            "only_inference_brain_changed": True,
+            "created_at": utc_now(),
+        }
+        switch_id = f"agentbrain_{_json_hash(switch_base)[:16]}"
+        switch = dict(switch_base)
+        switch["switch_id"] = switch_id
+        _write_json(self.agent_brain_switch_path(switch_id), switch)
+        event = self.append_audit(
+            "agent.brain.switched",
+            scope,
+            {"type": "agent_role", "id": role["role_id"]},
+            {"switch_id": switch_id, "from_provider": switch["from_provider"], "to_provider": provider, "contract_hash_unchanged": True},
+        )
+        return {"brain_switch": switch, "audit_event": event}
+
+    def update_agent_contract(self, role_id: str, *, change_summary: str, scope: dict[str, str]) -> dict[str, Any]:
+        self.ensure_agent_roles(scope)
+        role = self.get_agent_role(role_id)
+        if role is None:
+            return {"status": "not_found", "resource": "agent_role"}
+        if role.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": role.get("scope")}
+        current_contract = role["role_contract"]
+        updated_contract = dict(current_contract)
+        updated_requirements = list(updated_contract.get("evidence_requirements", []))
+        if "structured output schema" not in updated_requirements:
+            updated_requirements.append("structured output schema")
+        updated_contract["evidence_requirements"] = updated_requirements
+        new_hash = _json_hash(updated_contract)
+        update_base = {
+            "schema_version": "cs.agent_contract_update.v0",
+            "status": "versioned",
+            "scope": scope,
+            "role_id": role["role_id"],
+            "from_version": role.get("version", 1),
+            "to_version": int(role.get("version", 1)) + 1,
+            "change_summary": redact_text(change_summary),
+            "diff": {
+                "evidence_requirements_added": ["structured output schema"],
+                "allowed_tools_added": [],
+                "memory_scope_changed": False,
+                "authority_expansion": False,
+            },
+            "impact": {
+                "affected_missions": [mission["mission_id"] for mission in self._mission_records(scope)],
+                "affected_agent_packs": sorted({activation.get("pack_id") for activation in self._agent_pack_activation_records(scope) if activation.get("pack_id")}),
+            },
+            "migration_rollout_guidance": ["Re-run agent replay for active missions.", "Keep previous contract hash for audit comparison."],
+            "old_contract_hash": role["contract_hash"],
+            "new_contract_hash": new_hash,
+            "created_at": utc_now(),
+        }
+        update_id = f"agentupd_{_json_hash(update_base)[:16]}"
+        update = dict(update_base)
+        update["update_id"] = update_id
+        _write_json(self.agent_contract_update_path(update_id), update)
+        updated_role = dict(role)
+        updated_role["version"] = update["to_version"]
+        updated_role["role_contract"] = updated_contract
+        updated_role["contract_hash"] = new_hash
+        updated_role["change_history"] = [*role.get("change_history", []), {"update_id": update_id, "from_version": update["from_version"], "to_version": update["to_version"]}]
+        _write_json(self.agent_role_path(role["role_id"]), updated_role)
+        event = self.append_audit(
+            "agent.contract.updated",
+            scope,
+            {"type": "agent_role", "id": role["role_id"]},
+            {"update_id": update_id, "from_version": update["from_version"], "to_version": update["to_version"], "authority_expansion": False},
+        )
+        return {"contract_update": update, "agent_role": updated_role, "audit_event": event}
+
+    def test_agent_prompt_authority_expansion(
+        self,
+        role_id: str,
+        *,
+        requested_tool: str,
+        requested_memory_scope: str,
+        requested_authority: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        self.ensure_agent_roles(scope)
+        role = self.get_agent_role(role_id)
+        if role is None:
+            return {"status": "not_found", "resource": "agent_role"}
+        if role.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": role.get("scope")}
+        decision = self._agent_policy_decision(
+            scope=scope,
+            subject_id=role["role_id"],
+            decision="deny",
+            policy="agent_prompt_cannot_expand_authority",
+            reason="Prompt-only agent changes cannot grant new tools, connector access, memory scope, write permissions, or action authority.",
+            resolution_path=["Revise the Agent Role Contract, run policy review, and record a versioned contract update before granting authority."],
+        )
+        attempt_base = {
+            "schema_version": "cs.agent_prompt_authority_attempt.v0",
+            "status": "denied",
+            "scope": scope,
+            "role_id": role["role_id"],
+            "requested_tool": requested_tool,
+            "requested_memory_scope": requested_memory_scope,
+            "requested_authority": requested_authority,
+            "authority_expanded": False,
+            "role_contract_required": True,
+            "policy_decision": decision,
+            "created_at": utc_now(),
+        }
+        attempt_id = f"agentauth_{_json_hash(attempt_base)[:16]}"
+        attempt = dict(attempt_base)
+        attempt["attempt_id"] = attempt_id
+        _write_json(self.agent_mutation_attempt_path(attempt_id), attempt)
+        event = self.append_audit(
+            "agent.prompt_authority.denied",
+            scope,
+            {"type": "agent_role", "id": role["role_id"]},
+            {"attempt_id": attempt_id, "policy_decision_id": decision["policy_decision_id"], "authority_expanded": False},
+        )
+        return {"status": "policy_denied", "authority_attempt": attempt, "policy_decision": decision, "audit_event": event}
+
+    def record_agent_failure(
+        self,
+        trace_id: str,
+        role_id: str,
+        *,
+        failure_kind: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        trace = self.get_agent_trace(trace_id)
+        if trace is None:
+            return {"status": "not_found", "resource": "agent_trace"}
+        if trace.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": trace.get("scope")}
+        role = self.get_agent_role(role_id)
+        if role is None:
+            return {"status": "not_found", "resource": "agent_role"}
+        diagnosis_base = {
+            "schema_version": "cs.agent_failure_diagnosis.v0",
+            "status": "diagnosed",
+            "scope": scope,
+            "trace_id": trace_id,
+            "mission_id": trace.get("mission_id"),
+            "role_id": role["role_id"],
+            "failure_kind": failure_kind,
+            "first_failing_layer": "connector_capability" if failure_kind in {"timeout", "unavailable_connector"} else "agent_output_validation",
+            "mission_impact": "mission_can_continue_with_escalation",
+            "retry_path": ["retry specialist with same contract", "fallback to Orchestrator summary", "request owner or operator review"],
+            "escalation_path": ["show user-facing diagnosis", "preserve trace", "avoid direct mutation"],
+            "can_continue": True,
+            "user_facing_error": "Specialist agent failed safely; the Orchestrator kept the mission reviewable and escalation-ready.",
+            "created_at": utc_now(),
+        }
+        diagnosis_id = f"agentdiag_{_json_hash(diagnosis_base)[:16]}"
+        diagnosis = dict(diagnosis_base)
+        diagnosis["diagnosis_id"] = diagnosis_id
+        _write_json(self.agent_diagnosis_path(diagnosis_id), diagnosis)
+        event = self.append_audit(
+            "agent.failure.diagnosed",
+            scope,
+            {"type": "agent_role", "id": role["role_id"]},
+            {"diagnosis_id": diagnosis_id, "trace_id": trace_id, "first_failing_layer": diagnosis["first_failing_layer"]},
+        )
+        return {"diagnosis": diagnosis, "audit_event": event}
+
+    def test_agent_pack_capability(
+        self,
+        role_id: str,
+        *,
+        pack_id: str,
+        capability: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        self.ensure_agent_roles(scope)
+        role = self.get_agent_role(role_id)
+        if role is None:
+            return {"status": "not_found", "resource": "agent_role"}
+        if role.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": role.get("scope")}
+        activation = self._find_agent_pack_activation(pack_id, scope)
+        if activation is None or capability not in activation.get("granted_capabilities", []):
+            decision = self._agent_policy_decision(
+                scope=scope,
+                subject_id=role["role_id"],
+                decision="deny",
+                policy="agent_pack_workspace_grant_required",
+                reason="Agent Pack supplied agents can use only capabilities explicitly activated for this workspace or mission.",
+                resolution_path=["Activate the pack with the minimum required grant and ConnectorHub policy review."],
+            )
+            attempt_base = {
+                "schema_version": "cs.agent_pack_capability_attempt.v0",
+                "status": "denied",
+                "scope": scope,
+                "role_id": role["role_id"],
+                "pack_id": pack_id,
+                "capability": capability,
+                "activation_id": activation.get("activation_id") if activation else None,
+                "granted_capabilities": activation.get("granted_capabilities", []) if activation else [],
+                "connectorhub_mediated": False,
+                "capability_used": False,
+                "policy_decision": decision,
+                "created_at": utc_now(),
+            }
+            attempt_id = f"agentpackcap_{_json_hash(attempt_base)[:16]}"
+            attempt = dict(attempt_base)
+            attempt["capability_attempt_id"] = attempt_id
+            _write_json(self.agent_pack_capability_path(attempt_id), attempt)
+            event = self.append_audit(
+                "agent.pack_capability.denied",
+                scope,
+                {"type": "agent_role", "id": role["role_id"]},
+                {"pack_id": pack_id, "capability": capability, "policy_decision_id": decision["policy_decision_id"]},
+            )
+            return {"status": "policy_denied", "capability_attempt": attempt, "policy_decision": decision, "audit_event": event}
+        attempt_base = {
+            "schema_version": "cs.agent_pack_capability_attempt.v0",
+            "status": "mediated",
+            "scope": scope,
+            "role_id": role["role_id"],
+            "pack_id": pack_id,
+            "capability": capability,
+            "activation_id": activation["activation_id"],
+            "granted_capabilities": activation.get("granted_capabilities", []),
+            "connectorhub_mediated": True,
+            "direct_provider_access": False,
+            "credentials_exposed_to_agent": False,
+            "capability_used": True,
+            "created_at": utc_now(),
+        }
+        attempt_id = f"agentpackcap_{_json_hash(attempt_base)[:16]}"
+        attempt = dict(attempt_base)
+        attempt["capability_attempt_id"] = attempt_id
+        _write_json(self.agent_pack_capability_path(attempt_id), attempt)
+        event = self.append_audit(
+            "agent.pack_capability.mediated",
+            scope,
+            {"type": "agent_role", "id": role["role_id"]},
+            {"pack_id": pack_id, "capability": capability, "activation_id": activation["activation_id"]},
+        )
+        return {"capability_attempt": attempt, "audit_event": event}
+
+    def replay_agent_mission(self, trace_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        trace = self.get_agent_trace(trace_id)
+        if trace is None:
+            return {"status": "not_found", "resource": "agent_trace"}
+        if trace.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": trace.get("scope")}
+        outputs = [output for output in self._agent_output_records(scope) if output.get("trace_id") == trace_id]
+        diagnoses = [diagnosis for diagnosis in self._agent_diagnosis_records(scope) if diagnosis.get("trace_id") == trace_id]
+        role_ids = {trace.get("orchestrator_role_id"), *(delegation.get("role_id") for delegation in trace.get("delegations", []))}
+        roles = [self.get_agent_role(role_id) for role_id in role_ids if role_id]
+        replay_base = {
+            "schema_version": "cs.agent_mission_replay.v0",
+            "status": "reviewable",
+            "scope": scope,
+            "trace_id": trace_id,
+            "mission_id": trace.get("mission_id"),
+            "trace_refs": [f"agent_trace:{trace_id}"],
+            "role_contract_refs": [f"agent_role:{role['role_id']}" for role in roles if role],
+            "output_refs": [f"agent_output:{output['output_id']}" for output in outputs],
+            "diagnosis_refs": [f"agent_diagnosis:{diagnosis['diagnosis_id']}" for diagnosis in diagnoses],
+            "model_provider_records": [
+                {
+                    "role_id": role["role_id"],
+                    "provider": role["role_contract"]["model_policy"].get("provider"),
+                    "contract_hash": role["contract_hash"],
+                }
+                for role in roles
+                if role
+            ],
+            "tool_outputs": [{"output_id": output["output_id"], "role_id": output["role_id"], "evidence_refs": output.get("evidence_refs", [])} for output in outputs],
+            "policy_decision_refs": [],
+            "judge_results": [output for output in outputs if output.get("output_type") == "judgment"],
+            "evidence_refs": sorted({ref for output in outputs for ref in output.get("evidence_refs", [])}),
+            "audit_refs": [],
+            "hidden_chain_of_thought_required": False,
+            "review_without_hidden_chain_of_thought": True,
+            "created_at": utc_now(),
+        }
+        replay_id = f"agentreplay_{_json_hash(replay_base)[:16]}"
+        replay = dict(replay_base)
+        replay["replay_id"] = replay_id
+        _write_json(self.agent_replay_path(replay_id), replay)
+        event = self.append_audit(
+            "agent.replay.created",
+            scope,
+            {"type": "agent_mission_replay", "id": replay_id},
+            {"trace_id": trace_id, "role_contract_count": len(replay["role_contract_refs"]), "hidden_chain_of_thought_required": False},
+        )
+        replay["audit_refs"] = [f"audit:{event['event_id']}"]
+        _write_json(self.agent_replay_path(replay_id), replay)
+        return {"agent_replay": replay, "audit_event": event}
 
     def related_claims_for_artifact(self, artifact_id: str, scope: dict[str, str]) -> list[dict[str, Any]]:
         related = []

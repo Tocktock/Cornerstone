@@ -1,0 +1,3235 @@
+{
+  "agent_evidence": {
+    "activity_roles": [
+      "connector",
+      "evidence",
+      "judge",
+      "memory",
+      "playbook",
+      "policy",
+      "workflow"
+    ],
+    "artifact_id": "art_2735313e0cb92563",
+    "audit_event_count": 38,
+    "audit_event_types": [
+      "artifact.ingested",
+      "search.snapshot.created",
+      "evidence_bundle.created",
+      "claim.draft.created",
+      "mission.contract.created",
+      "workspace.mode.set",
+      "mission.activated",
+      "agent.role_contract.created",
+      "agent.role_contract.created",
+      "agent.role_contract.created",
+      "agent.role_contract.created",
+      "agent.role_contract.created",
+      "agent.role_contract.created",
+      "agent.role_contract.created",
+      "agent.role_contract.created",
+      "agent.roles.listed",
+      "agent.role.read",
+      "agent.role.read",
+      "agent.delegated",
+      "agent.delegated",
+      "agent.delegated",
+      "agent.delegated",
+      "agent.delegated",
+      "agent.delegated",
+      "agent.delegated",
+      "agent.orchestrated",
+      "agent.after_action_review.created",
+      "agent.direct_mutation.denied",
+      "agent.brain.switched",
+      "agent.contract.updated",
+      "agent.prompt_authority.denied",
+      "agent.failure.diagnosed",
+      "pack.registry.imported",
+      "pack.installed",
+      "pack.activated",
+      "agent.pack_capability.mediated",
+      "agent.pack_capability.denied",
+      "agent.replay.created"
+    ],
+    "brain_switch_id": "agentbrain_63b8734ace4dd810",
+    "claim_id": "claim_0cd57157ac98b783",
+    "contract_required_fields_present": {
+      "allowed_tools": true,
+      "audit_expectations": true,
+      "escalation_rules": true,
+      "evidence_requirements": true,
+      "forbidden_actions": true,
+      "judge_rubric": true,
+      "memory_scope": true,
+      "model_policy": true,
+      "purpose": true,
+      "responsibilities": true
+    },
+    "contract_update_id": "agentupd_2212009173a009f1",
+    "diagnosis_id": "agentdiag_a7ed42cca57005a7",
+    "direct_mutation_exit_code": 8,
+    "evidence_bundle_id": "evb_315ef2c310ce7253",
+    "mission_id": "mission_b16c12e9ec435841",
+    "output_count": 7,
+    "pack_allowed_capability_attempt_id": "agentpackcap_39a1a1d113136296",
+    "pack_capability_denied_exit_code": 8,
+    "pack_denied_capability_attempt_id": "agentpackcap_fe810fb0a87f0cd4",
+    "prompt_authority_exit_code": 8,
+    "replay_id": "agentreplay_e8d9a6f9b8132c85",
+    "research_basis": [
+      "OpenAI Agents SDK separates orchestration, handoffs, guardrails, state, and observability when the application owns tool execution and approvals.",
+      "OpenAI Agents SDK tracing records agent runs, tool calls, handoffs, guardrails, and custom events for review.",
+      "LangChain/LangGraph multi-agent patterns support main-agent subagents, handoffs, skills, routers, and custom workflows with centralized routing tradeoffs.",
+      "AutoGen frames multi-agent systems as customizable conversable agents with human input, tools, and programmable interaction patterns.",
+      "Recent traceability/accountability research motivates structured roles, handoffs, saved records, and replayable accountability in role-specialized agent pipelines."
+    ],
+    "role_count": 8,
+    "role_keys": [
+      "connector",
+      "evidence",
+      "judge",
+      "memory",
+      "orchestrator",
+      "playbook",
+      "policy",
+      "workflow"
+    ],
+    "search_snapshot_id": "search_052dc404e56c5b1d",
+    "trace_id": "agenttrace_d8e33c545d46877f"
+  },
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify full-agent-orchestration",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "198d9ca"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "agent_outputs_without_evidence_or_gap": 0,
+    "audit_verify_failed": 0,
+    "connector_credentials_exposed": 0,
+    "direct_agent_mutations": 0,
+    "direct_provider_access": 0,
+    "hidden_chain_of_thought_required": 0,
+    "prompt_authority_expansions": 0,
+    "real_external_http_calls": 0,
+    "role_contract_missing_required_fields": 0,
+    "ungranted_pack_capability_used": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/full-agent-orchestration-2026-06-10.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone agent orchestrate --mission-id <mission_id> --json"
+      ],
+      "id": "CS-AGENT-001",
+      "notes": "Mission trace shows Orchestrator plan, specialist delegation, missing-authority handling, synthesis, and after-action review.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone agent list --json",
+        "cornerstone agent orchestrate --mission-id <mission_id> --json"
+      ],
+      "id": "CS-AGENT-002",
+      "notes": "Agent activity view exposes specialist roles when useful without making daily users manage every specialist.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone role show <role_id> --view operator --json",
+        "cornerstone agent direct-mutation-test --json"
+      ],
+      "id": "CS-AGENT-003",
+      "notes": "Role Contract defines purpose, tools, forbidden actions, memory scope, evidence, escalation, model policy, rubric, and audit expectations, and enforcement denies direct mutation.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone role show <role_id> --view user --json",
+        "cornerstone role show <role_id> --view operator --json"
+      ],
+      "id": "CS-AGENT-004",
+      "notes": "Daily-user role card stays simple while operator view exposes full contract.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone agent direct-mutation-test --json"
+      ],
+      "id": "CS-AGENT-005",
+      "notes": "Specialist direct mutation attempt is denied and requires governed product/workflow paths.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone agent orchestrate --mission-id <mission_id> --json"
+      ],
+      "id": "CS-AGENT-006",
+      "notes": "Orchestrator delegation includes specialist rationale, handled evidence/tool refs, and influence on final outcome.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone agent orchestrate --mission-id <mission_id> --json"
+      ],
+      "id": "CS-AGENT-007",
+      "notes": "Specialist outputs are evidence-labeled or explicitly gap-labeled.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone agent orchestrate --mission-id <mission_id> --json",
+        "cornerstone audit verify --json"
+      ],
+      "id": "CS-AGENT-008",
+      "notes": "Trace and audit link granted autonomy to namespace owner, allowed work, events, and correction/rollback visibility.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone agent brain-switch --role-id <role_id> --provider ollama --model qwen3.6:27b --json"
+      ],
+      "id": "CS-AGENT-009",
+      "notes": "Provider switch changes only inference brain; contract hash, tools, memory scope, evidence rules, and audit expectations remain stable.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone agent contract-update --role-id <role_id> --json"
+      ],
+      "id": "CS-AGENT-010",
+      "notes": "Agent Role Contract update records versioned diff, impact, rollout guidance, affected missions, and audit.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone agent prompt-authority-test --json"
+      ],
+      "id": "CS-AGENT-011",
+      "notes": "Prompt-only authority expansion cannot add tools, connector access, memory scope, write permission, or action authority.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone agent diagnose <trace_id> --role-id <role_id> --json"
+      ],
+      "id": "CS-AGENT-012",
+      "notes": "Specialist failure records first failing layer, impact, retry/escalation path, continuation state, and user-facing error.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone pack activate <pack_id> --grant artifact.read --json",
+        "cornerstone agent pack-capability-test --json"
+      ],
+      "id": "CS-AGENT-013",
+      "notes": "Agent Pack supplied agent can use only explicitly activated workspace capability grants through ConnectorHub-mediated boundaries.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone agent replay <trace_id> --json"
+      ],
+      "id": "CS-AGENT-014",
+      "notes": "Replay preserves trace, role contracts, provider records, tool outputs, diagnosis refs, judge results, evidence refs, and audit refs without hidden chain-of-thought.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    }
+  ],
+  "scenario_set": "full-agent-orchestration",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/full-agent-orchestration-67124",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 14,
+    "product_feature_claims": "PARTIAL_FULL_AGENT_ORCHESTRATION_ONLY",
+    "scenario_count": 14
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "agent_list": {
+      "command": [
+        "cornerstone",
+        "agent",
+        "list",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "agent_roles": {
+          "daily_users_manage_specialists_directly": false,
+          "orchestrator_led": true,
+          "roles": [
+            {
+              "contract_hash": "9213d9357c4b6fad757b4236a68f19f9436980a0efa11217aa94496e30fe89f0",
+              "display_name": "Orchestrator Agent",
+              "purpose": "Own mission planning, delegation, synthesis, authority gaps, and after-action review.",
+              "role_id": "role_orchestrator_3e548f87d142e49b",
+              "role_key": "orchestrator",
+              "version": 1
+            },
+            {
+              "contract_hash": "9a285d1d7a31ef2e2b1ccd723e152a40c99ab6d7185d7bac645f8bd8494a248d",
+              "display_name": "Evidence Agent",
+              "purpose": "Review artifacts, search snapshots, and evidence bundles without mutating truth.",
+              "role_id": "role_evidence_3e548f87d142e49b",
+              "role_key": "evidence",
+              "version": 1
+            },
+            {
+              "contract_hash": "ddfa024f0b1b1eb86d7ef7789d9ba765924d87cbe7b658d2b390ef0ff9d22a85",
+              "display_name": "Memory Agent",
+              "purpose": "Draft memory candidates from evidence while leaving approval to governed memory paths.",
+              "role_id": "role_memory_3e548f87d142e49b",
+              "role_key": "memory",
+              "version": 1
+            },
+            {
+              "contract_hash": "bb9ffaea1e0e3e6a22360128daa105495240e61e53f6f8175449352b83b7d091",
+              "display_name": "Workflow Agent",
+              "purpose": "Prepare Workflow/Action proposals, dry-runs, and rollback-aware execution plans.",
+              "role_id": "role_workflow_3e548f87d142e49b",
+              "role_key": "workflow",
+              "version": 1
+            },
+            {
+              "contract_hash": "d1023bbc630c1e3355b6cb9d98328290ded0009f74fc558edbdf8e2ad57bc449",
+              "display_name": "Judge Agent",
+              "purpose": "Evaluate ambiguous outputs as a supporting signal without mutating memory or rules.",
+              "role_id": "role_judge_3e548f87d142e49b",
+              "role_key": "judge",
+              "version": 1
+            },
+            {
+              "contract_hash": "8cd7057b8a25e009fbf7ab452ec7dfd2f572128520e0025f234ebea5fe24bf0d",
+              "display_name": "Connector Agent",
+              "purpose": "Request ConnectorHub-mediated capabilities and never hold credentials or provider clients.",
+              "role_id": "role_connector_3e548f87d142e49b",
+              "role_key": "connector",
+              "version": 1
+            },
+            {
+              "contract_hash": "c3ea8f7f55c05544a0ccd0c7f9ba30aaed0bbd80e91d63208ea281ab7414696c",
+              "display_name": "Policy Agent",
+              "purpose": "Evaluate scope, risk, approval, egress, and authority boundaries.",
+              "role_id": "role_policy_3e548f87d142e49b",
+              "role_key": "policy",
+              "version": 1
+            },
+            {
+              "contract_hash": "4fc1aede1c22af6a3ad972d0bbbdb4ea0c666ab63f9b22481b2fd9668b6d1358",
+              "display_name": "Playbook Agent",
+              "purpose": "Suggest reusable playbooks from approved experience without auto-globalizing behavior.",
+              "role_id": "role_playbook_3e548f87d142e49b",
+              "role_key": "playbook",
+              "version": 1
+            }
+          ],
+          "schema_version": "cs.agent_role_registry_view.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "ready"
+        },
+        "audit_refs": [
+          "audit:audit_669de948a33df9bc"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone agent list",
+        "errors": [],
+        "evidence_refs": [
+          "agent_role:role_orchestrator_3e548f87d142e49b",
+          "agent_role:role_evidence_3e548f87d142e49b",
+          "agent_role:role_memory_3e548f87d142e49b",
+          "agent_role:role_workflow_3e548f87d142e49b",
+          "agent_role:role_judge_3e548f87d142e49b",
+          "agent_role:role_connector_3e548f87d142e49b",
+          "agent_role:role_policy_3e548f87d142e49b",
+          "agent_role:role_playbook_3e548f87d142e49b"
+        ],
+        "ids": {
+          "agent_role_registry_id": "local",
+          "git_commit": "198d9ca"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 38,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "198d9ca"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "brain_switch": {
+      "command": [
+        "cornerstone",
+        "agent",
+        "brain-switch",
+        "--role-id",
+        "role_evidence_3e548f87d142e49b",
+        "--provider",
+        "ollama",
+        "--model",
+        "qwen3.6:27b",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_11fb544ce5595ddd"
+        ],
+        "brain_switch": {
+          "allowed_tools_unchanged": true,
+          "audit_expectations_unchanged": true,
+          "contract_hash_after": "9a285d1d7a31ef2e2b1ccd723e152a40c99ab6d7185d7bac645f8bd8494a248d",
+          "contract_hash_before": "9a285d1d7a31ef2e2b1ccd723e152a40c99ab6d7185d7bac645f8bd8494a248d",
+          "created_at": "2026-06-09T17:20:19.900118Z",
+          "evidence_rules_unchanged": true,
+          "from_provider": "local_test",
+          "memory_scope_unchanged": true,
+          "only_inference_brain_changed": true,
+          "role_id": "role_evidence_3e548f87d142e49b",
+          "schema_version": "cs.agent_brain_switch.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "switched",
+          "switch_id": "agentbrain_63b8734ace4dd810",
+          "to_model": "qwen3.6:27b",
+          "to_provider": "ollama"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone agent brain-switch",
+        "errors": [],
+        "evidence_refs": [
+          "agent_role:role_evidence_3e548f87d142e49b"
+        ],
+        "ids": {
+          "git_commit": "198d9ca",
+          "role_id": "role_evidence_3e548f87d142e49b",
+          "switch_id": "agentbrain_63b8734ace4dd810"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_052dc404e56c5b1d",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_bb2fa6646d545ccb"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T17:20:19.407793Z",
+          "evidence_bundle_id": "evb_315ef2c310ce7253",
+          "evidence_items": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "provenance": {
+                "created_at": "2026-06-09T17:20:19.306897Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_052dc404e56c5b1d",
+              "snippet": "alpha-evidence-anchor.",
+              "source": {
+                "ingested_at": "2026-06-09T17:20:19.306897Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_2735313e0cb92563",
+                "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+                "evidence_refs": [
+                  "artifact:art_2735313e0cb92563",
+                  "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "alpha-evidence-anchor",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "alpha-evidence-anchor",
+                    "query_term": "alpha-evidence-anchor",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "alpha-evidence-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_052dc404e56c5b1d"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_052dc404e56c5b1d"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_315ef2c310ce7253",
+          "search_snapshot:search_052dc404e56c5b1d",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_bb2fa6646d545ccb",
+          "evidence_bundle_id": "evb_315ef2c310ce7253",
+          "git_commit": "198d9ca",
+          "search_snapshot_id": "search_052dc404e56c5b1d"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_315ef2c310ce7253",
+        "--statement",
+        "The Alpha evidence anchor requires an orchestrated mission review.",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_76a4cb5fb291b438"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_0cd57157ac98b783",
+          "created_at": "2026-06-09T17:20:19.460395Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_315ef2c310ce7253",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_052dc404e56c5b1d",
+              "evidence_bundle:evb_315ef2c310ce7253"
+            ],
+            "search_snapshot_id": "search_052dc404e56c5b1d"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The Alpha evidence anchor requires an orchestrated mission review.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_0cd57157ac98b783",
+          "evidence_bundle:evb_315ef2c310ce7253",
+          "search_snapshot:search_052dc404e56c5b1d",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_76a4cb5fb291b438",
+          "claim_id": "claim_0cd57157ac98b783",
+          "evidence_bundle_id": "evb_315ef2c310ce7253",
+          "git_commit": "198d9ca",
+          "search_snapshot_id": "search_052dc404e56c5b1d"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "contract_update": {
+      "command": [
+        "cornerstone",
+        "agent",
+        "contract-update",
+        "--role-id",
+        "role_evidence_3e548f87d142e49b",
+        "--change-summary",
+        "Add structured output schema evidence requirement without changing authority",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "agent_role": {
+          "change_history": [
+            {
+              "from_version": 1,
+              "to_version": 2,
+              "update_id": "agentupd_2212009173a009f1"
+            }
+          ],
+          "contract_hash": "d8a9b7b527fbcf361dda67416c0e4e500d38ca8136aa86dcf76900cc64a46f3f",
+          "created_at": "2026-06-09T17:20:19.629995Z",
+          "daily_user_card_visible": true,
+          "operator_contract_visible": true,
+          "role_card": {
+            "display_name": "Evidence Agent",
+            "purpose": "Review artifacts, search snapshots, and evidence bundles without mutating truth.",
+            "risk_boundary": "cannot directly mutate truth or source systems",
+            "schema_version": "cs.agent_role_card.v0",
+            "summary": "Evidence Agent helps the Orchestrator with bounded, evidence-labeled work.",
+            "visible_to_daily_user": true
+          },
+          "role_contract": {
+            "allowed_tools": [
+              "artifact.read",
+              "search.read",
+              "evidence.read"
+            ],
+            "audit_expectations": [
+              "agent.output.created"
+            ],
+            "escalation_rules": [
+              "escalate missing source",
+              "escalate contradiction"
+            ],
+            "evidence_requirements": [
+              "source refs",
+              "uncertainty label",
+              "structured output schema"
+            ],
+            "forbidden_actions": [
+              "claim.approve",
+              "memory.write",
+              "source.write"
+            ],
+            "judge_rubric": {
+              "checks": [
+                "source coverage",
+                "uncertainty"
+              ],
+              "llm_signal_is_supporting_only": true
+            },
+            "memory_scope": "none",
+            "model_policy": {
+              "contract_controls_authority": true,
+              "provider": "local_test",
+              "replaceable_brain": true
+            },
+            "purpose": "Review artifacts, search snapshots, and evidence bundles without mutating truth.",
+            "responsibilities": [
+              "inspect_artifacts",
+              "check_evidence_refs",
+              "label_evidence_gaps"
+            ],
+            "role_key": "evidence",
+            "schema_version": "cs.agent_role_contract.v0"
+          },
+          "role_id": "role_evidence_3e548f87d142e49b",
+          "role_key": "evidence",
+          "schema_version": "cs.agent_role_record.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "active",
+          "version": 2
+        },
+        "audit_refs": [
+          "audit:audit_7d4b1b0339ef7331"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone agent contract-update",
+        "contract_update": {
+          "change_summary": "Add structured output schema evidence requirement without changing authority",
+          "created_at": "2026-06-09T17:20:19.954522Z",
+          "diff": {
+            "allowed_tools_added": [],
+            "authority_expansion": false,
+            "evidence_requirements_added": [
+              "structured output schema"
+            ],
+            "memory_scope_changed": false
+          },
+          "from_version": 1,
+          "impact": {
+            "affected_agent_packs": [],
+            "affected_missions": [
+              "mission_b16c12e9ec435841"
+            ]
+          },
+          "migration_rollout_guidance": [
+            "Re-run agent replay for active missions.",
+            "Keep previous contract hash for audit comparison."
+          ],
+          "new_contract_hash": "d8a9b7b527fbcf361dda67416c0e4e500d38ca8136aa86dcf76900cc64a46f3f",
+          "old_contract_hash": "9a285d1d7a31ef2e2b1ccd723e152a40c99ab6d7185d7bac645f8bd8494a248d",
+          "role_id": "role_evidence_3e548f87d142e49b",
+          "schema_version": "cs.agent_contract_update.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "versioned",
+          "to_version": 2,
+          "update_id": "agentupd_2212009173a009f1"
+        },
+        "errors": [],
+        "evidence_refs": [
+          "agent_role:role_evidence_3e548f87d142e49b"
+        ],
+        "ids": {
+          "contract_update_id": "agentupd_2212009173a009f1",
+          "git_commit": "198d9ca",
+          "role_id": "role_evidence_3e548f87d142e49b"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "diagnose": {
+      "command": [
+        "cornerstone",
+        "agent",
+        "diagnose",
+        "agenttrace_d8e33c545d46877f",
+        "--role-id",
+        "role_connector_3e548f87d142e49b",
+        "--failure-kind",
+        "timeout",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_668cd814d86517eb"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone agent diagnose",
+        "diagnosis": {
+          "can_continue": true,
+          "created_at": "2026-06-09T17:20:20.063634Z",
+          "diagnosis_id": "agentdiag_a7ed42cca57005a7",
+          "escalation_path": [
+            "show user-facing diagnosis",
+            "preserve trace",
+            "avoid direct mutation"
+          ],
+          "failure_kind": "timeout",
+          "first_failing_layer": "connector_capability",
+          "mission_id": "mission_b16c12e9ec435841",
+          "mission_impact": "mission_can_continue_with_escalation",
+          "retry_path": [
+            "retry specialist with same contract",
+            "fallback to Orchestrator summary",
+            "request owner or operator review"
+          ],
+          "role_id": "role_connector_3e548f87d142e49b",
+          "schema_version": "cs.agent_failure_diagnosis.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "diagnosed",
+          "trace_id": "agenttrace_d8e33c545d46877f",
+          "user_facing_error": "Specialist agent failed safely; the Orchestrator kept the mission reviewable and escalation-ready."
+        },
+        "errors": [],
+        "evidence_refs": [
+          "agent_trace:agenttrace_d8e33c545d46877f",
+          "agent_diagnosis:agentdiag_a7ed42cca57005a7"
+        ],
+        "ids": {
+          "diagnosis_id": "agentdiag_a7ed42cca57005a7",
+          "git_commit": "198d9ca",
+          "role_id": "role_connector_3e548f87d142e49b",
+          "trace_id": "agenttrace_d8e33c545d46877f"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "direct_mutation": {
+      "command": [
+        "cornerstone",
+        "agent",
+        "direct-mutation-test",
+        "--role-id",
+        "role_evidence_3e548f87d142e49b",
+        "--target",
+        "durable_memory:approved_truth",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_c4a9729b24c9f53e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone agent direct-mutation-test",
+        "errors": [
+          {
+            "code": "CS_AGENT_POLICY_DENIED",
+            "message": "Agents cannot directly mutate durable truth, memory, source systems, or external systems.",
+            "policy": "agent_workflow_path_required",
+            "resolution_path": [
+              "Use governed claim, memory, Workflow/Action, ConnectorHub, and approval paths."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "198d9ca",
+          "mutation_attempt": "agentmut_86f95a6fb3c1d323"
+        },
+        "mode": "local_scaffold",
+        "mutation_attempt": {
+          "attempt_id": "agentmut_86f95a6fb3c1d323",
+          "created_at": "2026-06-09T17:20:19.845225Z",
+          "direct_mutation_performed": false,
+          "governed_paths_required": [
+            "claim",
+            "memory",
+            "workflow_action",
+            "connectorhub",
+            "audit"
+          ],
+          "policy_decision": {
+            "created_at": "2026-06-09T17:20:19.845091Z",
+            "decision": "deny",
+            "policy": "agent_workflow_path_required",
+            "policy_decision_id": "policy_6e634d86340c9e47",
+            "reason": "Agents cannot directly mutate durable truth, memory, source systems, or external systems.",
+            "resolution_path": [
+              "Use governed claim, memory, Workflow/Action, ConnectorHub, and approval paths."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "role_evidence_3e548f87d142e49b",
+              "type": "agent"
+            }
+          },
+          "role_id": "role_evidence_3e548f87d142e49b",
+          "schema_version": "cs.agent_mutation_attempt.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "denied",
+          "target": "durable_memory:approved_truth"
+        },
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_6e634d86340c9e47"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T17:20:19.845091Z",
+            "decision": "deny",
+            "policy": "agent_workflow_path_required",
+            "policy_decision_id": "policy_6e634d86340c9e47",
+            "reason": "Agents cannot directly mutate durable truth, memory, source systems, or external systems.",
+            "resolution_path": [
+              "Use governed claim, memory, Workflow/Action, ConnectorHub, and approval paths."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "role_evidence_3e548f87d142e49b",
+              "type": "agent"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/01_artifact_basic/input.txt",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-09T17:20:19.306897Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T17:20:19.306897Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_7a44431225fcc1a3"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_7a44431225fcc1a3",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "198d9ca"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "mission_activate": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "activate",
+        "mission_b16c12e9ec435841",
+        "--mode",
+        "autopilot",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_2f97af633a757110",
+          "audit:audit_6c64373bbb72661c"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission activate",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_b16c12e9ec435841"
+        ],
+        "ids": {
+          "git_commit": "198d9ca",
+          "mission_id": "mission_b16c12e9ec435841"
+        },
+        "mission": {
+          "activated_at": "2026-06-09T17:20:19.568234Z",
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "authority_view": {
+            "allowed_actions": [
+              "internal_status_update",
+              "draft_task",
+              "refresh_brief"
+            ],
+            "forbidden_actions": [
+              "external_writeback_without_workflow_action",
+              "cross_namespace_access",
+              "destructive_change",
+              "secret_exfiltration"
+            ],
+            "may_act_in_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "pause_stop_revoke": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T17:20:19.514832Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_315ef2c310ce7253",
+            "search_snapshot_id": "search_052dc404e56c5b1d"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Run an evidence-backed agent orchestration review without expanding authority",
+          "mission_id": "mission_b16c12e9ec435841",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_0cd57157ac98b783",
+            "statement": "The Alpha evidence anchor requires an orchestrated mission review.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "active",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "autopilot"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": false,
+            "autonomous_execution_allowed": true,
+            "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            "label": "Autopilot"
+          },
+          "mode": "autopilot",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T17:20:19.567820Z"
+        }
+      }
+    },
+    "mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--goal",
+        "Run an evidence-backed agent orchestration review without expanding authority",
+        "--claim-id",
+        "claim_0cd57157ac98b783",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_03802ceb1266f9e1"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_b16c12e9ec435841",
+          "claim:claim_0cd57157ac98b783",
+          "evidence_bundle:evb_315ef2c310ce7253",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_03802ceb1266f9e1",
+          "claim_id": "claim_0cd57157ac98b783",
+          "evidence_bundle_id": "evb_315ef2c310ce7253",
+          "git_commit": "198d9ca",
+          "mission_id": "mission_b16c12e9ec435841"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T17:20:19.514832Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_315ef2c310ce7253",
+            "search_snapshot_id": "search_052dc404e56c5b1d"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Run an evidence-backed agent orchestration review without expanding authority",
+          "mission_id": "mission_b16c12e9ec435841",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_0cd57157ac98b783",
+            "statement": "The Alpha evidence anchor requires an orchestrated mission review.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "assist"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "orchestrate": {
+      "command": [
+        "cornerstone",
+        "agent",
+        "orchestrate",
+        "--mission-id",
+        "mission_b16c12e9ec435841",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "agent_trace": {
+          "accountability": {
+            "agents_accountable_to_owner_scope": true,
+            "authority_grant_visible": true,
+            "correction_and_rollback_visible": true,
+            "namespace_owner": "local-user"
+          },
+          "after_action_review": {
+            "evidence_refs": [
+              "artifact:art_2735313e0cb92563",
+              "evidence_bundle:evb_315ef2c310ce7253"
+            ],
+            "missing_authority_questions": [
+              "External action approval remains required before provider writeback."
+            ],
+            "next_steps": [
+              "Review evidence gaps before promoting memory or executing external actions."
+            ],
+            "owner_visible": true,
+            "status": "complete"
+          },
+          "agent_activity_view": [
+            {
+              "display_name": "Evidence Agent",
+              "result_output_id": "agentout_cc2cc9a6a8cda205",
+              "role_id": "role_evidence_3e548f87d142e49b",
+              "visible_when_useful": true
+            },
+            {
+              "display_name": "Memory Agent",
+              "result_output_id": "agentout_b4f6ee96d5b08287",
+              "role_id": "role_memory_3e548f87d142e49b",
+              "visible_when_useful": true
+            },
+            {
+              "display_name": "Workflow Agent",
+              "result_output_id": "agentout_885cd0bac5d634df",
+              "role_id": "role_workflow_3e548f87d142e49b",
+              "visible_when_useful": true
+            },
+            {
+              "display_name": "Policy Agent",
+              "result_output_id": "agentout_0ba3304e8afa2e97",
+              "role_id": "role_policy_3e548f87d142e49b",
+              "visible_when_useful": true
+            },
+            {
+              "display_name": "Connector Agent",
+              "result_output_id": "agentout_de9f82cf2a7897c9",
+              "role_id": "role_connector_3e548f87d142e49b",
+              "visible_when_useful": true
+            },
+            {
+              "display_name": "Judge Agent",
+              "result_output_id": "agentout_9fd556817b7cf9c0",
+              "role_id": "role_judge_3e548f87d142e49b",
+              "visible_when_useful": true
+            },
+            {
+              "display_name": "Playbook Agent",
+              "result_output_id": "agentout_d95ecddf9e8d59b0",
+              "role_id": "role_playbook_3e548f87d142e49b",
+              "visible_when_useful": true
+            }
+          ],
+          "created_at": "2026-06-09T17:20:19.786823Z",
+          "delegations": [
+            {
+              "display_name": "Evidence Agent",
+              "handled_evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "influenced_final_outcome": true,
+              "rationale": "reviewed artifact and evidence bundle coverage",
+              "result_output_id": "agentout_cc2cc9a6a8cda205",
+              "role_id": "role_evidence_3e548f87d142e49b",
+              "role_key": "evidence",
+              "tool_refs": [
+                "artifact.read",
+                "search.read",
+                "evidence.read"
+              ]
+            },
+            {
+              "display_name": "Memory Agent",
+              "handled_evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "influenced_final_outcome": true,
+              "rationale": "drafted memory candidate with owner approval still required",
+              "result_output_id": "agentout_b4f6ee96d5b08287",
+              "role_id": "role_memory_3e548f87d142e49b",
+              "role_key": "memory",
+              "tool_refs": [
+                "memory.propose",
+                "evidence.read",
+                "wiki.read"
+              ]
+            },
+            {
+              "display_name": "Workflow Agent",
+              "handled_evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "influenced_final_outcome": true,
+              "rationale": "prepared governed Action Card path instead of direct mutation",
+              "result_output_id": "agentout_885cd0bac5d634df",
+              "role_id": "role_workflow_3e548f87d142e49b",
+              "role_key": "workflow",
+              "tool_refs": [
+                "action.propose",
+                "action.dry_run",
+                "workflow.read"
+              ]
+            },
+            {
+              "display_name": "Policy Agent",
+              "handled_evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "influenced_final_outcome": true,
+              "rationale": "checked scope, risk, approval, and authority boundaries",
+              "result_output_id": "agentout_0ba3304e8afa2e97",
+              "role_id": "role_policy_3e548f87d142e49b",
+              "role_key": "policy",
+              "tool_refs": [
+                "policy.evaluate",
+                "access.check",
+                "audit.write"
+              ]
+            },
+            {
+              "display_name": "Connector Agent",
+              "handled_evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "influenced_final_outcome": true,
+              "rationale": "verified ConnectorHub mediation and credential custody boundary",
+              "result_output_id": "agentout_de9f82cf2a7897c9",
+              "role_id": "role_connector_3e548f87d142e49b",
+              "role_key": "connector",
+              "tool_refs": [
+                "connector.request",
+                "capability.read",
+                "action.propose"
+              ]
+            },
+            {
+              "display_name": "Judge Agent",
+              "handled_evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "influenced_final_outcome": true,
+              "rationale": "scored outcome quality as supporting signal only",
+              "result_output_id": "agentout_9fd556817b7cf9c0",
+              "role_id": "role_judge_3e548f87d142e49b",
+              "role_key": "judge",
+              "tool_refs": [
+                "evidence.read",
+                "trajectory.read",
+                "rubric.evaluate"
+              ]
+            },
+            {
+              "display_name": "Playbook Agent",
+              "handled_evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "influenced_final_outcome": true,
+              "rationale": "identified reusable playbook candidate requiring approval",
+              "result_output_id": "agentout_d95ecddf9e8d59b0",
+              "role_id": "role_playbook_3e548f87d142e49b",
+              "role_key": "playbook",
+              "tool_refs": [
+                "experience.read",
+                "lesson.propose",
+                "pack.playbook.propose"
+              ]
+            }
+          ],
+          "hidden_chain_of_thought_captured": false,
+          "mission_id": "mission_b16c12e9ec435841",
+          "orchestrator_plan": {
+            "asks_for_missing_authority": true,
+            "delegation_model": "orchestrator_as_controller_specialists_as_tools",
+            "goal": "Run an evidence-backed agent orchestration review without expanding authority",
+            "steps": [
+              "review evidence",
+              "draft memory candidate",
+              "prepare workflow path",
+              "evaluate policy",
+              "check connector boundary",
+              "judge outcome quality",
+              "capture playbook candidate",
+              "produce after-action review"
+            ]
+          },
+          "orchestrator_role_id": "role_orchestrator_3e548f87d142e49b",
+          "outputs": [
+            "agent_output:agentout_cc2cc9a6a8cda205",
+            "agent_output:agentout_b4f6ee96d5b08287",
+            "agent_output:agentout_885cd0bac5d634df",
+            "agent_output:agentout_0ba3304e8afa2e97",
+            "agent_output:agentout_de9f82cf2a7897c9",
+            "agent_output:agentout_9fd556817b7cf9c0",
+            "agent_output:agentout_d95ecddf9e8d59b0"
+          ],
+          "replay_without_hidden_chain_of_thought": true,
+          "schema_version": "cs.agent_mission_trace.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "completed_with_review",
+          "trace_id": "agenttrace_d8e33c545d46877f"
+        },
+        "audit_refs": [
+          "audit:audit_609694bf091f63c8",
+          "audit:audit_feba56e71f05cbb7"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone agent orchestrate",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_b16c12e9ec435841",
+          "agent_trace:agenttrace_d8e33c545d46877f",
+          "agent_output:agentout_cc2cc9a6a8cda205",
+          "agent_output:agentout_b4f6ee96d5b08287",
+          "agent_output:agentout_885cd0bac5d634df",
+          "agent_output:agentout_0ba3304e8afa2e97",
+          "agent_output:agentout_de9f82cf2a7897c9",
+          "agent_output:agentout_9fd556817b7cf9c0",
+          "agent_output:agentout_d95ecddf9e8d59b0"
+        ],
+        "ids": {
+          "git_commit": "198d9ca",
+          "mission_id": "mission_b16c12e9ec435841",
+          "trace_id": "agenttrace_d8e33c545d46877f"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_activate": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "activate",
+        "pack_ops_recovery_agent",
+        "--grant",
+        "artifact.read",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "activation": {
+          "activation_id": "packact_e2e189f4d401e999",
+          "allowed_actions": [
+            "draft_recovery_playbook",
+            "propose_internal_status_update"
+          ],
+          "capability_disclosure_complete": true,
+          "connectorhub_boundary": {
+            "credentials_exposed_to_agent": false,
+            "declared_actions_only": true,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub"
+          },
+          "created_at": "2026-06-09T17:20:20.223038Z",
+          "evaluation_rubric": {
+            "checks": [
+              "evidence coverage",
+              "connector boundary",
+              "owner scope",
+              "rollback readiness"
+            ],
+            "llm_signal_is_supporting_only": true
+          },
+          "granted_capabilities": [
+            "artifact.read"
+          ],
+          "install_id": "packinst_9c596b2560d78262",
+          "memory_scope": {
+            "cross_namespace": false,
+            "default": "workspace",
+            "writes_product_defaults": false
+          },
+          "mission_id": null,
+          "model_policy": {
+            "allowed_models": [
+              "local_test.v0"
+            ],
+            "external_model_required": false,
+            "pass_judge": false,
+            "provider": "local_test"
+          },
+          "organization_admin_shortcut": {
+            "auditable": true,
+            "bypasses_capability_disclosure": false,
+            "policy_id": null,
+            "rollback_available": true,
+            "used": false,
+            "visible": true
+          },
+          "owner_granted_only_needed_capabilities": true,
+          "pack_id": "pack_ops_recovery_agent",
+          "policy_decision": {
+            "created_at": "2026-06-09T17:20:20.222891Z",
+            "decision": "allow",
+            "policy": "agent_pack_explicit_activation_grants",
+            "policy_decision_id": "policy_f481c60ac0937755",
+            "reason": "Certified Agent Pack activation with explicit owner-scoped capability grants.",
+            "resolution_path": [
+              "Use ConnectorHub-mediated capabilities and audit every action."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "pack_ops_recovery_agent",
+              "type": "agent_pack"
+            }
+          },
+          "requested_permissions": [
+            "artifact.read",
+            "experience.read",
+            "playbook.propose",
+            "connector.mock.crm.read",
+            "action.internal_status_update"
+          ],
+          "required_connector_capabilities": [
+            {
+              "capability": "connector.mock.crm.read",
+              "declared_actions_only": true,
+              "mediated_by": "ConnectorHub",
+              "provider": "mock_crm"
+            }
+          ],
+          "risk_level": "medium",
+          "role_card": {
+            "display_name": "Recovery Planner",
+            "owner_visible": true,
+            "risk_level": "medium",
+            "summary": "Suggests recovery templates from scoped evidence and approved experience."
+          },
+          "rollback": {
+            "available": true,
+            "target_version": "1.0.0"
+          },
+          "schema_version": "cs.agent_pack_activation.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "silent_activation": false,
+          "status": "active",
+          "version": "1.0.0"
+        },
+        "audit_refs": [
+          "audit:audit_2b035ccc8ab2d80c"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack activate",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "activation_id": "packact_e2e189f4d401e999",
+          "git_commit": "198d9ca",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_f481c60ac0937755"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T17:20:20.222891Z",
+            "decision": "allow",
+            "policy": "agent_pack_explicit_activation_grants",
+            "policy_decision_id": "policy_f481c60ac0937755",
+            "reason": "Certified Agent Pack activation with explicit owner-scoped capability grants.",
+            "resolution_path": [
+              "Use ConnectorHub-mediated capabilities and audit every action."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "pack_ops_recovery_agent",
+              "type": "agent_pack"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_capability_allowed": {
+      "command": [
+        "cornerstone",
+        "agent",
+        "pack-capability-test",
+        "--role-id",
+        "role_connector_3e548f87d142e49b",
+        "--pack-id",
+        "pack_ops_recovery_agent",
+        "--capability",
+        "artifact.read",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_9e71901ed14a49be"
+        ],
+        "capability_attempt": {
+          "activation_id": "packact_e2e189f4d401e999",
+          "capability": "artifact.read",
+          "capability_attempt_id": "agentpackcap_39a1a1d113136296",
+          "capability_used": true,
+          "connectorhub_mediated": true,
+          "created_at": "2026-06-09T17:20:20.275686Z",
+          "credentials_exposed_to_agent": false,
+          "direct_provider_access": false,
+          "granted_capabilities": [
+            "artifact.read"
+          ],
+          "pack_id": "pack_ops_recovery_agent",
+          "role_id": "role_connector_3e548f87d142e49b",
+          "schema_version": "cs.agent_pack_capability_attempt.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "mediated"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone agent pack-capability-test",
+        "errors": [],
+        "evidence_refs": [
+          "agent_role:role_connector_3e548f87d142e49b",
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "capability_attempt_id": "agentpackcap_39a1a1d113136296",
+          "git_commit": "198d9ca",
+          "pack_id": "pack_ops_recovery_agent",
+          "role_id": "role_connector_3e548f87d142e49b"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_capability_denied": {
+      "command": [
+        "cornerstone",
+        "agent",
+        "pack-capability-test",
+        "--role-id",
+        "role_connector_3e548f87d142e49b",
+        "--pack-id",
+        "pack_ops_recovery_agent",
+        "--capability",
+        "connector.action.mock_write",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ccd7956dcef3fd1c"
+        ],
+        "capability_attempt": {
+          "activation_id": "packact_e2e189f4d401e999",
+          "capability": "connector.action.mock_write",
+          "capability_attempt_id": "agentpackcap_fe810fb0a87f0cd4",
+          "capability_used": false,
+          "connectorhub_mediated": false,
+          "created_at": "2026-06-09T17:20:20.328794Z",
+          "granted_capabilities": [
+            "artifact.read"
+          ],
+          "pack_id": "pack_ops_recovery_agent",
+          "policy_decision": {
+            "created_at": "2026-06-09T17:20:20.328670Z",
+            "decision": "deny",
+            "policy": "agent_pack_workspace_grant_required",
+            "policy_decision_id": "policy_a44018e4fe3f6db3",
+            "reason": "Agent Pack supplied agents can use only capabilities explicitly activated for this workspace or mission.",
+            "resolution_path": [
+              "Activate the pack with the minimum required grant and ConnectorHub policy review."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "role_connector_3e548f87d142e49b",
+              "type": "agent"
+            }
+          },
+          "role_id": "role_connector_3e548f87d142e49b",
+          "schema_version": "cs.agent_pack_capability_attempt.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "denied"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone agent pack-capability-test",
+        "errors": [
+          {
+            "code": "CS_AGENT_POLICY_DENIED",
+            "message": "Agent Pack supplied agents can use only capabilities explicitly activated for this workspace or mission.",
+            "policy": "agent_pack_workspace_grant_required",
+            "resolution_path": [
+              "Activate the pack with the minimum required grant and ConnectorHub policy review."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "capability_attempt": "agentpackcap_fe810fb0a87f0cd4",
+          "git_commit": "198d9ca"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_a44018e4fe3f6db3"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T17:20:20.328670Z",
+            "decision": "deny",
+            "policy": "agent_pack_workspace_grant_required",
+            "policy_decision_id": "policy_a44018e4fe3f6db3",
+            "reason": "Agent Pack supplied agents can use only capabilities explicitly activated for this workspace or mission.",
+            "resolution_path": [
+              "Activate the pack with the minimum required grant and ConnectorHub policy review."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "role_connector_3e548f87d142e49b",
+              "type": "agent"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_import": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "import",
+        "--manifest",
+        "fixtures/vs0/packs/14_extension_ecosystem/trusted_agent_pack_manifest.json",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "agent_pack": {
+          "created_at": "2026-06-09T17:20:20.118289Z",
+          "install_requires_review": false,
+          "manifest": {
+            "after_action_review_template": {
+              "fields": [
+                "outcome",
+                "evidence_refs",
+                "policy_decisions",
+                "owner_acceptance",
+                "rollback_or_followup"
+              ]
+            },
+            "allowed_actions": [
+              "draft_recovery_playbook",
+              "propose_internal_status_update"
+            ],
+            "allowed_capabilities": [
+              "artifact.read",
+              "experience.read",
+              "playbook.propose",
+              "connector.mock.crm.read",
+              "action.internal_status_update"
+            ],
+            "certification": {
+              "audit_coverage": {
+                "activation": true,
+                "connector_request": true,
+                "install": true,
+                "registry": true,
+                "rollback": true,
+                "update": true
+              },
+              "benchmark_scenarios": [
+                "CS-EXT-001",
+                "CS-EXT-006",
+                "CS-EXT-014",
+                "CS-SEC-015"
+              ],
+              "connector_action_boundary_checks": {
+                "connectorhub_mediated": true,
+                "credentials_exposed_to_agent": false,
+                "direct_provider_access": false,
+                "status": "pass"
+              },
+              "human_review": {
+                "replaces_policy_checks": false,
+                "reviewer": "fixture-maintainer",
+                "status": "reviewed"
+              },
+              "intended_use": "Workspace-scoped recovery planning from existing CornerStone evidence.",
+              "llm_judge_rubrics": {
+                "pass_judge": false,
+                "provider": "local_test",
+                "supporting_signal_only": true
+              },
+              "model_compatibility": {
+                "external_model_required": false,
+                "local_test.v0": "pass"
+              },
+              "outcome_history": {
+                "replaces_scenario_certification": false,
+                "sample_size": 3,
+                "source": "local fixture trajectory examples"
+              },
+              "policy_checks": {
+                "autonomous_action_requires_activation": true,
+                "connectorhub_boundary_required": true,
+                "status": "pass"
+              },
+              "prompt_injection_tests": {
+                "blocked_tool_hijack": true,
+                "external_http_calls": 0,
+                "status": "pass"
+              },
+              "required_capabilities": [
+                "artifact.read",
+                "experience.read",
+                "playbook.propose",
+                "connector.mock.crm.read"
+              ],
+              "risk_level": "medium",
+              "rollback_support": {
+                "available": true,
+                "tested": true
+              },
+              "scenario_results": {
+                "scenario_ids": [
+                  "CS-EXT-001",
+                  "CS-EXT-009",
+                  "CS-SEC-015"
+                ],
+                "status": "pass"
+              },
+              "version_history": [
+                {
+                  "status": "certified",
+                  "version": "1.0.0"
+                }
+              ]
+            },
+            "components": {
+              "playbook_packs": [
+                {
+                  "id": "playbook_recovery_templates",
+                  "top_level_user_object": false
+                }
+              ],
+              "skill_packs": [
+                {
+                  "id": "skill_evidence_review",
+                  "top_level_user_object": false
+                }
+              ],
+              "tool_packs": [
+                {
+                  "connectorhub_mediated": true,
+                  "id": "tool_mock_crm_reader",
+                  "top_level_user_object": false
+                }
+              ]
+            },
+            "connector_requirements": [
+              {
+                "capability": "connector.mock.crm.read",
+                "declared_actions_only": true,
+                "mediated_by": "ConnectorHub",
+                "provider": "mock_crm"
+              }
+            ],
+            "evaluation_expectations": {
+              "benchmark_scenarios": [
+                "CS-EXT-001",
+                "CS-EXT-009",
+                "CS-SEC-015"
+              ],
+              "connector_boundary_tests_required": true,
+              "prompt_injection_tests_required": true,
+              "rollback_test_required": true
+            },
+            "forbidden_runtime": {
+              "direct_api_writeback": false,
+              "extension_owned_credentials": false,
+              "provider_clients": false,
+              "raw_secret_access": false
+            },
+            "judge_rubric": {
+              "checks": [
+                "evidence coverage",
+                "connector boundary",
+                "owner scope",
+                "rollback readiness"
+              ],
+              "llm_signal_is_supporting_only": true
+            },
+            "memory_scope": {
+              "cross_namespace": false,
+              "default": "workspace",
+              "writes_product_defaults": false
+            },
+            "model_policy": {
+              "allowed_models": [
+                "local_test.v0"
+              ],
+              "external_model_required": false,
+              "pass_judge": false,
+              "provider": "local_test"
+            },
+            "name": "Ops Recovery Agent Pack",
+            "pack_id": "pack_ops_recovery_agent",
+            "playbooks": [
+              {
+                "evidence_expectations": [
+                  "failed trajectory",
+                  "owner acceptance state",
+                  "current artifact evidence"
+                ],
+                "playbook_id": "pb_recovery_review",
+                "rollback": true,
+                "title": "Evidence-backed recovery review"
+              }
+            ],
+            "role_card": {
+              "display_name": "Recovery Planner",
+              "owner_visible": true,
+              "risk_level": "medium",
+              "summary": "Suggests recovery templates from scoped evidence and approved experience."
+            },
+            "role_contract": {
+              "cannot_do": [
+                "read raw provider credentials",
+                "write directly to provider APIs",
+                "change workspace behavior without activation grants"
+              ],
+              "purpose": "Help a workspace turn failed local missions into evidence-backed recovery playbooks.",
+              "role": "Scoped recovery planner"
+            },
+            "schema_version": "cs.agent_pack_manifest.v0",
+            "security_patches": {
+              "1.0.1-security": {
+                "behavior_changing": false,
+                "compatibility_checks": {
+                  "api_compatible": true,
+                  "model_policy_compatible": true,
+                  "playbook_compatible": true,
+                  "status": "pass"
+                },
+                "policy": "emergency_security_patch"
+              }
+            },
+            "supply_chain": {
+              "attestation": {
+                "builder_id": "https://cornerstone.local/builders/local-fixture",
+                "predicate_type": "https://slsa.dev/provenance/v1",
+                "verified": true
+              },
+              "provenance": {
+                "builder_id": "https://cornerstone.local/builders/local-fixture",
+                "predicate_type": "https://slsa.dev/provenance/v1",
+                "resolved_dependencies": [
+                  "local_test.v0",
+                  "mock_connector.v0"
+                ],
+                "subject_digest": "sha256:fixture-pack-ops-recovery"
+              },
+              "sbom": {
+                "digest": "sha256:fixture-sbom-pack-ops-recovery",
+                "format": "spdx-json-fixture",
+                "present": true
+              },
+              "signature": {
+                "certificate_ref": "rekor://fixture/pack_ops_recovery_agent",
+                "scheme": "sigstore-cosign-fixture",
+                "verified": true
+              }
+            },
+            "trust": {
+              "certified": true,
+              "public_marketplace_default": false,
+              "publisher": "cornerstone-first-party-fixture",
+              "risk_label": "medium",
+              "source": "curated_certified"
+            },
+            "updates": {
+              "1.1.0": {
+                "behavior_changing": true,
+                "diff": {
+                  "capabilities": [
+                    "playbook.propose"
+                  ],
+                  "connector_requirements": [
+                    "connector.mock.crm.read"
+                  ],
+                  "migration_notes": "owner can test in sandbox before approving",
+                  "model_policy": "unchanged local_test",
+                  "playbooks": [
+                    "pb_recovery_review"
+                  ],
+                  "risk": "medium",
+                  "role_contract": "adds recovery severity tags"
+                },
+                "evaluation_gate": {
+                  "connector_boundary": "pass",
+                  "prompt_injection_regression": "pass",
+                  "scenario_results": [
+                    "CS-EXT-012"
+                  ],
+                  "status": "pass"
+                },
+                "migration_notes": [
+                  "No silent behavior change; owner approval required before apply."
+                ],
+                "sandbox_canary_test": {
+                  "credentials_exposed_to_agent": false,
+                  "external_http_calls": 0,
+                  "status": "pass"
+                }
+              }
+            },
+            "version": "1.0.0"
+          },
+          "manifest_path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/14_extension_ecosystem/trusted_agent_pack_manifest.json",
+          "name": "Ops Recovery Agent Pack",
+          "pack_id": "pack_ops_recovery_agent",
+          "registry_source": "curated_certified",
+          "schema_version": "cs.agent_pack_registry_record.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_digest": "ad6fed3bf3ee6c7cf4d02410bbaa0295c886f19ee89cd6fe1dc32e344ea04537",
+          "status": "available",
+          "supply_chain": {
+            "certified": true,
+            "checks": {
+              "attestation_verified": true,
+              "provenance_present": true,
+              "risk_label_present": true,
+              "sbom_present": true,
+              "signature_verified": true,
+              "trusted_registry_source": true,
+              "update_metadata_present": true,
+              "version_declared": true
+            },
+            "registry_source": "curated_certified",
+            "risk_label": "medium",
+            "verified": true
+          },
+          "trust": {
+            "certified": true,
+            "public_marketplace_default": false,
+            "publisher": "cornerstone-first-party-fixture",
+            "risk_label": "medium",
+            "source": "curated_certified"
+          },
+          "version": "1.0.0"
+        },
+        "audit_refs": [
+          "audit:audit_c9a43f740efa608b"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack import",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent",
+          "manifest:ad6fed3bf3ee6c7cf4d02410bbaa0295c886f19ee89cd6fe1dc32e344ea04537"
+        ],
+        "ids": {
+          "git_commit": "198d9ca",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "pack_install": {
+      "command": [
+        "cornerstone",
+        "pack",
+        "install",
+        "pack_ops_recovery_agent",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_1ccbcbda89244ddc"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone pack install",
+        "errors": [],
+        "evidence_refs": [
+          "agent_pack:pack_ops_recovery_agent"
+        ],
+        "ids": {
+          "git_commit": "198d9ca",
+          "install_id": "packinst_9c596b2560d78262",
+          "pack_id": "pack_ops_recovery_agent"
+        },
+        "install": {
+          "activation_status": "inactive",
+          "behavior_changing_updates_apply_silently": false,
+          "can_act": false,
+          "created_at": "2026-06-09T17:20:20.170745Z",
+          "granted_capabilities": [],
+          "install_id": "packinst_9c596b2560d78262",
+          "mission_authority": false,
+          "pack_id": "pack_ops_recovery_agent",
+          "pinned_version": "1.0.0",
+          "review_required": false,
+          "schema_version": "cs.agent_pack_install.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "installed",
+          "supply_chain": {
+            "certified": true,
+            "checks": {
+              "attestation_verified": true,
+              "provenance_present": true,
+              "risk_label_present": true,
+              "sbom_present": true,
+              "signature_verified": true,
+              "trusted_registry_source": true,
+              "update_metadata_present": true,
+              "version_declared": true
+            },
+            "registry_source": "curated_certified",
+            "risk_label": "medium",
+            "verified": true
+          },
+          "trust": {
+            "certified": true,
+            "public_marketplace_default": false,
+            "publisher": "cornerstone-first-party-fixture",
+            "risk_label": "medium",
+            "source": "curated_certified"
+          },
+          "version": "1.0.0",
+          "version_pinned_by_default": true
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "prompt_authority": {
+      "command": [
+        "cornerstone",
+        "agent",
+        "prompt-authority-test",
+        "--role-id",
+        "role_evidence_3e548f87d142e49b",
+        "--requested-tool",
+        "connector.write",
+        "--requested-memory-scope",
+        "organization",
+        "--requested-authority",
+        "external_writeback",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ed8012fb8456d447"
+        ],
+        "authority_attempt": {
+          "attempt_id": "agentauth_db31c7fafa4c3b1f",
+          "authority_expanded": false,
+          "created_at": "2026-06-09T17:20:20.009493Z",
+          "policy_decision": {
+            "created_at": "2026-06-09T17:20:20.009365Z",
+            "decision": "deny",
+            "policy": "agent_prompt_cannot_expand_authority",
+            "policy_decision_id": "policy_8c67e2ffd1ba7eee",
+            "reason": "Prompt-only agent changes cannot grant new tools, connector access, memory scope, write permissions, or action authority.",
+            "resolution_path": [
+              "Revise the Agent Role Contract, run policy review, and record a versioned contract update before granting authority."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "role_evidence_3e548f87d142e49b",
+              "type": "agent"
+            }
+          },
+          "requested_authority": "external_writeback",
+          "requested_memory_scope": "organization",
+          "requested_tool": "connector.write",
+          "role_contract_required": true,
+          "role_id": "role_evidence_3e548f87d142e49b",
+          "schema_version": "cs.agent_prompt_authority_attempt.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "denied"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone agent prompt-authority-test",
+        "errors": [
+          {
+            "code": "CS_AGENT_POLICY_DENIED",
+            "message": "Prompt-only agent changes cannot grant new tools, connector access, memory scope, write permissions, or action authority.",
+            "policy": "agent_prompt_cannot_expand_authority",
+            "resolution_path": [
+              "Revise the Agent Role Contract, run policy review, and record a versioned contract update before granting authority."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "authority_attempt": "agentauth_db31c7fafa4c3b1f",
+          "git_commit": "198d9ca"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_8c67e2ffd1ba7eee"
+        ],
+        "policy_decisions": [
+          {
+            "created_at": "2026-06-09T17:20:20.009365Z",
+            "decision": "deny",
+            "policy": "agent_prompt_cannot_expand_authority",
+            "policy_decision_id": "policy_8c67e2ffd1ba7eee",
+            "reason": "Prompt-only agent changes cannot grant new tools, connector access, memory scope, write permissions, or action authority.",
+            "resolution_path": [
+              "Revise the Agent Role Contract, run policy review, and record a versioned contract update before granting authority."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "subject": {
+              "id": "role_evidence_3e548f87d142e49b",
+              "type": "agent"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "replay": {
+      "command": [
+        "cornerstone",
+        "agent",
+        "replay",
+        "agenttrace_d8e33c545d46877f",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "agent_replay": {
+          "audit_refs": [
+            "audit:audit_df47a9816b27b952"
+          ],
+          "created_at": "2026-06-09T17:20:20.381674Z",
+          "diagnosis_refs": [
+            "agent_diagnosis:agentdiag_a7ed42cca57005a7"
+          ],
+          "evidence_refs": [
+            "artifact:art_2735313e0cb92563",
+            "evidence_bundle:evb_315ef2c310ce7253"
+          ],
+          "hidden_chain_of_thought_required": false,
+          "judge_results": [
+            {
+              "created_at": "2026-06-09T17:20:19.787857Z",
+              "direct_mutation_performed": false,
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "insufficient_evidence_label": false,
+              "mission_id": "mission_b16c12e9ec435841",
+              "output_id": "agentout_9fd556817b7cf9c0",
+              "output_type": "judgment",
+              "role_id": "role_judge_3e548f87d142e49b",
+              "role_key": "judge",
+              "schema_version": "cs.agent_output.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "source_refs_or_gap_label_present": true,
+              "status": "evidence_labeled",
+              "summary": "scored outcome quality as supporting signal only",
+              "trace_id": "agenttrace_d8e33c545d46877f",
+              "uncertainty": "medium"
+            }
+          ],
+          "mission_id": "mission_b16c12e9ec435841",
+          "model_provider_records": [
+            {
+              "contract_hash": "4fc1aede1c22af6a3ad972d0bbbdb4ea0c666ab63f9b22481b2fd9668b6d1358",
+              "provider": "local_test",
+              "role_id": "role_playbook_3e548f87d142e49b"
+            },
+            {
+              "contract_hash": "9213d9357c4b6fad757b4236a68f19f9436980a0efa11217aa94496e30fe89f0",
+              "provider": "local_test",
+              "role_id": "role_orchestrator_3e548f87d142e49b"
+            },
+            {
+              "contract_hash": "d1023bbc630c1e3355b6cb9d98328290ded0009f74fc558edbdf8e2ad57bc449",
+              "provider": "local_test",
+              "role_id": "role_judge_3e548f87d142e49b"
+            },
+            {
+              "contract_hash": "c3ea8f7f55c05544a0ccd0c7f9ba30aaed0bbd80e91d63208ea281ab7414696c",
+              "provider": "local_test",
+              "role_id": "role_policy_3e548f87d142e49b"
+            },
+            {
+              "contract_hash": "8cd7057b8a25e009fbf7ab452ec7dfd2f572128520e0025f234ebea5fe24bf0d",
+              "provider": "local_test",
+              "role_id": "role_connector_3e548f87d142e49b"
+            },
+            {
+              "contract_hash": "bb9ffaea1e0e3e6a22360128daa105495240e61e53f6f8175449352b83b7d091",
+              "provider": "local_test",
+              "role_id": "role_workflow_3e548f87d142e49b"
+            },
+            {
+              "contract_hash": "ddfa024f0b1b1eb86d7ef7789d9ba765924d87cbe7b658d2b390ef0ff9d22a85",
+              "provider": "local_test",
+              "role_id": "role_memory_3e548f87d142e49b"
+            },
+            {
+              "contract_hash": "d8a9b7b527fbcf361dda67416c0e4e500d38ca8136aa86dcf76900cc64a46f3f",
+              "provider": "local_test",
+              "role_id": "role_evidence_3e548f87d142e49b"
+            }
+          ],
+          "output_refs": [
+            "agent_output:agentout_0ba3304e8afa2e97",
+            "agent_output:agentout_885cd0bac5d634df",
+            "agent_output:agentout_9fd556817b7cf9c0",
+            "agent_output:agentout_b4f6ee96d5b08287",
+            "agent_output:agentout_cc2cc9a6a8cda205",
+            "agent_output:agentout_d95ecddf9e8d59b0",
+            "agent_output:agentout_de9f82cf2a7897c9"
+          ],
+          "policy_decision_refs": [],
+          "replay_id": "agentreplay_e8d9a6f9b8132c85",
+          "review_without_hidden_chain_of_thought": true,
+          "role_contract_refs": [
+            "agent_role:role_playbook_3e548f87d142e49b",
+            "agent_role:role_orchestrator_3e548f87d142e49b",
+            "agent_role:role_judge_3e548f87d142e49b",
+            "agent_role:role_policy_3e548f87d142e49b",
+            "agent_role:role_connector_3e548f87d142e49b",
+            "agent_role:role_workflow_3e548f87d142e49b",
+            "agent_role:role_memory_3e548f87d142e49b",
+            "agent_role:role_evidence_3e548f87d142e49b"
+          ],
+          "schema_version": "cs.agent_mission_replay.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "reviewable",
+          "tool_outputs": [
+            {
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "output_id": "agentout_0ba3304e8afa2e97",
+              "role_id": "role_policy_3e548f87d142e49b"
+            },
+            {
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "output_id": "agentout_885cd0bac5d634df",
+              "role_id": "role_workflow_3e548f87d142e49b"
+            },
+            {
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "output_id": "agentout_9fd556817b7cf9c0",
+              "role_id": "role_judge_3e548f87d142e49b"
+            },
+            {
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "output_id": "agentout_b4f6ee96d5b08287",
+              "role_id": "role_memory_3e548f87d142e49b"
+            },
+            {
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "output_id": "agentout_cc2cc9a6a8cda205",
+              "role_id": "role_evidence_3e548f87d142e49b"
+            },
+            {
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "output_id": "agentout_d95ecddf9e8d59b0",
+              "role_id": "role_playbook_3e548f87d142e49b"
+            },
+            {
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "evidence_bundle:evb_315ef2c310ce7253"
+              ],
+              "output_id": "agentout_de9f82cf2a7897c9",
+              "role_id": "role_connector_3e548f87d142e49b"
+            }
+          ],
+          "trace_id": "agenttrace_d8e33c545d46877f",
+          "trace_refs": [
+            "agent_trace:agenttrace_d8e33c545d46877f"
+          ]
+        },
+        "audit_refs": [
+          "audit:audit_df47a9816b27b952"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone agent replay",
+        "errors": [],
+        "evidence_refs": [
+          "agent_trace:agenttrace_d8e33c545d46877f",
+          "agent_role:role_playbook_3e548f87d142e49b",
+          "agent_role:role_orchestrator_3e548f87d142e49b",
+          "agent_role:role_judge_3e548f87d142e49b",
+          "agent_role:role_policy_3e548f87d142e49b",
+          "agent_role:role_connector_3e548f87d142e49b",
+          "agent_role:role_workflow_3e548f87d142e49b",
+          "agent_role:role_memory_3e548f87d142e49b",
+          "agent_role:role_evidence_3e548f87d142e49b",
+          "agent_output:agentout_0ba3304e8afa2e97",
+          "agent_output:agentout_885cd0bac5d634df",
+          "agent_output:agentout_9fd556817b7cf9c0",
+          "agent_output:agentout_b4f6ee96d5b08287",
+          "agent_output:agentout_cc2cc9a6a8cda205",
+          "agent_output:agentout_d95ecddf9e8d59b0",
+          "agent_output:agentout_de9f82cf2a7897c9"
+        ],
+        "ids": {
+          "git_commit": "198d9ca",
+          "mission_id": "mission_b16c12e9ec435841",
+          "replay_id": "agentreplay_e8d9a6f9b8132c85",
+          "trace_id": "agenttrace_d8e33c545d46877f"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "role_show_operator": {
+      "command": [
+        "cornerstone",
+        "role",
+        "show",
+        "role_orchestrator_3e548f87d142e49b",
+        "--view",
+        "operator",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "agent_role_view": {
+          "contract_hash": "9213d9357c4b6fad757b4236a68f19f9436980a0efa11217aa94496e30fe89f0",
+          "daily_user_card_visible": true,
+          "operator_contract": {
+            "allowed_tools": [
+              "mission.read",
+              "evidence.read",
+              "policy.evaluate",
+              "workflow.propose",
+              "audit.read"
+            ],
+            "audit_expectations": [
+              "agent.orchestrated",
+              "agent.delegated",
+              "agent.after_action_review.created"
+            ],
+            "escalation_rules": [
+              "escalate missing authority",
+              "escalate high-risk or external action",
+              "escalate unresolved specialist conflict"
+            ],
+            "evidence_requirements": [
+              "delegation rationale",
+              "evidence refs for durable outputs",
+              "gap label when evidence is insufficient"
+            ],
+            "forbidden_actions": [
+              "direct_truth_mutation",
+              "direct_source_write",
+              "cross_namespace_access",
+              "silent_authority_expansion"
+            ],
+            "judge_rubric": {
+              "checks": [
+                "evidence coverage",
+                "policy compliance",
+                "mission outcome quality"
+              ],
+              "llm_signal_is_supporting_only": true
+            },
+            "memory_scope": "active_workspace_only",
+            "model_policy": {
+              "contract_controls_authority": true,
+              "provider": "local_test",
+              "replaceable_brain": true
+            },
+            "purpose": "Own mission planning, delegation, synthesis, authority gaps, and after-action review.",
+            "responsibilities": [
+              "plan_mission",
+              "delegate_specialists",
+              "merge_results",
+              "ask_for_missing_authority",
+              "produce_after_action_review"
+            ],
+            "role_key": "orchestrator",
+            "schema_version": "cs.agent_role_contract.v0"
+          },
+          "operator_contract_visible": true,
+          "role_card": {
+            "display_name": "Orchestrator Agent",
+            "purpose": "Own mission planning, delegation, synthesis, authority gaps, and after-action review.",
+            "risk_boundary": "cannot directly mutate truth or source systems",
+            "schema_version": "cs.agent_role_card.v0",
+            "summary": "Orchestrator Agent helps the Orchestrator with bounded, evidence-labeled work.",
+            "visible_to_daily_user": true
+          },
+          "role_id": "role_orchestrator_3e548f87d142e49b",
+          "role_key": "orchestrator",
+          "schema_version": "cs.agent_role_view.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "ready",
+          "version": 1,
+          "view": "operator"
+        },
+        "audit_refs": [
+          "audit:audit_87be8aa1744df21a"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone role show",
+        "errors": [],
+        "evidence_refs": [
+          "agent_role:role_orchestrator_3e548f87d142e49b"
+        ],
+        "ids": {
+          "git_commit": "198d9ca",
+          "role_id": "role_orchestrator_3e548f87d142e49b"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "role_show_user": {
+      "command": [
+        "cornerstone",
+        "role",
+        "show",
+        "role_orchestrator_3e548f87d142e49b",
+        "--view",
+        "user",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "agent_role_view": {
+          "contract_hash": "9213d9357c4b6fad757b4236a68f19f9436980a0efa11217aa94496e30fe89f0",
+          "daily_user_card_visible": true,
+          "operator_contract": null,
+          "operator_contract_visible": false,
+          "role_card": {
+            "display_name": "Orchestrator Agent",
+            "purpose": "Own mission planning, delegation, synthesis, authority gaps, and after-action review.",
+            "risk_boundary": "cannot directly mutate truth or source systems",
+            "schema_version": "cs.agent_role_card.v0",
+            "summary": "Orchestrator Agent helps the Orchestrator with bounded, evidence-labeled work.",
+            "visible_to_daily_user": true
+          },
+          "role_id": "role_orchestrator_3e548f87d142e49b",
+          "role_key": "orchestrator",
+          "schema_version": "cs.agent_role_view.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "ready",
+          "version": 1,
+          "view": "user"
+        },
+        "audit_refs": [
+          "audit:audit_f4ad170ea45b997a"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone role show",
+        "errors": [],
+        "evidence_refs": [
+          "agent_role:role_orchestrator_3e548f87d142e49b"
+        ],
+        "ids": {
+          "git_commit": "198d9ca",
+          "role_id": "role_orchestrator_3e548f87d142e49b"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "alpha-evidence-anchor",
+        "--state-dir",
+        "tmp/scenario/full-agent-orchestration-67124",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_b3c1a572df808b13"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_052dc404e56c5b1d",
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "audit_event_id": "audit_b3c1a572df808b13",
+          "git_commit": "198d9ca",
+          "search_snapshot_id": "search_052dc404e56c5b1d"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T17:20:19.349929Z",
+          "duration_ms": 0.281,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+              ],
+              "match_reasons": [
+                {
+                  "query": "alpha-evidence-anchor",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "alpha-evidence-anchor",
+                  "query_term": "alpha-evidence-anchor",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "alpha-evidence-anchor."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_052dc404e56c5b1d"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

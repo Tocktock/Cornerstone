@@ -101,20 +101,20 @@ CS-AUTO-017,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario 
 CS-AUTO-018,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-018 --json,reports/scenario/cs-auto-018.json,,,,,NOT_VERIFIED
 CS-AUTO-019,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-019 --json,reports/scenario/cs-auto-019.json,,,,,NOT_VERIFIED
 CS-AUTO-020,REGRESSION_GUARD,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
-CS-AGENT-001,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-001 --json,reports/scenario/cs-agent-001.json,,,,,NOT_VERIFIED
-CS-AGENT-002,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-002 --json,reports/scenario/cs-agent-002.json,,,,,NOT_VERIFIED
-CS-AGENT-003,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-003 --json,reports/scenario/cs-agent-003.json,,,,,NOT_VERIFIED
-CS-AGENT-004,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-004 --json,reports/scenario/cs-agent-004.json,,,,,NOT_VERIFIED
-CS-AGENT-005,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-005 --json,reports/scenario/cs-agent-005.json,,,,,NOT_VERIFIED
-CS-AGENT-006,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-006 --json,reports/scenario/cs-agent-006.json,,,,,NOT_VERIFIED
-CS-AGENT-007,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-007 --json,reports/scenario/cs-agent-007.json,,,,,NOT_VERIFIED
-CS-AGENT-008,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-008 --json,reports/scenario/cs-agent-008.json,,,,,NOT_VERIFIED
-CS-AGENT-009,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-009 --json,reports/scenario/cs-agent-009.json,,,,,NOT_VERIFIED
-CS-AGENT-010,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-010 --json,reports/scenario/cs-agent-010.json,,,,,NOT_VERIFIED
-CS-AGENT-011,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-011 --json,reports/scenario/cs-agent-011.json,,,,,NOT_VERIFIED
-CS-AGENT-012,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-012 --json,reports/scenario/cs-agent-012.json,,,,,NOT_VERIFIED
-CS-AGENT-013,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-013 --json,reports/scenario/cs-agent-013.json,,,,,NOT_VERIFIED
-CS-AGENT-014,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-014 --json,reports/scenario/cs-agent-014.json,,,,,NOT_VERIFIED
+CS-AGENT-001,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-002,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-003,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-004,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-005,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-006,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-007,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-008,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-009,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-010,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-011,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-012,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-013,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
+CS-AGENT-014,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
 CS-BRAIN-001,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-001 --json,reports/scenario/cs-brain-001.json,,,,,NOT_VERIFIED
 CS-BRAIN-002,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-002 --json,reports/scenario/cs-brain-002.json,,,,,NOT_VERIFIED
 CS-BRAIN-003,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-003 --json,reports/scenario/cs-brain-003.json,,,,,NOT_VERIFIED

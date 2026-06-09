@@ -144,6 +144,26 @@
         "CS-REG-014",
         "CS-REG-015"
       ]
+    },
+    {
+      "id": "pack_15_agent_orchestration",
+      "path": "packs/15_agent_orchestration/pack.json",
+      "scenario_ids": [
+        "CS-AGENT-001",
+        "CS-AGENT-002",
+        "CS-AGENT-003",
+        "CS-AGENT-004",
+        "CS-AGENT-005",
+        "CS-AGENT-006",
+        "CS-AGENT-007",
+        "CS-AGENT-008",
+        "CS-AGENT-009",
+        "CS-AGENT-010",
+        "CS-AGENT-011",
+        "CS-AGENT-012",
+        "CS-AGENT-013",
+        "CS-AGENT-014"
+      ]
     }
   ]
 }

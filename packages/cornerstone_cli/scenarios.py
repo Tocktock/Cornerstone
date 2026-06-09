@@ -5710,6 +5710,387 @@ def verify_full_extension_ecosystem(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_full_agent_orchestration(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("full-agent-orchestration")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    pack_manifest = "fixtures/vs0/packs/14_extension_ecosystem/trusted_agent_pack_manifest.json"
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(root, ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"]) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The Alpha evidence anchor requires an orchestrated mission review.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Run an evidence-backed agent orchestration review without expanding authority",
+            "--claim-id",
+            claim_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if claim_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["mission_activate"] = _run_cli_json(root, ["mission", "activate", mission_id, "--mode", "autopilot", "--state-dir", state_rel, "--json"]) if mission_id else {}
+
+    transcripts["agent_list"] = _run_cli_json(root, ["agent", "list", "--state-dir", state_rel, "--json"])
+    roles = _payload(transcripts["agent_list"]).get("agent_roles", {}).get("roles", [])
+    role_ids = {role.get("role_key"): role.get("role_id") for role in roles}
+    orchestrator_role_id = role_ids.get("orchestrator", "")
+    evidence_role_id = role_ids.get("evidence", "")
+    connector_role_id = role_ids.get("connector", "")
+
+    transcripts["role_show_user"] = _run_cli_json(root, ["role", "show", orchestrator_role_id, "--view", "user", "--state-dir", state_rel, "--json"]) if orchestrator_role_id else {}
+    transcripts["role_show_operator"] = _run_cli_json(root, ["role", "show", orchestrator_role_id, "--view", "operator", "--state-dir", state_rel, "--json"]) if orchestrator_role_id else {}
+    transcripts["orchestrate"] = _run_cli_json(root, ["agent", "orchestrate", "--mission-id", mission_id, "--state-dir", state_rel, "--json"]) if mission_id else {}
+    trace = _payload(transcripts["orchestrate"]).get("agent_trace", {})
+    trace_id = trace.get("trace_id", "")
+
+    transcripts["direct_mutation"] = _run_cli_json(
+        root,
+        [
+            "agent",
+            "direct-mutation-test",
+            "--role-id",
+            evidence_role_id,
+            "--target",
+            "durable_memory:approved_truth",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if evidence_role_id else {}
+    transcripts["brain_switch"] = _run_cli_json(
+        root,
+        [
+            "agent",
+            "brain-switch",
+            "--role-id",
+            evidence_role_id,
+            "--provider",
+            "ollama",
+            "--model",
+            "qwen3.6:27b",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if evidence_role_id else {}
+    transcripts["contract_update"] = _run_cli_json(
+        root,
+        [
+            "agent",
+            "contract-update",
+            "--role-id",
+            evidence_role_id,
+            "--change-summary",
+            "Add structured output schema evidence requirement without changing authority",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if evidence_role_id else {}
+    transcripts["prompt_authority"] = _run_cli_json(
+        root,
+        [
+            "agent",
+            "prompt-authority-test",
+            "--role-id",
+            evidence_role_id,
+            "--requested-tool",
+            "connector.write",
+            "--requested-memory-scope",
+            "organization",
+            "--requested-authority",
+            "external_writeback",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if evidence_role_id else {}
+    transcripts["diagnose"] = _run_cli_json(
+        root,
+        [
+            "agent",
+            "diagnose",
+            trace_id,
+            "--role-id",
+            connector_role_id,
+            "--failure-kind",
+            "timeout",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if trace_id and connector_role_id else {}
+
+    transcripts["pack_import"] = _run_cli_json(root, ["pack", "import", "--manifest", pack_manifest, "--state-dir", state_rel, "--json"])
+    transcripts["pack_install"] = _run_cli_json(root, ["pack", "install", "pack_ops_recovery_agent", "--state-dir", state_rel, "--json"])
+    transcripts["pack_activate"] = _run_cli_json(
+        root,
+        ["pack", "activate", "pack_ops_recovery_agent", "--grant", "artifact.read", "--state-dir", state_rel, "--json"],
+    )
+    transcripts["pack_capability_allowed"] = _run_cli_json(
+        root,
+        [
+            "agent",
+            "pack-capability-test",
+            "--role-id",
+            connector_role_id,
+            "--pack-id",
+            "pack_ops_recovery_agent",
+            "--capability",
+            "artifact.read",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if connector_role_id else {}
+    transcripts["pack_capability_denied"] = _run_cli_json(
+        root,
+        [
+            "agent",
+            "pack-capability-test",
+            "--role-id",
+            connector_role_id,
+            "--pack-id",
+            "pack_ops_recovery_agent",
+            "--capability",
+            "connector.action.mock_write",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if connector_role_id else {}
+    transcripts["replay"] = _run_cli_json(root, ["agent", "replay", trace_id, "--state-dir", state_rel, "--json"]) if trace_id else {}
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    user_view = _payload(transcripts["role_show_user"]).get("agent_role_view", {})
+    operator_view = _payload(transcripts["role_show_operator"]).get("agent_role_view", {})
+    operator_contract = operator_view.get("operator_contract", {}) or {}
+    required_contract_fields = [
+        "purpose",
+        "responsibilities",
+        "allowed_tools",
+        "forbidden_actions",
+        "memory_scope",
+        "evidence_requirements",
+        "escalation_rules",
+        "model_policy",
+        "judge_rubric",
+        "audit_expectations",
+    ]
+    outputs_dir = root / state_rel / "agents" / "outputs"
+    outputs = [json.loads(path.read_text()) for path in sorted(outputs_dir.glob("*.json"))] if outputs_dir.exists() else []
+    brain_switch = _payload(transcripts["brain_switch"]).get("brain_switch", {})
+    contract_update = _payload(transcripts["contract_update"]).get("contract_update", {})
+    diagnosis = _payload(transcripts["diagnose"]).get("diagnosis", {})
+    allowed_attempt = _payload(transcripts["pack_capability_allowed"]).get("capability_attempt", {})
+    denied_attempt = _payload(transcripts["pack_capability_denied"]).get("capability_attempt", {})
+    replay = _payload(transcripts["replay"]).get("agent_replay", {})
+    audit_events = _audit_events(root, state_rel)
+    event_types = [event.get("event_type") for event in audit_events]
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    activity_roles = {row.get("role_key") for row in trace.get("delegations", [])}
+    required_activity_roles = {"evidence", "memory", "workflow", "policy", "connector", "judge", "playbook"}
+
+    role_registry_ok = (
+        _exit_ok(transcripts["agent_list"])
+        and _payload(transcripts["agent_list"]).get("agent_roles", {}).get("orchestrator_led") is True
+        and len(roles) >= 8
+        and required_activity_roles <= set(role_ids)
+        and bool(orchestrator_role_id)
+    )
+    role_contract_ok = (
+        _exit_ok(transcripts["role_show_operator"])
+        and all(operator_contract.get(field) for field in required_contract_fields)
+        and operator_view.get("operator_contract_visible") is True
+    )
+    role_card_ok = (
+        _exit_ok(transcripts["role_show_user"])
+        and user_view.get("role_card", {}).get("display_name") == "Orchestrator Agent"
+        and user_view.get("operator_contract") is None
+        and user_view.get("daily_user_card_visible") is True
+    )
+    trace_ok = (
+        _exit_ok(transcripts["orchestrate"])
+        and trace.get("orchestrator_plan", {}).get("delegation_model") == "orchestrator_as_controller_specialists_as_tools"
+        and trace.get("after_action_review", {}).get("status") == "complete"
+        and trace.get("orchestrator_plan", {}).get("asks_for_missing_authority") is True
+        and required_activity_roles <= activity_roles
+    )
+    delegation_rationale_ok = trace_ok and all(row.get("rationale") and row.get("handled_evidence_refs") and row.get("influenced_final_outcome") is True for row in trace.get("delegations", []))
+    outputs_labeled_ok = bool(outputs) and all(output.get("source_refs_or_gap_label_present") is True and (output.get("evidence_refs") or output.get("insufficient_evidence_label") is True) for output in outputs)
+    direct_mutation_denied_ok = (
+        _policy_denied(transcripts["direct_mutation"], "CS_AGENT_POLICY_DENIED")
+        and _payload(transcripts["direct_mutation"]).get("mutation_attempt", {}).get("direct_mutation_performed") is False
+        and _payload(transcripts["direct_mutation"]).get("policy_decisions", [{}])[0].get("policy") == "agent_workflow_path_required"
+    )
+    accountability_ok = (
+        trace.get("accountability", {}).get("namespace_owner") == "local-user"
+        and trace.get("accountability", {}).get("authority_grant_visible") is True
+        and trace.get("accountability", {}).get("correction_and_rollback_visible") is True
+        and "agent.orchestrated" in event_types
+    )
+    brain_switch_ok = (
+        _exit_ok(transcripts["brain_switch"])
+        and brain_switch.get("contract_hash_before") == brain_switch.get("contract_hash_after")
+        and brain_switch.get("allowed_tools_unchanged") is True
+        and brain_switch.get("memory_scope_unchanged") is True
+        and brain_switch.get("evidence_rules_unchanged") is True
+        and brain_switch.get("only_inference_brain_changed") is True
+    )
+    contract_update_ok = (
+        _exit_ok(transcripts["contract_update"])
+        and contract_update.get("status") == "versioned"
+        and contract_update.get("diff", {}).get("authority_expansion") is False
+        and contract_update.get("from_version") == 1
+        and contract_update.get("to_version") == 2
+        and contract_update.get("migration_rollout_guidance")
+    )
+    prompt_authority_denied_ok = (
+        _policy_denied(transcripts["prompt_authority"], "CS_AGENT_POLICY_DENIED")
+        and _payload(transcripts["prompt_authority"]).get("authority_attempt", {}).get("authority_expanded") is False
+        and _payload(transcripts["prompt_authority"]).get("policy_decisions", [{}])[0].get("policy") == "agent_prompt_cannot_expand_authority"
+    )
+    diagnosis_ok = (
+        _exit_ok(transcripts["diagnose"])
+        and diagnosis.get("status") == "diagnosed"
+        and diagnosis.get("first_failing_layer")
+        and diagnosis.get("mission_impact")
+        and diagnosis.get("retry_path")
+        and diagnosis.get("escalation_path")
+        and diagnosis.get("user_facing_error")
+    )
+    pack_grants_ok = (
+        _exit_ok(transcripts["pack_import"])
+        and _exit_ok(transcripts["pack_install"])
+        and _exit_ok(transcripts["pack_activate"])
+        and _exit_ok(transcripts["pack_capability_allowed"])
+        and allowed_attempt.get("status") == "mediated"
+        and allowed_attempt.get("connectorhub_mediated") is True
+        and allowed_attempt.get("direct_provider_access") is False
+        and allowed_attempt.get("credentials_exposed_to_agent") is False
+        and _policy_denied(transcripts["pack_capability_denied"], "CS_AGENT_POLICY_DENIED")
+        and denied_attempt.get("status") == "denied"
+        and denied_attempt.get("capability_used") is False
+    )
+    replay_ok = (
+        _exit_ok(transcripts["replay"])
+        and replay.get("status") == "reviewable"
+        and replay.get("hidden_chain_of_thought_required") is False
+        and replay.get("review_without_hidden_chain_of_thought") is True
+        and len(replay.get("role_contract_refs", [])) >= 8
+        and replay.get("tool_outputs")
+        and replay.get("judge_results")
+        and replay.get("evidence_refs")
+    )
+
+    rows = [
+        _row("CS-AGENT-001", "MUST_PASS", "PASS" if trace_ok and audit_ok else "FAIL", ["cornerstone agent orchestrate --mission-id <mission_id> --json"], "Mission trace shows Orchestrator plan, specialist delegation, missing-authority handling, synthesis, and after-action review."),
+        _row("CS-AGENT-002", "MUST_PASS", "PASS" if role_registry_ok and trace_ok and audit_ok else "FAIL", ["cornerstone agent list --json", "cornerstone agent orchestrate --mission-id <mission_id> --json"], "Agent activity view exposes specialist roles when useful without making daily users manage every specialist."),
+        _row("CS-AGENT-003", "MUST_PASS", "PASS" if role_contract_ok and direct_mutation_denied_ok and audit_ok else "FAIL", ["cornerstone role show <role_id> --view operator --json", "cornerstone agent direct-mutation-test --json"], "Role Contract defines purpose, tools, forbidden actions, memory scope, evidence, escalation, model policy, rubric, and audit expectations, and enforcement denies direct mutation."),
+        _row("CS-AGENT-004", "MUST_PASS", "PASS" if role_card_ok and role_contract_ok and audit_ok else "FAIL", ["cornerstone role show <role_id> --view user --json", "cornerstone role show <role_id> --view operator --json"], "Daily-user role card stays simple while operator view exposes full contract."),
+        _row("CS-AGENT-005", "MUST_PASS", "PASS" if direct_mutation_denied_ok and audit_ok else "FAIL", ["cornerstone agent direct-mutation-test --json"], "Specialist direct mutation attempt is denied and requires governed product/workflow paths."),
+        _row("CS-AGENT-006", "MUST_PASS", "PASS" if delegation_rationale_ok and audit_ok else "FAIL", ["cornerstone agent orchestrate --mission-id <mission_id> --json"], "Orchestrator delegation includes specialist rationale, handled evidence/tool refs, and influence on final outcome."),
+        _row("CS-AGENT-007", "MUST_PASS", "PASS" if outputs_labeled_ok and audit_ok else "FAIL", ["cornerstone agent orchestrate --mission-id <mission_id> --json"], "Specialist outputs are evidence-labeled or explicitly gap-labeled."),
+        _row("CS-AGENT-008", "MUST_PASS", "PASS" if accountability_ok and audit_ok else "FAIL", ["cornerstone agent orchestrate --mission-id <mission_id> --json", "cornerstone audit verify --json"], "Trace and audit link granted autonomy to namespace owner, allowed work, events, and correction/rollback visibility."),
+        _row("CS-AGENT-009", "MUST_PASS", "PASS" if brain_switch_ok and audit_ok else "FAIL", ["cornerstone agent brain-switch --role-id <role_id> --provider ollama --model qwen3.6:27b --json"], "Provider switch changes only inference brain; contract hash, tools, memory scope, evidence rules, and audit expectations remain stable."),
+        _row("CS-AGENT-010", "MUST_PASS", "PASS" if contract_update_ok and audit_ok else "FAIL", ["cornerstone agent contract-update --role-id <role_id> --json"], "Agent Role Contract update records versioned diff, impact, rollout guidance, affected missions, and audit."),
+        _row("CS-AGENT-011", "MUST_PASS", "PASS" if prompt_authority_denied_ok and audit_ok else "FAIL", ["cornerstone agent prompt-authority-test --json"], "Prompt-only authority expansion cannot add tools, connector access, memory scope, write permission, or action authority."),
+        _row("CS-AGENT-012", "MUST_PASS", "PASS" if diagnosis_ok and audit_ok else "FAIL", ["cornerstone agent diagnose <trace_id> --role-id <role_id> --json"], "Specialist failure records first failing layer, impact, retry/escalation path, continuation state, and user-facing error."),
+        _row("CS-AGENT-013", "MUST_PASS", "PASS" if pack_grants_ok and audit_ok else "FAIL", ["cornerstone pack activate <pack_id> --grant artifact.read --json", "cornerstone agent pack-capability-test --json"], "Agent Pack supplied agent can use only explicitly activated workspace capability grants through ConnectorHub-mediated boundaries."),
+        _row("CS-AGENT-014", "MUST_PASS", "PASS" if replay_ok and audit_ok else "FAIL", ["cornerstone agent replay <trace_id> --json"], "Replay preserves trace, role contracts, provider records, tool outputs, diagnosis refs, judge results, evidence refs, and audit refs without hidden chain-of-thought."),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "full-agent-orchestration",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_FULL_AGENT_ORCHESTRATION_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "agent_evidence": {
+            "artifact_id": artifact_id,
+            "search_snapshot_id": snapshot_id,
+            "evidence_bundle_id": bundle_id,
+            "claim_id": claim_id,
+            "mission_id": mission_id,
+            "trace_id": trace_id,
+            "role_count": len(roles),
+            "role_keys": sorted(role_ids),
+            "activity_roles": sorted(activity_roles),
+            "output_count": len(outputs),
+            "contract_required_fields_present": {field: bool(operator_contract.get(field)) for field in required_contract_fields},
+            "brain_switch_id": brain_switch.get("switch_id"),
+            "contract_update_id": contract_update.get("update_id"),
+            "diagnosis_id": diagnosis.get("diagnosis_id"),
+            "replay_id": replay.get("replay_id"),
+            "pack_allowed_capability_attempt_id": allowed_attempt.get("capability_attempt_id"),
+            "pack_denied_capability_attempt_id": denied_attempt.get("capability_attempt_id"),
+            "direct_mutation_exit_code": transcripts["direct_mutation"].get("exit_code"),
+            "prompt_authority_exit_code": transcripts["prompt_authority"].get("exit_code"),
+            "pack_capability_denied_exit_code": transcripts["pack_capability_denied"].get("exit_code"),
+            "audit_event_types": event_types,
+            "audit_event_count": len(audit_events),
+            "research_basis": [
+                "OpenAI Agents SDK separates orchestration, handoffs, guardrails, state, and observability when the application owns tool execution and approvals.",
+                "OpenAI Agents SDK tracing records agent runs, tool calls, handoffs, guardrails, and custom events for review.",
+                "LangChain/LangGraph multi-agent patterns support main-agent subagents, handoffs, skills, routers, and custom workflows with centralized routing tradeoffs.",
+                "AutoGen frames multi-agent systems as customizable conversable agents with human input, tools, and programmable interaction patterns.",
+                "Recent traceability/accountability research motivates structured roles, handoffs, saved records, and replayable accountability in role-specialized agent pipelines.",
+            ],
+        },
+        "negative_evidence": {
+            "direct_agent_mutations": 0 if direct_mutation_denied_ok else 1,
+            "prompt_authority_expansions": 0 if prompt_authority_denied_ok else 1,
+            "ungranted_pack_capability_used": 0 if _policy_denied(transcripts["pack_capability_denied"], "CS_AGENT_POLICY_DENIED") else 1,
+            "direct_provider_access": 0 if allowed_attempt.get("direct_provider_access") is False and denied_attempt.get("capability_used") is False else 1,
+            "connector_credentials_exposed": 0 if allowed_attempt.get("credentials_exposed_to_agent") is False else 1,
+            "hidden_chain_of_thought_required": 0 if replay.get("hidden_chain_of_thought_required") is False and trace.get("hidden_chain_of_thought_captured") is False else 1,
+            "agent_outputs_without_evidence_or_gap": 0 if outputs_labeled_ok else 1,
+            "role_contract_missing_required_fields": 0 if role_contract_ok else 1,
+            "audit_verify_failed": 0 if audit_ok else 1,
+            "real_external_http_calls": 0,
+        },
+        "human_required": [],
+    }
+
+
 def verify_vs0_memory_truth_boundary(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-memory-truth-boundary")
     state_path = root / state_rel

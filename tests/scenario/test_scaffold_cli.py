@@ -1068,6 +1068,49 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_full_agent_orchestration_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full-agent-orchestration", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "full-agent-orchestration")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 14)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_FULL_AGENT_ORCHESTRATION_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {
+                "CS-AGENT-001",
+                "CS-AGENT-002",
+                "CS-AGENT-003",
+                "CS-AGENT-004",
+                "CS-AGENT-005",
+                "CS-AGENT-006",
+                "CS-AGENT-007",
+                "CS-AGENT-008",
+                "CS-AGENT-009",
+                "CS-AGENT-010",
+                "CS-AGENT-011",
+                "CS-AGENT-012",
+                "CS-AGENT-013",
+                "CS-AGENT-014",
+            },
+        )
+        evidence = payload["agent_evidence"]
+        self.assertEqual(evidence["role_count"], 8)
+        self.assertIn("orchestrator", evidence["role_keys"])
+        self.assertEqual(set(evidence["activity_roles"]), {"evidence", "memory", "workflow", "policy", "connector", "judge", "playbook"})
+        self.assertTrue(evidence["trace_id"].startswith("agenttrace_"))
+        self.assertTrue(evidence["brain_switch_id"].startswith("agentbrain_"))
+        self.assertTrue(evidence["contract_update_id"].startswith("agentupd_"))
+        self.assertTrue(evidence["diagnosis_id"].startswith("agentdiag_"))
+        self.assertTrue(evidence["replay_id"].startswith("agentreplay_"))
+        self.assertEqual(evidence["direct_mutation_exit_code"], 8)
+        self.assertEqual(evidence["prompt_authority_exit_code"], 8)
+        self.assertEqual(evidence["pack_capability_denied_exit_code"], 8)
+        self.assertGreaterEqual(evidence["audit_event_count"], 1)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

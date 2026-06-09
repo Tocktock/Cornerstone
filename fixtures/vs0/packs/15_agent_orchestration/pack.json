@@ -1,0 +1,57 @@
+{
+  "id": "pack_15_agent_orchestration",
+  "scenario_ids": [
+    "CS-AGENT-001",
+    "CS-AGENT-002",
+    "CS-AGENT-003",
+    "CS-AGENT-004",
+    "CS-AGENT-005",
+    "CS-AGENT-006",
+    "CS-AGENT-007",
+    "CS-AGENT-008",
+    "CS-AGENT-009",
+    "CS-AGENT-010",
+    "CS-AGENT-011",
+    "CS-AGENT-012",
+    "CS-AGENT-013",
+    "CS-AGENT-014"
+  ],
+  "classes": [],
+  "inputs": [
+    {
+      "path": "mission_seed.txt",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    },
+    {
+      "path": "../14_extension_ecosystem/trusted_agent_pack_manifest.json",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default"
+    }
+  ],
+  "negative_evidence": {
+    "direct_agent_mutations": 0,
+    "prompt_authority_expansions": 0,
+    "ungranted_pack_capability_used": 0,
+    "direct_provider_access": 0,
+    "connector_credentials_exposed": 0,
+    "hidden_chain_of_thought_required": 0,
+    "real_external_http_calls": 0
+  },
+  "expected": {
+    "orchestrator_led": true,
+    "specialist_roles_visible_when_useful": true,
+    "role_contracts_enforced": true,
+    "daily_role_card_and_operator_contract_views": true,
+    "direct_mutation_denied": true,
+    "outputs_evidence_or_gap_labeled": true,
+    "provider_switch_preserves_contract": true,
+    "contract_updates_are_versioned": true,
+    "prompt_authority_expansion_denied": true,
+    "failure_diagnosis_recorded": true,
+    "pack_agents_follow_activation_grants": true,
+    "replay_does_not_require_hidden_chain_of_thought": true
+  }
+}

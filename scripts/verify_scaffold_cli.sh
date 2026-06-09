@@ -43,7 +43,8 @@ memory_wiki_json=$(mktemp)
 learning_experience_json=$(mktemp)
 understanding_ontology_json=$(mktemp)
 extension_ecosystem_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json"' EXIT
+agent_orchestration_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json" "$agent_orchestration_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -542,6 +543,34 @@ grep -q '"real_external_http_calls": 0' "$extension_ecosystem_json" || fail "ful
 grep -q '"secret_reads": 0' "$extension_ecosystem_json" || fail "full-extension-ecosystem read secrets"
 grep -q '"product_feature_claims": "PARTIAL_FULL_EXTENSION_ECOSYSTEM_ONLY"' "$extension_ecosystem_json" || fail "full-extension-ecosystem overclaimed product feature scope"
 
+cornerstone scenario verify full-agent-orchestration --json > "$agent_orchestration_json"
+python3 -m json.tool "$agent_orchestration_json" >/dev/null
+grep -q '"scenario_set": "full-agent-orchestration"' "$agent_orchestration_json" || fail "full-agent-orchestration report missing scenario set"
+grep -q '"blocking": 0' "$agent_orchestration_json" || fail "full-agent-orchestration report has blocking scenarios"
+grep -q '"pass": 14' "$agent_orchestration_json" || fail "full-agent-orchestration did not pass exactly fourteen scenarios"
+grep -q '"id": "CS-AGENT-001"' "$agent_orchestration_json" || fail "full-agent-orchestration missing CS-AGENT-001"
+grep -q '"id": "CS-AGENT-014"' "$agent_orchestration_json" || fail "full-agent-orchestration missing CS-AGENT-014"
+grep -q '"role_count": 8' "$agent_orchestration_json" || fail "full-agent-orchestration missing eight role records"
+grep -q '"trace_id": "agenttrace_' "$agent_orchestration_json" || fail "full-agent-orchestration missing trace ID"
+grep -q '"brain_switch_id": "agentbrain_' "$agent_orchestration_json" || fail "full-agent-orchestration missing brain switch ID"
+grep -q '"contract_update_id": "agentupd_' "$agent_orchestration_json" || fail "full-agent-orchestration missing contract update ID"
+grep -q '"diagnosis_id": "agentdiag_' "$agent_orchestration_json" || fail "full-agent-orchestration missing diagnosis ID"
+grep -q '"replay_id": "agentreplay_' "$agent_orchestration_json" || fail "full-agent-orchestration missing replay ID"
+grep -q '"direct_mutation_exit_code": 8' "$agent_orchestration_json" || fail "full-agent-orchestration allowed direct mutation"
+grep -q '"prompt_authority_exit_code": 8' "$agent_orchestration_json" || fail "full-agent-orchestration allowed prompt authority expansion"
+grep -q '"pack_capability_denied_exit_code": 8' "$agent_orchestration_json" || fail "full-agent-orchestration allowed ungranted pack capability"
+grep -q '"direct_agent_mutations": 0' "$agent_orchestration_json" || fail "full-agent-orchestration directly mutated agent truth"
+grep -q '"prompt_authority_expansions": 0' "$agent_orchestration_json" || fail "full-agent-orchestration expanded authority through prompt"
+grep -q '"ungranted_pack_capability_used": 0' "$agent_orchestration_json" || fail "full-agent-orchestration used ungranted pack capability"
+grep -q '"direct_provider_access": 0' "$agent_orchestration_json" || fail "full-agent-orchestration allowed direct provider access"
+grep -q '"connector_credentials_exposed": 0' "$agent_orchestration_json" || fail "full-agent-orchestration exposed connector credentials"
+grep -q '"hidden_chain_of_thought_required": 0' "$agent_orchestration_json" || fail "full-agent-orchestration required hidden chain-of-thought"
+grep -q '"agent_outputs_without_evidence_or_gap": 0' "$agent_orchestration_json" || fail "full-agent-orchestration emitted output without evidence or gap label"
+grep -q '"role_contract_missing_required_fields": 0' "$agent_orchestration_json" || fail "full-agent-orchestration missed role contract fields"
+grep -q '"audit_verify_failed": 0' "$agent_orchestration_json" || fail "full-agent-orchestration failed audit verification"
+grep -q '"real_external_http_calls": 0' "$agent_orchestration_json" || fail "full-agent-orchestration reported real external HTTP calls"
+grep -q '"product_feature_claims": "PARTIAL_FULL_AGENT_ORCHESTRATION_ONLY"' "$agent_orchestration_json" || fail "full-agent-orchestration overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -571,4 +600,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, full-agent-orchestration verify, vs0-product-domain-readiness verify, unittest).\n'
