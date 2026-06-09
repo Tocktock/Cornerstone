@@ -1,0 +1,55 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$ROOT"
+
+export PATH="$ROOT:$PATH"
+
+fail() {
+  printf 'FAIL: %s\n' "$1" >&2
+  exit 1
+}
+
+cornerstone --help >/dev/null
+
+version_json=$(mktemp)
+health_json=$(mktemp)
+ready_json=$(mktemp)
+list_json=$(mktemp)
+coverage_json=$(mktemp)
+verify_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json"' EXIT
+
+cornerstone version --json > "$version_json"
+python3 -m json.tool "$version_json" >/dev/null
+grep -q '"schema_version": "cs.cli.v0"' "$version_json" || fail "version JSON missing schema version"
+
+cornerstone health --json > "$health_json"
+python3 -m json.tool "$health_json" >/dev/null
+grep -q '"status": "success"' "$health_json" || fail "health JSON did not succeed"
+
+set +e
+cornerstone ready --json > "$ready_json"
+ready_code=$?
+set -e
+[ "$ready_code" -eq 4 ] || fail "ready should exit 4 while product runtime is not ready; got $ready_code"
+python3 -m json.tool "$ready_json" >/dev/null
+grep -q '"status": "not_ready"' "$ready_json" || fail "ready JSON did not report not_ready"
+
+cornerstone scenario list --set full --json > "$list_json"
+python3 -m json.tool "$list_json" >/dev/null
+grep -q '"count": 206' "$list_json" || fail "full scenario list did not return 206 rows"
+
+cornerstone scenario coverage --json > "$coverage_json"
+python3 -m json.tool "$coverage_json" >/dev/null
+grep -q '"ok": true' "$coverage_json" || fail "scenario coverage failed"
+
+cornerstone scenario verify vs0-scaffold --json > "$verify_json"
+python3 -m json.tool "$verify_json" >/dev/null
+grep -q '"scenario_set": "vs0-scaffold"' "$verify_json" || fail "vs0-scaffold report missing scenario set"
+grep -q '"blocking": 0' "$verify_json" || fail "vs0-scaffold report has blocking scenarios"
+
+python3 -m unittest discover -s tests -p 'test_*.py'
+
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, unittest).\n'

@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, and VS-0 scaffold readiness report
+**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, VS-0 scaffold readiness report, and no-dependency scaffold CLI bootstrap
 **Canonical spelling:** Use **CornerStone** for product/project text.
 
 ## Product Definition
@@ -77,6 +77,22 @@ scripts/verify_local_verification_plane_docs.sh
 scripts/verify_design_system_docs.sh
 scripts/verify_vs0_scaffold_readiness_docs.sh
 ```
+
+Verify the current scaffold bootstrap with:
+
+```sh
+export PATH="$PWD:$PATH"
+cornerstone --help
+cornerstone version --json
+cornerstone health --json
+cornerstone ready --json        # exits 4 until product runtime exists
+cornerstone scenario list --set full --json
+cornerstone scenario coverage --json
+cornerstone scenario verify vs0-scaffold --json
+make verify-local-fast
+```
+
+The current scaffold CLI can verify scaffold readiness and scenario registry coverage. It does not claim VS-0 product-feature behavior is implemented or passing.
 
 ## First Implementation Target
 

@@ -1,0 +1,169 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-scaffold",
+  "command_evidence": [
+    {
+      "command": "sh scripts/verify_sot_docs.sh",
+      "exit_code": 0,
+      "stderr": [],
+      "stdout": [
+        "PASS: CornerStone design system docs verified.",
+        "PASS: CornerStone VS-0 scaffold readiness docs verified.",
+        "PASS: CornerStone SoT docs verified (206 full scenarios, design system, VS-0 scaffold readiness, VS-0 scaffold gate, 58 VS-0 scenarios, CLI native-first gate, local verification plane)."
+      ]
+    },
+    {
+      "command": "sh scripts/verify_cli_native_first_docs.sh",
+      "exit_code": 0,
+      "stderr": [],
+      "stdout": [
+        "PASS: CornerStone CLI native-first docs verified (39 feature-family rows; all CLI-required and release-blocking)."
+      ]
+    },
+    {
+      "command": "sh scripts/verify_vs0_scaffold_readiness_docs.sh",
+      "exit_code": 0,
+      "stderr": [],
+      "stdout": [
+        "PASS: CornerStone VS-0 scaffold readiness docs verified."
+      ]
+    }
+  ],
+  "coverage": {
+    "full": {
+      "count": 206,
+      "type_counts": {
+        "MUST_PASS": 184,
+        "REGRESSION_GUARD": 22
+      }
+    },
+    "missing": [],
+    "ok": true,
+    "vs0": {
+      "count": 58,
+      "type_counts": {
+        "MUST_PASS": 52,
+        "REGRESSION_GUARD": 6
+      }
+    }
+  },
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [
+    {
+      "expected_evidence": "Written approval naming dependency scope, or explicit approval to use ADR-0002 targets.",
+      "id": "H-FREEZE-001",
+      "release_impact": "Blocks dependency-based scaffold implementation.",
+      "required_human_action": "Approve the specific scaffold dependency set before dependency files are added.",
+      "why_ai_cannot_verify": "New production dependencies and lockfiles are approval-gated."
+    },
+    {
+      "expected_evidence": "Approved registry/report rows with required evidence per scenario.",
+      "id": "H-FREEZE-002",
+      "release_impact": "Blocks full release PASS until classified and evidenced.",
+      "required_human_action": "Review generated registry classifications once implemented.",
+      "why_ai_cannot_verify": "Full-set human-only ownership cannot be derived until a scenario registry exists."
+    }
+  ],
+  "ids": {
+    "git_commit": "dd3f7d6"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "docs/adr/ADR-0002-framework-and-version-policy.md",
+        "scripts/verify_sot_docs.sh"
+      ],
+      "id": "VS0-SCAF-001",
+      "notes": "Setup docs define compatible baseline and docs verification passes.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "docs/adr/ADR-0003-monorepo-setup.md",
+        "docs/adr/ADR-0005-domain-boundaries.md"
+      ],
+      "id": "VS0-SCAF-002",
+      "notes": "Monorepo direction preserves one product with internal engine boundaries.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "scripts/verify_cli_native_first_docs.sh",
+        "cornerstone --help",
+        "cornerstone version --json"
+      ],
+      "id": "VS0-SCAF-003",
+      "notes": "CLI native-first is documented and a native scaffold command exists.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md",
+        "cornerstone ready --json"
+      ],
+      "id": "VS0-SCAF-004",
+      "notes": "Future product-runtime readiness is still reported honestly as not ready.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "git diff --name-only",
+        "repo path review"
+      ],
+      "id": "VS0-SCAF-005",
+      "notes": "No production dependency lockfiles or product feature runtime directories are present.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "docs/verification-reports/template.md"
+      ],
+      "id": "VS0-SCAF-006",
+      "notes": "Verification report template can record scenario evidence and human-required items.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "scripts/verify_sot_docs.sh",
+        "scripts/verify_cli_native_first_docs.sh",
+        "cornerstone scenario coverage --json"
+      ],
+      "id": "VS0-SCAF-R01",
+      "notes": "Existing 206 full scenarios, 58 VS-0 scenarios, and CLI native-first gate remain wired.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "vs0-scaffold",
+  "schema_version": "cs.cli.v0",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 7,
+    "product_feature_claims": "NOT_VERIFIED",
+    "scenario_count": 7
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}
