@@ -896,6 +896,53 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_full_memory_wiki_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full-memory-wiki", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "full-memory-wiki")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 18)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_FULL_MEMORY_WIKI_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {
+                "CS-MEM-001",
+                "CS-MEM-002",
+                "CS-MEM-003",
+                "CS-MEM-004",
+                "CS-MEM-005",
+                "CS-MEM-006",
+                "CS-MEM-007",
+                "CS-MEM-008",
+                "CS-MEM-009",
+                "CS-MEM-010",
+                "CS-MEM-011",
+                "CS-MEM-012",
+                "CS-MEM-013",
+                "CS-MEM-014",
+                "CS-MEM-015",
+                "CS-MEM-016",
+                "CS-MEM-017",
+                "CS-MEM-018",
+            },
+        )
+        evidence = payload["memory_wiki_evidence"]
+        self.assertEqual(evidence["personal_search_result_count"], 1)
+        self.assertEqual(evidence["correction_search_result_count"], 1)
+        self.assertEqual(evidence["org_search_result_count"], 1)
+        self.assertEqual(evidence["stale_search_result_count"], 1)
+        self.assertEqual(evidence["answer_before_statement"].count("Monday"), 1)
+        self.assertEqual(evidence["answer_after_statement"].count("Friday"), 1)
+        self.assertEqual(evidence["conflict_selected_truth_foundation"], "archive_evidence")
+        self.assertEqual(evidence["corrected_memory_freshness"]["status"], "needs_review")
+        self.assertTrue(evidence["corrected_memory_freshness"]["warning_visible"])
+        self.assertEqual(evidence["quarantine_status"], "quarantined")
+        self.assertGreaterEqual(evidence["export_entry_count"], 1)
+        self.assertGreaterEqual(evidence["audit_event_count"], 1)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_full_understanding_ontology_verify(self) -> None:
         result = run_cli("scenario", "verify", "full-understanding-ontology", "--json")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

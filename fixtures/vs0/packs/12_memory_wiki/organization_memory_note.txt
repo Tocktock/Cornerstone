@@ -1,0 +1,5 @@
+Organization memory note.
+Anchor: org-memory-anchor.
+Northstar Ops policy review cadence is weekly.
+Role: org approver reviews organization memory.
+Workflow: approved evidence before organization truth.

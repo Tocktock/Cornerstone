@@ -12,6 +12,7 @@ from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
     verify_full_claim_collaboration,
+    verify_full_memory_wiki,
     verify_full_understanding_ontology,
     verify_vs0_audit_ledger,
     verify_vs0_briefing,
@@ -1267,7 +1268,15 @@ def command_memory_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
-    result = store.create_memory_from_evidence_bundle(args.evidence_bundle_id, args.statement, requested_scope)
+    result = store.create_memory_from_evidence_bundle(
+        args.evidence_bundle_id,
+        args.statement,
+        requested_scope,
+        trust_state=args.trust_state,
+        status=args.status,
+        memory_type=args.memory_type,
+        synthesis_mode=args.synthesis_mode,
+    )
     payload = base_response("cornerstone memory create", "success", root)
     payload.update(requested_scope)
     if result.get("status") == "not_found":
@@ -1443,6 +1452,178 @@ def command_memory_answer(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_EVIDENCE_MISSING
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_wiki_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.permanent_wiki_view(requested_scope, wiki_kind=args.kind)
+    wiki = result["wiki"]
+    payload = base_response("cornerstone wiki show", "success", root)
+    payload.update(requested_scope)
+    payload["wiki"] = wiki
+    payload["ids"].update({"wiki_id": wiki["wiki_id"]})
+    payload["evidence_refs"].extend([f"wiki:{wiki['wiki_id']}", *[ref for entry in wiki.get("entries", []) for ref in entry.get("source_refs", [])]])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_memory_control_center(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.memory_control_center(requested_scope)
+    control = result["memory_control_center"]
+    payload = base_response("cornerstone memory control-center", "success", root)
+    payload.update(requested_scope)
+    payload["memory_control_center"] = control
+    payload["ids"].update({"memory_control_center_id": control["control_center_id"]})
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_memory_temporary_session(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_temporary_memory_session(args.note, requested_scope)
+    session = result["temporary_session"]
+    payload = base_response("cornerstone memory temporary-session", "success", root)
+    payload.update(requested_scope)
+    payload["temporary_session"] = session
+    payload["ids"].update({"temporary_session_id": session["temporary_session_id"]})
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_memory_correct(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.correct_memory(
+        args.memory_id,
+        corrected_text=args.corrected_text,
+        rationale=args.rationale,
+        evidence_bundle_id=args.evidence_bundle_id,
+        scope=requested_scope,
+    )
+    payload = base_response("cornerstone memory correct", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="MEMORY")
+        print_payload(payload, args.json)
+        return exit_code
+    memory = result["memory"]
+    correction = result["correction"]
+    payload["memory"] = memory
+    payload["correction"] = correction
+    payload["ids"].update({"memory_id": memory["memory_id"], "correction_id": correction["correction_id"]})
+    payload["evidence_refs"].extend(correction.get("evidence_refs", []))
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_memory_control(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.control_memory(args.memory_id, action=args.action, scope=requested_scope)
+    payload = base_response("cornerstone memory control", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="MEMORY_CONTROL")
+        print_payload(payload, args.json)
+        return exit_code
+    control = result["memory_control_action"]
+    memory = result["memory"]
+    payload["memory_control_action"] = control
+    payload["memory"] = memory
+    payload["ids"].update({"memory_id": args.memory_id, "memory_control_action_id": control["memory_control_action_id"]})
+    payload["evidence_refs"].append(f"memory:{args.memory_id}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_memory_freshness(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.check_memory_freshness(args.memory_id, args.newer_evidence_bundle_id, requested_scope)
+    payload = base_response("cornerstone memory freshness", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="MEMORY_FRESHNESS")
+        print_payload(payload, args.json)
+        return exit_code
+    memory = result["memory"]
+    payload["memory"] = memory
+    payload["ids"].update({"memory_id": memory["memory_id"], "newer_evidence_bundle_id": args.newer_evidence_bundle_id})
+    payload["evidence_refs"].extend([f"memory:{memory['memory_id']}", f"evidence_bundle:{args.newer_evidence_bundle_id}", *memory.get("freshness", {}).get("newer_evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_memory_quarantine_check(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.quarantine_memory_attempt(args.artifact_id, args.statement, requested_scope)
+    payload = base_response("cornerstone memory quarantine-check", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="MEMORY_QUARANTINE")
+        print_payload(payload, args.json)
+        return exit_code
+    quarantine = result["memory_quarantine"]
+    payload["memory_quarantine"] = quarantine
+    payload["ids"].update({"memory_quarantine_id": quarantine["memory_quarantine_id"], "artifact_id": args.artifact_id})
+    payload["evidence_refs"].extend(quarantine.get("evidence_refs", []))
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_memory_export(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.export_memory(requested_scope)
+    export = result["memory_export"]
+    payload = base_response("cornerstone memory export", "success", root)
+    payload.update(requested_scope)
+    payload["memory_export"] = export
+    payload["ids"].update({"memory_export_id": export["memory_export_id"]})
+    payload["evidence_refs"].extend([f"memory_export:{export['memory_export_id']}", *[f"memory:{entry['memory_id']}" for entry in export.get("entries", [])]])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_memory_adapt(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.record_memory_adaptation(args.preference, requested_scope, source_memory_id=args.source_memory_id)
+    payload = base_response("cornerstone memory adapt", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="MEMORY_ADAPTATION")
+        print_payload(payload, args.json)
+        return exit_code
+    adaptation = result["memory_adaptation"]
+    payload["memory_adaptation"] = adaptation
+    payload["ids"].update({"memory_adaptation_id": adaptation["memory_adaptation_id"]})
+    payload["evidence_refs"].extend([f"memory_adaptation:{adaptation['memory_adaptation_id']}", *adaptation.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -2213,6 +2394,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_tenant_security_boundary(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
+    elif args.contract == "full-memory-wiki":
+        report = verify_full_memory_wiki(root)
     elif args.contract == "full-understanding-ontology":
         report = verify_full_understanding_ontology(root)
     else:
@@ -2243,6 +2426,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-product-domain-readiness",
                     "vs0-tenant-security-boundary",
                     "full-claim-collaboration",
+                    "full-memory-wiki",
                     "full-understanding-ontology",
                 ],
             }
@@ -2335,6 +2519,16 @@ def build_parser() -> argparse.ArgumentParser:
     walkthrough = product_sub.add_parser("walkthrough", help="Show the first-run product walkthrough")
     walkthrough.add_argument("--json", action="store_true", help="Emit JSON output")
     walkthrough.set_defaults(func=command_product_walkthrough)
+
+    wiki = subcommands.add_parser("wiki", help="Permanent wiki view commands")
+    wiki_sub = wiki.add_subparsers(dest="wiki_command")
+
+    wiki_show = wiki_sub.add_parser("show", help="Show a source-aware permanent wiki view")
+    wiki_show.add_argument("--kind", choices=["personal", "organization", "product-learning"], default="personal", help="Wiki view kind")
+    add_state_argument(wiki_show)
+    add_scope_arguments(wiki_show)
+    wiki_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    wiki_show.set_defaults(func=command_wiki_show)
 
     artifact = subcommands.add_parser("artifact", help="Artifact archive commands")
     artifact_sub = artifact.add_subparsers(dest="artifact_command")
@@ -2625,6 +2819,10 @@ def build_parser() -> argparse.ArgumentParser:
     memory_create = memory_sub.add_parser("create", help="Create owner-approved memory from an Evidence Bundle")
     memory_create.add_argument("--evidence-bundle-id", required=True, help="Evidence Bundle ID")
     memory_create.add_argument("--statement", required=True, help="Memory statement")
+    memory_create.add_argument("--trust-state", choices=["draft", "evidence_backed", "approved"], default="evidence_backed", help="Memory trust state")
+    memory_create.add_argument("--status", choices=["draft", "owner_approved"], default="owner_approved", help="Memory lifecycle status")
+    memory_create.add_argument("--memory-type", default="durable_fact", help="Memory type")
+    memory_create.add_argument("--synthesis-mode", choices=["owner_approved", "auto"], default="owner_approved", help="Memory synthesis mode")
     add_state_argument(memory_create)
     add_scope_arguments(memory_create)
     memory_create.add_argument("--json", action="store_true", help="Emit JSON output")
@@ -2659,6 +2857,67 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(memory_answer)
     memory_answer.add_argument("--json", action="store_true", help="Emit JSON output")
     memory_answer.set_defaults(func=command_memory_answer)
+
+    memory_control_center = memory_sub.add_parser("control-center", help="Show memory sovereignty controls")
+    add_state_argument(memory_control_center)
+    add_scope_arguments(memory_control_center)
+    memory_control_center.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_control_center.set_defaults(func=command_memory_control_center)
+
+    memory_temp = memory_sub.add_parser("temporary-session", help="Run a no-memory local session record")
+    memory_temp.add_argument("--note", required=True, help="Temporary session note")
+    add_state_argument(memory_temp)
+    add_scope_arguments(memory_temp)
+    memory_temp.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_temp.set_defaults(func=command_memory_temporary_session)
+
+    memory_correct = memory_sub.add_parser("correct", help="Correct a memory with owner or evidence provenance")
+    memory_correct.add_argument("memory_id", help="Memory ID")
+    memory_correct.add_argument("--corrected-text", required=True, help="Corrected memory statement")
+    memory_correct.add_argument("--rationale", required=True, help="Correction rationale")
+    memory_correct.add_argument("--evidence-bundle-id", help="Evidence Bundle supporting the correction")
+    add_state_argument(memory_correct)
+    add_scope_arguments(memory_correct)
+    memory_correct.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_correct.set_defaults(func=command_memory_correct)
+
+    memory_control = memory_sub.add_parser("control", help="Apply a memory sovereignty control")
+    memory_control.add_argument("memory_id", help="Memory ID")
+    memory_control.add_argument("--action", required=True, choices=["forget", "rollback", "demote", "promote", "disable-influence", "limit-scope"], help="Control action")
+    add_state_argument(memory_control)
+    add_scope_arguments(memory_control)
+    memory_control.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_control.set_defaults(func=command_memory_control)
+
+    memory_freshness = memory_sub.add_parser("freshness", help="Check memory freshness against newer evidence")
+    memory_freshness.add_argument("memory_id", help="Memory ID")
+    memory_freshness.add_argument("--newer-evidence-bundle-id", required=True, help="Newer Evidence Bundle ID")
+    add_state_argument(memory_freshness)
+    add_scope_arguments(memory_freshness)
+    memory_freshness.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_freshness.set_defaults(func=command_memory_freshness)
+
+    memory_quarantine = memory_sub.add_parser("quarantine-check", help="Quarantine unsafe memory write attempts")
+    memory_quarantine.add_argument("--artifact-id", required=True, help="Source artifact ID")
+    memory_quarantine.add_argument("--statement", required=True, help="Attempted memory statement")
+    add_state_argument(memory_quarantine)
+    add_scope_arguments(memory_quarantine)
+    memory_quarantine.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_quarantine.set_defaults(func=command_memory_quarantine_check)
+
+    memory_export = memory_sub.add_parser("export", help="Export memory and wiki state")
+    add_state_argument(memory_export)
+    add_scope_arguments(memory_export)
+    memory_export.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_export.set_defaults(func=command_memory_export)
+
+    memory_adapt = memory_sub.add_parser("adapt", help="Record namespace-local memory adaptation")
+    memory_adapt.add_argument("--preference", required=True, help="Namespace-local adaptation preference")
+    memory_adapt.add_argument("--source-memory-id", help="Source memory ID")
+    add_state_argument(memory_adapt)
+    add_scope_arguments(memory_adapt)
+    memory_adapt.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_adapt.set_defaults(func=command_memory_adapt)
 
     namespace = subcommands.add_parser("namespace", help="Namespace promotion commands")
     namespace_sub = namespace.add_subparsers(dest="namespace_command")

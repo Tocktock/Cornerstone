@@ -49,24 +49,24 @@ CS-CLAIM-011,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-claim-coll
 CS-CLAIM-012,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-claim-collaboration --json,reports/scenario/full-claim-collaboration-2026-06-09.json,,,,,PASS
 CS-CLAIM-013,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-claim-collaboration --json,reports/scenario/full-claim-collaboration-2026-06-09.json,,,,,PASS
 CS-CLAIM-014,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full-claim-collaboration --json,reports/scenario/full-claim-collaboration-2026-06-09.json,,,,,PASS
-CS-MEM-001,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-001 --json,reports/scenario/cs-mem-001.json,,,,,NOT_VERIFIED
-CS-MEM-002,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-002 --json,reports/scenario/cs-mem-002.json,,,,,NOT_VERIFIED
-CS-MEM-003,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-003 --json,reports/scenario/cs-mem-003.json,,,,,NOT_VERIFIED
-CS-MEM-004,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-004 --json,reports/scenario/cs-mem-004.json,,,,,NOT_VERIFIED
-CS-MEM-005,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-005 --json,reports/scenario/cs-mem-005.json,,,,,NOT_VERIFIED
-CS-MEM-006,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-006 --json,reports/scenario/cs-mem-006.json,,,,,NOT_VERIFIED
-CS-MEM-007,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-007 --json,reports/scenario/cs-mem-007.json,,,,,NOT_VERIFIED
-CS-MEM-008,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-008 --json,reports/scenario/cs-mem-008.json,,,,,NOT_VERIFIED
-CS-MEM-009,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-009 --json,reports/scenario/cs-mem-009.json,,,,,NOT_VERIFIED
-CS-MEM-010,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-010 --json,reports/scenario/cs-mem-010.json,,,,,NOT_VERIFIED
-CS-MEM-011,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-011 --json,reports/scenario/cs-mem-011.json,,,,,NOT_VERIFIED
-CS-MEM-012,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-012 --json,reports/scenario/cs-mem-012.json,,,,,NOT_VERIFIED
-CS-MEM-013,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-013 --json,reports/scenario/cs-mem-013.json,,,,,NOT_VERIFIED
-CS-MEM-014,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-014 --json,reports/scenario/cs-mem-014.json,,,,,NOT_VERIFIED
-CS-MEM-015,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-015 --json,reports/scenario/cs-mem-015.json,,,,,NOT_VERIFIED
-CS-MEM-016,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-016 --json,reports/scenario/cs-mem-016.json,,,,,NOT_VERIFIED
-CS-MEM-017,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-017 --json,reports/scenario/cs-mem-017.json,,,,,NOT_VERIFIED
-CS-MEM-018,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-018 --json,reports/scenario/cs-mem-018.json,,,,,NOT_VERIFIED
+CS-MEM-001,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-002,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-003,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-004,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-005,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-006,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-007,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-008,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-009,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-010,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-011,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-012,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-013,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-014,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-015,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-016,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-017,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
+CS-MEM-018,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-memory-wiki --json,reports/scenario/full-memory-wiki-2026-06-10.json,,,,,PASS
 CS-NS-001,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-namespace-isolation --json,reports/scenario/vs0-namespace-isolation-2026-06-09.json,,,,,PASS
 CS-NS-002,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-detail-surfaces --json,reports/scenario/vs0-detail-surfaces-2026-06-09.json,,,,,PASS
 CS-NS-003,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-namespace-isolation --json,reports/scenario/vs0-namespace-isolation-2026-06-09.json,,,,,PASS

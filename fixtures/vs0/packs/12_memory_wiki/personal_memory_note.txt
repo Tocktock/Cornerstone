@@ -1,0 +1,5 @@
+Personal memory note.
+Anchor: atlas-review-memory-anchor.
+Project Atlas review day is Monday.
+Preference: evidence-first summaries.
+Constraint: keep source references visible in memory answers and wiki views.

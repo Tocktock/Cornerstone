@@ -1,0 +1,5 @@
+Correction evidence.
+Anchor: memory-correction-anchor.
+Project Atlas review day is Friday.
+The previous Monday note was outdated.
+Corrections must preserve source provenance and visible update history.

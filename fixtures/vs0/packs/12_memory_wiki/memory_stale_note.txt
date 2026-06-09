@@ -1,0 +1,4 @@
+Freshness evidence.
+Anchor: memory-freshness-anchor.
+Project Atlas review day changed to Wednesday for the next cycle.
+Freshness checks must warn before stale memory is used as current fact.

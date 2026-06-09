@@ -70,6 +70,30 @@
         "CS-UND-011",
         "CS-UND-012"
       ]
+    },
+    {
+      "id": "pack_12_memory_wiki",
+      "path": "packs/12_memory_wiki/pack.json",
+      "scenario_ids": [
+        "CS-MEM-001",
+        "CS-MEM-002",
+        "CS-MEM-003",
+        "CS-MEM-004",
+        "CS-MEM-005",
+        "CS-MEM-006",
+        "CS-MEM-007",
+        "CS-MEM-008",
+        "CS-MEM-009",
+        "CS-MEM-010",
+        "CS-MEM-011",
+        "CS-MEM-012",
+        "CS-MEM-013",
+        "CS-MEM-014",
+        "CS-MEM-015",
+        "CS-MEM-016",
+        "CS-MEM-017",
+        "CS-MEM-018"
+      ]
     }
   ]
 }

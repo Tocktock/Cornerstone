@@ -39,8 +39,9 @@ memory_truth_json=$(mktemp)
 tenant_security_json=$(mktemp)
 product_domain_json=$(mktemp)
 claim_collaboration_json=$(mktemp)
+memory_wiki_json=$(mktemp)
 understanding_ontology_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$understanding_ontology_json"' EXIT
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$understanding_ontology_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -425,6 +426,32 @@ grep -q '"real_external_http_calls": 0' "$claim_collaboration_json" || fail "ful
 grep -q '"secret_reads": 0' "$claim_collaboration_json" || fail "full-claim-collaboration read secrets"
 grep -q '"product_feature_claims": "PARTIAL_FULL_CLAIM_COLLABORATION_ONLY"' "$claim_collaboration_json" || fail "full-claim-collaboration overclaimed product feature scope"
 
+cornerstone scenario verify full-memory-wiki --json > "$memory_wiki_json"
+python3 -m json.tool "$memory_wiki_json" >/dev/null
+grep -q '"scenario_set": "full-memory-wiki"' "$memory_wiki_json" || fail "full-memory-wiki report missing scenario set"
+grep -q '"blocking": 0' "$memory_wiki_json" || fail "full-memory-wiki report has blocking scenarios"
+grep -q '"pass": 18' "$memory_wiki_json" || fail "full-memory-wiki did not pass exactly eighteen scenarios"
+for scenario_id in CS-MEM-001 CS-MEM-002 CS-MEM-003 CS-MEM-004 CS-MEM-005 CS-MEM-006 CS-MEM-007 CS-MEM-008 CS-MEM-009 CS-MEM-010 CS-MEM-011 CS-MEM-012 CS-MEM-013 CS-MEM-014 CS-MEM-015 CS-MEM-016 CS-MEM-017 CS-MEM-018; do
+  grep -q "\"id\": \"$scenario_id\"" "$memory_wiki_json" || fail "full-memory-wiki missing $scenario_id"
+done
+grep -q '"quarantine_status": "quarantined"' "$memory_wiki_json" || fail "full-memory-wiki missing quarantine evidence"
+grep -q '"status": "needs_review"' "$memory_wiki_json" || fail "full-memory-wiki missing freshness warning"
+grep -q '"conflict_selected_truth_foundation": "archive_evidence"' "$memory_wiki_json" || fail "full-memory-wiki did not prefer archive evidence"
+grep -q '"memory_without_evidence": 0' "$memory_wiki_json" || fail "full-memory-wiki reported memory without evidence"
+grep -q '"raw_memory_used_as_truth": 0' "$memory_wiki_json" || fail "full-memory-wiki used raw memory as truth"
+grep -q '"hidden_profile_created": 0' "$memory_wiki_json" || fail "full-memory-wiki created hidden profile"
+grep -q '"temporary_session_memory_created": 0' "$memory_wiki_json" || fail "full-memory-wiki persisted temporary memory"
+grep -q '"correction_silent_overwrite": 0' "$memory_wiki_json" || fail "full-memory-wiki silently overwrote correction"
+grep -q '"forgotten_memory_used": 0' "$memory_wiki_json" || fail "full-memory-wiki used forgotten memory"
+grep -q '"stale_memory_used_without_warning": 0' "$memory_wiki_json" || fail "full-memory-wiki used stale memory without warning"
+grep -q '"untrusted_memory_promoted": 0' "$memory_wiki_json" || fail "full-memory-wiki promoted untrusted memory"
+grep -q '"product_learning_changed_user_org_truth": 0' "$memory_wiki_json" || fail "full-memory-wiki let product learning change user/org truth"
+grep -q '"cross_namespace_adaptation": 0' "$memory_wiki_json" || fail "full-memory-wiki adapted across namespaces"
+grep -q '"export_missing_sources": 0' "$memory_wiki_json" || fail "full-memory-wiki export missed sources"
+grep -q '"real_external_http_calls": 0' "$memory_wiki_json" || fail "full-memory-wiki reported real external HTTP calls"
+grep -q '"secret_reads": 0' "$memory_wiki_json" || fail "full-memory-wiki read secrets"
+grep -q '"product_feature_claims": "PARTIAL_FULL_MEMORY_WIKI_ONLY"' "$memory_wiki_json" || fail "full-memory-wiki overclaimed product feature scope"
+
 cornerstone scenario verify full-understanding-ontology --json > "$understanding_ontology_json"
 python3 -m json.tool "$understanding_ontology_json" >/dev/null
 grep -q '"scenario_set": "full-understanding-ontology"' "$understanding_ontology_json" || fail "full-understanding-ontology report missing scenario set"
@@ -484,4 +511,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-understanding-ontology verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-understanding-ontology verify, vs0-product-domain-readiness verify, unittest).\n'

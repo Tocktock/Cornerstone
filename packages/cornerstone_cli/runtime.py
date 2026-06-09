@@ -119,6 +119,12 @@ class LocalRuntimeStore:
         self.answer_dir = state_dir / "answers"
         self.memory_dir = state_dir / "memories"
         self.memory_conflict_dir = state_dir / "memory_conflicts"
+        self.wiki_dir = state_dir / "wiki_views"
+        self.memory_control_dir = state_dir / "memory_controls"
+        self.memory_export_dir = state_dir / "memory_exports"
+        self.memory_quarantine_dir = state_dir / "memory_quarantine"
+        self.memory_adaptation_dir = state_dir / "memory_adaptations"
+        self.temporary_session_dir = state_dir / "temporary_sessions"
         self.knowledge_capsule_dir = state_dir / "knowledge_capsules"
         self.decision_card_dir = state_dir / "decision_cards"
         self.correction_dir = state_dir / "corrections"
@@ -237,6 +243,24 @@ class LocalRuntimeStore:
     def memory_conflict_path(self, conflict_id: str) -> Path:
         return self.memory_conflict_dir / f"{conflict_id}.json"
 
+    def wiki_path(self, wiki_id: str) -> Path:
+        return self.wiki_dir / f"{wiki_id}.json"
+
+    def memory_control_path(self, control_id: str) -> Path:
+        return self.memory_control_dir / f"{control_id}.json"
+
+    def memory_export_path(self, export_id: str) -> Path:
+        return self.memory_export_dir / f"{export_id}.json"
+
+    def memory_quarantine_path(self, quarantine_id: str) -> Path:
+        return self.memory_quarantine_dir / f"{quarantine_id}.json"
+
+    def memory_adaptation_path(self, adaptation_id: str) -> Path:
+        return self.memory_adaptation_dir / f"{adaptation_id}.json"
+
+    def temporary_session_path(self, session_id: str) -> Path:
+        return self.temporary_session_dir / f"{session_id}.json"
+
     def knowledge_capsule_path(self, capsule_id: str) -> Path:
         return self.knowledge_capsule_dir / f"{capsule_id}.json"
 
@@ -346,6 +370,24 @@ class LocalRuntimeStore:
 
     def get_memory_conflict(self, conflict_id: str) -> dict[str, Any] | None:
         path = self.memory_conflict_path(conflict_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_memory_control(self, control_id: str) -> dict[str, Any] | None:
+        path = self.memory_control_path(control_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_memory_export(self, export_id: str) -> dict[str, Any] | None:
+        path = self.memory_export_path(export_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_memory_adaptation(self, adaptation_id: str) -> dict[str, Any] | None:
+        path = self.memory_adaptation_path(adaptation_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -495,6 +537,26 @@ class LocalRuntimeStore:
             return []
         records = []
         for path in sorted(self.memory_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _memory_control_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.memory_control_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.memory_control_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _memory_adaptation_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.memory_adaptation_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.memory_adaptation_dir.glob("*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
                 records.append(record)
@@ -716,7 +778,17 @@ class LocalRuntimeStore:
             "generated_at": utc_now(),
         }
 
-    def create_memory_from_evidence_bundle(self, bundle_id: str, statement: str, scope: dict[str, str]) -> dict[str, Any]:
+    def create_memory_from_evidence_bundle(
+        self,
+        bundle_id: str,
+        statement: str,
+        scope: dict[str, str],
+        *,
+        trust_state: str = "evidence_backed",
+        status: str = "owner_approved",
+        memory_type: str = "durable_fact",
+        synthesis_mode: str = "owner_approved",
+    ) -> dict[str, Any]:
         bundle = self.get_evidence_bundle(bundle_id)
         if bundle is None:
             return {"status": "not_found", "resource": "evidence_bundle"}
@@ -728,11 +800,13 @@ class LocalRuntimeStore:
         if not evidence_items or not artifact_refs:
             return {"status": "evidence_required"}
 
+        influence_answers = status == "owner_approved" and trust_state in {"evidence_backed", "approved"}
+        influence_actions = status == "owner_approved" and trust_state == "approved"
         memory_base = {
             "schema_version": "cs.memory.v0",
-            "status": "owner_approved",
-            "trust_state": "evidence_backed",
-            "memory_type": "durable_fact",
+            "status": status,
+            "trust_state": trust_state,
+            "memory_type": memory_type,
             "statement": redact_text(statement),
             "scope": scope,
             "source": {
@@ -741,19 +815,58 @@ class LocalRuntimeStore:
                 "evidence_bundle_id": bundle_id,
                 "search_snapshot_id": bundle.get("search_snapshot_id"),
                 "artifact_refs": artifact_refs,
+                "synthesis_mode": synthesis_mode,
             },
             "provenance": {
                 "source_evidence_bundle_id": bundle_id,
                 "source_search_snapshot_id": bundle.get("search_snapshot_id"),
                 "source_artifact_refs": artifact_refs,
-                "created_from": "owner_approved_memory_create",
+                "created_from": f"{synthesis_mode}_memory_create",
             },
             "canonicality": {
                 "canonical_truth_foundation": "archive_evidence",
                 "raw_agent_memory_canonical": False,
-                "owner_approved": True,
+                "owner_approved": status == "owner_approved",
                 "requires_evidence_for_truth_claims": True,
             },
+            "synthesis": {
+                "living_synthesis": True,
+                "raw_truth": False,
+                "source_count": len(evidence_items),
+                "confidence": "medium" if trust_state == "draft" else "high",
+                "why_written": "Synthesized from an Evidence Bundle with source artifacts.",
+                "auto_synthesized": synthesis_mode == "auto",
+                "user_visible_source": True,
+            },
+            "freshness": {
+                "status": "current",
+                "last_reviewed_at": utc_now(),
+                "stale_after_days": 90,
+                "warning_visible": False,
+            },
+            "usage_permissions": {
+                "can_influence_answers": influence_answers,
+                "can_influence_actions": influence_actions,
+                "can_influence_routing": influence_answers,
+                "requires_review_before_action_use": trust_state != "approved",
+                "allowed_scope": scope,
+            },
+            "identity_visibility": {
+                "user_owned_permanent_wiki": True,
+                "hidden_profile": False,
+                "inspectable": True,
+                "controllable": True,
+            },
+            "update_history": [
+                {
+                    "event": "created",
+                    "statement": redact_text(statement),
+                    "trust_state": trust_state,
+                    "status": status,
+                    "evidence_refs": [f"evidence_bundle:{bundle_id}", *artifact_refs],
+                    "created_at": utc_now(),
+                }
+            ],
             "evidence_refs": [
                 f"evidence_bundle:{bundle_id}",
                 f"search_snapshot:{bundle.get('search_snapshot_id')}",
@@ -773,6 +886,9 @@ class LocalRuntimeStore:
                 "evidence_bundle_id": bundle_id,
                 "artifact_refs": artifact_refs,
                 "canonical_truth_foundation": memory["canonicality"]["canonical_truth_foundation"],
+                "trust_state": trust_state,
+                "status": status,
+                "synthesis_mode": synthesis_mode,
             },
         )
         return {"memory": memory, "audit_event": event}
@@ -804,6 +920,33 @@ class LocalRuntimeStore:
                 "requires_evidence_for_truth_claims": True,
             },
             "evidence_refs": [],
+            "freshness": {
+                "status": "unverified",
+                "warning_visible": True,
+            },
+            "usage_permissions": {
+                "can_influence_answers": False,
+                "can_influence_actions": False,
+                "can_influence_routing": False,
+                "requires_review_before_action_use": True,
+                "allowed_scope": scope,
+            },
+            "identity_visibility": {
+                "user_owned_permanent_wiki": True,
+                "hidden_profile": False,
+                "inspectable": True,
+                "controllable": True,
+            },
+            "update_history": [
+                {
+                    "event": "raw_agent_candidate_created",
+                    "statement": redact_text(statement),
+                    "trust_state": "unverified",
+                    "status": "raw_agent_memory",
+                    "evidence_refs": [],
+                    "created_at": utc_now(),
+                }
+            ],
             "created_at": utc_now(),
         }
         memory_id = f"memory_{_json_hash(memory_base)[:16]}"
@@ -922,6 +1065,509 @@ class LocalRuntimeStore:
             {"reason": "cli_memory_show"},
         )
         return {"memory": memory, "audit_event": event}
+
+    def permanent_wiki_view(self, scope: dict[str, str], *, wiki_kind: str) -> dict[str, Any]:
+        memories = self._memory_records(scope)
+        claims = self._claim_records(scope)
+        missions = self._mission_records(scope)
+        actions = self._action_records(scope)
+        learning_records = self._learning_records(scope)
+        adaptations = self._memory_adaptation_records(scope)
+        promotions = self._namespace_promotion_records(scope)
+        if wiki_kind == "product-learning":
+            entries = [
+                {
+                    "entry_id": f"learning:{learning['learning_id']}",
+                    "entry_type": "product_learning",
+                    "title": learning.get("lesson"),
+                    "trust_state": "review_required",
+                    "source_refs": learning.get("evidence_refs", []),
+                    "changes_user_or_org_truth": learning.get("learning_boundary", {}).get("changes_user_or_org_truth"),
+                    "requires_review_before_memory_update": learning.get("learning_boundary", {}).get("requires_review_before_memory_update"),
+                    "scope": learning.get("scope"),
+                }
+                for learning in learning_records
+            ]
+            wiki_scope = {**scope, "namespace_id": "product_learning"}
+        else:
+            entries = []
+            for memory in memories:
+                entries.append(
+                    {
+                        "entry_id": f"memory:{memory['memory_id']}",
+                        "entry_type": "memory",
+                        "title": memory.get("statement"),
+                        "memory_type": memory.get("memory_type"),
+                        "status": memory.get("status"),
+                        "trust_state": memory.get("trust_state"),
+                        "freshness": memory.get("freshness"),
+                        "source_refs": memory.get("evidence_refs", []),
+                        "source": memory.get("source"),
+                        "update_history": memory.get("update_history", []),
+                        "correction_history": memory.get("correction_history", []),
+                        "usage_permissions": memory.get("usage_permissions", {}),
+                        "hidden_profile": memory.get("identity_visibility", {}).get("hidden_profile", False),
+                    }
+                )
+            for claim in claims:
+                entries.append(
+                    {
+                        "entry_id": f"claim:{claim['claim_id']}",
+                        "entry_type": "claim",
+                        "title": claim.get("statement"),
+                        "status": claim.get("status"),
+                        "trust_state": claim.get("trust_state"),
+                        "source_refs": self._claim_evidence_refs(claim),
+                    }
+                )
+            for mission in missions:
+                entries.append(
+                    {
+                        "entry_id": f"mission:{mission['mission_id']}",
+                        "entry_type": "mission",
+                        "title": mission.get("goal"),
+                        "status": mission.get("status"),
+                        "source_refs": mission.get("evidence", {}).get("artifact_refs", []),
+                    }
+                )
+            for action in actions:
+                entries.append(
+                    {
+                        "entry_id": f"action:{action['action_id']}",
+                        "entry_type": "action_history",
+                        "title": action.get("goal"),
+                        "status": action.get("execution", {}).get("status"),
+                        "source_refs": action.get("evidence", {}).get("artifact_refs", []),
+                    }
+                )
+            wiki_scope = scope
+
+        wiki_base = {
+            "schema_version": "cs.permanent_wiki_view.v0",
+            "wiki_kind": wiki_kind,
+            "scope": wiki_scope,
+            "status": "ready",
+            "source_aware": True,
+            "living_synthesis_not_raw_truth": True,
+            "archive_truth_foundation": True,
+            "entries": entries,
+            "entry_count": len(entries),
+            "update_history_visible": True,
+            "correction_history_count": sum(len(memory.get("correction_history", [])) for memory in memories),
+            "namespace_promotion_count": len(promotions),
+            "adaptation_count": len(adaptations),
+            "controls_available": [
+                "inspect",
+                "correct",
+                "demote",
+                "promote",
+                "forget",
+                "rollback",
+                "disable_influence",
+                "limit_scope",
+                "export",
+            ],
+            "identity_policy": {
+                "personal_memory_is_user_owned_wiki": wiki_kind == "personal",
+                "organization_memory_is_governed": wiki_kind == "organization",
+                "product_learning_separate_from_user_org_truth": wiki_kind == "product-learning",
+                "hidden_profile": False,
+            },
+            "created_at": utc_now(),
+        }
+        wiki_id = f"wiki_{_json_hash(wiki_base)[:16]}"
+        wiki = dict(wiki_base)
+        wiki["wiki_id"] = wiki_id
+        _write_json(self.wiki_path(wiki_id), wiki)
+        event = self.append_audit(
+            "wiki.view.generated",
+            scope,
+            {"type": "permanent_wiki_view", "id": wiki_id},
+            {"wiki_kind": wiki_kind, "entry_count": len(entries), "source_aware": True},
+        )
+        return {"wiki": wiki, "audit_event": event}
+
+    def memory_control_center(self, scope: dict[str, str]) -> dict[str, Any]:
+        memories = self._memory_records(scope)
+        control_base = {
+            "schema_version": "cs.memory_control_center.v0",
+            "scope": scope,
+            "status": "ready",
+            "memory_count": len(memories),
+            "controls": {
+                "inspect": True,
+                "correct": True,
+                "demote": True,
+                "promote": True,
+                "forget": True,
+                "rollback": True,
+                "disable_influence": True,
+                "limit_scope": True,
+                "export": True,
+            },
+            "influence_controls": {
+                "answers": True,
+                "actions": True,
+                "routing": True,
+                "autonomous_behavior": True,
+            },
+            "entries": [
+                {
+                    "memory_id": memory["memory_id"],
+                    "status": memory.get("status"),
+                    "trust_state": memory.get("trust_state"),
+                    "freshness": memory.get("freshness", {}),
+                    "usage_permissions": memory.get("usage_permissions", {}),
+                    "source_refs": memory.get("evidence_refs", []),
+                    "correction_history_count": len(memory.get("correction_history", [])),
+                    "update_history_count": len(memory.get("update_history", [])),
+                }
+                for memory in memories
+            ],
+            "hidden_profile": False,
+            "created_at": utc_now(),
+        }
+        control_id = f"memctrl_{_json_hash(control_base)[:16]}"
+        control = dict(control_base)
+        control["control_center_id"] = control_id
+        _write_json(self.memory_control_path(control_id), control)
+        event = self.append_audit(
+            "memory.control_center.opened",
+            scope,
+            {"type": "memory_control_center", "id": control_id},
+            {"memory_count": len(memories), "controls": list(control["controls"].keys())},
+        )
+        return {"memory_control_center": control, "audit_event": event}
+
+    def create_temporary_memory_session(self, note: str, scope: dict[str, str]) -> dict[str, Any]:
+        before_count = len(self._memory_records(scope))
+        session_base = {
+            "schema_version": "cs.temporary_memory_session.v0",
+            "status": "completed",
+            "scope": scope,
+            "note": redact_text(note),
+            "memory_mode": "no_memory",
+            "permanent_memory_created": False,
+            "memory_count_before": before_count,
+            "memory_count_after": before_count,
+            "security_and_audit_rules_still_apply": True,
+            "created_at": utc_now(),
+        }
+        session_id = f"tempsess_{_json_hash(session_base)[:16]}"
+        session = dict(session_base)
+        session["temporary_session_id"] = session_id
+        _write_json(self.temporary_session_path(session_id), session)
+        event = self.append_audit(
+            "memory.temporary_session.completed",
+            scope,
+            {"type": "temporary_memory_session", "id": session_id},
+            {"permanent_memory_created": False, "memory_mode": "no_memory"},
+        )
+        return {"temporary_session": session, "audit_event": event}
+
+    def correct_memory(
+        self,
+        memory_id: str,
+        *,
+        corrected_text: str,
+        rationale: str,
+        evidence_bundle_id: str | None,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        memory = self.get_memory(memory_id)
+        if memory is None:
+            return {"status": "not_found", "resource": "memory"}
+        if memory.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": memory.get("scope")}
+        bundle = self.get_evidence_bundle(evidence_bundle_id) if evidence_bundle_id else None
+        if evidence_bundle_id and bundle is None:
+            return {"status": "not_found", "resource": "evidence_bundle"}
+        if bundle and bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        evidence_refs = [f"memory:{memory_id}"]
+        if bundle:
+            evidence_refs.extend(
+                [
+                    f"evidence_bundle:{evidence_bundle_id}",
+                    f"search_snapshot:{bundle.get('search_snapshot_id')}",
+                    *[f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", [])],
+                ]
+            )
+        else:
+            evidence_refs.append("owner_judgment:local-user")
+
+        correction_base = {
+            "schema_version": "cs.correction.v0",
+            "status": "recorded",
+            "scope": scope,
+            "target": {
+                "kind": "memory",
+                "id": memory_id,
+                "original_trust_state": memory.get("trust_state"),
+                "original_provenance": memory.get("provenance"),
+            },
+            "correction": {
+                "corrected_text": redact_text(corrected_text),
+                "rationale": redact_text(rationale),
+                "source_type": "evidence_bundle" if bundle else "owner_judgment",
+            },
+            "learning_signal": {
+                "signal_type": "human_evidence_aware_correction",
+                "used_for_silent_overwrite": False,
+                "requires_review_before_memory_update": True,
+            },
+            "evidence_refs": evidence_refs,
+            "provenance_preserved": True,
+            "created_at": utc_now(),
+        }
+        correction_id = f"correction_{_json_hash(correction_base)[:16]}"
+        correction = dict(correction_base)
+        correction["correction_id"] = correction_id
+        updated = dict(memory)
+        previous_statement = memory.get("statement")
+        updated["statement"] = redact_text(corrected_text)
+        updated["status"] = "owner_approved"
+        updated["freshness"] = {**updated.get("freshness", {}), "status": "current", "warning_visible": False, "last_reviewed_at": utc_now()}
+        updated["provenance"] = {**updated.get("provenance", {}), "last_correction_id": correction_id}
+        correction_history = list(updated.get("correction_history", []))
+        correction_history.append({"correction_id": correction_id, "evidence_refs": evidence_refs, "silent_overwrite": False, "corrected_at": correction["created_at"]})
+        updated["correction_history"] = correction_history
+        update_history = list(updated.get("update_history", []))
+        update_history.append(
+            {
+                "event": "corrected",
+                "previous_statement": previous_statement,
+                "statement": updated["statement"],
+                "correction_id": correction_id,
+                "evidence_refs": evidence_refs,
+                "created_at": correction["created_at"],
+            }
+        )
+        updated["update_history"] = update_history
+        _write_json(self.correction_path(correction_id), correction)
+        _write_json(self.memory_path(memory_id), updated)
+        event = self.append_audit(
+            "memory.corrected",
+            scope,
+            {"type": "memory", "id": memory_id},
+            {"correction_id": correction_id, "source_type": correction["correction"]["source_type"], "silent_overwrite": False},
+        )
+        return {"correction": correction, "memory": updated, "audit_event": event}
+
+    def control_memory(self, memory_id: str, *, action: str, scope: dict[str, str]) -> dict[str, Any]:
+        memory = self.get_memory(memory_id)
+        if memory is None:
+            return {"status": "not_found", "resource": "memory"}
+        if memory.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": memory.get("scope")}
+        updated = dict(memory)
+        previous = {
+            "status": memory.get("status"),
+            "trust_state": memory.get("trust_state"),
+            "statement": memory.get("statement"),
+            "usage_permissions": memory.get("usage_permissions", {}),
+        }
+        if action == "forget":
+            updated["status"] = "forgotten"
+            updated["usage_permissions"] = {**updated.get("usage_permissions", {}), "can_influence_answers": False, "can_influence_actions": False, "can_influence_routing": False}
+            updated["retention_note"] = "Memory is disabled for future use; underlying archive and audit evidence remain according to retention policy."
+        elif action == "rollback":
+            rollback_statement = None
+            for entry in reversed(updated.get("update_history", [])):
+                if entry.get("previous_statement"):
+                    rollback_statement = entry["previous_statement"]
+                    break
+            if rollback_statement:
+                updated["statement"] = rollback_statement
+            updated["status"] = "owner_approved"
+            updated["usage_permissions"] = {**updated.get("usage_permissions", {}), "can_influence_answers": True}
+        elif action == "demote":
+            updated["trust_state"] = "draft"
+            updated["usage_permissions"] = {**updated.get("usage_permissions", {}), "can_influence_actions": False, "requires_review_before_action_use": True}
+        elif action == "promote":
+            updated["trust_state"] = "approved"
+            updated["status"] = "owner_approved"
+            updated["usage_permissions"] = {**updated.get("usage_permissions", {}), "can_influence_answers": True, "can_influence_actions": True, "requires_review_before_action_use": False}
+        elif action == "disable-influence":
+            updated["usage_permissions"] = {**updated.get("usage_permissions", {}), "can_influence_answers": False, "can_influence_actions": False, "can_influence_routing": False}
+        elif action == "limit-scope":
+            updated["usage_permissions"] = {**updated.get("usage_permissions", {}), "allowed_scope": scope, "limited_to_active_scope": True}
+        else:
+            return {"status": "invalid_action", "resource": "memory"}
+
+        control_base = {
+            "schema_version": "cs.memory_control_action.v0",
+            "status": "recorded",
+            "scope": scope,
+            "memory_id": memory_id,
+            "action": action,
+            "previous": previous,
+            "current": {
+                "status": updated.get("status"),
+                "trust_state": updated.get("trust_state"),
+                "statement": updated.get("statement"),
+                "usage_permissions": updated.get("usage_permissions", {}),
+            },
+            "archive_evidence_retained": True,
+            "created_at": utc_now(),
+        }
+        control_id = f"memact_{_json_hash(control_base)[:16]}"
+        control = dict(control_base)
+        control["memory_control_action_id"] = control_id
+        history = list(updated.get("update_history", []))
+        history.append({"event": f"control:{action}", "control_id": control_id, "created_at": control["created_at"], "previous": previous, "current": control["current"]})
+        updated["update_history"] = history
+        _write_json(self.memory_control_path(control_id), control)
+        _write_json(self.memory_path(memory_id), updated)
+        event = self.append_audit(
+            "memory.control.applied",
+            scope,
+            {"type": "memory_control_action", "id": control_id},
+            {"memory_id": memory_id, "action": action, "archive_evidence_retained": True},
+        )
+        return {"memory_control_action": control, "memory": updated, "audit_event": event}
+
+    def check_memory_freshness(self, memory_id: str, newer_evidence_bundle_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        memory = self.get_memory(memory_id)
+        if memory is None:
+            return {"status": "not_found", "resource": "memory"}
+        if memory.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": memory.get("scope")}
+        bundle = self.get_evidence_bundle(newer_evidence_bundle_id)
+        if bundle is None:
+            return {"status": "not_found", "resource": "evidence_bundle"}
+        if bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        old_refs = set(memory.get("source", {}).get("artifact_refs", []))
+        new_refs = {f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", [])}
+        needs_review = bool(new_refs and new_refs != old_refs)
+        updated = dict(memory)
+        updated["freshness"] = {
+            **updated.get("freshness", {}),
+            "status": "needs_review" if needs_review else "current",
+            "warning_visible": needs_review,
+            "newer_evidence_bundle_id": newer_evidence_bundle_id,
+            "newer_evidence_refs": sorted(new_refs),
+            "used_as_current_fact_without_warning": False,
+            "checked_at": utc_now(),
+        }
+        _write_json(self.memory_path(memory_id), updated)
+        event = self.append_audit(
+            "memory.freshness.checked",
+            scope,
+            {"type": "memory", "id": memory_id},
+            {"status": updated["freshness"]["status"], "warning_visible": updated["freshness"]["warning_visible"]},
+        )
+        return {"memory": updated, "audit_event": event}
+
+    def quarantine_memory_attempt(self, artifact_id: str, statement: str, scope: dict[str, str]) -> dict[str, Any]:
+        artifact = self.get_artifact(artifact_id, scope)
+        if artifact is None:
+            return {"status": "not_found", "resource": "artifact"}
+        if artifact.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": artifact.get("scope")}
+        text = f"{self._derived_text(artifact)}\n{statement}"
+        blocked_patterns = detect_unsafe_instructions(text)
+        unsafe = bool(blocked_patterns) or artifact.get("safety", {}).get("unsafe_instruction_detected") is True or artifact.get("safety", {}).get("untrusted_evidence") is True
+        quarantine_base = {
+            "schema_version": "cs.memory_quarantine.v0",
+            "status": "quarantined" if unsafe else "allowed_for_review",
+            "scope": scope,
+            "artifact_id": artifact_id,
+            "statement": redact_text(statement),
+            "blocked_patterns": blocked_patterns,
+            "memory_created": False,
+            "trusted_memory_created": False,
+            "requires_owner_review": True,
+            "reason": "Untrusted or unsafe content cannot write trusted memory without evidence, confidence, scope, and review.",
+            "evidence_refs": [f"artifact:{artifact_id}", f"storage:{artifact.get('original_storage_ref')}"],
+            "created_at": utc_now(),
+        }
+        quarantine_id = f"memq_{_json_hash(quarantine_base)[:16]}"
+        quarantine = dict(quarantine_base)
+        quarantine["memory_quarantine_id"] = quarantine_id
+        _write_json(self.memory_quarantine_path(quarantine_id), quarantine)
+        event = self.append_audit(
+            "memory.write.quarantined",
+            scope,
+            {"type": "memory_quarantine", "id": quarantine_id},
+            {"artifact_id": artifact_id, "memory_created": False, "requires_owner_review": True},
+        )
+        return {"memory_quarantine": quarantine, "audit_event": event}
+
+    def export_memory(self, scope: dict[str, str]) -> dict[str, Any]:
+        memories = self._memory_records(scope)
+        export_base = {
+            "schema_version": "cs.memory_export.v0",
+            "status": "ready",
+            "scope": scope,
+            "format": "json",
+            "entry_count": len(memories),
+            "entries": [
+                {
+                    "memory_id": memory["memory_id"],
+                    "statement": memory.get("statement"),
+                    "memory_type": memory.get("memory_type"),
+                    "status": memory.get("status"),
+                    "trust_state": memory.get("trust_state"),
+                    "freshness": memory.get("freshness", {}),
+                    "source": memory.get("source"),
+                    "evidence_refs": memory.get("evidence_refs", []),
+                    "correction_history": memory.get("correction_history", []),
+                    "owner_namespace": memory.get("scope"),
+                    "usage_permissions": memory.get("usage_permissions", {}),
+                }
+                for memory in memories
+            ],
+            "understandable": True,
+            "created_at": utc_now(),
+        }
+        export_id = f"memexport_{_json_hash(export_base)[:16]}"
+        export = dict(export_base)
+        export["memory_export_id"] = export_id
+        _write_json(self.memory_export_path(export_id), export)
+        event = self.append_audit(
+            "memory.export.created",
+            scope,
+            {"type": "memory_export", "id": export_id},
+            {"entry_count": len(memories), "format": "json"},
+        )
+        return {"memory_export": export, "audit_event": event}
+
+    def record_memory_adaptation(self, preference: str, scope: dict[str, str], *, source_memory_id: str | None = None) -> dict[str, Any]:
+        evidence_refs: list[str] = []
+        if source_memory_id:
+            memory = self.get_memory(source_memory_id)
+            if memory is None:
+                return {"status": "not_found", "resource": "memory"}
+            if memory.get("scope") != scope:
+                return {"status": "scope_denied", "resource_scope": memory.get("scope")}
+            evidence_refs.append(f"memory:{source_memory_id}")
+            evidence_refs.extend(memory.get("evidence_refs", []))
+        adaptation_base = {
+            "schema_version": "cs.memory_adaptation.v0",
+            "status": "active",
+            "scope": scope,
+            "preference": redact_text(preference),
+            "source_memory_id": source_memory_id,
+            "evidence_refs": evidence_refs,
+            "namespace_local": True,
+            "changes_product_defaults": False,
+            "changes_other_namespaces": False,
+            "governed_and_versioned": True,
+            "created_at": utc_now(),
+        }
+        adaptation_id = f"adapt_{_json_hash(adaptation_base)[:16]}"
+        adaptation = dict(adaptation_base)
+        adaptation["memory_adaptation_id"] = adaptation_id
+        _write_json(self.memory_adaptation_path(adaptation_id), adaptation)
+        event = self.append_audit(
+            "memory.adaptation.recorded",
+            scope,
+            {"type": "memory_adaptation", "id": adaptation_id},
+            {"namespace_local": True, "changes_other_namespaces": False},
+        )
+        return {"memory_adaptation": adaptation, "audit_event": event}
 
     def _access_decision_record(
         self,
@@ -1209,6 +1855,8 @@ class LocalRuntimeStore:
             haystack = statement.lower()
             if memory.get("status") != "owner_approved" or not memory.get("evidence_refs"):
                 continue
+            if memory.get("usage_permissions", {}).get("can_influence_answers") is False:
+                continue
             if any(term in haystack for term in terms):
                 matching_memories.append(memory)
 
@@ -1287,6 +1935,14 @@ class LocalRuntimeStore:
             "used_memory_refs": used_memory_refs,
             "evidence_refs": list(memory.get("evidence_refs", [])),
             "statement": memory.get("statement"),
+            "memory_use_explanation": {
+                "why_this_context": "Matched an owner-approved active-scope memory with evidence refs.",
+                "used_memory_refs": used_memory_refs,
+                "source_evidence_refs": list(memory.get("evidence_refs", [])),
+                "freshness": memory.get("freshness", {}),
+                "trust_state": memory.get("trust_state"),
+                "can_correct_or_disable": True,
+            },
             "context_boundary": {
                 "active_scope_only": True,
                 "implicit_cross_namespace_context": False,
