@@ -5,6 +5,7 @@ import json
 import re
 import shutil
 from datetime import datetime, timezone
+from time import perf_counter
 from pathlib import Path
 from typing import Any
 
@@ -124,11 +125,293 @@ class LocalRuntimeStore:
     def artifact_path(self, artifact_id: str) -> Path:
         return self.record_dir / f"{artifact_id}.json"
 
+    def search_snapshot_path(self, snapshot_id: str) -> Path:
+        return self.state_dir / "search" / "snapshots" / f"{snapshot_id}.json"
+
+    def evidence_bundle_path(self, bundle_id: str) -> Path:
+        return self.state_dir / "evidence" / "bundles" / f"{bundle_id}.json"
+
+    def claim_path(self, claim_id: str) -> Path:
+        return self.state_dir / "claims" / f"{claim_id}.json"
+
     def get_artifact(self, artifact_id: str) -> dict[str, Any] | None:
         path = self.artifact_path(artifact_id)
         if not path.exists():
             return None
         return _read_json(path)
+
+    def get_search_snapshot(self, snapshot_id: str) -> dict[str, Any] | None:
+        path = self.search_snapshot_path(snapshot_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_evidence_bundle(self, bundle_id: str) -> dict[str, Any] | None:
+        path = self.evidence_bundle_path(bundle_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_claim(self, claim_id: str) -> dict[str, Any] | None:
+        path = self.claim_path(claim_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def _artifact_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.record_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.record_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _derived_text(self, artifact: dict[str, Any]) -> str:
+        text_ref = artifact.get("derived", {}).get("text_ref")
+        if not text_ref:
+            return ""
+        path = self.artifact_dir / text_ref
+        if not path.exists():
+            return ""
+        return path.read_text()
+
+    def search(self, query: str, *, tenant_id: str, owner_id: str, namespace_id: str, workspace_id: str) -> dict[str, Any]:
+        started = perf_counter()
+        scope = {
+            "tenant_id": tenant_id,
+            "owner_id": owner_id,
+            "namespace_id": namespace_id,
+            "workspace_id": workspace_id,
+        }
+        query_terms = [term for term in re.findall(r"[a-z0-9-]+", query.lower()) if term]
+        results: list[dict[str, Any]] = []
+        for artifact in self._artifact_records(scope):
+            text = self._derived_text(artifact)
+            haystack = text.lower()
+            score = 0
+            if query.lower() in haystack:
+                score += 10
+            score += sum(1 for term in query_terms if term in haystack)
+            if score <= 0:
+                continue
+            first_term = next((term for term in query_terms if term in haystack), "")
+            start = haystack.find(first_term) if first_term else 0
+            start = max(start, 0)
+            snippet = text[start : start + 180].replace("\n", " ").strip()
+            results.append(
+                {
+                    "artifact_id": artifact["artifact_id"],
+                    "score": score,
+                    "snippet": snippet,
+                    "derived_text_ref": artifact.get("derived", {}).get("text_ref"),
+                    "original_storage_ref": artifact.get("original_storage_ref"),
+                    "evidence_refs": [
+                        f"artifact:{artifact['artifact_id']}",
+                        f"storage:{artifact['original_storage_ref']}",
+                    ],
+                }
+            )
+        results.sort(key=lambda row: (-int(row["score"]), row["artifact_id"]))
+        duration_ms = round((perf_counter() - started) * 1000, 3)
+        snapshot_base = {
+            "schema_version": "cs.search_snapshot.v0",
+            "query": query,
+            "filters": scope,
+            "result_count": len(results),
+            "results": results,
+            "created_at": utc_now(),
+            "duration_ms": duration_ms,
+        }
+        snapshot_id = f"search_{_json_hash(snapshot_base)[:16]}"
+        snapshot = dict(snapshot_base)
+        snapshot["search_snapshot_id"] = snapshot_id
+        _write_json(self.search_snapshot_path(snapshot_id), snapshot)
+        event = self.append_audit(
+            "search.snapshot.created",
+            scope,
+            {"type": "search_snapshot", "id": snapshot_id},
+            {"query": query, "result_count": len(results), "duration_ms": duration_ms},
+        )
+        return {"snapshot": snapshot, "audit_event": event}
+
+    def create_evidence_bundle(self, snapshot_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        snapshot = self.get_search_snapshot(snapshot_id)
+        if snapshot is None:
+            return {"status": "not_found"}
+        if snapshot.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": snapshot.get("filters")}
+        evidence_items = []
+        for result in snapshot.get("results", []):
+            artifact = self.get_artifact(result["artifact_id"])
+            if artifact is None:
+                return {"status": "not_found", "artifact_id": result["artifact_id"]}
+            if artifact.get("scope") != scope:
+                return {"status": "scope_denied", "resource_scope": artifact.get("scope")}
+            derived_text = self._derived_text(artifact)
+            snippet = result.get("snippet") or derived_text[:180].replace("\n", " ").strip()
+            if not snippet:
+                continue
+            evidence_items.append(
+                {
+                    "artifact_id": artifact["artifact_id"],
+                    "search_snapshot_id": snapshot_id,
+                    "snippet": snippet,
+                    "original_storage_ref": artifact.get("original_storage_ref"),
+                    "derived_text_ref": artifact.get("derived", {}).get("text_ref"),
+                    "source": artifact.get("source"),
+                    "provenance": artifact.get("provenance"),
+                }
+            )
+        bundle_base = {
+            "schema_version": "cs.evidence_bundle.v0",
+            "search_snapshot_id": snapshot_id,
+            "query": snapshot["query"],
+            "filters": scope,
+            "result_snapshot": {
+                "search_snapshot_id": snapshot_id,
+                "query": snapshot["query"],
+                "filters": scope,
+                "result_count": snapshot.get("result_count", 0),
+                "results": snapshot.get("results", []),
+            },
+            "evidence_items": evidence_items,
+            "created_at": utc_now(),
+        }
+        bundle_id = f"evb_{_json_hash(bundle_base)[:16]}"
+        bundle = dict(bundle_base)
+        bundle["evidence_bundle_id"] = bundle_id
+        _write_json(self.evidence_bundle_path(bundle_id), bundle)
+        event = self.append_audit(
+            "evidence_bundle.created",
+            scope,
+            {"type": "evidence_bundle", "id": bundle_id},
+            {"search_snapshot_id": snapshot_id, "evidence_item_count": len(evidence_items)},
+        )
+        return {"bundle": bundle, "audit_event": event}
+
+    def show_evidence_bundle(self, bundle_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        bundle = self.get_evidence_bundle(bundle_id)
+        if bundle is None:
+            return {"status": "not_found"}
+        if bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        event = self.append_audit(
+            "evidence_bundle.read",
+            scope,
+            {"type": "evidence_bundle", "id": bundle_id},
+            {"reason": "cli_evidence_bundle_show"},
+        )
+        return {"bundle": bundle, "audit_event": event}
+
+    def view_evidence_bundle(self, bundle_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        bundle = self.get_evidence_bundle(bundle_id)
+        if bundle is None:
+            return {"status": "not_found"}
+        if bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+
+        viewer_items = []
+        for item in bundle.get("evidence_items", []):
+            artifact = self.get_artifact(item["artifact_id"])
+            if artifact is None:
+                return {"status": "not_found", "artifact_id": item["artifact_id"]}
+            if artifact.get("scope") != scope:
+                return {"status": "scope_denied", "resource_scope": artifact.get("scope")}
+            derived_text = self._derived_text(artifact)
+            viewer_items.append(
+                {
+                    "artifact_id": artifact["artifact_id"],
+                    "original": {
+                        "storage_ref": artifact.get("original_storage_ref"),
+                        "media_type": artifact.get("media_type"),
+                        "source": artifact.get("source"),
+                        "raw_original_access": artifact.get("raw_original_access"),
+                        "size_bytes": artifact.get("original_size_bytes"),
+                    },
+                    "derived": {
+                        "text_ref": artifact.get("derived", {}).get("text_ref"),
+                        "status": artifact.get("derived", {}).get("status"),
+                        "text_preview": derived_text[:240].replace("\n", " ").strip(),
+                        "metadata": artifact.get("derived"),
+                    },
+                    "provenance": artifact.get("provenance"),
+                    "snippet": item.get("snippet"),
+                }
+            )
+
+        viewer_base = {
+            "schema_version": "cs.evidence_viewer.v0",
+            "evidence_bundle_id": bundle_id,
+            "search_snapshot_id": bundle.get("search_snapshot_id"),
+            "query": bundle.get("query"),
+            "filters": scope,
+            "viewer_items": viewer_items,
+            "opened_at": utc_now(),
+        }
+        viewer_id = f"viewer_{_json_hash(viewer_base)[:16]}"
+        viewer = dict(viewer_base)
+        viewer["evidence_viewer_id"] = viewer_id
+        event = self.append_audit(
+            "evidence_bundle.viewed",
+            scope,
+            {"type": "evidence_viewer", "id": viewer_id},
+            {"evidence_bundle_id": bundle_id, "viewer_item_count": len(viewer_items)},
+        )
+        return {"viewer": viewer, "audit_event": event}
+
+    def create_claim_from_evidence_bundle(self, bundle_id: str, statement: str, scope: dict[str, str]) -> dict[str, Any]:
+        bundle = self.get_evidence_bundle(bundle_id)
+        if bundle is None:
+            return {"status": "not_found"}
+        if bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+
+        claim_base = {
+            "schema_version": "cs.claim.v0",
+            "status": "draft",
+            "statement": statement,
+            "scope": scope,
+            "evidence_bundle": {
+                "evidence_bundle_id": bundle_id,
+                "search_snapshot_id": bundle.get("search_snapshot_id"),
+                "query": bundle.get("query"),
+                "filters": scope,
+                "evidence_item_count": len(bundle.get("evidence_items", [])),
+                "artifact_refs": [f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", [])],
+                "result_refs": [
+                    f"search_snapshot:{bundle.get('search_snapshot_id')}",
+                    f"evidence_bundle:{bundle_id}",
+                ],
+            },
+            "created_at": utc_now(),
+        }
+        claim_id = f"claim_{_json_hash(claim_base)[:16]}"
+        claim = dict(claim_base)
+        claim["claim_id"] = claim_id
+        _write_json(self.claim_path(claim_id), claim)
+        event = self.append_audit(
+            "claim.draft.created",
+            scope,
+            {"type": "claim", "id": claim_id},
+            {"evidence_bundle_id": bundle_id, "search_snapshot_id": bundle.get("search_snapshot_id")},
+        )
+        return {"claim": claim, "audit_event": event}
+
+    def show_claim(self, claim_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        claim = self.get_claim(claim_id)
+        if claim is None:
+            return {"status": "not_found"}
+        if claim.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": claim.get("scope")}
+        event = self.append_audit(
+            "claim.read",
+            scope,
+            {"type": "claim", "id": claim_id},
+            {"reason": "cli_claim_show"},
+        )
+        return {"claim": claim, "audit_event": event}
 
     def ingest_artifact(
         self,

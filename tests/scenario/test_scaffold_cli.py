@@ -187,6 +187,106 @@ class ScaffoldCliTests(unittest.TestCase):
         finally:
             shutil.rmtree(state_dir, ignore_errors=True)
 
+    def test_search_query_and_evidence_bundle(self) -> None:
+        state_dir = ROOT / "tmp/test-search-evidence"
+        shutil.rmtree(state_dir, ignore_errors=True)
+        try:
+            ingest = run_cli(
+                "artifact",
+                "ingest",
+                "fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "--state-dir",
+                "tmp/test-search-evidence",
+                "--json",
+            )
+            self.assertEqual(ingest.returncode, 0, ingest.stdout + ingest.stderr)
+
+            search = run_cli(
+                "search",
+                "query",
+                "alpha-evidence-anchor",
+                "--state-dir",
+                "tmp/test-search-evidence",
+                "--json",
+            )
+            self.assertEqual(search.returncode, 0, search.stdout + search.stderr)
+            search_payload = json.loads(search.stdout)
+            snapshot = search_payload["search_snapshot"]
+            self.assertEqual(snapshot["query"], "alpha-evidence-anchor")
+            self.assertEqual(snapshot["result_count"], 1)
+            self.assertIn("alpha-evidence-anchor", snapshot["results"][0]["snippet"])
+            self.assertTrue(any(ref.startswith("search_snapshot:") for ref in search_payload["evidence_refs"]))
+            self.assertTrue(any(ref.startswith("artifact:") for ref in search_payload["evidence_refs"]))
+            self.assertTrue(search_payload["audit_refs"])
+
+            bundle = run_cli(
+                "evidence",
+                "bundle",
+                "create",
+                "--search-snapshot-id",
+                snapshot["search_snapshot_id"],
+                "--state-dir",
+                "tmp/test-search-evidence",
+                "--json",
+            )
+            self.assertEqual(bundle.returncode, 0, bundle.stdout + bundle.stderr)
+            bundle_payload = json.loads(bundle.stdout)
+            bundle_id = bundle_payload["evidence_bundle"]["evidence_bundle_id"]
+            item = bundle_payload["evidence_bundle"]["evidence_items"][0]
+            self.assertTrue(item["original_storage_ref"].startswith("sha256:"))
+            self.assertTrue(item["derived_text_ref"].startswith("derived/"))
+            self.assertTrue(any(ref.startswith("evidence_bundle:") for ref in bundle_payload["evidence_refs"]))
+            self.assertTrue(bundle_payload["audit_refs"])
+
+            bundle_show = run_cli("evidence", "bundle", "show", bundle_id, "--state-dir", "tmp/test-search-evidence", "--json")
+            self.assertEqual(bundle_show.returncode, 0, bundle_show.stdout + bundle_show.stderr)
+            bundle_show_payload = json.loads(bundle_show.stdout)
+            self.assertTrue(bundle_show_payload["audit_refs"])
+
+            view = run_cli("evidence", "view", bundle_id, "--state-dir", "tmp/test-search-evidence", "--json")
+            self.assertEqual(view.returncode, 0, view.stdout + view.stderr)
+            view_payload = json.loads(view.stdout)
+            viewer_item = view_payload["evidence_viewer"]["viewer_items"][0]
+            self.assertEqual(viewer_item["original"]["storage_ref"], item["original_storage_ref"])
+            self.assertEqual(viewer_item["derived"]["text_ref"], item["derived_text_ref"])
+            self.assertIn("alpha-evidence-anchor", viewer_item["derived"]["text_preview"])
+            self.assertTrue(view_payload["audit_refs"])
+
+            claim = run_cli(
+                "claim",
+                "create",
+                "--evidence-bundle-id",
+                bundle_id,
+                "--statement",
+                "The alpha evidence anchor was present in the ingested fixture.",
+                "--state-dir",
+                "tmp/test-search-evidence",
+                "--json",
+            )
+            self.assertEqual(claim.returncode, 0, claim.stdout + claim.stderr)
+            claim_payload = json.loads(claim.stdout)
+            self.assertEqual(claim_payload["claim"]["evidence_bundle"]["evidence_bundle_id"], bundle_id)
+            self.assertEqual(claim_payload["claim"]["evidence_bundle"]["search_snapshot_id"], snapshot["search_snapshot_id"])
+            self.assertIn(f"artifact:{item['artifact_id']}", claim_payload["claim"]["evidence_bundle"]["artifact_refs"])
+            self.assertTrue(claim_payload["audit_refs"])
+
+            denied = run_cli(
+                "evidence",
+                "bundle",
+                "show",
+                bundle_id,
+                "--state-dir",
+                "tmp/test-search-evidence",
+                "--owner-id",
+                "other-user",
+                "--json",
+            )
+            self.assertEqual(denied.returncode, 6, denied.stdout + denied.stderr)
+            denied_payload = json.loads(denied.stdout)
+            self.assertEqual(denied_payload["errors"][0]["code"], "CS_SCOPE_DENIED")
+        finally:
+            shutil.rmtree(state_dir, ignore_errors=True)
+
     def test_vs0_artifact_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-artifacts", "--json")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -216,6 +316,23 @@ class ScaffoldCliTests(unittest.TestCase):
         )
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
+
+    def test_vs0_search_evidence_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-search-evidence", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-search-evidence")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 3)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_SEARCH_EVIDENCE_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-ARCH-008", "CS-ARCH-009", "CS-UND-001"})
+        self.assertEqual(payload["search_evidence"]["result_count"], 1)
+        self.assertIn("alpha-evidence-anchor", payload["search_evidence"]["first_snippet"])
+        self.assertTrue(payload["search_evidence"]["original_storage_ref"].startswith("sha256:"))
+        self.assertTrue(payload["search_evidence"]["derived_text_ref"].startswith("derived/"))
+        self.assertTrue(payload["search_evidence"]["claim_id"].startswith("claim_"))
+        self.assertTrue(payload["search_evidence"]["evidence_viewer_id"].startswith("viewer_"))
+        self.assertLessEqual(payload["search_evidence"]["first_use_duration_ms"], 5000)
 
     def test_scenario_gate_rejects_report_level_errors(self) -> None:
         report_path = ROOT / "reports/scenario/test-failed-report.json"

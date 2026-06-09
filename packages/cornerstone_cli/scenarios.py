@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
 import csv
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 
 from cornerstone_cli.local_test import LocalTestProvider
@@ -461,8 +463,12 @@ def _exit_ok(transcript: dict[str, Any]) -> bool:
     return transcript.get("exit_code") == 0 and isinstance(transcript.get("stdout_json"), dict)
 
 
+def _scenario_state_rel(name: str) -> str:
+    return f"tmp/scenario/{name}-{os.getpid()}"
+
+
 def verify_vs0_artifacts(root: Path) -> dict[str, Any]:
-    state_rel = "tmp/scenario/vs0-artifacts"
+    state_rel = _scenario_state_rel("vs0-artifacts")
     state_path = root / state_rel
     if state_path.exists():
         shutil.rmtree(state_path)
@@ -636,7 +642,7 @@ def _derived_text(root: Path, state_rel: str, artifact: dict[str, Any]) -> str:
 
 
 def verify_vs0_security(root: Path) -> dict[str, Any]:
-    state_rel = "tmp/scenario/vs0-security"
+    state_rel = _scenario_state_rel("vs0-security")
     state_path = root / state_rel
     if state_path.exists():
         shutil.rmtree(state_path)
@@ -747,6 +753,166 @@ def verify_vs0_security(root: Path) -> dict[str, Any]:
             "external_http_calls": int(prompt_safety.get("external_http_calls", 1)),
             "authority_expanded": int(bool(prompt_safety.get("authority_expanded", True))),
         },
+        "human_required": [],
+    }
+
+
+def verify_vs0_search_evidence(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-search-evidence")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+    first_use_started = perf_counter()
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    ingest_artifact = _artifact(transcripts["ingest"])
+    artifact_id = ingest_artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    first_use_duration_ms = round((perf_counter() - first_use_started) * 1000, 3)
+    search_payload = _payload(transcripts["search"])
+    snapshot = search_payload.get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    )
+    bundle_payload = _payload(transcripts["bundle_create"])
+    bundle = bundle_payload.get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["bundle_show"] = _run_cli_json(root, ["evidence", "bundle", "show", bundle_id, "--state-dir", state_rel, "--json"]) if bundle_id else {}
+    transcripts["evidence_view"] = _run_cli_json(root, ["evidence", "view", bundle_id, "--state-dir", state_rel, "--json"]) if bundle_id else {}
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The alpha evidence anchor was present in the ingested fixture.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    claim_payload = _payload(transcripts["claim_create"])
+    claim = claim_payload.get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["claim_show"] = _run_cli_json(root, ["claim", "show", claim_id, "--state-dir", state_rel, "--json"]) if claim_id else {}
+    transcripts["artifact_show"] = _run_cli_json(root, ["artifact", "show", artifact_id, "--state-dir", state_rel, "--json"]) if artifact_id else {}
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    search_results = snapshot.get("results", [])
+    bundle_items = bundle.get("evidence_items", [])
+    first_result = search_results[0] if search_results else {}
+    first_item = bundle_items[0] if bundle_items else {}
+    viewer_payload = _payload(transcripts["evidence_view"])
+    viewer = viewer_payload.get("evidence_viewer", {})
+    viewer_items = viewer.get("viewer_items", [])
+    first_viewer_item = viewer_items[0] if viewer_items else {}
+    search_refs = search_payload.get("evidence_refs", [])
+    bundle_refs = bundle_payload.get("evidence_refs", [])
+    claim_evidence = claim.get("evidence_bundle", {})
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    arch_008_ok = (
+        _exit_ok(transcripts["search"])
+        and _exit_ok(transcripts["bundle_create"])
+        and _exit_ok(transcripts["claim_create"])
+        and _exit_ok(transcripts["claim_show"])
+        and snapshot.get("query") == "alpha-evidence-anchor"
+        and snapshot.get("filters", {}).get("namespace_id") == "personal"
+        and snapshot.get("result_count", 0) >= 1
+        and bundle.get("search_snapshot_id") == snapshot_id
+        and first_item.get("artifact_id") == artifact_id
+        and first_item.get("search_snapshot_id") == snapshot_id
+        and claim.get("status") == "draft"
+        and claim_evidence.get("evidence_bundle_id") == bundle_id
+        and claim_evidence.get("search_snapshot_id") == snapshot_id
+        and claim_evidence.get("query") == "alpha-evidence-anchor"
+        and f"artifact:{artifact_id}" in claim_evidence.get("artifact_refs", [])
+        and _payload(transcripts["claim_create"]).get("audit_refs")
+        and any(ref.startswith("search_snapshot:") for ref in bundle_refs)
+        and any(ref.startswith("artifact:") for ref in bundle_refs)
+    )
+    arch_009_ok = (
+        _exit_ok(transcripts["bundle_show"])
+        and _exit_ok(transcripts["evidence_view"])
+        and _exit_ok(transcripts["artifact_show"])
+        and _payload(transcripts["bundle_show"]).get("audit_refs")
+        and viewer_payload.get("audit_refs")
+        and first_item.get("original_storage_ref", "").startswith("sha256:")
+        and bool(first_item.get("derived_text_ref"))
+        and _artifact(transcripts["artifact_show"]).get("original_storage_ref") == first_item.get("original_storage_ref")
+        and _artifact(transcripts["artifact_show"]).get("derived", {}).get("text_ref") == first_item.get("derived_text_ref")
+        and first_viewer_item.get("original", {}).get("storage_ref") == first_item.get("original_storage_ref")
+        and first_viewer_item.get("derived", {}).get("text_ref") == first_item.get("derived_text_ref")
+        and "alpha-evidence-anchor" in first_viewer_item.get("derived", {}).get("text_preview", "")
+    )
+    und_001_ok = (
+        _exit_ok(transcripts["search"])
+        and first_result.get("artifact_id") == artifact_id
+        and "alpha-evidence-anchor" in first_result.get("snippet", "")
+        and snapshot.get("duration_ms", 999999) <= 1000
+        and first_use_duration_ms <= 5000
+        and any(ref.startswith("search_snapshot:") for ref in search_refs)
+        and any(ref.startswith("artifact:") for ref in search_refs)
+    )
+    rows = [
+        _row(
+            "CS-ARCH-008",
+            "MUST_PASS",
+            "PASS" if arch_008_ok and audit_ok else "FAIL",
+            [
+                "cornerstone search query alpha-evidence-anchor --json",
+                "cornerstone evidence bundle create --search-snapshot-id <id> --json",
+                "cornerstone claim create --evidence-bundle-id <id> --json",
+            ],
+            "A draft claim links to an evidence bundle containing stored search query, filters, result snapshot, and artifact refs.",
+        ),
+        _row(
+            "CS-ARCH-009",
+            "MUST_PASS",
+            "PASS" if arch_009_ok and audit_ok else "FAIL",
+            ["cornerstone evidence view <bundle_id> --json", "cornerstone artifact show <artifact_id> --json"],
+            "The evidence viewer opens original source metadata plus derived text/metadata for the cited artifact.",
+        ),
+        _row(
+            "CS-UND-001",
+            "MUST_PASS",
+            "PASS" if und_001_ok and audit_ok else "FAIL",
+            ["cornerstone artifact ingest ... --json", "cornerstone search query alpha-evidence-anchor --json"],
+            "Search immediately returns the ingested artifact with a snippet, timing, and evidence-ready refs.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-search-evidence",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_SEARCH_EVIDENCE_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "search_evidence": {
+            "artifact_id": artifact_id,
+            "search_snapshot_id": snapshot_id,
+            "evidence_bundle_id": bundle_id,
+            "result_count": snapshot.get("result_count"),
+            "duration_ms": snapshot.get("duration_ms"),
+            "first_use_duration_ms": first_use_duration_ms,
+            "first_snippet": first_result.get("snippet"),
+            "original_storage_ref": first_item.get("original_storage_ref"),
+            "derived_text_ref": first_item.get("derived_text_ref"),
+            "claim_id": claim_id,
+            "evidence_viewer_id": viewer.get("evidence_viewer_id"),
+        },
+        "negative_evidence": {},
         "human_required": [],
     }
 

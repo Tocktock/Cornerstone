@@ -13,7 +13,7 @@
   "evidence_refs": [],
   "human_required": [],
   "ids": {
-    "git_commit": "040f294"
+    "git_commit": "e25f664"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -81,7 +81,7 @@
   ],
   "scenario_set": "vs0-artifacts",
   "schema_version": "cs.cli.v0",
-  "state_dir": "tmp/scenario/vs0-artifacts",
+  "state_dir": "tmp/scenario/vs0-artifacts-23500",
   "status": "success",
   "summary": {
     "blocking": 0,
@@ -97,7 +97,7 @@
         "audit",
         "verify",
         "--state-dir",
-        "tmp/scenario/vs0-artifacts",
+        "tmp/scenario/vs0-artifacts-23500",
         "--json"
       ],
       "exit_code": 0,
@@ -116,7 +116,7 @@
         "errors": [],
         "evidence_refs": [],
         "ids": {
-          "git_commit": "040f294"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
@@ -137,7 +137,7 @@
         "ingest",
         "fixtures/vs0/packs/02_dedup_versioning/input_v1.txt",
         "--state-dir",
-        "tmp/scenario/vs0-artifacts",
+        "tmp/scenario/vs0-artifacts-23500",
         "--json"
       ],
       "exit_code": 0,
@@ -162,13 +162,27 @@
           "original_size_bytes": 117,
           "original_storage_ref": "sha256:3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3",
           "provenance": {
-            "created_at": "2026-06-09T11:13:50.071314Z",
+            "created_at": "2026-06-09T11:28:56.049000Z",
             "lineage_from": null,
             "transformations": [
               "hash_calculated",
               "original_preserved",
               "derived_text_created"
             ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
           },
           "schema_version": "cs.artifact.v0",
           "scope": {
@@ -178,14 +192,14 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:13:50.071314Z",
+            "ingested_at": "2026-06-09T11:28:56.049000Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/02_dedup_versioning/input_v1.txt",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_cec1c209b7cb2935"
+          "audit:audit_5266f86092e1234e"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact ingest",
@@ -197,9 +211,9 @@
         ],
         "ids": {
           "artifact_id": "art_3fc9c836117463c2",
-          "audit_event_id": "audit_cec1c209b7cb2935",
+          "audit_event_id": "audit_5266f86092e1234e",
           "checksum_sha256": "3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3",
-          "git_commit": "040f294"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
@@ -220,7 +234,7 @@
         "ingest",
         "fixtures/vs0/packs/02_dedup_versioning/input_v1.txt",
         "--state-dir",
-        "tmp/scenario/vs0-artifacts",
+        "tmp/scenario/vs0-artifacts-23500",
         "--json"
       ],
       "exit_code": 0,
@@ -245,13 +259,27 @@
           "original_size_bytes": 117,
           "original_storage_ref": "sha256:3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3",
           "provenance": {
-            "created_at": "2026-06-09T11:13:50.071314Z",
+            "created_at": "2026-06-09T11:28:56.049000Z",
             "lineage_from": null,
             "transformations": [
               "hash_calculated",
               "original_preserved",
               "derived_text_created"
             ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
           },
           "schema_version": "cs.artifact.v0",
           "scope": {
@@ -261,14 +289,14 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:13:50.071314Z",
+            "ingested_at": "2026-06-09T11:28:56.049000Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/02_dedup_versioning/input_v1.txt",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_d32f12296970fc9c"
+          "audit:audit_b06a39546128911c"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact ingest",
@@ -280,9 +308,9 @@
         ],
         "ids": {
           "artifact_id": "art_3fc9c836117463c2",
-          "audit_event_id": "audit_d32f12296970fc9c",
+          "audit_event_id": "audit_b06a39546128911c",
           "checksum_sha256": "3fc9c836117463c25864e5fe408f98d0ae1427b6abd6a3d147fb8601c1c05ff3",
-          "git_commit": "040f294"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
@@ -303,7 +331,7 @@
         "ingest",
         "fixtures/vs0/packs/02_dedup_versioning/input_v2.txt",
         "--state-dir",
-        "tmp/scenario/vs0-artifacts",
+        "tmp/scenario/vs0-artifacts-23500",
         "--lineage-from",
         "art_3fc9c836117463c2",
         "--json"
@@ -330,13 +358,27 @@
           "original_size_bytes": 147,
           "original_storage_ref": "sha256:43367f5a85c40e493617c5c21a4c2145ab117117ed82965d6ff9a8e53bd208e3",
           "provenance": {
-            "created_at": "2026-06-09T11:13:50.160782Z",
+            "created_at": "2026-06-09T11:28:56.151038Z",
             "lineage_from": "art_3fc9c836117463c2",
             "transformations": [
               "hash_calculated",
               "original_preserved",
               "derived_text_created"
             ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
           },
           "schema_version": "cs.artifact.v0",
           "scope": {
@@ -346,14 +388,14 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:13:50.160782Z",
+            "ingested_at": "2026-06-09T11:28:56.151038Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/02_dedup_versioning/input_v2.txt",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_d7ac9cf1d8aed9b7"
+          "audit:audit_49541e79e1d776fe"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact ingest",
@@ -365,9 +407,9 @@
         ],
         "ids": {
           "artifact_id": "art_43367f5a85c40e49",
-          "audit_event_id": "audit_d7ac9cf1d8aed9b7",
+          "audit_event_id": "audit_49541e79e1d776fe",
           "checksum_sha256": "43367f5a85c40e493617c5c21a4c2145ab117117ed82965d6ff9a8e53bd208e3",
-          "git_commit": "040f294"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
@@ -388,7 +430,7 @@
         "ingest",
         "fixtures/vs0/packs/01_artifact_basic/input.txt",
         "--state-dir",
-        "tmp/scenario/vs0-artifacts",
+        "tmp/scenario/vs0-artifacts-23500",
         "--json"
       ],
       "exit_code": 0,
@@ -413,13 +455,27 @@
           "original_size_bytes": 239,
           "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
           "provenance": {
-            "created_at": "2026-06-09T11:13:49.786521Z",
+            "created_at": "2026-06-09T11:28:55.732338Z",
             "lineage_from": null,
             "transformations": [
               "hash_calculated",
               "original_preserved",
               "derived_text_created"
             ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
           },
           "schema_version": "cs.artifact.v0",
           "scope": {
@@ -429,14 +485,14 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:13:49.786521Z",
+            "ingested_at": "2026-06-09T11:28:55.732338Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_918b77b12ec23ba4"
+          "audit:audit_6c13ab18f8f89a81"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact ingest",
@@ -448,9 +504,9 @@
         ],
         "ids": {
           "artifact_id": "art_2735313e0cb92563",
-          "audit_event_id": "audit_918b77b12ec23ba4",
+          "audit_event_id": "audit_6c13ab18f8f89a81",
           "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
-          "git_commit": "040f294"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
@@ -471,7 +527,7 @@
         "ingest",
         "fixtures/vs0/packs/03_unknown_and_failed_extraction/fail.txt",
         "--state-dir",
-        "tmp/scenario/vs0-artifacts",
+        "tmp/scenario/vs0-artifacts-23500",
         "--derived-mode",
         "fail",
         "--json"
@@ -497,13 +553,27 @@
           "original_size_bytes": 116,
           "original_storage_ref": "sha256:131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05",
           "provenance": {
-            "created_at": "2026-06-09T11:13:49.885607Z",
+            "created_at": "2026-06-09T11:28:55.833844Z",
             "lineage_from": null,
             "transformations": [
               "hash_calculated",
               "original_preserved",
               "derived_failed"
             ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
           },
           "schema_version": "cs.artifact.v0",
           "scope": {
@@ -513,14 +583,14 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:13:49.885607Z",
+            "ingested_at": "2026-06-09T11:28:55.833844Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/03_unknown_and_failed_extraction/fail.txt",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_13aeca4936a4cc10"
+          "audit:audit_1a6f1540625345ab"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact ingest",
@@ -532,9 +602,9 @@
         ],
         "ids": {
           "artifact_id": "art_131931452e72a3cb",
-          "audit_event_id": "audit_13aeca4936a4cc10",
+          "audit_event_id": "audit_1a6f1540625345ab",
           "checksum_sha256": "131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05",
-          "git_commit": "040f294"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
@@ -555,7 +625,7 @@
         "ingest",
         "fixtures/vs0/packs/03_unknown_and_failed_extraction/unknown.bin",
         "--state-dir",
-        "tmp/scenario/vs0-artifacts",
+        "tmp/scenario/vs0-artifacts-23500",
         "--media-type",
         "application/octet-stream",
         "--derived-mode",
@@ -583,13 +653,27 @@
           "original_size_bytes": 112,
           "original_storage_ref": "sha256:54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662",
           "provenance": {
-            "created_at": "2026-06-09T11:13:49.981584Z",
+            "created_at": "2026-06-09T11:28:55.939986Z",
             "lineage_from": null,
             "transformations": [
               "hash_calculated",
               "original_preserved",
               "derived_deferred"
             ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
           },
           "schema_version": "cs.artifact.v0",
           "scope": {
@@ -599,14 +683,14 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:13:49.981584Z",
+            "ingested_at": "2026-06-09T11:28:55.939986Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/03_unknown_and_failed_extraction/unknown.bin",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_7d5bd5b327b0cff3"
+          "audit:audit_a093aedb67db1c1a"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact ingest",
@@ -618,9 +702,9 @@
         ],
         "ids": {
           "artifact_id": "art_54e415937ebeecfc",
-          "audit_event_id": "audit_7d5bd5b327b0cff3",
+          "audit_event_id": "audit_a093aedb67db1c1a",
           "checksum_sha256": "54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662",
-          "git_commit": "040f294"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
@@ -641,7 +725,7 @@
         "show",
         "art_2735313e0cb92563",
         "--state-dir",
-        "tmp/scenario/vs0-artifacts",
+        "tmp/scenario/vs0-artifacts-23500",
         "--json"
       ],
       "exit_code": 0,
@@ -666,13 +750,27 @@
           "original_size_bytes": 239,
           "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
           "provenance": {
-            "created_at": "2026-06-09T11:13:49.786521Z",
+            "created_at": "2026-06-09T11:28:55.732338Z",
             "lineage_from": null,
             "transformations": [
               "hash_calculated",
               "original_preserved",
               "derived_text_created"
             ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
           },
           "schema_version": "cs.artifact.v0",
           "scope": {
@@ -682,14 +780,14 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:13:49.786521Z",
+            "ingested_at": "2026-06-09T11:28:55.732338Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_ad023682a2ed50c6"
+          "audit:audit_d4e14e2ca98c95f9"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact show",
@@ -699,9 +797,9 @@
         ],
         "ids": {
           "artifact_id": "art_2735313e0cb92563",
-          "audit_event_id": "audit_ad023682a2ed50c6",
+          "audit_event_id": "audit_d4e14e2ca98c95f9",
           "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
-          "git_commit": "040f294"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
@@ -722,7 +820,7 @@
         "show",
         "art_131931452e72a3cb",
         "--state-dir",
-        "tmp/scenario/vs0-artifacts",
+        "tmp/scenario/vs0-artifacts-23500",
         "--json"
       ],
       "exit_code": 0,
@@ -746,13 +844,27 @@
           "original_size_bytes": 116,
           "original_storage_ref": "sha256:131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05",
           "provenance": {
-            "created_at": "2026-06-09T11:13:49.885607Z",
+            "created_at": "2026-06-09T11:28:55.833844Z",
             "lineage_from": null,
             "transformations": [
               "hash_calculated",
               "original_preserved",
               "derived_failed"
             ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
           },
           "schema_version": "cs.artifact.v0",
           "scope": {
@@ -762,14 +874,14 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:13:49.885607Z",
+            "ingested_at": "2026-06-09T11:28:55.833844Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/03_unknown_and_failed_extraction/fail.txt",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_6c3a11f0286a7071"
+          "audit:audit_fa89c619d922a017"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact show",
@@ -779,9 +891,9 @@
         ],
         "ids": {
           "artifact_id": "art_131931452e72a3cb",
-          "audit_event_id": "audit_6c3a11f0286a7071",
+          "audit_event_id": "audit_fa89c619d922a017",
           "checksum_sha256": "131931452e72a3cbf7aac09264aa44d585979744c52d11f64ea2a499489b5b05",
-          "git_commit": "040f294"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
@@ -802,7 +914,7 @@
         "show",
         "art_54e415937ebeecfc",
         "--state-dir",
-        "tmp/scenario/vs0-artifacts",
+        "tmp/scenario/vs0-artifacts-23500",
         "--json"
       ],
       "exit_code": 0,
@@ -826,13 +938,27 @@
           "original_size_bytes": 112,
           "original_storage_ref": "sha256:54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662",
           "provenance": {
-            "created_at": "2026-06-09T11:13:49.981584Z",
+            "created_at": "2026-06-09T11:28:55.939986Z",
             "lineage_from": null,
             "transformations": [
               "hash_calculated",
               "original_preserved",
               "derived_deferred"
             ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
           },
           "schema_version": "cs.artifact.v0",
           "scope": {
@@ -842,14 +968,14 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:13:49.981584Z",
+            "ingested_at": "2026-06-09T11:28:55.939986Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/03_unknown_and_failed_extraction/unknown.bin",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_68e2f326b9d53812"
+          "audit:audit_806cbd6fc32a1e1d"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact show",
@@ -859,9 +985,9 @@
         ],
         "ids": {
           "artifact_id": "art_54e415937ebeecfc",
-          "audit_event_id": "audit_68e2f326b9d53812",
+          "audit_event_id": "audit_806cbd6fc32a1e1d",
           "checksum_sha256": "54e415937ebeecfce11dc90ab8723a1b1e6193a64382b7e9f7056fe37e2d1662",
-          "git_commit": "040f294"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",

@@ -1,0 +1,853 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-search-evidence",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "e25f664"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {},
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-search-evidence-2026-06-09.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone search query alpha-evidence-anchor --json",
+        "cornerstone evidence bundle create --search-snapshot-id <id> --json",
+        "cornerstone claim create --evidence-bundle-id <id> --json"
+      ],
+      "id": "CS-ARCH-008",
+      "notes": "A draft claim links to an evidence bundle containing stored search query, filters, result snapshot, and artifact refs.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone evidence view <bundle_id> --json",
+        "cornerstone artifact show <artifact_id> --json"
+      ],
+      "id": "CS-ARCH-009",
+      "notes": "The evidence viewer opens original source metadata plus derived text/metadata for the cited artifact.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone artifact ingest ... --json",
+        "cornerstone search query alpha-evidence-anchor --json"
+      ],
+      "id": "CS-UND-001",
+      "notes": "Search immediately returns the ingested artifact with a snippet, timing, and evidence-ready refs.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    }
+  ],
+  "scenario_set": "vs0-search-evidence",
+  "schema_version": "cs.cli.v0",
+  "search_evidence": {
+    "artifact_id": "art_2735313e0cb92563",
+    "claim_id": "claim_c45b0823f53ae7a1",
+    "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+    "duration_ms": 0.162,
+    "evidence_bundle_id": "evb_a25a9472eb6124b3",
+    "evidence_viewer_id": "viewer_9e9a9bd9324b5100",
+    "first_snippet": "alpha-evidence-anchor.",
+    "first_use_duration_ms": 90.843,
+    "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+    "result_count": 1,
+    "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+  },
+  "state_dir": "tmp/scenario/vs0-search-evidence-42682",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 3,
+    "product_feature_claims": "PARTIAL_VS0_SEARCH_EVIDENCE_ONLY",
+    "scenario_count": 3
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "artifact_show": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "show",
+        "art_2735313e0cb92563",
+        "--state-dir",
+        "tmp/scenario/vs0-search-evidence-42682",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-09T11:37:18.857772Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:37:18.857772Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_2c7553c7c9f0587f"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact show",
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_2c7553c7c9f0587f",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "e25f664"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/vs0-search-evidence-42682",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 8,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "e25f664"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_4efbc6bbbd6a2d1d",
+        "--state-dir",
+        "tmp/scenario/vs0-search-evidence-42682",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_0858d39df2d40bb5"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T11:37:18.940444Z",
+          "evidence_bundle_id": "evb_a25a9472eb6124b3",
+          "evidence_items": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "provenance": {
+                "created_at": "2026-06-09T11:37:18.857772Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_4efbc6bbbd6a2d1d",
+              "snippet": "alpha-evidence-anchor.",
+              "source": {
+                "ingested_at": "2026-06-09T11:37:18.857772Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_2735313e0cb92563",
+                "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+                "evidence_refs": [
+                  "artifact:art_2735313e0cb92563",
+                  "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+                ],
+                "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+                "score": 11,
+                "snippet": "alpha-evidence-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_a25a9472eb6124b3",
+          "search_snapshot:search_4efbc6bbbd6a2d1d",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_0858d39df2d40bb5",
+          "evidence_bundle_id": "evb_a25a9472eb6124b3",
+          "git_commit": "e25f664",
+          "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "bundle_show": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "show",
+        "evb_a25a9472eb6124b3",
+        "--state-dir",
+        "tmp/scenario/vs0-search-evidence-42682",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_0fe71290cc02f2a4"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle show",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T11:37:18.940444Z",
+          "evidence_bundle_id": "evb_a25a9472eb6124b3",
+          "evidence_items": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "provenance": {
+                "created_at": "2026-06-09T11:37:18.857772Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_4efbc6bbbd6a2d1d",
+              "snippet": "alpha-evidence-anchor.",
+              "source": {
+                "ingested_at": "2026-06-09T11:37:18.857772Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_2735313e0cb92563",
+                "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+                "evidence_refs": [
+                  "artifact:art_2735313e0cb92563",
+                  "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+                ],
+                "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+                "score": 11,
+                "snippet": "alpha-evidence-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_a25a9472eb6124b3",
+          "search_snapshot:search_4efbc6bbbd6a2d1d",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_0fe71290cc02f2a4",
+          "evidence_bundle_id": "evb_a25a9472eb6124b3",
+          "git_commit": "e25f664",
+          "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_a25a9472eb6124b3",
+        "--statement",
+        "The alpha evidence anchor was present in the ingested fixture.",
+        "--state-dir",
+        "tmp/scenario/vs0-search-evidence-42682",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_289fe941ba129cfb"
+        ],
+        "claim": {
+          "claim_id": "claim_c45b0823f53ae7a1",
+          "created_at": "2026-06-09T11:37:19.077220Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_a25a9472eb6124b3",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_4efbc6bbbd6a2d1d",
+              "evidence_bundle:evb_a25a9472eb6124b3"
+            ],
+            "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The alpha evidence anchor was present in the ingested fixture.",
+          "status": "draft"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_c45b0823f53ae7a1",
+          "evidence_bundle:evb_a25a9472eb6124b3",
+          "search_snapshot:search_4efbc6bbbd6a2d1d",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_289fe941ba129cfb",
+          "claim_id": "claim_c45b0823f53ae7a1",
+          "evidence_bundle_id": "evb_a25a9472eb6124b3",
+          "git_commit": "e25f664",
+          "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "claim_show": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "show",
+        "claim_c45b0823f53ae7a1",
+        "--state-dir",
+        "tmp/scenario/vs0-search-evidence-42682",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ff61d0f6ad5e2a47"
+        ],
+        "claim": {
+          "claim_id": "claim_c45b0823f53ae7a1",
+          "created_at": "2026-06-09T11:37:19.077220Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_a25a9472eb6124b3",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_4efbc6bbbd6a2d1d",
+              "evidence_bundle:evb_a25a9472eb6124b3"
+            ],
+            "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The alpha evidence anchor was present in the ingested fixture.",
+          "status": "draft"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim show",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_c45b0823f53ae7a1",
+          "evidence_bundle:evb_a25a9472eb6124b3",
+          "search_snapshot:search_4efbc6bbbd6a2d1d",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_ff61d0f6ad5e2a47",
+          "claim_id": "claim_c45b0823f53ae7a1",
+          "evidence_bundle_id": "evb_a25a9472eb6124b3",
+          "git_commit": "e25f664",
+          "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "evidence_view": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "view",
+        "evb_a25a9472eb6124b3",
+        "--state-dir",
+        "tmp/scenario/vs0-search-evidence-42682",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_955aab8c211ba1f4"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence view",
+        "errors": [],
+        "evidence_refs": [
+          "evidence_viewer:viewer_9e9a9bd9324b5100",
+          "evidence_bundle:evb_a25a9472eb6124b3",
+          "search_snapshot:search_4efbc6bbbd6a2d1d",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "evidence_viewer": {
+          "evidence_bundle_id": "evb_a25a9472eb6124b3",
+          "evidence_viewer_id": "viewer_9e9a9bd9324b5100",
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "opened_at": "2026-06-09T11:37:19.031139Z",
+          "query": "alpha-evidence-anchor",
+          "schema_version": "cs.evidence_viewer.v0",
+          "search_snapshot_id": "search_4efbc6bbbd6a2d1d",
+          "viewer_items": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived": {
+                "metadata": {
+                  "media_type": "text/plain",
+                  "redacted": false,
+                  "status": "ready",
+                  "text_ref": "derived/art_2735313e0cb92563.txt"
+                },
+                "status": "ready",
+                "text_preview": "CornerStone fixture note.  Project: Alpha research review. Decision candidate: Keep original source material before derived summaries. Known risk: extraction may fail for an unknown binary attachment. Search phrase: alpha-evidence-anchor.",
+                "text_ref": "derived/art_2735313e0cb92563.txt"
+              },
+              "original": {
+                "media_type": "text/plain",
+                "raw_original_access": {
+                  "display": "controlled",
+                  "policy": "owner_scope_required"
+                },
+                "size_bytes": 239,
+                "source": {
+                  "ingested_at": "2026-06-09T11:37:18.857772Z",
+                  "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+                  "type": "local_file"
+                },
+                "storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+              },
+              "provenance": {
+                "created_at": "2026-06-09T11:37:18.857772Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "snippet": "alpha-evidence-anchor."
+            }
+          ]
+        },
+        "ids": {
+          "audit_event_id": "audit_955aab8c211ba1f4",
+          "evidence_bundle_id": "evb_a25a9472eb6124b3",
+          "evidence_viewer_id": "viewer_9e9a9bd9324b5100",
+          "git_commit": "e25f664",
+          "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/01_artifact_basic/input.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-search-evidence-42682",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-09T11:37:18.857772Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:37:18.857772Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_00ff64c6fc5749da"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_00ff64c6fc5749da",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "e25f664"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "alpha-evidence-anchor",
+        "--state-dir",
+        "tmp/scenario/vs0-search-evidence-42682",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_9bd1b78de9393399"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_4efbc6bbbd6a2d1d",
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "audit_event_id": "audit_9bd1b78de9393399",
+          "git_commit": "e25f664",
+          "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T11:37:18.893340Z",
+          "duration_ms": 0.162,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+              ],
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "score": 11,
+              "snippet": "alpha-evidence-anchor."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_4efbc6bbbd6a2d1d"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

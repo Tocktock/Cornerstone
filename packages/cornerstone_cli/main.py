@@ -11,6 +11,7 @@ from cornerstone_cli import __version__
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_vs0_search_evidence,
     verify_vs0_security,
     verify_vs0_artifacts,
     verify_vs0_fixtures,
@@ -25,6 +26,7 @@ EXIT_INVALID = 1
 EXIT_NOT_FOUND = 3
 EXIT_EVIDENCE_MISSING = 4
 EXIT_RUNTIME_FAILURE = 5
+EXIT_SCOPE_DENIED = 6
 
 
 def repo_root() -> Path:
@@ -277,6 +279,293 @@ def command_audit_verify(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS if report["status"] == "success" else EXIT_RUNTIME_FAILURE
 
 
+def command_search_query(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    result = store.search(args.query, **scope_args(args))
+    snapshot = result["snapshot"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone search query", "success", root)
+    payload.update(snapshot["filters"])
+    payload["ids"].update(
+        {
+            "search_snapshot_id": snapshot["search_snapshot_id"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["search_snapshot"] = snapshot
+    payload["evidence_refs"].append(f"search_snapshot:{snapshot['search_snapshot_id']}")
+    payload["evidence_refs"].extend(
+        ref
+        for result_row in snapshot.get("results", [])
+        for ref in result_row.get("evidence_refs", [])
+    )
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_evidence_bundle_create(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    result = store.create_evidence_bundle(args.search_snapshot_id, scope_args(args))
+    payload = base_response("cornerstone evidence bundle create", "success", root)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SEARCH_SNAPSHOT_NOT_FOUND",
+                "message": "Search snapshot was not found.",
+                "search_snapshot_id": args.search_snapshot_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Search snapshot is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+
+    bundle = result["bundle"]
+    audit_event = result["audit_event"]
+    payload.update(bundle["filters"])
+    payload["ids"].update(
+        {
+            "evidence_bundle_id": bundle["evidence_bundle_id"],
+            "search_snapshot_id": bundle["search_snapshot_id"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["evidence_bundle"] = bundle
+    payload["evidence_refs"].extend(
+        [
+            f"evidence_bundle:{bundle['evidence_bundle_id']}",
+            f"search_snapshot:{bundle['search_snapshot_id']}",
+        ]
+    )
+    payload["evidence_refs"].extend(f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_evidence_bundle_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    result = store.show_evidence_bundle(args.evidence_bundle_id, scope_args(args))
+    payload = base_response("cornerstone evidence bundle show", "success", root)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_EVIDENCE_BUNDLE_NOT_FOUND",
+                "message": "Evidence bundle was not found.",
+                "evidence_bundle_id": args.evidence_bundle_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Evidence bundle is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+
+    bundle = result["bundle"]
+    audit_event = result["audit_event"]
+    payload.update(bundle["filters"])
+    payload["ids"].update(
+        {
+            "evidence_bundle_id": bundle["evidence_bundle_id"],
+            "search_snapshot_id": bundle["search_snapshot_id"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["evidence_bundle"] = bundle
+    payload["evidence_refs"].extend(
+        [
+            f"evidence_bundle:{bundle['evidence_bundle_id']}",
+            f"search_snapshot:{bundle['search_snapshot_id']}",
+        ]
+    )
+    payload["evidence_refs"].extend(f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_evidence_view(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    result = store.view_evidence_bundle(args.evidence_bundle_id, scope_args(args))
+    payload = base_response("cornerstone evidence view", "success", root)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_EVIDENCE_BUNDLE_NOT_FOUND",
+                "message": "Evidence bundle was not found.",
+                "evidence_bundle_id": args.evidence_bundle_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Evidence bundle is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+
+    viewer = result["viewer"]
+    audit_event = result["audit_event"]
+    payload.update(viewer["filters"])
+    payload["ids"].update(
+        {
+            "evidence_viewer_id": viewer["evidence_viewer_id"],
+            "evidence_bundle_id": viewer["evidence_bundle_id"],
+            "search_snapshot_id": viewer["search_snapshot_id"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["evidence_viewer"] = viewer
+    payload["evidence_refs"].extend(
+        [
+            f"evidence_viewer:{viewer['evidence_viewer_id']}",
+            f"evidence_bundle:{viewer['evidence_bundle_id']}",
+            f"search_snapshot:{viewer['search_snapshot_id']}",
+        ]
+    )
+    payload["evidence_refs"].extend(f"artifact:{item['artifact_id']}" for item in viewer.get("viewer_items", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_claim_create(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    result = store.create_claim_from_evidence_bundle(args.evidence_bundle_id, args.statement, scope_args(args))
+    payload = base_response("cornerstone claim create", "success", root)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_EVIDENCE_BUNDLE_NOT_FOUND",
+                "message": "Evidence bundle was not found.",
+                "evidence_bundle_id": args.evidence_bundle_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Evidence bundle is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+
+    claim = result["claim"]
+    audit_event = result["audit_event"]
+    payload.update(claim["scope"])
+    payload["ids"].update(
+        {
+            "claim_id": claim["claim_id"],
+            "evidence_bundle_id": claim["evidence_bundle"]["evidence_bundle_id"],
+            "search_snapshot_id": claim["evidence_bundle"]["search_snapshot_id"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["claim"] = claim
+    payload["evidence_refs"].extend(
+        [
+            f"claim:{claim['claim_id']}",
+            f"evidence_bundle:{claim['evidence_bundle']['evidence_bundle_id']}",
+            f"search_snapshot:{claim['evidence_bundle']['search_snapshot_id']}",
+        ]
+    )
+    payload["evidence_refs"].extend(claim["evidence_bundle"].get("artifact_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_claim_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    result = store.show_claim(args.claim_id, scope_args(args))
+    payload = base_response("cornerstone claim show", "success", root)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CLAIM_NOT_FOUND",
+                "message": "Claim was not found.",
+                "claim_id": args.claim_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Claim is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+
+    claim = result["claim"]
+    audit_event = result["audit_event"]
+    payload.update(claim["scope"])
+    payload["ids"].update(
+        {
+            "claim_id": claim["claim_id"],
+            "evidence_bundle_id": claim["evidence_bundle"]["evidence_bundle_id"],
+            "search_snapshot_id": claim["evidence_bundle"]["search_snapshot_id"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["claim"] = claim
+    payload["evidence_refs"].extend(
+        [
+            f"claim:{claim['claim_id']}",
+            f"evidence_bundle:{claim['evidence_bundle']['evidence_bundle_id']}",
+            f"search_snapshot:{claim['evidence_bundle']['search_snapshot_id']}",
+        ]
+    )
+    payload["evidence_refs"].extend(claim["evidence_bundle"].get("artifact_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_scenario_list(args: argparse.Namespace) -> int:
     root = repo_root()
     scenarios = list_scenarios(root, args.set)
@@ -340,13 +629,15 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_artifacts(root)
     elif args.contract == "vs0-security":
         report = verify_vs0_security(root)
+    elif args.contract == "vs0-search-evidence":
+        report = verify_vs0_search_evidence(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
             {
                 "code": "CS_SCENARIO_CONTRACT_UNSUPPORTED",
                 "message": "Only scaffold and fixture verification are implemented in this batch.",
-                "supported": ["vs0-scaffold", "vs0-fixtures", "vs0-artifacts", "vs0-security"],
+                "supported": ["vs0-scaffold", "vs0-fixtures", "vs0-artifacts", "vs0-security", "vs0-search-evidence"],
             }
         )
         print_payload(payload, args.json)
@@ -459,6 +750,61 @@ def build_parser() -> argparse.ArgumentParser:
     add_state_argument(audit_verify)
     audit_verify.add_argument("--json", action="store_true", help="Emit JSON output")
     audit_verify.set_defaults(func=command_audit_verify)
+
+    search = subcommands.add_parser("search", help="Search artifact-derived content")
+    search_sub = search.add_subparsers(dest="search_command")
+
+    search_query = search_sub.add_parser("query", help="Search local artifact-derived content")
+    search_query.add_argument("query", help="Search query")
+    add_state_argument(search_query)
+    add_scope_arguments(search_query)
+    search_query.add_argument("--json", action="store_true", help="Emit JSON output")
+    search_query.set_defaults(func=command_search_query)
+
+    evidence = subcommands.add_parser("evidence", help="Evidence bundle commands")
+    evidence_sub = evidence.add_subparsers(dest="evidence_command")
+
+    bundle = evidence_sub.add_parser("bundle", help="Evidence bundle operations")
+    bundle_sub = bundle.add_subparsers(dest="bundle_command")
+
+    bundle_create = bundle_sub.add_parser("create", help="Create an evidence bundle from a search snapshot")
+    bundle_create.add_argument("--search-snapshot-id", required=True, help="Search snapshot ID")
+    add_state_argument(bundle_create)
+    add_scope_arguments(bundle_create)
+    bundle_create.add_argument("--json", action="store_true", help="Emit JSON output")
+    bundle_create.set_defaults(func=command_evidence_bundle_create)
+
+    bundle_show = bundle_sub.add_parser("show", help="Show an evidence bundle")
+    bundle_show.add_argument("evidence_bundle_id", help="Evidence bundle ID")
+    add_state_argument(bundle_show)
+    add_scope_arguments(bundle_show)
+    bundle_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    bundle_show.set_defaults(func=command_evidence_bundle_show)
+
+    evidence_view = evidence_sub.add_parser("view", help="Open original and derived evidence representations")
+    evidence_view.add_argument("evidence_bundle_id", help="Evidence bundle ID")
+    add_state_argument(evidence_view)
+    add_scope_arguments(evidence_view)
+    evidence_view.add_argument("--json", action="store_true", help="Emit JSON output")
+    evidence_view.set_defaults(func=command_evidence_view)
+
+    claim = subcommands.add_parser("claim", help="Draft claim commands")
+    claim_sub = claim.add_subparsers(dest="claim_command")
+
+    claim_create = claim_sub.add_parser("create", help="Create a draft claim from an evidence bundle")
+    claim_create.add_argument("--evidence-bundle-id", required=True, help="Evidence bundle ID")
+    claim_create.add_argument("--statement", required=True, help="Draft claim statement")
+    add_state_argument(claim_create)
+    add_scope_arguments(claim_create)
+    claim_create.add_argument("--json", action="store_true", help="Emit JSON output")
+    claim_create.set_defaults(func=command_claim_create)
+
+    claim_show = claim_sub.add_parser("show", help="Show a draft claim")
+    claim_show.add_argument("claim_id", help="Claim ID")
+    add_state_argument(claim_show)
+    add_scope_arguments(claim_show)
+    claim_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    claim_show.set_defaults(func=command_claim_show)
 
     scenario = subcommands.add_parser("scenario", help="Scenario registry and verification commands")
     scenario_sub = scenario.add_subparsers(dest="scenario_command")

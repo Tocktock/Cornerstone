@@ -6,7 +6,7 @@
   "evidence_refs": [],
   "human_required": [],
   "ids": {
-    "git_commit": "34d2590"
+    "git_commit": "e25f664"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -80,7 +80,7 @@
     "prompt_artifact_id": "art_80213d823aa788d5",
     "prompt_audit_ref_count": 2,
     "prompt_policy_decision_refs": [
-      "policy:policy_c60a4cccf1589a7a"
+      "policy:policy_9d11e2862f6437d9"
     ],
     "prompt_safety": {
       "action_cards_created_from_untrusted_artifact": 0,
@@ -101,7 +101,7 @@
     "secret_artifact_id": "art_ec7bc6a3b66c055a",
     "secret_derived_redacted": true
   },
-  "state_dir": "tmp/scenario/vs0-security",
+  "state_dir": "tmp/scenario/vs0-security-23501",
   "status": "success",
   "summary": {
     "blocking": 0,
@@ -117,7 +117,7 @@
         "audit",
         "verify",
         "--state-dir",
-        "tmp/scenario/vs0-security",
+        "tmp/scenario/vs0-security-23501",
         "--json"
       ],
       "exit_code": 0,
@@ -136,7 +136,7 @@
         "errors": [],
         "evidence_refs": [],
         "ids": {
-          "git_commit": "34d2590"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
@@ -157,7 +157,7 @@
         "ingest",
         "fixtures/vs0/packs/10_prompt_injection/input.txt",
         "--state-dir",
-        "tmp/scenario/vs0-security",
+        "tmp/scenario/vs0-security-23501",
         "--json"
       ],
       "exit_code": 0,
@@ -182,7 +182,7 @@
           "original_size_bytes": 267,
           "original_storage_ref": "sha256:80213d823aa788d530d142dfea9d07656cb0a8416167fb18c7ef1ca4a1686fa6",
           "provenance": {
-            "created_at": "2026-06-09T11:20:11.681535Z",
+            "created_at": "2026-06-09T11:28:55.789417Z",
             "lineage_from": null,
             "transformations": [
               "hash_calculated",
@@ -214,15 +214,15 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:20:11.681535Z",
+            "ingested_at": "2026-06-09T11:28:55.789417Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/10_prompt_injection/input.txt",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_212861159e9fb92d",
-          "audit:audit_c60a4cccf1589a7a"
+          "audit:audit_d87bf15f88527dfa",
+          "audit:audit_9d11e2862f6437d9"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact ingest",
@@ -234,20 +234,20 @@
         ],
         "ids": {
           "artifact_id": "art_80213d823aa788d5",
-          "audit_event_id": "audit_212861159e9fb92d",
+          "audit_event_id": "audit_d87bf15f88527dfa",
           "checksum_sha256": "80213d823aa788d530d142dfea9d07656cb0a8416167fb18c7ef1ca4a1686fa6",
-          "git_commit": "34d2590"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",
         "owner_id": "local-user",
         "policy_decision_refs": [
-          "policy:policy_c60a4cccf1589a7a"
+          "policy:policy_9d11e2862f6437d9"
         ],
         "policy_decisions": [
           {
             "decision": "deny",
-            "id": "policy_c60a4cccf1589a7a",
+            "id": "policy_9d11e2862f6437d9",
             "reason": "prompt_injection_blocked",
             "scope": "artifact_ingest"
           }
@@ -267,7 +267,7 @@
         "ingest",
         "fixtures/vs0/packs/09_redaction_secrets/input.txt",
         "--state-dir",
-        "tmp/scenario/vs0-security",
+        "tmp/scenario/vs0-security-23501",
         "--json"
       ],
       "exit_code": 0,
@@ -292,7 +292,7 @@
           "original_size_bytes": 189,
           "original_storage_ref": "sha256:ec7bc6a3b66c055a951294863dfa0b5079552d1e7bff7b92a755aa106f311e55",
           "provenance": {
-            "created_at": "2026-06-09T11:20:11.635537Z",
+            "created_at": "2026-06-09T11:28:55.741123Z",
             "lineage_from": null,
             "transformations": [
               "hash_calculated",
@@ -322,14 +322,14 @@
             "workspace_id": "default"
           },
           "source": {
-            "ingested_at": "2026-06-09T11:20:11.635537Z",
+            "ingested_at": "2026-06-09T11:28:55.741123Z",
             "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/09_redaction_secrets/input.txt",
             "type": "local_file"
           },
           "trust_state": "untrusted"
         },
         "audit_refs": [
-          "audit:audit_c6b9ddfa9afb6666"
+          "audit:audit_89572e7cb4aa26f2"
         ],
         "cli_schema_version": "cs.cli.v0",
         "command": "cornerstone artifact ingest",
@@ -341,9 +341,9 @@
         ],
         "ids": {
           "artifact_id": "art_ec7bc6a3b66c055a",
-          "audit_event_id": "audit_c6b9ddfa9afb6666",
+          "audit_event_id": "audit_89572e7cb4aa26f2",
           "checksum_sha256": "ec7bc6a3b66c055a951294863dfa0b5079552d1e7bff7b92a755aa106f311e55",
-          "git_commit": "34d2590"
+          "git_commit": "e25f664"
         },
         "mode": "local_scaffold",
         "namespace_id": "personal",

@@ -22,7 +22,8 @@ verify_json=$(mktemp)
 fixtures_json=$(mktemp)
 artifacts_json=$(mktemp)
 security_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json"' EXIT
+search_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -76,6 +77,18 @@ grep -q '"blocking": 0' "$security_json" || fail "vs0-security report has blocki
 grep -q '"unredacted_secret_occurrences": 0' "$security_json" || fail "vs0-security leaked unredacted secret occurrences"
 grep -q '"product_feature_claims": "PARTIAL_VS0_SECURITY_ONLY"' "$security_json" || fail "vs0-security overclaimed product feature scope"
 
+cornerstone scenario verify vs0-search-evidence --json > "$search_json"
+python3 -m json.tool "$search_json" >/dev/null
+grep -q '"scenario_set": "vs0-search-evidence"' "$search_json" || fail "vs0-search-evidence report missing scenario set"
+grep -q '"blocking": 0' "$search_json" || fail "vs0-search-evidence report has blocking scenarios"
+grep -q '"pass": 3' "$search_json" || fail "vs0-search-evidence did not pass exactly three scenarios"
+grep -q '"id": "CS-ARCH-008"' "$search_json" || fail "vs0-search-evidence missing CS-ARCH-008"
+grep -q '"id": "CS-ARCH-009"' "$search_json" || fail "vs0-search-evidence missing CS-ARCH-009"
+grep -q '"id": "CS-UND-001"' "$search_json" || fail "vs0-search-evidence missing CS-UND-001"
+grep -q '"claim_id": "claim_' "$search_json" || fail "vs0-search-evidence missing claim evidence"
+grep -q '"evidence_viewer_id": "viewer_' "$search_json" || fail "vs0-search-evidence missing evidence viewer"
+grep -q '"product_feature_claims": "PARTIAL_VS0_SEARCH_EVIDENCE_ONLY"' "$search_json" || fail "vs0-search-evidence overclaimed product feature scope"
+
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, unittest).\n'
