@@ -260,6 +260,16 @@ class LocalRuntimeStore:
                 records.append(record)
         return records
 
+    def _mission_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.mission_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.mission_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
     def related_claims_for_artifact(self, artifact_id: str, scope: dict[str, str]) -> list[dict[str, Any]]:
         related = []
         artifact_ref = f"artifact:{artifact_id}"
@@ -275,6 +285,53 @@ class LocalRuntimeStore:
                     }
                 )
         return related
+
+    def related_missions_for_artifact(self, artifact_id: str, scope: dict[str, str]) -> list[dict[str, Any]]:
+        related = []
+        artifact_ref = f"artifact:{artifact_id}"
+        for mission in self._mission_records(scope):
+            evidence = mission.get("evidence", {})
+            if artifact_ref in evidence.get("artifact_refs", []):
+                related.append(
+                    {
+                        "mission_id": mission["mission_id"],
+                        "status": mission.get("status"),
+                        "goal": mission.get("goal"),
+                        "evidence_bundle_id": evidence.get("evidence_bundle_id"),
+                    }
+                )
+        return related
+
+    def workspace_detail(self, scope: dict[str, str]) -> dict[str, Any]:
+        mode = self.get_workspace_mode(scope)
+        return {
+            "schema_version": "cs.workspace_detail.v0",
+            "active_scope": scope,
+            "active_workspace_label": (
+                f"{scope['namespace_id']} / {scope['workspace_id']} "
+                f"({scope['owner_id']} in {scope['tenant_id']})"
+            ),
+            "workspace_mode": mode,
+            "context_boundary": {
+                "default_context": "active_workspace_only",
+                "implicit_cross_namespace_context": False,
+                "implicit_cross_owner_context": False,
+                "promotion_required_for_cross_namespace_use": True,
+                "allowed_inherited_context_refs": [],
+            },
+            "visible_navigation": [
+                {"id": "home", "label": "Home"},
+                {"id": "search", "label": "Search"},
+                {"id": "artifacts", "label": "Artifacts"},
+                {"id": "claims", "label": "Claims"},
+                {"id": "actions", "label": "Actions"},
+            ],
+            "explanation": (
+                "CornerStone is using only the active tenant, owner, namespace, "
+                "and workspace unless a governed promotion or reference is recorded."
+            ),
+            "shown_at": utc_now(),
+        }
 
     def _derived_text(self, artifact: dict[str, Any]) -> str:
         text_ref = artifact.get("derived", {}).get("text_ref")

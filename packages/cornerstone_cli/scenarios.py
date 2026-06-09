@@ -2220,6 +2220,368 @@ def verify_vs0_briefing(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-detail-surfaces")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["workspace_personal_show"] = _run_cli_json(root, ["workspace", "show", "--state-dir", state_rel, "--json"])
+    transcripts["workspace_org_show"] = _run_cli_json(
+        root,
+        [
+            "workspace",
+            "show",
+            "--state-dir",
+            state_rel,
+            "--owner-id",
+            "local-org",
+            "--namespace-id",
+            "organization",
+            "--workspace-id",
+            "ops",
+            "--json",
+        ],
+    )
+
+    transcripts["unsupported_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--statement",
+            "Unsupported draft statement for trust ladder inspection.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    unsupported_claim = _payload(transcripts["unsupported_claim_create"]).get("claim", {})
+    unsupported_claim_id = unsupported_claim.get("claim_id", "")
+    transcripts["unsupported_claim_show"] = _run_cli_json(
+        root,
+        ["claim", "show", unsupported_claim_id, "--state-dir", state_rel, "--json"],
+    ) if unsupported_claim_id else {}
+    transcripts["unsupported_claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", unsupported_claim_id, "--state-dir", state_rel, "--json"],
+    ) if unsupported_claim_id else {}
+
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["evidence_view"] = _run_cli_json(root, ["evidence", "view", bundle_id, "--state-dir", state_rel, "--json"]) if bundle_id else {}
+    transcripts["evidence_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The alpha evidence anchor is inspectable through the evidence viewer.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    evidence_claim = _payload(transcripts["evidence_claim_create"]).get("claim", {})
+    evidence_claim_id = evidence_claim.get("claim_id", "")
+    transcripts["evidence_claim_show"] = _run_cli_json(
+        root,
+        ["claim", "show", evidence_claim_id, "--state-dir", state_rel, "--json"],
+    ) if evidence_claim_id else {}
+    transcripts["evidence_claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", evidence_claim_id, "--state-dir", state_rel, "--json"],
+    ) if evidence_claim_id else {}
+    approved_claim = _payload(transcripts["evidence_claim_approve"]).get("claim", {})
+    transcripts["approved_claim_show"] = _run_cli_json(
+        root,
+        ["claim", "show", evidence_claim_id, "--state-dir", state_rel, "--json"],
+    ) if evidence_claim_id else {}
+
+    transcripts["mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--claim-id",
+            evidence_claim_id,
+            "--goal",
+            "Inspect source-backed detail surfaces before action.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if evidence_claim_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["artifact_show"] = _run_cli_json(root, ["artifact", "show", artifact_id, "--state-dir", state_rel, "--json"]) if artifact_id else {}
+    transcripts["mission_activate"] = _run_cli_json(
+        root,
+        ["mission", "activate", mission_id, "--mode", "autopilot", "--state-dir", state_rel, "--json"],
+    ) if mission_id else {}
+    transcripts["high_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            evidence_claim_id,
+            "--goal",
+            "Mock external write for denial explanation.",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and evidence_claim_id else {}
+    high_action = _payload(transcripts["high_action_propose"]).get("action_card", {})
+    high_action_id = high_action.get("action_id", "")
+    transcripts["high_action_execute_before_approval"] = _run_cli_json(
+        root,
+        ["action", "execute", high_action_id, "--state-dir", state_rel, "--json"],
+    ) if high_action_id else {}
+
+    transcripts["egress_test"] = _run_cli_json(
+        root,
+        ["egress", "test", "--url", "https://example.invalid/detail-denied", "--state-dir", state_rel, "--json"],
+    )
+    transcripts["sandbox_test"] = _run_cli_json(
+        root,
+        ["sandbox", "test", "--capability", "shell", "--target", "arbitrary-shell", "--state-dir", state_rel, "--json"],
+    )
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    personal_workspace = _payload(transcripts["workspace_personal_show"]).get("workspace", {})
+    org_workspace = _payload(transcripts["workspace_org_show"]).get("workspace", {})
+    personal_boundary = personal_workspace.get("context_boundary", {})
+    org_boundary = org_workspace.get("context_boundary", {})
+    personal_nav = {item.get("id") for item in personal_workspace.get("visible_navigation", []) if isinstance(item, dict)}
+    org_nav = {item.get("id") for item in org_workspace.get("visible_navigation", []) if isinstance(item, dict)}
+
+    artifact_detail = _artifact(transcripts["artifact_show"])
+    related_claims = artifact_detail.get("related_claims", [])
+    related_missions = artifact_detail.get("related_missions", [])
+    evidence_viewer = _payload(transcripts["evidence_view"]).get("evidence_viewer", {})
+    viewer_items = evidence_viewer.get("viewer_items", [])
+    first_viewer_item = viewer_items[0] if viewer_items else {}
+
+    unsupported_show_claim = _payload(transcripts["unsupported_claim_show"]).get("claim", {})
+    evidence_show_claim = _payload(transcripts["evidence_claim_show"]).get("claim", {})
+    approved_show_claim = _payload(transcripts["approved_claim_show"]).get("claim", {})
+    trust_states = {
+        "draft": unsupported_show_claim.get("trust_state"),
+        "evidence_backed": evidence_show_claim.get("trust_state"),
+        "approved": approved_show_claim.get("trust_state"),
+    }
+    trust_authority = {
+        "draft": unsupported_show_claim.get("authority"),
+        "evidence_backed": evidence_show_claim.get("authority"),
+        "approved": approved_show_claim.get("authority"),
+    }
+
+    denial_transcript_names = [
+        "egress_test",
+        "sandbox_test",
+        "unsupported_claim_approve",
+        "high_action_execute_before_approval",
+    ]
+    denial_examples: dict[str, dict[str, Any]] = {}
+    missing_resolution_paths = 0
+    denial_without_audit = 0
+    for name in denial_transcript_names:
+        transcript = transcripts.get(name, {})
+        payload = _payload(transcript)
+        errors = payload.get("errors", [])
+        first_error = errors[0] if isinstance(errors, list) and errors else {}
+        resolution_path = first_error.get("resolution_path") if isinstance(first_error, dict) else None
+        if not isinstance(resolution_path, list) or not resolution_path:
+            missing_resolution_paths += 1
+        if not payload.get("audit_refs"):
+            denial_without_audit += 1
+        denial_examples[name] = {
+            "exit_code": transcript.get("exit_code"),
+            "status": payload.get("status"),
+            "error_code": first_error.get("code") if isinstance(first_error, dict) else None,
+            "message": first_error.get("message") if isinstance(first_error, dict) else None,
+            "resolution_path": resolution_path,
+            "policy_decision_refs": payload.get("policy_decision_refs", []),
+            "audit_refs": payload.get("audit_refs", []),
+        }
+
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    ns_002_ok = (
+        _exit_ok(transcripts["workspace_personal_show"])
+        and _exit_ok(transcripts["workspace_org_show"])
+        and personal_workspace.get("active_scope", {}).get("namespace_id") == "personal"
+        and org_workspace.get("active_scope", {}).get("namespace_id") == "organization"
+        and "personal / default" in personal_workspace.get("active_workspace_label", "")
+        and "organization / ops" in org_workspace.get("active_workspace_label", "")
+        and personal_boundary.get("implicit_cross_namespace_context") is False
+        and org_boundary.get("implicit_cross_namespace_context") is False
+        and personal_boundary.get("promotion_required_for_cross_namespace_use") is True
+        and org_boundary.get("promotion_required_for_cross_namespace_use") is True
+        and {"home", "search", "artifacts", "claims", "actions"}.issubset(personal_nav)
+        and {"home", "search", "artifacts", "claims", "actions"}.issubset(org_nav)
+    )
+    und_004_ok = (
+        _exit_ok(transcripts["artifact_show"])
+        and artifact_detail.get("artifact_id") == artifact_id
+        and artifact_detail.get("original_storage_ref", "").startswith("sha256:")
+        and artifact_detail.get("derived", {}).get("status") == "ready"
+        and "alpha-evidence-anchor" in artifact_detail.get("derived_text_preview", "")
+        and artifact_detail.get("source", {}).get("path")
+        and artifact_detail.get("provenance", {}).get("transformations")
+        and any(claim.get("claim_id") == evidence_claim_id for claim in related_claims if isinstance(claim, dict))
+        and any(item.get("mission_id") == mission_id for item in related_missions if isinstance(item, dict))
+        and _payload(transcripts["artifact_show"]).get("evidence_refs")
+        and _payload(transcripts["artifact_show"]).get("audit_refs")
+    )
+    claim_005_ok = (
+        _exit_ok(transcripts["unsupported_claim_show"])
+        and _exit_ok(transcripts["evidence_claim_show"])
+        and _exit_ok(transcripts["approved_claim_show"])
+        and trust_states == {"draft": "draft", "evidence_backed": "evidence_backed", "approved": "approved"}
+        and trust_authority["draft"].get("can_be_approved") is False
+        and trust_authority["evidence_backed"].get("can_be_approved") is True
+        and trust_authority["evidence_backed"].get("can_publish_shared_truth") is False
+        and trust_authority["approved"].get("can_publish_shared_truth") is True
+        and trust_authority["approved"].get("can_drive_autonomous_action") is False
+    )
+    claim_008_ok = (
+        _exit_ok(transcripts["evidence_claim_show"])
+        and _exit_ok(transcripts["evidence_view"])
+        and evidence_show_claim.get("evidence_bundle", {}).get("evidence_bundle_id") == bundle_id
+        and f"artifact:{artifact_id}" in evidence_show_claim.get("evidence_bundle", {}).get("artifact_refs", [])
+        and first_viewer_item.get("artifact_id") == artifact_id
+        and first_viewer_item.get("original", {}).get("storage_ref", "").startswith("sha256:")
+        and first_viewer_item.get("derived", {}).get("text_ref", "").startswith("derived/")
+        and "alpha-evidence-anchor" in first_viewer_item.get("derived", {}).get("text_preview", "")
+        and bool(first_viewer_item.get("snippet"))
+        and _payload(transcripts["evidence_view"]).get("audit_refs")
+    )
+    sec_005_ok = (
+        _policy_denied(transcripts["egress_test"], "CS_EGRESS_DENIED")
+        and _policy_denied(transcripts["sandbox_test"], "CS_SANDBOX_ACCESS_DENIED")
+        and transcripts["unsupported_claim_approve"].get("exit_code") == 4
+        and _action_policy_blocked(transcripts["high_action_execute_before_approval"])
+        and missing_resolution_paths == 0
+        and denial_without_audit == 0
+    )
+
+    rows = [
+        _row(
+            "CS-UND-004",
+            "MUST_PASS",
+            "PASS" if und_004_ok and audit_ok else "FAIL",
+            ["cornerstone artifact show <artifact_id> --json"],
+            "Artifact detail exposes original storage, derived text/metadata, source, evidence refs, related claim, related mission, and read audit refs.",
+        ),
+        _row(
+            "CS-CLAIM-005",
+            "MUST_PASS",
+            "PASS" if claim_005_ok and audit_ok else "FAIL",
+            [
+                "cornerstone claim show <draft_claim_id> --json",
+                "cornerstone claim show <evidence_backed_claim_id> --json",
+                "cornerstone claim show <approved_claim_id> --json",
+            ],
+            "Claim detail examples show Draft, Evidence-backed, and Approved trust states with authority limits for each state.",
+        ),
+        _row(
+            "CS-CLAIM-008",
+            "MUST_PASS",
+            "PASS" if claim_008_ok and audit_ok else "FAIL",
+            ["cornerstone claim show <claim_id> --json", "cornerstone evidence view <evidence_bundle_id> --json"],
+            "A claim carries evidence refs, and one explicit evidence-view command opens source artifact, excerpt, query-linked bundle, and derived representation.",
+        ),
+        _row(
+            "CS-NS-002",
+            "MUST_PASS",
+            "PASS" if ns_002_ok and audit_ok else "FAIL",
+            ["cornerstone workspace show --json", "cornerstone workspace show --owner-id local-org --namespace-id organization --workspace-id ops --json"],
+            "Workspace detail shows the active tenant, owner, namespace, workspace, mode, navigation context, and cross-namespace boundary.",
+        ),
+        _row(
+            "CS-SEC-005",
+            "MUST_PASS",
+            "PASS" if sec_005_ok and audit_ok else "FAIL",
+            [
+                "cornerstone egress test --json",
+                "cornerstone sandbox test --json",
+                "cornerstone claim approve <unsupported_claim_id> --json",
+                "cornerstone action execute <high_risk_action_id> --json",
+            ],
+            "Denied egress, sandbox access, unsupported claim approval, and high-risk action execution all include cause, safe resolution path, and audit evidence.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-detail-surfaces",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_DETAIL_SURFACES_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "detail_surface_evidence": {
+            "workspace_labels": {
+                "personal": personal_workspace.get("active_workspace_label"),
+                "organization": org_workspace.get("active_workspace_label"),
+            },
+            "workspace_boundaries": {
+                "personal": personal_boundary,
+                "organization": org_boundary,
+            },
+            "artifact_id": artifact_id,
+            "artifact_related_claim_ids": [claim.get("claim_id") for claim in related_claims if isinstance(claim, dict)],
+            "artifact_related_mission_ids": [item.get("mission_id") for item in related_missions if isinstance(item, dict)],
+            "artifact_derived_status": artifact_detail.get("derived", {}).get("status"),
+            "artifact_original_storage_ref": artifact_detail.get("original_storage_ref"),
+            "trust_states": trust_states,
+            "trust_authority": trust_authority,
+            "evidence_viewer_id": evidence_viewer.get("evidence_viewer_id"),
+            "evidence_viewer_item_count": len(viewer_items),
+            "evidence_viewer_first_item": first_viewer_item,
+            "denial_examples": denial_examples,
+            "audit_event_count": _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("event_count"),
+        },
+        "negative_evidence": {
+            "workspace_boundary_implicit_cross_namespace_context": int(bool(personal_boundary.get("implicit_cross_namespace_context")))
+            + int(bool(org_boundary.get("implicit_cross_namespace_context"))),
+            "artifact_detail_missing_related_claims": 0 if related_claims else 1,
+            "artifact_detail_missing_related_missions": 0 if related_missions else 1,
+            "trust_ladder_missing_states": 0 if trust_states == {"draft": "draft", "evidence_backed": "evidence_backed", "approved": "approved"} else 1,
+            "evidence_viewer_missing_sources": 0 if claim_008_ok else 1,
+            "policy_denials_missing_resolution_path": missing_resolution_paths,
+            "policy_denials_without_audit": denial_without_audit,
+        },
+        "human_required": [],
+    }
+
+
 def verify_vs0_mission_action(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-mission-action")
     state_path = root / state_rel

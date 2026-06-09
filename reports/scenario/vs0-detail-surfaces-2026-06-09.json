@@ -1,0 +1,2583 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-detail-surfaces",
+  "detail_surface_evidence": {
+    "artifact_derived_status": "ready",
+    "artifact_id": "art_2735313e0cb92563",
+    "artifact_original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+    "artifact_related_claim_ids": [
+      "claim_0dd32bcd2f8874b9"
+    ],
+    "artifact_related_mission_ids": [
+      "mission_962c2dc0d66306a1"
+    ],
+    "audit_event_count": 19,
+    "denial_examples": {
+      "egress_test": {
+        "audit_refs": [
+          "audit:audit_2cbe422e99ed442c"
+        ],
+        "error_code": "CS_EGRESS_DENIED",
+        "exit_code": 8,
+        "message": "External network access is denied unless an explicit scoped policy allows it.",
+        "policy_decision_refs": [
+          "policy:policy_cafd5661b8d8fa9c"
+        ],
+        "resolution_path": [
+          "Attach the requested action to a governed workflow or mission.",
+          "Request owner approval for a scoped connector capability.",
+          "Retry only after policy grants egress for this target and purpose."
+        ],
+        "status": "denied"
+      },
+      "high_action_execute_before_approval": {
+        "audit_refs": [
+          "audit:audit_be9bc03b3ce07648"
+        ],
+        "error_code": "CS_ACTION_POLICY_DENIED",
+        "exit_code": 8,
+        "message": "High-risk or external writeback action requires owner approval before execution.",
+        "policy_decision_refs": [
+          "policy:policy_4ac5d0b04adafd65"
+        ],
+        "resolution_path": [
+          "Use an active Mission Goal Contract.",
+          "Keep action inside allowed actions and owner namespace.",
+          "Run dry-run and request owner approval when policy requires it."
+        ],
+        "status": "denied"
+      },
+      "sandbox_test": {
+        "audit_refs": [
+          "audit:audit_5da7aa621ee93585"
+        ],
+        "error_code": "CS_SANDBOX_ACCESS_DENIED",
+        "exit_code": 8,
+        "message": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+        "policy_decision_refs": [
+          "policy:policy_a6783329f8b92500"
+        ],
+        "resolution_path": [
+          "Declare the minimum required capability in an Agent Pack or tool contract.",
+          "Run inside a safe sandbox boundary after owner approval.",
+          "Reduce scope or use an existing mediated workflow/action path."
+        ],
+        "status": "denied"
+      },
+      "unsupported_claim_approve": {
+        "audit_refs": [
+          "audit:audit_3831e4f38ebd61a1"
+        ],
+        "error_code": "CS_CLAIM_EVIDENCE_REQUIRED",
+        "exit_code": 4,
+        "message": "Claim approval requires an Evidence Bundle with at least one artifact reference.",
+        "policy_decision_refs": [],
+        "resolution_path": [
+          "Run cornerstone search query ... --json.",
+          "Run cornerstone evidence bundle create --search-snapshot-id <id> --json.",
+          "Create or recreate the claim with --evidence-bundle-id <id>."
+        ],
+        "status": "failed"
+      }
+    },
+    "evidence_viewer_first_item": {
+      "artifact_id": "art_2735313e0cb92563",
+      "derived": {
+        "metadata": {
+          "media_type": "text/plain",
+          "redacted": false,
+          "status": "ready",
+          "text_ref": "derived/art_2735313e0cb92563.txt"
+        },
+        "status": "ready",
+        "text_preview": "CornerStone fixture note.  Project: Alpha research review. Decision candidate: Keep original source material before derived summaries. Known risk: extraction may fail for an unknown binary attachment. Search phrase: alpha-evidence-anchor.",
+        "text_ref": "derived/art_2735313e0cb92563.txt"
+      },
+      "original": {
+        "media_type": "text/plain",
+        "raw_original_access": {
+          "display": "controlled",
+          "policy": "owner_scope_required"
+        },
+        "size_bytes": 239,
+        "source": {
+          "ingested_at": "2026-06-09T13:06:55.510239Z",
+          "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+          "type": "local_file"
+        },
+        "storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+      },
+      "provenance": {
+        "created_at": "2026-06-09T13:06:55.510239Z",
+        "lineage_from": null,
+        "transformations": [
+          "hash_calculated",
+          "original_preserved",
+          "derived_text_created"
+        ]
+      },
+      "snippet": "alpha-evidence-anchor."
+    },
+    "evidence_viewer_id": "viewer_c3d428cdf2555693",
+    "evidence_viewer_item_count": 1,
+    "trust_authority": {
+      "approved": {
+        "blocked_reason": "Autonomous action still requires a governed action or mission path.",
+        "can_be_approved": true,
+        "can_drive_autonomous_action": false,
+        "can_publish_shared_truth": true
+      },
+      "draft": {
+        "blocked_reason": "Evidence Bundle is required before approval or authority use.",
+        "can_be_approved": false,
+        "can_drive_autonomous_action": false,
+        "can_publish_shared_truth": false
+      },
+      "evidence_backed": {
+        "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+        "can_be_approved": true,
+        "can_drive_autonomous_action": false,
+        "can_publish_shared_truth": false
+      }
+    },
+    "trust_states": {
+      "approved": "approved",
+      "draft": "draft",
+      "evidence_backed": "evidence_backed"
+    },
+    "workspace_boundaries": {
+      "organization": {
+        "allowed_inherited_context_refs": [],
+        "default_context": "active_workspace_only",
+        "implicit_cross_namespace_context": false,
+        "implicit_cross_owner_context": false,
+        "promotion_required_for_cross_namespace_use": true
+      },
+      "personal": {
+        "allowed_inherited_context_refs": [],
+        "default_context": "active_workspace_only",
+        "implicit_cross_namespace_context": false,
+        "implicit_cross_owner_context": false,
+        "promotion_required_for_cross_namespace_use": true
+      }
+    },
+    "workspace_labels": {
+      "organization": "organization / ops (local-org in local-dev)",
+      "personal": "personal / default (local-user in local-dev)"
+    }
+  },
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "e8ce020"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "artifact_detail_missing_related_claims": 0,
+    "artifact_detail_missing_related_missions": 0,
+    "evidence_viewer_missing_sources": 0,
+    "policy_denials_missing_resolution_path": 0,
+    "policy_denials_without_audit": 0,
+    "trust_ladder_missing_states": 0,
+    "workspace_boundary_implicit_cross_namespace_context": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-detail-surfaces-2026-06-09.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone artifact show <artifact_id> --json"
+      ],
+      "id": "CS-UND-004",
+      "notes": "Artifact detail exposes original storage, derived text/metadata, source, evidence refs, related claim, related mission, and read audit refs.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone claim show <draft_claim_id> --json",
+        "cornerstone claim show <evidence_backed_claim_id> --json",
+        "cornerstone claim show <approved_claim_id> --json"
+      ],
+      "id": "CS-CLAIM-005",
+      "notes": "Claim detail examples show Draft, Evidence-backed, and Approved trust states with authority limits for each state.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone claim show <claim_id> --json",
+        "cornerstone evidence view <evidence_bundle_id> --json"
+      ],
+      "id": "CS-CLAIM-008",
+      "notes": "A claim carries evidence refs, and one explicit evidence-view command opens source artifact, excerpt, query-linked bundle, and derived representation.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone workspace show --json",
+        "cornerstone workspace show --owner-id local-org --namespace-id organization --workspace-id ops --json"
+      ],
+      "id": "CS-NS-002",
+      "notes": "Workspace detail shows the active tenant, owner, namespace, workspace, mode, navigation context, and cross-namespace boundary.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone egress test --json",
+        "cornerstone sandbox test --json",
+        "cornerstone claim approve <unsupported_claim_id> --json",
+        "cornerstone action execute <high_risk_action_id> --json"
+      ],
+      "id": "CS-SEC-005",
+      "notes": "Denied egress, sandbox access, unsupported claim approval, and high-risk action execution all include cause, safe resolution path, and audit evidence.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    }
+  ],
+  "scenario_set": "vs0-detail-surfaces",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/vs0-detail-surfaces-55068",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 5,
+    "product_feature_claims": "PARTIAL_VS0_DETAIL_SURFACES_ONLY",
+    "scenario_count": 5
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "approved_claim_show": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "show",
+        "claim_0dd32bcd2f8874b9",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_79d7884d0f2a08ec"
+        ],
+        "claim": {
+          "approved_at": "2026-06-09T13:06:55.783368Z",
+          "authority": {
+            "blocked_reason": "Autonomous action still requires a governed action or mission path.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": true
+          },
+          "claim_id": "claim_0dd32bcd2f8874b9",
+          "created_at": "2026-06-09T13:06:55.688537Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_effe3c0996790ae5",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_8c4480b46ff37aa9",
+              "evidence_bundle:evb_effe3c0996790ae5"
+            ],
+            "search_snapshot_id": "search_8c4480b46ff37aa9"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The alpha evidence anchor is inspectable through the evidence viewer.",
+          "status": "approved",
+          "trust_state": "approved"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim show",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_0dd32bcd2f8874b9",
+          "evidence_bundle:evb_effe3c0996790ae5",
+          "search_snapshot:search_8c4480b46ff37aa9",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_79d7884d0f2a08ec",
+          "claim_id": "claim_0dd32bcd2f8874b9",
+          "evidence_bundle_id": "evb_effe3c0996790ae5",
+          "git_commit": "e8ce020",
+          "search_snapshot_id": "search_8c4480b46ff37aa9"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "artifact_show": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "show",
+        "art_2735313e0cb92563",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "derived_text_preview": "CornerStone fixture note.  Project: Alpha research review. Decision candidate: Keep original source material before derived summaries. Known risk: extraction may fail for an unknown binary attachment. Search phrase: alpha-evidence-anchor.",
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-09T13:06:55.510239Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "related_claims": [
+            {
+              "claim_id": "claim_0dd32bcd2f8874b9",
+              "evidence_bundle_id": "evb_effe3c0996790ae5",
+              "statement": "The alpha evidence anchor is inspectable through the evidence viewer.",
+              "status": "approved"
+            }
+          ],
+          "related_missions": [
+            {
+              "evidence_bundle_id": "evb_effe3c0996790ae5",
+              "goal": "Inspect source-backed detail surfaces before action.",
+              "mission_id": "mission_962c2dc0d66306a1",
+              "status": "draft"
+            }
+          ],
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T13:06:55.510239Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_b428328fa9bb006d"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact show",
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563",
+          "claim:claim_0dd32bcd2f8874b9"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_b428328fa9bb006d",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "e8ce020"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 19,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "e8ce020"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_8c4480b46ff37aa9",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_7a243359b00f1008"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T13:06:55.594883Z",
+          "evidence_bundle_id": "evb_effe3c0996790ae5",
+          "evidence_items": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "provenance": {
+                "created_at": "2026-06-09T13:06:55.510239Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_8c4480b46ff37aa9",
+              "snippet": "alpha-evidence-anchor.",
+              "source": {
+                "ingested_at": "2026-06-09T13:06:55.510239Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_2735313e0cb92563",
+                "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+                "evidence_refs": [
+                  "artifact:art_2735313e0cb92563",
+                  "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "alpha-evidence-anchor",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "alpha-evidence-anchor",
+                    "query_term": "alpha-evidence-anchor",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "alpha-evidence-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_8c4480b46ff37aa9"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_8c4480b46ff37aa9"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_effe3c0996790ae5",
+          "search_snapshot:search_8c4480b46ff37aa9",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_7a243359b00f1008",
+          "evidence_bundle_id": "evb_effe3c0996790ae5",
+          "git_commit": "e8ce020",
+          "search_snapshot_id": "search_8c4480b46ff37aa9"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "egress_test": {
+      "command": [
+        "cornerstone",
+        "egress",
+        "test",
+        "--url",
+        "https://example.invalid/detail-denied",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_2cbe422e99ed442c"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone egress test",
+        "errors": [
+          {
+            "code": "CS_EGRESS_DENIED",
+            "external_http_calls": 0,
+            "message": "External network access is denied unless an explicit scoped policy allows it.",
+            "resolution_path": [
+              "Attach the requested action to a governed workflow or mission.",
+              "Request owner approval for a scoped connector capability.",
+              "Retry only after policy grants egress for this target and purpose."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "e8ce020"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_cafd5661b8d8fa9c"
+        ],
+        "policy_decisions": [
+          {
+            "decided_at": "2026-06-09T13:06:56.113100Z",
+            "decision": "deny",
+            "external_http_calls": 0,
+            "id": "policy_cafd5661b8d8fa9c",
+            "policy": "default_egress_deny",
+            "reason": "External network access is denied unless an explicit scoped policy allows it.",
+            "resolution_path": [
+              "Attach the requested action to a governed workflow or mission.",
+              "Request owner approval for a scoped connector capability.",
+              "Retry only after policy grants egress for this target and purpose."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "target": {
+              "type": "url",
+              "value": "https://example.invalid/detail-denied"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "evidence_claim_approve": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "approve",
+        "claim_0dd32bcd2f8874b9",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_fa840acbc9fbaad0"
+        ],
+        "claim": {
+          "approved_at": "2026-06-09T13:06:55.783368Z",
+          "authority": {
+            "blocked_reason": "Autonomous action still requires a governed action or mission path.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": true
+          },
+          "claim_id": "claim_0dd32bcd2f8874b9",
+          "created_at": "2026-06-09T13:06:55.688537Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_effe3c0996790ae5",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_8c4480b46ff37aa9",
+              "evidence_bundle:evb_effe3c0996790ae5"
+            ],
+            "search_snapshot_id": "search_8c4480b46ff37aa9"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The alpha evidence anchor is inspectable through the evidence viewer.",
+          "status": "approved",
+          "trust_state": "approved"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim approve",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_0dd32bcd2f8874b9",
+          "evidence_bundle:evb_effe3c0996790ae5",
+          "search_snapshot:search_8c4480b46ff37aa9",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_fa840acbc9fbaad0",
+          "claim_id": "claim_0dd32bcd2f8874b9",
+          "evidence_bundle_id": "evb_effe3c0996790ae5",
+          "git_commit": "e8ce020",
+          "search_snapshot_id": "search_8c4480b46ff37aa9"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "evidence_claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_effe3c0996790ae5",
+        "--statement",
+        "The alpha evidence anchor is inspectable through the evidence viewer.",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_1b9cdcfe0cfc11b7"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_0dd32bcd2f8874b9",
+          "created_at": "2026-06-09T13:06:55.688537Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_effe3c0996790ae5",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_8c4480b46ff37aa9",
+              "evidence_bundle:evb_effe3c0996790ae5"
+            ],
+            "search_snapshot_id": "search_8c4480b46ff37aa9"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The alpha evidence anchor is inspectable through the evidence viewer.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_0dd32bcd2f8874b9",
+          "evidence_bundle:evb_effe3c0996790ae5",
+          "search_snapshot:search_8c4480b46ff37aa9",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_1b9cdcfe0cfc11b7",
+          "claim_id": "claim_0dd32bcd2f8874b9",
+          "evidence_bundle_id": "evb_effe3c0996790ae5",
+          "git_commit": "e8ce020",
+          "search_snapshot_id": "search_8c4480b46ff37aa9"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "evidence_claim_show": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "show",
+        "claim_0dd32bcd2f8874b9",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_325bfb7d1c7a22eb"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_0dd32bcd2f8874b9",
+          "created_at": "2026-06-09T13:06:55.688537Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_effe3c0996790ae5",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_8c4480b46ff37aa9",
+              "evidence_bundle:evb_effe3c0996790ae5"
+            ],
+            "search_snapshot_id": "search_8c4480b46ff37aa9"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The alpha evidence anchor is inspectable through the evidence viewer.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim show",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_0dd32bcd2f8874b9",
+          "evidence_bundle:evb_effe3c0996790ae5",
+          "search_snapshot:search_8c4480b46ff37aa9",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_325bfb7d1c7a22eb",
+          "claim_id": "claim_0dd32bcd2f8874b9",
+          "evidence_bundle_id": "evb_effe3c0996790ae5",
+          "git_commit": "e8ce020",
+          "search_snapshot_id": "search_8c4480b46ff37aa9"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "evidence_view": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "view",
+        "evb_effe3c0996790ae5",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_fddf75bb4f8db648"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence view",
+        "errors": [],
+        "evidence_refs": [
+          "evidence_viewer:viewer_c3d428cdf2555693",
+          "evidence_bundle:evb_effe3c0996790ae5",
+          "search_snapshot:search_8c4480b46ff37aa9",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "evidence_viewer": {
+          "evidence_bundle_id": "evb_effe3c0996790ae5",
+          "evidence_viewer_id": "viewer_c3d428cdf2555693",
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "opened_at": "2026-06-09T13:06:55.641880Z",
+          "query": "alpha-evidence-anchor",
+          "schema_version": "cs.evidence_viewer.v0",
+          "search_snapshot_id": "search_8c4480b46ff37aa9",
+          "viewer_items": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived": {
+                "metadata": {
+                  "media_type": "text/plain",
+                  "redacted": false,
+                  "status": "ready",
+                  "text_ref": "derived/art_2735313e0cb92563.txt"
+                },
+                "status": "ready",
+                "text_preview": "CornerStone fixture note.  Project: Alpha research review. Decision candidate: Keep original source material before derived summaries. Known risk: extraction may fail for an unknown binary attachment. Search phrase: alpha-evidence-anchor.",
+                "text_ref": "derived/art_2735313e0cb92563.txt"
+              },
+              "original": {
+                "media_type": "text/plain",
+                "raw_original_access": {
+                  "display": "controlled",
+                  "policy": "owner_scope_required"
+                },
+                "size_bytes": 239,
+                "source": {
+                  "ingested_at": "2026-06-09T13:06:55.510239Z",
+                  "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+                  "type": "local_file"
+                },
+                "storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+              },
+              "provenance": {
+                "created_at": "2026-06-09T13:06:55.510239Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "snippet": "alpha-evidence-anchor."
+            }
+          ]
+        },
+        "ids": {
+          "audit_event_id": "audit_fddf75bb4f8db648",
+          "evidence_bundle_id": "evb_effe3c0996790ae5",
+          "evidence_viewer_id": "viewer_c3d428cdf2555693",
+          "git_commit": "e8ce020",
+          "search_snapshot_id": "search_8c4480b46ff37aa9"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "high_action_execute_before_approval": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_4010df79a119b3de",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_4010df79a119b3de",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_2d112ac95f81fa10",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T13:06:56.017456Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_0dd32bcd2f8874b9",
+            "created_at": "2026-06-09T13:06:56.017436Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_40a7f384c6f79735",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 1,
+              "risk": "high",
+              "target": "mock://local-target"
+            },
+            "goal": "Mock external write for denial explanation.",
+            "mission_id": "mission_962c2dc0d66306a1",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T13:06:56.017327Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_4ac5d0b04adafd65",
+              "mission_id": "mission_962c2dc0d66306a1",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_effe3c0996790ae5",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_8c4480b46ff37aa9",
+              "evidence_bundle:evb_effe3c0996790ae5"
+            ],
+            "search_snapshot_id": "search_8c4480b46ff37aa9"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "pending_approval"
+          },
+          "goal": "Mock external write for denial explanation.",
+          "mission_id": "mission_962c2dc0d66306a1",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T13:06:56.017327Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_4ac5d0b04adafd65",
+            "mission_id": "mission_962c2dc0d66306a1",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_0dd32bcd2f8874b9"
+        },
+        "audit_refs": [
+          "audit:audit_be9bc03b3ce07648"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [
+          {
+            "code": "CS_ACTION_POLICY_DENIED",
+            "message": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ]
+          }
+        ],
+        "evidence_refs": [
+          "action:action_4010df79a119b3de"
+        ],
+        "ids": {
+          "action_id": "action_4010df79a119b3de",
+          "git_commit": "e8ce020",
+          "mission_id": "mission_962c2dc0d66306a1"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_4ac5d0b04adafd65"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T13:06:56.063931Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_4ac5d0b04adafd65",
+            "mission_id": "mission_962c2dc0d66306a1",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "high_action_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_962c2dc0d66306a1",
+        "--claim-id",
+        "claim_0dd32bcd2f8874b9",
+        "--goal",
+        "Mock external write for denial explanation.",
+        "--action-kind",
+        "external_writeback",
+        "--risk",
+        "high",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_4010df79a119b3de",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_2d112ac95f81fa10",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T13:06:56.017456Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_0dd32bcd2f8874b9",
+            "created_at": "2026-06-09T13:06:56.017436Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_40a7f384c6f79735",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 1,
+              "risk": "high",
+              "target": "mock://local-target"
+            },
+            "goal": "Mock external write for denial explanation.",
+            "mission_id": "mission_962c2dc0d66306a1",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T13:06:56.017327Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_4ac5d0b04adafd65",
+              "mission_id": "mission_962c2dc0d66306a1",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_effe3c0996790ae5",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_8c4480b46ff37aa9",
+              "evidence_bundle:evb_effe3c0996790ae5"
+            ],
+            "search_snapshot_id": "search_8c4480b46ff37aa9"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "pending_approval"
+          },
+          "goal": "Mock external write for denial explanation.",
+          "mission_id": "mission_962c2dc0d66306a1",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T13:06:56.017327Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_4ac5d0b04adafd65",
+            "mission_id": "mission_962c2dc0d66306a1",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_0dd32bcd2f8874b9"
+        },
+        "audit_refs": [
+          "audit:audit_2d112ac95f81fa10"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_4010df79a119b3de",
+          "mission:mission_962c2dc0d66306a1",
+          "claim:claim_0dd32bcd2f8874b9",
+          "dry_run:dryrun_40a7f384c6f79735",
+          "evidence_bundle:evb_effe3c0996790ae5",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "action_id": "action_4010df79a119b3de",
+          "audit_event_id": "audit_2d112ac95f81fa10",
+          "claim_id": "claim_0dd32bcd2f8874b9",
+          "dry_run_id": "dryrun_40a7f384c6f79735",
+          "git_commit": "e8ce020",
+          "mission_id": "mission_962c2dc0d66306a1"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_4ac5d0b04adafd65"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T13:06:56.017327Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_4ac5d0b04adafd65",
+            "mission_id": "mission_962c2dc0d66306a1",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/01_artifact_basic/input.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-09T13:06:55.510239Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T13:06:55.510239Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_483d2b9192edc118"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_483d2b9192edc118",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "e8ce020"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "mission_activate": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "activate",
+        "mission_962c2dc0d66306a1",
+        "--mode",
+        "autopilot",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_90213e69b5d2a3a3",
+          "audit:audit_50be9b73384620aa"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission activate",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_962c2dc0d66306a1"
+        ],
+        "ids": {
+          "git_commit": "e8ce020",
+          "mission_id": "mission_962c2dc0d66306a1"
+        },
+        "mission": {
+          "activated_at": "2026-06-09T13:06:55.970849Z",
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "authority_view": {
+            "allowed_actions": [
+              "internal_status_update",
+              "draft_task",
+              "refresh_brief"
+            ],
+            "forbidden_actions": [
+              "external_writeback_without_workflow_action",
+              "cross_namespace_access",
+              "destructive_change",
+              "secret_exfiltration"
+            ],
+            "may_act_in_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "pause_stop_revoke": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T13:06:55.877868Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_effe3c0996790ae5",
+            "search_snapshot_id": "search_8c4480b46ff37aa9"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Inspect source-backed detail surfaces before action.",
+          "mission_id": "mission_962c2dc0d66306a1",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_0dd32bcd2f8874b9",
+            "statement": "The alpha evidence anchor is inspectable through the evidence viewer.",
+            "trust_state": "approved"
+          },
+          "status": "active",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "autopilot"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": false,
+            "autonomous_execution_allowed": true,
+            "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            "label": "Autopilot"
+          },
+          "mode": "autopilot",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T13:06:55.970433Z"
+        }
+      }
+    },
+    "mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--claim-id",
+        "claim_0dd32bcd2f8874b9",
+        "--goal",
+        "Inspect source-backed detail surfaces before action.",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_bdd073860587d1d3"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_962c2dc0d66306a1",
+          "claim:claim_0dd32bcd2f8874b9",
+          "evidence_bundle:evb_effe3c0996790ae5",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_bdd073860587d1d3",
+          "claim_id": "claim_0dd32bcd2f8874b9",
+          "evidence_bundle_id": "evb_effe3c0996790ae5",
+          "git_commit": "e8ce020",
+          "mission_id": "mission_962c2dc0d66306a1"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T13:06:55.877868Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_effe3c0996790ae5",
+            "search_snapshot_id": "search_8c4480b46ff37aa9"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Inspect source-backed detail surfaces before action.",
+          "mission_id": "mission_962c2dc0d66306a1",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_0dd32bcd2f8874b9",
+            "statement": "The alpha evidence anchor is inspectable through the evidence viewer.",
+            "trust_state": "approved"
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "assist"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "sandbox_test": {
+      "command": [
+        "cornerstone",
+        "sandbox",
+        "test",
+        "--capability",
+        "shell",
+        "--target",
+        "arbitrary-shell",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_5da7aa621ee93585"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone sandbox test",
+        "errors": [
+          {
+            "code": "CS_SANDBOX_ACCESS_DENIED",
+            "host_operations_executed": 0,
+            "message": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "resolution_path": [
+              "Declare the minimum required capability in an Agent Pack or tool contract.",
+              "Run inside a safe sandbox boundary after owner approval.",
+              "Reduce scope or use an existing mediated workflow/action path."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "e8ce020"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_a6783329f8b92500"
+        ],
+        "policy_decisions": [
+          {
+            "decided_at": "2026-06-09T13:06:56.161831Z",
+            "decision": "deny",
+            "environment_reads": 0,
+            "filesystem_reads": 0,
+            "host_operations_executed": 0,
+            "id": "policy_a6783329f8b92500",
+            "policy": "declared_sandbox_capability_required",
+            "reason": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "resolution_path": [
+              "Declare the minimum required capability in an Agent Pack or tool contract.",
+              "Run inside a safe sandbox boundary after owner approval.",
+              "Reduce scope or use an existing mediated workflow/action path."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "shell_commands_executed": 0,
+            "target": {
+              "type": "shell",
+              "value": "arbitrary-shell"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "alpha-evidence-anchor",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_9f597db09f89e0b1"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_8c4480b46ff37aa9",
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "audit_event_id": "audit_9f597db09f89e0b1",
+          "git_commit": "e8ce020",
+          "search_snapshot_id": "search_8c4480b46ff37aa9"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T13:06:55.547924Z",
+          "duration_ms": 0.203,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+              ],
+              "match_reasons": [
+                {
+                  "query": "alpha-evidence-anchor",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "alpha-evidence-anchor",
+                  "query_term": "alpha-evidence-anchor",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "alpha-evidence-anchor."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_8c4480b46ff37aa9"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "unsupported_claim_approve": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "approve",
+        "claim_87aac44d54f41605",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 4,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_3831e4f38ebd61a1"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Evidence Bundle is required before approval or authority use.",
+            "can_be_approved": false,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_87aac44d54f41605",
+          "created_at": "2026-06-09T13:06:55.353858Z",
+          "evidence_bundle": {
+            "artifact_refs": [],
+            "evidence_bundle_id": null,
+            "evidence_item_count": 0,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": null,
+            "result_refs": [],
+            "search_snapshot_id": null
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "Unsupported draft statement for trust ladder inspection.",
+          "status": "draft",
+          "trust_state": "draft"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim approve",
+        "errors": [
+          {
+            "code": "CS_CLAIM_EVIDENCE_REQUIRED",
+            "message": "Claim approval requires an Evidence Bundle with at least one artifact reference.",
+            "resolution_path": [
+              "Run cornerstone search query ... --json.",
+              "Run cornerstone evidence bundle create --search-snapshot-id <id> --json.",
+              "Create or recreate the claim with --evidence-bundle-id <id>."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "audit_event_id": "audit_3831e4f38ebd61a1",
+          "claim_id": "claim_87aac44d54f41605",
+          "git_commit": "e8ce020"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "unsupported_claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--statement",
+        "Unsupported draft statement for trust ladder inspection.",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_6a32409fe28701d1"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Evidence Bundle is required before approval or authority use.",
+            "can_be_approved": false,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_87aac44d54f41605",
+          "created_at": "2026-06-09T13:06:55.353858Z",
+          "evidence_bundle": {
+            "artifact_refs": [],
+            "evidence_bundle_id": null,
+            "evidence_item_count": 0,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": null,
+            "result_refs": [],
+            "search_snapshot_id": null
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "Unsupported draft statement for trust ladder inspection.",
+          "status": "draft",
+          "trust_state": "draft"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_87aac44d54f41605"
+        ],
+        "ids": {
+          "audit_event_id": "audit_6a32409fe28701d1",
+          "claim_id": "claim_87aac44d54f41605",
+          "git_commit": "e8ce020"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "unsupported_claim_show": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "show",
+        "claim_87aac44d54f41605",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_8070d6d0980690f8"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Evidence Bundle is required before approval or authority use.",
+            "can_be_approved": false,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_87aac44d54f41605",
+          "created_at": "2026-06-09T13:06:55.353858Z",
+          "evidence_bundle": {
+            "artifact_refs": [],
+            "evidence_bundle_id": null,
+            "evidence_item_count": 0,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": null,
+            "result_refs": [],
+            "search_snapshot_id": null
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "Unsupported draft statement for trust ladder inspection.",
+          "status": "draft",
+          "trust_state": "draft"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim show",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_87aac44d54f41605"
+        ],
+        "ids": {
+          "audit_event_id": "audit_8070d6d0980690f8",
+          "claim_id": "claim_87aac44d54f41605",
+          "git_commit": "e8ce020"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "workspace_org_show": {
+      "command": [
+        "cornerstone",
+        "workspace",
+        "show",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone workspace show",
+        "errors": [],
+        "evidence_refs": [
+          "workspace:ops"
+        ],
+        "ids": {
+          "git_commit": "e8ce020",
+          "workspace_id": "ops"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace": {
+          "active_scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "active_workspace_label": "organization / ops (local-org in local-dev)",
+          "context_boundary": {
+            "allowed_inherited_context_refs": [],
+            "default_context": "active_workspace_only",
+            "implicit_cross_namespace_context": false,
+            "implicit_cross_owner_context": false,
+            "promotion_required_for_cross_namespace_use": true
+          },
+          "explanation": "CornerStone is using only the active tenant, owner, namespace, and workspace unless a governed promotion or reference is recorded.",
+          "schema_version": "cs.workspace_detail.v0",
+          "shown_at": "2026-06-09T13:06:55.302898Z",
+          "visible_navigation": [
+            {
+              "id": "home",
+              "label": "Home"
+            },
+            {
+              "id": "search",
+              "label": "Search"
+            },
+            {
+              "id": "artifacts",
+              "label": "Artifacts"
+            },
+            {
+              "id": "claims",
+              "label": "Claims"
+            },
+            {
+              "id": "actions",
+              "label": "Actions"
+            }
+          ],
+          "workspace_mode": {
+            "available_modes": [
+              {
+                "approval_required_for_execution": true,
+                "autonomous_execution_allowed": false,
+                "label": "Manual",
+                "mode": "manual"
+              },
+              {
+                "approval_required_for_execution": true,
+                "autonomous_execution_allowed": false,
+                "label": "Assist",
+                "mode": "assist"
+              },
+              {
+                "approval_required_for_execution": false,
+                "autonomous_execution_allowed": true,
+                "label": "Autopilot",
+                "mode": "autopilot"
+              },
+              {
+                "approval_required_for_execution": true,
+                "autonomous_execution_allowed": false,
+                "label": "Locked",
+                "mode": "locked"
+              }
+            ],
+            "behaviors": {
+              "action_proposals_allowed": true,
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "description": "CornerStone can draft briefs, claims, mission contracts, and action cards without autonomous execution.",
+              "label": "Assist"
+            },
+            "mode": "assist",
+            "schema_version": "cs.workspace_mode.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "updated_at": "2026-06-09T13:06:55.302792Z"
+          }
+        },
+        "workspace_id": "ops"
+      }
+    },
+    "workspace_personal_show": {
+      "command": [
+        "cornerstone",
+        "workspace",
+        "show",
+        "--state-dir",
+        "tmp/scenario/vs0-detail-surfaces-55068",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone workspace show",
+        "errors": [],
+        "evidence_refs": [
+          "workspace:default"
+        ],
+        "ids": {
+          "git_commit": "e8ce020",
+          "workspace_id": "default"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace": {
+          "active_scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "active_workspace_label": "personal / default (local-user in local-dev)",
+          "context_boundary": {
+            "allowed_inherited_context_refs": [],
+            "default_context": "active_workspace_only",
+            "implicit_cross_namespace_context": false,
+            "implicit_cross_owner_context": false,
+            "promotion_required_for_cross_namespace_use": true
+          },
+          "explanation": "CornerStone is using only the active tenant, owner, namespace, and workspace unless a governed promotion or reference is recorded.",
+          "schema_version": "cs.workspace_detail.v0",
+          "shown_at": "2026-06-09T13:06:55.256166Z",
+          "visible_navigation": [
+            {
+              "id": "home",
+              "label": "Home"
+            },
+            {
+              "id": "search",
+              "label": "Search"
+            },
+            {
+              "id": "artifacts",
+              "label": "Artifacts"
+            },
+            {
+              "id": "claims",
+              "label": "Claims"
+            },
+            {
+              "id": "actions",
+              "label": "Actions"
+            }
+          ],
+          "workspace_mode": {
+            "available_modes": [
+              {
+                "approval_required_for_execution": true,
+                "autonomous_execution_allowed": false,
+                "label": "Manual",
+                "mode": "manual"
+              },
+              {
+                "approval_required_for_execution": true,
+                "autonomous_execution_allowed": false,
+                "label": "Assist",
+                "mode": "assist"
+              },
+              {
+                "approval_required_for_execution": false,
+                "autonomous_execution_allowed": true,
+                "label": "Autopilot",
+                "mode": "autopilot"
+              },
+              {
+                "approval_required_for_execution": true,
+                "autonomous_execution_allowed": false,
+                "label": "Locked",
+                "mode": "locked"
+              }
+            ],
+            "behaviors": {
+              "action_proposals_allowed": true,
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "description": "CornerStone can draft briefs, claims, mission contracts, and action cards without autonomous execution.",
+              "label": "Assist"
+            },
+            "mode": "assist",
+            "schema_version": "cs.workspace_mode.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "updated_at": "2026-06-09T13:06:55.256053Z"
+          }
+        },
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

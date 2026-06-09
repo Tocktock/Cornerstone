@@ -565,6 +565,45 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_detail_surfaces_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-detail-surfaces", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-detail-surfaces")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 5)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_DETAIL_SURFACES_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {"CS-UND-004", "CS-CLAIM-005", "CS-CLAIM-008", "CS-NS-002", "CS-SEC-005"},
+        )
+        evidence = payload["detail_surface_evidence"]
+        self.assertIn("personal / default", evidence["workspace_labels"]["personal"])
+        self.assertIn("organization / ops", evidence["workspace_labels"]["organization"])
+        self.assertFalse(evidence["workspace_boundaries"]["personal"]["implicit_cross_namespace_context"])
+        self.assertFalse(evidence["workspace_boundaries"]["organization"]["implicit_cross_namespace_context"])
+        self.assertTrue(evidence["artifact_related_claim_ids"])
+        self.assertTrue(evidence["artifact_related_mission_ids"])
+        self.assertEqual(evidence["artifact_derived_status"], "ready")
+        self.assertTrue(evidence["artifact_original_storage_ref"].startswith("sha256:"))
+        self.assertEqual(
+            evidence["trust_states"],
+            {"draft": "draft", "evidence_backed": "evidence_backed", "approved": "approved"},
+        )
+        self.assertTrue(evidence["trust_authority"]["draft"]["can_be_approved"] is False)
+        self.assertTrue(evidence["trust_authority"]["evidence_backed"]["can_be_approved"])
+        self.assertTrue(evidence["trust_authority"]["approved"]["can_publish_shared_truth"])
+        self.assertTrue(evidence["evidence_viewer_id"].startswith("viewer_"))
+        self.assertEqual(evidence["evidence_viewer_item_count"], 1)
+        self.assertIn("alpha-evidence-anchor", evidence["evidence_viewer_first_item"]["derived"]["text_preview"])
+        self.assertEqual(
+            {example["error_code"] for example in evidence["denial_examples"].values()},
+            {"CS_EGRESS_DENIED", "CS_SANDBOX_ACCESS_DENIED", "CS_CLAIM_EVIDENCE_REQUIRED", "CS_ACTION_POLICY_DENIED"},
+        )
+        self.assertTrue(all(example["resolution_path"] for example in evidence["denial_examples"].values()))
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

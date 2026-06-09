@@ -32,7 +32,8 @@ policy_json=$(mktemp)
 guardrails_json=$(mktemp)
 brief_json=$(mktemp)
 mission_action_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json"' EXIT
+detail_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -267,6 +268,27 @@ grep -q '"direct_provider_write_allowed": 0' "$mission_action_json" || fail "vs0
 grep -q '"connector_credentials_exposed": 0' "$mission_action_json" || fail "vs0-mission-action exposed connector credentials"
 grep -q '"product_feature_claims": "PARTIAL_VS0_MISSION_ACTION_ONLY"' "$mission_action_json" || fail "vs0-mission-action overclaimed product feature scope"
 
+cornerstone scenario verify vs0-detail-surfaces --json > "$detail_json"
+python3 -m json.tool "$detail_json" >/dev/null
+grep -q '"scenario_set": "vs0-detail-surfaces"' "$detail_json" || fail "vs0-detail-surfaces report missing scenario set"
+grep -q '"blocking": 0' "$detail_json" || fail "vs0-detail-surfaces report has blocking scenarios"
+grep -q '"pass": 5' "$detail_json" || fail "vs0-detail-surfaces did not pass exactly five scenarios"
+grep -q '"id": "CS-UND-004"' "$detail_json" || fail "vs0-detail-surfaces missing CS-UND-004"
+grep -q '"id": "CS-CLAIM-005"' "$detail_json" || fail "vs0-detail-surfaces missing CS-CLAIM-005"
+grep -q '"id": "CS-CLAIM-008"' "$detail_json" || fail "vs0-detail-surfaces missing CS-CLAIM-008"
+grep -q '"id": "CS-NS-002"' "$detail_json" || fail "vs0-detail-surfaces missing CS-NS-002"
+grep -q '"id": "CS-SEC-005"' "$detail_json" || fail "vs0-detail-surfaces missing CS-SEC-005"
+grep -q '"artifact_detail_missing_related_claims": 0' "$detail_json" || fail "vs0-detail-surfaces missed related claim detail"
+grep -q '"artifact_detail_missing_related_missions": 0' "$detail_json" || fail "vs0-detail-surfaces missed related mission detail"
+grep -q '"trust_ladder_missing_states": 0' "$detail_json" || fail "vs0-detail-surfaces missed trust ladder states"
+grep -q '"evidence_viewer_missing_sources": 0' "$detail_json" || fail "vs0-detail-surfaces missed evidence viewer sources"
+grep -q '"policy_denials_missing_resolution_path": 0' "$detail_json" || fail "vs0-detail-surfaces missed denial resolution paths"
+grep -q '"policy_denials_without_audit": 0' "$detail_json" || fail "vs0-detail-surfaces missed denial audit refs"
+grep -q '"workspace_boundary_implicit_cross_namespace_context": 0' "$detail_json" || fail "vs0-detail-surfaces allowed implicit cross-namespace context"
+grep -q '"CS_CLAIM_EVIDENCE_REQUIRED"' "$detail_json" || fail "vs0-detail-surfaces missing claim evidence denial"
+grep -q '"CS_ACTION_POLICY_DENIED"' "$detail_json" || fail "vs0-detail-surfaces missing action policy denial"
+grep -q '"product_feature_claims": "PARTIAL_VS0_DETAIL_SURFACES_ONLY"' "$detail_json" || fail "vs0-detail-surfaces overclaimed product feature scope"
+
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, unittest).\n'

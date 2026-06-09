@@ -14,6 +14,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_audit_ledger,
     verify_vs0_briefing,
     verify_vs0_claim_evidence,
+    verify_vs0_detail_surfaces,
     verify_vs0_mission_action,
     verify_vs0_namespace_isolation,
     verify_vs0_regression_guardrails,
@@ -263,7 +264,7 @@ def command_artifact_show(args: argparse.Namespace) -> int:
     artifact_detail = dict(artifact)
     artifact_detail["derived_text_preview"] = store.derived_text_preview(artifact)
     artifact_detail["related_claims"] = store.related_claims_for_artifact(artifact["artifact_id"], requested_scope)
-    artifact_detail["related_missions"] = []
+    artifact_detail["related_missions"] = store.related_missions_for_artifact(artifact["artifact_id"], requested_scope)
     payload.update(requested_scope)
     payload["ids"].update(
         {
@@ -845,6 +846,20 @@ def command_workspace_mode_set(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_workspace_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    workspace = store.workspace_detail(requested_scope)
+    payload = base_response("cornerstone workspace show", "success", root)
+    payload.update(requested_scope)
+    payload["workspace"] = workspace
+    payload["ids"].update({"workspace_id": requested_scope["workspace_id"]})
+    payload["evidence_refs"].append(f"workspace:{requested_scope['workspace_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_workspace_mode_show(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -1242,6 +1257,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_briefing(root)
     elif args.contract == "vs0-mission-action":
         report = verify_vs0_mission_action(root)
+    elif args.contract == "vs0-detail-surfaces":
+        report = verify_vs0_detail_surfaces(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -1263,6 +1280,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-regression-guardrails",
                     "vs0-briefing",
                     "vs0-mission-action",
+                    "vs0-detail-surfaces",
                 ],
             }
         )
@@ -1480,6 +1498,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     workspace = subcommands.add_parser("workspace", help="Workspace governance commands")
     workspace_sub = workspace.add_subparsers(dest="workspace_command")
+
+    workspace_show = workspace_sub.add_parser("show", help="Show active workspace and context boundary")
+    add_state_argument(workspace_show)
+    add_scope_arguments(workspace_show)
+    workspace_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    workspace_show.set_defaults(func=command_workspace_show)
+
     workspace_mode = workspace_sub.add_parser("mode", help="Workspace mode operations")
     workspace_mode_sub = workspace_mode.add_subparsers(dest="workspace_mode_command")
 
