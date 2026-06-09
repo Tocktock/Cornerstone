@@ -44,6 +44,14 @@ cli_native_first:
   release_gate: "Every product feature must have a verified native cornerstone CLI path or be explicitly classified as a non-feature implementation internal."
   verification_command: "scripts/verify_cli_native_first_docs.sh"
 
+local_verification_plane:
+  contract: "docs/scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md"
+  authority: "local scenario verification, fixture corpus, model harness, deterministic validators, CLI-native evidence, and release gating"
+  product_entrypoint: "cornerstone scenario verify <contract> --json"
+  baseline_model_provider: "local_test"
+  llm_rule: "LLM output alone never proves PASS; deterministic validators judge durable evidence"
+  verification_command: "scripts/verify_local_verification_plane_docs.sh"
+
 vs0_scaffold:
   contract: "docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md"
   authority: "setup-planning contract before VS-0 scaffold implementation or feature coding"
@@ -96,4 +104,5 @@ deprecated:
 verification:
   command: "scripts/verify_sot_docs.sh"
   cli_native_first_command: "scripts/verify_cli_native_first_docs.sh"
+  local_verification_plane_command: "scripts/verify_local_verification_plane_docs.sh"
   release_rule: "No PASS without concrete scenario evidence. No CLI, no feature PASS."

@@ -14,11 +14,12 @@ Before non-trivial planning, architecture, migration, or implementation work, re
 4. `docs/scenario-contracts/SCENARIO_MATRIX_FULL.md`
 5. `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md`
 6. `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv`
-7. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` before VS-0 scaffold or feature coding
-8. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` when working on v0.1/VS-0
-9. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-10. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-11. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
+7. `docs/scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md` before designing local/CI scenario verification, fixture corpora, model harnesses, or release gates
+8. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` before VS-0 scaffold or feature coding
+9. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` when working on v0.1/VS-0
+10. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+11. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+12. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
 
 The product SoT is the product authority. Repository files show implementation reality, not permission to drift.
 
@@ -59,6 +60,21 @@ Do not implement until the task-specific scenario contract is frozen:
 - CLI parity for every product feature: required `cornerstone ...` command, `--json` schema, exit codes, workspace/namespace scope, dry-run behavior, evidence refs, audit refs, and verification transcript
 
 A task is complete only when every AI-verifiable scenario is verified with concrete evidence. The canonical long-term scenario source is `docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md`, which currently contains 206 scenarios. The VS-0 subset in `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` currently contains 58 scenarios. CLI-native-first is a mandatory execution overlay: **No CLI, no feature PASS.**
+
+## Local Verification Plane
+
+Before changing local scenario verification, fixture corpora, model harnesses, CLI transcript capture, evidence validators, policy/security gates, or release gates, read:
+
+`docs/scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md`
+
+Agents must treat local verification as a CornerStone product acceptance surface, not an ad-hoc test folder:
+
+- Prefer `cornerstone scenario verify ... --json` as the product-level verification entry point.
+- Use a deterministic `local_test` model provider as the required baseline for local/CI scenario gates.
+- Use Ollama or another local LLM only as a model backend for semantic smoke tests; never use the LLM as the judge of `PASS`.
+- Validate `PASS` through deterministic checks over artifacts, evidence bundles, policy decisions, workflow/action records, audit events, CLI transcripts, and scenario reports.
+- Capture negative evidence for safety scenarios, including zero unauthorized tool calls, zero unauthorized action cards, zero egress, and zero unredacted secret leaks where prohibited.
+- Mark unavailable, subjective, external-provider, or production-only checks as `HUMAN_REQUIRED` with required evidence instead of `PASS`.
 
 ## Safety Defaults
 

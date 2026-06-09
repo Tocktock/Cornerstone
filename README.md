@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, and VS-0 scaffold gate
+**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, and VS-0 scaffold gate
 **Canonical spelling:** Use **CornerStone** for product/project text.
 
 ## Product Definition
@@ -28,11 +28,12 @@ Users should experience one CornerStone product. Internally, the product keeps c
 5. `docs/scenario-contracts/SCENARIO_MATRIX_FULL.md`
 6. `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md`
 7. `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv`
-8. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`
-9. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md`
-10. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-11. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-12. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
+8. `docs/scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md`
+9. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`
+10. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md`
+11. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+12. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+13. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
 
 ## Active Authority
 
@@ -44,6 +45,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/scenario-contracts/SCENARIO_MATRIX_FULL.md` | Scenario index generated from the full standard |
 | `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md` | Mandatory no-CLI-no-feature-PASS execution gate |
 | `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv` | Required CLI command coverage by feature family |
+| `docs/scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md` | Local scenario verification, fixture corpus, model harness, validators, and release-gate contract |
 | `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` | Frozen setup-planning contract before VS-0 feature coding |
 | `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` | Frozen first implementation subset |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
@@ -63,6 +65,7 @@ Verify the documentation wiring with:
 ```sh
 scripts/verify_sot_docs.sh
 scripts/verify_cli_native_first_docs.sh
+scripts/verify_local_verification_plane_docs.sh
 ```
 
 ## First Implementation Target
@@ -89,3 +92,9 @@ The full long-term scenario suite remains authoritative. VS-0 is only the first 
 Every product feature must be CLI-native first. UI and API remain important, but a user-visible, operator-visible, admin-visible, API-visible, workflow-visible, connector-visible, verification-visible, or automation-visible capability is not complete until it has a verified native `cornerstone ...` command path.
 
 The release invariant is: **No CLI, no feature PASS.** The CLI must use the same Product / Archive / Connector / Workflow / Policy / Evidence / Audit boundaries as the UI/API and must provide scriptable `--json` output, stable exit codes, workspace/namespace scope, dry-run for mutations, evidence refs, and audit refs.
+
+## Local Verification Plane
+
+Local verification is a product acceptance surface, not an ad-hoc test folder. Scenario `PASS` requires deterministic evidence over product records, policy decisions, workflow/action records, audit events, CLI transcripts, UI traces where relevant, and scenario reports.
+
+The release-facing local proof path is planned around `cornerstone scenario verify <contract> --json`. Local LLMs may help generate outputs, but deterministic validators own `PASS` or `FAIL`.

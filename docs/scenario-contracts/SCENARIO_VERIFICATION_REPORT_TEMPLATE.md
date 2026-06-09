@@ -45,6 +45,16 @@ Verification Gaps:
 CLI Parity Gaps:
 - TODO
 
+Local Verification Plane:
+- Scenario registry changes:
+- Corpus packs changed:
+- Validators changed:
+- Model providers changed:
+- CLI transcript schema changes:
+- Evidence artifacts generated:
+- Scenario report/gate result:
+- Human-required rows:
+
 Risks:
 - TODO
 
