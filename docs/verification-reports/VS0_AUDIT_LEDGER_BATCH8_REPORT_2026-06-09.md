@@ -60,8 +60,8 @@ PATH="$PWD:$PATH" cornerstone scenario verify vs0-audit-ledger --json --output r
 # summary.pass: 1
 # summary.blocking: 0
 # summary.product_feature_claims: PARTIAL_VS0_AUDIT_LEDGER_ONLY
-# audit_evidence.clean_audit_event_count: 6
-# audit_evidence.event_types: artifact.ingested, artifact.read, search.snapshot.created, evidence_bundle.created, claim.draft.created, claim.approved
+# audit_evidence.clean_audit_event_count: 8
+# audit_evidence.event_types: artifact.ingested, artifact.read, search.snapshot.created, evidence_bundle.created, claim.draft.created, claim.approved, policy.egress.denied, policy.sandbox_access.denied
 # audit_evidence.event_scopes_complete: true
 # audit_evidence.event_hashes_present: true
 # audit_evidence.event_details_present: true
@@ -78,6 +78,8 @@ PATH="$PWD:$PATH" cornerstone scenario verify vs0-audit-ledger --json --output r
 - Evidence bundle creation appends `evidence_bundle.created`.
 - Draft claim creation appends `claim.draft.created`.
 - Claim approval appends `claim.approved`.
+- Default egress denial appends `policy.egress.denied`.
+- Undeclared sandbox access denial appends `policy.sandbox_access.denied`.
 - Clean `cornerstone audit verify --json` returns `status=success`.
 - Controlled mutation of the first audit JSONL event makes `cornerstone audit verify --json` return exit code `5` with `AUDIT_EVENT_HASH_MISMATCH`.
 

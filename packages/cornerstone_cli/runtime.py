@@ -594,6 +594,72 @@ class LocalRuntimeStore:
         )
         return {"claim": claim, "audit_event": event}
 
+    def deny_egress_attempt(self, target_url: str, scope: dict[str, str]) -> dict[str, Any]:
+        decision_base = {
+            "schema_version": "cs.policy_decision.v0",
+            "decision": "deny",
+            "policy": "default_egress_deny",
+            "reason": "External network access is denied unless an explicit scoped policy allows it.",
+            "target": {"type": "url", "value": target_url},
+            "scope": scope,
+            "external_http_calls": 0,
+            "resolution_path": [
+                "Attach the requested action to a governed workflow or mission.",
+                "Request owner approval for a scoped connector capability.",
+                "Retry only after policy grants egress for this target and purpose.",
+            ],
+            "decided_at": utc_now(),
+        }
+        decision = dict(decision_base)
+        decision["id"] = f"policy_{_json_hash(decision_base)[:16]}"
+        event = self.append_audit(
+            "policy.egress.denied",
+            scope,
+            {"type": "policy_decision", "id": decision["id"]},
+            {
+                "policy": decision["policy"],
+                "target_url": target_url,
+                "external_http_calls": 0,
+                "reason": decision["reason"],
+            },
+        )
+        return {"policy_decision": decision, "audit_event": event}
+
+    def deny_sandbox_access(self, capability: str, target: str, scope: dict[str, str]) -> dict[str, Any]:
+        decision_base = {
+            "schema_version": "cs.policy_decision.v0",
+            "decision": "deny",
+            "policy": "declared_sandbox_capability_required",
+            "reason": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "target": {"type": capability, "value": target},
+            "scope": scope,
+            "host_operations_executed": 0,
+            "shell_commands_executed": 0,
+            "filesystem_reads": 0,
+            "environment_reads": 0,
+            "resolution_path": [
+                "Declare the minimum required capability in an Agent Pack or tool contract.",
+                "Run inside a safe sandbox boundary after owner approval.",
+                "Reduce scope or use an existing mediated workflow/action path.",
+            ],
+            "decided_at": utc_now(),
+        }
+        decision = dict(decision_base)
+        decision["id"] = f"policy_{_json_hash(decision_base)[:16]}"
+        event = self.append_audit(
+            "policy.sandbox_access.denied",
+            scope,
+            {"type": "policy_decision", "id": decision["id"]},
+            {
+                "policy": decision["policy"],
+                "capability": capability,
+                "target": target,
+                "host_operations_executed": 0,
+                "reason": decision["reason"],
+            },
+        )
+        return {"policy_decision": decision, "audit_event": event}
+
     def ingest_artifact(
         self,
         input_path: Path,

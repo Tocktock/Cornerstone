@@ -1,0 +1,569 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-security-policy",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "99aa374"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "egress_allowed": 0,
+    "environment_reads": 0,
+    "external_http_calls": 0,
+    "filesystem_reads": 0,
+    "host_operations_executed": 0,
+    "sandbox_access_allowed": 0,
+    "shell_commands_executed": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-security-policy-2026-06-09.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone egress test --url https://example.invalid/blocked --json",
+        "cornerstone audit verify --json"
+      ],
+      "id": "CS-SEC-002",
+      "notes": "Default egress policy denies external network access, records a deny policy decision, records audit, and performs zero external HTTP calls.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone sandbox test --capability shell --json",
+        "cornerstone sandbox test --capability filesystem --json",
+        "cornerstone sandbox test --capability environment --json",
+        "cornerstone sandbox test --capability host --json",
+        "cornerstone audit verify --json"
+      ],
+      "id": "CS-SEC-003",
+      "notes": "Undeclared shell, filesystem, environment, and host access are denied by sandbox policy with zero host operations.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    }
+  ],
+  "scenario_set": "vs0-security-policy",
+  "schema_version": "cs.cli.v0",
+  "security_policy_evidence": {
+    "audit_event_count": 5,
+    "egress_exit_code": 8,
+    "egress_external_http_calls": 0,
+    "egress_policy": "default_egress_deny",
+    "egress_resolution_path": [
+      "Attach the requested action to a governed workflow or mission.",
+      "Request owner approval for a scoped connector capability.",
+      "Retry only after policy grants egress for this target and purpose."
+    ],
+    "sandbox_cases": [
+      "sandbox_environment",
+      "sandbox_filesystem",
+      "sandbox_host",
+      "sandbox_shell"
+    ],
+    "sandbox_exit_codes": {
+      "sandbox_environment": 8,
+      "sandbox_filesystem": 8,
+      "sandbox_host": 8,
+      "sandbox_shell": 8
+    },
+    "sandbox_host_operations_executed": {
+      "sandbox_environment": 0,
+      "sandbox_filesystem": 0,
+      "sandbox_host": 0,
+      "sandbox_shell": 0
+    },
+    "sandbox_policies": {
+      "sandbox_environment": "declared_sandbox_capability_required",
+      "sandbox_filesystem": "declared_sandbox_capability_required",
+      "sandbox_host": "declared_sandbox_capability_required",
+      "sandbox_shell": "declared_sandbox_capability_required"
+    },
+    "sandbox_resolution_paths": {
+      "sandbox_environment": [
+        "Declare the minimum required capability in an Agent Pack or tool contract.",
+        "Run inside a safe sandbox boundary after owner approval.",
+        "Reduce scope or use an existing mediated workflow/action path."
+      ],
+      "sandbox_filesystem": [
+        "Declare the minimum required capability in an Agent Pack or tool contract.",
+        "Run inside a safe sandbox boundary after owner approval.",
+        "Reduce scope or use an existing mediated workflow/action path."
+      ],
+      "sandbox_host": [
+        "Declare the minimum required capability in an Agent Pack or tool contract.",
+        "Run inside a safe sandbox boundary after owner approval.",
+        "Reduce scope or use an existing mediated workflow/action path."
+      ],
+      "sandbox_shell": [
+        "Declare the minimum required capability in an Agent Pack or tool contract.",
+        "Run inside a safe sandbox boundary after owner approval.",
+        "Reduce scope or use an existing mediated workflow/action path."
+      ]
+    }
+  },
+  "state_dir": "tmp/scenario/vs0-security-policy-13293",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 2,
+    "product_feature_claims": "PARTIAL_VS0_SECURITY_POLICY_ONLY",
+    "scenario_count": 2
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/vs0-security-policy-13293",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 5,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "99aa374"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "egress_test": {
+      "command": [
+        "cornerstone",
+        "egress",
+        "test",
+        "--url",
+        "https://example.invalid/blocked",
+        "--state-dir",
+        "tmp/scenario/vs0-security-policy-13293",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_dc91239336007da9"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone egress test",
+        "errors": [
+          {
+            "code": "CS_EGRESS_DENIED",
+            "external_http_calls": 0,
+            "message": "External network access is denied unless an explicit scoped policy allows it.",
+            "resolution_path": [
+              "Attach the requested action to a governed workflow or mission.",
+              "Request owner approval for a scoped connector capability.",
+              "Retry only after policy grants egress for this target and purpose."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "99aa374"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_418bb087a3a8c7ef"
+        ],
+        "policy_decisions": [
+          {
+            "decided_at": "2026-06-09T12:27:43.662880Z",
+            "decision": "deny",
+            "external_http_calls": 0,
+            "id": "policy_418bb087a3a8c7ef",
+            "policy": "default_egress_deny",
+            "reason": "External network access is denied unless an explicit scoped policy allows it.",
+            "resolution_path": [
+              "Attach the requested action to a governed workflow or mission.",
+              "Request owner approval for a scoped connector capability.",
+              "Retry only after policy grants egress for this target and purpose."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "target": {
+              "type": "url",
+              "value": "https://example.invalid/blocked"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "sandbox_environment": {
+      "command": [
+        "cornerstone",
+        "sandbox",
+        "test",
+        "--capability",
+        "environment",
+        "--target",
+        "OPENAI_API_KEY",
+        "--state-dir",
+        "tmp/scenario/vs0-security-policy-13293",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_5458aa73237d5907"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone sandbox test",
+        "errors": [
+          {
+            "code": "CS_SANDBOX_ACCESS_DENIED",
+            "host_operations_executed": 0,
+            "message": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "resolution_path": [
+              "Declare the minimum required capability in an Agent Pack or tool contract.",
+              "Run inside a safe sandbox boundary after owner approval.",
+              "Reduce scope or use an existing mediated workflow/action path."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "99aa374"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_e594ba0130cc36c1"
+        ],
+        "policy_decisions": [
+          {
+            "decided_at": "2026-06-09T12:27:43.809579Z",
+            "decision": "deny",
+            "environment_reads": 0,
+            "filesystem_reads": 0,
+            "host_operations_executed": 0,
+            "id": "policy_e594ba0130cc36c1",
+            "policy": "declared_sandbox_capability_required",
+            "reason": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "resolution_path": [
+              "Declare the minimum required capability in an Agent Pack or tool contract.",
+              "Run inside a safe sandbox boundary after owner approval.",
+              "Reduce scope or use an existing mediated workflow/action path."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "shell_commands_executed": 0,
+            "target": {
+              "type": "environment",
+              "value": "OPENAI_API_KEY"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "sandbox_filesystem": {
+      "command": [
+        "cornerstone",
+        "sandbox",
+        "test",
+        "--capability",
+        "filesystem",
+        "--target",
+        "/etc/passwd",
+        "--state-dir",
+        "tmp/scenario/vs0-security-policy-13293",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_a12824f44bbbd458"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone sandbox test",
+        "errors": [
+          {
+            "code": "CS_SANDBOX_ACCESS_DENIED",
+            "host_operations_executed": 0,
+            "message": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "resolution_path": [
+              "Declare the minimum required capability in an Agent Pack or tool contract.",
+              "Run inside a safe sandbox boundary after owner approval.",
+              "Reduce scope or use an existing mediated workflow/action path."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "99aa374"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_1e418ac367cc3306"
+        ],
+        "policy_decisions": [
+          {
+            "decided_at": "2026-06-09T12:27:43.762616Z",
+            "decision": "deny",
+            "environment_reads": 0,
+            "filesystem_reads": 0,
+            "host_operations_executed": 0,
+            "id": "policy_1e418ac367cc3306",
+            "policy": "declared_sandbox_capability_required",
+            "reason": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "resolution_path": [
+              "Declare the minimum required capability in an Agent Pack or tool contract.",
+              "Run inside a safe sandbox boundary after owner approval.",
+              "Reduce scope or use an existing mediated workflow/action path."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "shell_commands_executed": 0,
+            "target": {
+              "type": "filesystem",
+              "value": "/etc/passwd"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "sandbox_host": {
+      "command": [
+        "cornerstone",
+        "sandbox",
+        "test",
+        "--capability",
+        "host",
+        "--target",
+        "host-runtime",
+        "--state-dir",
+        "tmp/scenario/vs0-security-policy-13293",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_c5dbef09976cbe61"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone sandbox test",
+        "errors": [
+          {
+            "code": "CS_SANDBOX_ACCESS_DENIED",
+            "host_operations_executed": 0,
+            "message": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "resolution_path": [
+              "Declare the minimum required capability in an Agent Pack or tool contract.",
+              "Run inside a safe sandbox boundary after owner approval.",
+              "Reduce scope or use an existing mediated workflow/action path."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "99aa374"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_852ab79e27a7c69c"
+        ],
+        "policy_decisions": [
+          {
+            "decided_at": "2026-06-09T12:27:43.860139Z",
+            "decision": "deny",
+            "environment_reads": 0,
+            "filesystem_reads": 0,
+            "host_operations_executed": 0,
+            "id": "policy_852ab79e27a7c69c",
+            "policy": "declared_sandbox_capability_required",
+            "reason": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "resolution_path": [
+              "Declare the minimum required capability in an Agent Pack or tool contract.",
+              "Run inside a safe sandbox boundary after owner approval.",
+              "Reduce scope or use an existing mediated workflow/action path."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "shell_commands_executed": 0,
+            "target": {
+              "type": "host",
+              "value": "host-runtime"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "sandbox_shell": {
+      "command": [
+        "cornerstone",
+        "sandbox",
+        "test",
+        "--capability",
+        "shell",
+        "--target",
+        "arbitrary-shell",
+        "--state-dir",
+        "tmp/scenario/vs0-security-policy-13293",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_253b6d2128b089ea"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone sandbox test",
+        "errors": [
+          {
+            "code": "CS_SANDBOX_ACCESS_DENIED",
+            "host_operations_executed": 0,
+            "message": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "resolution_path": [
+              "Declare the minimum required capability in an Agent Pack or tool contract.",
+              "Run inside a safe sandbox boundary after owner approval.",
+              "Reduce scope or use an existing mediated workflow/action path."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "99aa374"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_a2c1b17f77ab919a"
+        ],
+        "policy_decisions": [
+          {
+            "decided_at": "2026-06-09T12:27:43.710895Z",
+            "decision": "deny",
+            "environment_reads": 0,
+            "filesystem_reads": 0,
+            "host_operations_executed": 0,
+            "id": "policy_a2c1b17f77ab919a",
+            "policy": "declared_sandbox_capability_required",
+            "reason": "Host, shell, filesystem, and environment access require an explicit safe runtime capability.",
+            "resolution_path": [
+              "Declare the minimum required capability in an Agent Pack or tool contract.",
+              "Run inside a safe sandbox boundary after owner approval.",
+              "Reduce scope or use an existing mediated workflow/action path."
+            ],
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "shell_commands_executed": 0,
+            "target": {
+              "type": "shell",
+              "value": "arbitrary-shell"
+            }
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

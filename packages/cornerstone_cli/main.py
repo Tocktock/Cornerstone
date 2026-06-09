@@ -14,6 +14,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_audit_ledger,
     verify_vs0_claim_evidence,
     verify_vs0_namespace_isolation,
+    verify_vs0_security_policy,
     verify_vs0_universal_core,
     verify_vs0_search_evidence,
     verify_vs0_search_understanding,
@@ -32,6 +33,7 @@ EXIT_NOT_FOUND = 3
 EXIT_EVIDENCE_MISSING = 4
 EXIT_RUNTIME_FAILURE = 5
 EXIT_SCOPE_DENIED = 6
+EXIT_POLICY_DENIED = 8
 
 
 def repo_root() -> Path:
@@ -291,6 +293,54 @@ def command_audit_verify(args: argparse.Namespace) -> int:
         )
     print_payload(payload, args.json)
     return EXIT_SUCCESS if report["status"] == "success" else EXIT_RUNTIME_FAILURE
+
+
+def command_egress_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.deny_egress_attempt(args.url, requested_scope)
+    decision = result["policy_decision"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone egress test", "denied", root)
+    payload.update(requested_scope)
+    payload["policy_decisions"] = [decision]
+    payload["policy_decision_refs"].append(f"policy:{decision['id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    payload["errors"].append(
+        {
+            "code": "CS_EGRESS_DENIED",
+            "message": decision["reason"],
+            "resolution_path": decision["resolution_path"],
+            "external_http_calls": 0,
+        }
+    )
+    print_payload(payload, args.json)
+    return EXIT_POLICY_DENIED
+
+
+def command_sandbox_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.deny_sandbox_access(args.capability, args.target, requested_scope)
+    decision = result["policy_decision"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone sandbox test", "denied", root)
+    payload.update(requested_scope)
+    payload["policy_decisions"] = [decision]
+    payload["policy_decision_refs"].append(f"policy:{decision['id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    payload["errors"].append(
+        {
+            "code": "CS_SANDBOX_ACCESS_DENIED",
+            "message": decision["reason"],
+            "resolution_path": decision["resolution_path"],
+            "host_operations_executed": 0,
+        }
+    )
+    print_payload(payload, args.json)
+    return EXIT_POLICY_DENIED
 
 
 def command_search_query(args: argparse.Namespace) -> int:
@@ -729,6 +779,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_universal_core(root)
     elif args.contract == "vs0-claim-evidence":
         report = verify_vs0_claim_evidence(root)
+    elif args.contract == "vs0-security-policy":
+        report = verify_vs0_security_policy(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -746,6 +798,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-audit-ledger",
                     "vs0-universal-core",
                     "vs0-claim-evidence",
+                    "vs0-security-policy",
                 ],
             }
         )
@@ -860,6 +913,27 @@ def build_parser() -> argparse.ArgumentParser:
     add_state_argument(audit_verify)
     audit_verify.add_argument("--json", action="store_true", help="Emit JSON output")
     audit_verify.set_defaults(func=command_audit_verify)
+
+    egress = subcommands.add_parser("egress", help="Egress policy commands")
+    egress_sub = egress.add_subparsers(dest="egress_command")
+
+    egress_test = egress_sub.add_parser("test", help="Verify default egress denial without making a network call")
+    egress_test.add_argument("--url", default="https://example.invalid/blocked", help="External URL to evaluate")
+    add_state_argument(egress_test)
+    add_scope_arguments(egress_test)
+    egress_test.add_argument("--json", action="store_true", help="Emit JSON output")
+    egress_test.set_defaults(func=command_egress_test)
+
+    sandbox = subcommands.add_parser("sandbox", help="Sandbox policy commands")
+    sandbox_sub = sandbox.add_subparsers(dest="sandbox_command")
+
+    sandbox_test = sandbox_sub.add_parser("test", help="Verify undeclared host/tool access denial without executing it")
+    sandbox_test.add_argument("--capability", choices=["shell", "filesystem", "environment", "host"], default="shell")
+    sandbox_test.add_argument("--target", default="arbitrary-host-access")
+    add_state_argument(sandbox_test)
+    add_scope_arguments(sandbox_test)
+    sandbox_test.add_argument("--json", action="store_true", help="Emit JSON output")
+    sandbox_test.set_defaults(func=command_sandbox_test)
 
     search = subcommands.add_parser("search", help="Search artifact-derived content")
     search_sub = search.add_subparsers(dest="search_command")

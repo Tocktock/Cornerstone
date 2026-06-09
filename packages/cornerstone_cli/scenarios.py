@@ -502,6 +502,22 @@ def _scope_denied(transcript: dict[str, Any]) -> bool:
     )
 
 
+def _policy_denied(transcript: dict[str, Any], error_code: str) -> bool:
+    payload = _payload(transcript)
+    errors = payload.get("errors", [])
+    decisions = payload.get("policy_decisions", [])
+    return (
+        transcript.get("exit_code") == 8
+        and payload.get("status") == "denied"
+        and isinstance(errors, list)
+        and any(error.get("code") == error_code for error in errors if isinstance(error, dict))
+        and isinstance(decisions, list)
+        and any(decision.get("decision") == "deny" for decision in decisions if isinstance(decision, dict))
+        and bool(payload.get("policy_decision_refs"))
+        and bool(payload.get("audit_refs"))
+    )
+
+
 def _scenario_state_rel(name: str) -> str:
     return f"tmp/scenario/{name}-{os.getpid()}"
 
@@ -1521,6 +1537,14 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
         root,
         ["claim", "approve", claim_id, "--state-dir", state_rel, "--json"],
     ) if claim_id else {}
+    transcripts["egress_test"] = _run_cli_json(
+        root,
+        ["egress", "test", "--url", "https://example.invalid/audit-denied", "--state-dir", state_rel, "--json"],
+    )
+    transcripts["sandbox_test"] = _run_cli_json(
+        root,
+        ["sandbox", "test", "--capability", "shell", "--target", "arbitrary-shell", "--state-dir", state_rel, "--json"],
+    )
     transcripts["audit_verify_clean"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
 
     audit_events_before_tamper = _audit_events(root, state_rel)
@@ -1535,6 +1559,8 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
         "evidence_bundle.created",
         "claim.draft.created",
         "claim.approved",
+        "policy.egress.denied",
+        "policy.sandbox_access.denied",
     }
     missing_event_types = sorted(required_event_types - set(str(event_type) for event_type in audit_event_types))
 
@@ -1564,6 +1590,8 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
         and _exit_ok(transcripts["bundle_create"])
         and _exit_ok(transcripts["claim_create"])
         and _exit_ok(transcripts["claim_approve"])
+        and _policy_denied(transcripts["egress_test"], "CS_EGRESS_DENIED")
+        and _policy_denied(transcripts["sandbox_test"], "CS_SANDBOX_ACCESS_DENIED")
         and clean_ok
         and tamper_detected
         and not missing_event_types
@@ -1914,6 +1942,118 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
             "unsupported_approval_allowed": 0 if unsupported_denied else 1,
             "evidence_claim_approval_blocked": 0 if evidence_approved else 1,
             "autonomous_action_allowed_from_claim": int(bool(approved_claim.get("authority", {}).get("can_drive_autonomous_action", True))),
+        },
+        "human_required": [],
+    }
+
+
+def verify_vs0_security_policy(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-security-policy")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["egress_test"] = _run_cli_json(
+        root,
+        ["egress", "test", "--url", "https://example.invalid/blocked", "--state-dir", state_rel, "--json"],
+    )
+    sandbox_cases = {
+        "sandbox_shell": ["sandbox", "test", "--capability", "shell", "--target", "arbitrary-shell", "--state-dir", state_rel, "--json"],
+        "sandbox_filesystem": ["sandbox", "test", "--capability", "filesystem", "--target", "/etc/passwd", "--state-dir", state_rel, "--json"],
+        "sandbox_environment": ["sandbox", "test", "--capability", "environment", "--target", "OPENAI_API_KEY", "--state-dir", state_rel, "--json"],
+        "sandbox_host": ["sandbox", "test", "--capability", "host", "--target", "host-runtime", "--state-dir", state_rel, "--json"],
+    }
+    for name, args in sandbox_cases.items():
+        transcripts[name] = _run_cli_json(root, args)
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    egress_payload = _payload(transcripts["egress_test"])
+    egress_decision = (egress_payload.get("policy_decisions") or [{}])[0]
+    egress_error = (egress_payload.get("errors") or [{}])[0]
+    sandbox_payloads = {name: _payload(transcripts[name]) for name in sandbox_cases}
+    sandbox_decisions = {
+        name: (payload.get("policy_decisions") or [{}])[0]
+        for name, payload in sandbox_payloads.items()
+    }
+    sandbox_errors = {
+        name: (payload.get("errors") or [{}])[0]
+        for name, payload in sandbox_payloads.items()
+    }
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    egress_ok = (
+        _policy_denied(transcripts["egress_test"], "CS_EGRESS_DENIED")
+        and egress_decision.get("policy") == "default_egress_deny"
+        and egress_decision.get("external_http_calls") == 0
+        and egress_error.get("external_http_calls") == 0
+        and egress_error.get("resolution_path")
+    )
+    sandbox_ok = (
+        all(_policy_denied(transcripts[name], "CS_SANDBOX_ACCESS_DENIED") for name in sandbox_cases)
+        and all(decision.get("policy") == "declared_sandbox_capability_required" for decision in sandbox_decisions.values())
+        and all(decision.get("host_operations_executed") == 0 for decision in sandbox_decisions.values())
+        and all(decision.get("shell_commands_executed") == 0 for decision in sandbox_decisions.values())
+        and all(decision.get("filesystem_reads") == 0 for decision in sandbox_decisions.values())
+        and all(decision.get("environment_reads") == 0 for decision in sandbox_decisions.values())
+        and all(error.get("host_operations_executed") == 0 for error in sandbox_errors.values())
+        and all(error.get("resolution_path") for error in sandbox_errors.values())
+    )
+
+    rows = [
+        _row(
+            "CS-SEC-002",
+            "MUST_PASS",
+            "PASS" if egress_ok and audit_ok else "FAIL",
+            ["cornerstone egress test --url https://example.invalid/blocked --json", "cornerstone audit verify --json"],
+            "Default egress policy denies external network access, records a deny policy decision, records audit, and performs zero external HTTP calls.",
+        ),
+        _row(
+            "CS-SEC-003",
+            "MUST_PASS",
+            "PASS" if sandbox_ok and audit_ok else "FAIL",
+            [
+                "cornerstone sandbox test --capability shell --json",
+                "cornerstone sandbox test --capability filesystem --json",
+                "cornerstone sandbox test --capability environment --json",
+                "cornerstone sandbox test --capability host --json",
+                "cornerstone audit verify --json",
+            ],
+            "Undeclared shell, filesystem, environment, and host access are denied by sandbox policy with zero host operations.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-security-policy",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_SECURITY_POLICY_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "security_policy_evidence": {
+            "egress_policy": egress_decision.get("policy"),
+            "egress_exit_code": transcripts["egress_test"].get("exit_code"),
+            "egress_external_http_calls": egress_decision.get("external_http_calls"),
+            "egress_resolution_path": egress_error.get("resolution_path", []),
+            "sandbox_cases": sorted(sandbox_cases),
+            "sandbox_exit_codes": {name: transcripts[name].get("exit_code") for name in sandbox_cases},
+            "sandbox_policies": {name: decision.get("policy") for name, decision in sandbox_decisions.items()},
+            "sandbox_host_operations_executed": {name: decision.get("host_operations_executed") for name, decision in sandbox_decisions.items()},
+            "sandbox_resolution_paths": {name: sandbox_errors[name].get("resolution_path", []) for name in sandbox_cases},
+            "audit_event_count": _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("event_count"),
+        },
+        "negative_evidence": {
+            "external_http_calls": int(egress_decision.get("external_http_calls", 1)),
+            "egress_allowed": 0 if egress_ok else 1,
+            "host_operations_executed": sum(int(decision.get("host_operations_executed", 1)) for decision in sandbox_decisions.values()),
+            "shell_commands_executed": sum(int(decision.get("shell_commands_executed", 1)) for decision in sandbox_decisions.values()),
+            "filesystem_reads": sum(int(decision.get("filesystem_reads", 1)) for decision in sandbox_decisions.values()),
+            "environment_reads": sum(int(decision.get("environment_reads", 1)) for decision in sandbox_decisions.values()),
+            "sandbox_access_allowed": 0 if sandbox_ok else 1,
         },
         "human_required": [],
     }

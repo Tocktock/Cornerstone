@@ -457,6 +457,27 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_security_policy_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-security-policy", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-security-policy")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 2)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_SECURITY_POLICY_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-SEC-002", "CS-SEC-003"})
+        evidence = payload["security_policy_evidence"]
+        self.assertEqual(evidence["egress_policy"], "default_egress_deny")
+        self.assertEqual(evidence["egress_exit_code"], 8)
+        self.assertEqual(evidence["egress_external_http_calls"], 0)
+        self.assertTrue(evidence["egress_resolution_path"])
+        self.assertEqual(set(evidence["sandbox_cases"]), {"sandbox_environment", "sandbox_filesystem", "sandbox_host", "sandbox_shell"})
+        self.assertEqual(set(evidence["sandbox_exit_codes"].values()), {8})
+        self.assertEqual(set(evidence["sandbox_policies"].values()), {"declared_sandbox_capability_required"})
+        self.assertEqual(set(evidence["sandbox_host_operations_executed"].values()), {0})
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)
