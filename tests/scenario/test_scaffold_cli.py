@@ -161,6 +161,32 @@ class ScaffoldCliTests(unittest.TestCase):
         finally:
             shutil.rmtree(state_dir, ignore_errors=True)
 
+    def test_prompt_injection_ingest_records_policy_denial(self) -> None:
+        state_dir = ROOT / "tmp/test-prompt-injection"
+        shutil.rmtree(state_dir, ignore_errors=True)
+        try:
+            result = run_cli(
+                "artifact",
+                "ingest",
+                "fixtures/vs0/packs/10_prompt_injection/input.txt",
+                "--state-dir",
+                "tmp/test-prompt-injection",
+                "--json",
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            safety = payload["artifact"]["safety"]
+            self.assertTrue(safety["untrusted_evidence"])
+            self.assertTrue(safety["unsafe_instruction_detected"])
+            self.assertEqual(safety["tool_calls_created"], 0)
+            self.assertEqual(safety["action_cards_created_from_untrusted_artifact"], 0)
+            self.assertEqual(safety["external_http_calls"], 0)
+            self.assertFalse(safety["authority_expanded"])
+            self.assertTrue(payload["policy_decision_refs"])
+            self.assertGreaterEqual(len(payload["audit_refs"]), 2)
+        finally:
+            shutil.rmtree(state_dir, ignore_errors=True)
+
     def test_vs0_artifact_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-artifacts", "--json")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -171,6 +197,23 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_ARTIFACTS_ONLY")
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, {f"CS-ARCH-00{index}" for index in range(1, 6)})
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
+    def test_vs0_security_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-security", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("sk-test-", result.stdout)
+        self.assertNotIn("ghp_", result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-security")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 5)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_SECURITY_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {"CS-ARCH-006", "CS-ARCH-007", "CS-SEC-007", "CS-SEC-008", "CS-REG-013"},
+        )
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 

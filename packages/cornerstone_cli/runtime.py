@@ -2,12 +2,20 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from cornerstone_cli.validators import redact_text
+
+
+UNSAFE_INSTRUCTION_PATTERNS = [
+    re.compile(r"ignore (all )?(previous|prior) instructions", re.IGNORECASE),
+    re.compile(r"\b(call|invoke|use|run)\b.*\b(tool|api|http|url|webhook)\b", re.IGNORECASE),
+    re.compile(r"\b(authority|permission|approval)\b.*\b(now|granted|expanded|bypass)\b", re.IGNORECASE),
+]
 
 
 def utc_now() -> str:
@@ -30,6 +38,14 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text())
+
+
+def detect_unsafe_instructions(text: str) -> list[str]:
+    blocked: list[str] = []
+    for pattern in UNSAFE_INSTRUCTION_PATTERNS:
+        if pattern.search(text):
+            blocked.append(pattern.pattern)
+    return blocked
 
 
 class LocalRuntimeStore:
@@ -189,15 +205,29 @@ class LocalRuntimeStore:
             }
             transformations.append("derived_text_created")
 
+        raw_text_for_safety = data.decode("utf-8", errors="replace") if media_type.startswith("text/") else ""
+        blocked_attempts = detect_unsafe_instructions(raw_text_for_safety) if trust == "untrusted" else []
+        safety = {
+            "untrusted_evidence": trust == "untrusted",
+            "unsafe_instruction_detected": bool(blocked_attempts),
+            "blocked_attempt_count": len(blocked_attempts),
+            "blocked_attempts": blocked_attempts,
+            "tool_calls_created": 0,
+            "action_cards_created_from_untrusted_artifact": 0,
+            "external_http_calls": 0,
+            "authority_expanded": False,
+        }
         record = {
             "schema_version": "cs.artifact.v0",
             "artifact_id": artifact_id,
             "checksum_sha256": checksum,
             "content_identity": {"algorithm": "sha256", "value": checksum},
             "original_storage_ref": original_storage_ref,
+            "raw_original_access": {"policy": "owner_scope_required", "display": "controlled"},
             "original_size_bytes": len(data),
             "media_type": media_type,
             "trust_state": trust,
+            "safety": safety,
             "scope": scope,
             "source": {
                 "type": source,
@@ -223,8 +253,34 @@ class LocalRuntimeStore:
                 "trust_state": trust,
             },
         )
+        audit_events = [event]
+        policy_decisions: list[dict[str, str]] = []
+        if blocked_attempts:
+            unsafe_event = self.append_audit(
+                "unsafe_instruction.detected",
+                scope,
+                {"type": "artifact", "id": artifact_id},
+                {
+                    "blocked_attempt_count": len(blocked_attempts),
+                    "tool_calls_created": 0,
+                    "action_cards_created_from_untrusted_artifact": 0,
+                    "external_http_calls": 0,
+                    "authority_expanded": False,
+                },
+            )
+            audit_events.append(unsafe_event)
+            policy_decisions.append(
+                {
+                    "id": f"policy_{unsafe_event['event_hash'][:16]}",
+                    "decision": "deny",
+                    "reason": "prompt_injection_blocked",
+                    "scope": "artifact_ingest",
+                }
+            )
         return {
             "artifact": record,
             "deduplicated": False,
             "audit_event": event,
+            "audit_events": audit_events,
+            "policy_decisions": policy_decisions,
         }

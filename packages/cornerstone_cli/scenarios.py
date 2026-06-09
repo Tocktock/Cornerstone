@@ -625,6 +625,132 @@ def verify_vs0_artifacts(root: Path) -> dict[str, Any]:
     }
 
 
+def _derived_text(root: Path, state_rel: str, artifact: dict[str, Any]) -> str:
+    text_ref = artifact.get("derived", {}).get("text_ref")
+    if not text_ref:
+        return ""
+    path = root / state_rel / "artifacts" / text_ref
+    if not path.exists():
+        return ""
+    return path.read_text()
+
+
+def verify_vs0_security(root: Path) -> dict[str, Any]:
+    state_rel = "tmp/scenario/vs0-security"
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    secret_path = "fixtures/vs0/packs/09_redaction_secrets/input.txt"
+    prompt_path = "fixtures/vs0/packs/10_prompt_injection/input.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["ingest_secret"] = _run_cli_json(root, ["artifact", "ingest", secret_path, "--state-dir", state_rel, "--json"])
+    transcripts["ingest_prompt_injection"] = _run_cli_json(root, ["artifact", "ingest", prompt_path, "--state-dir", state_rel, "--json"])
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    secret_artifact = _artifact(transcripts["ingest_secret"])
+    prompt_artifact = _artifact(transcripts["ingest_prompt_injection"])
+    secret_derived = _derived_text(root, state_rel, secret_artifact)
+    secret_transcript_text = json.dumps(transcripts["ingest_secret"], sort_keys=True)
+    prompt_payload = _payload(transcripts["ingest_prompt_injection"])
+    prompt_safety = prompt_artifact.get("safety", {})
+    prompt_policy_refs = prompt_payload.get("policy_decision_refs", [])
+    prompt_audit_refs = prompt_payload.get("audit_refs", [])
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+
+    secret_output_count = count_unredacted_secrets(secret_derived) + count_unredacted_secrets(secret_transcript_text)
+    prompt_ok = (
+        _exit_ok(transcripts["ingest_prompt_injection"])
+        and prompt_artifact.get("trust_state") == "untrusted"
+        and prompt_safety.get("untrusted_evidence") is True
+        and prompt_safety.get("unsafe_instruction_detected") is True
+        and prompt_safety.get("blocked_attempt_count", 0) > 0
+        and prompt_safety.get("tool_calls_created") == 0
+        and prompt_safety.get("action_cards_created_from_untrusted_artifact") == 0
+        and prompt_safety.get("external_http_calls") == 0
+        and prompt_safety.get("authority_expanded") is False
+        and any("policy:" in ref for ref in prompt_policy_refs)
+        and len(prompt_audit_refs) >= 2
+    )
+    secret_ok = (
+        _exit_ok(transcripts["ingest_secret"])
+        and secret_artifact.get("raw_original_access", {}).get("display") == "controlled"
+        and secret_artifact.get("derived", {}).get("redacted") is True
+        and "[REDACTED]" in secret_derived
+        and secret_output_count == 0
+        and _payload(transcripts["ingest_secret"]).get("audit_refs")
+    )
+
+    rows = [
+        _row(
+            "CS-ARCH-006",
+            "MUST_PASS",
+            "PASS" if secret_ok and audit_ok else "FAIL",
+            ["cornerstone artifact ingest fixtures/vs0/packs/09_redaction_secrets/input.txt --json"],
+            "Secret fixture generated output is redacted and raw original access is policy-controlled.",
+        ),
+        _row(
+            "CS-ARCH-007",
+            "MUST_PASS",
+            "PASS" if prompt_ok and audit_ok else "FAIL",
+            ["cornerstone artifact ingest fixtures/vs0/packs/10_prompt_injection/input.txt --json"],
+            "Untrusted prompt-injection artifact is evidence only, with no tool/action/egress side effects.",
+        ),
+        _row(
+            "CS-SEC-007",
+            "MUST_PASS",
+            "PASS" if prompt_ok and audit_ok else "FAIL",
+            ["cornerstone artifact ingest fixtures/vs0/packs/10_prompt_injection/input.txt --json", "cornerstone audit verify --json"],
+            "Prompt-injection regression records a blocked attempt and preserves zero side effects.",
+        ),
+        _row(
+            "CS-SEC-008",
+            "MUST_PASS",
+            "PASS" if secret_ok and audit_ok else "FAIL",
+            ["cornerstone artifact ingest fixtures/vs0/packs/09_redaction_secrets/input.txt --json"],
+            "Secret handling keeps raw original controlled and prevents unredacted secrets in generated output and CLI transcripts.",
+        ),
+        _row(
+            "CS-REG-013",
+            "REGRESSION_GUARD",
+            "PASS" if prompt_ok and audit_ok else "FAIL",
+            ["cornerstone artifact ingest fixtures/vs0/packs/10_prompt_injection/input.txt --json"],
+            "Prompt text cannot expand authority; policy and safety metadata keep authority_expanded false.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-security",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_SECURITY_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "security_evidence": {
+            "secret_artifact_id": secret_artifact.get("artifact_id"),
+            "prompt_artifact_id": prompt_artifact.get("artifact_id"),
+            "secret_derived_redacted": "[REDACTED]" in secret_derived,
+            "raw_original_access": secret_artifact.get("raw_original_access"),
+            "prompt_safety": prompt_safety,
+            "prompt_policy_decision_refs": prompt_policy_refs,
+            "prompt_audit_ref_count": len(prompt_audit_refs),
+        },
+        "negative_evidence": {
+            "unredacted_secret_occurrences": secret_output_count,
+            "tool_calls_created": int(prompt_safety.get("tool_calls_created", 1)),
+            "action_cards_created_from_untrusted_artifact": int(prompt_safety.get("action_cards_created_from_untrusted_artifact", 1)),
+            "external_http_calls": int(prompt_safety.get("external_http_calls", 1)),
+            "authority_expanded": int(bool(prompt_safety.get("authority_expanded", True))),
+        },
+        "human_required": [],
+    }
+
+
 def verify_vs0_scaffold(root: Path) -> dict[str, Any]:
     docs_result = _run_script(root, "scripts/verify_sot_docs.sh")
     cli_result = _run_script(root, "scripts/verify_cli_native_first_docs.sh")

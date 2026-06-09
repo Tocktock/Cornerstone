@@ -11,6 +11,7 @@ from cornerstone_cli import __version__
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_vs0_security,
     verify_vs0_artifacts,
     verify_vs0_fixtures,
     verify_vs0_scaffold,
@@ -194,6 +195,8 @@ def command_artifact_ingest(args: argparse.Namespace) -> int:
 
     artifact = result["artifact"]
     audit_event = result["audit_event"]
+    audit_events = result.get("audit_events", [audit_event])
+    policy_decisions = result.get("policy_decisions", [])
     payload.update(artifact["scope"])
     payload["ids"].update(
         {
@@ -210,7 +213,10 @@ def command_artifact_ingest(args: argparse.Namespace) -> int:
             f"storage:{artifact['original_storage_ref']}",
         ]
     )
-    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in audit_events)
+    payload["policy_decision_refs"].extend(f"policy:{decision['id']}" for decision in policy_decisions)
+    if policy_decisions:
+        payload["policy_decisions"] = policy_decisions
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -332,13 +338,15 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                 )
     elif args.contract == "vs0-artifacts":
         report = verify_vs0_artifacts(root)
+    elif args.contract == "vs0-security":
+        report = verify_vs0_security(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
             {
                 "code": "CS_SCENARIO_CONTRACT_UNSUPPORTED",
                 "message": "Only scaffold and fixture verification are implemented in this batch.",
-                "supported": ["vs0-scaffold", "vs0-fixtures", "vs0-artifacts"],
+                "supported": ["vs0-scaffold", "vs0-fixtures", "vs0-artifacts", "vs0-security"],
             }
         )
         print_payload(payload, args.json)

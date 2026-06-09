@@ -1,0 +1,363 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-security",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "34d2590"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "action_cards_created_from_untrusted_artifact": 0,
+    "authority_expanded": 0,
+    "external_http_calls": 0,
+    "tool_calls_created": 0,
+    "unredacted_secret_occurrences": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-security-2026-06-09.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone artifact ingest fixtures/vs0/packs/09_redaction_secrets/input.txt --json"
+      ],
+      "id": "CS-ARCH-006",
+      "notes": "Secret fixture generated output is redacted and raw original access is policy-controlled.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone artifact ingest fixtures/vs0/packs/10_prompt_injection/input.txt --json"
+      ],
+      "id": "CS-ARCH-007",
+      "notes": "Untrusted prompt-injection artifact is evidence only, with no tool/action/egress side effects.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone artifact ingest fixtures/vs0/packs/10_prompt_injection/input.txt --json",
+        "cornerstone audit verify --json"
+      ],
+      "id": "CS-SEC-007",
+      "notes": "Prompt-injection regression records a blocked attempt and preserves zero side effects.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone artifact ingest fixtures/vs0/packs/09_redaction_secrets/input.txt --json"
+      ],
+      "id": "CS-SEC-008",
+      "notes": "Secret handling keeps raw original controlled and prevents unredacted secrets in generated output and CLI transcripts.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone artifact ingest fixtures/vs0/packs/10_prompt_injection/input.txt --json"
+      ],
+      "id": "CS-REG-013",
+      "notes": "Prompt text cannot expand authority; policy and safety metadata keep authority_expanded false.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "vs0-security",
+  "schema_version": "cs.cli.v0",
+  "security_evidence": {
+    "prompt_artifact_id": "art_80213d823aa788d5",
+    "prompt_audit_ref_count": 2,
+    "prompt_policy_decision_refs": [
+      "policy:policy_c60a4cccf1589a7a"
+    ],
+    "prompt_safety": {
+      "action_cards_created_from_untrusted_artifact": 0,
+      "authority_expanded": false,
+      "blocked_attempt_count": 1,
+      "blocked_attempts": [
+        "ignore (all )?(previous|prior) instructions"
+      ],
+      "external_http_calls": 0,
+      "tool_calls_created": 0,
+      "unsafe_instruction_detected": true,
+      "untrusted_evidence": true
+    },
+    "raw_original_access": {
+      "display": "controlled",
+      "policy": "owner_scope_required"
+    },
+    "secret_artifact_id": "art_ec7bc6a3b66c055a",
+    "secret_derived_redacted": true
+  },
+  "state_dir": "tmp/scenario/vs0-security",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 5,
+    "product_feature_claims": "PARTIAL_VS0_SECURITY_ONLY",
+    "scenario_count": 5
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/vs0-security",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 3,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "34d2590"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_prompt_injection": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/10_prompt_injection/input.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-security",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_80213d823aa788d5",
+          "checksum_sha256": "80213d823aa788d530d142dfea9d07656cb0a8416167fb18c7ef1ca4a1686fa6",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "80213d823aa788d530d142dfea9d07656cb0a8416167fb18c7ef1ca4a1686fa6"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_80213d823aa788d5.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 267,
+          "original_storage_ref": "sha256:80213d823aa788d530d142dfea9d07656cb0a8416167fb18c7ef1ca4a1686fa6",
+          "provenance": {
+            "created_at": "2026-06-09T11:20:11.681535Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 1,
+            "blocked_attempts": [
+              "ignore (all )?(previous|prior) instructions"
+            ],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": true,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:20:11.681535Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/10_prompt_injection/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_212861159e9fb92d",
+          "audit:audit_c60a4cccf1589a7a"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_80213d823aa788d5",
+          "storage:sha256:80213d823aa788d530d142dfea9d07656cb0a8416167fb18c7ef1ca4a1686fa6"
+        ],
+        "ids": {
+          "artifact_id": "art_80213d823aa788d5",
+          "audit_event_id": "audit_212861159e9fb92d",
+          "checksum_sha256": "80213d823aa788d530d142dfea9d07656cb0a8416167fb18c7ef1ca4a1686fa6",
+          "git_commit": "34d2590"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_c60a4cccf1589a7a"
+        ],
+        "policy_decisions": [
+          {
+            "decision": "deny",
+            "id": "policy_c60a4cccf1589a7a",
+            "reason": "prompt_injection_blocked",
+            "scope": "artifact_ingest"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_secret": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/09_redaction_secrets/input.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-security",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_ec7bc6a3b66c055a",
+          "checksum_sha256": "ec7bc6a3b66c055a951294863dfa0b5079552d1e7bff7b92a755aa106f311e55",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "ec7bc6a3b66c055a951294863dfa0b5079552d1e7bff7b92a755aa106f311e55"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": true,
+            "status": "ready",
+            "text_ref": "derived/art_ec7bc6a3b66c055a.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 189,
+          "original_storage_ref": "sha256:ec7bc6a3b66c055a951294863dfa0b5079552d1e7bff7b92a755aa106f311e55",
+          "provenance": {
+            "created_at": "2026-06-09T11:20:11.635537Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T11:20:11.635537Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/09_redaction_secrets/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_c6b9ddfa9afb6666"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_ec7bc6a3b66c055a",
+          "storage:sha256:ec7bc6a3b66c055a951294863dfa0b5079552d1e7bff7b92a755aa106f311e55"
+        ],
+        "ids": {
+          "artifact_id": "art_ec7bc6a3b66c055a",
+          "audit_event_id": "audit_c6b9ddfa9afb6666",
+          "checksum_sha256": "ec7bc6a3b66c055a951294863dfa0b5079552d1e7bff7b92a755aa106f311e55",
+          "git_commit": "34d2590"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}
