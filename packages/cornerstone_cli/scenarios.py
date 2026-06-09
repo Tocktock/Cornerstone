@@ -2582,6 +2582,263 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-conversation-onboarding")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    message = (
+        "Messy onboarding note: Alpha research review needs a concise brief. "
+        "Decision candidate: keep original source material before derived summaries. "
+        "Search phrase: alpha-evidence-anchor. Please suggest any durable outputs without forcing setup."
+    )
+    transcripts: dict[str, dict[str, Any]] = {}
+    first_use_started = perf_counter()
+    transcripts["conversation_start"] = _run_cli_json(
+        root,
+        ["conversation", "start", "--message", message, "--state-dir", state_rel, "--json"],
+    )
+    start_payload = _payload(transcripts["conversation_start"])
+    conversation = start_payload.get("conversation", {})
+    conversation_id = conversation.get("conversation_id", "")
+    source_artifact = start_payload.get("artifact", {})
+    source_artifact_id = source_artifact.get("artifact_id", "")
+    transcripts["search"] = _run_cli_json(
+        root,
+        ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"],
+    )
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["brief_create"] = _run_cli_json(
+        root,
+        ["brief", "create", "--evidence-bundle-id", bundle_id, "--state-dir", state_rel, "--json"],
+    ) if bundle_id else {}
+    brief = _payload(transcripts["brief_create"]).get("brief", {})
+    brief_id = brief.get("brief_id", "")
+    transcripts["conversation_promote_claim"] = _run_cli_json(
+        root,
+        [
+            "conversation",
+            "promote",
+            conversation_id,
+            "--kind",
+            "claim",
+            "--statement",
+            "Alpha research review should keep original source material before derived summaries.",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if conversation_id and bundle_id else {}
+    promoted_claim = _payload(transcripts["conversation_promote_claim"]).get("claim", {})
+    promoted_claim_id = promoted_claim.get("claim_id", "")
+    transcripts["claim_show"] = _run_cli_json(
+        root,
+        ["claim", "show", promoted_claim_id, "--state-dir", state_rel, "--json"],
+    ) if promoted_claim_id else {}
+    transcripts["unsupported_answer"] = _run_cli_json(
+        root,
+        [
+            "conversation",
+            "answer",
+            conversation_id,
+            "--question",
+            "What is the approved Project Zeta budget?",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if conversation_id else {}
+    first_use_duration_ms = round((perf_counter() - first_use_started) * 1000, 3)
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    search_first = (snapshot.get("results") or [{}])[0]
+    bundle_items = bundle.get("evidence_items", [])
+    bundle_first = bundle_items[0] if bundle_items else {}
+    promoted_evidence = promoted_claim.get("evidence_bundle", {})
+    promoted_scope = promoted_claim.get("scope", {})
+    promoted_source = promoted_claim.get("source_conversation", {})
+    promoted_provenance = promoted_claim.get("provenance", {})
+    answer = _payload(transcripts["unsupported_answer"]).get("answer", {})
+    required_setup = conversation.get("required_setup", {})
+    suggested_outputs = conversation.get("suggested_outputs", [])
+    suggested_types = {item.get("type") for item in suggested_outputs if isinstance(item, dict)}
+    forced_suggestion_count = sum(1 for item in suggested_outputs if isinstance(item, dict) and item.get("forced") is True)
+    setup_required_count = sum(1 for value in required_setup.values() if value is True)
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+
+    common_path_ok = (
+        _exit_ok(transcripts["conversation_start"])
+        and _exit_ok(transcripts["search"])
+        and _exit_ok(transcripts["bundle_create"])
+        and _exit_ok(transcripts["brief_create"])
+        and _exit_ok(transcripts["conversation_promote_claim"])
+        and conversation_id.startswith("conv_")
+        and source_artifact_id.startswith("art_")
+        and source_artifact.get("source", {}).get("type") == "conversation_turn"
+        and conversation.get("source_artifact_id") == source_artifact_id
+        and snapshot.get("result_count") == 1
+        and search_first.get("artifact_id") == source_artifact_id
+        and bundle_first.get("artifact_id") == source_artifact_id
+        and brief.get("status") == "evidence_backed"
+        and promoted_claim_id.startswith("claim_")
+        and promoted_evidence.get("evidence_bundle_id") == bundle_id
+        and f"artifact:{source_artifact_id}" in promoted_evidence.get("artifact_refs", [])
+        and audit_ok
+    )
+    prod_005_ok = (
+        common_path_ok
+        and first_use_duration_ms <= 5000
+        and setup_required_count == 0
+        and brief_id.startswith("brief_")
+        and promoted_claim.get("trust_state") == "evidence_backed"
+    )
+    claim_001_ok = (
+        common_path_ok
+        and conversation.get("started_from") == "natural_message"
+        and conversation.get("pre_modeling_required") is False
+        and required_setup.get("connector_setup") is False
+        and required_setup.get("model_provider_setup") is False
+        and required_setup.get("ontology_setup") is False
+        and required_setup.get("organization_policy_setup") is False
+    )
+    claim_003_ok = (
+        _exit_ok(transcripts["conversation_start"])
+        and {
+            "Mission Card",
+            "Knowledge Capsule",
+            "Claim",
+            "Action Card",
+            "Memory",
+            "Playbook Candidate",
+        }.issubset(suggested_types)
+        and forced_suggestion_count == 0
+        and conversation.get("user_can_continue_without_conversion") is True
+    )
+    claim_004_ok = (
+        _exit_ok(transcripts["conversation_promote_claim"])
+        and _exit_ok(transcripts["claim_show"])
+        and promoted_source.get("conversation_id") == conversation_id
+        and promoted_source.get("source_artifact_ref") == f"artifact:{source_artifact_id}"
+        and promoted_evidence.get("evidence_bundle_id") == bundle_id
+        and _scope_complete(promoted_scope)
+        and promoted_claim.get("trust_state") == "evidence_backed"
+        and promoted_provenance.get("created_from") == "conversation.promote"
+        and _payload(transcripts["conversation_promote_claim"]).get("audit_refs")
+    )
+    claim_009_ok = (
+        _exit_ok(transcripts["unsupported_answer"])
+        and answer.get("label") == "insufficient_evidence"
+        and answer.get("trust_state") == "insufficient_evidence"
+        and answer.get("presented_as_fact") is False
+        and answer.get("unsupported_assertions_labeled") is True
+        and answer.get("supporting_result_count") == 0
+        and answer.get("evidence_refs") == []
+        and _payload(transcripts["unsupported_answer"]).get("audit_refs")
+    )
+
+    rows = [
+        _row(
+            "CS-PROD-005",
+            "MUST_PASS",
+            "PASS" if prod_005_ok else "FAIL",
+            [
+                "cornerstone conversation start --message <messy_input> --json",
+                "cornerstone brief create --evidence-bundle-id <id> --json",
+                "cornerstone conversation promote <conversation_id> --kind claim --json",
+            ],
+            "The first useful path starts from messy conversation input, reaches an evidence-backed brief, and manually promotes a draft/evidence-backed claim without connector, model-provider, ontology, or organization setup.",
+        ),
+        _row(
+            "CS-CLAIM-001",
+            "MUST_PASS",
+            "PASS" if claim_001_ok else "FAIL",
+            ["cornerstone conversation start --message <messy_input> --json", "cornerstone brief create ... --json", "cornerstone conversation promote ... --json"],
+            "Natural conversation input reaches a brief and claim without pre-modeling a case, mission, ontology, or document.",
+        ),
+        _row(
+            "CS-CLAIM-003",
+            "MUST_PASS",
+            "PASS" if claim_003_ok else "FAIL",
+            ["cornerstone conversation start --message <messy_input> --json"],
+            "Conversation start suggests Mission Card, Knowledge Capsule, Claim, Action Card, Memory, and Playbook Candidate as optional promotions without forcing conversion.",
+        ),
+        _row(
+            "CS-CLAIM-004",
+            "MUST_PASS",
+            "PASS" if claim_004_ok else "FAIL",
+            ["cornerstone conversation promote <conversation_id> --kind claim --evidence-bundle-id <id> --json"],
+            "Manual conversation promotion creates a durable claim with source conversation ref, source artifact ref, evidence bundle, owner namespace, trust state, provenance, and audit refs.",
+        ),
+        _row(
+            "CS-CLAIM-009",
+            "MUST_PASS",
+            "PASS" if claim_009_ok else "FAIL",
+            ["cornerstone conversation answer <conversation_id> --question <unsupported_question> --json"],
+            "Unsupported answer path labels insufficient evidence, avoids presenting the answer as fact, and records audit evidence.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-conversation-onboarding",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_CONVERSATION_ONBOARDING_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "conversation_evidence": {
+            "conversation_id": conversation_id,
+            "source_artifact_id": source_artifact_id,
+            "source_artifact_source_type": source_artifact.get("source", {}).get("type"),
+            "search_result_count": snapshot.get("result_count"),
+            "evidence_bundle_id": bundle_id,
+            "brief_id": brief_id,
+            "brief_status": brief.get("status"),
+            "promoted_claim_id": promoted_claim_id,
+            "promoted_claim_trust_state": promoted_claim.get("trust_state"),
+            "promoted_claim_source_conversation": promoted_source,
+            "promoted_claim_provenance": promoted_provenance,
+            "suggested_output_types": sorted(suggested_types),
+            "forced_suggestion_count": forced_suggestion_count,
+            "required_setup": required_setup,
+            "unsupported_answer_label": answer.get("label"),
+            "unsupported_answer_presented_as_fact": answer.get("presented_as_fact"),
+            "unsupported_answer_search_result_count": answer.get("search_result_count"),
+            "unsupported_answer_supporting_result_count": answer.get("supporting_result_count"),
+            "unsupported_answer_meaningful_question_terms": answer.get("meaningful_question_terms", []),
+            "unsupported_answer_matched_terms": answer.get("matched_terms", []),
+            "first_use_duration_ms": first_use_duration_ms,
+            "audit_event_count": _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("event_count"),
+        },
+        "negative_evidence": {
+            "pre_modeling_required": int(bool(conversation.get("pre_modeling_required", True))),
+            "required_connector_setup": int(bool(required_setup.get("connector_setup", True))),
+            "required_model_provider_setup": int(bool(required_setup.get("model_provider_setup", True))),
+            "required_ontology_setup": int(bool(required_setup.get("ontology_setup", True))),
+            "forced_conversion": forced_suggestion_count,
+            "promoted_objects_without_scope": 0 if _scope_complete(promoted_scope) else 1,
+            "promoted_objects_without_evidence": 0 if promoted_evidence.get("evidence_bundle_id") and promoted_evidence.get("artifact_refs") else 1,
+            "unsupported_assertions_presented_as_fact": int(bool(answer.get("presented_as_fact", True))),
+            "real_external_http_calls": 0,
+        },
+        "human_required": [],
+    }
+
+
 def verify_vs0_mission_action(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-mission-action")
     state_path = root / state_rel

@@ -604,6 +604,48 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_conversation_onboarding_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-conversation-onboarding", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-conversation-onboarding")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 5)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_CONVERSATION_ONBOARDING_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {"CS-PROD-005", "CS-CLAIM-001", "CS-CLAIM-003", "CS-CLAIM-004", "CS-CLAIM-009"},
+        )
+        evidence = payload["conversation_evidence"]
+        self.assertTrue(evidence["conversation_id"].startswith("conv_"))
+        self.assertTrue(evidence["source_artifact_id"].startswith("art_"))
+        self.assertEqual(evidence["source_artifact_source_type"], "conversation_turn")
+        self.assertEqual(evidence["search_result_count"], 1)
+        self.assertTrue(evidence["evidence_bundle_id"].startswith("evb_"))
+        self.assertTrue(evidence["brief_id"].startswith("brief_"))
+        self.assertEqual(evidence["brief_status"], "evidence_backed")
+        self.assertTrue(evidence["promoted_claim_id"].startswith("claim_"))
+        self.assertEqual(evidence["promoted_claim_trust_state"], "evidence_backed")
+        self.assertEqual(evidence["promoted_claim_source_conversation"]["conversation_id"], evidence["conversation_id"])
+        self.assertEqual(evidence["promoted_claim_source_conversation"]["source_artifact_ref"], f"artifact:{evidence['source_artifact_id']}")
+        self.assertEqual(evidence["promoted_claim_provenance"]["created_from"], "conversation.promote")
+        self.assertEqual(
+            set(evidence["suggested_output_types"]),
+            {"Action Card", "Claim", "Knowledge Capsule", "Memory", "Mission Card", "Playbook Candidate"},
+        )
+        self.assertEqual(evidence["forced_suggestion_count"], 0)
+        self.assertFalse(evidence["required_setup"]["connector_setup"])
+        self.assertFalse(evidence["required_setup"]["model_provider_setup"])
+        self.assertFalse(evidence["required_setup"]["ontology_setup"])
+        self.assertEqual(evidence["unsupported_answer_label"], "insufficient_evidence")
+        self.assertFalse(evidence["unsupported_answer_presented_as_fact"])
+        self.assertEqual(evidence["unsupported_answer_supporting_result_count"], 0)
+        self.assertIn("budget", evidence["unsupported_answer_meaningful_question_terms"])
+        self.assertEqual(evidence["unsupported_answer_matched_terms"], ["is"])
+        self.assertLessEqual(evidence["first_use_duration_ms"], 5000)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

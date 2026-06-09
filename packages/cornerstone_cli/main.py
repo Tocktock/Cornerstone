@@ -14,6 +14,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_audit_ledger,
     verify_vs0_briefing,
     verify_vs0_claim_evidence,
+    verify_vs0_conversation_onboarding,
     verify_vs0_detail_surfaces,
     verify_vs0_mission_action,
     verify_vs0_namespace_isolation,
@@ -1174,6 +1175,151 @@ def command_connector_direct_write_test(args: argparse.Namespace) -> int:
     return EXIT_POLICY_DENIED
 
 
+def command_conversation_start(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.start_conversation(args.message, requested_scope)
+    conversation = result["conversation"]
+    artifact = result["artifact"]
+    payload = base_response("cornerstone conversation start", "success", root)
+    payload.update(requested_scope)
+    payload["conversation"] = conversation
+    payload["artifact"] = artifact
+    payload["ids"].update(
+        {
+            "conversation_id": conversation["conversation_id"],
+            "artifact_id": artifact["artifact_id"],
+        }
+    )
+    payload["evidence_refs"].extend(
+        [
+            f"conversation:{conversation['conversation_id']}",
+            f"artifact:{artifact['artifact_id']}",
+            f"storage:{artifact['original_storage_ref']}",
+        ]
+    )
+    payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in result["audit_events"])
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_conversation_promote(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.promote_conversation_to_claim(
+        args.conversation_id,
+        args.statement,
+        args.evidence_bundle_id,
+        requested_scope,
+    )
+    payload = base_response("cornerstone conversation promote", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CONVERSATION_PROMOTION_SOURCE_NOT_FOUND",
+                "message": "Conversation or Evidence Bundle was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Conversation promotion source is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+
+    claim = result["claim"]
+    evidence = claim["evidence_bundle"]
+    payload.update(claim["scope"])
+    payload["claim"] = claim
+    payload["promoted_object"] = claim
+    payload["ids"].update(
+        {
+            "conversation_id": args.conversation_id,
+            "claim_id": claim["claim_id"],
+            "evidence_bundle_id": evidence["evidence_bundle_id"],
+            "search_snapshot_id": evidence["search_snapshot_id"],
+        }
+    )
+    payload["evidence_refs"].extend(
+        [
+            f"conversation:{args.conversation_id}",
+            f"claim:{claim['claim_id']}",
+            f"evidence_bundle:{evidence['evidence_bundle_id']}",
+            f"search_snapshot:{evidence['search_snapshot_id']}",
+        ]
+    )
+    payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in result["audit_events"])
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_conversation_answer(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.answer_conversation(args.conversation_id, args.question, requested_scope)
+    payload = base_response("cornerstone conversation answer", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CONVERSATION_NOT_FOUND",
+                "message": "Conversation was not found.",
+                "conversation_id": args.conversation_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Conversation is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+
+    answer = result["answer"]
+    snapshot = result["search_snapshot"]
+    payload["answer"] = answer
+    payload["search_snapshot"] = snapshot
+    payload["ids"].update(
+        {
+            "conversation_id": args.conversation_id,
+            "answer_id": answer["answer_id"],
+            "search_snapshot_id": snapshot["search_snapshot_id"],
+        }
+    )
+    payload["evidence_refs"].extend(
+        [
+            f"conversation:{args.conversation_id}",
+            f"answer:{answer['answer_id']}",
+            f"search_snapshot:{snapshot['search_snapshot_id']}",
+        ]
+    )
+    payload["evidence_refs"].extend(answer.get("evidence_refs", []))
+    payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in result["audit_events"])
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_scenario_list(args: argparse.Namespace) -> int:
     root = repo_root()
     scenarios = list_scenarios(root, args.set)
@@ -1259,6 +1405,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_mission_action(root)
     elif args.contract == "vs0-detail-surfaces":
         report = verify_vs0_detail_surfaces(root)
+    elif args.contract == "vs0-conversation-onboarding":
+        report = verify_vs0_conversation_onboarding(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -1281,6 +1429,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-briefing",
                     "vs0-mission-action",
                     "vs0-detail-surfaces",
+                    "vs0-conversation-onboarding",
                 ],
             }
         )
@@ -1589,6 +1738,34 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(direct_write)
     direct_write.add_argument("--json", action="store_true", help="Emit JSON output")
     direct_write.set_defaults(func=command_connector_direct_write_test)
+
+    conversation = subcommands.add_parser("conversation", help="Conversation-first work surface commands")
+    conversation_sub = conversation.add_subparsers(dest="conversation_command")
+
+    conversation_start = conversation_sub.add_parser("start", help="Start from a natural-language message")
+    conversation_start.add_argument("--message", required=True, help="User message or pasted messy input")
+    add_state_argument(conversation_start)
+    add_scope_arguments(conversation_start)
+    conversation_start.add_argument("--json", action="store_true", help="Emit JSON output")
+    conversation_start.set_defaults(func=command_conversation_start)
+
+    conversation_promote = conversation_sub.add_parser("promote", help="Promote a selected conversation output")
+    conversation_promote.add_argument("conversation_id", help="Conversation ID")
+    conversation_promote.add_argument("--kind", choices=["claim"], default="claim")
+    conversation_promote.add_argument("--statement", required=True, help="Promoted claim statement")
+    conversation_promote.add_argument("--evidence-bundle-id", required=True, help="Evidence Bundle ID")
+    add_state_argument(conversation_promote)
+    add_scope_arguments(conversation_promote)
+    conversation_promote.add_argument("--json", action="store_true", help="Emit JSON output")
+    conversation_promote.set_defaults(func=command_conversation_promote)
+
+    conversation_answer = conversation_sub.add_parser("answer", help="Answer a question from workspace evidence")
+    conversation_answer.add_argument("conversation_id", help="Conversation ID")
+    conversation_answer.add_argument("--question", required=True, help="Question to answer")
+    add_state_argument(conversation_answer)
+    add_scope_arguments(conversation_answer)
+    conversation_answer.add_argument("--json", action="store_true", help="Emit JSON output")
+    conversation_answer.set_defaults(func=command_conversation_answer)
 
     scenario = subcommands.add_parser("scenario", help="Scenario registry and verification commands")
     scenario_sub = scenario.add_subparsers(dest="scenario_command")

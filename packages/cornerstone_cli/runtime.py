@@ -29,6 +29,26 @@ SEMANTIC_ALIASES = {
     "preserved": ["keep", "stored", "original"],
 }
 
+ANSWER_STOP_TERMS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "for",
+    "in",
+    "is",
+    "of",
+    "or",
+    "the",
+    "to",
+    "what",
+    "when",
+    "where",
+    "which",
+    "who",
+    "why",
+}
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -82,8 +102,10 @@ class LocalRuntimeStore:
         self.original_dir = self.artifact_dir / "originals"
         self.record_dir = self.artifact_dir / "records"
         self.workspace_dir = state_dir / "workspaces"
+        self.conversation_dir = state_dir / "conversations"
         self.mission_dir = state_dir / "missions"
         self.action_dir = state_dir / "actions"
+        self.answer_dir = state_dir / "answers"
         self.audit_path = state_dir / "audit" / "events.jsonl"
 
     def reset(self) -> None:
@@ -168,6 +190,9 @@ class LocalRuntimeStore:
     def claim_path(self, claim_id: str) -> Path:
         return self.state_dir / "claims" / f"{claim_id}.json"
 
+    def conversation_path(self, conversation_id: str) -> Path:
+        return self.conversation_dir / f"{conversation_id}.json"
+
     def workspace_path(self, scope: dict[str, str]) -> Path:
         return self.workspace_dir / f"{scope_key(scope)}.json"
 
@@ -176,6 +201,9 @@ class LocalRuntimeStore:
 
     def action_path(self, action_id: str) -> Path:
         return self.action_dir / f"{action_id}.json"
+
+    def answer_path(self, answer_id: str) -> Path:
+        return self.answer_dir / f"{answer_id}.json"
 
     def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
         if scope is not None:
@@ -217,6 +245,12 @@ class LocalRuntimeStore:
 
     def get_brief(self, brief_id: str) -> dict[str, Any] | None:
         path = self.brief_path(brief_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_conversation(self, conversation_id: str) -> dict[str, Any] | None:
+        path = self.conversation_path(conversation_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -1350,6 +1384,271 @@ class LocalRuntimeStore:
             },
         )
         return {"policy_decision": policy, "audit_event": event}
+
+    def ingest_text_artifact(
+        self,
+        text: str,
+        scope: dict[str, str],
+        *,
+        source_type: str,
+        source_ref: str,
+        trust: str = "untrusted",
+    ) -> dict[str, Any]:
+        data = text.encode("utf-8")
+        checksum = sha256_bytes(data)
+        artifact_id = f"art_{checksum[:16]}"
+        original_storage_ref = f"sha256:{checksum}"
+        original_path = self.original_dir / checksum
+        self.original_dir.mkdir(parents=True, exist_ok=True)
+        if not original_path.exists():
+            original_path.write_bytes(data)
+
+        existing = self.get_artifact(artifact_id, scope)
+        if existing and existing.get("scope") == scope:
+            event = self.append_audit(
+                "artifact.deduplicated",
+                scope,
+                {"type": "artifact", "id": artifact_id},
+                {"checksum_sha256": checksum, "original_storage_ref": original_storage_ref},
+            )
+            return {"artifact": existing, "deduplicated": True, "audit_event": event}
+
+        now = utc_now()
+        raw_text = data.decode("utf-8", errors="replace")
+        redacted_text = redact_text(raw_text)
+        derived_text_ref = f"derived/{artifact_id}.txt"
+        derived_path = self.artifact_dir / derived_text_ref
+        derived_path.parent.mkdir(parents=True, exist_ok=True)
+        derived_path.write_text(redacted_text)
+        blocked_attempts = detect_unsafe_instructions(raw_text) if trust == "untrusted" else []
+        safety = {
+            "untrusted_evidence": trust == "untrusted",
+            "unsafe_instruction_detected": bool(blocked_attempts),
+            "blocked_attempt_count": len(blocked_attempts),
+            "blocked_attempts": blocked_attempts,
+            "tool_calls_created": 0,
+            "action_cards_created_from_untrusted_artifact": 0,
+            "external_http_calls": 0,
+            "authority_expanded": False,
+        }
+        record = {
+            "schema_version": "cs.artifact.v0",
+            "artifact_id": artifact_id,
+            "checksum_sha256": checksum,
+            "content_identity": {"algorithm": "sha256", "value": checksum},
+            "original_storage_ref": original_storage_ref,
+            "raw_original_access": {"policy": "owner_scope_required", "display": "controlled"},
+            "original_size_bytes": len(data),
+            "media_type": "text/plain",
+            "trust_state": trust,
+            "safety": safety,
+            "scope": scope,
+            "source": {
+                "type": source_type,
+                "ref": source_ref,
+                "ingested_at": now,
+            },
+            "derived": {
+                "status": "ready",
+                "media_type": "text/plain",
+                "text_ref": derived_text_ref,
+                "redacted": redacted_text != raw_text,
+            },
+            "provenance": {
+                "created_at": now,
+                "lineage_from": None,
+                "transformations": ["hash_calculated", "original_preserved", "derived_text_created"],
+            },
+        }
+        _write_json(self.artifact_path(artifact_id, scope), record)
+        event = self.append_audit(
+            "artifact.ingested",
+            scope,
+            {"type": "artifact", "id": artifact_id},
+            {
+                "checksum_sha256": checksum,
+                "original_storage_ref": original_storage_ref,
+                "source_type": source_type,
+                "derived_status": "ready",
+                "unsafe_instruction_detected": safety["unsafe_instruction_detected"],
+            },
+        )
+        return {"artifact": record, "deduplicated": False, "audit_event": event}
+
+    def start_conversation(self, message: str, scope: dict[str, str]) -> dict[str, Any]:
+        conversation_base = {
+            "schema_version": "cs.conversation.v0",
+            "scope": scope,
+            "started_from": "natural_message",
+            "pre_modeling_required": False,
+            "required_setup": {
+                "connector_setup": False,
+                "model_provider_setup": False,
+                "ontology_setup": False,
+                "organization_policy_setup": False,
+            },
+            "created_at": utc_now(),
+        }
+        conversation_id = f"conv_{_json_hash({**conversation_base, 'message': message})[:16]}"
+        artifact_result = self.ingest_text_artifact(
+            message,
+            scope,
+            source_type="conversation_turn",
+            source_ref=conversation_id,
+            trust="untrusted",
+        )
+        artifact = artifact_result["artifact"]
+        turn = {
+            "turn_id": f"turn_{_json_hash({'conversation_id': conversation_id, 'role': 'user', 'message': message})[:16]}",
+            "role": "user",
+            "content": redact_text(message),
+            "artifact_ref": f"artifact:{artifact['artifact_id']}",
+            "created_at": utc_now(),
+        }
+        conversation = dict(conversation_base)
+        conversation.update(
+            {
+                "conversation_id": conversation_id,
+                "turns": [turn],
+                "source_artifact_id": artifact["artifact_id"],
+                "suggested_outputs": [
+                    {"type": "Mission Card", "mode": "optional_promotion", "forced": False},
+                    {"type": "Knowledge Capsule", "mode": "optional_promotion", "forced": False},
+                    {"type": "Claim", "mode": "optional_promotion", "forced": False},
+                    {"type": "Action Card", "mode": "optional_promotion", "forced": False},
+                    {"type": "Memory", "mode": "optional_promotion", "forced": False},
+                    {"type": "Playbook Candidate", "mode": "optional_promotion", "forced": False},
+                ],
+                "user_can_continue_without_conversion": True,
+            }
+        )
+        _write_json(self.conversation_path(conversation_id), conversation)
+        event = self.append_audit(
+            "conversation.started",
+            scope,
+            {"type": "conversation", "id": conversation_id},
+            {
+                "source_artifact_id": artifact["artifact_id"],
+                "suggested_output_types": [item["type"] for item in conversation["suggested_outputs"]],
+            },
+        )
+        return {
+            "conversation": conversation,
+            "artifact": artifact,
+            "audit_events": [artifact_result["audit_event"], event],
+        }
+
+    def promote_conversation_to_claim(
+        self,
+        conversation_id: str,
+        statement: str,
+        evidence_bundle_id: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        conversation = self.get_conversation(conversation_id)
+        if conversation is None:
+            return {"status": "not_found", "resource": "conversation"}
+        if conversation.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": conversation.get("scope")}
+
+        result = self.create_claim_from_evidence_bundle(evidence_bundle_id, statement, scope)
+        if result.get("status"):
+            return result
+
+        claim = dict(result["claim"])
+        claim["source_conversation"] = {
+            "conversation_id": conversation_id,
+            "turn_refs": [f"conversation_turn:{turn['turn_id']}" for turn in conversation.get("turns", [])],
+            "source_artifact_ref": f"artifact:{conversation.get('source_artifact_id')}",
+        }
+        claim["provenance"] = {
+            "created_from": "conversation.promote",
+            "source_conversation_id": conversation_id,
+            "source_artifact_id": conversation.get("source_artifact_id"),
+            "promoted_at": utc_now(),
+        }
+        _write_json(self.claim_path(claim["claim_id"]), claim)
+        event = self.append_audit(
+            "conversation.promoted",
+            scope,
+            {"type": "claim", "id": claim["claim_id"]},
+            {
+                "conversation_id": conversation_id,
+                "evidence_bundle_id": evidence_bundle_id,
+                "promoted_kind": "claim",
+                "trust_state": claim.get("trust_state"),
+            },
+        )
+        return {"claim": claim, "audit_events": [result["audit_event"], event]}
+
+    def answer_conversation(self, conversation_id: str, question: str, scope: dict[str, str]) -> dict[str, Any]:
+        conversation = self.get_conversation(conversation_id)
+        if conversation is None:
+            return {"status": "not_found", "resource": "conversation"}
+        if conversation.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": conversation.get("scope")}
+
+        search_result = self.search(question, **scope)
+        snapshot = search_result["snapshot"]
+        evidence_refs: list[str] = []
+        meaningful_question_terms = {
+            term
+            for term in search_terms(question)
+            if len(term) > 2 and term not in ANSWER_STOP_TERMS
+        }
+        matched_terms = {
+            str(reason.get("matched_term") or reason.get("query_term") or reason.get("query")).lower()
+            for result in snapshot.get("results", [])
+            for reason in result.get("match_reasons", [])
+            if isinstance(reason, dict)
+        }
+        supported_by_meaningful_match = bool(meaningful_question_terms & matched_terms)
+        label = "evidence_backed" if snapshot.get("result_count", 0) > 0 and supported_by_meaningful_match else "insufficient_evidence"
+        presented_as_fact = label == "evidence_backed"
+        if presented_as_fact:
+            evidence_refs.extend(
+                ref
+                for result_row in snapshot.get("results", [])
+                for ref in result_row.get("evidence_refs", [])
+            )
+        supporting_result_count = snapshot.get("result_count", 0) if presented_as_fact else 0
+        answer_base = {
+            "schema_version": "cs.conversation_answer.v0",
+            "conversation_id": conversation_id,
+            "question": question,
+            "scope": scope,
+            "label": label,
+            "trust_state": label,
+            "presented_as_fact": presented_as_fact,
+            "answer": (
+                "The available evidence supports an answer; inspect the attached evidence refs."
+                if presented_as_fact
+                else "Insufficient evidence. Add or attach source evidence before treating this as fact."
+            ),
+            "search_snapshot_id": snapshot.get("search_snapshot_id"),
+            "search_result_count": snapshot.get("result_count", 0),
+            "supporting_result_count": supporting_result_count,
+            "meaningful_question_terms": sorted(meaningful_question_terms),
+            "matched_terms": sorted(matched_terms),
+            "evidence_refs": evidence_refs,
+            "unsupported_assertions_labeled": not presented_as_fact,
+            "created_at": utc_now(),
+        }
+        answer = dict(answer_base)
+        answer["answer_id"] = f"answer_{_json_hash(answer_base)[:16]}"
+        _write_json(self.answer_path(answer["answer_id"]), answer)
+        event = self.append_audit(
+            "conversation.answer.created",
+            scope,
+            {"type": "conversation_answer", "id": answer["answer_id"]},
+            {
+                "conversation_id": conversation_id,
+                "label": label,
+                "search_snapshot_id": snapshot.get("search_snapshot_id"),
+                "search_result_count": snapshot.get("result_count", 0),
+            },
+        )
+        return {"answer": answer, "search_snapshot": snapshot, "audit_events": [search_result["audit_event"], event]}
 
     def ingest_artifact(
         self,

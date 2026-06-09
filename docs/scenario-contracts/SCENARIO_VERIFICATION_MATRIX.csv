@@ -3,7 +3,7 @@ CS-PROD-001,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-
 CS-PROD-002,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-002.json,,,,,NOT_VERIFIED
 CS-PROD-003,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-003.json,,,,,NOT_VERIFIED
 CS-PROD-004,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
-CS-PROD-005,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-005.json,,,,,NOT_VERIFIED
+CS-PROD-005,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-conversation-onboarding --json,reports/scenario/vs0-conversation-onboarding-2026-06-09.json,,,,,PASS
 CS-PROD-006,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-006 --json,reports/scenario/cs-prod-006.json,,,,,NOT_VERIFIED
 CS-PROD-007,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-007 --json,reports/scenario/cs-prod-007.json,,,,,NOT_VERIFIED
 CS-PROD-008,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-008 --json,reports/scenario/cs-prod-008.json,,,,,NOT_VERIFIED
@@ -35,15 +35,15 @@ CS-UND-009,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-
 CS-UND-010,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-010 --json,reports/scenario/cs-und-010.json,,,,,NOT_VERIFIED
 CS-UND-011,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-011 --json,reports/scenario/cs-und-011.json,,,,,NOT_VERIFIED
 CS-UND-012,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-012 --json,reports/scenario/cs-und-012.json,,,,,NOT_VERIFIED
-CS-CLAIM-001,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-001.json,,,,,NOT_VERIFIED
+CS-CLAIM-001,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-conversation-onboarding --json,reports/scenario/vs0-conversation-onboarding-2026-06-09.json,,,,,PASS
 CS-CLAIM-002,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
-CS-CLAIM-003,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-003.json,,,,,NOT_VERIFIED
-CS-CLAIM-004,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-004.json,,,,,NOT_VERIFIED
+CS-CLAIM-003,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-conversation-onboarding --json,reports/scenario/vs0-conversation-onboarding-2026-06-09.json,,,,,PASS
+CS-CLAIM-004,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-conversation-onboarding --json,reports/scenario/vs0-conversation-onboarding-2026-06-09.json,,,,,PASS
 CS-CLAIM-005,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-detail-surfaces --json,reports/scenario/vs0-detail-surfaces-2026-06-09.json,,,,,PASS
 CS-CLAIM-006,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-claim-evidence --json,reports/scenario/vs0-claim-evidence-2026-06-09.json,,,,,PASS
 CS-CLAIM-007,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-claim-evidence --json,reports/scenario/vs0-claim-evidence-2026-06-09.json,,,,,PASS
 CS-CLAIM-008,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-detail-surfaces --json,reports/scenario/vs0-detail-surfaces-2026-06-09.json,,,,,PASS
-CS-CLAIM-009,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-009 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-009.json,,,,,NOT_VERIFIED
+CS-CLAIM-009,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-conversation-onboarding --json,reports/scenario/vs0-conversation-onboarding-2026-06-09.json,,,,,PASS
 CS-CLAIM-010,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-CLAIM-011,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-CLAIM-011 --json,reports/scenario/cs-claim-011.json,,,,,NOT_VERIFIED
 CS-CLAIM-012,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-CLAIM-012 --json,reports/scenario/cs-claim-012.json,,,,,NOT_VERIFIED
