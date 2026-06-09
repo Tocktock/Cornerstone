@@ -743,6 +743,36 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_tenant_security_boundary_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-tenant-security-boundary", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-tenant-security-boundary")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 3)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_TENANT_SECURITY_BOUNDARY_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-NS-004", "CS-SEC-004", "CS-REG-006"})
+        evidence = payload["tenant_security_evidence"]
+        self.assertEqual(evidence["promoted_memory_scope"]["owner_id"], "local-org")
+        self.assertEqual(evidence["promoted_memory_scope"]["namespace_id"], "organization")
+        self.assertEqual(evidence["promotion_mode"], "copy_with_provenance")
+        self.assertEqual(evidence["promotion_policy"], "local_rbac_abac_matrix")
+        self.assertEqual(evidence["pre_promotion_answer_status"], "insufficient_evidence")
+        self.assertEqual(evidence["pre_promotion_used_memory_refs"], [])
+        self.assertEqual(evidence["direct_cross_scope_read_exit_code"], 6)
+        self.assertEqual(evidence["post_promotion_answer_status"], "answered")
+        self.assertTrue(evidence["post_promotion_used_promoted_memory"])
+        self.assertEqual(evidence["post_promotion_used_memory_refs"], [f"memory:{evidence['promoted_memory_id']}"])
+        self.assertEqual(evidence["access_matrix_case_count"], 7)
+        self.assertEqual(evidence["access_allow_count"], 3)
+        self.assertEqual(evidence["access_deny_count"], 4)
+        self.assertIn("namespace.promotion.created", evidence["event_types"])
+        self.assertIn("policy.access.evaluated", evidence["event_types"])
+        self.assertIn("memory.answer.insufficient_evidence", evidence["event_types"])
+        self.assertIn("memory.answer.created", evidence["event_types"])
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

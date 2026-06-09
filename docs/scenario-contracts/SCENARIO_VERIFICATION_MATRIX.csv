@@ -70,7 +70,7 @@ CS-MEM-018,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario C
 CS-NS-001,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-namespace-isolation --json,reports/scenario/vs0-namespace-isolation-2026-06-09.json,,,,,PASS
 CS-NS-002,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-detail-surfaces --json,reports/scenario/vs0-detail-surfaces-2026-06-09.json,,,,,PASS
 CS-NS-003,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-namespace-isolation --json,reports/scenario/vs0-namespace-isolation-2026-06-09.json,,,,,PASS
-CS-NS-004,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0 --scenario CS-NS-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-ns-004.json,,,,,NOT_VERIFIED
+CS-NS-004,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-tenant-security-boundary --json,reports/scenario/vs0-tenant-security-boundary-2026-06-09.json,,,,,PASS
 CS-NS-005,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-005 --json,reports/scenario/cs-ns-005.json,,,,,NOT_VERIFIED
 CS-NS-006,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-006 --json,reports/scenario/cs-ns-006.json,,,,,NOT_VERIFIED
 CS-NS-007,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-007 --json,reports/scenario/cs-ns-007.json,,,,,NOT_VERIFIED
@@ -168,7 +168,7 @@ CS-EXT-016,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario C
 CS-SEC-001,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
 CS-SEC-002,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security-policy --json,reports/scenario/vs0-security-policy-2026-06-09.json,,,,,PASS
 CS-SEC-003,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security-policy --json,reports/scenario/vs0-security-policy-2026-06-09.json,,,,,PASS
-CS-SEC-004,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-004.json,,,,,NOT_VERIFIED
+CS-SEC-004,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-tenant-security-boundary --json,reports/scenario/vs0-tenant-security-boundary-2026-06-09.json,,,,,PASS
 CS-SEC-005,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-detail-surfaces --json,reports/scenario/vs0-detail-surfaces-2026-06-09.json,,,,,PASS
 CS-SEC-006,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-audit-ledger --json,reports/scenario/vs0-audit-ledger-2026-06-09.json,,,,,PASS
 CS-SEC-007,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0-security --json,reports/scenario/vs0-security-2026-06-09.json,,,,,PASS
@@ -190,7 +190,7 @@ CS-REG-002,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-missio
 CS-REG-003,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-REG-004,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-universal-core --json,reports/scenario/vs0-universal-core-2026-06-09.json,,,,,PASS
 CS-REG-005,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-memory-truth-boundary --json,reports/scenario/vs0-memory-truth-boundary-2026-06-09.json,,,,,PASS
-CS-REG-006,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-REG-006 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-reg-006.json,,,,,NOT_VERIFIED
+CS-REG-006,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0-tenant-security-boundary --json,reports/scenario/vs0-tenant-security-boundary-2026-06-09.json,,,,,PASS
 CS-REG-007,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-007 --json,reports/scenario/cs-reg-007.json,,,,,NOT_VERIFIED
 CS-REG-008,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-008 --json,reports/scenario/cs-reg-008.json,,,,,NOT_VERIFIED
 CS-REG-009,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-009 --json,reports/scenario/cs-reg-009.json,,,,,NOT_VERIFIED

@@ -1,0 +1,2474 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-tenant-security-boundary",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "4139db6"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "direct_cross_scope_memory_read_allowed": 0,
+    "policy_decisions_without_audit": 0,
+    "post_promotion_used_source_memory_directly": 0,
+    "pre_promotion_evidence_refs": 0,
+    "pre_promotion_personal_memory_used": 0,
+    "promotion_without_evidence": 0,
+    "promotion_without_provenance": 0,
+    "real_external_http_calls": 0,
+    "secret_reads": 0,
+    "unauthorized_access_allowed": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-tenant-security-boundary-2026-06-09.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone namespace promote --source-kind memory --source-id <memory_id> --target-owner-id local-org --target-namespace-id organization --target-workspace-id ops --json"
+      ],
+      "id": "CS-NS-004",
+      "notes": "Explicit memory promotion creates an organization-scoped copy with source provenance, source evidence refs, policy decision refs, and audit refs.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone access evaluate --principal-role <role> --action <action> --classification <level> --mission-authority <state> --json"
+      ],
+      "id": "CS-SEC-004",
+      "notes": "Local deterministic access matrix covers roles, attributes, namespace, classification, mission authority, policy allow/deny decisions, and audit refs.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone memory answer --question <question> --owner-id local-org --namespace-id organization --workspace-id ops --json"
+      ],
+      "id": "CS-REG-006",
+      "notes": "Organization memory answers use no personal memory before explicit promotion and use only the promoted organization-scoped memory after promotion.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "vs0-tenant-security-boundary",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/vs0-tenant-security-boundary-71655",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 3,
+    "product_feature_claims": "PARTIAL_VS0_TENANT_SECURITY_BOUNDARY_ONLY",
+    "scenario_count": 3
+  },
+  "tenant_id": "local-dev",
+  "tenant_security_evidence": {
+    "access_allow_count": 3,
+    "access_cases": {
+      "org_admin_read_restricted_allowed": {
+        "action": "read",
+        "decided_at": "2026-06-09T14:50:22.116939Z",
+        "decision": "allow",
+        "evaluation_model": "deterministic_local_rbac_abac",
+        "external_http_calls": 0,
+        "id": "policy_6013c88948662b29",
+        "mission_authority": "active",
+        "policy": "local_rbac_abac_matrix",
+        "principal": {
+          "attributes": [
+            "clearance:restricted",
+            "team:ops"
+          ],
+          "id": "admin-1",
+          "role": "org_admin"
+        },
+        "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+        "resolution_path": [
+          "Proceed through the same scoped CLI path and audit ledger."
+        ],
+        "resource": {
+          "classification": "restricted",
+          "id": "memory_b3448ca1137e8b3c",
+          "kind": "memory",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          }
+        },
+        "schema_version": "cs.policy_decision.v0",
+        "scope": {
+          "namespace_id": "organization",
+          "owner_id": "local-org",
+          "tenant_id": "local-dev",
+          "workspace_id": "ops"
+        },
+        "secret_reads": 0
+      },
+      "org_approver_approve_allowed": {
+        "action": "approve",
+        "decided_at": "2026-06-09T14:50:22.342244Z",
+        "decision": "allow",
+        "evaluation_model": "deterministic_local_rbac_abac",
+        "external_http_calls": 0,
+        "id": "policy_8be0f013d72620c1",
+        "mission_authority": "active",
+        "policy": "local_rbac_abac_matrix",
+        "principal": {
+          "attributes": [
+            "team:ops"
+          ],
+          "id": "approver-1",
+          "role": "org_approver"
+        },
+        "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+        "resolution_path": [
+          "Proceed through the same scoped CLI path and audit ledger."
+        ],
+        "resource": {
+          "classification": "confidential",
+          "id": "claim-for-promoted-memory",
+          "kind": "claim",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          }
+        },
+        "schema_version": "cs.policy_decision.v0",
+        "scope": {
+          "namespace_id": "organization",
+          "owner_id": "local-org",
+          "tenant_id": "local-dev",
+          "workspace_id": "ops"
+        },
+        "secret_reads": 0
+      },
+      "org_member_configure_denied": {
+        "action": "configure",
+        "decided_at": "2026-06-09T14:50:22.679650Z",
+        "decision": "deny",
+        "evaluation_model": "deterministic_local_rbac_abac",
+        "external_http_calls": 0,
+        "id": "policy_63f949abad25efe1",
+        "mission_authority": "active",
+        "policy": "configuration_requires_org_admin",
+        "principal": {
+          "attributes": [],
+          "id": "member-3",
+          "role": "org_member"
+        },
+        "reason": "Policy or namespace configuration requires the org_admin role.",
+        "resolution_path": [
+          "Ask an organization admin to configure the policy or grant the needed role."
+        ],
+        "resource": {
+          "classification": "internal",
+          "id": "organization-policy",
+          "kind": "policy",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          }
+        },
+        "schema_version": "cs.policy_decision.v0",
+        "scope": {
+          "namespace_id": "organization",
+          "owner_id": "local-org",
+          "tenant_id": "local-dev",
+          "workspace_id": "ops"
+        },
+        "secret_reads": 0
+      },
+      "org_member_execute_without_mission_denied": {
+        "action": "execute",
+        "decided_at": "2026-06-09T14:50:22.825448Z",
+        "decision": "deny",
+        "evaluation_model": "deterministic_local_rbac_abac",
+        "external_http_calls": 0,
+        "id": "policy_ea44e1d420c3fa8b",
+        "mission_authority": "none",
+        "policy": "mission_authority_required_for_execution",
+        "principal": {
+          "attributes": [],
+          "id": "member-4",
+          "role": "org_member"
+        },
+        "reason": "Execution requires an active or approved Mission Goal Contract authority.",
+        "resolution_path": [
+          "Activate or approve a Mission Goal Contract before execution."
+        ],
+        "resource": {
+          "classification": "internal",
+          "id": "action-without-authority",
+          "kind": "action",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          }
+        },
+        "schema_version": "cs.policy_decision.v0",
+        "scope": {
+          "namespace_id": "organization",
+          "owner_id": "local-org",
+          "tenant_id": "local-dev",
+          "workspace_id": "ops"
+        },
+        "secret_reads": 0
+      },
+      "org_member_read_internal_allowed": {
+        "action": "read",
+        "decided_at": "2026-06-09T14:50:22.241746Z",
+        "decision": "allow",
+        "evaluation_model": "deterministic_local_rbac_abac",
+        "external_http_calls": 0,
+        "id": "policy_7a1ec2379e53df08",
+        "mission_authority": "active",
+        "policy": "local_rbac_abac_matrix",
+        "principal": {
+          "attributes": [
+            "team:ops"
+          ],
+          "id": "member-1",
+          "role": "org_member"
+        },
+        "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+        "resolution_path": [
+          "Proceed through the same scoped CLI path and audit ledger."
+        ],
+        "resource": {
+          "classification": "internal",
+          "id": "memory_b3448ca1137e8b3c",
+          "kind": "memory",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          }
+        },
+        "schema_version": "cs.policy_decision.v0",
+        "scope": {
+          "namespace_id": "organization",
+          "owner_id": "local-org",
+          "tenant_id": "local-dev",
+          "workspace_id": "ops"
+        },
+        "secret_reads": 0
+      },
+      "org_member_read_restricted_denied": {
+        "action": "read",
+        "decided_at": "2026-06-09T14:50:22.566986Z",
+        "decision": "deny",
+        "evaluation_model": "deterministic_local_rbac_abac",
+        "external_http_calls": 0,
+        "id": "policy_e2ecc1c3cc8415cc",
+        "mission_authority": "active",
+        "policy": "restricted_classification_clearance_required",
+        "principal": {
+          "attributes": [
+            "team:ops"
+          ],
+          "id": "member-2",
+          "role": "org_member"
+        },
+        "reason": "Restricted resources require org_admin or clearance:restricted.",
+        "resolution_path": [
+          "Request restricted clearance or reduce the resource classification."
+        ],
+        "resource": {
+          "classification": "restricted",
+          "id": "memory_b3448ca1137e8b3c",
+          "kind": "memory",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          }
+        },
+        "schema_version": "cs.policy_decision.v0",
+        "scope": {
+          "namespace_id": "organization",
+          "owner_id": "local-org",
+          "tenant_id": "local-dev",
+          "workspace_id": "ops"
+        },
+        "secret_reads": 0
+      },
+      "personal_user_read_org_denied": {
+        "action": "read",
+        "decided_at": "2026-06-09T14:50:22.449953Z",
+        "decision": "deny",
+        "evaluation_model": "deterministic_local_rbac_abac",
+        "external_http_calls": 0,
+        "id": "policy_641335754993a091",
+        "mission_authority": "none",
+        "policy": "organization_membership_required",
+        "principal": {
+          "attributes": [],
+          "id": "local-user",
+          "role": "personal_user"
+        },
+        "reason": "Organization resources require an organization role in the active organization namespace.",
+        "resolution_path": [
+          "Request organization access or promote only through an approved namespace workflow."
+        ],
+        "resource": {
+          "classification": "internal",
+          "id": "memory_b3448ca1137e8b3c",
+          "kind": "memory",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          }
+        },
+        "schema_version": "cs.policy_decision.v0",
+        "scope": {
+          "namespace_id": "organization",
+          "owner_id": "local-org",
+          "tenant_id": "local-dev",
+          "workspace_id": "ops"
+        },
+        "secret_reads": 0
+      }
+    },
+    "access_deny_count": 4,
+    "access_matrix_case_count": 7,
+    "audit_event_count": 15,
+    "direct_cross_scope_read_exit_code": 6,
+    "event_types": [
+      "artifact.ingested",
+      "search.snapshot.created",
+      "evidence_bundle.created",
+      "memory.owner_approved.created",
+      "memory.answer.insufficient_evidence",
+      "policy.access.evaluated",
+      "namespace.promotion.created",
+      "memory.answer.created",
+      "policy.access.evaluated",
+      "policy.access.evaluated",
+      "policy.access.evaluated",
+      "policy.access.evaluated",
+      "policy.access.evaluated",
+      "policy.access.evaluated",
+      "policy.access.evaluated"
+    ],
+    "post_promotion_answer_status": "answered",
+    "post_promotion_used_memory_refs": [
+      "memory:memory_b3448ca1137e8b3c"
+    ],
+    "post_promotion_used_promoted_memory": true,
+    "pre_promotion_answer_status": "insufficient_evidence",
+    "pre_promotion_used_memory_refs": [],
+    "promoted_memory_id": "memory_b3448ca1137e8b3c",
+    "promoted_memory_scope": {
+      "namespace_id": "organization",
+      "owner_id": "local-org",
+      "tenant_id": "local-dev",
+      "workspace_id": "ops"
+    },
+    "promotion_evidence_refs": [
+      "namespace_promotion:promotion_cb32886cac4c7a20",
+      "memory:memory_12441de28d9195a4",
+      "evidence_bundle:evb_e0ab45270da2851e",
+      "search_snapshot:search_56900777e3ee5508",
+      "artifact:art_67c8222eb9418cae"
+    ],
+    "promotion_id": "promotion_cb32886cac4c7a20",
+    "promotion_mode": "copy_with_provenance",
+    "promotion_policy": "local_rbac_abac_matrix",
+    "promotion_provenance": {
+      "activity": "explicit_namespace_promotion",
+      "agent": "local-user",
+      "mode": "copy_with_provenance",
+      "source_entity": "memory:memory_12441de28d9195a4",
+      "source_scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      },
+      "target_entity": "memory:memory_b3448ca1137e8b3c",
+      "target_scope": {
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "tenant_id": "local-dev",
+        "workspace_id": "ops"
+      }
+    },
+    "source_artifact_id": "art_67c8222eb9418cae",
+    "source_memory_id": "memory_12441de28d9195a4",
+    "source_memory_scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    }
+  },
+  "transcripts": {
+    "access_org_admin_read_restricted_allowed": {
+      "command": [
+        "cornerstone",
+        "access",
+        "evaluate",
+        "--principal-id",
+        "admin-1",
+        "--principal-role",
+        "org_admin",
+        "--principal-attributes",
+        "clearance:restricted,team:ops",
+        "--action",
+        "read",
+        "--resource-kind",
+        "memory",
+        "--resource-id",
+        "memory_b3448ca1137e8b3c",
+        "--classification",
+        "restricted",
+        "--mission-authority",
+        "active",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "access_decision": {
+          "action": "read",
+          "decided_at": "2026-06-09T14:50:22.116939Z",
+          "decision": "allow",
+          "evaluation_model": "deterministic_local_rbac_abac",
+          "external_http_calls": 0,
+          "id": "policy_6013c88948662b29",
+          "mission_authority": "active",
+          "policy": "local_rbac_abac_matrix",
+          "principal": {
+            "attributes": [
+              "clearance:restricted",
+              "team:ops"
+            ],
+            "id": "admin-1",
+            "role": "org_admin"
+          },
+          "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+          "resolution_path": [
+            "Proceed through the same scoped CLI path and audit ledger."
+          ],
+          "resource": {
+            "classification": "restricted",
+            "id": "memory_b3448ca1137e8b3c",
+            "kind": "memory",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            }
+          },
+          "schema_version": "cs.policy_decision.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "secret_reads": 0
+        },
+        "audit_refs": [
+          "audit:audit_0903fd772ef56474"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone access evaluate",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "4139db6",
+          "policy_decision_id": "policy_6013c88948662b29",
+          "resource_id": "memory_b3448ca1137e8b3c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [
+          "policy:policy_6013c88948662b29"
+        ],
+        "policy_decisions": [
+          {
+            "action": "read",
+            "decided_at": "2026-06-09T14:50:22.116939Z",
+            "decision": "allow",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_6013c88948662b29",
+            "mission_authority": "active",
+            "policy": "local_rbac_abac_matrix",
+            "principal": {
+              "attributes": [
+                "clearance:restricted",
+                "team:ops"
+              ],
+              "id": "admin-1",
+              "role": "org_admin"
+            },
+            "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+            "resolution_path": [
+              "Proceed through the same scoped CLI path and audit ledger."
+            ],
+            "resource": {
+              "classification": "restricted",
+              "id": "memory_b3448ca1137e8b3c",
+              "kind": "memory",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "allowed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "access_org_approver_approve_allowed": {
+      "command": [
+        "cornerstone",
+        "access",
+        "evaluate",
+        "--principal-id",
+        "approver-1",
+        "--principal-role",
+        "org_approver",
+        "--principal-attributes",
+        "team:ops",
+        "--action",
+        "approve",
+        "--resource-kind",
+        "claim",
+        "--resource-id",
+        "claim-for-promoted-memory",
+        "--classification",
+        "confidential",
+        "--mission-authority",
+        "active",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "access_decision": {
+          "action": "approve",
+          "decided_at": "2026-06-09T14:50:22.342244Z",
+          "decision": "allow",
+          "evaluation_model": "deterministic_local_rbac_abac",
+          "external_http_calls": 0,
+          "id": "policy_8be0f013d72620c1",
+          "mission_authority": "active",
+          "policy": "local_rbac_abac_matrix",
+          "principal": {
+            "attributes": [
+              "team:ops"
+            ],
+            "id": "approver-1",
+            "role": "org_approver"
+          },
+          "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+          "resolution_path": [
+            "Proceed through the same scoped CLI path and audit ledger."
+          ],
+          "resource": {
+            "classification": "confidential",
+            "id": "claim-for-promoted-memory",
+            "kind": "claim",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            }
+          },
+          "schema_version": "cs.policy_decision.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "secret_reads": 0
+        },
+        "audit_refs": [
+          "audit:audit_89b9b8d9d3d81a05"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone access evaluate",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "4139db6",
+          "policy_decision_id": "policy_8be0f013d72620c1",
+          "resource_id": "claim-for-promoted-memory"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [
+          "policy:policy_8be0f013d72620c1"
+        ],
+        "policy_decisions": [
+          {
+            "action": "approve",
+            "decided_at": "2026-06-09T14:50:22.342244Z",
+            "decision": "allow",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_8be0f013d72620c1",
+            "mission_authority": "active",
+            "policy": "local_rbac_abac_matrix",
+            "principal": {
+              "attributes": [
+                "team:ops"
+              ],
+              "id": "approver-1",
+              "role": "org_approver"
+            },
+            "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+            "resolution_path": [
+              "Proceed through the same scoped CLI path and audit ledger."
+            ],
+            "resource": {
+              "classification": "confidential",
+              "id": "claim-for-promoted-memory",
+              "kind": "claim",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "allowed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "access_org_member_configure_denied": {
+      "command": [
+        "cornerstone",
+        "access",
+        "evaluate",
+        "--principal-id",
+        "member-3",
+        "--principal-role",
+        "org_member",
+        "--action",
+        "configure",
+        "--resource-kind",
+        "policy",
+        "--resource-id",
+        "organization-policy",
+        "--classification",
+        "internal",
+        "--mission-authority",
+        "active",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "access_decision": {
+          "action": "configure",
+          "decided_at": "2026-06-09T14:50:22.679650Z",
+          "decision": "deny",
+          "evaluation_model": "deterministic_local_rbac_abac",
+          "external_http_calls": 0,
+          "id": "policy_63f949abad25efe1",
+          "mission_authority": "active",
+          "policy": "configuration_requires_org_admin",
+          "principal": {
+            "attributes": [],
+            "id": "member-3",
+            "role": "org_member"
+          },
+          "reason": "Policy or namespace configuration requires the org_admin role.",
+          "resolution_path": [
+            "Ask an organization admin to configure the policy or grant the needed role."
+          ],
+          "resource": {
+            "classification": "internal",
+            "id": "organization-policy",
+            "kind": "policy",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            }
+          },
+          "schema_version": "cs.policy_decision.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "secret_reads": 0
+        },
+        "audit_refs": [
+          "audit:audit_051dd778110af2ab"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone access evaluate",
+        "errors": [
+          {
+            "code": "CS_ACCESS_POLICY_DENIED",
+            "message": "Policy or namespace configuration requires the org_admin role.",
+            "resolution_path": [
+              "Ask an organization admin to configure the policy or grant the needed role."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "4139db6",
+          "policy_decision_id": "policy_63f949abad25efe1",
+          "resource_id": "organization-policy"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [
+          "policy:policy_63f949abad25efe1"
+        ],
+        "policy_decisions": [
+          {
+            "action": "configure",
+            "decided_at": "2026-06-09T14:50:22.679650Z",
+            "decision": "deny",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_63f949abad25efe1",
+            "mission_authority": "active",
+            "policy": "configuration_requires_org_admin",
+            "principal": {
+              "attributes": [],
+              "id": "member-3",
+              "role": "org_member"
+            },
+            "reason": "Policy or namespace configuration requires the org_admin role.",
+            "resolution_path": [
+              "Ask an organization admin to configure the policy or grant the needed role."
+            ],
+            "resource": {
+              "classification": "internal",
+              "id": "organization-policy",
+              "kind": "policy",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "access_org_member_execute_without_mission_denied": {
+      "command": [
+        "cornerstone",
+        "access",
+        "evaluate",
+        "--principal-id",
+        "member-4",
+        "--principal-role",
+        "org_member",
+        "--action",
+        "execute",
+        "--resource-kind",
+        "action",
+        "--resource-id",
+        "action-without-authority",
+        "--classification",
+        "internal",
+        "--mission-authority",
+        "none",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "access_decision": {
+          "action": "execute",
+          "decided_at": "2026-06-09T14:50:22.825448Z",
+          "decision": "deny",
+          "evaluation_model": "deterministic_local_rbac_abac",
+          "external_http_calls": 0,
+          "id": "policy_ea44e1d420c3fa8b",
+          "mission_authority": "none",
+          "policy": "mission_authority_required_for_execution",
+          "principal": {
+            "attributes": [],
+            "id": "member-4",
+            "role": "org_member"
+          },
+          "reason": "Execution requires an active or approved Mission Goal Contract authority.",
+          "resolution_path": [
+            "Activate or approve a Mission Goal Contract before execution."
+          ],
+          "resource": {
+            "classification": "internal",
+            "id": "action-without-authority",
+            "kind": "action",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            }
+          },
+          "schema_version": "cs.policy_decision.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "secret_reads": 0
+        },
+        "audit_refs": [
+          "audit:audit_ec9011ab9199ff6f"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone access evaluate",
+        "errors": [
+          {
+            "code": "CS_ACCESS_POLICY_DENIED",
+            "message": "Execution requires an active or approved Mission Goal Contract authority.",
+            "resolution_path": [
+              "Activate or approve a Mission Goal Contract before execution."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "4139db6",
+          "policy_decision_id": "policy_ea44e1d420c3fa8b",
+          "resource_id": "action-without-authority"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [
+          "policy:policy_ea44e1d420c3fa8b"
+        ],
+        "policy_decisions": [
+          {
+            "action": "execute",
+            "decided_at": "2026-06-09T14:50:22.825448Z",
+            "decision": "deny",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_ea44e1d420c3fa8b",
+            "mission_authority": "none",
+            "policy": "mission_authority_required_for_execution",
+            "principal": {
+              "attributes": [],
+              "id": "member-4",
+              "role": "org_member"
+            },
+            "reason": "Execution requires an active or approved Mission Goal Contract authority.",
+            "resolution_path": [
+              "Activate or approve a Mission Goal Contract before execution."
+            ],
+            "resource": {
+              "classification": "internal",
+              "id": "action-without-authority",
+              "kind": "action",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "access_org_member_read_internal_allowed": {
+      "command": [
+        "cornerstone",
+        "access",
+        "evaluate",
+        "--principal-id",
+        "member-1",
+        "--principal-role",
+        "org_member",
+        "--principal-attributes",
+        "team:ops",
+        "--action",
+        "read",
+        "--resource-kind",
+        "memory",
+        "--resource-id",
+        "memory_b3448ca1137e8b3c",
+        "--classification",
+        "internal",
+        "--mission-authority",
+        "active",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "access_decision": {
+          "action": "read",
+          "decided_at": "2026-06-09T14:50:22.241746Z",
+          "decision": "allow",
+          "evaluation_model": "deterministic_local_rbac_abac",
+          "external_http_calls": 0,
+          "id": "policy_7a1ec2379e53df08",
+          "mission_authority": "active",
+          "policy": "local_rbac_abac_matrix",
+          "principal": {
+            "attributes": [
+              "team:ops"
+            ],
+            "id": "member-1",
+            "role": "org_member"
+          },
+          "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+          "resolution_path": [
+            "Proceed through the same scoped CLI path and audit ledger."
+          ],
+          "resource": {
+            "classification": "internal",
+            "id": "memory_b3448ca1137e8b3c",
+            "kind": "memory",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            }
+          },
+          "schema_version": "cs.policy_decision.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "secret_reads": 0
+        },
+        "audit_refs": [
+          "audit:audit_46d4eacc7a0ad82e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone access evaluate",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "4139db6",
+          "policy_decision_id": "policy_7a1ec2379e53df08",
+          "resource_id": "memory_b3448ca1137e8b3c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [
+          "policy:policy_7a1ec2379e53df08"
+        ],
+        "policy_decisions": [
+          {
+            "action": "read",
+            "decided_at": "2026-06-09T14:50:22.241746Z",
+            "decision": "allow",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_7a1ec2379e53df08",
+            "mission_authority": "active",
+            "policy": "local_rbac_abac_matrix",
+            "principal": {
+              "attributes": [
+                "team:ops"
+              ],
+              "id": "member-1",
+              "role": "org_member"
+            },
+            "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+            "resolution_path": [
+              "Proceed through the same scoped CLI path and audit ledger."
+            ],
+            "resource": {
+              "classification": "internal",
+              "id": "memory_b3448ca1137e8b3c",
+              "kind": "memory",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "allowed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "access_org_member_read_restricted_denied": {
+      "command": [
+        "cornerstone",
+        "access",
+        "evaluate",
+        "--principal-id",
+        "member-2",
+        "--principal-role",
+        "org_member",
+        "--principal-attributes",
+        "team:ops",
+        "--action",
+        "read",
+        "--resource-kind",
+        "memory",
+        "--resource-id",
+        "memory_b3448ca1137e8b3c",
+        "--classification",
+        "restricted",
+        "--mission-authority",
+        "active",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "access_decision": {
+          "action": "read",
+          "decided_at": "2026-06-09T14:50:22.566986Z",
+          "decision": "deny",
+          "evaluation_model": "deterministic_local_rbac_abac",
+          "external_http_calls": 0,
+          "id": "policy_e2ecc1c3cc8415cc",
+          "mission_authority": "active",
+          "policy": "restricted_classification_clearance_required",
+          "principal": {
+            "attributes": [
+              "team:ops"
+            ],
+            "id": "member-2",
+            "role": "org_member"
+          },
+          "reason": "Restricted resources require org_admin or clearance:restricted.",
+          "resolution_path": [
+            "Request restricted clearance or reduce the resource classification."
+          ],
+          "resource": {
+            "classification": "restricted",
+            "id": "memory_b3448ca1137e8b3c",
+            "kind": "memory",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            }
+          },
+          "schema_version": "cs.policy_decision.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "secret_reads": 0
+        },
+        "audit_refs": [
+          "audit:audit_86d79bd10b1bdda6"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone access evaluate",
+        "errors": [
+          {
+            "code": "CS_ACCESS_POLICY_DENIED",
+            "message": "Restricted resources require org_admin or clearance:restricted.",
+            "resolution_path": [
+              "Request restricted clearance or reduce the resource classification."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "4139db6",
+          "policy_decision_id": "policy_e2ecc1c3cc8415cc",
+          "resource_id": "memory_b3448ca1137e8b3c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [
+          "policy:policy_e2ecc1c3cc8415cc"
+        ],
+        "policy_decisions": [
+          {
+            "action": "read",
+            "decided_at": "2026-06-09T14:50:22.566986Z",
+            "decision": "deny",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_e2ecc1c3cc8415cc",
+            "mission_authority": "active",
+            "policy": "restricted_classification_clearance_required",
+            "principal": {
+              "attributes": [
+                "team:ops"
+              ],
+              "id": "member-2",
+              "role": "org_member"
+            },
+            "reason": "Restricted resources require org_admin or clearance:restricted.",
+            "resolution_path": [
+              "Request restricted clearance or reduce the resource classification."
+            ],
+            "resource": {
+              "classification": "restricted",
+              "id": "memory_b3448ca1137e8b3c",
+              "kind": "memory",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "access_personal_user_read_org_denied": {
+      "command": [
+        "cornerstone",
+        "access",
+        "evaluate",
+        "--principal-id",
+        "local-user",
+        "--principal-role",
+        "personal_user",
+        "--action",
+        "read",
+        "--resource-kind",
+        "memory",
+        "--resource-id",
+        "memory_b3448ca1137e8b3c",
+        "--classification",
+        "internal",
+        "--mission-authority",
+        "none",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 8,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "access_decision": {
+          "action": "read",
+          "decided_at": "2026-06-09T14:50:22.449953Z",
+          "decision": "deny",
+          "evaluation_model": "deterministic_local_rbac_abac",
+          "external_http_calls": 0,
+          "id": "policy_641335754993a091",
+          "mission_authority": "none",
+          "policy": "organization_membership_required",
+          "principal": {
+            "attributes": [],
+            "id": "local-user",
+            "role": "personal_user"
+          },
+          "reason": "Organization resources require an organization role in the active organization namespace.",
+          "resolution_path": [
+            "Request organization access or promote only through an approved namespace workflow."
+          ],
+          "resource": {
+            "classification": "internal",
+            "id": "memory_b3448ca1137e8b3c",
+            "kind": "memory",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            }
+          },
+          "schema_version": "cs.policy_decision.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "secret_reads": 0
+        },
+        "audit_refs": [
+          "audit:audit_c5918a66a333112d"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone access evaluate",
+        "errors": [
+          {
+            "code": "CS_ACCESS_POLICY_DENIED",
+            "message": "Organization resources require an organization role in the active organization namespace.",
+            "resolution_path": [
+              "Request organization access or promote only through an approved namespace workflow."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "4139db6",
+          "policy_decision_id": "policy_641335754993a091",
+          "resource_id": "memory_b3448ca1137e8b3c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [
+          "policy:policy_641335754993a091"
+        ],
+        "policy_decisions": [
+          {
+            "action": "read",
+            "decided_at": "2026-06-09T14:50:22.449953Z",
+            "decision": "deny",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_641335754993a091",
+            "mission_authority": "none",
+            "policy": "organization_membership_required",
+            "principal": {
+              "attributes": [],
+              "id": "local-user",
+              "role": "personal_user"
+            },
+            "reason": "Organization resources require an organization role in the active organization namespace.",
+            "resolution_path": [
+              "Request organization access or promote only through an approved namespace workflow."
+            ],
+            "resource": {
+              "classification": "internal",
+              "id": "memory_b3448ca1137e8b3c",
+              "kind": "memory",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "denied",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 15,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "4139db6"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_personal": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/08_namespace_isolation/personal.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_67c8222eb9418cae",
+          "checksum_sha256": "67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_67c8222eb9418cae.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 147,
+          "original_storage_ref": "sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+          "provenance": {
+            "created_at": "2026-06-09T14:50:21.311046Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T14:50:21.311046Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/08_namespace_isolation/personal.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_597df7d393475727"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_67c8222eb9418cae",
+          "storage:sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70"
+        ],
+        "ids": {
+          "artifact_id": "art_67c8222eb9418cae",
+          "audit_event_id": "audit_597df7d393475727",
+          "checksum_sha256": "67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+          "git_commit": "4139db6"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "namespace_promote_memory": {
+      "command": [
+        "cornerstone",
+        "namespace",
+        "promote",
+        "--source-kind",
+        "memory",
+        "--source-id",
+        "memory_12441de28d9195a4",
+        "--target-owner-id",
+        "local-org",
+        "--target-namespace-id",
+        "organization",
+        "--target-workspace-id",
+        "ops",
+        "--mode",
+        "copy_with_provenance",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_a9f66be68c2b1f2e",
+          "audit:audit_880066a39401f24a"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone namespace promote",
+        "errors": [],
+        "evidence_refs": [
+          "namespace_promotion:promotion_cb32886cac4c7a20",
+          "memory:memory_12441de28d9195a4",
+          "evidence_bundle:evb_e0ab45270da2851e",
+          "search_snapshot:search_56900777e3ee5508",
+          "artifact:art_67c8222eb9418cae"
+        ],
+        "ids": {
+          "git_commit": "4139db6",
+          "namespace_promotion_id": "promotion_cb32886cac4c7a20",
+          "source_memory_id": "memory_12441de28d9195a4",
+          "target_memory_id": "memory_b3448ca1137e8b3c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "namespace_promotion": {
+          "created_at": "2026-06-09T14:50:21.908666Z",
+          "evidence_refs": [
+            "namespace_promotion:promotion_cb32886cac4c7a20",
+            "memory:memory_12441de28d9195a4",
+            "evidence_bundle:evb_e0ab45270da2851e",
+            "search_snapshot:search_56900777e3ee5508",
+            "artifact:art_67c8222eb9418cae"
+          ],
+          "mode": "copy_with_provenance",
+          "policy_decision": {
+            "action": "promote",
+            "decided_at": "2026-06-09T14:50:21.907190Z",
+            "decision": "allow",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_d81111f3ffb643c3",
+            "mission_authority": "active",
+            "policy": "local_rbac_abac_matrix",
+            "principal": {
+              "attributes": [
+                "clearance:restricted",
+                "namespace:organization",
+                "namespace:personal"
+              ],
+              "id": "local-user",
+              "role": "org_admin"
+            },
+            "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+            "resolution_path": [
+              "Proceed through the same scoped CLI path and audit ledger."
+            ],
+            "resource": {
+              "classification": "restricted",
+              "id": "memory_12441de28d9195a4",
+              "kind": "memory",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          },
+          "promotion_id": "promotion_cb32886cac4c7a20",
+          "provenance": {
+            "activity": "explicit_namespace_promotion",
+            "agent": "local-user",
+            "mode": "copy_with_provenance",
+            "source_entity": "memory:memory_12441de28d9195a4",
+            "source_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "target_entity": "memory:memory_b3448ca1137e8b3c",
+            "target_scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            }
+          },
+          "schema_version": "cs.namespace_promotion.v0",
+          "source": {
+            "evidence_refs": [
+              "evidence_bundle:evb_e0ab45270da2851e",
+              "search_snapshot:search_56900777e3ee5508",
+              "artifact:art_67c8222eb9418cae"
+            ],
+            "id": "memory_12441de28d9195a4",
+            "kind": "memory",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "status": "promoted",
+          "target": {
+            "id": "memory_b3448ca1137e8b3c",
+            "kind": "memory",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            }
+          }
+        },
+        "owner_id": "local-org",
+        "policy_decision_refs": [
+          "policy:policy_d81111f3ffb643c3"
+        ],
+        "policy_decisions": [
+          {
+            "action": "promote",
+            "decided_at": "2026-06-09T14:50:21.907190Z",
+            "decision": "allow",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_d81111f3ffb643c3",
+            "mission_authority": "active",
+            "policy": "local_rbac_abac_matrix",
+            "principal": {
+              "attributes": [
+                "clearance:restricted",
+                "namespace:organization",
+                "namespace:personal"
+              ],
+              "id": "local-user",
+              "role": "org_admin"
+            },
+            "reason": "Access is allowed by the local deterministic RBAC/ABAC matrix.",
+            "resolution_path": [
+              "Proceed through the same scoped CLI path and audit ledger."
+            ],
+            "resource": {
+              "classification": "restricted",
+              "id": "memory_12441de28d9195a4",
+              "kind": "memory",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          }
+        ],
+        "product": "CornerStone",
+        "promoted_item": {
+          "canonicality": {
+            "canonical_truth_foundation": "archive_evidence",
+            "explicitly_promoted": true,
+            "owner_approved": true,
+            "raw_agent_memory_canonical": false,
+            "requires_evidence_for_truth_claims": true
+          },
+          "created_at": "2026-06-09T14:50:21.908634Z",
+          "evidence_refs": [
+            "namespace_promotion:promotion_cb32886cac4c7a20",
+            "memory:memory_12441de28d9195a4",
+            "evidence_bundle:evb_e0ab45270da2851e",
+            "search_snapshot:search_56900777e3ee5508",
+            "artifact:art_67c8222eb9418cae"
+          ],
+          "memory_id": "memory_b3448ca1137e8b3c",
+          "memory_type": "promoted_durable_fact",
+          "provenance": {
+            "created_from": "explicit_namespace_promotion",
+            "mode": "copy_with_provenance",
+            "namespace_promotion_id": "promotion_cb32886cac4c7a20",
+            "policy_decision_ref": "policy:policy_d81111f3ffb643c3",
+            "source_evidence_refs": [
+              "evidence_bundle:evb_e0ab45270da2851e",
+              "search_snapshot:search_56900777e3ee5508",
+              "artifact:art_67c8222eb9418cae"
+            ],
+            "source_memory_id": "memory_12441de28d9195a4",
+            "source_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "target_scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            }
+          },
+          "schema_version": "cs.memory.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "source": {
+            "artifact_refs": [
+              "artifact:art_67c8222eb9418cae"
+            ],
+            "created_from": "namespace.promote",
+            "evidence_bundle_id": "evb_e0ab45270da2851e",
+            "namespace_promotion_id": "promotion_cb32886cac4c7a20",
+            "promotion_mode": "copy_with_provenance",
+            "search_snapshot_id": "search_56900777e3ee5508",
+            "source_memory_id": "memory_12441de28d9195a4",
+            "source_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source_type": "explicit_namespace_promotion"
+          },
+          "statement": "Owner-approved personal memory: personal-only-alpha belongs to the private personal workspace.",
+          "status": "owner_approved",
+          "trust_state": "evidence_backed"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "org_answer_after_promotion": {
+      "command": [
+        "cornerstone",
+        "memory",
+        "answer",
+        "--question",
+        "What does personal-only-alpha say?",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_106d6e25faa0c562"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone memory answer",
+        "errors": [],
+        "evidence_refs": [
+          "memory_answer:answer_83f60e282988f53e",
+          "namespace_promotion:promotion_cb32886cac4c7a20",
+          "memory:memory_12441de28d9195a4",
+          "evidence_bundle:evb_e0ab45270da2851e",
+          "search_snapshot:search_56900777e3ee5508",
+          "artifact:art_67c8222eb9418cae"
+        ],
+        "ids": {
+          "git_commit": "4139db6",
+          "memory_answer_id": "answer_83f60e282988f53e"
+        },
+        "memory_answer": {
+          "answer_id": "answer_83f60e282988f53e",
+          "answer_label": "evidence_backed",
+          "based_on": "active_scope_owner_approved_memory",
+          "context_boundary": {
+            "active_scope_only": true,
+            "implicit_cross_namespace_context": false,
+            "personal_memory_used_without_promotion": false,
+            "promotion_refs": [
+              "namespace_promotion:promotion_cb32886cac4c7a20"
+            ],
+            "used_promoted_memory": true
+          },
+          "created_at": "2026-06-09T14:50:22.011446Z",
+          "evidence_refs": [
+            "namespace_promotion:promotion_cb32886cac4c7a20",
+            "memory:memory_12441de28d9195a4",
+            "evidence_bundle:evb_e0ab45270da2851e",
+            "search_snapshot:search_56900777e3ee5508",
+            "artifact:art_67c8222eb9418cae"
+          ],
+          "presented_as_fact": true,
+          "question": "What does personal-only-alpha say?",
+          "schema_version": "cs.memory_answer.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "statement": "Owner-approved personal memory: personal-only-alpha belongs to the private personal workspace.",
+          "status": "answered",
+          "used_memory_refs": [
+            "memory:memory_b3448ca1137e8b3c"
+          ]
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "org_answer_before_promotion": {
+      "command": [
+        "cornerstone",
+        "memory",
+        "answer",
+        "--question",
+        "What does personal-only-alpha say?",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 4,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_4a1e2291f46b160d"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone memory answer",
+        "errors": [
+          {
+            "code": "CS_MEMORY_ANSWER_EVIDENCE_REQUIRED",
+            "message": "No owner-approved active-scope memory can answer the question.",
+            "resolution_path": [
+              "Explicitly promote, copy, reference, or permit the source memory before using it in this workspace."
+            ]
+          }
+        ],
+        "evidence_refs": [
+          "memory_answer:answer_77e2584c3ba274f7"
+        ],
+        "ids": {
+          "git_commit": "4139db6",
+          "memory_answer_id": "answer_77e2584c3ba274f7"
+        },
+        "memory_answer": {
+          "answer_id": "answer_77e2584c3ba274f7",
+          "answer_label": "insufficient_evidence",
+          "based_on": "active_scope_memory_only",
+          "context_boundary": {
+            "active_scope_only": true,
+            "explicit_promotion_required": true,
+            "implicit_cross_namespace_context": false,
+            "personal_memory_used_without_promotion": false
+          },
+          "created_at": "2026-06-09T14:50:21.663839Z",
+          "evidence_refs": [],
+          "policy_decision": {
+            "action": "read",
+            "decided_at": "2026-06-09T14:50:21.663178Z",
+            "decision": "deny",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_33575e5f3dbaff30",
+            "mission_authority": "none",
+            "policy": "cross_namespace_memory_denied_by_default",
+            "principal": {
+              "attributes": [
+                "namespace:organization"
+              ],
+              "id": "local-org",
+              "role": "org_member"
+            },
+            "reason": "No owner-approved active-scope memory matched the question; CornerStone did not search or use other namespaces.",
+            "resolution_path": [
+              "Explicitly promote, copy, reference, or permit the source memory before using it in this workspace."
+            ],
+            "resource": {
+              "classification": "confidential",
+              "id": "active-scope-memory",
+              "kind": "memory",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          },
+          "presented_as_fact": false,
+          "question": "What does personal-only-alpha say?",
+          "schema_version": "cs.memory_answer.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "status": "insufficient_evidence",
+          "used_memory_refs": []
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [
+          "policy:policy_33575e5f3dbaff30"
+        ],
+        "policy_decisions": [
+          {
+            "action": "read",
+            "decided_at": "2026-06-09T14:50:21.663178Z",
+            "decision": "deny",
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "id": "policy_33575e5f3dbaff30",
+            "mission_authority": "none",
+            "policy": "cross_namespace_memory_denied_by_default",
+            "principal": {
+              "attributes": [
+                "namespace:organization"
+              ],
+              "id": "local-org",
+              "role": "org_member"
+            },
+            "reason": "No owner-approved active-scope memory matched the question; CornerStone did not search or use other namespaces.",
+            "resolution_path": [
+              "Explicitly promote, copy, reference, or permit the source memory before using it in this workspace."
+            ],
+            "resource": {
+              "classification": "confidential",
+              "id": "active-scope-memory",
+              "kind": "memory",
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              }
+            },
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "secret_reads": 0
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "insufficient_evidence",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "org_show_personal_memory": {
+      "command": [
+        "cornerstone",
+        "memory",
+        "show",
+        "memory_12441de28d9195a4",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 6,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone memory show",
+        "errors": [
+          {
+            "code": "CS_SCOPE_DENIED",
+            "message": "Memory record is outside the requested scope.",
+            "resource_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "4139db6"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "personal_bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_56900777e3ee5508",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_76c2e23e999f6ddd"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T14:50:21.475462Z",
+          "evidence_bundle_id": "evb_e0ab45270da2851e",
+          "evidence_items": [
+            {
+              "artifact_id": "art_67c8222eb9418cae",
+              "derived_text_ref": "derived/art_67c8222eb9418cae.txt",
+              "original_storage_ref": "sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+              "provenance": {
+                "created_at": "2026-06-09T14:50:21.311046Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_56900777e3ee5508",
+              "snippet": "personal-only-alpha. This should not appear in organization workspace search without explicit promotion.",
+              "source": {
+                "ingested_at": "2026-06-09T14:50:21.311046Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/08_namespace_isolation/personal.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "personal-only-alpha",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "personal-only-alpha",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_67c8222eb9418cae",
+                "derived_text_ref": "derived/art_67c8222eb9418cae.txt",
+                "evidence_refs": [
+                  "artifact:art_67c8222eb9418cae",
+                  "storage:sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "personal-only-alpha",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "personal-only-alpha",
+                    "query_term": "personal-only-alpha",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "personal-only-alpha. This should not appear in organization workspace search without explicit promotion."
+              }
+            ],
+            "search_snapshot_id": "search_56900777e3ee5508"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_56900777e3ee5508"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_e0ab45270da2851e",
+          "search_snapshot:search_56900777e3ee5508",
+          "artifact:art_67c8222eb9418cae"
+        ],
+        "ids": {
+          "audit_event_id": "audit_76c2e23e999f6ddd",
+          "evidence_bundle_id": "evb_e0ab45270da2851e",
+          "git_commit": "4139db6",
+          "search_snapshot_id": "search_56900777e3ee5508"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "personal_memory_create": {
+      "command": [
+        "cornerstone",
+        "memory",
+        "create",
+        "--evidence-bundle-id",
+        "evb_e0ab45270da2851e",
+        "--statement",
+        "Owner-approved personal memory: personal-only-alpha belongs to the private personal workspace.",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_8fa629f582ac28bc"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone memory create",
+        "errors": [],
+        "evidence_refs": [
+          "memory:memory_12441de28d9195a4",
+          "evidence_bundle:evb_e0ab45270da2851e",
+          "search_snapshot:search_56900777e3ee5508",
+          "artifact:art_67c8222eb9418cae"
+        ],
+        "ids": {
+          "evidence_bundle_id": "evb_e0ab45270da2851e",
+          "git_commit": "4139db6",
+          "memory_id": "memory_12441de28d9195a4"
+        },
+        "memory": {
+          "canonicality": {
+            "canonical_truth_foundation": "archive_evidence",
+            "owner_approved": true,
+            "raw_agent_memory_canonical": false,
+            "requires_evidence_for_truth_claims": true
+          },
+          "created_at": "2026-06-09T14:50:21.565889Z",
+          "evidence_refs": [
+            "evidence_bundle:evb_e0ab45270da2851e",
+            "search_snapshot:search_56900777e3ee5508",
+            "artifact:art_67c8222eb9418cae"
+          ],
+          "memory_id": "memory_12441de28d9195a4",
+          "memory_type": "durable_fact",
+          "provenance": {
+            "created_from": "owner_approved_memory_create",
+            "source_artifact_refs": [
+              "artifact:art_67c8222eb9418cae"
+            ],
+            "source_evidence_bundle_id": "evb_e0ab45270da2851e",
+            "source_search_snapshot_id": "search_56900777e3ee5508"
+          },
+          "schema_version": "cs.memory.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "artifact_refs": [
+              "artifact:art_67c8222eb9418cae"
+            ],
+            "created_from": "memory.create",
+            "evidence_bundle_id": "evb_e0ab45270da2851e",
+            "search_snapshot_id": "search_56900777e3ee5508",
+            "source_type": "evidence_bundle"
+          },
+          "statement": "Owner-approved personal memory: personal-only-alpha belongs to the private personal workspace.",
+          "status": "owner_approved",
+          "trust_state": "evidence_backed"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "personal_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "personal-only-alpha",
+        "--state-dir",
+        "tmp/scenario/vs0-tenant-security-boundary-71655",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_6f19ccb2dbf8488d"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_56900777e3ee5508",
+          "artifact:art_67c8222eb9418cae",
+          "storage:sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70"
+        ],
+        "ids": {
+          "audit_event_id": "audit_6f19ccb2dbf8488d",
+          "git_commit": "4139db6",
+          "search_snapshot_id": "search_56900777e3ee5508"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T14:50:21.385872Z",
+          "duration_ms": 0.333,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "personal-only-alpha",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_67c8222eb9418cae",
+              "derived_text_ref": "derived/art_67c8222eb9418cae.txt",
+              "evidence_refs": [
+                "artifact:art_67c8222eb9418cae",
+                "storage:sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70"
+              ],
+              "match_reasons": [
+                {
+                  "query": "personal-only-alpha",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "personal-only-alpha",
+                  "query_term": "personal-only-alpha",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "personal-only-alpha. This should not appear in organization workspace search without explicit promotion."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_56900777e3ee5508"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

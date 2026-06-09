@@ -3319,6 +3319,365 @@ def verify_vs0_memory_truth_boundary(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_vs0_tenant_security_boundary(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-tenant-security-boundary")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    personal_path = "fixtures/vs0/packs/08_namespace_isolation/personal.txt"
+    org_scope_args = ["--owner-id", "local-org", "--namespace-id", "organization", "--workspace-id", "ops"]
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    transcripts["ingest_personal"] = _run_cli_json(root, ["artifact", "ingest", personal_path, "--state-dir", state_rel, "--json"])
+    source_artifact = _artifact(transcripts["ingest_personal"])
+    source_artifact_id = source_artifact.get("artifact_id", "")
+    transcripts["personal_search"] = _run_cli_json(root, ["search", "query", "personal-only-alpha", "--state-dir", state_rel, "--json"])
+    personal_snapshot = _payload(transcripts["personal_search"]).get("search_snapshot", {})
+    personal_snapshot_id = personal_snapshot.get("search_snapshot_id", "")
+    transcripts["personal_bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", personal_snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if personal_snapshot_id else {}
+    personal_bundle = _payload(transcripts["personal_bundle_create"]).get("evidence_bundle", {})
+    personal_bundle_id = personal_bundle.get("evidence_bundle_id", "")
+    transcripts["personal_memory_create"] = _run_cli_json(
+        root,
+        [
+            "memory",
+            "create",
+            "--evidence-bundle-id",
+            personal_bundle_id,
+            "--statement",
+            "Owner-approved personal memory: personal-only-alpha belongs to the private personal workspace.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if personal_bundle_id else {}
+    source_memory = _payload(transcripts["personal_memory_create"]).get("memory", {})
+    source_memory_id = source_memory.get("memory_id", "")
+
+    question = "What does personal-only-alpha say?"
+    transcripts["org_answer_before_promotion"] = _run_cli_json(
+        root,
+        ["memory", "answer", "--question", question, "--state-dir", state_rel, *org_scope_args, "--json"],
+    )
+    transcripts["org_show_personal_memory"] = _run_cli_json(
+        root,
+        ["memory", "show", source_memory_id, "--state-dir", state_rel, *org_scope_args, "--json"],
+    ) if source_memory_id else {}
+    transcripts["namespace_promote_memory"] = _run_cli_json(
+        root,
+        [
+            "namespace",
+            "promote",
+            "--source-kind",
+            "memory",
+            "--source-id",
+            source_memory_id,
+            "--target-owner-id",
+            "local-org",
+            "--target-namespace-id",
+            "organization",
+            "--target-workspace-id",
+            "ops",
+            "--mode",
+            "copy_with_provenance",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if source_memory_id else {}
+    promotion_payload = _payload(transcripts["namespace_promote_memory"])
+    promotion = promotion_payload.get("namespace_promotion", {})
+    promoted_memory = promotion_payload.get("promoted_item", {})
+    promoted_memory_id = promoted_memory.get("memory_id", "")
+    transcripts["org_answer_after_promotion"] = _run_cli_json(
+        root,
+        ["memory", "answer", "--question", question, "--state-dir", state_rel, *org_scope_args, "--json"],
+    )
+
+    access_cases = {
+        "org_admin_read_restricted_allowed": [
+            "--principal-id",
+            "admin-1",
+            "--principal-role",
+            "org_admin",
+            "--principal-attributes",
+            "clearance:restricted,team:ops",
+            "--action",
+            "read",
+            "--resource-kind",
+            "memory",
+            "--resource-id",
+            promoted_memory_id or "promoted-memory",
+            "--classification",
+            "restricted",
+            "--mission-authority",
+            "active",
+        ],
+        "org_member_read_internal_allowed": [
+            "--principal-id",
+            "member-1",
+            "--principal-role",
+            "org_member",
+            "--principal-attributes",
+            "team:ops",
+            "--action",
+            "read",
+            "--resource-kind",
+            "memory",
+            "--resource-id",
+            promoted_memory_id or "promoted-memory",
+            "--classification",
+            "internal",
+            "--mission-authority",
+            "active",
+        ],
+        "org_approver_approve_allowed": [
+            "--principal-id",
+            "approver-1",
+            "--principal-role",
+            "org_approver",
+            "--principal-attributes",
+            "team:ops",
+            "--action",
+            "approve",
+            "--resource-kind",
+            "claim",
+            "--resource-id",
+            "claim-for-promoted-memory",
+            "--classification",
+            "confidential",
+            "--mission-authority",
+            "active",
+        ],
+        "personal_user_read_org_denied": [
+            "--principal-id",
+            "local-user",
+            "--principal-role",
+            "personal_user",
+            "--action",
+            "read",
+            "--resource-kind",
+            "memory",
+            "--resource-id",
+            promoted_memory_id or "promoted-memory",
+            "--classification",
+            "internal",
+            "--mission-authority",
+            "none",
+        ],
+        "org_member_read_restricted_denied": [
+            "--principal-id",
+            "member-2",
+            "--principal-role",
+            "org_member",
+            "--principal-attributes",
+            "team:ops",
+            "--action",
+            "read",
+            "--resource-kind",
+            "memory",
+            "--resource-id",
+            promoted_memory_id or "promoted-memory",
+            "--classification",
+            "restricted",
+            "--mission-authority",
+            "active",
+        ],
+        "org_member_configure_denied": [
+            "--principal-id",
+            "member-3",
+            "--principal-role",
+            "org_member",
+            "--action",
+            "configure",
+            "--resource-kind",
+            "policy",
+            "--resource-id",
+            "organization-policy",
+            "--classification",
+            "internal",
+            "--mission-authority",
+            "active",
+        ],
+        "org_member_execute_without_mission_denied": [
+            "--principal-id",
+            "member-4",
+            "--principal-role",
+            "org_member",
+            "--action",
+            "execute",
+            "--resource-kind",
+            "action",
+            "--resource-id",
+            "action-without-authority",
+            "--classification",
+            "internal",
+            "--mission-authority",
+            "none",
+        ],
+    }
+    allow_cases = {
+        "org_admin_read_restricted_allowed",
+        "org_member_read_internal_allowed",
+        "org_approver_approve_allowed",
+    }
+    for name, access_args in access_cases.items():
+        transcripts[f"access_{name}"] = _run_cli_json(
+            root,
+            ["access", "evaluate", *access_args, "--state-dir", state_rel, *org_scope_args, "--json"],
+        )
+
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    before_answer = _payload(transcripts["org_answer_before_promotion"]).get("memory_answer", {})
+    after_answer = _payload(transcripts["org_answer_after_promotion"]).get("memory_answer", {})
+    access_decisions = {
+        name: _payload(transcripts[f"access_{name}"]).get("access_decision", {})
+        for name in access_cases
+    }
+    denied_case_names = sorted(set(access_cases) - allow_cases)
+    audit_events = _audit_events(root, state_rel)
+    event_types = [event.get("event_type") for event in audit_events]
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+
+    promotion_ok = (
+        _exit_ok(transcripts["namespace_promote_memory"])
+        and promotion.get("status") == "promoted"
+        and promotion.get("mode") == "copy_with_provenance"
+        and promotion.get("source", {}).get("id") == source_memory_id
+        and promotion.get("source", {}).get("scope", {}).get("namespace_id") == "personal"
+        and promotion.get("target", {}).get("id") == promoted_memory_id
+        and promotion.get("target", {}).get("scope", {}).get("owner_id") == "local-org"
+        and promotion.get("target", {}).get("scope", {}).get("namespace_id") == "organization"
+        and promoted_memory.get("scope", {}).get("owner_id") == "local-org"
+        and promoted_memory.get("scope", {}).get("namespace_id") == "organization"
+        and f"memory:{source_memory_id}" in promotion.get("evidence_refs", [])
+        and any(ref.startswith("artifact:") for ref in promotion.get("evidence_refs", []))
+        and bool(promotion_payload.get("audit_refs"))
+        and bool(promotion_payload.get("policy_decision_refs"))
+        and promotion.get("policy_decision", {}).get("decision") == "allow"
+    )
+    access_ok = (
+        all(_exit_ok(transcripts[f"access_{name}"]) for name in allow_cases)
+        and all(_policy_denied(transcripts[f"access_{name}"], "CS_ACCESS_POLICY_DENIED") for name in denied_case_names)
+        and {access_decisions[name].get("decision") for name in allow_cases} == {"allow"}
+        and {access_decisions[name].get("decision") for name in denied_case_names} == {"deny"}
+        and all(access_decisions[name].get("principal", {}).get("role") for name in access_cases)
+        and all(access_decisions[name].get("resource", {}).get("scope", {}).get("namespace_id") == "organization" for name in access_cases)
+        and {"internal", "confidential", "restricted"}.issubset(
+            {str(decision.get("resource", {}).get("classification")) for decision in access_decisions.values()}
+        )
+        and {"none", "active"}.issubset({str(decision.get("mission_authority")) for decision in access_decisions.values()})
+        and all(decision.get("policy") for decision in access_decisions.values())
+        and all(_payload(transcripts[f"access_{name}"]).get("audit_refs") for name in access_cases)
+    )
+    leak_boundary_ok = (
+        transcripts["org_answer_before_promotion"].get("exit_code") == 4
+        and before_answer.get("status") == "insufficient_evidence"
+        and before_answer.get("used_memory_refs") == []
+        and before_answer.get("context_boundary", {}).get("personal_memory_used_without_promotion") is False
+        and _scope_denied(transcripts["org_show_personal_memory"])
+        and _exit_ok(transcripts["org_answer_after_promotion"])
+        and after_answer.get("status") == "answered"
+        and after_answer.get("context_boundary", {}).get("used_promoted_memory") is True
+        and after_answer.get("used_memory_refs") == [f"memory:{promoted_memory_id}"]
+        and f"memory:{source_memory_id}" not in after_answer.get("used_memory_refs", [])
+    )
+
+    unauthorized_access_allows = sum(
+        1
+        for name in denied_case_names
+        if transcripts[f"access_{name}"].get("exit_code") != 8
+        or access_decisions[name].get("decision") == "allow"
+    )
+    policy_decisions_without_audit = sum(
+        1
+        for name in access_cases
+        if not _payload(transcripts[f"access_{name}"]).get("audit_refs")
+    )
+    external_calls = sum(int(decision.get("external_http_calls", 0) or 0) for decision in access_decisions.values())
+    secret_reads = sum(int(decision.get("secret_reads", 0) or 0) for decision in access_decisions.values())
+    negative_evidence = {
+        "pre_promotion_personal_memory_used": int(bool(before_answer.get("used_memory_refs"))),
+        "pre_promotion_evidence_refs": len(before_answer.get("evidence_refs", [])),
+        "direct_cross_scope_memory_read_allowed": 0 if _scope_denied(transcripts["org_show_personal_memory"]) else 1,
+        "post_promotion_used_source_memory_directly": int(f"memory:{source_memory_id}" in after_answer.get("used_memory_refs", [])),
+        "unauthorized_access_allowed": unauthorized_access_allows,
+        "policy_decisions_without_audit": policy_decisions_without_audit,
+        "promotion_without_provenance": 0 if promotion.get("provenance") else 1,
+        "promotion_without_evidence": 0 if promotion.get("evidence_refs") else 1,
+        "real_external_http_calls": external_calls,
+        "secret_reads": secret_reads,
+    }
+    rows = [
+        _row(
+            "CS-NS-004",
+            "MUST_PASS",
+            "PASS" if promotion_ok and audit_ok else "FAIL",
+            ["cornerstone namespace promote --source-kind memory --source-id <memory_id> --target-owner-id local-org --target-namespace-id organization --target-workspace-id ops --json"],
+            "Explicit memory promotion creates an organization-scoped copy with source provenance, source evidence refs, policy decision refs, and audit refs.",
+        ),
+        _row(
+            "CS-SEC-004",
+            "MUST_PASS",
+            "PASS" if access_ok and audit_ok else "FAIL",
+            ["cornerstone access evaluate --principal-role <role> --action <action> --classification <level> --mission-authority <state> --json"],
+            "Local deterministic access matrix covers roles, attributes, namespace, classification, mission authority, policy allow/deny decisions, and audit refs.",
+        ),
+        _row(
+            "CS-REG-006",
+            "REGRESSION_GUARD",
+            "PASS" if leak_boundary_ok and promotion_ok and audit_ok else "FAIL",
+            ["cornerstone memory answer --question <question> --owner-id local-org --namespace-id organization --workspace-id ops --json"],
+            "Organization memory answers use no personal memory before explicit promotion and use only the promoted organization-scoped memory after promotion.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-tenant-security-boundary",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_TENANT_SECURITY_BOUNDARY_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "tenant_security_evidence": {
+            "source_artifact_id": source_artifact_id,
+            "source_memory_id": source_memory_id,
+            "source_memory_scope": source_memory.get("scope"),
+            "promoted_memory_id": promoted_memory_id,
+            "promoted_memory_scope": promoted_memory.get("scope"),
+            "promotion_id": promotion.get("promotion_id"),
+            "promotion_mode": promotion.get("mode"),
+            "promotion_provenance": promotion.get("provenance"),
+            "promotion_evidence_refs": promotion.get("evidence_refs"),
+            "promotion_policy": promotion.get("policy_decision", {}).get("policy"),
+            "pre_promotion_answer_status": before_answer.get("status"),
+            "pre_promotion_used_memory_refs": before_answer.get("used_memory_refs"),
+            "direct_cross_scope_read_exit_code": transcripts["org_show_personal_memory"].get("exit_code"),
+            "post_promotion_answer_status": after_answer.get("status"),
+            "post_promotion_used_memory_refs": after_answer.get("used_memory_refs"),
+            "post_promotion_used_promoted_memory": after_answer.get("context_boundary", {}).get("used_promoted_memory"),
+            "access_matrix_case_count": len(access_cases),
+            "access_allow_count": len([name for name in access_cases if access_decisions[name].get("decision") == "allow"]),
+            "access_deny_count": len([name for name in access_cases if access_decisions[name].get("decision") == "deny"]),
+            "access_cases": access_decisions,
+            "audit_event_count": len(audit_events),
+            "event_types": event_types,
+        },
+        "negative_evidence": negative_evidence,
+        "human_required": [],
+    }
+
+
 def verify_vs0_product_domain_readiness(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-product-domain-readiness")
     state_path = root / state_rel

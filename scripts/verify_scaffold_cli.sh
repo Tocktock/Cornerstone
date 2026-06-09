@@ -36,8 +36,9 @@ detail_json=$(mktemp)
 conversation_json=$(mktemp)
 product_loop_json=$(mktemp)
 memory_truth_json=$(mktemp)
+tenant_security_json=$(mktemp)
 product_domain_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$product_domain_json"' EXIT
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -365,6 +366,34 @@ grep -q '"conflict_without_audit": 0' "$memory_truth_json" || fail "vs0-memory-t
 grep -q '"real_external_http_calls": 0' "$memory_truth_json" || fail "vs0-memory-truth-boundary reported real external HTTP calls"
 grep -q '"product_feature_claims": "PARTIAL_VS0_MEMORY_TRUTH_BOUNDARY_ONLY"' "$memory_truth_json" || fail "vs0-memory-truth-boundary overclaimed product feature scope"
 
+cornerstone scenario verify vs0-tenant-security-boundary --json > "$tenant_security_json"
+python3 -m json.tool "$tenant_security_json" >/dev/null
+grep -q '"scenario_set": "vs0-tenant-security-boundary"' "$tenant_security_json" || fail "vs0-tenant-security-boundary report missing scenario set"
+grep -q '"blocking": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary report has blocking scenarios"
+grep -q '"pass": 3' "$tenant_security_json" || fail "vs0-tenant-security-boundary did not pass exactly three scenarios"
+grep -q '"id": "CS-NS-004"' "$tenant_security_json" || fail "vs0-tenant-security-boundary missing CS-NS-004"
+grep -q '"id": "CS-SEC-004"' "$tenant_security_json" || fail "vs0-tenant-security-boundary missing CS-SEC-004"
+grep -q '"id": "CS-REG-006"' "$tenant_security_json" || fail "vs0-tenant-security-boundary missing CS-REG-006"
+grep -q '"promotion_mode": "copy_with_provenance"' "$tenant_security_json" || fail "vs0-tenant-security-boundary missing copy-with-provenance promotion"
+grep -q '"promotion_policy": "local_rbac_abac_matrix"' "$tenant_security_json" || fail "vs0-tenant-security-boundary missing promotion policy decision"
+grep -q '"pre_promotion_answer_status": "insufficient_evidence"' "$tenant_security_json" || fail "vs0-tenant-security-boundary used memory before promotion"
+grep -q '"direct_cross_scope_read_exit_code": 6' "$tenant_security_json" || fail "vs0-tenant-security-boundary did not deny direct cross-scope read"
+grep -q '"post_promotion_answer_status": "answered"' "$tenant_security_json" || fail "vs0-tenant-security-boundary did not answer after promotion"
+grep -q '"post_promotion_used_promoted_memory": true' "$tenant_security_json" || fail "vs0-tenant-security-boundary did not use promoted memory"
+grep -q '"access_matrix_case_count": 7' "$tenant_security_json" || fail "vs0-tenant-security-boundary missing access matrix cases"
+grep -q '"access_allow_count": 3' "$tenant_security_json" || fail "vs0-tenant-security-boundary missing allowed access cases"
+grep -q '"access_deny_count": 4' "$tenant_security_json" || fail "vs0-tenant-security-boundary missing denied access cases"
+grep -q '"pre_promotion_personal_memory_used": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary used personal memory before promotion"
+grep -q '"direct_cross_scope_memory_read_allowed": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary allowed direct cross-scope memory read"
+grep -q '"post_promotion_used_source_memory_directly": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary used source memory directly after promotion"
+grep -q '"unauthorized_access_allowed": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary allowed unauthorized access"
+grep -q '"policy_decisions_without_audit": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary missed policy audit refs"
+grep -q '"promotion_without_provenance": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary missed promotion provenance"
+grep -q '"promotion_without_evidence": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary missed promotion evidence"
+grep -q '"real_external_http_calls": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary reported real external HTTP calls"
+grep -q '"secret_reads": 0' "$tenant_security_json" || fail "vs0-tenant-security-boundary read secrets"
+grep -q '"product_feature_claims": "PARTIAL_VS0_TENANT_SECURITY_BOUNDARY_ONLY"' "$tenant_security_json" || fail "vs0-tenant-security-boundary overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -394,4 +423,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, vs0-product-domain-readiness verify, unittest).\n'

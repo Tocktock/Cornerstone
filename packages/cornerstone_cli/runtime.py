@@ -108,6 +108,8 @@ class LocalRuntimeStore:
         self.answer_dir = state_dir / "answers"
         self.memory_dir = state_dir / "memories"
         self.memory_conflict_dir = state_dir / "memory_conflicts"
+        self.namespace_promotion_dir = state_dir / "namespace_promotions"
+        self.access_decision_dir = state_dir / "access_decisions"
         self.learning_dir = state_dir / "learning"
         self.audit_path = state_dir / "audit" / "events.jsonl"
 
@@ -214,6 +216,12 @@ class LocalRuntimeStore:
     def memory_conflict_path(self, conflict_id: str) -> Path:
         return self.memory_conflict_dir / f"{conflict_id}.json"
 
+    def namespace_promotion_path(self, promotion_id: str) -> Path:
+        return self.namespace_promotion_dir / f"{promotion_id}.json"
+
+    def access_decision_path(self, decision_id: str) -> Path:
+        return self.access_decision_dir / f"{decision_id}.json"
+
     def learning_path(self, learning_id: str) -> Path:
         return self.learning_dir / f"{learning_id}.json"
 
@@ -287,6 +295,12 @@ class LocalRuntimeStore:
 
     def get_memory_conflict(self, conflict_id: str) -> dict[str, Any] | None:
         path = self.memory_conflict_path(conflict_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_namespace_promotion(self, promotion_id: str) -> dict[str, Any] | None:
+        path = self.namespace_promotion_path(promotion_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -372,6 +386,17 @@ class LocalRuntimeStore:
         for path in sorted(self.memory_dir.glob("*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _namespace_promotion_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.namespace_promotion_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.namespace_promotion_dir.glob("*.json")):
+            record = _read_json(path)
+            target_scope = record.get("target", {}).get("scope") or record.get("target_scope")
+            if target_scope == scope:
                 records.append(record)
         return records
 
@@ -716,6 +741,397 @@ class LocalRuntimeStore:
             {"reason": "cli_memory_show"},
         )
         return {"memory": memory, "audit_event": event}
+
+    def _access_decision_record(
+        self,
+        *,
+        scope: dict[str, str],
+        principal_id: str,
+        principal_role: str,
+        principal_attributes: list[str],
+        action: str,
+        resource_kind: str,
+        resource_id: str,
+        resource_scope: dict[str, str],
+        classification: str,
+        mission_authority: str,
+    ) -> dict[str, Any]:
+        attributes = sorted({attribute.strip() for attribute in principal_attributes if attribute.strip()})
+        decision = "allow"
+        policy = "local_rbac_abac_matrix"
+        reason = "Access is allowed by the local deterministic RBAC/ABAC matrix."
+        resolution_path = ["Proceed through the same scoped CLI path and audit ledger."]
+        allowed_org_roles = {"org_admin", "org_approver", "org_member"}
+        read_write_actions = {"read", "write", "promote"}
+
+        if scope != resource_scope:
+            decision = "deny"
+            policy = "active_workspace_resource_scope"
+            reason = "The active workspace scope does not match the requested resource scope."
+            resolution_path = ["Switch to the resource workspace or request an explicit promotion/reference."]
+        elif resource_scope["namespace_id"] == "organization" and principal_role not in allowed_org_roles:
+            decision = "deny"
+            policy = "organization_membership_required"
+            reason = "Organization resources require an organization role in the active organization namespace."
+            resolution_path = ["Request organization access or promote only through an approved namespace workflow."]
+        elif action == "configure" and principal_role != "org_admin":
+            decision = "deny"
+            policy = "configuration_requires_org_admin"
+            reason = "Policy or namespace configuration requires the org_admin role."
+            resolution_path = ["Ask an organization admin to configure the policy or grant the needed role."]
+        elif action == "approve" and principal_role not in {"org_admin", "org_approver"}:
+            decision = "deny"
+            policy = "approval_requires_authorized_approver"
+            reason = "Approval requires an org_admin or org_approver role."
+            resolution_path = ["Request review from an authorized approver."]
+        elif action == "execute" and mission_authority not in {"active", "approved"}:
+            decision = "deny"
+            policy = "mission_authority_required_for_execution"
+            reason = "Execution requires an active or approved Mission Goal Contract authority."
+            resolution_path = ["Activate or approve a Mission Goal Contract before execution."]
+        elif classification == "secret":
+            decision = "deny"
+            policy = "secret_classification_denied_in_local_scaffold"
+            reason = "The local scaffold denies secret-classified resource access by default."
+            resolution_path = ["Use fake-secret fixtures only and move secret access to an approved production policy design."]
+        elif classification == "restricted" and principal_role != "org_admin" and "clearance:restricted" not in attributes:
+            decision = "deny"
+            policy = "restricted_classification_clearance_required"
+            reason = "Restricted resources require org_admin or clearance:restricted."
+            resolution_path = ["Request restricted clearance or reduce the resource classification."]
+        elif action in read_write_actions and principal_role in allowed_org_roles | {"personal_user"}:
+            decision = "allow"
+        elif action not in {"read", "write", "promote", "approve", "execute", "configure"}:
+            decision = "deny"
+            policy = "unknown_action_denied"
+            reason = "Unknown access actions are denied by default."
+            resolution_path = ["Use a declared action in the local access matrix."]
+
+        decision_base = {
+            "schema_version": "cs.policy_decision.v0",
+            "decision": decision,
+            "policy": policy,
+            "reason": reason,
+            "principal": {
+                "id": principal_id,
+                "role": principal_role,
+                "attributes": attributes,
+            },
+            "action": action,
+            "resource": {
+                "kind": resource_kind,
+                "id": resource_id,
+                "scope": resource_scope,
+                "classification": classification,
+            },
+            "scope": scope,
+            "mission_authority": mission_authority,
+            "evaluation_model": "deterministic_local_rbac_abac",
+            "external_http_calls": 0,
+            "secret_reads": 0,
+            "resolution_path": resolution_path,
+            "decided_at": utc_now(),
+        }
+        record = dict(decision_base)
+        record["id"] = f"policy_{_json_hash(decision_base)[:16]}"
+        return record
+
+    def evaluate_access(
+        self,
+        *,
+        principal_id: str,
+        principal_role: str,
+        principal_attributes: list[str],
+        action: str,
+        resource_kind: str,
+        resource_id: str,
+        resource_scope: dict[str, str],
+        classification: str,
+        mission_authority: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        decision = self._access_decision_record(
+            scope=scope,
+            principal_id=principal_id,
+            principal_role=principal_role,
+            principal_attributes=principal_attributes,
+            action=action,
+            resource_kind=resource_kind,
+            resource_id=resource_id,
+            resource_scope=resource_scope,
+            classification=classification,
+            mission_authority=mission_authority,
+        )
+        _write_json(self.access_decision_path(decision["id"]), decision)
+        event = self.append_audit(
+            "policy.access.evaluated",
+            scope,
+            {"type": "policy_decision", "id": decision["id"]},
+            {
+                "policy": decision["policy"],
+                "decision": decision["decision"],
+                "principal_role": principal_role,
+                "action": action,
+                "resource_kind": resource_kind,
+                "resource_id": resource_id,
+                "resource_scope": resource_scope,
+                "classification": classification,
+                "mission_authority": mission_authority,
+                "external_http_calls": 0,
+                "secret_reads": 0,
+            },
+        )
+        return {"policy_decision": decision, "audit_event": event}
+
+    def promote_memory_to_namespace(
+        self,
+        memory_id: str,
+        source_scope: dict[str, str],
+        target_scope: dict[str, str],
+        *,
+        mode: str,
+        principal_id: str = "local-user",
+        principal_role: str = "org_admin",
+    ) -> dict[str, Any]:
+        source = self.get_memory(memory_id)
+        if source is None:
+            return {"status": "not_found", "resource": "memory"}
+        if source.get("scope") != source_scope:
+            return {"status": "scope_denied", "resource_scope": source.get("scope")}
+        if source.get("status") != "owner_approved" or not source.get("evidence_refs"):
+            return {"status": "evidence_required", "resource": "memory"}
+
+        policy_result = self.evaluate_access(
+            principal_id=principal_id,
+            principal_role=principal_role,
+            principal_attributes=["namespace:personal", "namespace:organization", "clearance:restricted"],
+            action="promote",
+            resource_kind="memory",
+            resource_id=memory_id,
+            resource_scope=target_scope,
+            classification="restricted",
+            mission_authority="active",
+            scope=target_scope,
+        )
+        decision = policy_result["policy_decision"]
+        if decision["decision"] != "allow":
+            return {"status": "policy_denied", "policy_decision": decision, "audit_event": policy_result["audit_event"]}
+
+        source_evidence_refs = list(source.get("evidence_refs", []))
+        target_base = {
+            "schema_version": "cs.memory.v0",
+            "status": "owner_approved",
+            "trust_state": "evidence_backed",
+            "memory_type": "promoted_durable_fact",
+            "statement": source.get("statement", ""),
+            "scope": target_scope,
+            "source": {
+                "created_from": "namespace.promote",
+                "source_type": "explicit_namespace_promotion",
+                "source_memory_id": memory_id,
+                "source_scope": source_scope,
+                "promotion_mode": mode,
+                "evidence_bundle_id": source.get("source", {}).get("evidence_bundle_id"),
+                "search_snapshot_id": source.get("source", {}).get("search_snapshot_id"),
+                "artifact_refs": source.get("source", {}).get("artifact_refs", []),
+            },
+            "provenance": {
+                "created_from": "explicit_namespace_promotion",
+                "mode": mode,
+                "source_memory_id": memory_id,
+                "source_scope": source_scope,
+                "target_scope": target_scope,
+                "source_evidence_refs": source_evidence_refs,
+                "policy_decision_ref": f"policy:{decision['id']}",
+            },
+            "canonicality": {
+                "canonical_truth_foundation": "archive_evidence",
+                "raw_agent_memory_canonical": False,
+                "owner_approved": True,
+                "requires_evidence_for_truth_claims": True,
+                "explicitly_promoted": True,
+            },
+            "evidence_refs": [f"memory:{memory_id}", *source_evidence_refs],
+            "created_at": utc_now(),
+        }
+        target_memory_id = f"memory_{_json_hash(target_base)[:16]}"
+        target_memory = dict(target_base)
+        target_memory["memory_id"] = target_memory_id
+
+        promotion_base = {
+            "schema_version": "cs.namespace_promotion.v0",
+            "status": "promoted",
+            "mode": mode,
+            "source": {
+                "kind": "memory",
+                "id": memory_id,
+                "scope": source_scope,
+                "evidence_refs": source_evidence_refs,
+            },
+            "target": {
+                "kind": "memory",
+                "id": target_memory_id,
+                "scope": target_scope,
+            },
+            "provenance": {
+                "activity": "explicit_namespace_promotion",
+                "agent": principal_id,
+                "source_entity": f"memory:{memory_id}",
+                "target_entity": f"memory:{target_memory_id}",
+                "source_scope": source_scope,
+                "target_scope": target_scope,
+                "mode": mode,
+            },
+            "policy_decision": decision,
+            "evidence_refs": [f"memory:{memory_id}", *source_evidence_refs],
+            "created_at": utc_now(),
+        }
+        promotion_id = f"promotion_{_json_hash(promotion_base)[:16]}"
+        promotion = dict(promotion_base)
+        promotion["promotion_id"] = promotion_id
+        promotion["evidence_refs"] = [f"namespace_promotion:{promotion_id}", *promotion["evidence_refs"]]
+
+        target_memory["source"]["namespace_promotion_id"] = promotion_id
+        target_memory["provenance"]["namespace_promotion_id"] = promotion_id
+        target_memory["evidence_refs"] = [f"namespace_promotion:{promotion_id}", *target_memory["evidence_refs"]]
+        _write_json(self.memory_path(target_memory_id), target_memory)
+        _write_json(self.namespace_promotion_path(promotion_id), promotion)
+
+        promotion_event = self.append_audit(
+            "namespace.promotion.created",
+            target_scope,
+            {"type": "namespace_promotion", "id": promotion_id},
+            {
+                "source_kind": "memory",
+                "source_id": memory_id,
+                "target_kind": "memory",
+                "target_id": target_memory_id,
+                "source_scope": source_scope,
+                "target_scope": target_scope,
+                "mode": mode,
+                "evidence_refs": promotion["evidence_refs"],
+                "policy_decision_ref": f"policy:{decision['id']}",
+            },
+        )
+        return {
+            "promotion": promotion,
+            "promoted_memory": target_memory,
+            "policy_decision": decision,
+            "audit_events": [policy_result["audit_event"], promotion_event],
+        }
+
+    def answer_from_memory(self, question: str, scope: dict[str, str]) -> dict[str, Any]:
+        terms = [term for term in search_terms(question) if term not in ANSWER_STOP_TERMS]
+        matching_memories = []
+        for memory in self._memory_records(scope):
+            statement = str(memory.get("statement", ""))
+            haystack = statement.lower()
+            if memory.get("status") != "owner_approved" or not memory.get("evidence_refs"):
+                continue
+            if any(term in haystack for term in terms):
+                matching_memories.append(memory)
+
+        if not matching_memories:
+            decision = self._access_decision_record(
+                scope=scope,
+                principal_id=scope["owner_id"],
+                principal_role="org_member" if scope["namespace_id"] == "organization" else "personal_user",
+                principal_attributes=[f"namespace:{scope['namespace_id']}"],
+                action="read",
+                resource_kind="memory",
+                resource_id="active-scope-memory",
+                resource_scope=scope,
+                classification="confidential",
+                mission_authority="none",
+            )
+            decision["decision"] = "deny"
+            decision["policy"] = "cross_namespace_memory_denied_by_default"
+            decision["reason"] = "No owner-approved active-scope memory matched the question; CornerStone did not search or use other namespaces."
+            decision["resolution_path"] = ["Explicitly promote, copy, reference, or permit the source memory before using it in this workspace."]
+            decision_base = dict(decision)
+            decision_base.pop("id", None)
+            decision["id"] = f"policy_{_json_hash(decision_base)[:16]}"
+            _write_json(self.access_decision_path(decision["id"]), decision)
+            answer_base = {
+                "schema_version": "cs.memory_answer.v0",
+                "status": "insufficient_evidence",
+                "question": redact_text(question),
+                "scope": scope,
+                "answer_label": "insufficient_evidence",
+                "presented_as_fact": False,
+                "based_on": "active_scope_memory_only",
+                "used_memory_refs": [],
+                "evidence_refs": [],
+                "policy_decision": decision,
+                "context_boundary": {
+                    "active_scope_only": True,
+                    "implicit_cross_namespace_context": False,
+                    "personal_memory_used_without_promotion": False,
+                    "explicit_promotion_required": True,
+                },
+                "created_at": utc_now(),
+            }
+            answer_id = f"answer_{_json_hash(answer_base)[:16]}"
+            answer = dict(answer_base)
+            answer["answer_id"] = answer_id
+            _write_json(self.answer_path(answer_id), answer)
+            event = self.append_audit(
+                "memory.answer.insufficient_evidence",
+                scope,
+                {"type": "memory_answer", "id": answer_id},
+                {
+                    "question": redact_text(question),
+                    "used_memory_refs": [],
+                    "policy": decision["policy"],
+                    "personal_memory_used_without_promotion": False,
+                },
+            )
+            return {"status": "insufficient_evidence", "answer": answer, "policy_decision": decision, "audit_event": event}
+
+        memory = matching_memories[0]
+        used_memory_refs = [f"memory:{memory['memory_id']}"]
+        promotions = [
+            promotion
+            for promotion in self._namespace_promotion_records(scope)
+            if promotion.get("target", {}).get("id") == memory.get("memory_id")
+        ]
+        answer_base = {
+            "schema_version": "cs.memory_answer.v0",
+            "status": "answered",
+            "question": redact_text(question),
+            "scope": scope,
+            "answer_label": "evidence_backed",
+            "presented_as_fact": True,
+            "based_on": "active_scope_owner_approved_memory",
+            "used_memory_refs": used_memory_refs,
+            "evidence_refs": list(memory.get("evidence_refs", [])),
+            "statement": memory.get("statement"),
+            "context_boundary": {
+                "active_scope_only": True,
+                "implicit_cross_namespace_context": False,
+                "personal_memory_used_without_promotion": False,
+                "used_promoted_memory": bool(promotions),
+                "promotion_refs": [f"namespace_promotion:{promotion['promotion_id']}" for promotion in promotions],
+            },
+            "created_at": utc_now(),
+        }
+        answer_id = f"answer_{_json_hash(answer_base)[:16]}"
+        answer = dict(answer_base)
+        answer["answer_id"] = answer_id
+        _write_json(self.answer_path(answer_id), answer)
+        event = self.append_audit(
+            "memory.answer.created",
+            scope,
+            {"type": "memory_answer", "id": answer_id},
+            {
+                "question": redact_text(question),
+                "used_memory_refs": used_memory_refs,
+                "evidence_ref_count": len(answer["evidence_refs"]),
+                "used_promoted_memory": bool(promotions),
+                "personal_memory_used_without_promotion": False,
+            },
+        )
+        return {"answer": answer, "audit_event": event}
 
     def record_learning_from_action(self, action_id: str, lesson: str, scope: dict[str, str]) -> dict[str, Any]:
         action = self.get_action(action_id)

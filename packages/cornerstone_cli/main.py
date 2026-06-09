@@ -20,6 +20,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_memory_truth_boundary,
     verify_vs0_product_loop_identity,
     verify_vs0_product_domain_readiness,
+    verify_vs0_tenant_security_boundary,
     verify_vs0_namespace_isolation,
     verify_vs0_regression_guardrails,
     verify_vs0_security_policy,
@@ -1080,6 +1081,181 @@ def command_memory_conflict_test(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_memory_answer(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.answer_from_memory(args.question, requested_scope)
+    answer = result["answer"]
+    payload = base_response("cornerstone memory answer", "success" if answer["status"] == "answered" else "insufficient_evidence", root)
+    payload.update(requested_scope)
+    payload["memory_answer"] = answer
+    payload["ids"].update({"memory_answer_id": answer["answer_id"]})
+    payload["evidence_refs"].extend([f"memory_answer:{answer['answer_id']}", *answer.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    if result.get("policy_decision"):
+        decision = result["policy_decision"]
+        payload["policy_decisions"] = [decision]
+        payload["policy_decision_refs"].append(f"policy:{decision['id']}")
+    if answer["status"] != "answered":
+        payload["errors"].append(
+            {
+                "code": "CS_MEMORY_ANSWER_EVIDENCE_REQUIRED",
+                "message": "No owner-approved active-scope memory can answer the question.",
+                "resolution_path": answer.get("policy_decision", {}).get("resolution_path", []),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_namespace_promote(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    source_scope = scope_args(args)
+    target_scope = {
+        "tenant_id": args.target_tenant_id or source_scope["tenant_id"],
+        "owner_id": args.target_owner_id,
+        "namespace_id": args.target_namespace_id,
+        "workspace_id": args.target_workspace_id,
+    }
+    payload = base_response("cornerstone namespace promote", "success", root)
+    payload.update(target_scope)
+    if args.source_kind != "memory":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_NAMESPACE_PROMOTION_KIND_UNSUPPORTED",
+                "message": "The local scaffold currently supports memory promotion only.",
+                "source_kind": args.source_kind,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    result = store.promote_memory_to_namespace(
+        args.source_id,
+        source_scope,
+        target_scope,
+        mode=args.mode,
+        principal_id=args.principal_id,
+        principal_role=args.principal_role,
+    )
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_NAMESPACE_PROMOTION_SOURCE_NOT_FOUND",
+                "message": "Promotion source was not found.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Promotion source is outside the requested source scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    if result.get("status") == "evidence_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_NAMESPACE_PROMOTION_EVIDENCE_REQUIRED",
+                "message": "Explicit promotion requires an owner-approved evidence-backed source item.",
+                "resource": result.get("resource"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+    if result.get("status") == "policy_denied":
+        decision = result["policy_decision"]
+        payload["status"] = "denied"
+        payload["policy_decisions"] = [decision]
+        payload["policy_decision_refs"].append(f"policy:{decision['id']}")
+        payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+        payload["errors"].append(
+            {
+                "code": "CS_NAMESPACE_PROMOTION_POLICY_DENIED",
+                "message": decision["reason"],
+                "resolution_path": decision["resolution_path"],
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_POLICY_DENIED
+
+    promotion = result["promotion"]
+    promoted_memory = result["promoted_memory"]
+    decision = result["policy_decision"]
+    payload["namespace_promotion"] = promotion
+    payload["promoted_item"] = promoted_memory
+    payload["policy_decisions"] = [decision]
+    payload["ids"].update(
+        {
+            "namespace_promotion_id": promotion["promotion_id"],
+            "source_memory_id": args.source_id,
+            "target_memory_id": promoted_memory["memory_id"],
+        }
+    )
+    payload["evidence_refs"].extend(promotion.get("evidence_refs", []))
+    payload["policy_decision_refs"].append(f"policy:{decision['id']}")
+    payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in result["audit_events"])
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_access_evaluate(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    resource_scope = {
+        "tenant_id": args.resource_tenant_id or requested_scope["tenant_id"],
+        "owner_id": args.resource_owner_id or requested_scope["owner_id"],
+        "namespace_id": args.resource_namespace_id or requested_scope["namespace_id"],
+        "workspace_id": args.resource_workspace_id or requested_scope["workspace_id"],
+    }
+    principal_attributes = [attribute.strip() for attribute in args.principal_attributes.split(",") if attribute.strip()]
+    result = store.evaluate_access(
+        principal_id=args.principal_id,
+        principal_role=args.principal_role,
+        principal_attributes=principal_attributes,
+        action=args.action,
+        resource_kind=args.resource_kind,
+        resource_id=args.resource_id,
+        resource_scope=resource_scope,
+        classification=args.classification,
+        mission_authority=args.mission_authority,
+        scope=requested_scope,
+    )
+    decision = result["policy_decision"]
+    status = "allowed" if decision["decision"] == "allow" else "denied"
+    payload = base_response("cornerstone access evaluate", status, root)
+    payload.update(requested_scope)
+    payload["access_decision"] = decision
+    payload["policy_decisions"] = [decision]
+    payload["policy_decision_refs"].append(f"policy:{decision['id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    payload["ids"].update({"policy_decision_id": decision["id"], "resource_id": args.resource_id})
+    if decision["decision"] != "allow":
+        payload["errors"].append(
+            {
+                "code": "CS_ACCESS_POLICY_DENIED",
+                "message": decision["reason"],
+                "resolution_path": decision["resolution_path"],
+            }
+        )
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if decision["decision"] == "allow" else EXIT_POLICY_DENIED
+
+
 def command_learning_record(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -1697,6 +1873,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_memory_truth_boundary(root)
     elif args.contract == "vs0-product-domain-readiness":
         report = verify_vs0_product_domain_readiness(root)
+    elif args.contract == "vs0-tenant-security-boundary":
+        report = verify_vs0_tenant_security_boundary(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -1723,6 +1901,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-product-loop-identity",
                     "vs0-memory-truth-boundary",
                     "vs0-product-domain-readiness",
+                    "vs0-tenant-security-boundary",
                 ],
             }
         )
@@ -2012,6 +2191,52 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(memory_conflict)
     memory_conflict.add_argument("--json", action="store_true", help="Emit JSON output")
     memory_conflict.set_defaults(func=command_memory_conflict_test)
+
+    memory_answer = memory_sub.add_parser("answer", help="Answer from owner-approved memory in the active scope")
+    memory_answer.add_argument("--question", required=True, help="Question to answer")
+    add_state_argument(memory_answer)
+    add_scope_arguments(memory_answer)
+    memory_answer.add_argument("--json", action="store_true", help="Emit JSON output")
+    memory_answer.set_defaults(func=command_memory_answer)
+
+    namespace = subcommands.add_parser("namespace", help="Namespace promotion commands")
+    namespace_sub = namespace.add_subparsers(dest="namespace_command")
+
+    namespace_promote = namespace_sub.add_parser("promote", help="Explicitly promote a scoped item with provenance")
+    namespace_promote.add_argument("--source-kind", choices=["memory"], default="memory")
+    namespace_promote.add_argument("--source-id", required=True, help="Source item ID")
+    namespace_promote.add_argument("--target-tenant-id", help="Target tenant; defaults to source tenant")
+    namespace_promote.add_argument("--target-owner-id", required=True, help="Target owner")
+    namespace_promote.add_argument("--target-namespace-id", required=True, help="Target namespace")
+    namespace_promote.add_argument("--target-workspace-id", required=True, help="Target workspace")
+    namespace_promote.add_argument("--mode", choices=["copy_with_provenance"], default="copy_with_provenance")
+    namespace_promote.add_argument("--principal-id", default="local-user", help="Actor requesting promotion")
+    namespace_promote.add_argument("--principal-role", choices=["org_admin", "org_approver"], default="org_admin")
+    add_state_argument(namespace_promote)
+    add_scope_arguments(namespace_promote)
+    namespace_promote.add_argument("--json", action="store_true", help="Emit JSON output")
+    namespace_promote.set_defaults(func=command_namespace_promote)
+
+    access = subcommands.add_parser("access", help="Local deterministic access-control commands")
+    access_sub = access.add_subparsers(dest="access_command")
+
+    access_evaluate = access_sub.add_parser("evaluate", help="Evaluate local RBAC/ABAC policy without external calls")
+    access_evaluate.add_argument("--principal-id", default="local-user", help="Principal identifier")
+    access_evaluate.add_argument("--principal-role", choices=["personal_user", "org_member", "org_approver", "org_admin"], default="personal_user")
+    access_evaluate.add_argument("--principal-attributes", default="", help="Comma-separated principal attributes")
+    access_evaluate.add_argument("--action", choices=["read", "write", "promote", "approve", "execute", "configure"], required=True)
+    access_evaluate.add_argument("--resource-kind", default="memory")
+    access_evaluate.add_argument("--resource-id", default="resource")
+    access_evaluate.add_argument("--resource-tenant-id", help="Resource tenant; defaults to active tenant")
+    access_evaluate.add_argument("--resource-owner-id", help="Resource owner; defaults to active owner")
+    access_evaluate.add_argument("--resource-namespace-id", help="Resource namespace; defaults to active namespace")
+    access_evaluate.add_argument("--resource-workspace-id", help="Resource workspace; defaults to active workspace")
+    access_evaluate.add_argument("--classification", choices=["public", "internal", "confidential", "restricted", "secret"], default="internal")
+    access_evaluate.add_argument("--mission-authority", choices=["none", "draft", "active", "approved"], default="none")
+    add_state_argument(access_evaluate)
+    add_scope_arguments(access_evaluate)
+    access_evaluate.add_argument("--json", action="store_true", help="Emit JSON output")
+    access_evaluate.set_defaults(func=command_access_evaluate)
 
     learning = subcommands.add_parser("learning", help="Action outcome learning commands")
     learning_sub = learning.add_subparsers(dest="learning_command")
