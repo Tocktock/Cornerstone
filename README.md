@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, and VS-0 scaffold gate
+**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, and VS-0 scaffold readiness report
 **Canonical spelling:** Use **CornerStone** for product/project text.
 
 ## Product Definition
@@ -29,11 +29,15 @@ Users should experience one CornerStone product. Internally, the product keeps c
 6. `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md`
 7. `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv`
 8. `docs/scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md`
-9. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`
-10. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md`
-11. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-12. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-13. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
+9. `docs/design/DESIGN_SYSTEM_CONTRACT_V0_3.md`
+10. `docs/design/DESIGN_CONCEPT_SYSTEM_V0_3.md`
+11. `docs/design/tokens/cornerstone_design_tokens_v0_3.json`
+12. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`
+13. `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md`
+14. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md`
+15. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+16. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+17. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
 
 ## Active Authority
 
@@ -46,7 +50,11 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md` | Mandatory no-CLI-no-feature-PASS execution gate |
 | `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv` | Required CLI command coverage by feature family |
 | `docs/scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md` | Local scenario verification, fixture corpus, model harness, validators, and release-gate contract |
+| `docs/design/DESIGN_SYSTEM_CONTRACT_V0_3.md` | Applied design-system contract for UI implementation |
+| `docs/design/DESIGN_CONCEPT_SYSTEM_V0_3.md` | Source design concept and page/component guidance |
+| `docs/design/tokens/cornerstone_design_tokens_v0_3.json` | Canonical design tokens |
 | `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` | Frozen setup-planning contract before VS-0 feature coding |
+| `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` | Current implementation gate: scaffold next, product features blocked |
 | `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` | Frozen first implementation subset |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
@@ -66,11 +74,15 @@ Verify the documentation wiring with:
 scripts/verify_sot_docs.sh
 scripts/verify_cli_native_first_docs.sh
 scripts/verify_local_verification_plane_docs.sh
+scripts/verify_design_system_docs.sh
+scripts/verify_vs0_scaffold_readiness_docs.sh
 ```
 
 ## First Implementation Target
 
 Before feature coding, the VS-0 setup-planning gate is `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`. It defines the version baseline, monorepo direction, CLI scaffold expectations, verification report shape, and human approval gates for production dependency additions.
+
+Before scaffold implementation, read `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md`. The current gate allows VS-0 scaffold foundation work only after preflight and approval. It does not allow VS-0 product-feature implementation or any claim that local verification is implemented.
 
 VS-0 starts with:
 
@@ -98,3 +110,11 @@ The release invariant is: **No CLI, no feature PASS.** The CLI must use the same
 Local verification is a product acceptance surface, not an ad-hoc test folder. Scenario `PASS` requires deterministic evidence over product records, policy decisions, workflow/action records, audit events, CLI transcripts, UI traces where relevant, and scenario reports.
 
 The release-facing local proof path is planned around `cornerstone scenario verify <contract> --json`. Local LLMs may help generate outputs, but deterministic validators own `PASS` or `FAIL`.
+
+## Design System
+
+CornerStone's design doctrine is **Calm Surface. Deep Evidence. Safe Action.**
+
+The default product surface is a light, calm universal workspace for drop, search, ask, recent work, and quiet knowledge states. Admin surfaces use the same calm shell but expose connectors, policies, roles, namespaces, and audit logs only in admin context.
+
+The default theme is light. Do not make the first screen a chatbot, admin dashboard, dark command center, connector panel, or ontology setup surface.

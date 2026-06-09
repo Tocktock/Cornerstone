@@ -21,6 +21,7 @@ Deliverables:
 - Full scenario matrix installed under `docs/scenario-contracts/`.
 - Old conflicting docs archived, replaced, or explicitly marked superseded.
 - `VS0_SCAFFOLD_CONTRACT.md` frozen.
+- `VS0_SCAFFOLD_READINESS_REPORT_V0.md` recorded.
 - `VS0_IMPLEMENTATION_CONTRACT.md` frozen.
 - Setup/version ADRs added.
 - Scenario report template added.
@@ -33,6 +34,7 @@ Exit criteria:
 - Product goal points to living evidence-first autonomous operational intelligence.
 - Full scenario standard contains 206 scenarios.
 - VS-0 scaffold contract exists before feature coding.
+- VS-0 scaffold readiness report says scaffold foundation is next and product features remain blocked.
 - First scenario contract contains 58 VS-0 scenarios.
 - Setup ADRs exist and contain no runtime implementation.
 - `scripts/verify_sot_docs.sh` passes.
@@ -44,8 +46,15 @@ Goal: one CornerStone app starts locally.
 Prerequisites:
 
 - `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` accepted.
+- `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` read and still current.
 - Production dependency additions approved.
 - Runtime pins and lockfile strategy follow `docs/adr/ADR-0002-framework-and-version-policy.md`.
+
+Scope guard:
+
+- Start with scaffold foundation only.
+- Do not implement artifact/search/claim/action/audit product behavior in Milestone 1.
+- Do not claim Local Verification Plane implementation until a runner, corpus, validators, providers, and native `cornerstone ...` CLI commands exist.
 
 Deliverables:
 

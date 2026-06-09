@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "name": "CornerStone Design Tokens v0.3",
+    "doctrine": "Calm Surface. Deep Evidence. Safe Action.",
+    "status": "draft"
+  },
+  "color": {
+    "background": {
+      "app": "#F8FAFC",
+      "surface": "#FFFFFF",
+      "subtle": "#F1F5F9"
+    },
+    "border": {
+      "default": "#E2E8F0",
+      "strong": "#CBD5E1",
+      "focus": "#2563EB"
+    },
+    "text": {
+      "primary": "#0F172A",
+      "secondary": "#475569",
+      "muted": "#64748B",
+      "inverse": "#FFFFFF"
+    },
+    "primary": {
+      "50": "#EFF6FF",
+      "100": "#DBEAFE",
+      "500": "#2563EB",
+      "600": "#1D4ED8",
+      "700": "#1E40AF"
+    },
+    "evidence": {
+      "50": "#ECFDF5",
+      "100": "#D1FAE5",
+      "500": "#22C55E",
+      "700": "#15803D"
+    },
+    "review": {
+      "50": "#FFFBEB",
+      "100": "#FEF3C7",
+      "500": "#F59E0B",
+      "700": "#B45309"
+    },
+    "danger": {
+      "50": "#FEF2F2",
+      "100": "#FEE2E2",
+      "500": "#EF4444",
+      "700": "#B91C1C"
+    },
+    "neutral": {
+      "50": "#F8FAFC",
+      "100": "#F1F5F9",
+      "200": "#E2E8F0",
+      "500": "#64748B",
+      "700": "#334155",
+      "900": "#0F172A"
+    }
+  },
+  "space": {
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "20px",
+    "6": "24px",
+    "8": "32px",
+    "10": "40px",
+    "12": "48px"
+  },
+  "radius": {
+    "sm": "6px",
+    "md": "10px",
+    "lg": "14px",
+    "xl": "18px",
+    "pill": "999px"
+  },
+  "layout": {
+    "sidebarWidth": "248px",
+    "rightRailWidth": "340px",
+    "headerHeight": "72px",
+    "contentGutter": "32px",
+    "cardPadding": "24px",
+    "listRowHeight": "64px"
+  },
+  "shadow": {
+    "card": "0 1px 2px rgba(15, 23, 42, 0.04)",
+    "popover": "0 10px 25px rgba(15, 23, 42, 0.10)",
+    "focus": "0 0 0 3px rgba(37, 99, 235, 0.16)"
+  },
+  "typography": {
+    "fontFamily": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+    "display": { "fontSize": "40px", "lineHeight": "48px", "fontWeight": 700 },
+    "pageTitle": { "fontSize": "32px", "lineHeight": "40px", "fontWeight": 700 },
+    "sectionTitle": { "fontSize": "16px", "lineHeight": "24px", "fontWeight": 650 },
+    "body": { "fontSize": "14px", "lineHeight": "22px", "fontWeight": 400 },
+    "metadata": { "fontSize": "12px", "lineHeight": "18px", "fontWeight": 400 },
+    "label": { "fontSize": "12px", "lineHeight": "16px", "fontWeight": 600 }
+  },
+  "state": {
+    "saved": { "bg": "#EFF6FF", "fg": "#1D4ED8", "border": "#BFDBFE" },
+    "searchable": { "bg": "#EFF6FF", "fg": "#2563EB", "border": "#BFDBFE" },
+    "draft": { "bg": "#F1F5F9", "fg": "#475569", "border": "#CBD5E1" },
+    "evidenceBacked": { "bg": "#ECFDF5", "fg": "#15803D", "border": "#BBF7D0" },
+    "corroborated": { "bg": "#ECFDF5", "fg": "#15803D", "border": "#BBF7D0" },
+    "underReview": { "bg": "#FFFBEB", "fg": "#B45309", "border": "#FDE68A" },
+    "insufficientEvidence": { "bg": "#FFFBEB", "fg": "#B45309", "border": "#FDE68A" },
+    "approved": { "bg": "#ECFDF5", "fg": "#15803D", "border": "#BBF7D0" },
+    "executed": { "bg": "#ECFDF5", "fg": "#15803D", "border": "#BBF7D0" },
+    "failed": { "bg": "#FEF2F2", "fg": "#B91C1C", "border": "#FECACA" },
+    "policyBlocked": { "bg": "#FEF2F2", "fg": "#B91C1C", "border": "#FECACA" }
+  }
+}

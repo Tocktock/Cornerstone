@@ -1,4 +1,4 @@
-version: "0.4"
+version: "0.6"
 effective_date: "2026-06-09"
 owner: "JiYong / Tars"
 canonical_spelling: "CornerStone"
@@ -52,6 +52,16 @@ local_verification_plane:
   llm_rule: "LLM output alone never proves PASS; deterministic validators judge durable evidence"
   verification_command: "scripts/verify_local_verification_plane_docs.sh"
 
+design_system:
+  contract: "docs/design/DESIGN_SYSTEM_CONTRACT_V0_3.md"
+  concept: "docs/design/DESIGN_CONCEPT_SYSTEM_V0_3.md"
+  tokens: "docs/design/tokens/cornerstone_design_tokens_v0_3.json"
+  doctrine: "Calm Surface. Deep Evidence. Safe Action."
+  default_theme: "light"
+  primary_surface: "Universal Workspace"
+  admin_surface: "Connectors, policies, roles, namespaces, and audit logs in admin context"
+  verification_command: "scripts/verify_design_system_docs.sh"
+
 vs0_scaffold:
   contract: "docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md"
   authority: "setup-planning contract before VS-0 scaffold implementation or feature coding"
@@ -68,6 +78,14 @@ vs0_scaffold:
     - "docs/adr/ADR-0004-cli-native-first-setup.md"
     - "docs/adr/ADR-0005-domain-boundaries.md"
     - "docs/adr/ADR-0006-agent-guide.md"
+
+vs0_scaffold_readiness:
+  report: "docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md"
+  authority: "current implementation gate: VS-0 scaffold foundation may proceed only after preflight and approval; VS-0 product features remain blocked"
+  next_implementation_scope: "VS-0 Scaffold Foundation"
+  product_feature_implementation: "blocked until scaffold runtime, native CLI paths, and scenario verification exist"
+  local_verification_plane_status: "documentation-only until runner, corpus, validators, providers, and CLI commands are implemented"
+  verification_command: "scripts/verify_vs0_scaffold_readiness_docs.sh"
 
 technical_defaults:
   file: "docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md"
@@ -105,4 +123,6 @@ verification:
   command: "scripts/verify_sot_docs.sh"
   cli_native_first_command: "scripts/verify_cli_native_first_docs.sh"
   local_verification_plane_command: "scripts/verify_local_verification_plane_docs.sh"
+  design_system_command: "scripts/verify_design_system_docs.sh"
+  vs0_scaffold_readiness_command: "scripts/verify_vs0_scaffold_readiness_docs.sh"
   release_rule: "No PASS without concrete scenario evidence. No CLI, no feature PASS."

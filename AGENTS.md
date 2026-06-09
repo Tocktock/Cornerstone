@@ -15,11 +15,14 @@ Before non-trivial planning, architecture, migration, or implementation work, re
 5. `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md`
 6. `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv`
 7. `docs/scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md` before designing local/CI scenario verification, fixture corpora, model harnesses, or release gates
-8. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` before VS-0 scaffold or feature coding
-9. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` when working on v0.1/VS-0
-10. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-11. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-12. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
+8. `docs/design/DESIGN_SYSTEM_CONTRACT_V0_3.md` before UI, design-system, component, or frontend work
+9. `docs/design/DESIGN_CONCEPT_SYSTEM_V0_3.md` and `docs/design/tokens/cornerstone_design_tokens_v0_3.json` for visual concept and tokens
+10. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` before VS-0 scaffold or feature coding
+11. `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` before VS-0 scaffold implementation
+12. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` when working on v0.1/VS-0
+13. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+14. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+15. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
 
 The product SoT is the product authority. Repository files show implementation reality, not permission to drift.
 
@@ -76,6 +79,23 @@ Agents must treat local verification as a CornerStone product acceptance surface
 - Capture negative evidence for safety scenarios, including zero unauthorized tool calls, zero unauthorized action cards, zero egress, and zero unredacted secret leaks where prohibited.
 - Mark unavailable, subjective, external-provider, or production-only checks as `HUMAN_REQUIRED` with required evidence instead of `PASS`.
 
+## Design System
+
+Before UI, frontend, component, or design-system work, read:
+
+`docs/design/DESIGN_SYSTEM_CONTRACT_V0_3.md`
+
+CornerStone's visual doctrine is **Calm Surface. Deep Evidence. Safe Action.**
+
+Agents must preserve:
+
+- light-first calm workspace and admin surfaces;
+- small standard navigation with Home, Search, Artifacts, Claims, and Actions as the normal-user default;
+- admin controls separated into admin context;
+- evidence, policy, approval, and audit as progressively disclosed detail;
+- trust/risk labels that use text plus color, never color alone;
+- no dark command-center, chatbot-only, connector-admin-first, or ontology-first default experience.
+
 ## Safety Defaults
 
 - Preserve original artifacts before derived processing.
@@ -105,13 +125,19 @@ Never claim implemented, passing, fixed, or done without evidence. Evidence can 
 
 When something cannot be verified, report it as `NOT_VERIFIED`, `NOT_RUN`, or `HUMAN_REQUIRED`; do not mark it `PASS`.
 
-Run `scripts/verify_sot_docs.sh` after documentation edits that touch SoT, scenario, handoff, or contract files. Run `scripts/verify_cli_native_first_docs.sh` after documentation edits that touch CLI-native-first rules or feature parity matrices.
+Run `scripts/verify_sot_docs.sh` after documentation edits that touch SoT, scenario, handoff, design, or contract files. Run `scripts/verify_cli_native_first_docs.sh` after documentation edits that touch CLI-native-first rules or feature parity matrices. Run `scripts/verify_design_system_docs.sh` after documentation edits that touch design-system rules or tokens. Run `scripts/verify_vs0_scaffold_readiness_docs.sh` after documentation edits that touch VS-0 scaffold readiness or implementation gating.
 
 ## First Implementation Target
 
 Start with the VS-0 scaffold contract before feature coding:
 
 `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`
+
+Before starting scaffold implementation, read:
+
+`docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md`
+
+The current approved next implementation scope is VS-0 scaffold foundation only after preflight and approval. Do not start VS-0 product features from this gate.
 
 Then start VS-0:
 

@@ -55,6 +55,14 @@ Local Verification Plane:
 - Scenario report/gate result:
 - Human-required rows:
 
+Design System:
+- Design scenarios checked:
+- Token usage or mapping evidence:
+- Screenshots/browser traces:
+- State coverage:
+- Accessibility/responsive checks:
+- Human-required visual approval:
+
 Risks:
 - TODO
 

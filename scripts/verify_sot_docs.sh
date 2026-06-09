@@ -28,6 +28,10 @@ require_file "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md"
 require_file "docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md"
 require_file "docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv"
 require_file "docs/scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md"
+require_file "docs/design/DESIGN_SYSTEM_CONTRACT_V0_3.md"
+require_file "docs/design/DESIGN_CONCEPT_SYSTEM_V0_3.md"
+require_file "docs/design/tokens/cornerstone_design_tokens_v0_3.json"
+require_file "docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md"
 require_file "docs/verification-reports/template.md"
 require_file "docs/adr/ADR-0002-framework-and-version-policy.md"
 require_file "docs/adr/ADR-0003-monorepo-setup.md"
@@ -36,6 +40,8 @@ require_file "docs/adr/ADR-0005-domain-boundaries.md"
 require_file "docs/adr/ADR-0006-agent-guide.md"
 require_file "scripts/verify_cli_native_first_docs.sh"
 require_file "scripts/verify_local_verification_plane_docs.sh"
+require_file "scripts/verify_design_system_docs.sh"
+require_file "scripts/verify_vs0_scaffold_readiness_docs.sh"
 require_file "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md"
 require_file "docs/agent/PROJECT_OPERATING_CONSTITUTION.md"
 
@@ -61,6 +67,14 @@ grep -q 'CLI_FEATURE_PARITY_MATRIX.csv' docs/sot/README.md || fail "SoT README m
 grep -q 'local_verification_plane:' docs/sot/sot_manifest.yaml || fail "manifest missing local verification plane section"
 grep -q 'LOCAL_VERIFICATION_PLANE_V0.md' README.md || fail "README missing local verification plane"
 grep -q 'LOCAL_VERIFICATION_PLANE_V0.md' docs/sot/README.md || fail "SoT README missing local verification plane"
+grep -q 'design_system:' docs/sot/sot_manifest.yaml || fail "manifest missing design system section"
+grep -q 'DESIGN_SYSTEM_CONTRACT_V0_3.md' README.md || fail "README missing design system contract"
+grep -q 'DESIGN_SYSTEM_CONTRACT_V0_3.md' docs/sot/README.md || fail "SoT README missing design system contract"
+grep -q 'DESIGN_SYSTEM_CONTRACT_V0_3.md' AGENTS.md || fail "AGENTS missing design system contract"
+grep -q 'vs0_scaffold_readiness:' docs/sot/sot_manifest.yaml || fail "manifest missing VS-0 scaffold readiness section"
+grep -q 'VS0_SCAFFOLD_READINESS_REPORT_V0.md' README.md || fail "README missing VS-0 scaffold readiness report"
+grep -q 'VS0_SCAFFOLD_READINESS_REPORT_V0.md' docs/sot/README.md || fail "SoT README missing VS-0 scaffold readiness report"
+grep -q 'VS0_SCAFFOLD_READINESS_REPORT_V0.md' AGENTS.md || fail "AGENTS missing VS-0 scaffold readiness report"
 grep -q 'vs0_scaffold:' docs/sot/sot_manifest.yaml || fail "manifest missing VS-0 scaffold section"
 grep -q 'Python target: 3.14.x' docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md || fail "VS-0 scaffold contract missing Python 3.14 target"
 grep -q 'Node target: 24.x LTS' docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md || fail "VS-0 scaffold contract missing Node 24 LTS target"
@@ -73,5 +87,7 @@ grep -q 'VS0_SCAFFOLD_CONTRACT.md' AGENTS.md || fail "AGENTS missing VS-0 scaffo
 
 sh scripts/verify_cli_native_first_docs.sh
 sh scripts/verify_local_verification_plane_docs.sh
+sh scripts/verify_design_system_docs.sh
+sh scripts/verify_vs0_scaffold_readiness_docs.sh
 
-printf 'PASS: CornerStone SoT docs verified (206 full scenarios, VS-0 scaffold gate, 58 VS-0 scenarios, CLI native-first gate, local verification plane).\n'
+printf 'PASS: CornerStone SoT docs verified (206 full scenarios, design system, VS-0 scaffold readiness, VS-0 scaffold gate, 58 VS-0 scenarios, CLI native-first gate, local verification plane).\n'
