@@ -16,6 +16,7 @@ from cornerstone_cli.scenarios import (
     verify_full_claim_collaboration,
     verify_full_extension_ecosystem,
     verify_full_learning_experience,
+    verify_full_mission_control_autonomy_lifecycle,
     verify_full_memory_wiki,
     verify_full_namespace_governance,
     verify_full_security_operations,
@@ -218,6 +219,83 @@ def command_product_walkthrough(args: argparse.Namespace) -> int:
         "boundary_explanation": "Internal engines are implementation boundaries; daily users see one CornerStone workflow.",
     }
     payload["evidence_refs"].append("product:CornerStone:first-run-walkthrough")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def _surface_payload(args: argparse.Namespace, command: str) -> tuple[Path, LocalRuntimeStore, dict[str, str], dict[str, Any]]:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    payload = base_response(command, "success", root)
+    payload.update(requested_scope)
+    return root, store, requested_scope, payload
+
+
+def command_product_mission_control(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = _surface_payload(args, "cornerstone product mission-control")
+    result = store.mission_control_view(requested_scope)
+    surface = result["mission_control"]
+    payload["mission_control"] = surface
+    payload["ids"].update({"mission_control_id": surface["surface_id"]})
+    payload["evidence_refs"].append(f"mission_control:{surface['surface_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_product_loop_view(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = _surface_payload(args, "cornerstone product loop-view")
+    result = store.product_loop_view(
+        requested_scope,
+        conversation_id=args.conversation_id or "",
+        brief_id=args.brief_id or "",
+        claim_id=args.claim_id or "",
+        mission_id=args.mission_id or "",
+        action_id=args.action_id or "",
+        outcome_id=args.outcome_id or "",
+    )
+    loop = result["product_loop"]
+    payload["product_loop"] = loop
+    payload["ids"].update({"loop_id": loop["loop_id"]})
+    payload["evidence_refs"].append(f"product_loop:{loop['loop_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_product_boundary(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = _surface_payload(args, "cornerstone product boundary")
+    result = store.product_boundary_review(requested_scope)
+    boundary = result["boundary_review"]
+    payload["boundary_review"] = boundary
+    payload["ids"].update({"boundary_id": boundary["boundary_id"]})
+    payload["evidence_refs"].append(f"product_boundary:{boundary['boundary_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_product_plain_language(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = _surface_payload(args, "cornerstone product plain-language-review")
+    result = store.product_plain_language_review(requested_scope)
+    review = result["plain_language_review"]
+    payload["plain_language_review"] = review
+    payload["ids"].update({"review_id": review["review_id"]})
+    payload["evidence_refs"].append(f"product_plain_language_review:{review['review_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_product_repo_split_review(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = _surface_payload(args, "cornerstone product repo-split-review")
+    result = store.product_repo_split_review(requested_scope)
+    review = result["repo_split_review"]
+    payload["repo_split_review"] = review
+    payload["ids"].update({"review_id": review["review_id"]})
+    payload["evidence_refs"].append(f"product_repo_split_review:{review['review_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -3368,6 +3446,168 @@ def command_action_idempotency_test(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_connector_action_trace(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_connector_action_trace(args.action_id, requested_scope)
+    payload = base_response("cornerstone connector action-trace", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="CONNECTOR_ACTION_TRACE")
+        print_payload(payload, args.json)
+        return exit_code
+    trace = result["connector_action_trace"]
+    payload["connector_action_trace"] = trace
+    payload["ids"].update({"connector_action_trace_id": trace["trace_id"], "action_id": args.action_id})
+    payload["evidence_refs"].extend([f"connector_action_trace:{trace['trace_id']}", f"action:{args.action_id}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_mission_autonomy_control(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.control_mission_autonomy(args.mission_id, requested_scope, control=args.control, reason=args.reason)
+    payload = base_response("cornerstone mission autonomy-control", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="MISSION_AUTONOMY_CONTROL")
+        print_payload(payload, args.json)
+        return exit_code
+    control = result["autonomy_control"]
+    payload["mission"] = result["mission"]
+    payload["autonomy_control"] = control
+    payload["workspace_mode"] = result["workspace_mode"]
+    payload["ids"].update({"control_id": control["control_id"], "mission_id": args.mission_id})
+    payload["evidence_refs"].extend([f"mission:{args.mission_id}", f"autonomy_control:{control['control_id']}"])
+    payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in result["audit_events"])
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_mission_escalate(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.escalate_mission_exception(args.mission_id, args.exception, requested_scope)
+    payload = base_response("cornerstone mission escalate", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="MISSION_ESCALATION")
+        print_payload(payload, args.json)
+        return exit_code
+    escalation = result["escalation"]
+    payload["escalation"] = escalation
+    payload["ids"].update({"escalation_id": escalation["escalation_id"], "mission_id": args.mission_id})
+    payload["evidence_refs"].extend([f"mission:{args.mission_id}", f"escalation:{escalation['escalation_id']}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_mission_outcome(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.record_mission_outcome(args.mission_id, args.action_id, requested_scope)
+    payload = base_response("cornerstone mission outcome", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="MISSION_OUTCOME")
+        print_payload(payload, args.json)
+        return exit_code
+    outcome = result["mission_outcome"]
+    payload["mission_outcome"] = outcome
+    payload["ids"].update({"outcome_id": outcome["outcome_id"], "mission_id": args.mission_id, "action_id": args.action_id})
+    payload["evidence_refs"].extend([f"mission_outcome:{outcome['outcome_id']}", f"mission:{args.mission_id}", f"action:{args.action_id}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_mission_after_action(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_mission_after_action_review(args.mission_id, args.outcome_id, requested_scope)
+    payload = base_response("cornerstone mission after-action-review", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="MISSION_AFTER_ACTION")
+        print_payload(payload, args.json)
+        return exit_code
+    review = result["after_action_review"]
+    payload["after_action_review"] = review
+    payload["ids"].update({"review_id": review["review_id"], "mission_id": args.mission_id, "outcome_id": args.outcome_id})
+    payload["evidence_refs"].extend([f"after_action_review:{review['review_id']}", f"mission:{args.mission_id}", f"mission_outcome:{args.outcome_id}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_mission_audit_export(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.export_mission_audit(args.mission_id, requested_scope)
+    payload = base_response("cornerstone mission audit-export", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="MISSION_AUDIT_EXPORT")
+        print_payload(payload, args.json)
+        return exit_code
+    export = result["mission_audit_export"]
+    payload["mission_audit_export"] = export
+    payload["ids"].update({"export_id": export["export_id"], "mission_id": args.mission_id})
+    payload["evidence_refs"].extend([f"mission_audit_export:{export['export_id']}", f"mission:{args.mission_id}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_autopilot_metrics(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.autonomy_quality_metrics(args.mission_id, args.outcome_id, requested_scope)
+    payload = base_response("cornerstone autopilot metrics", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="AUTOPILOT_METRICS")
+        print_payload(payload, args.json)
+        return exit_code
+    metrics = result["autonomy_metrics"]
+    payload["autonomy_metrics"] = metrics
+    payload["ids"].update({"metric_id": metrics["metric_id"], "mission_id": args.mission_id, "outcome_id": args.outcome_id})
+    payload["evidence_refs"].extend([f"autonomy_metrics:{metrics['metric_id']}", f"mission:{args.mission_id}", f"mission_outcome:{args.outcome_id}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_action_reversibility_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.test_action_reversibility(args.action_id, requested_scope, args.mode)
+    payload = base_response("cornerstone action reversibility-test", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+        exit_code = _record_command_failure(payload, result, resource_label="ACTION_REVERSIBILITY")
+        print_payload(payload, args.json)
+        return exit_code
+    record = result["action_reversibility"]
+    payload["action_reversibility"] = record
+    payload["ids"].update({"reversibility_id": record["reversibility_id"], "action_id": args.action_id})
+    payload["evidence_refs"].extend([f"action_reversibility:{record['reversibility_id']}", f"action:{args.action_id}"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_security_sensitive_change_test(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -3729,6 +3969,40 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_full_security_operations(root)
     elif args.contract == "full-namespace-governance":
         report = verify_full_namespace_governance(root)
+    elif args.contract == "full-mission-control-autonomy-lifecycle":
+        report = verify_full_mission_control_autonomy_lifecycle(root)
+    elif args.contract == "full":
+        final_batch_ids = {
+            "CS-PROD-006",
+            "CS-PROD-007",
+            "CS-PROD-008",
+            "CS-PROD-009",
+            "CS-PROD-010",
+            "CS-AUTO-012",
+            "CS-AUTO-013",
+            "CS-AUTO-014",
+            "CS-AUTO-015",
+            "CS-AUTO-016",
+            "CS-AUTO-017",
+            "CS-AUTO-018",
+            "CS-AUTO-019",
+            "CS-REG-019",
+        }
+        requested = set(args.scenario or [])
+        if requested and requested <= final_batch_ids:
+            report = verify_full_mission_control_autonomy_lifecycle(root)
+        else:
+            payload = base_response("cornerstone scenario verify full", "failed", root)
+            payload["errors"].append(
+                {
+                    "code": "CS_FULL_SCENARIO_FILTER_REQUIRED",
+                    "message": "Use the explicit batch contract for broad verification, or pass a scenario ID implemented by the final full batch.",
+                    "supported_scenarios": sorted(final_batch_ids),
+                    "requested": sorted(requested),
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_INVALID
     elif args.contract == "full-learning-experience":
         report = verify_full_learning_experience(root)
     elif args.contract == "full-extension-ecosystem":
@@ -3769,6 +4043,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "full-brain-routing",
                     "full-security-operations",
                     "full-namespace-governance",
+                    "full-mission-control-autonomy-lifecycle",
+                    "full",
                     "full-extension-ecosystem",
                     "full-learning-experience",
                     "full-memory-wiki",
@@ -3778,6 +4054,31 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_INVALID
+
+    if args.scenario and args.contract != "vs0-fixtures":
+        requested = set(args.scenario)
+        rows = report.get("scenario_results", [])
+        present = {row.get("id") for row in rows}
+        missing = sorted(requested - present)
+        report["scenario_filter"] = sorted(requested)
+        if missing:
+            report["status"] = "failed"
+            report.setdefault("errors", []).append(
+                {
+                    "code": "CS_SCENARIO_FILTER_MISSING",
+                    "message": "Requested product scenario is not covered by this verification contract.",
+                    "missing": missing,
+                }
+            )
+        else:
+            filtered_rows = [row for row in rows if row.get("id") in requested]
+            report["scenario_results"] = filtered_rows
+            blocking = [row for row in filtered_rows if row.get("status") != "PASS" and row.get("owner") != "Human"]
+            report.setdefault("summary", {})
+            report["summary"]["scenario_count"] = len(filtered_rows)
+            report["summary"]["pass"] = len([row for row in filtered_rows if row.get("status") == "PASS"])
+            report["summary"]["blocking"] = len(blocking)
+            report["status"] = "success" if not blocking else "failed"
 
     payload = base_response(f"cornerstone scenario verify {args.contract}", report["status"], root)
     payload.update(report)
@@ -3864,6 +4165,42 @@ def build_parser() -> argparse.ArgumentParser:
     walkthrough = product_sub.add_parser("walkthrough", help="Show the first-run product walkthrough")
     walkthrough.add_argument("--json", action="store_true", help="Emit JSON output")
     walkthrough.set_defaults(func=command_product_walkthrough)
+
+    mission_control = product_sub.add_parser("mission-control", help="Show Mission Control / Ops Inbox projection")
+    add_state_argument(mission_control)
+    add_scope_arguments(mission_control)
+    mission_control.add_argument("--json", action="store_true", help="Emit JSON output")
+    mission_control.set_defaults(func=command_product_mission_control)
+
+    loop_view = product_sub.add_parser("loop-view", help="Show Inbox to Learn journey for one item")
+    loop_view.add_argument("--conversation-id")
+    loop_view.add_argument("--brief-id")
+    loop_view.add_argument("--claim-id")
+    loop_view.add_argument("--mission-id")
+    loop_view.add_argument("--action-id")
+    loop_view.add_argument("--outcome-id")
+    add_state_argument(loop_view)
+    add_scope_arguments(loop_view)
+    loop_view.add_argument("--json", action="store_true", help="Emit JSON output")
+    loop_view.set_defaults(func=command_product_loop_view)
+
+    boundary = product_sub.add_parser("boundary", help="Show source-system and CornerStone boundary copy")
+    add_state_argument(boundary)
+    add_scope_arguments(boundary)
+    boundary.add_argument("--json", action="store_true", help="Emit JSON output")
+    boundary.set_defaults(func=command_product_boundary)
+
+    plain_language = product_sub.add_parser("plain-language-review", help="Verify plain product language for first value and mission work")
+    add_state_argument(plain_language)
+    add_scope_arguments(plain_language)
+    plain_language.add_argument("--json", action="store_true", help="Emit JSON output")
+    plain_language.set_defaults(func=command_product_plain_language)
+
+    repo_split = product_sub.add_parser("repo-split-review", help="Verify UX labels do not require internal repo mental models")
+    add_state_argument(repo_split)
+    add_scope_arguments(repo_split)
+    repo_split.add_argument("--json", action="store_true", help="Emit JSON output")
+    repo_split.set_defaults(func=command_product_repo_split_review)
 
     wiki = subcommands.add_parser("wiki", help="Permanent wiki view commands")
     wiki_sub = wiki.add_subparsers(dest="wiki_command")
@@ -4175,6 +4512,14 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(autopilot_readiness)
     autopilot_readiness.add_argument("--json", action="store_true", help="Emit JSON output")
     autopilot_readiness.set_defaults(func=command_autopilot_readiness)
+
+    autopilot_metrics = autopilot_sub.add_parser("metrics", help="Report outcome-quality-first autonomy metrics")
+    autopilot_metrics.add_argument("--mission-id", required=True, help="Mission ID")
+    autopilot_metrics.add_argument("--outcome-id", required=True, help="Mission outcome ID")
+    add_state_argument(autopilot_metrics)
+    add_scope_arguments(autopilot_metrics)
+    autopilot_metrics.add_argument("--json", action="store_true", help="Emit JSON output")
+    autopilot_metrics.set_defaults(func=command_autopilot_metrics)
 
     memory = subcommands.add_parser("memory", help="Durable owner-approved memory commands")
     memory_sub = memory.add_subparsers(dest="memory_command")
@@ -4830,6 +5175,50 @@ def build_parser() -> argparse.ArgumentParser:
     mission_show.add_argument("--json", action="store_true", help="Emit JSON output")
     mission_show.set_defaults(func=command_mission_show)
 
+    mission_autonomy = mission_sub.add_parser("autonomy-control", help="Pause, stop, revoke, or reduce mission autonomy")
+    mission_autonomy.add_argument("mission_id", help="Mission ID")
+    mission_autonomy.add_argument("--control", choices=["pause", "stop", "revoke", "reduce"], required=True)
+    mission_autonomy.add_argument("--reason", required=True)
+    add_state_argument(mission_autonomy)
+    add_scope_arguments(mission_autonomy)
+    mission_autonomy.add_argument("--json", action="store_true", help="Emit JSON output")
+    mission_autonomy.set_defaults(func=command_mission_autonomy_control)
+
+    mission_escalate = mission_sub.add_parser("escalate", help="Create a mission exception escalation card")
+    mission_escalate.add_argument("mission_id", help="Mission ID")
+    mission_escalate.add_argument(
+        "--exception",
+        choices=["missing_evidence", "policy_denial", "connector_failure", "model_disagreement", "unclear_goal", "high_risk_action"],
+        required=True,
+    )
+    add_state_argument(mission_escalate)
+    add_scope_arguments(mission_escalate)
+    mission_escalate.add_argument("--json", action="store_true", help="Emit JSON output")
+    mission_escalate.set_defaults(func=command_mission_escalate)
+
+    mission_outcome = mission_sub.add_parser("outcome", help="Record a mission outcome evaluation")
+    mission_outcome.add_argument("mission_id", help="Mission ID")
+    mission_outcome.add_argument("--action-id", required=True, help="Executed Action ID")
+    add_state_argument(mission_outcome)
+    add_scope_arguments(mission_outcome)
+    mission_outcome.add_argument("--json", action="store_true", help="Emit JSON output")
+    mission_outcome.set_defaults(func=command_mission_outcome)
+
+    mission_aar = mission_sub.add_parser("after-action-review", help="Generate a mission after-action review and scorecard")
+    mission_aar.add_argument("mission_id", help="Mission ID")
+    mission_aar.add_argument("--outcome-id", required=True, help="Mission outcome ID")
+    add_state_argument(mission_aar)
+    add_scope_arguments(mission_aar)
+    mission_aar.add_argument("--json", action="store_true", help="Emit JSON output")
+    mission_aar.set_defaults(func=command_mission_after_action)
+
+    mission_audit_export = mission_sub.add_parser("audit-export", help="Export a mission audit-first report")
+    mission_audit_export.add_argument("mission_id", help="Mission ID")
+    add_state_argument(mission_audit_export)
+    add_scope_arguments(mission_audit_export)
+    mission_audit_export.add_argument("--json", action="store_true", help="Emit JSON output")
+    mission_audit_export.set_defaults(func=command_mission_audit_export)
+
     action = subcommands.add_parser("action", help="Governed Workflow/Action commands")
     action_sub = action.add_subparsers(dest="action_command")
 
@@ -4868,6 +5257,14 @@ def build_parser() -> argparse.ArgumentParser:
     action_idempotency.add_argument("--json", action="store_true", help="Emit JSON output")
     action_idempotency.set_defaults(func=command_action_idempotency_test)
 
+    action_reversibility = action_sub.add_parser("reversibility-test", help="Review rollback, compensation, retry, or non-reversible action handling")
+    action_reversibility.add_argument("action_id", help="Action ID")
+    action_reversibility.add_argument("--mode", choices=["rollback", "compensation", "retry", "non_reversible"], required=True)
+    add_state_argument(action_reversibility)
+    add_scope_arguments(action_reversibility)
+    action_reversibility.add_argument("--json", action="store_true", help="Emit JSON output")
+    action_reversibility.set_defaults(func=command_action_reversibility_test)
+
     connector = subcommands.add_parser("connector", help="Connector boundary commands")
     connector_sub = connector.add_subparsers(dest="connector_command")
 
@@ -4886,6 +5283,13 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(credential_boundary)
     credential_boundary.add_argument("--json", action="store_true", help="Emit JSON output")
     credential_boundary.set_defaults(func=command_connector_credential_boundary_test)
+
+    action_trace = connector_sub.add_parser("action-trace", help="Record ConnectorHub-mediated provider action trace")
+    action_trace.add_argument("action_id", help="Action ID")
+    add_state_argument(action_trace)
+    add_scope_arguments(action_trace)
+    action_trace.add_argument("--json", action="store_true", help="Emit JSON output")
+    action_trace.set_defaults(func=command_connector_action_trace)
 
     security = subcommands.add_parser("security", help="Security and operations verification helpers")
     security_sub = security.add_subparsers(dest="security_command")

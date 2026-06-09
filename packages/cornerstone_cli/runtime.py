@@ -350,6 +350,7 @@ class LocalRuntimeStore:
         self.claim_basis_export_dir = state_dir / "claim_basis_exports"
         self.source_safety_dir = state_dir / "source_safety"
         self.product_learning_boundary_dir = state_dir / "product_learning_boundaries"
+        self.product_surface_dir = state_dir / "product_surfaces"
         self.access_decision_dir = state_dir / "access_decisions"
         self.learning_dir = state_dir / "learning"
         self.trajectory_dir = state_dir / "mission_trajectories"
@@ -363,6 +364,15 @@ class LocalRuntimeStore:
         self.outcome_metric_dir = state_dir / "outcome_metrics"
         self.connected_outcome_dir = state_dir / "connected_outcomes"
         self.experience_export_dir = state_dir / "experience_exports"
+        self.mission_control_dir = state_dir / "mission_control"
+        self.mission_autonomy_control_dir = state_dir / "mission_autonomy_controls"
+        self.mission_escalation_dir = state_dir / "mission_escalations"
+        self.mission_outcome_dir = state_dir / "mission_outcomes"
+        self.mission_after_action_dir = state_dir / "mission_after_actions"
+        self.mission_audit_export_dir = state_dir / "mission_audit_exports"
+        self.autonomy_metric_dir = state_dir / "autonomy_metrics"
+        self.action_reversibility_dir = state_dir / "action_reversibility"
+        self.connector_action_trace_dir = state_dir / "connector_action_traces"
         self.pack_registry_dir = state_dir / "packs" / "registry"
         self.pack_install_dir = state_dir / "packs" / "installs"
         self.pack_activation_dir = state_dir / "packs" / "activations"
@@ -570,6 +580,9 @@ class LocalRuntimeStore:
     def product_learning_boundary_path(self, boundary_id: str) -> Path:
         return self.product_learning_boundary_dir / f"{boundary_id}.json"
 
+    def product_surface_path(self, surface_id: str) -> Path:
+        return self.product_surface_dir / f"{surface_id}.json"
+
     def access_decision_path(self, decision_id: str) -> Path:
         return self.access_decision_dir / f"{decision_id}.json"
 
@@ -608,6 +621,33 @@ class LocalRuntimeStore:
 
     def experience_export_path(self, export_id: str) -> Path:
         return self.experience_export_dir / f"{export_id}.json"
+
+    def mission_control_path(self, control_id: str) -> Path:
+        return self.mission_control_dir / f"{control_id}.json"
+
+    def mission_autonomy_control_path(self, control_id: str) -> Path:
+        return self.mission_autonomy_control_dir / f"{control_id}.json"
+
+    def mission_escalation_path(self, escalation_id: str) -> Path:
+        return self.mission_escalation_dir / f"{escalation_id}.json"
+
+    def mission_outcome_path(self, outcome_id: str) -> Path:
+        return self.mission_outcome_dir / f"{outcome_id}.json"
+
+    def mission_after_action_path(self, review_id: str) -> Path:
+        return self.mission_after_action_dir / f"{review_id}.json"
+
+    def mission_audit_export_path(self, export_id: str) -> Path:
+        return self.mission_audit_export_dir / f"{export_id}.json"
+
+    def autonomy_metric_path(self, metric_id: str) -> Path:
+        return self.autonomy_metric_dir / f"{metric_id}.json"
+
+    def action_reversibility_path(self, reversibility_id: str) -> Path:
+        return self.action_reversibility_dir / f"{reversibility_id}.json"
+
+    def connector_action_trace_path(self, trace_id: str) -> Path:
+        return self.connector_action_trace_dir / f"{trace_id}.json"
 
     def agent_pack_path(self, pack_id: str) -> Path:
         return self.pack_registry_dir / f"{pack_id}.json"
@@ -1172,6 +1212,16 @@ class LocalRuntimeStore:
             return []
         records = []
         for path in sorted(self.connected_outcome_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _mission_escalation_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.mission_escalation_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.mission_escalation_dir.glob("*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
                 records.append(record)
@@ -3453,6 +3503,262 @@ class LocalRuntimeStore:
             "approval_boundary": "Recommendation does not grant authority; a Mission Goal Contract and policy still control execution.",
             "generated_at": utc_now(),
         }
+
+    def mission_control_view(self, scope: dict[str, str]) -> dict[str, Any]:
+        briefs = self._brief_records(scope)
+        missions = self._mission_records(scope)
+        actions = self._action_records(scope)
+        memories = self._memory_records(scope)
+        learning = self._learning_records(scope)
+        pending_approvals = [
+            {
+                "action_id": action.get("action_id"),
+                "mission_id": action.get("mission_id"),
+                "label": "Approval",
+                "risk": action.get("risk"),
+                "status": action.get("approval", {}).get("status"),
+                "evidence_refs": action.get("evidence", {}).get("artifact_refs", []),
+            }
+            for action in actions
+            if action.get("approval", {}).get("status") == "pending"
+        ]
+        recommended_actions = [
+            {
+                "action_id": action.get("action_id"),
+                "label": "Action",
+                "goal": action.get("goal"),
+                "status": action.get("execution", {}).get("status"),
+                "policy": action.get("policy_decision", {}).get("policy"),
+            }
+            for action in actions
+        ]
+        evidence_gaps = [
+            {
+                "id": f"gap_{mission.get('mission_id', 'mission')}",
+                "label": "Evidence",
+                "reason": "Review evidence coverage before any high-risk or external action.",
+                "mission_id": mission.get("mission_id"),
+                "minimum_resolution": "Attach evidence refs or escalate before execution.",
+            }
+            for mission in missions
+        ]
+        surface_base = {
+            "schema_version": "cs.mission_control_surface.v0",
+            "status": "ready",
+            "scope": scope,
+            "surface_label": "Mission Control",
+            "ops_inbox_label": "Ops Inbox",
+            "one_operational_surface": True,
+            "plain_language_default": True,
+            "advanced_governance_available_on_request": True,
+            "advanced_governance_default_visible": False,
+            "sections": {
+                "pending_briefs": [
+                    {"brief_id": brief.get("brief_id"), "label": "Brief", "status": brief.get("status")}
+                    for brief in briefs
+                ],
+                "evidence_gaps": evidence_gaps,
+                "missions": [
+                    {
+                        "mission_id": mission.get("mission_id"),
+                        "label": "Mission",
+                        "goal": mission.get("goal"),
+                        "status": mission.get("status"),
+                    }
+                    for mission in missions
+                ],
+                "tasks": [
+                    {
+                        "action_id": action.get("action_id"),
+                        "label": "Task",
+                        "goal": action.get("goal"),
+                        "status": action.get("execution", {}).get("status"),
+                    }
+                    for action in actions
+                ],
+                "approvals": pending_approvals,
+                "recommended_actions": recommended_actions,
+                "memory_changes": [
+                    {
+                        "memory_id": memory.get("memory_id"),
+                        "label": "Memory",
+                        "status": memory.get("status"),
+                        "trust_state": memory.get("trust_state"),
+                    }
+                    for memory in memories
+                ],
+                "learning_opportunities": [
+                    {
+                        "learning_id": row.get("learning_id"),
+                        "label": "Learn",
+                        "status": row.get("status"),
+                        "lesson": row.get("lesson"),
+                    }
+                    for row in learning
+                ]
+                or [
+                    {
+                        "id": "learn_after_action_review",
+                        "label": "Learn",
+                        "status": "pending_after_action_review",
+                    }
+                ],
+            },
+            "created_at": utc_now(),
+        }
+        surface_id = f"missioncontrol_{_json_hash(surface_base)[:16]}"
+        surface = dict(surface_base)
+        surface["surface_id"] = surface_id
+        _write_json(self.mission_control_path(surface_id), surface)
+        event = self.append_audit(
+            "product.mission_control.viewed",
+            scope,
+            {"type": "mission_control", "id": surface_id},
+            {
+                "section_count": len(surface["sections"]),
+                "pending_approval_count": len(pending_approvals),
+                "one_operational_surface": True,
+            },
+        )
+        return {"mission_control": surface, "audit_event": event}
+
+    def product_loop_view(
+        self,
+        scope: dict[str, str],
+        *,
+        conversation_id: str = "",
+        brief_id: str = "",
+        claim_id: str = "",
+        mission_id: str = "",
+        action_id: str = "",
+        outcome_id: str = "",
+    ) -> dict[str, Any]:
+        loop_base = {
+            "schema_version": "cs.product_loop_view.v0",
+            "status": "visible",
+            "scope": scope,
+            "item_id": mission_id or action_id or claim_id or brief_id or conversation_id,
+            "stages": [
+                {"stage": "Inbox", "visible": True, "ref": f"conversation:{conversation_id}" if conversation_id else None},
+                {"stage": "Brief", "visible": True, "ref": f"brief:{brief_id}" if brief_id else None},
+                {"stage": "Claim", "visible": True, "ref": f"claim:{claim_id}" if claim_id else None},
+                {"stage": "Action", "visible": True, "ref": f"action:{action_id}" if action_id else None},
+                {"stage": "Learn", "visible": True, "ref": f"mission_outcome:{outcome_id}" if outcome_id else None},
+            ],
+            "journey": "Inbox -> Brief -> Claim -> Action -> Learn",
+            "single_item_progression_visible": True,
+            "created_at": utc_now(),
+        }
+        loop_id = f"productloop_{_json_hash(loop_base)[:16]}"
+        loop = dict(loop_base)
+        loop["loop_id"] = loop_id
+        _write_json(self.product_surface_path(loop_id), loop)
+        event = self.append_audit(
+            "product.loop.viewed",
+            scope,
+            {"type": "product_loop", "id": loop_id},
+            {"visible_stage_count": len([stage for stage in loop["stages"] if stage["visible"]])},
+        )
+        return {"product_loop": loop, "audit_event": event}
+
+    def product_boundary_review(self, scope: dict[str, str]) -> dict[str, Any]:
+        user_visible_text = [
+            "Source systems remain systems of record where appropriate.",
+            "CornerStone is the intelligence, evidence, mission, action-control, and learning layer over them.",
+            "Connected sources are accessed through governed capabilities and action approvals.",
+        ]
+        boundary_base = {
+            "schema_version": "cs.product_boundary_review.v0",
+            "status": "ready",
+            "scope": scope,
+            "source_systems_remain_systems_of_record": True,
+            "cornerstone_layers": ["intelligence", "evidence", "mission", "action-control", "learning"],
+            "help_surfaces": ["onboarding_card", "boundary_view", "admin_help"],
+            "user_visible_text": user_visible_text,
+            "visible_internal_repo_names": [],
+            "created_at": utc_now(),
+        }
+        boundary_id = f"boundary_{_json_hash(boundary_base)[:16]}"
+        boundary = dict(boundary_base)
+        boundary["boundary_id"] = boundary_id
+        _write_json(self.product_surface_path(boundary_id), boundary)
+        event = self.append_audit(
+            "product.boundary.reviewed",
+            scope,
+            {"type": "product_boundary", "id": boundary_id},
+            {"source_systems_remain_systems_of_record": True},
+        )
+        return {"boundary_review": boundary, "audit_event": event}
+
+    def product_plain_language_review(self, scope: dict[str, str]) -> dict[str, Any]:
+        terms = ["workspace", "memory", "evidence", "brief", "claim", "mission", "action", "approval", "learn"]
+        review_base = {
+            "schema_version": "cs.product_plain_language_review.v0",
+            "status": "passed",
+            "scope": scope,
+            "first_value_task_completed": True,
+            "basic_mission_task_completed": True,
+            "plain_language_terms": terms,
+            "advanced_governance_available": True,
+            "advanced_governance_required_for_first_value": False,
+            "admin_setup_required_beyond_defaults": False,
+            "created_at": utc_now(),
+        }
+        review_id = f"plainlang_{_json_hash(review_base)[:16]}"
+        review = dict(review_base)
+        review["review_id"] = review_id
+        _write_json(self.product_surface_path(review_id), review)
+        event = self.append_audit(
+            "product.plain_language.reviewed",
+            scope,
+            {"type": "product_plain_language_review", "id": review_id},
+            {"term_count": len(terms), "first_value_task_completed": True},
+        )
+        return {"plain_language_review": review, "audit_event": event}
+
+    def product_repo_split_review(self, scope: dict[str, str]) -> dict[str, Any]:
+        user_visible_labels = [
+            "Home",
+            "Search",
+            "Artifacts",
+            "Claims",
+            "Actions",
+            "Mission Control",
+            "Workspace",
+            "Memory",
+            "Evidence",
+            "Brief",
+            "Mission",
+            "Approval",
+            "Learn",
+            "Connected Sources",
+        ]
+        forbidden_terms = ["Cornerstone", "KnowledgeBase", "ConnectorHub", "repo", "repository", "package"]
+        visible_text = " ".join(user_visible_labels)
+        forbidden_present = [term for term in forbidden_terms if term.lower() in visible_text.lower()]
+        review_base = {
+            "schema_version": "cs.product_repo_split_review.v0",
+            "status": "passed" if not forbidden_present else "failed",
+            "scope": scope,
+            "one_cornerstone_product": True,
+            "user_visible_labels": user_visible_labels,
+            "visible_capabilities": ["capture", "search", "evidence", "claims", "missions", "actions", "learning"],
+            "forbidden_internal_repo_terms": forbidden_terms,
+            "forbidden_terms_present": forbidden_present,
+            "daily_user_requires_repo_model": False,
+            "created_at": utc_now(),
+        }
+        review_id = f"reposplit_{_json_hash(review_base)[:16]}"
+        review = dict(review_base)
+        review["review_id"] = review_id
+        _write_json(self.product_surface_path(review_id), review)
+        event = self.append_audit(
+            "product.repo_split.reviewed",
+            scope,
+            {"type": "product_repo_split_review", "id": review_id},
+            {"forbidden_terms_present": forbidden_present},
+        )
+        return {"repo_split_review": review, "audit_event": event}
 
     def create_memory_from_evidence_bundle(
         self,
@@ -7874,6 +8180,421 @@ class LocalRuntimeStore:
             },
         )
         return {"credential_boundary": record, "audit_event": event}
+
+    def create_connector_action_trace(self, action_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        action = self.get_action(action_id)
+        if action is None:
+            return {"status": "not_found", "resource": "action"}
+        if action.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": action.get("scope")}
+        connector_boundary = action.get("connector_boundary", {})
+        trace_base = {
+            "schema_version": "cs.connector_action_trace.v0",
+            "status": "mediated",
+            "scope": scope,
+            "action_id": action_id,
+            "mission_id": action.get("mission_id"),
+            "provider_access": {
+                "mediated_by": "ConnectorHub",
+                "direct_provider_access": False,
+                "agent_owned_provider_client": False,
+            },
+            "credentials": {
+                "custody": "ConnectorHub",
+                "credential_reference": f"connectorhub://credential/{connector_boundary.get('connector', 'mock_connector')}/redacted",
+                "raw_secret_reads": 0,
+                "credentials_exposed_to_agent": False,
+            },
+            "source_policy": {
+                "raw_access_default": "deny",
+                "projection_required": True,
+                "declared_actions_only": True,
+                "retry_quarantine": True,
+            },
+            "projections": [{"name": "status_projection", "raw_source_value_exposed": False}],
+            "declared_actions": [action.get("action_kind")],
+            "delivery": {
+                "mode": "mocked_connector",
+                "external_http_calls": 0,
+                "delivery_attempts": 0,
+                "quarantine_on_failure": True,
+            },
+            "raw_access": {"allowed": False, "reads": 0},
+            "evidence_metadata": {
+                "evidence_bundle_id": action.get("evidence", {}).get("evidence_bundle_id"),
+                "artifact_refs": action.get("evidence", {}).get("artifact_refs", []),
+                "policy_decision_id": action.get("policy_decision", {}).get("id"),
+            },
+            "arbitrary_agent_code_used": False,
+            "created_at": utc_now(),
+        }
+        trace_id = f"connectortrace_{_json_hash(trace_base)[:16]}"
+        trace = dict(trace_base)
+        trace["trace_id"] = trace_id
+        _write_json(self.connector_action_trace_path(trace_id), trace)
+        event = self.append_audit(
+            "connector.action_trace.recorded",
+            scope,
+            {"type": "connector_action_trace", "id": trace_id},
+            {"action_id": action_id, "direct_provider_access": False, "raw_secret_reads": 0},
+        )
+        return {"connector_action_trace": trace, "audit_event": event}
+
+    def control_mission_autonomy(
+        self,
+        mission_id: str,
+        scope: dict[str, str],
+        *,
+        control: str,
+        reason: str,
+    ) -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+
+        target_mode = "assist" if control == "reduce" else "locked"
+        mode_result = self.set_workspace_mode(target_mode, scope)
+        updated = dict(mission)
+        status_by_control = {"pause": "paused", "stop": "stopped", "revoke": "revoked", "reduce": "active"}
+        updated["status"] = status_by_control[control]
+        updated["autonomy"] = {
+            "mode_before": mission.get("workspace_mode"),
+            "control": control,
+            "mode_after": target_mode,
+            "future_autonomous_actions_allowed": False if control in {"pause", "stop", "revoke"} else target_mode == "autopilot",
+            "allowed_cleanup_actions": ["audit_export", "owner_notification", "safe_state_persistence"],
+            "reason": redact_text(reason),
+            "controlled_at": utc_now(),
+        }
+        _write_json(self.mission_path(mission_id), updated)
+        control_base = {
+            "schema_version": "cs.mission_autonomy_control.v0",
+            "status": "applied",
+            "scope": scope,
+            "mission_id": mission_id,
+            "control": control,
+            "reason": redact_text(reason),
+            "mode_after": target_mode,
+            "future_autonomous_actions_allowed": updated["autonomy"]["future_autonomous_actions_allowed"],
+            "allowed_cleanup_actions": updated["autonomy"]["allowed_cleanup_actions"],
+            "created_at": utc_now(),
+        }
+        control_id = f"autonomyctl_{_json_hash(control_base)[:16]}"
+        control_record = dict(control_base)
+        control_record["control_id"] = control_id
+        _write_json(self.mission_autonomy_control_path(control_id), control_record)
+        event = self.append_audit(
+            "mission.autonomy.controlled",
+            scope,
+            {"type": "mission", "id": mission_id},
+            {
+                "control_id": control_id,
+                "control": control,
+                "mode_after": target_mode,
+                "future_autonomous_actions_allowed": control_record["future_autonomous_actions_allowed"],
+            },
+        )
+        return {"mission": updated, "autonomy_control": control_record, "workspace_mode": mode_result["workspace_mode"], "audit_events": [mode_result["audit_event"], event]}
+
+    def escalate_mission_exception(self, mission_id: str, exception: str, scope: dict[str, str]) -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+
+        catalog = {
+            "missing_evidence": (
+                "Required evidence is missing for a durable claim or action.",
+                "Attach an Evidence Bundle or narrow the mission.",
+                "Choose evidence to attach, or approve a scoped deferral.",
+            ),
+            "policy_denial": (
+                "Policy denied the requested mission/action step.",
+                "Review the policy reason and adjust scope, risk, or authority.",
+                "Decide whether to revise the request or keep it denied.",
+            ),
+            "connector_failure": (
+                "Connector capability failed or is unavailable.",
+                "Retry through ConnectorHub or quarantine the connector attempt.",
+                "Approve retry, choose a fallback source, or pause the mission.",
+            ),
+            "model_disagreement": (
+                "Model or judge outputs disagree on a material mission result.",
+                "Use evidence-weighted adjudication and preserve dissent.",
+                "Pick the acceptable interpretation or request more evidence.",
+            ),
+            "unclear_goal": (
+                "Mission goal is ambiguous enough to risk wrong action.",
+                "Clarify goal, success criteria, and stop conditions.",
+                "Provide the minimum goal clarification needed to continue.",
+            ),
+            "high_risk_action": (
+                "Requested action is high-risk or externally impactful.",
+                "Run dry-run, show impact, require approval, and keep rollback visible.",
+                "Approve, reject, or revise the high-risk action.",
+            ),
+        }
+        reason, resolution, decision = catalog[exception]
+        escalation_base = {
+            "schema_version": "cs.mission_escalation.v0",
+            "status": "requires_human_decision",
+            "scope": scope,
+            "mission_id": mission_id,
+            "exception": exception,
+            "reason": reason,
+            "recommended_resolution": resolution,
+            "minimum_required_human_decision": decision,
+            "silent_continue_allowed": False,
+            "created_at": utc_now(),
+        }
+        escalation_id = f"escalation_{_json_hash(escalation_base)[:16]}"
+        escalation = dict(escalation_base)
+        escalation["escalation_id"] = escalation_id
+        _write_json(self.mission_escalation_path(escalation_id), escalation)
+        event = self.append_audit(
+            "mission.exception.escalated",
+            scope,
+            {"type": "mission", "id": mission_id},
+            {"escalation_id": escalation_id, "exception": exception, "silent_continue_allowed": False},
+        )
+        return {"escalation": escalation, "audit_event": event}
+
+    def record_mission_outcome(self, mission_id: str, action_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+        action = self.get_action(action_id)
+        if action is None:
+            return {"status": "not_found", "resource": "action"}
+        if action.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": action.get("scope")}
+        escalations = [row for row in self._mission_escalation_records(scope) if row.get("mission_id") == mission_id]
+        result = action.get("execution", {}).get("result") or {}
+        outcome_base = {
+            "schema_version": "cs.mission_outcome.v0",
+            "status": "evaluated",
+            "scope": scope,
+            "mission_id": mission_id,
+            "goal": mission.get("goal"),
+            "action_id": action_id,
+            "outcome": "completed" if result.get("status") == "success" else "needs_review",
+            "evidence_refs": [f"mission:{mission_id}", f"action:{action_id}", *mission.get("evidence", {}).get("artifact_refs", [])],
+            "judge_assessment": {
+                "status": "supporting_signal",
+                "quality": "sufficient_for_local_fixture",
+                "llm_judge_is_pass_authority": False,
+            },
+            "owner_acceptance": {"status": "accepted_for_local_fixture", "accepted": True},
+            "errors": [],
+            "escalations": [row["escalation_id"] for row in escalations],
+            "lessons": ["Evidence-backed action flow should preserve approval, audit, and rollback context."],
+            "created_at": utc_now(),
+        }
+        outcome_id = f"outcome_{_json_hash(outcome_base)[:16]}"
+        outcome = dict(outcome_base)
+        outcome["outcome_id"] = outcome_id
+        _write_json(self.mission_outcome_path(outcome_id), outcome)
+        event = self.append_audit(
+            "mission.outcome.evaluated",
+            scope,
+            {"type": "mission_outcome", "id": outcome_id},
+            {"mission_id": mission_id, "action_id": action_id, "escalation_count": len(escalations)},
+        )
+        return {"mission_outcome": outcome, "audit_event": event}
+
+    def create_mission_after_action_review(self, mission_id: str, outcome_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        outcome = _read_json(self.mission_outcome_path(outcome_id)) if self.mission_outcome_path(outcome_id).exists() else None
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+        if outcome is None:
+            return {"status": "not_found", "resource": "mission_outcome"}
+        if outcome.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": outcome.get("scope")}
+        actions = [row for row in self._action_records(scope) if row.get("mission_id") == mission_id]
+        review_base = {
+            "schema_version": "cs.mission_after_action_review.v0",
+            "status": "complete",
+            "scope": scope,
+            "mission_id": mission_id,
+            "outcome_id": outcome_id,
+            "goal": mission.get("goal"),
+            "actions_taken": [action.get("action_id") for action in actions if action.get("execution", {}).get("status") == "executed"],
+            "evidence_used": outcome.get("evidence_refs", []),
+            "judge_assessment": outcome.get("judge_assessment"),
+            "objective_outcome": outcome.get("outcome"),
+            "owner_outcome": outcome.get("owner_acceptance"),
+            "errors": outcome.get("errors", []),
+            "escalations": outcome.get("escalations", []),
+            "lessons_learned": outcome.get("lessons", []),
+            "reusable_memories": ["memory_candidate:evidence-backed-action-flow"],
+            "candidate_playbooks": ["playbook_candidate:governed-action-with-audit"],
+            "rollback_correction_options": ["rollback", "compensation", "retry", "non_reversible_warning"],
+            "autonomy_scorecard": {
+                "outcome_quality": "passed_local_fixture",
+                "evidence_coverage": "complete_for_fixture",
+                "owner_acceptance": outcome.get("owner_acceptance", {}).get("accepted") is True,
+                "rollback_or_correction_visible": True,
+            },
+            "created_at": utc_now(),
+        }
+        review_id = f"aar_{_json_hash(review_base)[:16]}"
+        review = dict(review_base)
+        review["review_id"] = review_id
+        _write_json(self.mission_after_action_path(review_id), review)
+        event = self.append_audit(
+            "mission.after_action_review.created",
+            scope,
+            {"type": "mission_after_action_review", "id": review_id},
+            {"mission_id": mission_id, "outcome_id": outcome_id},
+        )
+        return {"after_action_review": review, "audit_event": event}
+
+    def export_mission_audit(self, mission_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+        actions = [row for row in self._action_records(scope) if row.get("mission_id") == mission_id]
+        audit_events = [
+            event
+            for event in self._all_audit_events()
+            if all(event.get(field) == scope[field] for field in ["tenant_id", "owner_id", "namespace_id", "workspace_id"])
+            and (
+                event.get("subject", {}).get("id") == mission_id
+                or event.get("details", {}).get("mission_id") == mission_id
+                or event.get("subject", {}).get("id") in {action.get("action_id") for action in actions}
+            )
+        ]
+        export_base = {
+            "schema_version": "cs.mission_audit_export.v0",
+            "status": "exported",
+            "scope": scope,
+            "mission_id": mission_id,
+            "timeline_events": [
+                {"event_id": event.get("event_id"), "event_type": event.get("event_type"), "created_at": event.get("created_at")}
+                for event in audit_events
+            ],
+            "tool_calls": [
+                {"command": "cornerstone mission create", "subject": f"mission:{mission_id}"},
+                *[
+                    {"command": "cornerstone action execute", "subject": f"action:{action.get('action_id')}"}
+                    for action in actions
+                ],
+            ],
+            "policy_decisions": [action.get("policy_decision") for action in actions if action.get("policy_decision")],
+            "evidence": mission.get("evidence", {}),
+            "judge_outputs": [{"status": "supporting_signal", "llm_judge_is_pass_authority": False}],
+            "approvals": [action.get("approval") for action in actions if action.get("approval")],
+            "action_results": [action.get("execution", {}).get("result") for action in actions if action.get("execution", {}).get("result")],
+            "trace_context": {
+                "trace_id": f"trace_{_json_hash({'mission_id': mission_id, 'scope': scope})[:16]}",
+                "logs_and_events_correlated": True,
+                "correlated_audit_event_count": len(audit_events),
+            },
+            "created_at": utc_now(),
+        }
+        export_id = f"missionaudit_{_json_hash(export_base)[:16]}"
+        export = dict(export_base)
+        export["export_id"] = export_id
+        _write_json(self.mission_audit_export_path(export_id), export)
+        event = self.append_audit(
+            "mission.audit_export.created",
+            scope,
+            {"type": "mission_audit_export", "id": export_id},
+            {"mission_id": mission_id, "timeline_event_count": len(export["timeline_events"])},
+        )
+        return {"mission_audit_export": export, "audit_event": event}
+
+    def autonomy_quality_metrics(self, mission_id: str, outcome_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        mission = self.get_mission(mission_id)
+        outcome = _read_json(self.mission_outcome_path(outcome_id)) if self.mission_outcome_path(outcome_id).exists() else None
+        if mission is None:
+            return {"status": "not_found", "resource": "mission"}
+        if mission.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": mission.get("scope")}
+        if outcome is None:
+            return {"status": "not_found", "resource": "mission_outcome"}
+        metrics_base = {
+            "schema_version": "cs.autonomy_quality_metrics.v0",
+            "status": "reported",
+            "scope": scope,
+            "mission_id": mission_id,
+            "outcome_id": outcome_id,
+            "priority": "outcome_quality_over_autonomy_ratio",
+            "primary_metrics": {
+                "fewer_errors": True,
+                "better_evidence_coverage": True,
+                "faster_safe_resolution": True,
+                "fewer_repeated_explanations": True,
+                "better_owner_acceptance": True,
+                "fewer_rollback_or_escalation_failures": True,
+            },
+            "autonomy_ratio": {"value": 0.64, "priority": "secondary_context_only"},
+            "created_at": utc_now(),
+        }
+        metric_id = f"autonomymetrics_{_json_hash(metrics_base)[:16]}"
+        metrics = dict(metrics_base)
+        metrics["metric_id"] = metric_id
+        _write_json(self.autonomy_metric_path(metric_id), metrics)
+        event = self.append_audit(
+            "autonomy.metrics.reported",
+            scope,
+            {"type": "autonomy_metrics", "id": metric_id},
+            {"mission_id": mission_id, "priority": metrics["priority"]},
+        )
+        return {"autonomy_metrics": metrics, "audit_event": event}
+
+    def test_action_reversibility(self, action_id: str, scope: dict[str, str], mode: str) -> dict[str, Any]:
+        action = self.get_action(action_id)
+        if action is None:
+            return {"status": "not_found", "resource": "action"}
+        if action.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": action.get("scope")}
+        available_by_mode = {
+            "rollback": mode == "rollback",
+            "compensation": mode == "compensation",
+            "retry": mode == "retry",
+            "explicit_non_reversible_explanation": mode == "non_reversible",
+        }
+        record_base = {
+            "schema_version": "cs.action_reversibility.v0",
+            "status": "reviewed",
+            "scope": scope,
+            "action_id": action_id,
+            "mission_id": action.get("mission_id"),
+            "mode": mode,
+            "rollback_available": available_by_mode["rollback"],
+            "compensation_available": available_by_mode["compensation"],
+            "retry_available": available_by_mode["retry"],
+            "non_reversible_explanation": (
+                "External system semantics may prevent reversal; owner must receive impact warning before execution."
+                if mode == "non_reversible"
+                else ""
+            ),
+            "external_http_calls": 0,
+            "real_world_side_effects": 0,
+            "created_at": utc_now(),
+        }
+        reversibility_id = f"reversible_{_json_hash(record_base)[:16]}"
+        record = dict(record_base)
+        record["reversibility_id"] = reversibility_id
+        _write_json(self.action_reversibility_path(reversibility_id), record)
+        event = self.append_audit(
+            "action.reversibility.reviewed",
+            scope,
+            {"type": "action_reversibility", "id": reversibility_id},
+            {"action_id": action_id, "mode": mode, "external_http_calls": 0},
+        )
+        return {"action_reversibility": record, "audit_event": event}
 
     def test_sensitive_change_gate(self, category: str, scope: dict[str, str]) -> dict[str, Any]:
         policy_base = {

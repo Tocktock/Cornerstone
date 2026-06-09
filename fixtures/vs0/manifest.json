@@ -228,6 +228,26 @@
         "CS-REG-007",
         "CS-REG-008"
       ]
+    },
+    {
+      "id": "pack_19_mission_control_autonomy",
+      "path": "packs/19_mission_control_autonomy/pack.json",
+      "scenario_ids": [
+        "CS-PROD-006",
+        "CS-PROD-007",
+        "CS-PROD-008",
+        "CS-PROD-009",
+        "CS-PROD-010",
+        "CS-AUTO-012",
+        "CS-AUTO-013",
+        "CS-AUTO-014",
+        "CS-AUTO-015",
+        "CS-AUTO-016",
+        "CS-AUTO-017",
+        "CS-AUTO-018",
+        "CS-AUTO-019",
+        "CS-REG-019"
+      ]
     }
   ]
 }

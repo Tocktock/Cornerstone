@@ -4,11 +4,11 @@ CS-PROD-002,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-product-loop-i
 CS-PROD-003,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-product-domain-readiness --json,reports/scenario/vs0-product-domain-readiness-2026-06-09.json,,,,,PASS
 CS-PROD-004,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
 CS-PROD-005,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-conversation-onboarding --json,reports/scenario/vs0-conversation-onboarding-2026-06-09.json,,,,,PASS
-CS-PROD-006,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-006 --json,reports/scenario/cs-prod-006.json,,,,,NOT_VERIFIED
-CS-PROD-007,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-007 --json,reports/scenario/cs-prod-007.json,,,,,NOT_VERIFIED
-CS-PROD-008,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-008 --json,reports/scenario/cs-prod-008.json,,,,,NOT_VERIFIED
-CS-PROD-009,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-009 --json,reports/scenario/cs-prod-009.json,,,,,NOT_VERIFIED
-CS-PROD-010,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-010 --json,reports/scenario/cs-prod-010.json,,,,,NOT_VERIFIED
+CS-PROD-006,MUST_PASS,true,U+D,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-PROD-007,MUST_PASS,true,U+D,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-PROD-008,MUST_PASS,true,U+D,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-PROD-009,MUST_PASS,true,U+D,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-PROD-010,MUST_PASS,true,U+D,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
 CS-ARCH-001,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-artifacts --json,reports/scenario/vs0-artifacts-2026-06-09.json,,,,,PASS
 CS-ARCH-002,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-artifacts --json,reports/scenario/vs0-artifacts-2026-06-09.json,,,,,PASS
 CS-ARCH-003,MUST_PASS,true,D,AI,cornerstone scenario verify vs0-artifacts --json,reports/scenario/vs0-artifacts-2026-06-09.json,,,,,PASS
@@ -92,14 +92,14 @@ CS-AUTO-008,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-mission-acti
 CS-AUTO-009,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-AUTO-010,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-AUTO-011,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
-CS-AUTO-012,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-012 --json,reports/scenario/cs-auto-012.json,,,,,NOT_VERIFIED
-CS-AUTO-013,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-013 --json,reports/scenario/cs-auto-013.json,,,,,NOT_VERIFIED
-CS-AUTO-014,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-014 --json,reports/scenario/cs-auto-014.json,,,,,NOT_VERIFIED
-CS-AUTO-015,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-015 --json,reports/scenario/cs-auto-015.json,,,,,NOT_VERIFIED
-CS-AUTO-016,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-016 --json,reports/scenario/cs-auto-016.json,,,,,NOT_VERIFIED
-CS-AUTO-017,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-017 --json,reports/scenario/cs-auto-017.json,,,,,NOT_VERIFIED
-CS-AUTO-018,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-018 --json,reports/scenario/cs-auto-018.json,,,,,NOT_VERIFIED
-CS-AUTO-019,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-019 --json,reports/scenario/cs-auto-019.json,,,,,NOT_VERIFIED
+CS-AUTO-012,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-AUTO-013,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-AUTO-014,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-AUTO-015,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-AUTO-016,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-AUTO-017,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-AUTO-018,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
+CS-AUTO-019,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
 CS-AUTO-020,REGRESSION_GUARD,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-AGENT-001,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
 CS-AGENT-002,MUST_PASS,true,D+P,AI,cornerstone scenario verify full-agent-orchestration --json,reports/scenario/full-agent-orchestration-2026-06-10.json,,,,,PASS
@@ -203,5 +203,5 @@ CS-REG-015,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full-exten
 CS-REG-016,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS
 CS-REG-017,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS
 CS-REG-018,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS
-CS-REG-019,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-019 --json,reports/scenario/cs-reg-019.json,,,,,NOT_VERIFIED
+CS-REG-019,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full-mission-control-autonomy-lifecycle --json,reports/scenario/full-mission-control-autonomy-lifecycle-2026-06-10.json,,,,,PASS
 CS-REG-020,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full-security-operations --json,reports/scenario/full-security-operations-2026-06-10.json,,,,,PASS

@@ -1,0 +1,51 @@
+{
+  "schema_version": "cs.fixture_pack.v0",
+  "id": "pack_19_mission_control_autonomy",
+  "description": "Mission Control, product-understandability, and autonomy lifecycle fixture for final frozen scenario rows.",
+  "scenario_ids": [
+    "CS-PROD-006",
+    "CS-PROD-007",
+    "CS-PROD-008",
+    "CS-PROD-009",
+    "CS-PROD-010",
+    "CS-AUTO-012",
+    "CS-AUTO-013",
+    "CS-AUTO-014",
+    "CS-AUTO-015",
+    "CS-AUTO-016",
+    "CS-AUTO-017",
+    "CS-AUTO-018",
+    "CS-AUTO-019",
+    "CS-REG-019"
+  ],
+  "classes": ["mission", "product", "autonomy", "action", "audit", "learning"],
+  "inputs": [
+    {
+      "path": "input.txt",
+      "media_type": "text/plain",
+      "trust": "trusted",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default",
+      "kind": "plain_text",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR",
+      "expected_anchor": "mission-control-alpha"
+    }
+  ],
+  "negative_evidence": {
+    "external_http_calls": 0,
+    "secret_reads": 0,
+    "direct_provider_access": 0,
+    "raw_provider_credentials": 0,
+    "direct_write_executions": 0,
+    "unauthorized_high_risk_executions": 0,
+    "future_autonomous_action_after_revoke": 0,
+    "unredacted_secret_occurrences": 0
+  },
+  "expected": {
+    "mission_control_surfaces_exist": true,
+    "autonomy_revoke_enforced": true,
+    "mission_audit_export_includes_timeline": true,
+    "action_reversibility_modes_declared": true
+  }
+}

@@ -1257,6 +1257,57 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_full_mission_control_autonomy_lifecycle_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full-mission-control-autonomy-lifecycle", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "full-mission-control-autonomy-lifecycle")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 14)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_FULL_MISSION_CONTROL_AUTONOMY_LIFECYCLE_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {
+                "CS-PROD-006",
+                "CS-PROD-007",
+                "CS-PROD-008",
+                "CS-PROD-009",
+                "CS-PROD-010",
+                "CS-AUTO-012",
+                "CS-AUTO-013",
+                "CS-AUTO-014",
+                "CS-AUTO-015",
+                "CS-AUTO-016",
+                "CS-AUTO-017",
+                "CS-AUTO-018",
+                "CS-AUTO-019",
+                "CS-REG-019",
+            },
+        )
+        evidence = payload["mission_control_autonomy_evidence"]
+        self.assertTrue(evidence["mission_control_id"].startswith("missioncontrol_"))
+        self.assertTrue(evidence["connector_action_trace_id"].startswith("connectortrace_"))
+        self.assertTrue(evidence["outcome_id"].startswith("outcome_"))
+        self.assertTrue(evidence["after_action_review_id"].startswith("aar_"))
+        self.assertTrue(evidence["mission_audit_export_id"].startswith("missionaudit_"))
+        self.assertTrue(evidence["autonomy_metric_id"].startswith("autonomymetrics_"))
+        self.assertTrue(evidence["revoke_control_id"].startswith("autonomyctl_"))
+        self.assertTrue(evidence["repo_split_review_id"].startswith("reposplit_"))
+        self.assertEqual(set(evidence["reversibility_ids"]), {"rollback", "compensation", "retry", "non_reversible"})
+        self.assertEqual(len(evidence["escalation_ids"]), 6)
+        self.assertFalse(payload["human_required"])
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
+    def test_full_filtered_final_scenario_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full", "--scenario", "CS-PROD-006", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_filter"], ["CS-PROD-006"])
+        self.assertEqual(payload["summary"]["scenario_count"], 1)
+        self.assertEqual(payload["scenario_results"][0]["id"], "CS-PROD-006")
+        self.assertEqual(payload["scenario_results"][0]["status"], "PASS")
+
 
 if __name__ == "__main__":
     unittest.main()

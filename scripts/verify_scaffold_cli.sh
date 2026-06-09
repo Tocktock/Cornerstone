@@ -47,7 +47,8 @@ agent_orchestration_json=$(mktemp)
 brain_routing_json=$(mktemp)
 security_operations_json=$(mktemp)
 namespace_governance_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json" "$agent_orchestration_json" "$brain_routing_json" "$security_operations_json" "$namespace_governance_json"' EXIT
+mission_control_autonomy_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$memory_wiki_json" "$learning_experience_json" "$understanding_ontology_json" "$extension_ecosystem_json" "$agent_orchestration_json" "$brain_routing_json" "$security_operations_json" "$namespace_governance_json" "$mission_control_autonomy_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -694,6 +695,50 @@ grep -q '"secret_reads": 0' "$namespace_governance_json" || fail "full-namespace
 grep -q '"human_required": \[\]' "$namespace_governance_json" || fail "full-namespace-governance should have no human-required rows"
 grep -q '"product_feature_claims": "PARTIAL_FULL_NAMESPACE_GOVERNANCE_ONLY"' "$namespace_governance_json" || fail "full-namespace-governance overclaimed product feature scope"
 
+cornerstone scenario verify full-mission-control-autonomy-lifecycle --json > "$mission_control_autonomy_json"
+python3 -m json.tool "$mission_control_autonomy_json" >/dev/null
+grep -q '"scenario_set": "full-mission-control-autonomy-lifecycle"' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle report missing scenario set"
+grep -q '"blocking": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle report has blocking scenarios"
+grep -q '"pass": 14' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle did not pass exactly fourteen scenarios"
+for scenario_id in CS-PROD-006 CS-PROD-007 CS-PROD-008 CS-PROD-009 CS-PROD-010 CS-AUTO-012 CS-AUTO-013 CS-AUTO-014 CS-AUTO-015 CS-AUTO-016 CS-AUTO-017 CS-AUTO-018 CS-AUTO-019 CS-REG-019; do
+  grep -q "\"id\": \"$scenario_id\"" "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing $scenario_id"
+done
+grep -q '"mission_control_id": "missioncontrol_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing mission control surface"
+grep -q '"connector_action_trace_id": "connectortrace_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing connector action trace"
+grep -q '"outcome_id": "outcome_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing mission outcome"
+grep -q '"after_action_review_id": "aar_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing after-action review"
+grep -q '"mission_audit_export_id": "missionaudit_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing mission audit export"
+grep -q '"autonomy_metric_id": "autonomymetrics_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing autonomy metrics"
+grep -q '"revoke_control_id": "autonomyctl_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing revoke control"
+grep -q '"repo_split_review_id": "reposplit_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing repo split review"
+grep -q '"rollback": "reversible_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing rollback reversibility"
+grep -q '"compensation": "reversible_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing compensation reversibility"
+grep -q '"retry": "reversible_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing retry reversibility"
+grep -q '"non_reversible": "reversible_' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missing non-reversible explanation"
+grep -q '"mission_control_missing_sections": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missed mission-control sections"
+grep -q '"loop_missing_visible_stage": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missed product loop stage"
+grep -q '"boundary_internal_repo_names_visible": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle exposed boundary repo names"
+grep -q '"personal_promotion_without_provenance": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle promoted without provenance"
+grep -q '"plain_language_admin_setup_required": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle required admin setup"
+grep -q '"direct_provider_access_allowed": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle allowed direct provider access"
+grep -q '"connector_trace_direct_provider_access": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle connector trace used direct provider access"
+grep -q '"connector_credentials_exposed": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle exposed connector credentials"
+grep -q '"connector_raw_secret_reads": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle read connector secrets"
+grep -q '"arbitrary_agent_provider_code_used": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle used arbitrary provider code"
+grep -q '"future_autonomous_action_after_revoke": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle allowed action after revoke"
+grep -q '"exception_missing_reason_or_decision": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missed escalation reason"
+grep -q '"exception_silent_continue": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle continued silently after exception"
+grep -q '"outcome_missing_evaluation": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missed outcome evaluation"
+grep -q '"after_action_review_missing_scorecard": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missed scorecard"
+grep -q '"audit_export_missing_required_surface": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missed audit export fields"
+grep -q '"metrics_prioritize_autonomy_ratio": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle prioritized autonomy ratio"
+grep -q '"reversibility_missing_path": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle missed reversibility path"
+grep -q '"internal_repo_split_exposed": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle exposed internal repo split"
+grep -q '"real_external_http_calls": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle reported external HTTP calls"
+grep -q '"audit_verify_failed": 0' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle failed audit verification"
+grep -q '"human_required": \[\]' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle should have no human-required rows"
+grep -q '"product_feature_claims": "PARTIAL_FULL_MISSION_CONTROL_AUTONOMY_LIFECYCLE_ONLY"' "$mission_control_autonomy_json" || fail "full-mission-control-autonomy-lifecycle overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -723,4 +768,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, full-agent-orchestration verify, full-brain-routing verify, full-security-operations verify, full-namespace-governance verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, full-agent-orchestration verify, full-brain-routing verify, full-security-operations verify, full-namespace-governance verify, full-mission-control-autonomy-lifecycle verify, vs0-product-domain-readiness verify, unittest).\n'

@@ -8701,6 +8701,552 @@ def verify_vs0_mission_action(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_full_mission_control_autonomy_lifecycle(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("full-mission-control-autonomy-lifecycle")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/19_mission_control_autonomy/input.txt"
+    if not (root / input_path).exists():
+        input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    org_scope_args = ["--owner-id", "local-org", "--namespace-id", "organization", "--workspace-id", "ops"]
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    message = (
+        "Mission control alpha request: review evidence, prepare a governed action, "
+        "and keep the learning trail visible. Anchor: mission-control-alpha."
+    )
+    transcripts["product_walkthrough"] = _run_cli_json(root, ["product", "walkthrough", "--json"])
+    transcripts["conversation_start"] = _run_cli_json(
+        root,
+        ["conversation", "start", "--message", message, "--state-dir", state_rel, "--json"],
+    )
+    conversation = _payload(transcripts["conversation_start"]).get("conversation", {})
+    conversation_id = conversation.get("conversation_id", "")
+    artifact = _payload(transcripts["conversation_start"]).get("artifact", {})
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["fixture_ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "mission-control-alpha", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["brief_create"] = _run_cli_json(
+        root,
+        ["brief", "create", "--evidence-bundle-id", bundle_id, "--state-dir", state_rel, "--json"],
+    ) if bundle_id else {}
+    brief = _payload(transcripts["brief_create"]).get("brief", {})
+    brief_id = brief.get("brief_id", "")
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "Mission control alpha has enough evidence for a governed action rehearsal.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["memory_create"] = _run_cli_json(
+        root,
+        [
+            "memory",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "Owner-approved memory: mission-control-alpha should stay visible in Mission Control.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    memory = _payload(transcripts["memory_create"]).get("memory", {})
+    memory_id = memory.get("memory_id", "")
+    transcripts["namespace_promote_memory"] = _run_cli_json(
+        root,
+        [
+            "namespace",
+            "promote",
+            "--source-kind",
+            "memory",
+            "--source-id",
+            memory_id,
+            "--target-owner-id",
+            "local-org",
+            "--target-namespace-id",
+            "organization",
+            "--target-workspace-id",
+            "ops",
+            "--mode",
+            "copy_with_provenance",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if memory_id else {}
+    promotion = _payload(transcripts["namespace_promote_memory"]).get("namespace_promotion", {})
+
+    transcripts["mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Complete the mission-control alpha review through governed action and learning",
+            "--claim-id",
+            claim_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if claim_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["mission_activate"] = _run_cli_json(
+        root,
+        ["mission", "activate", mission_id, "--mode", "autopilot", "--state-dir", state_rel, "--json"],
+    ) if mission_id else {}
+    transcripts["low_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Update local mission status for mission-control alpha",
+            "--action-kind",
+            "internal_status_update",
+            "--risk",
+            "low",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    low_action = _payload(transcripts["low_action_propose"]).get("action_card", {})
+    low_action_id = low_action.get("action_id", "")
+    transcripts["low_action_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", low_action_id, "--state-dir", state_rel, "--json"],
+    ) if low_action_id else {}
+    low_result = _payload(transcripts["low_action_execute"]).get("action_result", {})
+    transcripts["learning_record"] = _run_cli_json(
+        root,
+        [
+            "learning",
+            "record",
+            "--action-id",
+            low_action_id,
+            "--lesson",
+            "Mission Control should surface evidence-backed action progress and learning.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if low_action_id else {}
+    learning = _payload(transcripts["learning_record"]).get("learning", {})
+    transcripts["high_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Write a mocked connected-source status for mission-control alpha",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "mock_connector",
+            "--target",
+            "mock://mission-control/status",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    high_action = _payload(transcripts["high_action_propose"]).get("action_card", {})
+    high_action_id = high_action.get("action_id", "")
+
+    transcripts["product_mission_control"] = _run_cli_json(root, ["product", "mission-control", "--state-dir", state_rel, "--json"])
+    transcripts["product_boundary"] = _run_cli_json(root, ["product", "boundary", "--state-dir", state_rel, "--json"])
+    transcripts["product_plain_language"] = _run_cli_json(root, ["product", "plain-language-review", "--state-dir", state_rel, "--json"])
+    transcripts["product_repo_split"] = _run_cli_json(root, ["product", "repo-split-review", "--state-dir", state_rel, "--json"])
+
+    transcripts["direct_write"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "direct-write-test",
+            "--provider",
+            "mock_provider",
+            "--target",
+            "mock://mission-control/status",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    transcripts["high_execute_before_approval"] = _run_cli_json(
+        root,
+        ["action", "execute", high_action_id, "--state-dir", state_rel, "--json"],
+    ) if high_action_id else {}
+    transcripts["high_action_approve"] = _run_cli_json(
+        root,
+        ["action", "approve", high_action_id, "--approver", "owner", "--state-dir", state_rel, "--json"],
+    ) if high_action_id else {}
+    transcripts["high_action_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", high_action_id, "--state-dir", state_rel, "--json"],
+    ) if high_action_id else {}
+    high_result = _payload(transcripts["high_action_execute"]).get("action_result", {})
+    high_executed = _payload(transcripts["high_action_execute"]).get("action_card", {})
+    transcripts["connector_action_trace"] = _run_cli_json(
+        root,
+        ["connector", "action-trace", high_action_id, "--state-dir", state_rel, "--json"],
+    ) if high_action_id else {}
+
+    escalation_kinds = ["missing_evidence", "policy_denial", "connector_failure", "model_disagreement", "unclear_goal", "high_risk_action"]
+    for kind in escalation_kinds:
+        transcripts[f"escalate_{kind}"] = _run_cli_json(
+            root,
+            ["mission", "escalate", mission_id, "--exception", kind, "--state-dir", state_rel, "--json"],
+        ) if mission_id else {}
+
+    transcripts["mission_outcome"] = _run_cli_json(
+        root,
+        ["mission", "outcome", mission_id, "--action-id", high_action_id, "--state-dir", state_rel, "--json"],
+    ) if mission_id and high_action_id else {}
+    outcome = _payload(transcripts["mission_outcome"]).get("mission_outcome", {})
+    outcome_id = outcome.get("outcome_id", "")
+    transcripts["mission_aar"] = _run_cli_json(
+        root,
+        ["mission", "after-action-review", mission_id, "--outcome-id", outcome_id, "--state-dir", state_rel, "--json"],
+    ) if mission_id and outcome_id else {}
+    aar = _payload(transcripts["mission_aar"]).get("after_action_review", {})
+    transcripts["mission_audit_export"] = _run_cli_json(
+        root,
+        ["mission", "audit-export", mission_id, "--state-dir", state_rel, "--json"],
+    ) if mission_id else {}
+    audit_export = _payload(transcripts["mission_audit_export"]).get("mission_audit_export", {})
+    transcripts["autopilot_metrics"] = _run_cli_json(
+        root,
+        ["autopilot", "metrics", "--mission-id", mission_id, "--outcome-id", outcome_id, "--state-dir", state_rel, "--json"],
+    ) if mission_id and outcome_id else {}
+    metrics = _payload(transcripts["autopilot_metrics"]).get("autonomy_metrics", {})
+    transcripts["product_loop_view"] = _run_cli_json(
+        root,
+        [
+            "product",
+            "loop-view",
+            "--conversation-id",
+            conversation_id,
+            "--brief-id",
+            brief_id,
+            "--claim-id",
+            claim_id,
+            "--mission-id",
+            mission_id,
+            "--action-id",
+            high_action_id,
+            "--outcome-id",
+            outcome_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if outcome_id else {}
+    loop_view = _payload(transcripts["product_loop_view"]).get("product_loop", {})
+
+    reversibility_modes = ["rollback", "compensation", "retry", "non_reversible"]
+    for mode in reversibility_modes:
+        transcripts[f"reversibility_{mode}"] = _run_cli_json(
+            root,
+            ["action", "reversibility-test", high_action_id, "--mode", mode, "--state-dir", state_rel, "--json"],
+        ) if high_action_id else {}
+    reversibility_records = {
+        mode: _payload(transcripts[f"reversibility_{mode}"]).get("action_reversibility", {})
+        for mode in reversibility_modes
+    }
+
+    transcripts["mission_revoke"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "autonomy-control",
+            mission_id,
+            "--control",
+            "revoke",
+            "--reason",
+            "Owner revoked Autopilot after local scenario proof.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id else {}
+    revoke = _payload(transcripts["mission_revoke"]).get("autonomy_control", {})
+    transcripts["post_revoke_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Attempt autonomous work after revoke",
+            "--action-kind",
+            "internal_status_update",
+            "--risk",
+            "low",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if mission_id and claim_id else {}
+    post_revoke_action = _payload(transcripts["post_revoke_action_propose"]).get("action_card", {})
+    post_revoke_action_id = post_revoke_action.get("action_id", "")
+    transcripts["post_revoke_action_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", post_revoke_action_id, "--state-dir", state_rel, "--json"],
+    ) if post_revoke_action_id else {}
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    mission_control = _payload(transcripts["product_mission_control"]).get("mission_control", {})
+    sections = mission_control.get("sections", {})
+    boundary = _payload(transcripts["product_boundary"]).get("boundary_review", {})
+    plain = _payload(transcripts["product_plain_language"]).get("plain_language_review", {})
+    repo_split = _payload(transcripts["product_repo_split"]).get("repo_split_review", {})
+    connector_trace = _payload(transcripts["connector_action_trace"]).get("connector_action_trace", {})
+    escalations = [
+        _payload(transcripts[f"escalate_{kind}"]).get("escalation", {})
+        for kind in escalation_kinds
+    ]
+    audit_payload = _payload(transcripts["audit_verify"]).get("audit_integrity", {})
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and audit_payload.get("status") == "success"
+    audit_events = _audit_events(root, state_rel)
+    event_types = [event.get("event_type") for event in audit_events]
+
+    mission_control_ok = (
+        _exit_ok(transcripts["product_mission_control"])
+        and mission_control.get("one_operational_surface") is True
+        and all(sections.get(key) for key in ["pending_briefs", "evidence_gaps", "missions", "tasks", "approvals", "recommended_actions", "memory_changes", "learning_opportunities"])
+    )
+    loop_ok = (
+        _exit_ok(transcripts["product_loop_view"])
+        and loop_view.get("single_item_progression_visible") is True
+        and [stage.get("stage") for stage in loop_view.get("stages", [])] == ["Inbox", "Brief", "Claim", "Action", "Learn"]
+        and all(stage.get("visible") is True and stage.get("ref") for stage in loop_view.get("stages", []))
+    )
+    boundary_ok = (
+        _exit_ok(transcripts["product_boundary"])
+        and boundary.get("source_systems_remain_systems_of_record") is True
+        and {"intelligence", "evidence", "mission", "action-control", "learning"}.issubset(set(boundary.get("cornerstone_layers", [])))
+        and boundary.get("visible_internal_repo_names") == []
+    )
+    personal_to_org_ok = (
+        _exit_ok(transcripts["namespace_promote_memory"])
+        and promotion.get("status") == "promoted"
+        and promotion.get("source", {}).get("scope", {}).get("namespace_id") == "personal"
+        and promotion.get("target", {}).get("scope", {}).get("owner_id") == "local-org"
+        and promotion.get("target", {}).get("scope", {}).get("namespace_id") == "organization"
+        and promotion.get("provenance")
+        and promotion.get("policy_decision", {}).get("decision") == "allow"
+    )
+    plain_language_ok = (
+        _exit_ok(transcripts["product_plain_language"])
+        and plain.get("first_value_task_completed") is True
+        and plain.get("basic_mission_task_completed") is True
+        and plain.get("advanced_governance_required_for_first_value") is False
+        and {"workspace", "memory", "evidence", "brief", "claim", "mission", "action", "approval", "learn"}.issubset(set(plain.get("plain_language_terms", [])))
+    )
+    connector_trace_ok = (
+        _policy_denied(transcripts["direct_write"], "CS_DIRECT_WRITE_DENIED")
+        and _exit_ok(transcripts["connector_action_trace"])
+        and connector_trace.get("provider_access", {}).get("mediated_by") == "ConnectorHub"
+        and connector_trace.get("provider_access", {}).get("direct_provider_access") is False
+        and connector_trace.get("credentials", {}).get("raw_secret_reads") == 0
+        and connector_trace.get("source_policy", {}).get("projection_required") is True
+        and connector_trace.get("source_policy", {}).get("retry_quarantine") is True
+        and connector_trace.get("raw_access", {}).get("allowed") is False
+        and connector_trace.get("arbitrary_agent_code_used") is False
+    )
+    revoke_ok = (
+        _exit_ok(transcripts["mission_revoke"])
+        and revoke.get("control") == "revoke"
+        and revoke.get("future_autonomous_actions_allowed") is False
+        and _policy_denied(transcripts["post_revoke_action_execute"], "CS_ACTION_POLICY_DENIED")
+    )
+    escalations_ok = (
+        len(escalations) == 6
+        and all(row.get("status") == "requires_human_decision" for row in escalations)
+        and all(row.get("reason") and row.get("recommended_resolution") and row.get("minimum_required_human_decision") for row in escalations)
+        and all(row.get("silent_continue_allowed") is False for row in escalations)
+    )
+    outcome_ok = (
+        _exit_ok(transcripts["mission_outcome"])
+        and outcome.get("status") == "evaluated"
+        and outcome.get("evidence_refs")
+        and outcome.get("judge_assessment", {}).get("llm_judge_is_pass_authority") is False
+        and outcome.get("owner_acceptance", {}).get("accepted") is True
+        and isinstance(outcome.get("errors"), list)
+        and isinstance(outcome.get("escalations"), list)
+        and outcome.get("lessons")
+    )
+    aar_ok = (
+        _exit_ok(transcripts["mission_aar"])
+        and aar.get("status") == "complete"
+        and aar.get("goal")
+        and aar.get("actions_taken")
+        and aar.get("evidence_used")
+        and aar.get("judge_assessment")
+        and aar.get("owner_outcome")
+        and "rollback" in aar.get("rollback_correction_options", [])
+        and aar.get("autonomy_scorecard", {}).get("rollback_or_correction_visible") is True
+    )
+    audit_export_ok = (
+        _exit_ok(transcripts["mission_audit_export"])
+        and audit_export.get("status") == "exported"
+        and audit_export.get("timeline_events")
+        and audit_export.get("tool_calls")
+        and audit_export.get("policy_decisions")
+        and audit_export.get("evidence")
+        and audit_export.get("judge_outputs")
+        and audit_export.get("approvals")
+        and audit_export.get("action_results")
+        and audit_export.get("trace_context", {}).get("logs_and_events_correlated") is True
+    )
+    metrics_ok = (
+        _exit_ok(transcripts["autopilot_metrics"])
+        and metrics.get("priority") == "outcome_quality_over_autonomy_ratio"
+        and all(metrics.get("primary_metrics", {}).values())
+        and metrics.get("autonomy_ratio", {}).get("priority") == "secondary_context_only"
+    )
+    reversibility_ok = (
+        all(_exit_ok(transcripts[f"reversibility_{mode}"]) for mode in reversibility_modes)
+        and reversibility_records["rollback"].get("rollback_available") is True
+        and reversibility_records["compensation"].get("compensation_available") is True
+        and reversibility_records["retry"].get("retry_available") is True
+        and bool(reversibility_records["non_reversible"].get("non_reversible_explanation"))
+    )
+    repo_split_ok = (
+        _exit_ok(transcripts["product_repo_split"])
+        and repo_split.get("one_cornerstone_product") is True
+        and repo_split.get("forbidden_terms_present") == []
+        and repo_split.get("daily_user_requires_repo_model") is False
+    )
+
+    negative_evidence = {
+        "mission_control_missing_sections": len({"pending_briefs", "evidence_gaps", "missions", "tasks", "approvals", "recommended_actions", "memory_changes", "learning_opportunities"} - set(sections)),
+        "loop_missing_visible_stage": 0 if loop_ok else 1,
+        "boundary_internal_repo_names_visible": len(boundary.get("visible_internal_repo_names", [])),
+        "personal_promotion_without_provenance": 0 if promotion.get("provenance") else 1,
+        "plain_language_admin_setup_required": int(bool(plain.get("admin_setup_required_beyond_defaults"))),
+        "direct_provider_access_allowed": 0 if _policy_denied(transcripts["direct_write"], "CS_DIRECT_WRITE_DENIED") else 1,
+        "connector_trace_direct_provider_access": int(bool(connector_trace.get("provider_access", {}).get("direct_provider_access"))),
+        "connector_credentials_exposed": int(bool(connector_trace.get("credentials", {}).get("credentials_exposed_to_agent"))),
+        "connector_raw_secret_reads": int(connector_trace.get("credentials", {}).get("raw_secret_reads", 1) or 0),
+        "arbitrary_agent_provider_code_used": int(bool(connector_trace.get("arbitrary_agent_code_used", True))),
+        "future_autonomous_action_after_revoke": 0 if _policy_denied(transcripts["post_revoke_action_execute"], "CS_ACTION_POLICY_DENIED") else 1,
+        "exception_missing_reason_or_decision": sum(1 for row in escalations if not (row.get("reason") and row.get("recommended_resolution") and row.get("minimum_required_human_decision"))),
+        "exception_silent_continue": sum(1 for row in escalations if row.get("silent_continue_allowed") is not False),
+        "outcome_missing_evaluation": 0 if outcome_ok else 1,
+        "after_action_review_missing_scorecard": 0 if aar_ok else 1,
+        "audit_export_missing_required_surface": 0 if audit_export_ok else 1,
+        "metrics_prioritize_autonomy_ratio": 0 if metrics.get("priority") == "outcome_quality_over_autonomy_ratio" else 1,
+        "reversibility_missing_path": 0 if reversibility_ok else 1,
+        "internal_repo_split_exposed": len(repo_split.get("forbidden_terms_present", ["missing"])),
+        "real_external_http_calls": int(low_result.get("external_http_calls", 0) or 0) + int(high_result.get("external_http_calls", 0) or 0) + int(connector_trace.get("delivery", {}).get("external_http_calls", 0) or 0),
+        "audit_verify_failed": 0 if audit_ok else 1,
+    }
+
+    rows = [
+        _row("CS-PROD-006", "MUST_PASS", "PASS" if mission_control_ok and audit_ok else "FAIL", ["cornerstone product mission-control --json"], "Mission Control/Ops Inbox surface shows briefs, evidence gaps, missions, tasks, approvals, actions, memory changes, and learning opportunities."),
+        _row("CS-PROD-007", "MUST_PASS", "PASS" if loop_ok and audit_ok else "FAIL", ["cornerstone product loop-view --json"], "One item visibly progresses through Inbox, Brief, Claim, Action, and Learn."),
+        _row("CS-PROD-008", "MUST_PASS", "PASS" if boundary_ok and audit_ok else "FAIL", ["cornerstone product boundary --json"], "Product boundary copy explains source systems as systems of record and CornerStone as intelligence/evidence/mission/action-control/learning layer."),
+        _row("CS-PROD-009", "MUST_PASS", "PASS" if personal_to_org_ok and audit_ok else "FAIL", ["cornerstone namespace promote --source-kind memory --mode copy_with_provenance --json"], "Personal memory can be explicitly promoted into organization namespace with provenance, policy, and audit."),
+        _row("CS-PROD-010", "MUST_PASS", "PASS" if plain_language_ok and audit_ok else "FAIL", ["cornerstone product plain-language-review --json"], "First value and basic mission work use plain product language while advanced governance remains optional."),
+        _row("CS-AUTO-012", "MUST_PASS", "PASS" if connector_trace_ok and audit_ok else "FAIL", ["cornerstone connector action-trace <action_id> --json"], "Provider action trace is ConnectorHub-mediated with no direct provider access, secret exposure, raw access, or arbitrary agent code."),
+        _row("CS-AUTO-013", "MUST_PASS", "PASS" if revoke_ok and audit_ok else "FAIL", ["cornerstone mission autonomy-control <mission_id> --control revoke --json"], "Mission autonomy revoke records the event and blocks future autonomous execution outside safe cleanup."),
+        _row("CS-AUTO-014", "MUST_PASS", "PASS" if escalations_ok and audit_ok else "FAIL", ["cornerstone mission escalate <mission_id> --exception <kind> --json"], "Missing evidence, policy denial, connector failure, model disagreement, unclear goal, and high-risk action escalate with reason, resolution, and minimum human decision."),
+        _row("CS-AUTO-015", "MUST_PASS", "PASS" if outcome_ok and audit_ok else "FAIL", ["cornerstone mission outcome <mission_id> --action-id <action_id> --json"], "Mission outcome records evidence, judge assessment, owner acceptance, errors, escalations, and lessons."),
+        _row("CS-AUTO-016", "MUST_PASS", "PASS" if aar_ok and audit_ok else "FAIL", ["cornerstone mission after-action-review <mission_id> --outcome-id <outcome_id> --json"], "After-action review and Autonomy Scorecard include goal, actions, evidence, judge/owner outcome, errors, escalations, lessons, playbooks, and rollback/correction options."),
+        _row("CS-AUTO-017", "MUST_PASS", "PASS" if audit_export_ok and audit_ok else "FAIL", ["cornerstone mission audit-export <mission_id> --json"], "Mission audit export includes timeline events, tool calls, policy decisions, evidence, judge outputs, approvals, and action results."),
+        _row("CS-AUTO-018", "MUST_PASS", "PASS" if metrics_ok and audit_ok else "FAIL", ["cornerstone autopilot metrics --mission-id <mission_id> --outcome-id <outcome_id> --json"], "Autonomy metrics prioritize outcome quality over raw autonomy ratio."),
+        _row("CS-AUTO-019", "MUST_PASS", "PASS" if reversibility_ok and audit_ok else "FAIL", ["cornerstone action reversibility-test <action_id> --mode <mode> --json"], "Action reversibility covers rollback, compensation, retry, and explicit non-reversible explanation paths."),
+        _row("CS-REG-019", "REGRESSION_GUARD", "PASS" if repo_split_ok and audit_ok else "FAIL", ["cornerstone product repo-split-review --json"], "UX labels present one CornerStone product and visible capabilities, not internal repository names as the required mental model."),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "full-mission-control-autonomy-lifecycle",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_FULL_MISSION_CONTROL_AUTONOMY_LIFECYCLE_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "mission_control_autonomy_evidence": {
+            "conversation_id": conversation_id,
+            "artifact_id": artifact_id,
+            "search_snapshot_id": snapshot_id,
+            "evidence_bundle_id": bundle_id,
+            "brief_id": brief_id,
+            "claim_id": claim_id,
+            "memory_id": memory_id,
+            "promotion_id": promotion.get("promotion_id"),
+            "mission_id": mission_id,
+            "low_action_id": low_action_id,
+            "high_action_id": high_action_id,
+            "learning_id": learning.get("learning_id"),
+            "mission_control_id": mission_control.get("surface_id"),
+            "connector_action_trace_id": connector_trace.get("trace_id"),
+            "outcome_id": outcome_id,
+            "after_action_review_id": aar.get("review_id"),
+            "mission_audit_export_id": audit_export.get("export_id"),
+            "autonomy_metric_id": metrics.get("metric_id"),
+            "reversibility_ids": {mode: record.get("reversibility_id") for mode, record in reversibility_records.items()},
+            "revoke_control_id": revoke.get("control_id"),
+            "escalation_ids": [row.get("escalation_id") for row in escalations],
+            "repo_split_review_id": repo_split.get("review_id"),
+            "audit_event_types": event_types,
+            "audit_event_count": audit_payload.get("event_count"),
+            "research_basis": [
+                "Durable workflow practice favors persisted state, pause/replay semantics, activity retries, and explicit event histories for long-running work.",
+                "Saga/compensation practice favors explicit rollback, compensation, retry, or non-reversible warning by action semantics.",
+                "OpenTelemetry observability guidance supports correlating traces, logs, and events for audit navigation.",
+                "NIST AI RMF frames AI risk management as continuous govern, map, measure, and manage activity.",
+                "Progressive disclosure keeps first-value product language simple while advanced governance remains available on request.",
+            ],
+        },
+        "negative_evidence": negative_evidence,
+        "human_required": [],
+    }
+
+
 def _report_passes(report: dict[str, Any], scenario_ids: set[str]) -> bool:
     rows = report.get("scenario_results", [])
     passed = {row.get("id") for row in rows if row.get("status") == "PASS"}

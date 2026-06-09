@@ -1,0 +1,11 @@
+Mission control alpha request.
+
+The owner needs one operational surface for the item: pending brief, evidence gap, mission, task, approval, recommended action, memory change, and learning opportunity.
+
+Source systems remain systems of record. CornerStone should act as the intelligence, evidence, mission, action-control, and learning layer over those systems.
+
+The local scenario should use ConnectorHub-mediated mocked provider action only, with no direct provider credentials, no raw source access, no external HTTP call, and no secret read.
+
+Autopilot must support revoke, escalation, outcome evaluation, after-action review, audit export, outcome-quality metrics, and rollback, compensation, retry, or non-reversible explanation.
+
+Anchor: mission-control-alpha.
