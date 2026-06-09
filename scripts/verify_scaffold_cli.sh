@@ -24,7 +24,8 @@ artifacts_json=$(mktemp)
 security_json=$(mktemp)
 search_json=$(mktemp)
 understanding_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json"' EXIT
+namespace_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -106,6 +107,31 @@ grep -q '"project_result_count": 1' "$understanding_json" || fail "vs0-search-un
 grep -q '"same_content_scope_collisions": 0' "$understanding_json" || fail "vs0-search-understanding reported same-content scope collision"
 grep -q '"product_feature_claims": "PARTIAL_VS0_SEARCH_UNDERSTANDING_ONLY"' "$understanding_json" || fail "vs0-search-understanding overclaimed product feature scope"
 
+cornerstone scenario verify vs0-namespace-isolation --json > "$namespace_json"
+python3 -m json.tool "$namespace_json" >/dev/null
+grep -q '"scenario_set": "vs0-namespace-isolation"' "$namespace_json" || fail "vs0-namespace-isolation report missing scenario set"
+grep -q '"blocking": 0' "$namespace_json" || fail "vs0-namespace-isolation report has blocking scenarios"
+grep -q '"pass": 2' "$namespace_json" || fail "vs0-namespace-isolation did not pass exactly two scenarios"
+grep -q '"id": "CS-NS-001"' "$namespace_json" || fail "vs0-namespace-isolation missing CS-NS-001"
+grep -q '"id": "CS-NS-003"' "$namespace_json" || fail "vs0-namespace-isolation missing CS-NS-003"
+if grep -q '"id": "CS-NS-002"' "$namespace_json"; then
+  fail "vs0-namespace-isolation must not claim CS-NS-002"
+fi
+if grep -q '"id": "CS-NS-004"' "$namespace_json"; then
+  fail "vs0-namespace-isolation must not claim CS-NS-004"
+fi
+if grep -q '"id": "CS-SEC-004"' "$namespace_json"; then
+  fail "vs0-namespace-isolation must not claim CS-SEC-004"
+fi
+if grep -q '"id": "CS-REG-006"' "$namespace_json"; then
+  fail "vs0-namespace-isolation must not claim CS-REG-006"
+fi
+grep -q '"ownerless_records": 0' "$namespace_json" || fail "vs0-namespace-isolation reported ownerless records"
+grep -q '"cross_namespace_results": 0' "$namespace_json" || fail "vs0-namespace-isolation reported cross-namespace results"
+grep -q '"cross_scope_access_allowed": 0' "$namespace_json" || fail "vs0-namespace-isolation allowed cross-scope access"
+grep -q '"implicit_promotions": 0' "$namespace_json" || fail "vs0-namespace-isolation reported implicit promotions"
+grep -q '"product_feature_claims": "PARTIAL_VS0_NAMESPACE_ISOLATION_ONLY"' "$namespace_json" || fail "vs0-namespace-isolation overclaimed product feature scope"
+
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, unittest).\n'

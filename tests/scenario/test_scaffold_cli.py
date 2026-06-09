@@ -372,6 +372,28 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_namespace_isolation_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-namespace-isolation", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-namespace-isolation")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 2)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_NAMESPACE_ISOLATION_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-NS-001", "CS-NS-003"})
+        self.assertGreaterEqual(payload["namespace_evidence"]["context_record_scope_count"], 7)
+        self.assertEqual(payload["namespace_evidence"]["personal_artifact_scope"]["owner_id"], "local-user")
+        self.assertEqual(payload["namespace_evidence"]["personal_artifact_scope"]["namespace_id"], "personal")
+        self.assertEqual(payload["namespace_evidence"]["organization_artifact_scope"]["owner_id"], "local-org")
+        self.assertEqual(payload["namespace_evidence"]["organization_artifact_scope"]["namespace_id"], "organization")
+        self.assertEqual(payload["namespace_evidence"]["organization_cross_personal_result_count"], 0)
+        self.assertEqual(payload["namespace_evidence"]["personal_cross_organization_result_count"], 0)
+        self.assertEqual(payload["namespace_evidence"]["cross_scope_evidence_attempts_denied"], 2)
+        self.assertEqual(payload["transcripts"]["org_create_bundle_from_personal_snapshot"]["stdout_json"]["owner_id"], "local-org")
+        self.assertEqual(payload["transcripts"]["org_claim_from_personal_bundle"]["stdout_json"]["owner_id"], "local-org")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

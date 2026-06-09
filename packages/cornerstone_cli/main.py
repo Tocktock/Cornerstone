@@ -11,6 +11,7 @@ from cornerstone_cli import __version__
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_vs0_namespace_isolation,
     verify_vs0_search_evidence,
     verify_vs0_search_understanding,
     verify_vs0_security,
@@ -166,7 +167,9 @@ def command_ready(args: argparse.Namespace) -> int:
 def command_artifact_ingest(args: argparse.Namespace) -> int:
     root = repo_root()
     input_path = (root / args.path).resolve()
+    requested_scope = scope_args(args)
     payload = base_response("cornerstone artifact ingest", "success", root)
+    payload.update(requested_scope)
     if not input_path.exists() or not input_path.is_file():
         payload["status"] = "failed"
         payload["errors"].append(
@@ -183,7 +186,7 @@ def command_artifact_ingest(args: argparse.Namespace) -> int:
     try:
         result = store.ingest_artifact(
             input_path,
-            **scope_args(args),
+            **requested_scope,
             source=args.source,
             media_type=args.media_type,
             derived_mode=args.derived_mode,
@@ -226,9 +229,10 @@ def command_artifact_ingest(args: argparse.Namespace) -> int:
 
 def command_artifact_show(args: argparse.Namespace) -> int:
     root = repo_root()
-    payload = base_response("cornerstone artifact show", "success", root)
-    store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
+    payload = base_response("cornerstone artifact show", "success", root)
+    payload.update(requested_scope)
+    store = LocalRuntimeStore(state_dir(root, args))
     artifact = store.get_artifact(args.artifact_id, requested_scope)
     if artifact is None:
         payload["status"] = "failed"
@@ -315,8 +319,10 @@ def command_search_query(args: argparse.Namespace) -> int:
 def command_evidence_bundle_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
-    result = store.create_evidence_bundle(args.search_snapshot_id, scope_args(args))
+    requested_scope = scope_args(args)
+    result = store.create_evidence_bundle(args.search_snapshot_id, requested_scope)
     payload = base_response("cornerstone evidence bundle create", "success", root)
+    payload.update(requested_scope)
     if result.get("status") == "not_found":
         payload["status"] = "failed"
         payload["errors"].append(
@@ -366,8 +372,10 @@ def command_evidence_bundle_create(args: argparse.Namespace) -> int:
 def command_evidence_bundle_show(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
-    result = store.show_evidence_bundle(args.evidence_bundle_id, scope_args(args))
+    requested_scope = scope_args(args)
+    result = store.show_evidence_bundle(args.evidence_bundle_id, requested_scope)
     payload = base_response("cornerstone evidence bundle show", "success", root)
+    payload.update(requested_scope)
     if result.get("status") == "not_found":
         payload["status"] = "failed"
         payload["errors"].append(
@@ -417,8 +425,10 @@ def command_evidence_bundle_show(args: argparse.Namespace) -> int:
 def command_evidence_view(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
-    result = store.view_evidence_bundle(args.evidence_bundle_id, scope_args(args))
+    requested_scope = scope_args(args)
+    result = store.view_evidence_bundle(args.evidence_bundle_id, requested_scope)
     payload = base_response("cornerstone evidence view", "success", root)
+    payload.update(requested_scope)
     if result.get("status") == "not_found":
         payload["status"] = "failed"
         payload["errors"].append(
@@ -470,8 +480,10 @@ def command_evidence_view(args: argparse.Namespace) -> int:
 def command_claim_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
-    result = store.create_claim_from_evidence_bundle(args.evidence_bundle_id, args.statement, scope_args(args))
+    requested_scope = scope_args(args)
+    result = store.create_claim_from_evidence_bundle(args.evidence_bundle_id, args.statement, requested_scope)
     payload = base_response("cornerstone claim create", "success", root)
+    payload.update(requested_scope)
     if result.get("status") == "not_found":
         payload["status"] = "failed"
         payload["errors"].append(
@@ -523,8 +535,10 @@ def command_claim_create(args: argparse.Namespace) -> int:
 def command_claim_show(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
-    result = store.show_claim(args.claim_id, scope_args(args))
+    requested_scope = scope_args(args)
+    result = store.show_claim(args.claim_id, requested_scope)
     payload = base_response("cornerstone claim show", "success", root)
+    payload.update(requested_scope)
     if result.get("status") == "not_found":
         payload["status"] = "failed"
         payload["errors"].append(
@@ -640,13 +654,23 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_search_evidence(root)
     elif args.contract == "vs0-search-understanding":
         report = verify_vs0_search_understanding(root)
+    elif args.contract == "vs0-namespace-isolation":
+        report = verify_vs0_namespace_isolation(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
             {
                 "code": "CS_SCENARIO_CONTRACT_UNSUPPORTED",
-                "message": "Only scaffold and fixture verification are implemented in this batch.",
-                "supported": ["vs0-scaffold", "vs0-fixtures", "vs0-artifacts", "vs0-security", "vs0-search-evidence", "vs0-search-understanding"],
+                "message": "The requested scenario verification contract is not implemented.",
+                "supported": [
+                    "vs0-scaffold",
+                    "vs0-fixtures",
+                    "vs0-artifacts",
+                    "vs0-security",
+                    "vs0-search-evidence",
+                    "vs0-search-understanding",
+                    "vs0-namespace-isolation",
+                ],
             }
         )
         print_payload(payload, args.json)

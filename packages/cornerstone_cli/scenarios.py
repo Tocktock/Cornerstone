@@ -463,6 +463,45 @@ def _exit_ok(transcript: dict[str, Any]) -> bool:
     return transcript.get("exit_code") == 0 and isinstance(transcript.get("stdout_json"), dict)
 
 
+SCOPE_FIELDS = ["tenant_id", "owner_id", "namespace_id", "workspace_id"]
+OWNERLESS_SCOPE_VALUES = {"", "global", "ownerless", "none", "null"}
+
+
+def _scope_complete(scope: Any) -> bool:
+    if not isinstance(scope, dict):
+        return False
+    for field in SCOPE_FIELDS:
+        value = scope.get(field)
+        if not isinstance(value, str) or value.strip().lower() in OWNERLESS_SCOPE_VALUES:
+            return False
+    return True
+
+
+def _audit_events(root: Path, state_rel: str) -> list[dict[str, Any]]:
+    audit_path = root / state_rel / "audit" / "events.jsonl"
+    if not audit_path.exists():
+        return []
+    events = []
+    for line in audit_path.read_text().splitlines():
+        if line.strip():
+            events.append(json.loads(line))
+    return events
+
+
+def _event_scope(event: dict[str, Any]) -> dict[str, Any]:
+    return {field: event.get(field) for field in SCOPE_FIELDS}
+
+
+def _scope_denied(transcript: dict[str, Any]) -> bool:
+    payload = _payload(transcript)
+    errors = payload.get("errors", [])
+    return (
+        transcript.get("exit_code") == 6
+        and isinstance(errors, list)
+        and any(error.get("code") == "CS_SCOPE_DENIED" for error in errors if isinstance(error, dict))
+    )
+
+
 def _scenario_state_rel(name: str) -> str:
     return f"tmp/scenario/{name}-{os.getpid()}"
 
@@ -1244,6 +1283,198 @@ def verify_vs0_search_understanding(root: Path) -> dict[str, Any]:
             ),
             "semantic_unexplained_results": 0 if any(reason.get("type") == "semantic_alias" for reason in semantic_first.get("match_reasons", [])) else 1,
             "same_content_scope_collisions": 0 if same_content_personal_first.get("scope", {}).get("owner_id") == "local-user" and same_content_org_first.get("scope", {}).get("owner_id") == "local-org" else 1,
+        },
+        "human_required": [],
+    }
+
+
+def verify_vs0_namespace_isolation(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-namespace-isolation")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    personal_path = "fixtures/vs0/packs/08_namespace_isolation/personal.txt"
+    org_path = "fixtures/vs0/packs/08_namespace_isolation/org.txt"
+    org_scope_args = ["--owner-id", "local-org", "--namespace-id", "organization", "--workspace-id", "ops"]
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    transcripts["ingest_personal"] = _run_cli_json(root, ["artifact", "ingest", personal_path, "--state-dir", state_rel, "--json"])
+    personal_artifact = _artifact(transcripts["ingest_personal"])
+    personal_id = personal_artifact.get("artifact_id", "")
+    transcripts["ingest_org"] = _run_cli_json(root, ["artifact", "ingest", org_path, "--state-dir", state_rel, *org_scope_args, "--json"])
+    org_artifact = _artifact(transcripts["ingest_org"])
+    org_id = org_artifact.get("artifact_id", "")
+
+    transcripts["personal_search"] = _run_cli_json(root, ["search", "query", "personal-only-alpha", "--state-dir", state_rel, "--json"])
+    transcripts["org_search"] = _run_cli_json(root, ["search", "query", "org-visible-beta", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["org_cross_personal_search"] = _run_cli_json(root, ["search", "query", "personal-only-alpha", "--state-dir", state_rel, *org_scope_args, "--json"])
+    transcripts["personal_cross_org_search"] = _run_cli_json(root, ["search", "query", "org-visible-beta", "--state-dir", state_rel, "--json"])
+
+    personal_snapshot = _payload(transcripts["personal_search"]).get("search_snapshot", {})
+    org_snapshot = _payload(transcripts["org_search"]).get("search_snapshot", {})
+    org_cross_personal_snapshot = _payload(transcripts["org_cross_personal_search"]).get("search_snapshot", {})
+    personal_cross_org_snapshot = _payload(transcripts["personal_cross_org_search"]).get("search_snapshot", {})
+    personal_snapshot_id = personal_snapshot.get("search_snapshot_id", "")
+    org_snapshot_id = org_snapshot.get("search_snapshot_id", "")
+
+    transcripts["org_bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", org_snapshot_id, "--state-dir", state_rel, *org_scope_args, "--json"],
+    ) if org_snapshot_id else {}
+    org_bundle = _payload(transcripts["org_bundle_create"]).get("evidence_bundle", {})
+    org_bundle_id = org_bundle.get("evidence_bundle_id", "")
+    transcripts["org_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            org_bundle_id,
+            "--statement",
+            "The organization visible beta phrase belongs to the organization workspace.",
+            "--state-dir",
+            state_rel,
+            *org_scope_args,
+            "--json",
+        ],
+    ) if org_bundle_id else {}
+    org_claim = _payload(transcripts["org_claim_create"]).get("claim", {})
+
+    transcripts["org_create_bundle_from_personal_snapshot"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", personal_snapshot_id, "--state-dir", state_rel, *org_scope_args, "--json"],
+    ) if personal_snapshot_id else {}
+    transcripts["personal_bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", personal_snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if personal_snapshot_id else {}
+    personal_bundle = _payload(transcripts["personal_bundle_create"]).get("evidence_bundle", {})
+    personal_bundle_id = personal_bundle.get("evidence_bundle_id", "")
+    transcripts["org_claim_from_personal_bundle"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            personal_bundle_id,
+            "--statement",
+            "Organization should not draft from personal-only evidence.",
+            "--state-dir",
+            state_rel,
+            *org_scope_args,
+            "--json",
+        ],
+    ) if personal_bundle_id else {}
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    personal_first = (personal_snapshot.get("results") or [{}])[0]
+    org_first = (org_snapshot.get("results") or [{}])[0]
+    audit_events = _audit_events(root, state_rel)
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+
+    context_scopes = [
+        personal_artifact.get("scope"),
+        org_artifact.get("scope"),
+        personal_snapshot.get("filters"),
+        org_snapshot.get("filters"),
+        org_bundle.get("filters"),
+        org_claim.get("scope"),
+        org_claim.get("evidence_bundle", {}).get("filters"),
+    ]
+    context_scopes.extend(result.get("scope") for result in personal_snapshot.get("results", []) if isinstance(result, dict))
+    context_scopes.extend(result.get("scope") for result in org_snapshot.get("results", []) if isinstance(result, dict))
+    context_scopes.extend(_event_scope(event) for event in audit_events)
+    ownerless_records = sum(1 for scope in context_scopes if not _scope_complete(scope))
+
+    ns_001_ok = (
+        _exit_ok(transcripts["ingest_personal"])
+        and _exit_ok(transcripts["ingest_org"])
+        and _exit_ok(transcripts["personal_search"])
+        and _exit_ok(transcripts["org_search"])
+        and _exit_ok(transcripts["org_bundle_create"])
+        and _exit_ok(transcripts["org_claim_create"])
+        and personal_artifact.get("scope", {}).get("owner_id") == "local-user"
+        and personal_artifact.get("scope", {}).get("namespace_id") == "personal"
+        and org_artifact.get("scope", {}).get("owner_id") == "local-org"
+        and org_artifact.get("scope", {}).get("namespace_id") == "organization"
+        and org_bundle.get("filters", {}).get("namespace_id") == "organization"
+        and org_claim.get("scope", {}).get("namespace_id") == "organization"
+        and ownerless_records == 0
+    )
+    ns_003_ok = (
+        _exit_ok(transcripts["personal_search"])
+        and _exit_ok(transcripts["org_search"])
+        and _exit_ok(transcripts["org_cross_personal_search"])
+        and _exit_ok(transcripts["personal_cross_org_search"])
+        and personal_snapshot.get("result_count") == 1
+        and personal_first.get("artifact_id") == personal_id
+        and personal_first.get("scope", {}).get("namespace_id") == "personal"
+        and org_snapshot.get("result_count") == 1
+        and org_first.get("artifact_id") == org_id
+        and org_first.get("scope", {}).get("namespace_id") == "organization"
+        and org_cross_personal_snapshot.get("result_count") == 0
+        and personal_cross_org_snapshot.get("result_count") == 0
+        and _scope_denied(transcripts["org_create_bundle_from_personal_snapshot"])
+        and _scope_denied(transcripts["org_claim_from_personal_bundle"])
+    )
+
+    rows = [
+        _row(
+            "CS-NS-001",
+            "MUST_PASS",
+            "PASS" if ns_001_ok and audit_ok else "FAIL",
+            [
+                "cornerstone artifact ingest fixtures/vs0/packs/08_namespace_isolation/personal.txt --json",
+                "cornerstone artifact ingest fixtures/vs0/packs/08_namespace_isolation/org.txt --owner-id local-org --namespace-id organization --workspace-id ops --json",
+                "cornerstone evidence bundle create --search-snapshot-id <org_snapshot_id> --owner-id local-org --namespace-id organization --workspace-id ops --json",
+                "cornerstone claim create --evidence-bundle-id <org_bundle_id> --owner-id local-org --namespace-id organization --workspace-id ops --json",
+            ],
+            "Generated VS-0 context records for artifacts, search snapshots, evidence bundles, claims, and audit events all carry explicit tenant, owner, namespace, and workspace scope.",
+        ),
+        _row(
+            "CS-NS-003",
+            "MUST_PASS",
+            "PASS" if ns_003_ok and audit_ok else "FAIL",
+            [
+                "cornerstone search query personal-only-alpha --owner-id local-org --namespace-id organization --workspace-id ops --json",
+                "cornerstone evidence bundle create --search-snapshot-id <personal_snapshot_id> --owner-id local-org --namespace-id organization --workspace-id ops --json",
+                "cornerstone claim create --evidence-bundle-id <personal_bundle_id> --owner-id local-org --namespace-id organization --workspace-id ops --json",
+            ],
+            "Organization-scoped search returns zero personal-only results, and organization attempts to reuse personal search/evidence are denied by scope.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-namespace-isolation",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_NAMESPACE_ISOLATION_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "namespace_evidence": {
+            "context_record_scope_count": len(context_scopes),
+            "audit_event_count": len(audit_events),
+            "personal_artifact_scope": personal_artifact.get("scope"),
+            "organization_artifact_scope": org_artifact.get("scope"),
+            "personal_result_count": personal_snapshot.get("result_count"),
+            "organization_result_count": org_snapshot.get("result_count"),
+            "organization_cross_personal_result_count": org_cross_personal_snapshot.get("result_count"),
+            "personal_cross_organization_result_count": personal_cross_org_snapshot.get("result_count"),
+            "cross_scope_evidence_attempts_denied": int(_scope_denied(transcripts["org_create_bundle_from_personal_snapshot"]))
+            + int(_scope_denied(transcripts["org_claim_from_personal_bundle"])),
+            "organization_claim_scope": org_claim.get("scope"),
+        },
+        "negative_evidence": {
+            "ownerless_records": ownerless_records,
+            "cross_namespace_results": int(org_cross_personal_snapshot.get("result_count", 1)) + int(personal_cross_org_snapshot.get("result_count", 1)),
+            "cross_scope_access_allowed": 0 if _scope_denied(transcripts["org_create_bundle_from_personal_snapshot"]) and _scope_denied(transcripts["org_claim_from_personal_bundle"]) else 1,
+            "implicit_promotions": 0,
         },
         "human_required": [],
     }

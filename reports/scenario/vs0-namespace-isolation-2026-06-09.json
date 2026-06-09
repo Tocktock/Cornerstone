@@ -1,0 +1,1093 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-namespace-isolation",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "9e91762"
+  },
+  "mode": "local_scaffold",
+  "namespace_evidence": {
+    "audit_event_count": 9,
+    "context_record_scope_count": 18,
+    "cross_scope_evidence_attempts_denied": 2,
+    "organization_artifact_scope": {
+      "namespace_id": "organization",
+      "owner_id": "local-org",
+      "tenant_id": "local-dev",
+      "workspace_id": "ops"
+    },
+    "organization_claim_scope": {
+      "namespace_id": "organization",
+      "owner_id": "local-org",
+      "tenant_id": "local-dev",
+      "workspace_id": "ops"
+    },
+    "organization_cross_personal_result_count": 0,
+    "organization_result_count": 1,
+    "personal_artifact_scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    },
+    "personal_cross_organization_result_count": 0,
+    "personal_result_count": 1
+  },
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "cross_namespace_results": 0,
+    "cross_scope_access_allowed": 0,
+    "implicit_promotions": 0,
+    "ownerless_records": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-namespace-isolation-2026-06-09.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone artifact ingest fixtures/vs0/packs/08_namespace_isolation/personal.txt --json",
+        "cornerstone artifact ingest fixtures/vs0/packs/08_namespace_isolation/org.txt --owner-id local-org --namespace-id organization --workspace-id ops --json",
+        "cornerstone evidence bundle create --search-snapshot-id <org_snapshot_id> --owner-id local-org --namespace-id organization --workspace-id ops --json",
+        "cornerstone claim create --evidence-bundle-id <org_bundle_id> --owner-id local-org --namespace-id organization --workspace-id ops --json"
+      ],
+      "id": "CS-NS-001",
+      "notes": "Generated VS-0 context records for artifacts, search snapshots, evidence bundles, claims, and audit events all carry explicit tenant, owner, namespace, and workspace scope.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone search query personal-only-alpha --owner-id local-org --namespace-id organization --workspace-id ops --json",
+        "cornerstone evidence bundle create --search-snapshot-id <personal_snapshot_id> --owner-id local-org --namespace-id organization --workspace-id ops --json",
+        "cornerstone claim create --evidence-bundle-id <personal_bundle_id> --owner-id local-org --namespace-id organization --workspace-id ops --json"
+      ],
+      "id": "CS-NS-003",
+      "notes": "Organization-scoped search returns zero personal-only results, and organization attempts to reuse personal search/evidence are denied by scope.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    }
+  ],
+  "scenario_set": "vs0-namespace-isolation",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/vs0-namespace-isolation-87024",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 2,
+    "product_feature_claims": "PARTIAL_VS0_NAMESPACE_ISOLATION_ONLY",
+    "scenario_count": 2
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 9,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "9e91762"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_org": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/08_namespace_isolation/org.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_750f509f1c46c9f7",
+          "checksum_sha256": "750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_750f509f1c46c9f7.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 119,
+          "original_storage_ref": "sha256:750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065",
+          "provenance": {
+            "created_at": "2026-06-09T12:05:39.127462Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T12:05:39.127462Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/08_namespace_isolation/org.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_5d0a8a75cf76975b"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_750f509f1c46c9f7",
+          "storage:sha256:750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065"
+        ],
+        "ids": {
+          "artifact_id": "art_750f509f1c46c9f7",
+          "audit_event_id": "audit_5d0a8a75cf76975b",
+          "checksum_sha256": "750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065",
+          "git_commit": "9e91762"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "ingest_personal": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/08_namespace_isolation/personal.txt",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_67c8222eb9418cae",
+          "checksum_sha256": "67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_67c8222eb9418cae.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 147,
+          "original_storage_ref": "sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+          "provenance": {
+            "created_at": "2026-06-09T12:05:39.080990Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T12:05:39.080990Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/08_namespace_isolation/personal.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_f7762a2e1c40bc4b"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_67c8222eb9418cae",
+          "storage:sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70"
+        ],
+        "ids": {
+          "artifact_id": "art_67c8222eb9418cae",
+          "audit_event_id": "audit_f7762a2e1c40bc4b",
+          "checksum_sha256": "67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+          "git_commit": "9e91762"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "org_bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_e7808cc9ab77c18f",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_d545032bd4c415dc"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T12:05:39.348126Z",
+          "evidence_bundle_id": "evb_3d058b830c12e867",
+          "evidence_items": [
+            {
+              "artifact_id": "art_750f509f1c46c9f7",
+              "derived_text_ref": "derived/art_750f509f1c46c9f7.txt",
+              "original_storage_ref": "sha256:750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065",
+              "provenance": {
+                "created_at": "2026-06-09T12:05:39.127462Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_e7808cc9ab77c18f",
+              "snippet": "org-visible-beta. This should remain separate from personal-only context.",
+              "source": {
+                "ingested_at": "2026-06-09T12:05:39.127462Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/08_namespace_isolation/org.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "query": "org-visible-beta",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "query": "org-visible-beta",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_750f509f1c46c9f7",
+                "derived_text_ref": "derived/art_750f509f1c46c9f7.txt",
+                "evidence_refs": [
+                  "artifact:art_750f509f1c46c9f7",
+                  "storage:sha256:750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "org-visible-beta",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "org-visible-beta",
+                    "query_term": "org-visible-beta",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "organization",
+                  "owner_id": "local-org",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "ops"
+                },
+                "score": 11,
+                "snippet": "org-visible-beta. This should remain separate from personal-only context."
+              }
+            ],
+            "search_snapshot_id": "search_e7808cc9ab77c18f"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_e7808cc9ab77c18f"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_3d058b830c12e867",
+          "search_snapshot:search_e7808cc9ab77c18f",
+          "artifact:art_750f509f1c46c9f7"
+        ],
+        "ids": {
+          "audit_event_id": "audit_d545032bd4c415dc",
+          "evidence_bundle_id": "evb_3d058b830c12e867",
+          "git_commit": "9e91762",
+          "search_snapshot_id": "search_e7808cc9ab77c18f"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "org_claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_3d058b830c12e867",
+        "--statement",
+        "The organization visible beta phrase belongs to the organization workspace.",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_6fbd8d5c4d10e031"
+        ],
+        "claim": {
+          "claim_id": "claim_faf2105629f09c43",
+          "created_at": "2026-06-09T12:05:39.392943Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_750f509f1c46c9f7"
+            ],
+            "evidence_bundle_id": "evb_3d058b830c12e867",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "organization",
+              "owner_id": "local-org",
+              "tenant_id": "local-dev",
+              "workspace_id": "ops"
+            },
+            "query": "org-visible-beta",
+            "result_refs": [
+              "search_snapshot:search_e7808cc9ab77c18f",
+              "evidence_bundle:evb_3d058b830c12e867"
+            ],
+            "search_snapshot_id": "search_e7808cc9ab77c18f"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "statement": "The organization visible beta phrase belongs to the organization workspace.",
+          "status": "draft"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_faf2105629f09c43",
+          "evidence_bundle:evb_3d058b830c12e867",
+          "search_snapshot:search_e7808cc9ab77c18f",
+          "artifact:art_750f509f1c46c9f7"
+        ],
+        "ids": {
+          "audit_event_id": "audit_6fbd8d5c4d10e031",
+          "claim_id": "claim_faf2105629f09c43",
+          "evidence_bundle_id": "evb_3d058b830c12e867",
+          "git_commit": "9e91762",
+          "search_snapshot_id": "search_e7808cc9ab77c18f"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "org_claim_from_personal_bundle": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_3f7f09efb24369e3",
+        "--statement",
+        "Organization should not draft from personal-only evidence.",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 6,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [
+          {
+            "code": "CS_SCOPE_DENIED",
+            "message": "Evidence bundle is outside the requested scope.",
+            "resource_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "9e91762"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "org_create_bundle_from_personal_snapshot": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_418c2bdd8d777aed",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 6,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [
+          {
+            "code": "CS_SCOPE_DENIED",
+            "message": "Search snapshot is outside the requested scope.",
+            "resource_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "9e91762"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "org_cross_personal_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "personal-only-alpha",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_2a1c9e69ae072ae2"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_ba0ec77b42d453b3"
+        ],
+        "ids": {
+          "audit_event_id": "audit_2a1c9e69ae072ae2",
+          "git_commit": "9e91762",
+          "search_snapshot_id": "search_ba0ec77b42d453b3"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T12:05:39.257695Z",
+          "duration_ms": 0.27,
+          "filters": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "query": "personal-only-alpha",
+          "result_count": 0,
+          "results": [],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_ba0ec77b42d453b3"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "org_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "org-visible-beta",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--owner-id",
+        "local-org",
+        "--namespace-id",
+        "organization",
+        "--workspace-id",
+        "ops",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_5fb8be02825dc0f9"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_e7808cc9ab77c18f",
+          "artifact:art_750f509f1c46c9f7",
+          "storage:sha256:750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065"
+        ],
+        "ids": {
+          "audit_event_id": "audit_5fb8be02825dc0f9",
+          "git_commit": "9e91762",
+          "search_snapshot_id": "search_e7808cc9ab77c18f"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "organization",
+        "owner_id": "local-org",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T12:05:39.211899Z",
+          "duration_ms": 0.275,
+          "filters": {
+            "namespace_id": "organization",
+            "owner_id": "local-org",
+            "tenant_id": "local-dev",
+            "workspace_id": "ops"
+          },
+          "query": "org-visible-beta",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_750f509f1c46c9f7",
+              "derived_text_ref": "derived/art_750f509f1c46c9f7.txt",
+              "evidence_refs": [
+                "artifact:art_750f509f1c46c9f7",
+                "storage:sha256:750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065"
+              ],
+              "match_reasons": [
+                {
+                  "query": "org-visible-beta",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "org-visible-beta",
+                  "query_term": "org-visible-beta",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:750f509f1c46c9f7688953dd0f7736d15c53df2ec4552acbdfabec056bd58065",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "organization",
+                "owner_id": "local-org",
+                "tenant_id": "local-dev",
+                "workspace_id": "ops"
+              },
+              "score": 11,
+              "snippet": "org-visible-beta. This should remain separate from personal-only context."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_e7808cc9ab77c18f"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "ops"
+      }
+    },
+    "personal_bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_418c2bdd8d777aed",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_a73a5f59bc340410"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T12:05:39.482237Z",
+          "evidence_bundle_id": "evb_3f7f09efb24369e3",
+          "evidence_items": [
+            {
+              "artifact_id": "art_67c8222eb9418cae",
+              "derived_text_ref": "derived/art_67c8222eb9418cae.txt",
+              "original_storage_ref": "sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+              "provenance": {
+                "created_at": "2026-06-09T12:05:39.080990Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_418c2bdd8d777aed",
+              "snippet": "personal-only-alpha. This should not appear in organization workspace search without explicit promotion.",
+              "source": {
+                "ingested_at": "2026-06-09T12:05:39.080990Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/08_namespace_isolation/personal.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "personal-only-alpha",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "personal-only-alpha",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_67c8222eb9418cae",
+                "derived_text_ref": "derived/art_67c8222eb9418cae.txt",
+                "evidence_refs": [
+                  "artifact:art_67c8222eb9418cae",
+                  "storage:sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "personal-only-alpha",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "personal-only-alpha",
+                    "query_term": "personal-only-alpha",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "personal-only-alpha. This should not appear in organization workspace search without explicit promotion."
+              }
+            ],
+            "search_snapshot_id": "search_418c2bdd8d777aed"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_418c2bdd8d777aed"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_3f7f09efb24369e3",
+          "search_snapshot:search_418c2bdd8d777aed",
+          "artifact:art_67c8222eb9418cae"
+        ],
+        "ids": {
+          "audit_event_id": "audit_a73a5f59bc340410",
+          "evidence_bundle_id": "evb_3f7f09efb24369e3",
+          "git_commit": "9e91762",
+          "search_snapshot_id": "search_418c2bdd8d777aed"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "personal_cross_org_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "org-visible-beta",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ad4566bc90200396"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_1e949d0671806739"
+        ],
+        "ids": {
+          "audit_event_id": "audit_ad4566bc90200396",
+          "git_commit": "9e91762",
+          "search_snapshot_id": "search_1e949d0671806739"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T12:05:39.302997Z",
+          "duration_ms": 0.267,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "org-visible-beta",
+          "result_count": 0,
+          "results": [],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_1e949d0671806739"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "personal_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "personal-only-alpha",
+        "--state-dir",
+        "tmp/scenario/vs0-namespace-isolation-87024",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_6aa2ece9200f2ade"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_418c2bdd8d777aed",
+          "artifact:art_67c8222eb9418cae",
+          "storage:sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70"
+        ],
+        "ids": {
+          "audit_event_id": "audit_6aa2ece9200f2ade",
+          "git_commit": "9e91762",
+          "search_snapshot_id": "search_418c2bdd8d777aed"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T12:05:39.165295Z",
+          "duration_ms": 0.258,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "personal-only-alpha",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_67c8222eb9418cae",
+              "derived_text_ref": "derived/art_67c8222eb9418cae.txt",
+              "evidence_refs": [
+                "artifact:art_67c8222eb9418cae",
+                "storage:sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70"
+              ],
+              "match_reasons": [
+                {
+                  "query": "personal-only-alpha",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "personal-only-alpha",
+                  "query_term": "personal-only-alpha",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:67c8222eb9418caed0a9cdb4a571b159cfe03ac2ed1b8721fc94b505e0f4ef70",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "personal-only-alpha. This should not appear in organization workspace search without explicit promotion."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_418c2bdd8d777aed"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

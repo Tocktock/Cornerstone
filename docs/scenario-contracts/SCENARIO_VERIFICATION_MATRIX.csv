@@ -67,9 +67,9 @@ CS-MEM-015,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario C
 CS-MEM-016,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-016 --json,reports/scenario/cs-mem-016.json,,,,,NOT_VERIFIED
 CS-MEM-017,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-017 --json,reports/scenario/cs-mem-017.json,,,,,NOT_VERIFIED
 CS-MEM-018,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-018 --json,reports/scenario/cs-mem-018.json,,,,,NOT_VERIFIED
-CS-NS-001,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0 --scenario CS-NS-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-ns-001.json,,,,,NOT_VERIFIED
+CS-NS-001,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-namespace-isolation --json,reports/scenario/vs0-namespace-isolation-2026-06-09.json,,,,,PASS
 CS-NS-002,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0 --scenario CS-NS-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-ns-002.json,,,,,NOT_VERIFIED
-CS-NS-003,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0 --scenario CS-NS-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-ns-003.json,,,,,NOT_VERIFIED
+CS-NS-003,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0-namespace-isolation --json,reports/scenario/vs0-namespace-isolation-2026-06-09.json,,,,,PASS
 CS-NS-004,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0 --scenario CS-NS-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-ns-004.json,,,,,NOT_VERIFIED
 CS-NS-005,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-005 --json,reports/scenario/cs-ns-005.json,,,,,NOT_VERIFIED
 CS-NS-006,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-006 --json,reports/scenario/cs-ns-006.json,,,,,NOT_VERIFIED
