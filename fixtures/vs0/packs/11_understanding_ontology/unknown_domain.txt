@@ -1,0 +1,5 @@
+Project: HelioShelf Calibration
+Asset: Lumen gasket register
+Fact: calibration marker is phase-seven amber
+Event: 2026-09-03 field review
+Claim: HelioShelf calibration may need specialist review.

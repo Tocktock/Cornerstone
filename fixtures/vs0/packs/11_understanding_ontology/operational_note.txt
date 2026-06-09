@@ -1,0 +1,8 @@
+Project: Atlas Renewal
+Person: Maya Chen
+Organization: Northstar Ops
+Asset: Evidence Console
+Policy: review window is 2026-07-01
+Event: 2026-07-15 review kickoff
+Relationship: Atlas Renewal -> review window : governed_by
+Claim: Atlas Renewal needs evidence review before action.

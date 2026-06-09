@@ -39,7 +39,8 @@ memory_truth_json=$(mktemp)
 tenant_security_json=$(mktemp)
 product_domain_json=$(mktemp)
 claim_collaboration_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json"' EXIT
+understanding_ontology_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_loop_json" "$memory_truth_json" "$tenant_security_json" "$product_domain_json" "$claim_collaboration_json" "$understanding_ontology_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -424,6 +425,36 @@ grep -q '"real_external_http_calls": 0' "$claim_collaboration_json" || fail "ful
 grep -q '"secret_reads": 0' "$claim_collaboration_json" || fail "full-claim-collaboration read secrets"
 grep -q '"product_feature_claims": "PARTIAL_FULL_CLAIM_COLLABORATION_ONLY"' "$claim_collaboration_json" || fail "full-claim-collaboration overclaimed product feature scope"
 
+cornerstone scenario verify full-understanding-ontology --json > "$understanding_ontology_json"
+python3 -m json.tool "$understanding_ontology_json" >/dev/null
+grep -q '"scenario_set": "full-understanding-ontology"' "$understanding_ontology_json" || fail "full-understanding-ontology report missing scenario set"
+grep -q '"blocking": 0' "$understanding_ontology_json" || fail "full-understanding-ontology report has blocking scenarios"
+grep -q '"pass": 7' "$understanding_ontology_json" || fail "full-understanding-ontology did not pass exactly seven scenarios"
+grep -q '"id": "CS-UND-006"' "$understanding_ontology_json" || fail "full-understanding-ontology missing CS-UND-006"
+grep -q '"id": "CS-UND-007"' "$understanding_ontology_json" || fail "full-understanding-ontology missing CS-UND-007"
+grep -q '"id": "CS-UND-008"' "$understanding_ontology_json" || fail "full-understanding-ontology missing CS-UND-008"
+grep -q '"id": "CS-UND-009"' "$understanding_ontology_json" || fail "full-understanding-ontology missing CS-UND-009"
+grep -q '"id": "CS-UND-010"' "$understanding_ontology_json" || fail "full-understanding-ontology missing CS-UND-010"
+grep -q '"id": "CS-UND-011"' "$understanding_ontology_json" || fail "full-understanding-ontology missing CS-UND-011"
+grep -q '"id": "CS-UND-012"' "$understanding_ontology_json" || fail "full-understanding-ontology missing CS-UND-012"
+grep -q '"suggestion_kinds":' "$understanding_ontology_json" || fail "full-understanding-ontology missing suggestion kinds"
+grep -q '"object"' "$understanding_ontology_json" || fail "full-understanding-ontology missing object suggestions"
+grep -q '"fact"' "$understanding_ontology_json" || fail "full-understanding-ontology missing fact suggestions"
+grep -q '"event"' "$understanding_ontology_json" || fail "full-understanding-ontology missing event suggestions"
+grep -q '"link"' "$understanding_ontology_json" || fail "full-understanding-ontology missing link suggestions"
+grep -q '"staleness_status": "needs_review"' "$understanding_ontology_json" || fail "full-understanding-ontology missing stale context review warning"
+grep -q '"from": 1' "$understanding_ontology_json" || fail "full-understanding-ontology missing ontology from-version"
+grep -q '"to": 2' "$understanding_ontology_json" || fail "full-understanding-ontology missing ontology to-version"
+grep -q '"approved_truth_without_promotion": 0' "$understanding_ontology_json" || fail "full-understanding-ontology approved truth without promotion"
+grep -q '"suggestions_without_evidence": 0' "$understanding_ontology_json" || fail "full-understanding-ontology suggested without evidence"
+grep -q '"silent_contradiction_choice": 0' "$understanding_ontology_json" || fail "full-understanding-ontology silently chose contradiction"
+grep -q '"stale_truth_used_without_warning": 0' "$understanding_ontology_json" || fail "full-understanding-ontology used stale truth without warning"
+grep -q '"unversioned_ontology_changes": 0' "$understanding_ontology_json" || fail "full-understanding-ontology changed ontology without version"
+grep -q '"domain_specific_certainty_without_evidence": 0' "$understanding_ontology_json" || fail "full-understanding-ontology claimed unknown-domain certainty"
+grep -q '"real_external_http_calls": 0' "$understanding_ontology_json" || fail "full-understanding-ontology reported real external HTTP calls"
+grep -q '"secret_reads": 0' "$understanding_ontology_json" || fail "full-understanding-ontology read secrets"
+grep -q '"product_feature_claims": "PARTIAL_FULL_UNDERSTANDING_ONTOLOGY_ONLY"' "$understanding_ontology_json" || fail "full-understanding-ontology overclaimed product feature scope"
+
 cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
 python3 -m json.tool "$product_domain_json" >/dev/null
 grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
@@ -453,4 +484,4 @@ grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' 
 
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, vs0-product-domain-readiness verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-understanding-ontology verify, vs0-product-domain-readiness verify, unittest).\n'

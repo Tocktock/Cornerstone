@@ -896,6 +896,37 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_full_understanding_ontology_verify(self) -> None:
+        result = run_cli("scenario", "verify", "full-understanding-ontology", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "full-understanding-ontology")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 7)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_FULL_UNDERSTANDING_ONTOLOGY_ONLY")
+        self.assertEqual(
+            {row["id"] for row in payload["scenario_results"]},
+            {"CS-UND-006", "CS-UND-007", "CS-UND-008", "CS-UND-009", "CS-UND-010", "CS-UND-011", "CS-UND-012"},
+        )
+        evidence = payload["understanding_evidence"]
+        self.assertGreaterEqual(evidence["suggestion_count"], 4)
+        self.assertGreaterEqual(evidence["promoted_item_count"], 5)
+        self.assertIn("object", evidence["suggestion_kinds"])
+        self.assertIn("fact", evidence["suggestion_kinds"])
+        self.assertIn("event", evidence["suggestion_kinds"])
+        self.assertIn("link", evidence["suggestion_kinds"])
+        self.assertTrue(evidence["operational_map_id"].startswith("omap_"))
+        self.assertGreaterEqual(evidence["map_node_count"], 1)
+        self.assertGreaterEqual(evidence["map_edge_count"], 1)
+        self.assertGreaterEqual(evidence["contradiction_count"], 1)
+        self.assertEqual(set(evidence["contradiction_values"]), {"2026-07-01", "2026-08-15"})
+        self.assertEqual(evidence["staleness_status"], "needs_review")
+        self.assertTrue(evidence["staleness_warning_visible"])
+        self.assertEqual(evidence["ontology_change_versions"], {"from": 1, "to": 2})
+        self.assertGreaterEqual(evidence["unknown_evidence_gap_count"], 1)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

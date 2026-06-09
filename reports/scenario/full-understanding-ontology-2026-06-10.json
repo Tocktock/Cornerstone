@@ -1,0 +1,3787 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify full-understanding-ontology",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "66b45c4"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "approved_truth_without_promotion": 0,
+    "domain_specific_certainty_without_evidence": 0,
+    "real_external_http_calls": 0,
+    "secret_reads": 0,
+    "silent_contradiction_choice": 0,
+    "stale_truth_used_without_warning": 0,
+    "suggestions_without_evidence": 0,
+    "unversioned_ontology_changes": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/full-understanding-ontology-2026-06-10.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone understand suggest --artifact-id <artifact_id> --json"
+      ],
+      "id": "CS-UND-006",
+      "notes": "Draft structure suggestions include objects, links, facts, and events with source evidence and confidence, without approved ontology truth.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone understand promote --suggestion-id <suggestion_id> --json"
+      ],
+      "id": "CS-UND-007",
+      "notes": "Promotion creates durable draft ontology items preserving evidence, owner scope, namespace, and trust state.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone understand map --json"
+      ],
+      "id": "CS-UND-008",
+      "notes": "Operational map includes evidence-linked artifacts, ontology items, claims, missions, actions, timelines, policies, decisions, and workflows.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone understand contradictions --json"
+      ],
+      "id": "CS-UND-009",
+      "notes": "Contradictory policy evidence is visible with competing values and evidence, unresolved status, and no silent winner.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone understand stale-check --claim-id <claim_id> --newer-evidence-bundle-id <bundle_id> --json"
+      ],
+      "id": "CS-UND-010",
+      "notes": "A newer evidence bundle marks the approved claim as needing review and prevents current-truth use without warning.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone understand ontology-change --item-id <ontology_item_id> --property label --to-value <value> --json"
+      ],
+      "id": "CS-UND-011",
+      "notes": "Ontology item changes record version, diff, impact, affected objects, rollback guidance, migration guidance, and audit.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone understand suggest --artifact-id <unknown_domain_artifact_id> --domain unknown --json"
+      ],
+      "id": "CS-UND-012",
+      "notes": "Unknown-domain extraction stays draft, labels unsupported inferences, and records evidence gaps instead of claiming domain certainty.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    }
+  ],
+  "scenario_set": "full-understanding-ontology",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/full-understanding-ontology-24692",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 7,
+    "product_feature_claims": "PARTIAL_FULL_UNDERSTANDING_ONTOLOGY_ONLY",
+    "scenario_count": 7
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "action_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_f78a17e7c635a499",
+        "--claim-id",
+        "claim_547f8744fc6d5e95",
+        "--goal",
+        "Record Atlas Renewal review follow-up.",
+        "--action-kind",
+        "internal_status_update",
+        "--risk",
+        "low",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_4d077b1e4745478d",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": false,
+            "status": "not_required"
+          },
+          "audit_ref": "audit:audit_ec149f7de0609d01",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T15:28:20.192214Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_547f8744fc6d5e95",
+            "created_at": "2026-06-09T15:28:20.192191Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_6b35473d5946423b",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Record Atlas Renewal review follow-up.",
+            "mission_id": "mission_f78a17e7c635a499",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": false,
+              "can_execute_now": true,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T15:28:20.192076Z",
+              "decision": "allow",
+              "execution_status": "ready_to_execute",
+              "id": "policy_c9ed44b510a99607",
+              "mission_id": "mission_f78a17e7c635a499",
+              "policy": "low_risk_autopilot_allowed",
+              "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "artifact:art_ed28d3aa5067e098"
+            ],
+            "evidence_bundle_id": "evb_af531c2f996ad0eb",
+            "evidence_item_count": 2,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "2026-07-01",
+            "result_refs": [
+              "search_snapshot:search_81198322e8517bb1",
+              "evidence_bundle:evb_af531c2f996ad0eb"
+            ],
+            "search_snapshot_id": "search_81198322e8517bb1"
+          },
+          "execution": {
+            "can_execute_now": true,
+            "result": null,
+            "status": "ready_to_execute"
+          },
+          "goal": "Record Atlas Renewal review follow-up.",
+          "mission_id": "mission_f78a17e7c635a499",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T15:28:20.192076Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_c9ed44b510a99607",
+            "mission_id": "mission_f78a17e7c635a499",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_547f8744fc6d5e95"
+        },
+        "audit_refs": [
+          "audit:audit_ec149f7de0609d01"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_4d077b1e4745478d",
+          "mission:mission_f78a17e7c635a499",
+          "claim:claim_547f8744fc6d5e95",
+          "dry_run:dryrun_6b35473d5946423b",
+          "evidence_bundle:evb_af531c2f996ad0eb",
+          "artifact:art_302a0d9daa5d3360",
+          "artifact:art_ed28d3aa5067e098"
+        ],
+        "ids": {
+          "action_id": "action_4d077b1e4745478d",
+          "audit_event_id": "audit_ec149f7de0609d01",
+          "claim_id": "claim_547f8744fc6d5e95",
+          "dry_run_id": "dryrun_6b35473d5946423b",
+          "git_commit": "66b45c4",
+          "mission_id": "mission_f78a17e7c635a499"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_c9ed44b510a99607"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T15:28:20.192076Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_c9ed44b510a99607",
+            "mission_id": "mission_f78a17e7c635a499",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 27,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "66b45c4"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "claim_approve": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "approve",
+        "claim_547f8744fc6d5e95",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_3988865a8bf94838"
+        ],
+        "claim": {
+          "approved_at": "2026-06-09T15:28:19.937730Z",
+          "authority": {
+            "blocked_reason": "Autonomous action still requires a governed action or mission path.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": true
+          },
+          "claim_id": "claim_547f8744fc6d5e95",
+          "created_at": "2026-06-09T15:28:19.887595Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "artifact:art_ed28d3aa5067e098"
+            ],
+            "evidence_bundle_id": "evb_af531c2f996ad0eb",
+            "evidence_item_count": 2,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "2026-07-01",
+            "result_refs": [
+              "search_snapshot:search_81198322e8517bb1",
+              "evidence_bundle:evb_af531c2f996ad0eb"
+            ],
+            "search_snapshot_id": "search_81198322e8517bb1"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "Atlas Renewal review window is 2026-07-01.",
+          "status": "approved",
+          "trust_state": "approved"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim approve",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_547f8744fc6d5e95",
+          "evidence_bundle:evb_af531c2f996ad0eb",
+          "search_snapshot:search_81198322e8517bb1",
+          "artifact:art_302a0d9daa5d3360",
+          "artifact:art_ed28d3aa5067e098"
+        ],
+        "ids": {
+          "audit_event_id": "audit_3988865a8bf94838",
+          "claim_id": "claim_547f8744fc6d5e95",
+          "evidence_bundle_id": "evb_af531c2f996ad0eb",
+          "git_commit": "66b45c4",
+          "search_snapshot_id": "search_81198322e8517bb1"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_af531c2f996ad0eb",
+        "--statement",
+        "Atlas Renewal review window is 2026-07-01.",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_865f16e2eed2c4ed"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_547f8744fc6d5e95",
+          "created_at": "2026-06-09T15:28:19.887595Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "artifact:art_ed28d3aa5067e098"
+            ],
+            "evidence_bundle_id": "evb_af531c2f996ad0eb",
+            "evidence_item_count": 2,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "2026-07-01",
+            "result_refs": [
+              "search_snapshot:search_81198322e8517bb1",
+              "evidence_bundle:evb_af531c2f996ad0eb"
+            ],
+            "search_snapshot_id": "search_81198322e8517bb1"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "Atlas Renewal review window is 2026-07-01.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_547f8744fc6d5e95",
+          "evidence_bundle:evb_af531c2f996ad0eb",
+          "search_snapshot:search_81198322e8517bb1",
+          "artifact:art_302a0d9daa5d3360",
+          "artifact:art_ed28d3aa5067e098"
+        ],
+        "ids": {
+          "audit_event_id": "audit_865f16e2eed2c4ed",
+          "claim_id": "claim_547f8744fc6d5e95",
+          "evidence_bundle_id": "evb_af531c2f996ad0eb",
+          "git_commit": "66b45c4",
+          "search_snapshot_id": "search_81198322e8517bb1"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "contradictions": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "contradictions",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_daf9d758ca8c4ab7"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand contradictions",
+        "contradictions": [
+          {
+            "asks_for_resolution": true,
+            "claim_or_memory_marked_uncertain": true,
+            "competing_evidence": [
+              {
+                "evidence_refs": [
+                  "understanding_suggestion:sugg_08552053c503bea6",
+                  "artifact:art_ed28d3aa5067e098",
+                  "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+                ],
+                "label": "review window is 2026-07-01",
+                "ontology_item_id": "onto_5b85ef8ab68e63cd",
+                "value": "2026-07-01"
+              },
+              {
+                "evidence_refs": [
+                  "understanding_suggestion:sugg_bec82d0494793b4a",
+                  "artifact:art_f598d9dd3b9112b5",
+                  "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+                ],
+                "label": "review window is 2026-08-15",
+                "ontology_item_id": "onto_c19f80ccb778669c",
+                "value": "2026-08-15"
+              }
+            ],
+            "competing_values": [
+              "2026-07-01",
+              "2026-08-15"
+            ],
+            "contradiction_id": "contra_6e6a18de54d1f9b3",
+            "created_at": "2026-06-09T15:28:20.297854Z",
+            "fact_key": "review_window",
+            "schema_version": "cs.contradiction.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "silent_choice_made": false,
+            "status": "unresolved"
+          }
+        ],
+        "errors": [],
+        "evidence_refs": [
+          "understanding_suggestion:sugg_08552053c503bea6",
+          "artifact:art_ed28d3aa5067e098",
+          "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+          "understanding_suggestion:sugg_bec82d0494793b4a",
+          "artifact:art_f598d9dd3b9112b5",
+          "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+        ],
+        "ids": {
+          "audit_event_id": "audit_daf9d758ca8c4ab7",
+          "git_commit": "66b45c4"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_new": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/11_understanding_ontology/policy_new.txt",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_f598d9dd3b9112b5",
+          "checksum_sha256": "f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_f598d9dd3b9112b5.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 122,
+          "original_storage_ref": "sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085",
+          "provenance": {
+            "created_at": "2026-06-09T15:28:19.635547Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T15:28:19.635547Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/11_understanding_ontology/policy_new.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_8b1ba789122446e9"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_f598d9dd3b9112b5",
+          "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+        ],
+        "ids": {
+          "artifact_id": "art_f598d9dd3b9112b5",
+          "audit_event_id": "audit_8b1ba789122446e9",
+          "checksum_sha256": "f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085",
+          "git_commit": "66b45c4"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_old": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/11_understanding_ontology/policy_old.txt",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_ed28d3aa5067e098",
+          "checksum_sha256": "ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_ed28d3aa5067e098.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 121,
+          "original_storage_ref": "sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+          "provenance": {
+            "created_at": "2026-06-09T15:28:19.481377Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T15:28:19.481377Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/11_understanding_ontology/policy_old.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_c27e6fe66f190dcb"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_ed28d3aa5067e098",
+          "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+        ],
+        "ids": {
+          "artifact_id": "art_ed28d3aa5067e098",
+          "audit_event_id": "audit_c27e6fe66f190dcb",
+          "checksum_sha256": "ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+          "git_commit": "66b45c4"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_operational": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/11_understanding_ontology/operational_note.txt",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_302a0d9daa5d3360",
+          "checksum_sha256": "302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_302a0d9daa5d3360.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 279,
+          "original_storage_ref": "sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "provenance": {
+            "created_at": "2026-06-09T15:28:19.222659Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T15:28:19.222659Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/11_understanding_ontology/operational_note.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_53315338b6893933"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+        ],
+        "ids": {
+          "artifact_id": "art_302a0d9daa5d3360",
+          "audit_event_id": "audit_53315338b6893933",
+          "checksum_sha256": "302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "git_commit": "66b45c4"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ingest_unknown": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/11_understanding_ontology/unknown_domain.txt",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_84d48e132183e1af",
+          "checksum_sha256": "84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_84d48e132183e1af.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 196,
+          "original_storage_ref": "sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56",
+          "provenance": {
+            "created_at": "2026-06-09T15:28:20.466523Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T15:28:20.466523Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/11_understanding_ontology/unknown_domain.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_fbce76eed991fc58"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_84d48e132183e1af",
+          "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56"
+        ],
+        "ids": {
+          "artifact_id": "art_84d48e132183e1af",
+          "audit_event_id": "audit_fbce76eed991fc58",
+          "checksum_sha256": "84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56",
+          "git_commit": "66b45c4"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "map": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "map",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_16327b20b522ec25"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand map",
+        "errors": [],
+        "evidence_refs": [
+          "operational_map:omap_ba615c10e37162d3",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "artifact:art_ed28d3aa5067e098",
+          "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+          "artifact:art_f598d9dd3b9112b5",
+          "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085",
+          "understanding_suggestion:sugg_08552053c503bea6",
+          "artifact:art_ed28d3aa5067e098",
+          "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+          "understanding_suggestion:sugg_fb037a99e210ab4c",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "understanding_suggestion:sugg_07c2dc672995b2fa",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "understanding_suggestion:sugg_bec82d0494793b4a",
+          "artifact:art_f598d9dd3b9112b5",
+          "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085",
+          "understanding_suggestion:sugg_1af4320aa6d423e8",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "claim:claim_547f8744fc6d5e95",
+          "evidence_bundle:evb_af531c2f996ad0eb",
+          "search_snapshot:search_81198322e8517bb1",
+          "artifact:art_302a0d9daa5d3360",
+          "artifact:art_ed28d3aa5067e098",
+          "artifact:art_302a0d9daa5d3360",
+          "artifact:art_ed28d3aa5067e098",
+          "artifact:art_302a0d9daa5d3360",
+          "artifact:art_ed28d3aa5067e098"
+        ],
+        "ids": {
+          "audit_event_id": "audit_16327b20b522ec25",
+          "git_commit": "66b45c4",
+          "operational_map_id": "omap_ba615c10e37162d3"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "operational_map": {
+          "correctable": true,
+          "created_at": "2026-06-09T15:28:20.244724Z",
+          "decisions": [
+            {
+              "claim_id": "claim_547f8744fc6d5e95",
+              "status": "approved",
+              "trust_state": "approved"
+            }
+          ],
+          "edges": [
+            {
+              "evidence_refs": [
+                "understanding_suggestion:sugg_08552053c503bea6",
+                "artifact:art_ed28d3aa5067e098",
+                "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+              ],
+              "source": "ontology_item:onto_5b85ef8ab68e63cd",
+              "target": "artifact:art_ed28d3aa5067e098",
+              "type": "supported_by"
+            },
+            {
+              "evidence_refs": [
+                "understanding_suggestion:sugg_fb037a99e210ab4c",
+                "artifact:art_302a0d9daa5d3360",
+                "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+              ],
+              "source": "ontology_item:onto_9895116beceba821",
+              "target": "artifact:art_302a0d9daa5d3360",
+              "type": "supported_by"
+            },
+            {
+              "evidence_refs": [
+                "understanding_suggestion:sugg_07c2dc672995b2fa",
+                "artifact:art_302a0d9daa5d3360",
+                "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+              ],
+              "source": "ontology_item:onto_ba43352a3ec18ac0",
+              "target": "artifact:art_302a0d9daa5d3360",
+              "type": "supported_by"
+            },
+            {
+              "evidence_refs": [
+                "understanding_suggestion:sugg_bec82d0494793b4a",
+                "artifact:art_f598d9dd3b9112b5",
+                "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+              ],
+              "source": "ontology_item:onto_c19f80ccb778669c",
+              "target": "artifact:art_f598d9dd3b9112b5",
+              "type": "supported_by"
+            },
+            {
+              "evidence_refs": [
+                "understanding_suggestion:sugg_1af4320aa6d423e8",
+                "artifact:art_302a0d9daa5d3360",
+                "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+              ],
+              "source": "ontology_item:onto_ea030f17bc974200",
+              "target": "artifact:art_302a0d9daa5d3360",
+              "type": "supported_by"
+            },
+            {
+              "evidence_refs": [
+                "claim:claim_547f8744fc6d5e95",
+                "evidence_bundle:evb_af531c2f996ad0eb",
+                "search_snapshot:search_81198322e8517bb1",
+                "artifact:art_302a0d9daa5d3360",
+                "artifact:art_ed28d3aa5067e098"
+              ],
+              "source": "claim:claim_547f8744fc6d5e95",
+              "target": "artifact:art_302a0d9daa5d3360",
+              "type": "supported_by"
+            },
+            {
+              "evidence_refs": [
+                "claim:claim_547f8744fc6d5e95",
+                "evidence_bundle:evb_af531c2f996ad0eb",
+                "search_snapshot:search_81198322e8517bb1",
+                "artifact:art_302a0d9daa5d3360",
+                "artifact:art_ed28d3aa5067e098"
+              ],
+              "source": "claim:claim_547f8744fc6d5e95",
+              "target": "artifact:art_ed28d3aa5067e098",
+              "type": "supported_by"
+            },
+            {
+              "evidence_refs": [
+                "artifact:art_302a0d9daa5d3360",
+                "artifact:art_ed28d3aa5067e098"
+              ],
+              "source": "mission:mission_f78a17e7c635a499",
+              "target": "claim:claim_547f8744fc6d5e95",
+              "type": "derived_from_claim"
+            },
+            {
+              "evidence_refs": [
+                "artifact:art_302a0d9daa5d3360",
+                "artifact:art_ed28d3aa5067e098"
+              ],
+              "source": "action:action_4d077b1e4745478d",
+              "target": "mission:mission_f78a17e7c635a499",
+              "type": "executes_mission"
+            }
+          ],
+          "evidence_linked": true,
+          "nodes": [
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "artifact:art_302a0d9daa5d3360",
+                "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+              ],
+              "id": "artifact:art_302a0d9daa5d3360",
+              "label": "art_302a0d9daa5d3360",
+              "type": "artifact"
+            },
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "artifact:art_ed28d3aa5067e098",
+                "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+              ],
+              "id": "artifact:art_ed28d3aa5067e098",
+              "label": "art_ed28d3aa5067e098",
+              "type": "artifact"
+            },
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "artifact:art_f598d9dd3b9112b5",
+                "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+              ],
+              "id": "artifact:art_f598d9dd3b9112b5",
+              "label": "art_f598d9dd3b9112b5",
+              "type": "artifact"
+            },
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "understanding_suggestion:sugg_08552053c503bea6",
+                "artifact:art_ed28d3aa5067e098",
+                "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+              ],
+              "id": "ontology_item:onto_5b85ef8ab68e63cd",
+              "label": "review window is 2026-07-01",
+              "trust_state": "draft",
+              "type": "fact"
+            },
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "understanding_suggestion:sugg_fb037a99e210ab4c",
+                "artifact:art_302a0d9daa5d3360",
+                "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+              ],
+              "id": "ontology_item:onto_9895116beceba821",
+              "label": "Atlas Renewal governed by review window",
+              "trust_state": "draft",
+              "type": "link"
+            },
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "understanding_suggestion:sugg_07c2dc672995b2fa",
+                "artifact:art_302a0d9daa5d3360",
+                "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+              ],
+              "id": "ontology_item:onto_ba43352a3ec18ac0",
+              "label": "2026-07-15 review kickoff",
+              "trust_state": "draft",
+              "type": "event"
+            },
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "understanding_suggestion:sugg_bec82d0494793b4a",
+                "artifact:art_f598d9dd3b9112b5",
+                "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+              ],
+              "id": "ontology_item:onto_c19f80ccb778669c",
+              "label": "review window is 2026-08-15",
+              "trust_state": "draft",
+              "type": "fact"
+            },
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "understanding_suggestion:sugg_1af4320aa6d423e8",
+                "artifact:art_302a0d9daa5d3360",
+                "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+              ],
+              "id": "ontology_item:onto_ea030f17bc974200",
+              "label": "Atlas Renewal",
+              "trust_state": "draft",
+              "type": "object"
+            },
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "claim:claim_547f8744fc6d5e95",
+                "evidence_bundle:evb_af531c2f996ad0eb",
+                "search_snapshot:search_81198322e8517bb1",
+                "artifact:art_302a0d9daa5d3360",
+                "artifact:art_ed28d3aa5067e098"
+              ],
+              "id": "claim:claim_547f8744fc6d5e95",
+              "label": "Atlas Renewal review window is 2026-07-01.",
+              "trust_state": "approved",
+              "type": "claim"
+            },
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "artifact:art_302a0d9daa5d3360",
+                "artifact:art_ed28d3aa5067e098"
+              ],
+              "id": "mission:mission_f78a17e7c635a499",
+              "label": "Review the Atlas Renewal window with evidence-linked operational context.",
+              "status": "active",
+              "type": "mission"
+            },
+            {
+              "correctable": true,
+              "evidence_refs": [
+                "artifact:art_302a0d9daa5d3360",
+                "artifact:art_ed28d3aa5067e098"
+              ],
+              "id": "action:action_4d077b1e4745478d",
+              "label": "Record Atlas Renewal review follow-up.",
+              "status": null,
+              "type": "workflow_action"
+            }
+          ],
+          "operational_map_id": "omap_ba615c10e37162d3",
+          "policies": [
+            {
+              "decision": "allow",
+              "policy": "low_risk_autopilot_allowed",
+              "policy_decision_id": "policy_c9ed44b510a99607"
+            }
+          ],
+          "schema_version": "cs.operational_map.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "ready",
+          "timelines": [
+            {
+              "at": "2026-06-09T15:28:19.222659Z",
+              "event": "artifact_ingested",
+              "ref": "artifact:art_302a0d9daa5d3360"
+            },
+            {
+              "at": "2026-06-09T15:28:19.481377Z",
+              "event": "artifact_ingested",
+              "ref": "artifact:art_ed28d3aa5067e098"
+            },
+            {
+              "at": "2026-06-09T15:28:19.635547Z",
+              "event": "artifact_ingested",
+              "ref": "artifact:art_f598d9dd3b9112b5"
+            }
+          ],
+          "workflows": [
+            {
+              "mission_id": "mission_f78a17e7c635a499",
+              "status": "active"
+            }
+          ]
+        },
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "mission_activate": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "activate",
+        "mission_f78a17e7c635a499",
+        "--mode",
+        "autopilot",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_69889a442e338725",
+          "audit:audit_b6db1c1eca4b63d0"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission activate",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_f78a17e7c635a499"
+        ],
+        "ids": {
+          "git_commit": "66b45c4",
+          "mission_id": "mission_f78a17e7c635a499"
+        },
+        "mission": {
+          "activated_at": "2026-06-09T15:28:20.138998Z",
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "authority_view": {
+            "allowed_actions": [
+              "internal_status_update",
+              "draft_task",
+              "refresh_brief"
+            ],
+            "forbidden_actions": [
+              "external_writeback_without_workflow_action",
+              "cross_namespace_access",
+              "destructive_change",
+              "secret_exfiltration"
+            ],
+            "may_act_in_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "pause_stop_revoke": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T15:28:20.087022Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "artifact:art_ed28d3aa5067e098"
+            ],
+            "evidence_bundle_id": "evb_af531c2f996ad0eb",
+            "search_snapshot_id": "search_81198322e8517bb1"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Review the Atlas Renewal window with evidence-linked operational context.",
+          "mission_id": "mission_f78a17e7c635a499",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_547f8744fc6d5e95",
+            "statement": "Atlas Renewal review window is 2026-07-01.",
+            "trust_state": "approved"
+          },
+          "status": "active",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "autopilot"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": false,
+            "autonomous_execution_allowed": true,
+            "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            "label": "Autopilot"
+          },
+          "mode": "autopilot",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T15:28:20.138508Z"
+        }
+      }
+    },
+    "mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--goal",
+        "Review the Atlas Renewal window with evidence-linked operational context.",
+        "--claim-id",
+        "claim_547f8744fc6d5e95",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_4bc2e8c2b8b29f09"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_f78a17e7c635a499",
+          "claim:claim_547f8744fc6d5e95",
+          "evidence_bundle:evb_af531c2f996ad0eb",
+          "artifact:art_302a0d9daa5d3360",
+          "artifact:art_ed28d3aa5067e098"
+        ],
+        "ids": {
+          "audit_event_id": "audit_4bc2e8c2b8b29f09",
+          "claim_id": "claim_547f8744fc6d5e95",
+          "evidence_bundle_id": "evb_af531c2f996ad0eb",
+          "git_commit": "66b45c4",
+          "mission_id": "mission_f78a17e7c635a499"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T15:28:20.087022Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "artifact:art_ed28d3aa5067e098"
+            ],
+            "evidence_bundle_id": "evb_af531c2f996ad0eb",
+            "search_snapshot_id": "search_81198322e8517bb1"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Review the Atlas Renewal window with evidence-linked operational context.",
+          "mission_id": "mission_f78a17e7c635a499",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_547f8744fc6d5e95",
+            "statement": "Atlas Renewal review window is 2026-07-01.",
+            "trust_state": "approved"
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "assist"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "new_bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_8b2f683b4d0c6979",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_4e11e4f107463d45"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T15:28:20.037126Z",
+          "evidence_bundle_id": "evb_ab5da2278142e244",
+          "evidence_items": [
+            {
+              "artifact_id": "art_f598d9dd3b9112b5",
+              "derived_text_ref": "derived/art_f598d9dd3b9112b5.txt",
+              "original_storage_ref": "sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085",
+              "provenance": {
+                "created_at": "2026-06-09T15:28:19.635547Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_8b2f683b4d0c6979",
+              "snippet": "2026-08-15 Claim: Newer evidence records the review window as 2026-08-15.",
+              "source": {
+                "ingested_at": "2026-06-09T15:28:19.635547Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/11_understanding_ontology/policy_new.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "2026-08-15",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "2026-08-15",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_f598d9dd3b9112b5",
+                "derived_text_ref": "derived/art_f598d9dd3b9112b5.txt",
+                "evidence_refs": [
+                  "artifact:art_f598d9dd3b9112b5",
+                  "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "2026-08-15",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "2026-08-15",
+                    "query_term": "2026-08-15",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "2026-08-15 Claim: Newer evidence records the review window as 2026-08-15."
+              }
+            ],
+            "search_snapshot_id": "search_8b2f683b4d0c6979"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_8b2f683b4d0c6979"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_ab5da2278142e244",
+          "search_snapshot:search_8b2f683b4d0c6979",
+          "artifact:art_f598d9dd3b9112b5"
+        ],
+        "ids": {
+          "audit_event_id": "audit_4e11e4f107463d45",
+          "evidence_bundle_id": "evb_ab5da2278142e244",
+          "git_commit": "66b45c4",
+          "search_snapshot_id": "search_8b2f683b4d0c6979"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "new_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "2026-08-15",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_66afa01f4559c4be"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_8b2f683b4d0c6979",
+          "artifact:art_f598d9dd3b9112b5",
+          "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+        ],
+        "ids": {
+          "audit_event_id": "audit_66afa01f4559c4be",
+          "git_commit": "66b45c4",
+          "search_snapshot_id": "search_8b2f683b4d0c6979"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T15:28:19.987626Z",
+          "duration_ms": 0.32,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "2026-08-15",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_f598d9dd3b9112b5",
+              "derived_text_ref": "derived/art_f598d9dd3b9112b5.txt",
+              "evidence_refs": [
+                "artifact:art_f598d9dd3b9112b5",
+                "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+              ],
+              "match_reasons": [
+                {
+                  "query": "2026-08-15",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "2026-08-15",
+                  "query_term": "2026-08-15",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "2026-08-15 Claim: Newer evidence records the review window as 2026-08-15."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_8b2f683b4d0c6979"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "old_bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_81198322e8517bb1",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_7e4d6c90353153f1"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T15:28:19.836854Z",
+          "evidence_bundle_id": "evb_af531c2f996ad0eb",
+          "evidence_items": [
+            {
+              "artifact_id": "art_302a0d9daa5d3360",
+              "derived_text_ref": "derived/art_302a0d9daa5d3360.txt",
+              "original_storage_ref": "sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+              "provenance": {
+                "created_at": "2026-06-09T15:28:19.222659Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_81198322e8517bb1",
+              "snippet": "2026-07-01 Event: 2026-07-15 review kickoff Relationship: Atlas Renewal -> review window : governed_by Claim: Atlas Renewal needs evidence review before action.",
+              "source": {
+                "ingested_at": "2026-06-09T15:28:19.222659Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/11_understanding_ontology/operational_note.txt",
+                "type": "local_file"
+              }
+            },
+            {
+              "artifact_id": "art_ed28d3aa5067e098",
+              "derived_text_ref": "derived/art_ed28d3aa5067e098.txt",
+              "original_storage_ref": "sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+              "provenance": {
+                "created_at": "2026-06-09T15:28:19.481377Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_81198322e8517bb1",
+              "snippet": "2026-07-01 Claim: The original review window was recorded as 2026-07-01.",
+              "source": {
+                "ingested_at": "2026-06-09T15:28:19.481377Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/11_understanding_ontology/policy_old.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "2026-07-01",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "2026-07-01",
+            "result_count": 2,
+            "results": [
+              {
+                "artifact_id": "art_302a0d9daa5d3360",
+                "derived_text_ref": "derived/art_302a0d9daa5d3360.txt",
+                "evidence_refs": [
+                  "artifact:art_302a0d9daa5d3360",
+                  "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "2026-07-01",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "2026-07-01",
+                    "query_term": "2026-07-01",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "2026-07-01 Event: 2026-07-15 review kickoff Relationship: Atlas Renewal -> review window : governed_by Claim: Atlas Renewal needs evidence review before action."
+              },
+              {
+                "artifact_id": "art_ed28d3aa5067e098",
+                "derived_text_ref": "derived/art_ed28d3aa5067e098.txt",
+                "evidence_refs": [
+                  "artifact:art_ed28d3aa5067e098",
+                  "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "2026-07-01",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "2026-07-01",
+                    "query_term": "2026-07-01",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "2026-07-01 Claim: The original review window was recorded as 2026-07-01."
+              }
+            ],
+            "search_snapshot_id": "search_81198322e8517bb1"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_81198322e8517bb1"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_af531c2f996ad0eb",
+          "search_snapshot:search_81198322e8517bb1",
+          "artifact:art_302a0d9daa5d3360",
+          "artifact:art_ed28d3aa5067e098"
+        ],
+        "ids": {
+          "audit_event_id": "audit_7e4d6c90353153f1",
+          "evidence_bundle_id": "evb_af531c2f996ad0eb",
+          "git_commit": "66b45c4",
+          "search_snapshot_id": "search_81198322e8517bb1"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "old_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "2026-07-01",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_910a15d30528edaf"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_81198322e8517bb1",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "artifact:art_ed28d3aa5067e098",
+          "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+        ],
+        "ids": {
+          "audit_event_id": "audit_910a15d30528edaf",
+          "git_commit": "66b45c4",
+          "search_snapshot_id": "search_81198322e8517bb1"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T15:28:19.784140Z",
+          "duration_ms": 0.31,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "2026-07-01",
+          "result_count": 2,
+          "results": [
+            {
+              "artifact_id": "art_302a0d9daa5d3360",
+              "derived_text_ref": "derived/art_302a0d9daa5d3360.txt",
+              "evidence_refs": [
+                "artifact:art_302a0d9daa5d3360",
+                "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+              ],
+              "match_reasons": [
+                {
+                  "query": "2026-07-01",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "2026-07-01",
+                  "query_term": "2026-07-01",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "2026-07-01 Event: 2026-07-15 review kickoff Relationship: Atlas Renewal -> review window : governed_by Claim: Atlas Renewal needs evidence review before action."
+            },
+            {
+              "artifact_id": "art_ed28d3aa5067e098",
+              "derived_text_ref": "derived/art_ed28d3aa5067e098.txt",
+              "evidence_refs": [
+                "artifact:art_ed28d3aa5067e098",
+                "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+              ],
+              "match_reasons": [
+                {
+                  "query": "2026-07-01",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "2026-07-01",
+                  "query_term": "2026-07-01",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "2026-07-01 Claim: The original review window was recorded as 2026-07-01."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_81198322e8517bb1"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "ontology_change": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "ontology-change",
+        "--item-id",
+        "onto_5b85ef8ab68e63cd",
+        "--property",
+        "label",
+        "--to-value",
+        "review window needs owner review",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_a0c3a0a85893bdb7"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand ontology-change",
+        "errors": [],
+        "evidence_refs": [
+          "ontology_change:ochg_1a33ebfc6686ae53",
+          "understanding_suggestion:sugg_08552053c503bea6",
+          "artifact:art_ed28d3aa5067e098",
+          "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+        ],
+        "ids": {
+          "audit_event_id": "audit_a0c3a0a85893bdb7",
+          "git_commit": "66b45c4",
+          "ontology_change_id": "ochg_1a33ebfc6686ae53",
+          "ontology_item_id": "onto_5b85ef8ab68e63cd"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "ontology_change": {
+          "created_at": "2026-06-09T15:28:20.405108Z",
+          "diff": {
+            "from": "review window is 2026-07-01",
+            "property": "label",
+            "to": "review window needs owner review"
+          },
+          "evidence_refs": [
+            "understanding_suggestion:sugg_08552053c503bea6",
+            "artifact:art_ed28d3aa5067e098",
+            "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+          ],
+          "from_version": 1,
+          "impact": {
+            "affected_actions": [
+              "action:action_4d077b1e4745478d"
+            ],
+            "affected_claims": [
+              "claim:claim_547f8744fc6d5e95"
+            ],
+            "affected_missions": [
+              "mission:mission_f78a17e7c635a499"
+            ],
+            "affected_playbooks": []
+          },
+          "migration_guidance": [
+            "Review affected claims, missions, playbooks, and actions before broad use."
+          ],
+          "ontology_change_id": "ochg_1a33ebfc6686ae53",
+          "ontology_item_id": "onto_5b85ef8ab68e63cd",
+          "rollback_guidance": [
+            "Restore label to the prior value recorded in this change.",
+            "Re-run contradiction, staleness, and operational-map checks before using the changed item as approved truth."
+          ],
+          "schema_version": "cs.ontology_change.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "recorded",
+          "to_version": 2
+        },
+        "ontology_item": {
+          "approved_ontology_truth": false,
+          "candidate_type": "policy",
+          "created_at": "2026-06-09T15:28:19.573121Z",
+          "evidence_refs": [
+            "understanding_suggestion:sugg_08552053c503bea6",
+            "artifact:art_ed28d3aa5067e098",
+            "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+          ],
+          "fact_key": "review_window",
+          "fact_value": "2026-07-01",
+          "kind": "fact",
+          "label": "review window needs owner review",
+          "ontology_item_id": "onto_5b85ef8ab68e63cd",
+          "provenance": {
+            "created_from": "understanding.promote",
+            "source_artifact_id": "art_ed28d3aa5067e098",
+            "source_suggestion_id": "sugg_08552053c503bea6",
+            "trust_state_preserved": true
+          },
+          "relationship": null,
+          "schema_version": "cs.ontology_item.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "artifact_id": "art_ed28d3aa5067e098",
+            "line_no": 2,
+            "snippet": "Policy: review window is 2026-07-01"
+          },
+          "source_suggestion_id": "sugg_08552053c503bea6",
+          "status": "promoted_draft",
+          "trust_state": "draft",
+          "value": "review window is 2026-07-01",
+          "version": 2,
+          "version_history": [
+            {
+              "diff": {
+                "from": "review window is 2026-07-01",
+                "property": "label",
+                "to": "review window needs owner review"
+              },
+              "from_version": 1,
+              "ontology_change_id": "ochg_1a33ebfc6686ae53",
+              "to_version": 2
+            }
+          ]
+        },
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "promote_new_policy": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "promote",
+        "--suggestion-id",
+        "sugg_bec82d0494793b4a",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_1470cede0d9a44e9"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand promote",
+        "errors": [],
+        "evidence_refs": [
+          "ontology_item:onto_c19f80ccb778669c",
+          "understanding_suggestion:sugg_bec82d0494793b4a",
+          "artifact:art_f598d9dd3b9112b5",
+          "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+        ],
+        "ids": {
+          "audit_event_id": "audit_1470cede0d9a44e9",
+          "git_commit": "66b45c4",
+          "ontology_item_id": "onto_c19f80ccb778669c",
+          "suggestion_id": "sugg_bec82d0494793b4a"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "ontology_item": {
+          "approved_ontology_truth": false,
+          "candidate_type": "policy",
+          "created_at": "2026-06-09T15:28:19.730101Z",
+          "evidence_refs": [
+            "understanding_suggestion:sugg_bec82d0494793b4a",
+            "artifact:art_f598d9dd3b9112b5",
+            "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+          ],
+          "fact_key": "review_window",
+          "fact_value": "2026-08-15",
+          "kind": "fact",
+          "label": "review window is 2026-08-15",
+          "ontology_item_id": "onto_c19f80ccb778669c",
+          "provenance": {
+            "created_from": "understanding.promote",
+            "source_artifact_id": "art_f598d9dd3b9112b5",
+            "source_suggestion_id": "sugg_bec82d0494793b4a",
+            "trust_state_preserved": true
+          },
+          "relationship": null,
+          "schema_version": "cs.ontology_item.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "artifact_id": "art_f598d9dd3b9112b5",
+            "line_no": 2,
+            "snippet": "Policy: review window is 2026-08-15"
+          },
+          "source_suggestion_id": "sugg_bec82d0494793b4a",
+          "status": "promoted_draft",
+          "trust_state": "draft",
+          "value": "review window is 2026-08-15",
+          "version": 1,
+          "version_history": []
+        },
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "promote_old_policy": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "promote",
+        "--suggestion-id",
+        "sugg_08552053c503bea6",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_fb0d8562b02cb8a7"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand promote",
+        "errors": [],
+        "evidence_refs": [
+          "ontology_item:onto_5b85ef8ab68e63cd",
+          "understanding_suggestion:sugg_08552053c503bea6",
+          "artifact:art_ed28d3aa5067e098",
+          "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+        ],
+        "ids": {
+          "audit_event_id": "audit_fb0d8562b02cb8a7",
+          "git_commit": "66b45c4",
+          "ontology_item_id": "onto_5b85ef8ab68e63cd",
+          "suggestion_id": "sugg_08552053c503bea6"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "ontology_item": {
+          "approved_ontology_truth": false,
+          "candidate_type": "policy",
+          "created_at": "2026-06-09T15:28:19.573121Z",
+          "evidence_refs": [
+            "understanding_suggestion:sugg_08552053c503bea6",
+            "artifact:art_ed28d3aa5067e098",
+            "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+          ],
+          "fact_key": "review_window",
+          "fact_value": "2026-07-01",
+          "kind": "fact",
+          "label": "review window is 2026-07-01",
+          "ontology_item_id": "onto_5b85ef8ab68e63cd",
+          "provenance": {
+            "created_from": "understanding.promote",
+            "source_artifact_id": "art_ed28d3aa5067e098",
+            "source_suggestion_id": "sugg_08552053c503bea6",
+            "trust_state_preserved": true
+          },
+          "relationship": null,
+          "schema_version": "cs.ontology_item.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "artifact_id": "art_ed28d3aa5067e098",
+            "line_no": 2,
+            "snippet": "Policy: review window is 2026-07-01"
+          },
+          "source_suggestion_id": "sugg_08552053c503bea6",
+          "status": "promoted_draft",
+          "trust_state": "draft",
+          "value": "review window is 2026-07-01",
+          "version": 1,
+          "version_history": []
+        },
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "promote_operational_1": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "promote",
+        "--suggestion-id",
+        "sugg_1af4320aa6d423e8",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_0927cc20f6dafd38"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand promote",
+        "errors": [],
+        "evidence_refs": [
+          "ontology_item:onto_ea030f17bc974200",
+          "understanding_suggestion:sugg_1af4320aa6d423e8",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+        ],
+        "ids": {
+          "audit_event_id": "audit_0927cc20f6dafd38",
+          "git_commit": "66b45c4",
+          "ontology_item_id": "onto_ea030f17bc974200",
+          "suggestion_id": "sugg_1af4320aa6d423e8"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "ontology_item": {
+          "approved_ontology_truth": false,
+          "candidate_type": "project",
+          "created_at": "2026-06-09T15:28:19.318798Z",
+          "evidence_refs": [
+            "understanding_suggestion:sugg_1af4320aa6d423e8",
+            "artifact:art_302a0d9daa5d3360",
+            "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+          ],
+          "fact_key": null,
+          "fact_value": "Atlas Renewal",
+          "kind": "object",
+          "label": "Atlas Renewal",
+          "ontology_item_id": "onto_ea030f17bc974200",
+          "provenance": {
+            "created_from": "understanding.promote",
+            "source_artifact_id": "art_302a0d9daa5d3360",
+            "source_suggestion_id": "sugg_1af4320aa6d423e8",
+            "trust_state_preserved": true
+          },
+          "relationship": null,
+          "schema_version": "cs.ontology_item.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "artifact_id": "art_302a0d9daa5d3360",
+            "line_no": 1,
+            "snippet": "Project: Atlas Renewal"
+          },
+          "source_suggestion_id": "sugg_1af4320aa6d423e8",
+          "status": "promoted_draft",
+          "trust_state": "draft",
+          "value": "Atlas Renewal",
+          "version": 1,
+          "version_history": []
+        },
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "promote_operational_2": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "promote",
+        "--suggestion-id",
+        "sugg_fb037a99e210ab4c",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_1400662a3cd34948"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand promote",
+        "errors": [],
+        "evidence_refs": [
+          "ontology_item:onto_9895116beceba821",
+          "understanding_suggestion:sugg_fb037a99e210ab4c",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+        ],
+        "ids": {
+          "audit_event_id": "audit_1400662a3cd34948",
+          "git_commit": "66b45c4",
+          "ontology_item_id": "onto_9895116beceba821",
+          "suggestion_id": "sugg_fb037a99e210ab4c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "ontology_item": {
+          "approved_ontology_truth": false,
+          "candidate_type": "relationship",
+          "created_at": "2026-06-09T15:28:19.369058Z",
+          "evidence_refs": [
+            "understanding_suggestion:sugg_fb037a99e210ab4c",
+            "artifact:art_302a0d9daa5d3360",
+            "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+          ],
+          "fact_key": null,
+          "fact_value": null,
+          "kind": "link",
+          "label": "Atlas Renewal governed by review window",
+          "ontology_item_id": "onto_9895116beceba821",
+          "provenance": {
+            "created_from": "understanding.promote",
+            "source_artifact_id": "art_302a0d9daa5d3360",
+            "source_suggestion_id": "sugg_fb037a99e210ab4c",
+            "trust_state_preserved": true
+          },
+          "relationship": {
+            "predicate": "governed_by",
+            "source": "Atlas Renewal",
+            "target": "review window"
+          },
+          "schema_version": "cs.ontology_item.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "artifact_id": "art_302a0d9daa5d3360",
+            "line_no": 7,
+            "snippet": "Relationship: Atlas Renewal -> review window : governed_by"
+          },
+          "source_suggestion_id": "sugg_fb037a99e210ab4c",
+          "status": "promoted_draft",
+          "trust_state": "draft",
+          "value": "Atlas Renewal -> review window : governed_by",
+          "version": 1,
+          "version_history": []
+        },
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "promote_operational_3": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "promote",
+        "--suggestion-id",
+        "sugg_07c2dc672995b2fa",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_80f956f1c889eafb"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand promote",
+        "errors": [],
+        "evidence_refs": [
+          "ontology_item:onto_ba43352a3ec18ac0",
+          "understanding_suggestion:sugg_07c2dc672995b2fa",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+        ],
+        "ids": {
+          "audit_event_id": "audit_80f956f1c889eafb",
+          "git_commit": "66b45c4",
+          "ontology_item_id": "onto_ba43352a3ec18ac0",
+          "suggestion_id": "sugg_07c2dc672995b2fa"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "ontology_item": {
+          "approved_ontology_truth": false,
+          "candidate_type": "event",
+          "created_at": "2026-06-09T15:28:19.421394Z",
+          "evidence_refs": [
+            "understanding_suggestion:sugg_07c2dc672995b2fa",
+            "artifact:art_302a0d9daa5d3360",
+            "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+          ],
+          "fact_key": null,
+          "fact_value": "2026-07-15 review kickoff",
+          "kind": "event",
+          "label": "2026-07-15 review kickoff",
+          "ontology_item_id": "onto_ba43352a3ec18ac0",
+          "provenance": {
+            "created_from": "understanding.promote",
+            "source_artifact_id": "art_302a0d9daa5d3360",
+            "source_suggestion_id": "sugg_07c2dc672995b2fa",
+            "trust_state_preserved": true
+          },
+          "relationship": null,
+          "schema_version": "cs.ontology_item.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "artifact_id": "art_302a0d9daa5d3360",
+            "line_no": 6,
+            "snippet": "Event: 2026-07-15 review kickoff"
+          },
+          "source_suggestion_id": "sugg_07c2dc672995b2fa",
+          "status": "promoted_draft",
+          "trust_state": "draft",
+          "value": "2026-07-15 review kickoff",
+          "version": 1,
+          "version_history": []
+        },
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "stale_check": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "stale-check",
+        "--claim-id",
+        "claim_547f8744fc6d5e95",
+        "--newer-evidence-bundle-id",
+        "evb_ab5da2278142e244",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_b5aaac366dd00c5d"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand stale-check",
+        "errors": [],
+        "evidence_refs": [
+          "staleness:stale_2a8b0cac644b3212",
+          "artifact:art_302a0d9daa5d3360",
+          "artifact:art_ed28d3aa5067e098",
+          "artifact:art_f598d9dd3b9112b5"
+        ],
+        "ids": {
+          "audit_event_id": "audit_b5aaac366dd00c5d",
+          "claim_id": "claim_547f8744fc6d5e95",
+          "git_commit": "66b45c4",
+          "staleness_id": "stale_2a8b0cac644b3212"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "staleness": {
+          "checked_at": "2026-06-09T15:28:20.350939Z",
+          "claim_id": "claim_547f8744fc6d5e95",
+          "claim_trust_state": "approved",
+          "newer_evidence_bundle_id": "evb_ab5da2278142e244",
+          "newer_evidence_refs": [
+            "artifact:art_f598d9dd3b9112b5"
+          ],
+          "old_evidence_refs": [
+            "artifact:art_302a0d9daa5d3360",
+            "artifact:art_ed28d3aa5067e098"
+          ],
+          "reason": "newer_or_contradictory_evidence_available",
+          "schema_version": "cs.staleness_check.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "staleness_id": "stale_2a8b0cac644b3212",
+          "status": "needs_review",
+          "used_as_approved_current_truth_without_warning": false,
+          "warning_visible": true
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "suggest_new": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "suggest",
+        "--artifact-id",
+        "art_f598d9dd3b9112b5",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_12ed8f294e5d2562"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand suggest",
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_f598d9dd3b9112b5",
+          "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085",
+          "artifact:art_f598d9dd3b9112b5",
+          "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085",
+          "artifact:art_f598d9dd3b9112b5",
+          "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+        ],
+        "ids": {
+          "artifact_id": "art_f598d9dd3b9112b5",
+          "audit_event_id": "audit_12ed8f294e5d2562",
+          "git_commit": "66b45c4"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "understanding_suggestions": [
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "project",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.677368Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_f598d9dd3b9112b5",
+              "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+            ],
+            "fact_key": null,
+            "fact_value": "Atlas Renewal",
+            "kind": "object",
+            "label": "Atlas Renewal",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_f598d9dd3b9112b5",
+              "line_no": 1,
+              "snippet": "Project: Atlas Renewal"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_59d1ee56acf5a721",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "Atlas Renewal"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "policy",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.677517Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_f598d9dd3b9112b5",
+              "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+            ],
+            "fact_key": "review_window",
+            "fact_value": "2026-08-15",
+            "kind": "fact",
+            "label": "review window is 2026-08-15",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_f598d9dd3b9112b5",
+              "line_no": 2,
+              "snippet": "Policy: review window is 2026-08-15"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_bec82d0494793b4a",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "review window is 2026-08-15"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "claim",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.677534Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_f598d9dd3b9112b5",
+              "storage:sha256:f598d9dd3b9112b505a25a00ef6cc3ff6b6fd4a46685a061dfcf1ccc04733085"
+            ],
+            "fact_key": "newer_evidence_records_the_review_window_as_2026-08-15",
+            "fact_value": "Newer evidence records the review window as 2026-08-15",
+            "kind": "fact",
+            "label": "Newer evidence records the review window as 2026-08-15.",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_f598d9dd3b9112b5",
+              "line_no": 3,
+              "snippet": "Claim: Newer evidence records the review window as 2026-08-15."
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_4c52cc76c6f85ae3",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "Newer evidence records the review window as 2026-08-15."
+          }
+        ],
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "suggest_old": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "suggest",
+        "--artifact-id",
+        "art_ed28d3aa5067e098",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_6547dd12e55564c7"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand suggest",
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_ed28d3aa5067e098",
+          "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+          "artifact:art_ed28d3aa5067e098",
+          "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a",
+          "artifact:art_ed28d3aa5067e098",
+          "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+        ],
+        "ids": {
+          "artifact_id": "art_ed28d3aa5067e098",
+          "audit_event_id": "audit_6547dd12e55564c7",
+          "git_commit": "66b45c4"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "understanding_suggestions": [
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "project",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.521105Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_ed28d3aa5067e098",
+              "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+            ],
+            "fact_key": null,
+            "fact_value": "Atlas Renewal",
+            "kind": "object",
+            "label": "Atlas Renewal",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_ed28d3aa5067e098",
+              "line_no": 1,
+              "snippet": "Project: Atlas Renewal"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_e87ee53782cfe507",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "Atlas Renewal"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "policy",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.521250Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_ed28d3aa5067e098",
+              "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+            ],
+            "fact_key": "review_window",
+            "fact_value": "2026-07-01",
+            "kind": "fact",
+            "label": "review window is 2026-07-01",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_ed28d3aa5067e098",
+              "line_no": 2,
+              "snippet": "Policy: review window is 2026-07-01"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_08552053c503bea6",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "review window is 2026-07-01"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "claim",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.521267Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_ed28d3aa5067e098",
+              "storage:sha256:ed28d3aa5067e098a89b7ce2475da3e34d144dbd6e28db3c48a06b047bf0200a"
+            ],
+            "fact_key": "the_original_review_window_was_recorded_as_2026-07-01",
+            "fact_value": "The original review window was recorded as 2026-07-01",
+            "kind": "fact",
+            "label": "The original review window was recorded as 2026-07-01.",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_ed28d3aa5067e098",
+              "line_no": 3,
+              "snippet": "Claim: The original review window was recorded as 2026-07-01."
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_1ce5aa9fc4769b5e",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "The original review window was recorded as 2026-07-01."
+          }
+        ],
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "suggest_operational": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "suggest",
+        "--artifact-id",
+        "art_302a0d9daa5d3360",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_8a72089a1398e20a"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand suggest",
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993",
+          "artifact:art_302a0d9daa5d3360",
+          "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+        ],
+        "ids": {
+          "artifact_id": "art_302a0d9daa5d3360",
+          "audit_event_id": "audit_8a72089a1398e20a",
+          "git_commit": "66b45c4"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "understanding_suggestions": [
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "project",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.262882Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+            ],
+            "fact_key": null,
+            "fact_value": "Atlas Renewal",
+            "kind": "object",
+            "label": "Atlas Renewal",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_302a0d9daa5d3360",
+              "line_no": 1,
+              "snippet": "Project: Atlas Renewal"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_1af4320aa6d423e8",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "Atlas Renewal"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "person",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.263028Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+            ],
+            "fact_key": null,
+            "fact_value": "Maya Chen",
+            "kind": "object",
+            "label": "Maya Chen",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_302a0d9daa5d3360",
+              "line_no": 2,
+              "snippet": "Person: Maya Chen"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_63525a0b4554b03c",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "Maya Chen"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "organization",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.263044Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+            ],
+            "fact_key": null,
+            "fact_value": "Northstar Ops",
+            "kind": "object",
+            "label": "Northstar Ops",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_302a0d9daa5d3360",
+              "line_no": 3,
+              "snippet": "Organization: Northstar Ops"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_dab11e3130b2dfff",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "Northstar Ops"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "asset",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.263054Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+            ],
+            "fact_key": null,
+            "fact_value": "Evidence Console",
+            "kind": "object",
+            "label": "Evidence Console",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_302a0d9daa5d3360",
+              "line_no": 4,
+              "snippet": "Asset: Evidence Console"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_4ac140f0544ee0c7",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "Evidence Console"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "policy",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.263066Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+            ],
+            "fact_key": "review_window",
+            "fact_value": "2026-07-01",
+            "kind": "fact",
+            "label": "review window is 2026-07-01",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_302a0d9daa5d3360",
+              "line_no": 5,
+              "snippet": "Policy: review window is 2026-07-01"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_24571e63598d8176",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "review window is 2026-07-01"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "event",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.263075Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+            ],
+            "fact_key": null,
+            "fact_value": "2026-07-15 review kickoff",
+            "kind": "event",
+            "label": "2026-07-15 review kickoff",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_302a0d9daa5d3360",
+              "line_no": 6,
+              "snippet": "Event: 2026-07-15 review kickoff"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_07c2dc672995b2fa",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "2026-07-15 review kickoff"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "relationship",
+            "confidence": 0.78,
+            "created_at": "2026-06-09T15:28:19.263138Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+            ],
+            "kind": "link",
+            "label": "Atlas Renewal governed by review window",
+            "relationship": {
+              "predicate": "governed_by",
+              "source": "Atlas Renewal",
+              "target": "review window"
+            },
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_302a0d9daa5d3360",
+              "line_no": 7,
+              "snippet": "Relationship: Atlas Renewal -> review window : governed_by"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_fb037a99e210ab4c",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "Atlas Renewal -> review window : governed_by"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "claim",
+            "confidence": 0.82,
+            "created_at": "2026-06-09T15:28:19.263152Z",
+            "evidence_gaps": [],
+            "evidence_refs": [
+              "artifact:art_302a0d9daa5d3360",
+              "storage:sha256:302a0d9daa5d3360af0602346c463e175d1d20b710f0025ba89d433c9a984993"
+            ],
+            "fact_key": "atlas_renewal_needs_evidence_review_before_action",
+            "fact_value": "Atlas Renewal needs evidence review before action",
+            "kind": "fact",
+            "label": "Atlas Renewal needs evidence review before action.",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_302a0d9daa5d3360",
+              "line_no": 8,
+              "snippet": "Claim: Atlas Renewal needs evidence review before action."
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_1a840dd7805c5fc9",
+            "trust_state": "draft",
+            "unsupported_inferences": [],
+            "value": "Atlas Renewal needs evidence review before action."
+          }
+        ],
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "suggest_unknown": {
+      "command": [
+        "cornerstone",
+        "understand",
+        "suggest",
+        "--artifact-id",
+        "art_84d48e132183e1af",
+        "--domain",
+        "unknown",
+        "--state-dir",
+        "tmp/scenario/full-understanding-ontology-24692",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_1dec9fe36a210891"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone understand suggest",
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_84d48e132183e1af",
+          "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56",
+          "artifact:art_84d48e132183e1af",
+          "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56",
+          "artifact:art_84d48e132183e1af",
+          "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56",
+          "artifact:art_84d48e132183e1af",
+          "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56",
+          "artifact:art_84d48e132183e1af",
+          "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56"
+        ],
+        "ids": {
+          "artifact_id": "art_84d48e132183e1af",
+          "audit_event_id": "audit_1dec9fe36a210891",
+          "git_commit": "66b45c4"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "understanding_suggestions": [
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "project",
+            "confidence": 0.64,
+            "created_at": "2026-06-09T15:28:20.507790Z",
+            "evidence_gaps": [
+              "No approved domain ontology or solution-pack rule was used for this suggestion."
+            ],
+            "evidence_refs": [
+              "artifact:art_84d48e132183e1af",
+              "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56"
+            ],
+            "fact_key": null,
+            "fact_value": "HelioShelf Calibration",
+            "kind": "object",
+            "label": "HelioShelf Calibration",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_84d48e132183e1af",
+              "line_no": 1,
+              "snippet": "Project: HelioShelf Calibration"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_af3a77351863588d",
+            "trust_state": "draft",
+            "unsupported_inferences": [
+              "Domain-specific meaning is not inferred without evidence or an approved solution pack."
+            ],
+            "value": "HelioShelf Calibration"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "asset",
+            "confidence": 0.64,
+            "created_at": "2026-06-09T15:28:20.507945Z",
+            "evidence_gaps": [
+              "No approved domain ontology or solution-pack rule was used for this suggestion."
+            ],
+            "evidence_refs": [
+              "artifact:art_84d48e132183e1af",
+              "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56"
+            ],
+            "fact_key": null,
+            "fact_value": "Lumen gasket register",
+            "kind": "object",
+            "label": "Lumen gasket register",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_84d48e132183e1af",
+              "line_no": 2,
+              "snippet": "Asset: Lumen gasket register"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_4790fe185aed64b3",
+            "trust_state": "draft",
+            "unsupported_inferences": [
+              "Domain-specific meaning is not inferred without evidence or an approved solution pack."
+            ],
+            "value": "Lumen gasket register"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "fact",
+            "confidence": 0.64,
+            "created_at": "2026-06-09T15:28:20.507962Z",
+            "evidence_gaps": [
+              "No approved domain ontology or solution-pack rule was used for this suggestion."
+            ],
+            "evidence_refs": [
+              "artifact:art_84d48e132183e1af",
+              "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56"
+            ],
+            "fact_key": "calibration_marker",
+            "fact_value": "phase-seven amber",
+            "kind": "fact",
+            "label": "calibration marker is phase-seven amber",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_84d48e132183e1af",
+              "line_no": 3,
+              "snippet": "Fact: calibration marker is phase-seven amber"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_17df06d4a85c5977",
+            "trust_state": "draft",
+            "unsupported_inferences": [
+              "Domain-specific meaning is not inferred without evidence or an approved solution pack."
+            ],
+            "value": "calibration marker is phase-seven amber"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "event",
+            "confidence": 0.64,
+            "created_at": "2026-06-09T15:28:20.507974Z",
+            "evidence_gaps": [
+              "No approved domain ontology or solution-pack rule was used for this suggestion."
+            ],
+            "evidence_refs": [
+              "artifact:art_84d48e132183e1af",
+              "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56"
+            ],
+            "fact_key": null,
+            "fact_value": "2026-09-03 field review",
+            "kind": "event",
+            "label": "2026-09-03 field review",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_84d48e132183e1af",
+              "line_no": 4,
+              "snippet": "Event: 2026-09-03 field review"
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_b8f01d7ee85b6769",
+            "trust_state": "draft",
+            "unsupported_inferences": [
+              "Domain-specific meaning is not inferred without evidence or an approved solution pack."
+            ],
+            "value": "2026-09-03 field review"
+          },
+          {
+            "approved_ontology_truth": false,
+            "candidate_type": "claim",
+            "confidence": 0.64,
+            "created_at": "2026-06-09T15:28:20.507985Z",
+            "evidence_gaps": [
+              "No approved domain ontology or solution-pack rule was used for this suggestion."
+            ],
+            "evidence_refs": [
+              "artifact:art_84d48e132183e1af",
+              "storage:sha256:84d48e132183e1afbfd826bb1c6f2f0442233efd887c7c42c1c6ab8200e08b56"
+            ],
+            "fact_key": "helioshelf_calibration_may_need_specialist_review",
+            "fact_value": "HelioShelf calibration may need specialist review",
+            "kind": "fact",
+            "label": "HelioShelf calibration may need specialist review.",
+            "schema_version": "cs.understanding_suggestion.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "source": {
+              "artifact_id": "art_84d48e132183e1af",
+              "line_no": 5,
+              "snippet": "Claim: HelioShelf calibration may need specialist review."
+            },
+            "status": "suggested",
+            "suggestion_id": "sugg_2a8f8eb5d1f80142",
+            "trust_state": "draft",
+            "unsupported_inferences": [
+              "Domain-specific meaning is not inferred without evidence or an approved solution pack."
+            ],
+            "value": "HelioShelf calibration may need specialist review."
+          }
+        ],
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    }
+  },
+  "understanding_evidence": {
+    "action_id": "action_4d077b1e4745478d",
+    "audit_event_count": 27,
+    "claim_id": "claim_547f8744fc6d5e95",
+    "claim_status": "approved",
+    "contradiction_count": 1,
+    "contradiction_values": [
+      "2026-07-01",
+      "2026-08-15"
+    ],
+    "map_edge_count": 9,
+    "map_node_count": 11,
+    "map_policy_count": 1,
+    "mission_id": "mission_f78a17e7c635a499",
+    "ontology_change_id": "ochg_1a33ebfc6686ae53",
+    "ontology_change_impact": {
+      "affected_actions": [
+        "action:action_4d077b1e4745478d"
+      ],
+      "affected_claims": [
+        "claim:claim_547f8744fc6d5e95"
+      ],
+      "affected_missions": [
+        "mission:mission_f78a17e7c635a499"
+      ],
+      "affected_playbooks": []
+    },
+    "ontology_change_versions": {
+      "from": 1,
+      "to": 2
+    },
+    "operational_artifact_id": "art_302a0d9daa5d3360",
+    "operational_map_id": "omap_ba615c10e37162d3",
+    "promoted_item_count": 5,
+    "promoted_item_ids": [
+      "onto_ea030f17bc974200",
+      "onto_9895116beceba821",
+      "onto_ba43352a3ec18ac0",
+      "onto_5b85ef8ab68e63cd",
+      "onto_c19f80ccb778669c"
+    ],
+    "staleness_status": "needs_review",
+    "staleness_warning_visible": true,
+    "suggestion_count": 8,
+    "suggestion_kinds": [
+      "event",
+      "fact",
+      "link",
+      "object"
+    ],
+    "suggestion_types": [
+      "asset",
+      "claim",
+      "event",
+      "organization",
+      "person",
+      "policy",
+      "project",
+      "relationship"
+    ],
+    "unknown_artifact_id": "art_84d48e132183e1af",
+    "unknown_evidence_gap_count": 5,
+    "unknown_suggestion_count": 5
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

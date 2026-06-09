@@ -12,6 +12,7 @@ from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
     verify_full_claim_collaboration,
+    verify_full_understanding_ontology,
     verify_vs0_audit_ledger,
     verify_vs0_briefing,
     verify_vs0_claim_evidence,
@@ -1083,6 +1084,128 @@ def command_share_show(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_understand_suggest(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.suggest_operational_structure(args.artifact_id, requested_scope, domain=args.domain)
+    payload = base_response("cornerstone understand suggest", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="UNDERSTANDING")
+        print_payload(payload, args.json)
+        return exit_code
+    suggestions = result["suggestions"]
+    audit_event = result["audit_event"]
+    payload["understanding_suggestions"] = suggestions
+    payload["ids"].update({"artifact_id": args.artifact_id, "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].extend(ref for suggestion in suggestions for ref in suggestion.get("evidence_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_understand_promote(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.promote_understanding_suggestion(args.suggestion_id, requested_scope)
+    payload = base_response("cornerstone understand promote", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="ONTOLOGY")
+        print_payload(payload, args.json)
+        return exit_code
+    item = result["ontology_item"]
+    audit_event = result["audit_event"]
+    payload["ontology_item"] = item
+    payload["ids"].update({"ontology_item_id": item["ontology_item_id"], "suggestion_id": args.suggestion_id, "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].extend([f"ontology_item:{item['ontology_item_id']}", *item.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_understand_map(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.operational_map(requested_scope)
+    operational_map = result["operational_map"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone understand map", "success", root)
+    payload.update(requested_scope)
+    payload["operational_map"] = operational_map
+    payload["ids"].update({"operational_map_id": operational_map["operational_map_id"], "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].append(f"operational_map:{operational_map['operational_map_id']}")
+    for node in operational_map.get("nodes", []):
+        payload["evidence_refs"].extend(node.get("evidence_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_understand_contradictions(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.detect_contradictions(requested_scope)
+    contradictions = result["contradictions"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone understand contradictions", "success", root)
+    payload.update(requested_scope)
+    payload["contradictions"] = contradictions
+    payload["ids"].update({"audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].extend(ref for contradiction in contradictions for evidence in contradiction.get("competing_evidence", []) for ref in evidence.get("evidence_refs", []))
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_understand_stale_check(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.check_staleness(args.claim_id, args.newer_evidence_bundle_id, requested_scope)
+    payload = base_response("cornerstone understand stale-check", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") in {"not_found", "scope_denied"}:
+        exit_code = _record_command_failure(payload, result, resource_label="STALENESS")
+        print_payload(payload, args.json)
+        return exit_code
+    staleness = result["staleness"]
+    audit_event = result["audit_event"]
+    payload["staleness"] = staleness
+    payload["ids"].update({"staleness_id": staleness["staleness_id"], "claim_id": args.claim_id, "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].extend([f"staleness:{staleness['staleness_id']}", *staleness.get("old_evidence_refs", []), *staleness.get("newer_evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_understand_ontology_change(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.record_ontology_change(args.item_id, property_name=args.property, new_value=args.to_value, scope=requested_scope)
+    payload = base_response("cornerstone understand ontology-change", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _record_command_failure(payload, result, resource_label="ONTOLOGY_CHANGE")
+        print_payload(payload, args.json)
+        return exit_code
+    change = result["ontology_change"]
+    item = result["ontology_item"]
+    audit_event = result["audit_event"]
+    payload["ontology_change"] = change
+    payload["ontology_item"] = item
+    payload["ids"].update({"ontology_change_id": change["ontology_change_id"], "ontology_item_id": item["ontology_item_id"], "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].extend([f"ontology_change:{change['ontology_change_id']}", *change.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_workspace_mode_set(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -2090,6 +2213,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_tenant_security_boundary(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
+    elif args.contract == "full-understanding-ontology":
+        report = verify_full_understanding_ontology(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -2118,6 +2243,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-product-domain-readiness",
                     "vs0-tenant-security-boundary",
                     "full-claim-collaboration",
+                    "full-understanding-ontology",
                 ],
             }
         )
@@ -2411,6 +2537,53 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(share_show)
     share_show.add_argument("--json", action="store_true", help="Emit JSON output")
     share_show.set_defaults(func=command_share_show)
+
+    understand = subcommands.add_parser("understand", help="Understanding and draft ontology commands")
+    understand_sub = understand.add_subparsers(dest="understand_command")
+
+    understand_suggest = understand_sub.add_parser("suggest", help="Suggest draft operational structure from an artifact")
+    understand_suggest.add_argument("--artifact-id", required=True, help="Source artifact ID")
+    understand_suggest.add_argument("--domain", choices=["general", "unknown"], default="general", help="Domain certainty mode")
+    add_state_argument(understand_suggest)
+    add_scope_arguments(understand_suggest)
+    understand_suggest.add_argument("--json", action="store_true", help="Emit JSON output")
+    understand_suggest.set_defaults(func=command_understand_suggest)
+
+    understand_promote = understand_sub.add_parser("promote", help="Promote a suggestion into a draft ontology item")
+    understand_promote.add_argument("--suggestion-id", required=True, help="Understanding suggestion ID")
+    add_state_argument(understand_promote)
+    add_scope_arguments(understand_promote)
+    understand_promote.add_argument("--json", action="store_true", help="Emit JSON output")
+    understand_promote.set_defaults(func=command_understand_promote)
+
+    understand_map = understand_sub.add_parser("map", help="Build an evidence-linked operational map")
+    add_state_argument(understand_map)
+    add_scope_arguments(understand_map)
+    understand_map.add_argument("--json", action="store_true", help="Emit JSON output")
+    understand_map.set_defaults(func=command_understand_map)
+
+    understand_contradictions = understand_sub.add_parser("contradictions", help="Detect unresolved fact contradictions")
+    add_state_argument(understand_contradictions)
+    add_scope_arguments(understand_contradictions)
+    understand_contradictions.add_argument("--json", action="store_true", help="Emit JSON output")
+    understand_contradictions.set_defaults(func=command_understand_contradictions)
+
+    understand_stale = understand_sub.add_parser("stale-check", help="Check whether a claim needs review because of newer evidence")
+    understand_stale.add_argument("--claim-id", required=True, help="Claim ID to check")
+    understand_stale.add_argument("--newer-evidence-bundle-id", required=True, help="Newer Evidence Bundle ID")
+    add_state_argument(understand_stale)
+    add_scope_arguments(understand_stale)
+    understand_stale.add_argument("--json", action="store_true", help="Emit JSON output")
+    understand_stale.set_defaults(func=command_understand_stale_check)
+
+    understand_change = understand_sub.add_parser("ontology-change", help="Record a versioned ontology item change")
+    understand_change.add_argument("--item-id", required=True, help="Ontology item ID")
+    understand_change.add_argument("--property", default="label", help="Ontology item property to change")
+    understand_change.add_argument("--to-value", required=True, help="New property value")
+    add_state_argument(understand_change)
+    add_scope_arguments(understand_change)
+    understand_change.add_argument("--json", action="store_true", help="Emit JSON output")
+    understand_change.set_defaults(func=command_understand_ontology_change)
 
     workspace = subcommands.add_parser("workspace", help="Workspace governance commands")
     workspace_sub = workspace.add_subparsers(dest="workspace_command")

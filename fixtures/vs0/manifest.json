@@ -57,6 +57,19 @@
         "CS-SEC-007",
         "CS-REG-013"
       ]
+    },
+    {
+      "id": "pack_11_understanding_ontology",
+      "path": "packs/11_understanding_ontology/pack.json",
+      "scenario_ids": [
+        "CS-UND-006",
+        "CS-UND-007",
+        "CS-UND-008",
+        "CS-UND-009",
+        "CS-UND-010",
+        "CS-UND-011",
+        "CS-UND-012"
+      ]
     }
   ]
 }

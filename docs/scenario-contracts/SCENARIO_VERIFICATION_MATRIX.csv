@@ -28,13 +28,13 @@ CS-UND-002,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-understa
 CS-UND-003,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-search-understanding --json,reports/scenario/vs0-search-understanding-2026-06-09.json,,,,,PASS
 CS-UND-004,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-detail-surfaces --json,reports/scenario/vs0-detail-surfaces-2026-06-09.json,,,,,PASS
 CS-UND-005,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
-CS-UND-006,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-006 --json,reports/scenario/cs-und-006.json,,,,,NOT_VERIFIED
-CS-UND-007,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-007 --json,reports/scenario/cs-und-007.json,,,,,NOT_VERIFIED
-CS-UND-008,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-008 --json,reports/scenario/cs-und-008.json,,,,,NOT_VERIFIED
-CS-UND-009,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-009 --json,reports/scenario/cs-und-009.json,,,,,NOT_VERIFIED
-CS-UND-010,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-010 --json,reports/scenario/cs-und-010.json,,,,,NOT_VERIFIED
-CS-UND-011,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-011 --json,reports/scenario/cs-und-011.json,,,,,NOT_VERIFIED
-CS-UND-012,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-012 --json,reports/scenario/cs-und-012.json,,,,,NOT_VERIFIED
+CS-UND-006,MUST_PASS,true,D+M,AI,cornerstone scenario verify full-understanding-ontology --json,reports/scenario/full-understanding-ontology-2026-06-10.json,,,,,PASS
+CS-UND-007,MUST_PASS,true,D+M,AI,cornerstone scenario verify full-understanding-ontology --json,reports/scenario/full-understanding-ontology-2026-06-10.json,,,,,PASS
+CS-UND-008,MUST_PASS,true,D+M,AI,cornerstone scenario verify full-understanding-ontology --json,reports/scenario/full-understanding-ontology-2026-06-10.json,,,,,PASS
+CS-UND-009,MUST_PASS,true,D+M,AI,cornerstone scenario verify full-understanding-ontology --json,reports/scenario/full-understanding-ontology-2026-06-10.json,,,,,PASS
+CS-UND-010,MUST_PASS,true,D+M,AI,cornerstone scenario verify full-understanding-ontology --json,reports/scenario/full-understanding-ontology-2026-06-10.json,,,,,PASS
+CS-UND-011,MUST_PASS,true,D+M,AI,cornerstone scenario verify full-understanding-ontology --json,reports/scenario/full-understanding-ontology-2026-06-10.json,,,,,PASS
+CS-UND-012,MUST_PASS,true,D+M,AI,cornerstone scenario verify full-understanding-ontology --json,reports/scenario/full-understanding-ontology-2026-06-10.json,,,,,PASS
 CS-CLAIM-001,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-conversation-onboarding --json,reports/scenario/vs0-conversation-onboarding-2026-06-09.json,,,,,PASS
 CS-CLAIM-002,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
 CS-CLAIM-003,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0-conversation-onboarding --json,reports/scenario/vs0-conversation-onboarding-2026-06-09.json,,,,,PASS

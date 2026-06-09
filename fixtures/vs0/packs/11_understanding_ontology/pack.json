@@ -1,0 +1,66 @@
+{
+  "id": "pack_11_understanding_ontology",
+  "classes": ["understanding", "ontology", "contradiction", "staleness"],
+  "scenario_ids": [
+    "CS-UND-006",
+    "CS-UND-007",
+    "CS-UND-008",
+    "CS-UND-009",
+    "CS-UND-010",
+    "CS-UND-011",
+    "CS-UND-012"
+  ],
+  "inputs": [
+    {
+      "path": "operational_note.txt",
+      "media_type": "text/plain",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    },
+    {
+      "path": "policy_old.txt",
+      "media_type": "text/plain",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    },
+    {
+      "path": "policy_new.txt",
+      "media_type": "text/plain",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    },
+    {
+      "path": "unknown_domain.txt",
+      "media_type": "text/plain",
+      "owner_id": "local-user",
+      "namespace_id": "personal",
+      "workspace_id": "default",
+      "expected_sha256": "CALCULATED_BY_VALIDATOR"
+    }
+  ],
+  "expected": {
+    "draft_suggestions_required": true,
+    "promotion_preserves_evidence": true,
+    "operational_map_evidence_linked": true,
+    "contradiction_visible": true,
+    "staleness_warning_required": true,
+    "ontology_change_versioned": true,
+    "unknown_domain_uncertainty_required": true
+  },
+  "negative_evidence": {
+    "approved_truth_without_promotion": 0,
+    "suggestions_without_evidence": 0,
+    "silent_contradiction_choice": 0,
+    "stale_truth_used_without_warning": 0,
+    "unversioned_ontology_changes": 0,
+    "domain_specific_certainty_without_evidence": 0,
+    "external_http_calls": 0,
+    "secret_reads": 0
+  }
+}

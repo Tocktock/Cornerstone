@@ -2339,6 +2339,370 @@ def verify_full_claim_collaboration(root: Path) -> dict[str, Any]:
     }
 
 
+def _suggestions(transcript: dict[str, Any]) -> list[dict[str, Any]]:
+    rows = _payload(transcript).get("understanding_suggestions", [])
+    return rows if isinstance(rows, list) else []
+
+
+def _find_suggestion(rows: list[dict[str, Any]], *, kind: str | None = None, candidate_type: str | None = None, fact_value: str | None = None) -> dict[str, Any]:
+    for row in rows:
+        if kind is not None and row.get("kind") != kind:
+            continue
+        if candidate_type is not None and row.get("candidate_type") != candidate_type:
+            continue
+        if fact_value is not None and row.get("fact_value") != fact_value:
+            continue
+        return row
+    return {}
+
+
+def verify_full_understanding_ontology(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("full-understanding-ontology")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    scope_args_list: list[str] = ["--state-dir", state_rel, "--json"]
+    operational_path = "fixtures/vs0/packs/11_understanding_ontology/operational_note.txt"
+    old_path = "fixtures/vs0/packs/11_understanding_ontology/policy_old.txt"
+    new_path = "fixtures/vs0/packs/11_understanding_ontology/policy_new.txt"
+    unknown_path = "fixtures/vs0/packs/11_understanding_ontology/unknown_domain.txt"
+
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["ingest_operational"] = _run_cli_json(root, ["artifact", "ingest", operational_path, *scope_args_list])
+    operational_artifact = _artifact(transcripts["ingest_operational"])
+    operational_artifact_id = operational_artifact.get("artifact_id", "")
+    transcripts["suggest_operational"] = _run_cli_json(
+        root,
+        ["understand", "suggest", "--artifact-id", operational_artifact_id, *scope_args_list],
+    ) if operational_artifact_id else {}
+    operational_suggestions = _suggestions(transcripts["suggest_operational"])
+    project_suggestion = _find_suggestion(operational_suggestions, candidate_type="project")
+    link_suggestion = _find_suggestion(operational_suggestions, kind="link")
+    event_suggestion = _find_suggestion(operational_suggestions, kind="event")
+
+    promoted_items: list[dict[str, Any]] = []
+    for index, suggestion in enumerate([project_suggestion, link_suggestion, event_suggestion], start=1):
+        suggestion_id = suggestion.get("suggestion_id")
+        if suggestion_id:
+            transcripts[f"promote_operational_{index}"] = _run_cli_json(root, ["understand", "promote", "--suggestion-id", suggestion_id, *scope_args_list])
+            item = _payload(transcripts[f"promote_operational_{index}"]).get("ontology_item", {})
+            if item:
+                promoted_items.append(item)
+
+    transcripts["ingest_old"] = _run_cli_json(root, ["artifact", "ingest", old_path, *scope_args_list])
+    old_artifact = _artifact(transcripts["ingest_old"])
+    old_artifact_id = old_artifact.get("artifact_id", "")
+    transcripts["suggest_old"] = _run_cli_json(root, ["understand", "suggest", "--artifact-id", old_artifact_id, *scope_args_list]) if old_artifact_id else {}
+    old_policy_suggestion = _find_suggestion(_suggestions(transcripts["suggest_old"]), candidate_type="policy", fact_value="2026-07-01")
+    transcripts["promote_old_policy"] = _run_cli_json(
+        root,
+        ["understand", "promote", "--suggestion-id", old_policy_suggestion.get("suggestion_id", ""), *scope_args_list],
+    ) if old_policy_suggestion.get("suggestion_id") else {}
+    old_policy_item = _payload(transcripts["promote_old_policy"]).get("ontology_item", {})
+    if old_policy_item:
+        promoted_items.append(old_policy_item)
+
+    transcripts["ingest_new"] = _run_cli_json(root, ["artifact", "ingest", new_path, *scope_args_list])
+    new_artifact = _artifact(transcripts["ingest_new"])
+    new_artifact_id = new_artifact.get("artifact_id", "")
+    transcripts["suggest_new"] = _run_cli_json(root, ["understand", "suggest", "--artifact-id", new_artifact_id, *scope_args_list]) if new_artifact_id else {}
+    new_policy_suggestion = _find_suggestion(_suggestions(transcripts["suggest_new"]), candidate_type="policy", fact_value="2026-08-15")
+    transcripts["promote_new_policy"] = _run_cli_json(
+        root,
+        ["understand", "promote", "--suggestion-id", new_policy_suggestion.get("suggestion_id", ""), *scope_args_list],
+    ) if new_policy_suggestion.get("suggestion_id") else {}
+    new_policy_item = _payload(transcripts["promote_new_policy"]).get("ontology_item", {})
+    if new_policy_item:
+        promoted_items.append(new_policy_item)
+
+    transcripts["old_search"] = _run_cli_json(root, ["search", "query", "2026-07-01", *scope_args_list])
+    old_snapshot = _payload(transcripts["old_search"]).get("search_snapshot", {})
+    old_snapshot_id = old_snapshot.get("search_snapshot_id", "")
+    transcripts["old_bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", old_snapshot_id, *scope_args_list],
+    ) if old_snapshot_id else {}
+    old_bundle = _payload(transcripts["old_bundle_create"]).get("evidence_bundle", {})
+    old_bundle_id = old_bundle.get("evidence_bundle_id", "")
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            old_bundle_id,
+            "--statement",
+            "Atlas Renewal review window is 2026-07-01.",
+            *scope_args_list,
+        ],
+    ) if old_bundle_id else {}
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["claim_approve"] = _run_cli_json(root, ["claim", "approve", claim_id, *scope_args_list]) if claim_id else {}
+    approved_claim = _payload(transcripts["claim_approve"]).get("claim", {})
+
+    transcripts["new_search"] = _run_cli_json(root, ["search", "query", "2026-08-15", *scope_args_list])
+    new_snapshot = _payload(transcripts["new_search"]).get("search_snapshot", {})
+    new_snapshot_id = new_snapshot.get("search_snapshot_id", "")
+    transcripts["new_bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", new_snapshot_id, *scope_args_list],
+    ) if new_snapshot_id else {}
+    new_bundle = _payload(transcripts["new_bundle_create"]).get("evidence_bundle", {})
+    new_bundle_id = new_bundle.get("evidence_bundle_id", "")
+
+    transcripts["mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Review the Atlas Renewal window with evidence-linked operational context.",
+            "--claim-id",
+            claim_id,
+            *scope_args_list,
+        ],
+    ) if claim_id else {}
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["mission_activate"] = _run_cli_json(root, ["mission", "activate", mission_id, "--mode", "autopilot", *scope_args_list]) if mission_id else {}
+    transcripts["action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Record Atlas Renewal review follow-up.",
+            "--action-kind",
+            "internal_status_update",
+            "--risk",
+            "low",
+            *scope_args_list,
+        ],
+    ) if mission_id and claim_id else {}
+    action = _payload(transcripts["action_propose"]).get("action_card", {})
+
+    transcripts["map"] = _run_cli_json(root, ["understand", "map", *scope_args_list])
+    operational_map = _payload(transcripts["map"]).get("operational_map", {})
+    transcripts["contradictions"] = _run_cli_json(root, ["understand", "contradictions", *scope_args_list])
+    contradictions = _payload(transcripts["contradictions"]).get("contradictions", [])
+    first_contradiction = contradictions[0] if contradictions else {}
+    transcripts["stale_check"] = _run_cli_json(
+        root,
+        ["understand", "stale-check", "--claim-id", claim_id, "--newer-evidence-bundle-id", new_bundle_id, *scope_args_list],
+    ) if claim_id and new_bundle_id else {}
+    staleness = _payload(transcripts["stale_check"]).get("staleness", {})
+
+    transcripts["ontology_change"] = _run_cli_json(
+        root,
+        [
+            "understand",
+            "ontology-change",
+            "--item-id",
+            old_policy_item.get("ontology_item_id", ""),
+            "--property",
+            "label",
+            "--to-value",
+            "review window needs owner review",
+            *scope_args_list,
+        ],
+    ) if old_policy_item.get("ontology_item_id") else {}
+    ontology_change = _payload(transcripts["ontology_change"]).get("ontology_change", {})
+    changed_item = _payload(transcripts["ontology_change"]).get("ontology_item", {})
+
+    transcripts["ingest_unknown"] = _run_cli_json(root, ["artifact", "ingest", unknown_path, *scope_args_list])
+    unknown_artifact = _artifact(transcripts["ingest_unknown"])
+    unknown_artifact_id = unknown_artifact.get("artifact_id", "")
+    transcripts["suggest_unknown"] = _run_cli_json(
+        root,
+        ["understand", "suggest", "--artifact-id", unknown_artifact_id, "--domain", "unknown", *scope_args_list],
+    ) if unknown_artifact_id else {}
+    unknown_suggestions = _suggestions(transcripts["suggest_unknown"])
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    audit_events = _audit_events(root, state_rel)
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+    suggestion_kinds = {row.get("kind") for row in operational_suggestions}
+    suggestion_types = {row.get("candidate_type") for row in operational_suggestions}
+    suggestions_have_evidence = all(row.get("evidence_refs") for row in operational_suggestions)
+    suggestions_are_draft = all(row.get("trust_state") == "draft" and row.get("approved_ontology_truth") is False for row in operational_suggestions)
+    promoted_preserve = all(
+        item.get("trust_state") == "draft"
+        and item.get("approved_ontology_truth") is False
+        and item.get("scope", {}).get("namespace_id") == "personal"
+        and item.get("evidence_refs")
+        for item in promoted_items
+    )
+    map_nodes = operational_map.get("nodes", [])
+    map_edges = operational_map.get("edges", [])
+    map_ok = (
+        _exit_ok(transcripts["map"])
+        and operational_map.get("evidence_linked") is True
+        and operational_map.get("correctable") is True
+        and any(node.get("type") == "artifact" for node in map_nodes)
+        and any(node.get("type") in {"object", "fact", "event", "link"} for node in map_nodes)
+        and any(str(node.get("id", "")).startswith("claim:") for node in map_nodes)
+        and any(str(node.get("id", "")).startswith("mission:") for node in map_nodes)
+        and any(str(node.get("id", "")).startswith("action:") for node in map_nodes)
+        and bool(map_edges)
+        and bool(operational_map.get("timelines"))
+        and bool(operational_map.get("policies"))
+        and bool(operational_map.get("decisions"))
+        and bool(operational_map.get("workflows"))
+    )
+    contradiction_ok = (
+        _exit_ok(transcripts["contradictions"])
+        and bool(contradictions)
+        and first_contradiction.get("status") == "unresolved"
+        and set(first_contradiction.get("competing_values", [])) == {"2026-07-01", "2026-08-15"}
+        and first_contradiction.get("silent_choice_made") is False
+        and first_contradiction.get("asks_for_resolution") is True
+        and first_contradiction.get("claim_or_memory_marked_uncertain") is True
+        and len(first_contradiction.get("competing_evidence", [])) >= 2
+    )
+    staleness_ok = (
+        _exit_ok(transcripts["stale_check"])
+        and staleness.get("status") == "needs_review"
+        and staleness.get("warning_visible") is True
+        and staleness.get("used_as_approved_current_truth_without_warning") is False
+        and staleness.get("old_evidence_refs")
+        and staleness.get("newer_evidence_refs")
+    )
+    ontology_change_ok = (
+        _exit_ok(transcripts["ontology_change"])
+        and ontology_change.get("status") == "recorded"
+        and ontology_change.get("to_version") == 2
+        and ontology_change.get("diff", {}).get("property") == "label"
+        and ontology_change.get("rollback_guidance")
+        and ontology_change.get("migration_guidance")
+        and ontology_change.get("impact", {}).get("affected_claims")
+        and ontology_change.get("impact", {}).get("affected_missions")
+        and changed_item.get("version") == 2
+        and changed_item.get("version_history")
+    )
+    unknown_ok = (
+        _exit_ok(transcripts["suggest_unknown"])
+        and bool(unknown_suggestions)
+        and all(row.get("trust_state") == "draft" for row in unknown_suggestions)
+        and any(row.get("unsupported_inferences") for row in unknown_suggestions)
+        and any(row.get("evidence_gaps") for row in unknown_suggestions)
+        and all(row.get("approved_ontology_truth") is False for row in unknown_suggestions)
+    )
+
+    rows = [
+        _row(
+            "CS-UND-006",
+            "MUST_PASS",
+            "PASS" if _exit_ok(transcripts["suggest_operational"]) and suggestion_kinds >= {"object", "fact", "event", "link"} and suggestions_have_evidence and suggestions_are_draft and audit_ok else "FAIL",
+            ["cornerstone understand suggest --artifact-id <artifact_id> --json"],
+            "Draft structure suggestions include objects, links, facts, and events with source evidence and confidence, without approved ontology truth.",
+        ),
+        _row(
+            "CS-UND-007",
+            "MUST_PASS",
+            "PASS" if promoted_preserve and audit_ok else "FAIL",
+            ["cornerstone understand promote --suggestion-id <suggestion_id> --json"],
+            "Promotion creates durable draft ontology items preserving evidence, owner scope, namespace, and trust state.",
+        ),
+        _row(
+            "CS-UND-008",
+            "MUST_PASS",
+            "PASS" if map_ok and audit_ok else "FAIL",
+            ["cornerstone understand map --json"],
+            "Operational map includes evidence-linked artifacts, ontology items, claims, missions, actions, timelines, policies, decisions, and workflows.",
+        ),
+        _row(
+            "CS-UND-009",
+            "MUST_PASS",
+            "PASS" if contradiction_ok and audit_ok else "FAIL",
+            ["cornerstone understand contradictions --json"],
+            "Contradictory policy evidence is visible with competing values and evidence, unresolved status, and no silent winner.",
+        ),
+        _row(
+            "CS-UND-010",
+            "MUST_PASS",
+            "PASS" if staleness_ok and audit_ok else "FAIL",
+            ["cornerstone understand stale-check --claim-id <claim_id> --newer-evidence-bundle-id <bundle_id> --json"],
+            "A newer evidence bundle marks the approved claim as needing review and prevents current-truth use without warning.",
+        ),
+        _row(
+            "CS-UND-011",
+            "MUST_PASS",
+            "PASS" if ontology_change_ok and audit_ok else "FAIL",
+            ["cornerstone understand ontology-change --item-id <ontology_item_id> --property label --to-value <value> --json"],
+            "Ontology item changes record version, diff, impact, affected objects, rollback guidance, migration guidance, and audit.",
+        ),
+        _row(
+            "CS-UND-012",
+            "MUST_PASS",
+            "PASS" if unknown_ok and audit_ok else "FAIL",
+            ["cornerstone understand suggest --artifact-id <unknown_domain_artifact_id> --domain unknown --json"],
+            "Unknown-domain extraction stays draft, labels unsupported inferences, and records evidence gaps instead of claiming domain certainty.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    negative_evidence = {
+        "approved_truth_without_promotion": 0 if suggestions_are_draft and promoted_preserve else 1,
+        "suggestions_without_evidence": 0 if suggestions_have_evidence else 1,
+        "silent_contradiction_choice": 0 if contradiction_ok else 1,
+        "stale_truth_used_without_warning": 0 if staleness_ok else 1,
+        "unversioned_ontology_changes": 0 if ontology_change_ok else 1,
+        "domain_specific_certainty_without_evidence": 0 if unknown_ok else 1,
+        "real_external_http_calls": 0,
+        "secret_reads": 0,
+    }
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "full-understanding-ontology",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_FULL_UNDERSTANDING_ONTOLOGY_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "understanding_evidence": {
+            "operational_artifact_id": operational_artifact_id,
+            "suggestion_count": len(operational_suggestions),
+            "suggestion_kinds": sorted(str(value) for value in suggestion_kinds if value),
+            "suggestion_types": sorted(str(value) for value in suggestion_types if value),
+            "promoted_item_count": len(promoted_items),
+            "promoted_item_ids": [item.get("ontology_item_id") for item in promoted_items],
+            "claim_id": claim_id,
+            "claim_status": approved_claim.get("status"),
+            "mission_id": mission_id,
+            "action_id": action.get("action_id"),
+            "operational_map_id": operational_map.get("operational_map_id"),
+            "map_node_count": len(map_nodes),
+            "map_edge_count": len(map_edges),
+            "map_policy_count": len(operational_map.get("policies", [])),
+            "contradiction_count": len(contradictions),
+            "contradiction_values": first_contradiction.get("competing_values", []),
+            "staleness_status": staleness.get("status"),
+            "staleness_warning_visible": staleness.get("warning_visible"),
+            "ontology_change_id": ontology_change.get("ontology_change_id"),
+            "ontology_change_versions": {
+                "from": ontology_change.get("from_version"),
+                "to": ontology_change.get("to_version"),
+            },
+            "ontology_change_impact": ontology_change.get("impact"),
+            "unknown_artifact_id": unknown_artifact_id,
+            "unknown_suggestion_count": len(unknown_suggestions),
+            "unknown_evidence_gap_count": sum(1 for row in unknown_suggestions if row.get("evidence_gaps")),
+            "audit_event_count": len(audit_events),
+        },
+        "negative_evidence": negative_evidence,
+        "human_required": [],
+    }
+
+
 def verify_vs0_security_policy(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-security-policy")
     state_path = root / state_rel

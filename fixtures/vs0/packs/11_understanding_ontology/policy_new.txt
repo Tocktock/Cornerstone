@@ -1,0 +1,3 @@
+Project: Atlas Renewal
+Policy: review window is 2026-08-15
+Claim: Newer evidence records the review window as 2026-08-15.

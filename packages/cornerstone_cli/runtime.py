@@ -49,6 +49,17 @@ ANSWER_STOP_TERMS = {
     "why",
 }
 
+STRUCTURE_LABELS = {
+    "person": ("object", "person"),
+    "organization": ("object", "organization"),
+    "project": ("object", "project"),
+    "policy": ("fact", "policy"),
+    "asset": ("object", "asset"),
+    "event": ("event", "event"),
+    "claim": ("fact", "claim"),
+    "fact": ("fact", "fact"),
+}
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -112,6 +123,12 @@ class LocalRuntimeStore:
         self.decision_card_dir = state_dir / "decision_cards"
         self.correction_dir = state_dir / "corrections"
         self.share_dir = state_dir / "shares"
+        self.understanding_suggestion_dir = state_dir / "understanding_suggestions"
+        self.ontology_item_dir = state_dir / "ontology_items"
+        self.operational_map_dir = state_dir / "operational_maps"
+        self.contradiction_dir = state_dir / "contradictions"
+        self.staleness_dir = state_dir / "staleness"
+        self.ontology_change_dir = state_dir / "ontology_changes"
         self.namespace_promotion_dir = state_dir / "namespace_promotions"
         self.access_decision_dir = state_dir / "access_decisions"
         self.learning_dir = state_dir / "learning"
@@ -232,6 +249,24 @@ class LocalRuntimeStore:
     def share_path(self, share_id: str) -> Path:
         return self.share_dir / f"{share_id}.json"
 
+    def understanding_suggestion_path(self, suggestion_id: str) -> Path:
+        return self.understanding_suggestion_dir / f"{suggestion_id}.json"
+
+    def ontology_item_path(self, item_id: str) -> Path:
+        return self.ontology_item_dir / f"{item_id}.json"
+
+    def operational_map_path(self, map_id: str) -> Path:
+        return self.operational_map_dir / f"{map_id}.json"
+
+    def contradiction_path(self, contradiction_id: str) -> Path:
+        return self.contradiction_dir / f"{contradiction_id}.json"
+
+    def staleness_path(self, staleness_id: str) -> Path:
+        return self.staleness_dir / f"{staleness_id}.json"
+
+    def ontology_change_path(self, change_id: str) -> Path:
+        return self.ontology_change_dir / f"{change_id}.json"
+
     def namespace_promotion_path(self, promotion_id: str) -> Path:
         return self.namespace_promotion_dir / f"{promotion_id}.json"
 
@@ -335,6 +370,42 @@ class LocalRuntimeStore:
 
     def get_share(self, share_id: str) -> dict[str, Any] | None:
         path = self.share_path(share_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_understanding_suggestion(self, suggestion_id: str) -> dict[str, Any] | None:
+        path = self.understanding_suggestion_path(suggestion_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_ontology_item(self, item_id: str) -> dict[str, Any] | None:
+        path = self.ontology_item_path(item_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_operational_map(self, map_id: str) -> dict[str, Any] | None:
+        path = self.operational_map_path(map_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_contradiction(self, contradiction_id: str) -> dict[str, Any] | None:
+        path = self.contradiction_path(contradiction_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_staleness(self, staleness_id: str) -> dict[str, Any] | None:
+        path = self.staleness_path(staleness_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_ontology_change(self, change_id: str) -> dict[str, Any] | None:
+        path = self.ontology_change_path(change_id)
         if not path.exists():
             return None
         return _read_json(path)
@@ -464,6 +535,36 @@ class LocalRuntimeStore:
             return []
         records = []
         for path in sorted(self.share_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _understanding_suggestion_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.understanding_suggestion_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.understanding_suggestion_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _ontology_item_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.ontology_item_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.ontology_item_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _ontology_change_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.ontology_change_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.ontology_change_dir.glob("*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
                 records.append(record)
@@ -2154,6 +2255,446 @@ class LocalRuntimeStore:
             {"reason": "cli_share_show"},
         )
         return {"share": share, "audit_event": event}
+
+    def _fact_parts(self, value: str) -> tuple[str, str]:
+        cleaned = value.strip().rstrip(".")
+        for separator in [" is ", " = ", ":"]:
+            if separator in cleaned:
+                key, fact_value = cleaned.split(separator, 1)
+                return self._normalize_key(key), fact_value.strip()
+        return self._normalize_key(cleaned), cleaned
+
+    def _normalize_key(self, value: str) -> str:
+        terms = search_terms(value)
+        return "_".join(terms[:8]) or "unlabeled_fact"
+
+    def _relationship_parts(self, value: str) -> tuple[str, str, str]:
+        match = re.match(r"(.+?)\s*->\s*(.+?)\s*:\s*(.+)", value)
+        if not match:
+            return value.strip(), "", "related_to"
+        return match.group(1).strip(), match.group(2).strip(), self._normalize_key(match.group(3))
+
+    def suggest_operational_structure(
+        self,
+        artifact_id: str,
+        scope: dict[str, str],
+        *,
+        domain: str = "general",
+    ) -> dict[str, Any]:
+        artifact = self.get_artifact(artifact_id, scope)
+        if artifact is None:
+            return {"status": "not_found", "resource": "artifact"}
+        if artifact.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": artifact.get("scope")}
+
+        text = self._derived_text(artifact)
+        suggestions: list[dict[str, Any]] = []
+        for line_no, line in enumerate(text.splitlines(), start=1):
+            stripped = line.strip()
+            if not stripped:
+                continue
+            relationship_match = re.match(r"Relationship:\s*(.+)", stripped, re.IGNORECASE)
+            if relationship_match:
+                source, target, predicate = self._relationship_parts(relationship_match.group(1))
+                base = {
+                    "schema_version": "cs.understanding_suggestion.v0",
+                    "status": "suggested",
+                    "kind": "link",
+                    "candidate_type": "relationship",
+                    "label": f"{source} {predicate.replace('_', ' ')} {target}",
+                    "value": relationship_match.group(1).strip(),
+                    "relationship": {"source": source, "target": target, "predicate": predicate},
+                    "source": {
+                        "artifact_id": artifact_id,
+                        "line_no": line_no,
+                        "snippet": stripped,
+                    },
+                    "scope": scope,
+                    "trust_state": "draft",
+                    "approved_ontology_truth": False,
+                    "confidence": 0.78,
+                    "evidence_refs": [f"artifact:{artifact_id}", f"storage:{artifact.get('original_storage_ref')}"],
+                    "unsupported_inferences": [],
+                    "evidence_gaps": [],
+                    "created_at": utc_now(),
+                }
+                suggestion = dict(base)
+                suggestion["suggestion_id"] = f"sugg_{_json_hash(base)[:16]}"
+                suggestions.append(suggestion)
+                continue
+
+            label_match = re.match(r"([A-Za-z][A-Za-z ]{1,32}):\s*(.+)", stripped)
+            if not label_match:
+                continue
+            label_key = self._normalize_key(label_match.group(1)).replace("_", " ")
+            raw_value = label_match.group(2).strip()
+            structure = STRUCTURE_LABELS.get(label_key)
+            if structure is None:
+                continue
+            kind, candidate_type = structure
+            fact_key = None
+            fact_value = raw_value
+            if kind == "fact":
+                fact_key, fact_value = self._fact_parts(raw_value)
+            base = {
+                "schema_version": "cs.understanding_suggestion.v0",
+                "status": "suggested",
+                "kind": kind,
+                "candidate_type": candidate_type,
+                "label": raw_value,
+                "value": raw_value,
+                "fact_key": fact_key,
+                "fact_value": fact_value,
+                "source": {
+                    "artifact_id": artifact_id,
+                    "line_no": line_no,
+                    "snippet": stripped,
+                },
+                "scope": scope,
+                "trust_state": "draft",
+                "approved_ontology_truth": False,
+                "confidence": 0.82 if domain != "unknown" else 0.64,
+                "evidence_refs": [f"artifact:{artifact_id}", f"storage:{artifact.get('original_storage_ref')}"],
+                "unsupported_inferences": (
+                    ["Domain-specific meaning is not inferred without evidence or an approved solution pack."]
+                    if domain == "unknown"
+                    else []
+                ),
+                "evidence_gaps": (
+                    ["No approved domain ontology or solution-pack rule was used for this suggestion."]
+                    if domain == "unknown"
+                    else []
+                ),
+                "created_at": utc_now(),
+            }
+            suggestion = dict(base)
+            suggestion["suggestion_id"] = f"sugg_{_json_hash(base)[:16]}"
+            suggestions.append(suggestion)
+
+        for suggestion in suggestions:
+            _write_json(self.understanding_suggestion_path(suggestion["suggestion_id"]), suggestion)
+        event = self.append_audit(
+            "understanding.suggestions.created",
+            scope,
+            {"type": "artifact", "id": artifact_id},
+            {
+                "suggestion_count": len(suggestions),
+                "domain": domain,
+                "approved_ontology_truth_created": False,
+            },
+        )
+        return {"suggestions": suggestions, "audit_event": event}
+
+    def promote_understanding_suggestion(self, suggestion_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        suggestion = self.get_understanding_suggestion(suggestion_id)
+        if suggestion is None:
+            return {"status": "not_found", "resource": "understanding_suggestion"}
+        if suggestion.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": suggestion.get("scope")}
+
+        item_base = {
+            "schema_version": "cs.ontology_item.v0",
+            "status": "promoted_draft",
+            "scope": scope,
+            "kind": suggestion.get("kind"),
+            "candidate_type": suggestion.get("candidate_type"),
+            "label": suggestion.get("label"),
+            "value": suggestion.get("value"),
+            "fact_key": suggestion.get("fact_key"),
+            "fact_value": suggestion.get("fact_value"),
+            "relationship": suggestion.get("relationship"),
+            "trust_state": suggestion.get("trust_state"),
+            "approved_ontology_truth": False,
+            "source_suggestion_id": suggestion_id,
+            "source": suggestion.get("source"),
+            "provenance": {
+                "created_from": "understanding.promote",
+                "source_suggestion_id": suggestion_id,
+                "source_artifact_id": suggestion.get("source", {}).get("artifact_id"),
+                "trust_state_preserved": True,
+            },
+            "evidence_refs": [f"understanding_suggestion:{suggestion_id}", *suggestion.get("evidence_refs", [])],
+            "version": 1,
+            "version_history": [],
+            "created_at": utc_now(),
+        }
+        item_id = f"onto_{_json_hash(item_base)[:16]}"
+        item = dict(item_base)
+        item["ontology_item_id"] = item_id
+        _write_json(self.ontology_item_path(item_id), item)
+        event = self.append_audit(
+            "ontology.item.promoted",
+            scope,
+            {"type": "ontology_item", "id": item_id},
+            {
+                "suggestion_id": suggestion_id,
+                "trust_state": item["trust_state"],
+                "approved_ontology_truth": False,
+                "evidence_refs": item["evidence_refs"],
+            },
+        )
+        return {"ontology_item": item, "audit_event": event}
+
+    def operational_map(self, scope: dict[str, str]) -> dict[str, Any]:
+        artifacts = self._artifact_records(scope)
+        ontology_items = self._ontology_item_records(scope)
+        claims = self._claim_records(scope)
+        missions = self._mission_records(scope)
+        actions = self._action_records(scope)
+        policy_decisions = []
+        if self.access_decision_dir.exists():
+            for path in sorted(self.access_decision_dir.glob("*.json")):
+                decision = _read_json(path)
+                if decision.get("scope") == scope:
+                    policy_decisions.append(decision)
+
+        nodes: list[dict[str, Any]] = []
+        edges: list[dict[str, Any]] = []
+        timelines: list[dict[str, Any]] = []
+        for artifact in artifacts:
+            nodes.append(
+                {
+                    "id": f"artifact:{artifact['artifact_id']}",
+                    "type": "artifact",
+                    "label": artifact["artifact_id"],
+                    "evidence_refs": [f"artifact:{artifact['artifact_id']}", f"storage:{artifact.get('original_storage_ref')}"],
+                    "correctable": True,
+                }
+            )
+            timelines.append({"at": artifact.get("source", {}).get("ingested_at"), "event": "artifact_ingested", "ref": f"artifact:{artifact['artifact_id']}"})
+        for item in ontology_items:
+            nodes.append(
+                {
+                    "id": f"ontology_item:{item['ontology_item_id']}",
+                    "type": item.get("kind"),
+                    "label": item.get("label"),
+                    "trust_state": item.get("trust_state"),
+                    "evidence_refs": item.get("evidence_refs", []),
+                    "correctable": True,
+                }
+            )
+            source_artifact_id = item.get("source", {}).get("artifact_id")
+            if source_artifact_id:
+                edges.append(
+                    {
+                        "source": f"ontology_item:{item['ontology_item_id']}",
+                        "target": f"artifact:{source_artifact_id}",
+                        "type": "supported_by",
+                        "evidence_refs": item.get("evidence_refs", []),
+                    }
+                )
+        for claim in claims:
+            nodes.append({"id": f"claim:{claim['claim_id']}", "type": "claim", "label": claim.get("statement"), "trust_state": claim.get("trust_state"), "evidence_refs": self._claim_evidence_refs(claim), "correctable": True})
+            for artifact_ref in claim.get("evidence_bundle", {}).get("artifact_refs", []):
+                edges.append({"source": f"claim:{claim['claim_id']}", "target": artifact_ref, "type": "supported_by", "evidence_refs": self._claim_evidence_refs(claim)})
+        for mission in missions:
+            nodes.append({"id": f"mission:{mission['mission_id']}", "type": "mission", "label": mission.get("goal"), "status": mission.get("status"), "evidence_refs": mission.get("evidence", {}).get("artifact_refs", []), "correctable": True})
+            claim_id = mission.get("source_claim", {}).get("claim_id")
+            if claim_id:
+                edges.append({"source": f"mission:{mission['mission_id']}", "target": f"claim:{claim_id}", "type": "derived_from_claim", "evidence_refs": mission.get("evidence", {}).get("artifact_refs", [])})
+        for action in actions:
+            nodes.append({"id": f"action:{action['action_id']}", "type": "workflow_action", "label": action.get("goal"), "status": action.get("status"), "evidence_refs": action.get("evidence", {}).get("artifact_refs", []), "correctable": True})
+            edges.append({"source": f"action:{action['action_id']}", "target": f"mission:{action.get('mission_id')}", "type": "executes_mission", "evidence_refs": action.get("evidence", {}).get("artifact_refs", [])})
+            if action.get("policy_decision"):
+                policy_decisions.append(action["policy_decision"])
+
+        map_base = {
+            "schema_version": "cs.operational_map.v0",
+            "scope": scope,
+            "status": "ready",
+            "nodes": nodes,
+            "edges": edges,
+            "timelines": [entry for entry in timelines if entry.get("at")],
+            "policies": [{"policy_decision_id": decision.get("id"), "policy": decision.get("policy"), "decision": decision.get("decision")} for decision in policy_decisions],
+            "decisions": [{"claim_id": claim["claim_id"], "trust_state": claim.get("trust_state"), "status": claim.get("status")} for claim in claims],
+            "workflows": [{"mission_id": mission["mission_id"], "status": mission.get("status")} for mission in missions],
+            "evidence_linked": all(node.get("evidence_refs") for node in nodes if node.get("type") in {"artifact", "fact", "link", "event", "claim"}),
+            "correctable": True,
+            "created_at": utc_now(),
+        }
+        map_id = f"omap_{_json_hash(map_base)[:16]}"
+        operational_map = dict(map_base)
+        operational_map["operational_map_id"] = map_id
+        _write_json(self.operational_map_path(map_id), operational_map)
+        event = self.append_audit(
+            "understanding.operational_map.created",
+            scope,
+            {"type": "operational_map", "id": map_id},
+            {"node_count": len(nodes), "edge_count": len(edges), "evidence_linked": operational_map["evidence_linked"]},
+        )
+        return {"operational_map": operational_map, "audit_event": event}
+
+    def detect_contradictions(self, scope: dict[str, str]) -> dict[str, Any]:
+        by_key: dict[str, list[dict[str, Any]]] = {}
+        for item in self._ontology_item_records(scope):
+            if item.get("kind") != "fact" or not item.get("fact_key"):
+                continue
+            by_key.setdefault(item["fact_key"], []).append(item)
+
+        contradictions = []
+        for fact_key, items in sorted(by_key.items()):
+            values = {str(item.get("fact_value")) for item in items}
+            if len(values) < 2:
+                continue
+            base = {
+                "schema_version": "cs.contradiction.v0",
+                "status": "unresolved",
+                "scope": scope,
+                "fact_key": fact_key,
+                "competing_values": sorted(values),
+                "competing_evidence": [
+                    {
+                        "ontology_item_id": item["ontology_item_id"],
+                        "value": item.get("fact_value"),
+                        "label": item.get("label"),
+                        "evidence_refs": item.get("evidence_refs", []),
+                    }
+                    for item in items
+                ],
+                "silent_choice_made": False,
+                "asks_for_resolution": True,
+                "claim_or_memory_marked_uncertain": True,
+                "created_at": utc_now(),
+            }
+            contradiction_id = f"contra_{_json_hash(base)[:16]}"
+            contradiction = dict(base)
+            contradiction["contradiction_id"] = contradiction_id
+            _write_json(self.contradiction_path(contradiction_id), contradiction)
+            contradictions.append(contradiction)
+
+        event = self.append_audit(
+            "understanding.contradictions.detected",
+            scope,
+            {"type": "contradiction_scan", "id": scope_key(scope)},
+            {"contradiction_count": len(contradictions), "silent_choice_made": False},
+        )
+        return {"contradictions": contradictions, "audit_event": event}
+
+    def check_staleness(self, claim_id: str, newer_evidence_bundle_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        claim = self.get_claim(claim_id)
+        if claim is None:
+            return {"status": "not_found", "resource": "claim"}
+        if claim.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": claim.get("scope")}
+        newer_bundle = self.get_evidence_bundle(newer_evidence_bundle_id)
+        if newer_bundle is None:
+            return {"status": "not_found", "resource": "evidence_bundle"}
+        if newer_bundle.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": newer_bundle.get("filters")}
+
+        old_refs = set(claim.get("evidence_bundle", {}).get("artifact_refs", []))
+        new_refs = {f"artifact:{item['artifact_id']}" for item in newer_bundle.get("evidence_items", [])}
+        needs_review = bool(new_refs and new_refs != old_refs)
+        base = {
+            "schema_version": "cs.staleness_check.v0",
+            "status": "needs_review" if needs_review else "current",
+            "scope": scope,
+            "claim_id": claim_id,
+            "claim_trust_state": claim.get("trust_state"),
+            "old_evidence_refs": sorted(old_refs),
+            "newer_evidence_refs": sorted(new_refs),
+            "newer_evidence_bundle_id": newer_evidence_bundle_id,
+            "warning_visible": needs_review,
+            "used_as_approved_current_truth_without_warning": False,
+            "reason": "newer_or_contradictory_evidence_available" if needs_review else "no_newer_conflicting_evidence",
+            "checked_at": utc_now(),
+        }
+        staleness_id = f"stale_{_json_hash(base)[:16]}"
+        staleness = dict(base)
+        staleness["staleness_id"] = staleness_id
+        _write_json(self.staleness_path(staleness_id), staleness)
+        event = self.append_audit(
+            "understanding.staleness.checked",
+            scope,
+            {"type": "staleness_check", "id": staleness_id},
+            {"claim_id": claim_id, "status": staleness["status"], "warning_visible": staleness["warning_visible"]},
+        )
+        return {"staleness": staleness, "audit_event": event}
+
+    def record_ontology_change(
+        self,
+        item_id: str,
+        *,
+        property_name: str,
+        new_value: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        item = self.get_ontology_item(item_id)
+        if item is None:
+            return {"status": "not_found", "resource": "ontology_item"}
+        if item.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": item.get("scope")}
+        old_value = item.get(property_name)
+        affected_evidence_refs = set(item.get("evidence_refs", []))
+        affected_claims = [
+            f"claim:{claim['claim_id']}"
+            for claim in self._claim_records(scope)
+            if affected_evidence_refs & set(self._claim_evidence_refs(claim))
+        ]
+        affected_missions = [
+            f"mission:{mission['mission_id']}"
+            for mission in self._mission_records(scope)
+            if affected_evidence_refs & set(mission.get("evidence", {}).get("artifact_refs", []))
+        ]
+        affected_actions = [
+            f"action:{action['action_id']}"
+            for action in self._action_records(scope)
+            if affected_evidence_refs & set(action.get("evidence", {}).get("artifact_refs", []))
+        ]
+        change_base = {
+            "schema_version": "cs.ontology_change.v0",
+            "status": "recorded",
+            "scope": scope,
+            "ontology_item_id": item_id,
+            "from_version": item.get("version", 1),
+            "to_version": int(item.get("version", 1)) + 1,
+            "diff": {
+                "property": property_name,
+                "from": old_value,
+                "to": redact_text(new_value),
+            },
+            "impact": {
+                "affected_claims": affected_claims,
+                "affected_missions": affected_missions,
+                "affected_playbooks": [],
+                "affected_actions": affected_actions,
+            },
+            "rollback_guidance": [
+                f"Restore {property_name} to the prior value recorded in this change.",
+                "Re-run contradiction, staleness, and operational-map checks before using the changed item as approved truth.",
+            ],
+            "migration_guidance": [
+                "Review affected claims, missions, playbooks, and actions before broad use.",
+            ],
+            "evidence_refs": item.get("evidence_refs", []),
+            "created_at": utc_now(),
+        }
+        change_id = f"ochg_{_json_hash(change_base)[:16]}"
+        change = dict(change_base)
+        change["ontology_change_id"] = change_id
+
+        updated_item = dict(item)
+        updated_item[property_name] = redact_text(new_value)
+        updated_item["version"] = change["to_version"]
+        history = list(updated_item.get("version_history", []))
+        history.append({"ontology_change_id": change_id, "from_version": change["from_version"], "to_version": change["to_version"], "diff": change["diff"]})
+        updated_item["version_history"] = history
+        _write_json(self.ontology_change_path(change_id), change)
+        _write_json(self.ontology_item_path(item_id), updated_item)
+        event = self.append_audit(
+            "ontology.change.recorded",
+            scope,
+            {"type": "ontology_change", "id": change_id},
+            {
+                "ontology_item_id": item_id,
+                "from_version": change["from_version"],
+                "to_version": change["to_version"],
+                "affected_claim_count": len(affected_claims),
+                "affected_mission_count": len(affected_missions),
+                "affected_action_count": len(affected_actions),
+            },
+        )
+        return {"ontology_change": change, "ontology_item": updated_item, "audit_event": event}
 
     def deny_egress_attempt(self, target_url: str, scope: dict[str, str]) -> dict[str, Any]:
         decision_base = {
