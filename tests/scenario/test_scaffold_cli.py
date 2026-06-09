@@ -478,6 +478,24 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_regression_guardrails_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-regression-guardrails", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-regression-guardrails")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 3)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_REGRESSION_GUARDRAILS_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-REG-016", "CS-REG-017", "CS-REG-018"})
+        summaries = payload["component_summaries"]
+        self.assertEqual(summaries["claim_evidence"]["trust_states"], {"unsupported": "draft", "evidence_backed": "evidence_backed", "approved": "approved"})
+        self.assertIn("claim.approved", summaries["audit_ledger"]["event_types"])
+        self.assertIn("policy.egress.denied", summaries["audit_ledger"]["event_types"])
+        self.assertEqual(summaries["security_policy"]["egress_external_http_calls"], 0)
+        self.assertEqual(set(summaries["security_policy"]["sandbox_cases"]), {"sandbox_environment", "sandbox_filesystem", "sandbox_host", "sandbox_shell"})
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

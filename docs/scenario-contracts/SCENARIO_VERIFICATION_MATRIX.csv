@@ -200,8 +200,8 @@ CS-REG-012,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --sce
 CS-REG-013,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0-security --json,reports/scenario/vs0-security-2026-06-09.json,,,,,PASS
 CS-REG-014,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-014 --json,reports/scenario/cs-reg-014.json,,,,,NOT_VERIFIED
 CS-REG-015,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-015 --json,reports/scenario/cs-reg-015.json,,,,,NOT_VERIFIED
-CS-REG-016,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-016 --json,reports/scenario/cs-reg-016.json,,,,,NOT_VERIFIED
-CS-REG-017,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-017 --json,reports/scenario/cs-reg-017.json,,,,,NOT_VERIFIED
-CS-REG-018,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-018 --json,reports/scenario/cs-reg-018.json,,,,,NOT_VERIFIED
+CS-REG-016,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS
+CS-REG-017,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS
+CS-REG-018,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0-regression-guardrails --json,reports/scenario/vs0-regression-guardrails-2026-06-09.json,,,,,PASS
 CS-REG-019,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-019 --json,reports/scenario/cs-reg-019.json,,,,,NOT_VERIFIED
 CS-REG-020,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-020 --json,reports/scenario/cs-reg-020.json,,,,,NOT_VERIFIED

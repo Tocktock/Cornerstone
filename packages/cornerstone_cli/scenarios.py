@@ -2059,6 +2059,149 @@ def verify_vs0_security_policy(root: Path) -> dict[str, Any]:
     }
 
 
+def _report_passes(report: dict[str, Any], scenario_ids: set[str]) -> bool:
+    rows = report.get("scenario_results", [])
+    passed = {row.get("id") for row in rows if row.get("status") == "PASS"}
+    return report.get("status") == "success" and scenario_ids <= passed
+
+
+def _negative_zero(report: dict[str, Any]) -> bool:
+    negative = report.get("negative_evidence", {})
+    return isinstance(negative, dict) and all(value == 0 for value in negative.values() if isinstance(value, int))
+
+
+def verify_vs0_regression_guardrails(root: Path) -> dict[str, Any]:
+    claim_report = verify_vs0_claim_evidence(root)
+    audit_report = verify_vs0_audit_ledger(root)
+    security_policy_report = verify_vs0_security_policy(root)
+    security_report = verify_vs0_security(root)
+    namespace_report = verify_vs0_namespace_isolation(root)
+    search_evidence_report = verify_vs0_search_evidence(root)
+
+    claim_evidence = claim_report.get("claim_evidence", {})
+    audit_evidence = audit_report.get("audit_evidence", {})
+    security_policy_evidence = security_policy_report.get("security_policy_evidence", {})
+
+    reg_016_ok = (
+        _report_passes(claim_report, {"CS-CLAIM-006", "CS-CLAIM-007"})
+        and _report_passes(search_evidence_report, {"CS-ARCH-008", "CS-ARCH-009", "CS-UND-001"})
+        and claim_evidence.get("unsupported_claim_trust_state") == "draft"
+        and claim_evidence.get("evidence_claim_trust_state") == "evidence_backed"
+        and claim_evidence.get("approved_claim_trust_state") == "approved"
+        and "CS_CLAIM_EVIDENCE_REQUIRED" in claim_evidence.get("unsupported_approval_error_codes", [])
+        and _negative_zero(claim_report)
+    )
+    reg_017_ok = (
+        _report_passes(audit_report, {"CS-SEC-006"})
+        and audit_evidence.get("missing_event_types") == []
+        and audit_evidence.get("tamper_detection_exit_code") == 5
+        and _negative_zero(audit_report)
+    )
+    reg_018_ok = (
+        _report_passes(security_policy_report, {"CS-SEC-002", "CS-SEC-003"})
+        and _report_passes(security_report, {"CS-SEC-007", "CS-SEC-008", "CS-REG-013"})
+        and _report_passes(namespace_report, {"CS-NS-001", "CS-NS-003"})
+        and _report_passes(claim_report, {"CS-CLAIM-006", "CS-CLAIM-007"})
+        and security_policy_evidence.get("egress_external_http_calls") == 0
+        and _negative_zero(security_policy_report)
+        and _negative_zero(security_report)
+        and _negative_zero(namespace_report)
+        and _negative_zero(claim_report)
+    )
+
+    rows = [
+        _row(
+            "CS-REG-016",
+            "REGRESSION_GUARD",
+            "PASS" if reg_016_ok else "FAIL",
+            [
+                "cornerstone scenario verify vs0-claim-evidence --json",
+                "cornerstone scenario verify vs0-search-evidence --json",
+            ],
+            "Evidence requirements and trust states remain visible through unsupported draft, evidence-backed claim, approved claim, and evidence bundle checks.",
+        ),
+        _row(
+            "CS-REG-017",
+            "REGRESSION_GUARD",
+            "PASS" if reg_017_ok else "FAIL",
+            ["cornerstone scenario verify vs0-audit-ledger --json"],
+            "Critical implemented events still appear in the tamper-evident audit ledger and tampering is detected.",
+        ),
+        _row(
+            "CS-REG-018",
+            "REGRESSION_GUARD",
+            "PASS" if reg_018_ok else "FAIL",
+            [
+                "cornerstone scenario verify vs0-security-policy --json",
+                "cornerstone scenario verify vs0-security --json",
+                "cornerstone scenario verify vs0-namespace-isolation --json",
+                "cornerstone scenario verify vs0-claim-evidence --json",
+            ],
+            "Default egress deny, sandbox denial, namespace isolation, policy checks, redaction, prompt-injection defense, and claim approval gates remain intact.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    component_summaries = {
+        "claim_evidence": {
+            "status": claim_report.get("status"),
+            "summary": claim_report.get("summary"),
+            "negative_evidence": claim_report.get("negative_evidence"),
+            "trust_states": {
+                "unsupported": claim_evidence.get("unsupported_claim_trust_state"),
+                "evidence_backed": claim_evidence.get("evidence_claim_trust_state"),
+                "approved": claim_evidence.get("approved_claim_trust_state"),
+            },
+        },
+        "audit_ledger": {
+            "status": audit_report.get("status"),
+            "summary": audit_report.get("summary"),
+            "negative_evidence": audit_report.get("negative_evidence"),
+            "event_types": audit_evidence.get("event_types"),
+            "tamper_detection_exit_code": audit_evidence.get("tamper_detection_exit_code"),
+        },
+        "security_policy": {
+            "status": security_policy_report.get("status"),
+            "summary": security_policy_report.get("summary"),
+            "negative_evidence": security_policy_report.get("negative_evidence"),
+            "egress_external_http_calls": security_policy_evidence.get("egress_external_http_calls"),
+            "sandbox_cases": security_policy_evidence.get("sandbox_cases"),
+        },
+        "security": {
+            "status": security_report.get("status"),
+            "summary": security_report.get("summary"),
+            "negative_evidence": security_report.get("negative_evidence"),
+        },
+        "namespace_isolation": {
+            "status": namespace_report.get("status"),
+            "summary": namespace_report.get("summary"),
+            "negative_evidence": namespace_report.get("negative_evidence"),
+        },
+        "search_evidence": {
+            "status": search_evidence_report.get("status"),
+            "summary": search_evidence_report.get("summary"),
+            "negative_evidence": search_evidence_report.get("negative_evidence"),
+        },
+    }
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-regression-guardrails",
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_REGRESSION_GUARDRAILS_ONLY",
+        },
+        "scenario_results": rows,
+        "component_summaries": component_summaries,
+        "negative_evidence": {
+            "evidence_guardrail_failed": 0 if reg_016_ok else 1,
+            "audit_guardrail_failed": 0 if reg_017_ok else 1,
+            "security_guardrail_failed": 0 if reg_018_ok else 1,
+        },
+        "human_required": [],
+    }
+
+
 def verify_vs0_scaffold(root: Path) -> dict[str, Any]:
     docs_result = _run_script(root, "scripts/verify_sot_docs.sh")
     cli_result = _run_script(root, "scripts/verify_cli_native_first_docs.sh")

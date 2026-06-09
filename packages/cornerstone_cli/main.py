@@ -14,6 +14,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_audit_ledger,
     verify_vs0_claim_evidence,
     verify_vs0_namespace_isolation,
+    verify_vs0_regression_guardrails,
     verify_vs0_security_policy,
     verify_vs0_universal_core,
     verify_vs0_search_evidence,
@@ -781,6 +782,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_claim_evidence(root)
     elif args.contract == "vs0-security-policy":
         report = verify_vs0_security_policy(root)
+    elif args.contract == "vs0-regression-guardrails":
+        report = verify_vs0_regression_guardrails(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -799,6 +802,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-universal-core",
                     "vs0-claim-evidence",
                     "vs0-security-policy",
+                    "vs0-regression-guardrails",
                 ],
             }
         )
