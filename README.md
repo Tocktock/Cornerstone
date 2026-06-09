@@ -88,6 +88,7 @@ cornerstone health --json
 cornerstone ready --json        # exits 4 until product runtime exists
 cornerstone scenario list --set full --json
 cornerstone scenario coverage --json
+python3 scripts/verify_scenario_matrix.py
 cornerstone scenario verify vs0-scaffold --json
 make verify-local-fast
 ```

@@ -1,0 +1,207 @@
+scenario_id,type,local_required,verification_class,verification_owner,verification_command,evidence_artifact,human_required_reason,required_human_action,expected_human_evidence,release_impact,status
+CS-PROD-001,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-001.json,,,,,NOT_VERIFIED
+CS-PROD-002,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-002.json,,,,,NOT_VERIFIED
+CS-PROD-003,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-003.json,,,,,NOT_VERIFIED
+CS-PROD-004,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-004.json,,,,,NOT_VERIFIED
+CS-PROD-005,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-005.json,,,,,NOT_VERIFIED
+CS-PROD-006,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-006 --json,reports/scenario/cs-prod-006.json,,,,,NOT_VERIFIED
+CS-PROD-007,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-007 --json,reports/scenario/cs-prod-007.json,,,,,NOT_VERIFIED
+CS-PROD-008,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-008 --json,reports/scenario/cs-prod-008.json,,,,,NOT_VERIFIED
+CS-PROD-009,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-009 --json,reports/scenario/cs-prod-009.json,,,,,NOT_VERIFIED
+CS-PROD-010,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-010 --json,reports/scenario/cs-prod-010.json,,,,,NOT_VERIFIED
+CS-ARCH-001,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-001.json,,,,,NOT_VERIFIED
+CS-ARCH-002,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-002.json,,,,,NOT_VERIFIED
+CS-ARCH-003,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-003.json,,,,,NOT_VERIFIED
+CS-ARCH-004,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-004.json,,,,,NOT_VERIFIED
+CS-ARCH-005,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-005.json,,,,,NOT_VERIFIED
+CS-ARCH-006,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-006 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-006.json,,,,,NOT_VERIFIED
+CS-ARCH-007,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-007 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-007.json,,,,,NOT_VERIFIED
+CS-ARCH-008,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-008 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-008.json,,,,,NOT_VERIFIED
+CS-ARCH-009,MUST_PASS,true,D,AI,cornerstone scenario verify vs0 --scenario CS-ARCH-009 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-arch-009.json,,,,,NOT_VERIFIED
+CS-ARCH-010,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-010 --json,reports/scenario/cs-arch-010.json,,,,,NOT_VERIFIED
+CS-ARCH-011,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-011 --json,reports/scenario/cs-arch-011.json,,,,,NOT_VERIFIED
+CS-ARCH-012,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-012 --json,reports/scenario/cs-arch-012.json,,,,,NOT_VERIFIED
+CS-ARCH-013,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-013 --json,reports/scenario/cs-arch-013.json,,,,,NOT_VERIFIED
+CS-ARCH-014,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-ARCH-014 --json,reports/scenario/cs-arch-014.json,,,,,NOT_VERIFIED
+CS-UND-001,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-001.json,,,,,NOT_VERIFIED
+CS-UND-002,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-002.json,,,,,NOT_VERIFIED
+CS-UND-003,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-003.json,,,,,NOT_VERIFIED
+CS-UND-004,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-004.json,,,,,NOT_VERIFIED
+CS-UND-005,MUST_PASS,true,D+M,AI,cornerstone scenario verify vs0 --scenario CS-UND-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-und-005.json,,,,,NOT_VERIFIED
+CS-UND-006,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-006 --json,reports/scenario/cs-und-006.json,,,,,NOT_VERIFIED
+CS-UND-007,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-007 --json,reports/scenario/cs-und-007.json,,,,,NOT_VERIFIED
+CS-UND-008,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-008 --json,reports/scenario/cs-und-008.json,,,,,NOT_VERIFIED
+CS-UND-009,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-009 --json,reports/scenario/cs-und-009.json,,,,,NOT_VERIFIED
+CS-UND-010,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-010 --json,reports/scenario/cs-und-010.json,,,,,NOT_VERIFIED
+CS-UND-011,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-011 --json,reports/scenario/cs-und-011.json,,,,,NOT_VERIFIED
+CS-UND-012,MUST_PASS,true,D+M,AI,cornerstone scenario verify full --scenario CS-UND-012 --json,reports/scenario/cs-und-012.json,,,,,NOT_VERIFIED
+CS-CLAIM-001,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-001.json,,,,,NOT_VERIFIED
+CS-CLAIM-002,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-002.json,,,,,NOT_VERIFIED
+CS-CLAIM-003,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-003.json,,,,,NOT_VERIFIED
+CS-CLAIM-004,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-004.json,,,,,NOT_VERIFIED
+CS-CLAIM-005,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-005.json,,,,,NOT_VERIFIED
+CS-CLAIM-006,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-006 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-006.json,,,,,NOT_VERIFIED
+CS-CLAIM-007,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-007 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-007.json,,,,,NOT_VERIFIED
+CS-CLAIM-008,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-008 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-008.json,,,,,NOT_VERIFIED
+CS-CLAIM-009,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-009 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-009.json,,,,,NOT_VERIFIED
+CS-CLAIM-010,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify vs0 --scenario CS-CLAIM-010 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-claim-010.json,,,,,NOT_VERIFIED
+CS-CLAIM-011,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-CLAIM-011 --json,reports/scenario/cs-claim-011.json,,,,,NOT_VERIFIED
+CS-CLAIM-012,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-CLAIM-012 --json,reports/scenario/cs-claim-012.json,,,,,NOT_VERIFIED
+CS-CLAIM-013,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-CLAIM-013 --json,reports/scenario/cs-claim-013.json,,,,,NOT_VERIFIED
+CS-CLAIM-014,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-CLAIM-014 --json,reports/scenario/cs-claim-014.json,,,,,NOT_VERIFIED
+CS-MEM-001,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-001 --json,reports/scenario/cs-mem-001.json,,,,,NOT_VERIFIED
+CS-MEM-002,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-002 --json,reports/scenario/cs-mem-002.json,,,,,NOT_VERIFIED
+CS-MEM-003,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-003 --json,reports/scenario/cs-mem-003.json,,,,,NOT_VERIFIED
+CS-MEM-004,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-004 --json,reports/scenario/cs-mem-004.json,,,,,NOT_VERIFIED
+CS-MEM-005,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-005 --json,reports/scenario/cs-mem-005.json,,,,,NOT_VERIFIED
+CS-MEM-006,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-006 --json,reports/scenario/cs-mem-006.json,,,,,NOT_VERIFIED
+CS-MEM-007,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-007 --json,reports/scenario/cs-mem-007.json,,,,,NOT_VERIFIED
+CS-MEM-008,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-008 --json,reports/scenario/cs-mem-008.json,,,,,NOT_VERIFIED
+CS-MEM-009,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-009 --json,reports/scenario/cs-mem-009.json,,,,,NOT_VERIFIED
+CS-MEM-010,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-010 --json,reports/scenario/cs-mem-010.json,,,,,NOT_VERIFIED
+CS-MEM-011,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-011 --json,reports/scenario/cs-mem-011.json,,,,,NOT_VERIFIED
+CS-MEM-012,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-012 --json,reports/scenario/cs-mem-012.json,,,,,NOT_VERIFIED
+CS-MEM-013,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-013 --json,reports/scenario/cs-mem-013.json,,,,,NOT_VERIFIED
+CS-MEM-014,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-014 --json,reports/scenario/cs-mem-014.json,,,,,NOT_VERIFIED
+CS-MEM-015,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-015 --json,reports/scenario/cs-mem-015.json,,,,,NOT_VERIFIED
+CS-MEM-016,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-016 --json,reports/scenario/cs-mem-016.json,,,,,NOT_VERIFIED
+CS-MEM-017,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-017 --json,reports/scenario/cs-mem-017.json,,,,,NOT_VERIFIED
+CS-MEM-018,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-MEM-018 --json,reports/scenario/cs-mem-018.json,,,,,NOT_VERIFIED
+CS-NS-001,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0 --scenario CS-NS-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-ns-001.json,,,,,NOT_VERIFIED
+CS-NS-002,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0 --scenario CS-NS-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-ns-002.json,,,,,NOT_VERIFIED
+CS-NS-003,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0 --scenario CS-NS-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-ns-003.json,,,,,NOT_VERIFIED
+CS-NS-004,MUST_PASS,true,D+P,AI,cornerstone scenario verify vs0 --scenario CS-NS-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-ns-004.json,,,,,NOT_VERIFIED
+CS-NS-005,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-005 --json,reports/scenario/cs-ns-005.json,,,,,NOT_VERIFIED
+CS-NS-006,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-006 --json,reports/scenario/cs-ns-006.json,,,,,NOT_VERIFIED
+CS-NS-007,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-007 --json,reports/scenario/cs-ns-007.json,,,,,NOT_VERIFIED
+CS-NS-008,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-008 --json,reports/scenario/cs-ns-008.json,,,,,NOT_VERIFIED
+CS-NS-009,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-009 --json,reports/scenario/cs-ns-009.json,,,,,NOT_VERIFIED
+CS-NS-010,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-010 --json,reports/scenario/cs-ns-010.json,,,,,NOT_VERIFIED
+CS-NS-011,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-011 --json,reports/scenario/cs-ns-011.json,,,,,NOT_VERIFIED
+CS-NS-012,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-012 --json,reports/scenario/cs-ns-012.json,,,,,NOT_VERIFIED
+CS-NS-013,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-013 --json,reports/scenario/cs-ns-013.json,,,,,NOT_VERIFIED
+CS-NS-014,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-014 --json,reports/scenario/cs-ns-014.json,,,,,NOT_VERIFIED
+CS-AUTO-001,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-001.json,,,,,NOT_VERIFIED
+CS-AUTO-002,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-002.json,,,,,NOT_VERIFIED
+CS-AUTO-003,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-003.json,,,,,NOT_VERIFIED
+CS-AUTO-004,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-004.json,,,,,NOT_VERIFIED
+CS-AUTO-005,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-005.json,,,,,NOT_VERIFIED
+CS-AUTO-006,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-006 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-006.json,,,,,NOT_VERIFIED
+CS-AUTO-007,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-007 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-007.json,,,,,NOT_VERIFIED
+CS-AUTO-008,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-008 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-008.json,,,,,NOT_VERIFIED
+CS-AUTO-009,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-009 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-009.json,,,,,NOT_VERIFIED
+CS-AUTO-010,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-010 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-010.json,,,,,NOT_VERIFIED
+CS-AUTO-011,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-011 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-011.json,,,,,NOT_VERIFIED
+CS-AUTO-012,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-012 --json,reports/scenario/cs-auto-012.json,,,,,NOT_VERIFIED
+CS-AUTO-013,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-013 --json,reports/scenario/cs-auto-013.json,,,,,NOT_VERIFIED
+CS-AUTO-014,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-014 --json,reports/scenario/cs-auto-014.json,,,,,NOT_VERIFIED
+CS-AUTO-015,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-015 --json,reports/scenario/cs-auto-015.json,,,,,NOT_VERIFIED
+CS-AUTO-016,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-016 --json,reports/scenario/cs-auto-016.json,,,,,NOT_VERIFIED
+CS-AUTO-017,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-017 --json,reports/scenario/cs-auto-017.json,,,,,NOT_VERIFIED
+CS-AUTO-018,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-018 --json,reports/scenario/cs-auto-018.json,,,,,NOT_VERIFIED
+CS-AUTO-019,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-019 --json,reports/scenario/cs-auto-019.json,,,,,NOT_VERIFIED
+CS-AUTO-020,REGRESSION_GUARD,true,D+P+U,AI,cornerstone scenario verify full --scenario CS-AUTO-020 --json,reports/scenario/cs-auto-020.json,,,,,NOT_VERIFIED
+CS-AGENT-001,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-001 --json,reports/scenario/cs-agent-001.json,,,,,NOT_VERIFIED
+CS-AGENT-002,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-002 --json,reports/scenario/cs-agent-002.json,,,,,NOT_VERIFIED
+CS-AGENT-003,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-003 --json,reports/scenario/cs-agent-003.json,,,,,NOT_VERIFIED
+CS-AGENT-004,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-004 --json,reports/scenario/cs-agent-004.json,,,,,NOT_VERIFIED
+CS-AGENT-005,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-005 --json,reports/scenario/cs-agent-005.json,,,,,NOT_VERIFIED
+CS-AGENT-006,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-006 --json,reports/scenario/cs-agent-006.json,,,,,NOT_VERIFIED
+CS-AGENT-007,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-007 --json,reports/scenario/cs-agent-007.json,,,,,NOT_VERIFIED
+CS-AGENT-008,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-008 --json,reports/scenario/cs-agent-008.json,,,,,NOT_VERIFIED
+CS-AGENT-009,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-009 --json,reports/scenario/cs-agent-009.json,,,,,NOT_VERIFIED
+CS-AGENT-010,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-010 --json,reports/scenario/cs-agent-010.json,,,,,NOT_VERIFIED
+CS-AGENT-011,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-011 --json,reports/scenario/cs-agent-011.json,,,,,NOT_VERIFIED
+CS-AGENT-012,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-012 --json,reports/scenario/cs-agent-012.json,,,,,NOT_VERIFIED
+CS-AGENT-013,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-013 --json,reports/scenario/cs-agent-013.json,,,,,NOT_VERIFIED
+CS-AGENT-014,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-AGENT-014 --json,reports/scenario/cs-agent-014.json,,,,,NOT_VERIFIED
+CS-BRAIN-001,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-001 --json,reports/scenario/cs-brain-001.json,,,,,NOT_VERIFIED
+CS-BRAIN-002,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-002 --json,reports/scenario/cs-brain-002.json,,,,,NOT_VERIFIED
+CS-BRAIN-003,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-003 --json,reports/scenario/cs-brain-003.json,,,,,NOT_VERIFIED
+CS-BRAIN-004,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-004 --json,reports/scenario/cs-brain-004.json,,,,,NOT_VERIFIED
+CS-BRAIN-005,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-005 --json,reports/scenario/cs-brain-005.json,,,,,NOT_VERIFIED
+CS-BRAIN-006,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-006 --json,reports/scenario/cs-brain-006.json,,,,,NOT_VERIFIED
+CS-BRAIN-007,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-007 --json,reports/scenario/cs-brain-007.json,,,,,NOT_VERIFIED
+CS-BRAIN-008,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-008 --json,reports/scenario/cs-brain-008.json,,,,,NOT_VERIFIED
+CS-BRAIN-009,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-009 --json,reports/scenario/cs-brain-009.json,,,,,NOT_VERIFIED
+CS-BRAIN-010,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-010 --json,reports/scenario/cs-brain-010.json,,,,,NOT_VERIFIED
+CS-BRAIN-011,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-011 --json,reports/scenario/cs-brain-011.json,,,,,NOT_VERIFIED
+CS-BRAIN-012,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-012 --json,reports/scenario/cs-brain-012.json,,,,,NOT_VERIFIED
+CS-BRAIN-013,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-013 --json,reports/scenario/cs-brain-013.json,,,,,NOT_VERIFIED
+CS-BRAIN-014,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-014 --json,reports/scenario/cs-brain-014.json,,,,,NOT_VERIFIED
+CS-BRAIN-015,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-015 --json,reports/scenario/cs-brain-015.json,,,,,NOT_VERIFIED
+CS-BRAIN-016,MUST_PASS,true,M+D+P,AI,cornerstone scenario verify full --scenario CS-BRAIN-016 --json,reports/scenario/cs-brain-016.json,,,,,NOT_VERIFIED
+CS-LEARN-001,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-001 --json,reports/scenario/cs-learn-001.json,,,,,NOT_VERIFIED
+CS-LEARN-002,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-002 --json,reports/scenario/cs-learn-002.json,,,,,NOT_VERIFIED
+CS-LEARN-003,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-003 --json,reports/scenario/cs-learn-003.json,,,,,NOT_VERIFIED
+CS-LEARN-004,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-004 --json,reports/scenario/cs-learn-004.json,,,,,NOT_VERIFIED
+CS-LEARN-005,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-005 --json,reports/scenario/cs-learn-005.json,,,,,NOT_VERIFIED
+CS-LEARN-006,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-006 --json,reports/scenario/cs-learn-006.json,,,,,NOT_VERIFIED
+CS-LEARN-007,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-007 --json,reports/scenario/cs-learn-007.json,,,,,NOT_VERIFIED
+CS-LEARN-008,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-008 --json,reports/scenario/cs-learn-008.json,,,,,NOT_VERIFIED
+CS-LEARN-009,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-009 --json,reports/scenario/cs-learn-009.json,,,,,NOT_VERIFIED
+CS-LEARN-010,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-010 --json,reports/scenario/cs-learn-010.json,,,,,NOT_VERIFIED
+CS-LEARN-011,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-011 --json,reports/scenario/cs-learn-011.json,,,,,NOT_VERIFIED
+CS-LEARN-012,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-012 --json,reports/scenario/cs-learn-012.json,,,,,NOT_VERIFIED
+CS-LEARN-013,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-013 --json,reports/scenario/cs-learn-013.json,,,,,NOT_VERIFIED
+CS-LEARN-014,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-014 --json,reports/scenario/cs-learn-014.json,,,,,NOT_VERIFIED
+CS-LEARN-015,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-015 --json,reports/scenario/cs-learn-015.json,,,,,NOT_VERIFIED
+CS-LEARN-016,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-016 --json,reports/scenario/cs-learn-016.json,,,,,NOT_VERIFIED
+CS-LEARN-017,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-017 --json,reports/scenario/cs-learn-017.json,,,,,NOT_VERIFIED
+CS-LEARN-018,MUST_PASS,true,M+D,AI,cornerstone scenario verify full --scenario CS-LEARN-018 --json,reports/scenario/cs-learn-018.json,,,,,NOT_VERIFIED
+CS-EXT-001,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-001 --json,reports/scenario/cs-ext-001.json,,,,,NOT_VERIFIED
+CS-EXT-002,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-002 --json,reports/scenario/cs-ext-002.json,,,,,NOT_VERIFIED
+CS-EXT-003,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-003 --json,reports/scenario/cs-ext-003.json,,,,,NOT_VERIFIED
+CS-EXT-004,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-004 --json,reports/scenario/cs-ext-004.json,,,,,NOT_VERIFIED
+CS-EXT-005,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-005 --json,reports/scenario/cs-ext-005.json,,,,,NOT_VERIFIED
+CS-EXT-006,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-006 --json,reports/scenario/cs-ext-006.json,,,,,NOT_VERIFIED
+CS-EXT-007,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-007 --json,reports/scenario/cs-ext-007.json,,,,,NOT_VERIFIED
+CS-EXT-008,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-008 --json,reports/scenario/cs-ext-008.json,,,,,NOT_VERIFIED
+CS-EXT-009,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-009 --json,reports/scenario/cs-ext-009.json,,,,,NOT_VERIFIED
+CS-EXT-010,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-010 --json,reports/scenario/cs-ext-010.json,,,,,NOT_VERIFIED
+CS-EXT-011,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-011 --json,reports/scenario/cs-ext-011.json,,,,,NOT_VERIFIED
+CS-EXT-012,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-012 --json,reports/scenario/cs-ext-012.json,,,,,NOT_VERIFIED
+CS-EXT-013,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-013 --json,reports/scenario/cs-ext-013.json,,,,,NOT_VERIFIED
+CS-EXT-014,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-014 --json,reports/scenario/cs-ext-014.json,,,,,NOT_VERIFIED
+CS-EXT-015,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-015 --json,reports/scenario/cs-ext-015.json,,,,,NOT_VERIFIED
+CS-EXT-016,MUST_PASS,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-EXT-016 --json,reports/scenario/cs-ext-016.json,,,,,NOT_VERIFIED
+CS-SEC-001,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-001.json,,,,,NOT_VERIFIED
+CS-SEC-002,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-002.json,,,,,NOT_VERIFIED
+CS-SEC-003,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-003.json,,,,,NOT_VERIFIED
+CS-SEC-004,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-004.json,,,,,NOT_VERIFIED
+CS-SEC-005,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-005.json,,,,,NOT_VERIFIED
+CS-SEC-006,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-006 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-006.json,,,,,NOT_VERIFIED
+CS-SEC-007,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-007 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-007.json,,,,,NOT_VERIFIED
+CS-SEC-008,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-SEC-008 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-sec-008.json,,,,,NOT_VERIFIED
+CS-SEC-009,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-009 --json,reports/scenario/cs-sec-009.json,,,,,NOT_VERIFIED
+CS-SEC-010,MUST_PASS,true,P+D,AI,cornerstone scenario verify full --scenario CS-SEC-010 --json,reports/scenario/cs-sec-010.json,,,,,NOT_VERIFIED
+CS-SEC-011,MUST_PASS,true,D,AI,cornerstone scenario verify full --scenario CS-SEC-011 --json,reports/scenario/cs-sec-011.json,,,,,NOT_VERIFIED
+CS-SEC-012,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-012 --json,reports/scenario/cs-sec-012.json,,,,,NOT_VERIFIED
+CS-SEC-013,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-013 --json,reports/scenario/cs-sec-013.json,,,,,NOT_VERIFIED
+CS-SEC-014,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-014 --json,reports/scenario/cs-sec-014.json,,,,,NOT_VERIFIED
+CS-SEC-015,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-015 --json,reports/scenario/cs-sec-015.json,,,,,NOT_VERIFIED
+CS-SEC-016,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-016 --json,reports/scenario/cs-sec-016.json,,,,,NOT_VERIFIED
+CS-SEC-017,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-017 --json,reports/scenario/cs-sec-017.json,,,,,NOT_VERIFIED
+CS-SEC-018,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-018 --json,reports/scenario/cs-sec-018.json,,,,,NOT_VERIFIED
+CS-SEC-019,MUST_PASS,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-019 --json,reports/scenario/cs-sec-019.json,,,,,NOT_VERIFIED
+CS-SEC-020,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-SEC-020 --json,reports/scenario/cs-sec-020.json,,,,,NOT_VERIFIED
+CS-REG-001,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0 --scenario CS-REG-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-reg-001.json,,,,,NOT_VERIFIED
+CS-REG-002,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0 --scenario CS-REG-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-reg-002.json,,,,,NOT_VERIFIED
+CS-REG-003,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0 --scenario CS-REG-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-reg-003.json,,,,,NOT_VERIFIED
+CS-REG-004,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0 --scenario CS-REG-004 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-reg-004.json,,,,,NOT_VERIFIED
+CS-REG-005,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify vs0 --scenario CS-REG-005 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-reg-005.json,,,,,NOT_VERIFIED
+CS-REG-006,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify vs0 --scenario CS-REG-006 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-reg-006.json,,,,,NOT_VERIFIED
+CS-REG-007,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-007 --json,reports/scenario/cs-reg-007.json,,,,,NOT_VERIFIED
+CS-REG-008,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-008 --json,reports/scenario/cs-reg-008.json,,,,,NOT_VERIFIED
+CS-REG-009,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-009 --json,reports/scenario/cs-reg-009.json,,,,,NOT_VERIFIED
+CS-REG-010,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-010 --json,reports/scenario/cs-reg-010.json,,,,,NOT_VERIFIED
+CS-REG-011,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-011 --json,reports/scenario/cs-reg-011.json,,,,,NOT_VERIFIED
+CS-REG-012,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-012 --json,reports/scenario/cs-reg-012.json,,,,,NOT_VERIFIED
+CS-REG-013,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-013 --json,reports/scenario/cs-reg-013.json,,,,,NOT_VERIFIED
+CS-REG-014,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-014 --json,reports/scenario/cs-reg-014.json,,,,,NOT_VERIFIED
+CS-REG-015,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-015 --json,reports/scenario/cs-reg-015.json,,,,,NOT_VERIFIED
+CS-REG-016,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-016 --json,reports/scenario/cs-reg-016.json,,,,,NOT_VERIFIED
+CS-REG-017,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-017 --json,reports/scenario/cs-reg-017.json,,,,,NOT_VERIFIED
+CS-REG-018,REGRESSION_GUARD,true,S+P+D,AI,cornerstone scenario verify full --scenario CS-REG-018 --json,reports/scenario/cs-reg-018.json,,,,,NOT_VERIFIED
+CS-REG-019,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-019 --json,reports/scenario/cs-reg-019.json,,,,,NOT_VERIFIED
+CS-REG-020,REGRESSION_GUARD,true,D+P+S,AI,cornerstone scenario verify full --scenario CS-REG-020 --json,reports/scenario/cs-reg-020.json,,,,,NOT_VERIFIED

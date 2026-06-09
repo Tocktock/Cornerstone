@@ -44,6 +44,8 @@ grep -q '"count": 206' "$list_json" || fail "full scenario list did not return 2
 cornerstone scenario coverage --json > "$coverage_json"
 python3 -m json.tool "$coverage_json" >/dev/null
 grep -q '"ok": true' "$coverage_json" || fail "scenario coverage failed"
+python3 scripts/generate_scenario_verification_matrix.py --check
+python3 scripts/verify_scenario_matrix.py
 
 cornerstone scenario verify vs0-scaffold --json > "$verify_json"
 python3 -m json.tool "$verify_json" >/dev/null

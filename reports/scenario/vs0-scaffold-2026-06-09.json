@@ -40,6 +40,10 @@
     },
     "missing": [],
     "ok": true,
+    "verification_matrix": {
+      "count": 206,
+      "path": "docs/scenario-contracts/SCENARIO_VERIFICATION_MATRIX.csv"
+    },
     "vs0": {
       "count": 58,
       "type_counts": {
@@ -67,7 +71,7 @@
     }
   ],
   "ids": {
-    "git_commit": "dd3f7d6"
+    "git_commit": "ff12b6f"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",

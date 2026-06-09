@@ -51,6 +51,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["full"]["count"], 206)
         self.assertEqual(payload["vs0"]["count"], 58)
+        self.assertEqual(payload["verification_matrix"]["count"], 206)
 
     def test_vs0_scaffold_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-scaffold", "--json")

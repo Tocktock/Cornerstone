@@ -70,7 +70,7 @@ The current repo gate still requires VS-0 scaffold foundation before VS-0 produc
 - [x] Run baseline documentation verification.
 - [x] Research current practices for RAG evaluation, durable agent workflows, policy-as-code, provenance, observability, supply-chain evidence, and LLM application security.
 - [x] Freeze scenario counts and first implementation boundary.
-- [ ] Build scenario registry and evidence report skeleton.
+- [x] Build scenario registry and evidence report skeleton.
 - [ ] Build native `cornerstone` CLI scaffold for version/health/ready/scenario commands.
 - [ ] Add deterministic fixtures and validators.
 - [ ] Add local `local_test` model provider.

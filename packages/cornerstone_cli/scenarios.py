@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import subprocess
+import csv
 from pathlib import Path
 from typing import Any
 
@@ -73,6 +74,14 @@ def list_scenarios(root: Path, scenario_set: str) -> list[dict[str, Any]]:
     return load_full_scenarios(root)
 
 
+def load_verification_matrix(root: Path) -> list[dict[str, str]]:
+    matrix = root / "docs/scenario-contracts/SCENARIO_VERIFICATION_MATRIX.csv"
+    if not matrix.exists():
+        return []
+    with matrix.open(newline="") as file:
+        return list(csv.DictReader(file))
+
+
 def _type_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
     counts = {"MUST_PASS": 0, "REGRESSION_GUARD": 0}
     for row in rows:
@@ -85,6 +94,8 @@ def coverage_report(root: Path) -> dict[str, Any]:
     vs0 = load_vs0_scenarios(root)
     full_ids = {row["id"] for row in full}
     vs0_ids = {row["id"] for row in vs0}
+    matrix = load_verification_matrix(root)
+    matrix_ids = {row["scenario_id"] for row in matrix}
     full_counts = _type_counts(full)
     vs0_counts = _type_counts(vs0)
     missing: list[str] = []
@@ -104,12 +115,17 @@ def coverage_report(root: Path) -> dict[str, Any]:
 
     missing_vs0_from_full = sorted(vs0_ids - full_ids)
     missing.extend(f"vs0_not_in_full:{scenario_id}" for scenario_id in missing_vs0_from_full)
+    if len(matrix) != FULL_EXPECTED:
+        missing.append(f"verification_matrix_count:{len(matrix)}")
+    missing_matrix = sorted(full_ids - matrix_ids)
+    missing.extend(f"verification_matrix_missing:{scenario_id}" for scenario_id in missing_matrix)
 
     return {
         "ok": not missing,
         "missing": missing,
         "full": {"count": len(full), "type_counts": full_counts},
         "vs0": {"count": len(vs0), "type_counts": vs0_counts},
+        "verification_matrix": {"count": len(matrix), "path": "docs/scenario-contracts/SCENARIO_VERIFICATION_MATRIX.csv"},
     }
 
 
