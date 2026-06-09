@@ -646,6 +646,38 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_product_domain_readiness_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-product-domain-readiness", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-product-domain-readiness")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 3)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY")
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-PROD-001", "CS-PROD-003", "CS-AUTO-002"})
+        evidence = payload["product_domain_readiness_evidence"]
+        self.assertEqual(evidence["walkthrough_product_name"], "CornerStone")
+        self.assertTrue(evidence["walkthrough_one_service"])
+        self.assertFalse(evidence["daily_user_requires_subsystem_knowledge"])
+        self.assertEqual(set(evidence["walkthrough_navigation"]), {"actions", "artifacts", "claims", "home", "search"})
+        self.assertEqual(evidence["domain_count"], 3)
+        self.assertTrue(all(row["ok"] for row in evidence["domain_evidence"]))
+        self.assertEqual({row["key"] for row in evidence["domain_evidence"]}, {"hiring_review", "home_maintenance", "research_review"})
+        self.assertEqual(evidence["initial_workspace_mode"], "assist")
+        readiness = evidence["readiness"]
+        self.assertTrue(readiness["ready"])
+        self.assertEqual(readiness["recommendation"], "recommend_autopilot")
+        self.assertEqual(readiness["recommended_mode"], "autopilot")
+        self.assertTrue(readiness["mission_contract_required"])
+        self.assertGreaterEqual(readiness["signals"]["evidence_backed_brief_count"], 1)
+        self.assertGreaterEqual(readiness["signals"]["optional_suggestion_count"], 1)
+        self.assertGreaterEqual(readiness["signals"]["mission_contract_count"], 1)
+        self.assertGreaterEqual(readiness["signals"]["successful_internal_task_count"], 1)
+        self.assertGreaterEqual(readiness["signals"]["successful_playbook_count"], 1)
+        self.assertEqual(evidence["readiness_action_result"]["external_http_calls"], 0)
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_same_content_isolation_across_scopes(self) -> None:
         state_dir = ROOT / "tmp/test-same-content-scope"
         shutil.rmtree(state_dir, ignore_errors=True)

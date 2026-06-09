@@ -294,11 +294,42 @@ class LocalRuntimeStore:
                 records.append(record)
         return records
 
+    def _brief_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        brief_dir = self.state_dir / "briefs"
+        if not brief_dir.exists():
+            return []
+        records = []
+        for path in sorted(brief_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _conversation_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.conversation_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.conversation_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
     def _mission_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
         if not self.mission_dir.exists():
             return []
         records = []
         for path in sorted(self.mission_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _action_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.action_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.action_dir.glob("*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
                 records.append(record)
@@ -365,6 +396,68 @@ class LocalRuntimeStore:
                 "and workspace unless a governed promotion or reference is recorded."
             ),
             "shown_at": utc_now(),
+        }
+
+    def autopilot_readiness(self, scope: dict[str, str]) -> dict[str, Any]:
+        briefs = self._brief_records(scope)
+        conversations = self._conversation_records(scope)
+        missions = self._mission_records(scope)
+        actions = self._action_records(scope)
+        evidence_backed_brief_count = sum(1 for brief in briefs if brief.get("status") == "evidence_backed")
+        optional_suggestion_count = sum(
+            1
+            for conversation in conversations
+            for suggestion in conversation.get("suggested_outputs", [])
+            if isinstance(suggestion, dict) and suggestion.get("mode") == "optional_promotion" and suggestion.get("forced") is False
+        )
+        active_or_draft_mission_count = sum(1 for mission in missions if mission.get("status") in {"draft", "active"})
+        successful_internal_action_count = sum(
+            1
+            for action in actions
+            if action.get("execution", {}).get("status") == "executed"
+            and action.get("execution", {}).get("result", {}).get("side_effect_boundary") == "local_internal_state"
+        )
+        successful_playbook_count = successful_internal_action_count
+        ready = (
+            evidence_backed_brief_count >= 1
+            and optional_suggestion_count >= 1
+            and active_or_draft_mission_count >= 1
+            and successful_internal_action_count >= 1
+            and successful_playbook_count >= 1
+        )
+        current_mode = self.get_workspace_mode(scope)
+        return {
+            "schema_version": "cs.autopilot_readiness.v0",
+            "scope": scope,
+            "current_workspace_mode": current_mode["mode"],
+            "starts_conservatively": True,
+            "progression": [
+                "assist_by_default",
+                "evidence_backed_briefs",
+                "optional_structure_suggestions",
+                "governed_internal_tasks",
+                "successful_playbook_history",
+                "autopilot_recommendation_with_mission_contract",
+            ],
+            "signals": {
+                "evidence_backed_brief_count": evidence_backed_brief_count,
+                "optional_suggestion_count": optional_suggestion_count,
+                "mission_contract_count": active_or_draft_mission_count,
+                "successful_internal_task_count": successful_internal_action_count,
+                "successful_playbook_count": successful_playbook_count,
+            },
+            "recommendation": "recommend_autopilot" if ready else "stay_assist",
+            "recommended_mode": "autopilot" if ready else "assist",
+            "ready": ready,
+            "reason": (
+                "Fixture history includes an evidence-backed brief, optional durable-output suggestions, "
+                "a Mission Goal Contract, and a successful low-risk internal playbook/action run."
+                if ready
+                else "More evidence-backed briefs, suggestions, mission contracts, and successful internal runs are required before recommending Autopilot."
+            ),
+            "mission_contract_required": True,
+            "approval_boundary": "Recommendation does not grant authority; a Mission Goal Contract and policy still control execution.",
+            "generated_at": utc_now(),
         }
 
     def _derived_text(self, artifact: dict[str, Any]) -> str:

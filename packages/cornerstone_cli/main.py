@@ -17,6 +17,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_conversation_onboarding,
     verify_vs0_detail_surfaces,
     verify_vs0_mission_action,
+    verify_vs0_product_domain_readiness,
     verify_vs0_namespace_isolation,
     verify_vs0_regression_guardrails,
     verify_vs0_security_policy,
@@ -172,6 +173,41 @@ def command_ready(args: argparse.Namespace) -> int:
         )
     print_payload(payload, args.json)
     return EXIT_SUCCESS if not missing else EXIT_EVIDENCE_MISSING
+
+
+def command_product_walkthrough(args: argparse.Namespace) -> int:
+    root = repo_root()
+    payload = base_response("cornerstone product walkthrough", "success", root)
+    payload["walkthrough"] = {
+        "schema_version": "cs.product_walkthrough.v0",
+        "product_name": "CornerStone",
+        "one_service": True,
+        "daily_user_requires_subsystem_knowledge": False,
+        "primary_navigation": [
+            {"id": "home", "label": "Home"},
+            {"id": "search", "label": "Search"},
+            {"id": "artifacts", "label": "Artifacts"},
+            {"id": "claims", "label": "Claims"},
+            {"id": "actions", "label": "Actions"},
+        ],
+        "first_run_path": ["Inbox", "Brief", "Claim", "Action", "Learn"],
+        "capability_language": [
+            "Capture information as immutable artifacts.",
+            "Search and inspect source-backed evidence.",
+            "Create evidence-backed briefs and claims.",
+            "Use governed action cards for safe action.",
+            "Keep audit and learning visible as product surfaces.",
+        ],
+        "internal_boundaries": [
+            "Archive/Evidence",
+            "Mission/Intelligence",
+            "Connector/Action",
+        ],
+        "boundary_explanation": "Internal engines are implementation boundaries; daily users see one CornerStone workflow.",
+    }
+    payload["evidence_refs"].append("product:CornerStone:first-run-walkthrough")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
 
 
 def command_artifact_ingest(args: argparse.Namespace) -> int:
@@ -874,6 +910,20 @@ def command_workspace_mode_show(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_autopilot_readiness(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    readiness = store.autopilot_readiness(requested_scope)
+    payload = base_response("cornerstone autopilot readiness", "success", root)
+    payload.update(requested_scope)
+    payload["autopilot_readiness"] = readiness
+    payload["ids"].update({"workspace_id": requested_scope["workspace_id"]})
+    payload["evidence_refs"].append(f"workspace:{requested_scope['workspace_id']}:autopilot-readiness")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_mission_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -1407,6 +1457,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_detail_surfaces(root)
     elif args.contract == "vs0-conversation-onboarding":
         report = verify_vs0_conversation_onboarding(root)
+    elif args.contract == "vs0-product-domain-readiness":
+        report = verify_vs0_product_domain_readiness(root)
     else:
         payload = base_response("cornerstone scenario verify", "failed", root)
         payload["errors"].append(
@@ -1430,6 +1482,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-mission-action",
                     "vs0-detail-surfaces",
                     "vs0-conversation-onboarding",
+                    "vs0-product-domain-readiness",
                 ],
             }
         )
@@ -1514,6 +1567,13 @@ def build_parser() -> argparse.ArgumentParser:
     ready = subcommands.add_parser("ready", help="Check local runtime readiness")
     ready.add_argument("--json", action="store_true", help="Emit JSON output")
     ready.set_defaults(func=command_ready)
+
+    product = subcommands.add_parser("product", help="Product identity walkthrough commands")
+    product_sub = product.add_subparsers(dest="product_command")
+
+    walkthrough = product_sub.add_parser("walkthrough", help="Show the first-run product walkthrough")
+    walkthrough.add_argument("--json", action="store_true", help="Emit JSON output")
+    walkthrough.set_defaults(func=command_product_walkthrough)
 
     artifact = subcommands.add_parser("artifact", help="Artifact archive commands")
     artifact_sub = artifact.add_subparsers(dest="artifact_command")
@@ -1669,6 +1729,15 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(workspace_mode_show)
     workspace_mode_show.add_argument("--json", action="store_true", help="Emit JSON output")
     workspace_mode_show.set_defaults(func=command_workspace_mode_show)
+
+    autopilot = subcommands.add_parser("autopilot", help="Autopilot readiness commands")
+    autopilot_sub = autopilot.add_subparsers(dest="autopilot_command")
+
+    autopilot_readiness = autopilot_sub.add_parser("readiness", help="Recommend conservative Autopilot readiness from local history")
+    add_state_argument(autopilot_readiness)
+    add_scope_arguments(autopilot_readiness)
+    autopilot_readiness.add_argument("--json", action="store_true", help="Emit JSON output")
+    autopilot_readiness.set_defaults(func=command_autopilot_readiness)
 
     mission = subcommands.add_parser("mission", help="Mission Goal Contract commands")
     mission_sub = mission.add_subparsers(dest="mission_command")

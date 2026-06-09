@@ -1,7 +1,7 @@
 scenario_id,type,local_required,verification_class,verification_owner,verification_command,evidence_artifact,human_required_reason,required_human_action,expected_human_evidence,release_impact,status
-CS-PROD-001,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-001 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-001.json,,,,,NOT_VERIFIED
+CS-PROD-001,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-product-domain-readiness --json,reports/scenario/vs0-product-domain-readiness-2026-06-09.json,,,,,PASS
 CS-PROD-002,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-002.json,,,,,NOT_VERIFIED
-CS-PROD-003,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0 --scenario CS-PROD-003 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-prod-003.json,,,,,NOT_VERIFIED
+CS-PROD-003,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-product-domain-readiness --json,reports/scenario/vs0-product-domain-readiness-2026-06-09.json,,,,,PASS
 CS-PROD-004,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-briefing --json,reports/scenario/vs0-briefing-2026-06-09.json,,,,,PASS
 CS-PROD-005,MUST_PASS,true,U+D,AI,cornerstone scenario verify vs0-conversation-onboarding --json,reports/scenario/vs0-conversation-onboarding-2026-06-09.json,,,,,PASS
 CS-PROD-006,MUST_PASS,true,U+D,AI,cornerstone scenario verify full --scenario CS-PROD-006 --json,reports/scenario/cs-prod-006.json,,,,,NOT_VERIFIED
@@ -82,7 +82,7 @@ CS-NS-012,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-N
 CS-NS-013,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-013 --json,reports/scenario/cs-ns-013.json,,,,,NOT_VERIFIED
 CS-NS-014,MUST_PASS,true,D+P,AI,cornerstone scenario verify full --scenario CS-NS-014 --json,reports/scenario/cs-ns-014.json,,,,,NOT_VERIFIED
 CS-AUTO-001,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
-CS-AUTO-002,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0 --scenario CS-AUTO-002 --corpus fixtures/vs0 --model-provider local_test --json,reports/scenario/cs-auto-002.json,,,,,NOT_VERIFIED
+CS-AUTO-002,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-product-domain-readiness --json,reports/scenario/vs0-product-domain-readiness-2026-06-09.json,,,,,PASS
 CS-AUTO-003,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-AUTO-004,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS
 CS-AUTO-005,MUST_PASS,true,D+P+U,AI,cornerstone scenario verify vs0-mission-action --json,reports/scenario/vs0-mission-action-2026-06-09.json,,,,,PASS

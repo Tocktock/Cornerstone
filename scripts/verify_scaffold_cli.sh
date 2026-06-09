@@ -34,7 +34,8 @@ brief_json=$(mktemp)
 mission_action_json=$(mktemp)
 detail_json=$(mktemp)
 conversation_json=$(mktemp)
-trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json"' EXIT
+product_domain_json=$(mktemp)
+trap 'rm -f "$version_json" "$health_json" "$ready_json" "$list_json" "$coverage_json" "$verify_json" "$fixtures_json" "$artifacts_json" "$security_json" "$search_json" "$understanding_json" "$namespace_json" "$audit_json" "$universal_json" "$claim_json" "$policy_json" "$guardrails_json" "$brief_json" "$mission_action_json" "$detail_json" "$conversation_json" "$product_domain_json"' EXIT
 
 cornerstone version --json > "$version_json"
 python3 -m json.tool "$version_json" >/dev/null
@@ -317,6 +318,33 @@ grep -q '"unsupported_assertions_presented_as_fact": 0' "$conversation_json" || 
 grep -q '"real_external_http_calls": 0' "$conversation_json" || fail "vs0-conversation-onboarding reported real external HTTP calls"
 grep -q '"product_feature_claims": "PARTIAL_VS0_CONVERSATION_ONBOARDING_ONLY"' "$conversation_json" || fail "vs0-conversation-onboarding overclaimed product feature scope"
 
+cornerstone scenario verify vs0-product-domain-readiness --json > "$product_domain_json"
+python3 -m json.tool "$product_domain_json" >/dev/null
+grep -q '"scenario_set": "vs0-product-domain-readiness"' "$product_domain_json" || fail "vs0-product-domain-readiness report missing scenario set"
+grep -q '"blocking": 0' "$product_domain_json" || fail "vs0-product-domain-readiness report has blocking scenarios"
+grep -q '"pass": 3' "$product_domain_json" || fail "vs0-product-domain-readiness did not pass exactly three scenarios"
+grep -q '"id": "CS-PROD-001"' "$product_domain_json" || fail "vs0-product-domain-readiness missing CS-PROD-001"
+grep -q '"id": "CS-PROD-003"' "$product_domain_json" || fail "vs0-product-domain-readiness missing CS-PROD-003"
+grep -q '"id": "CS-AUTO-002"' "$product_domain_json" || fail "vs0-product-domain-readiness missing CS-AUTO-002"
+grep -q '"walkthrough_product_name": "CornerStone"' "$product_domain_json" || fail "vs0-product-domain-readiness missing CornerStone walkthrough"
+grep -q '"walkthrough_one_service": true' "$product_domain_json" || fail "vs0-product-domain-readiness missing one-service walkthrough"
+grep -q '"daily_user_requires_subsystem_knowledge": false' "$product_domain_json" || fail "vs0-product-domain-readiness required subsystem knowledge"
+grep -q '"domain_count": 3' "$product_domain_json" || fail "vs0-product-domain-readiness missing three domains"
+grep -q '"initial_workspace_mode": "assist"' "$product_domain_json" || fail "vs0-product-domain-readiness did not start conservatively"
+grep -q '"recommendation": "recommend_autopilot"' "$product_domain_json" || fail "vs0-product-domain-readiness missing Autopilot recommendation"
+grep -q '"recommended_mode": "autopilot"' "$product_domain_json" || fail "vs0-product-domain-readiness missing recommended mode"
+grep -q '"mission_contract_required": true' "$product_domain_json" || fail "vs0-product-domain-readiness missing mission contract requirement"
+grep -q '"successful_internal_task_count": 1' "$product_domain_json" || fail "vs0-product-domain-readiness missing successful internal task"
+grep -q '"successful_playbook_count": 1' "$product_domain_json" || fail "vs0-product-domain-readiness missing successful playbook count"
+grep -q '"subsystem_identity_required": 0' "$product_domain_json" || fail "vs0-product-domain-readiness required subsystem identity"
+grep -q '"missing_navigation_items": 0' "$product_domain_json" || fail "vs0-product-domain-readiness missed navigation items"
+grep -q '"logistics_required": 0' "$product_domain_json" || fail "vs0-product-domain-readiness required logistics terms"
+grep -q '"domain_failures": 0' "$product_domain_json" || fail "vs0-product-domain-readiness reported domain failures"
+grep -q '"readiness_recommended_without_history": 0' "$product_domain_json" || fail "vs0-product-domain-readiness recommended without history"
+grep -q '"autopilot_authority_granted_without_mission_contract": 0' "$product_domain_json" || fail "vs0-product-domain-readiness granted authority without mission contract"
+grep -q '"real_external_http_calls": 0' "$product_domain_json" || fail "vs0-product-domain-readiness reported real external HTTP calls"
+grep -q '"product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY"' "$product_domain_json" || fail "vs0-product-domain-readiness overclaimed product feature scope"
+
 python3 -m unittest discover -s tests -p 'test_*.py'
 
-printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, unittest).\n'
+printf 'PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-domain-readiness verify, unittest).\n'

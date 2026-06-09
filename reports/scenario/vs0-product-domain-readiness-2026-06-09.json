@@ -1,0 +1,3443 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-product-domain-readiness",
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "eb76360"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "autopilot_authority_granted_without_mission_contract": 0,
+    "domain_failures": 0,
+    "logistics_required": 0,
+    "missing_navigation_items": 0,
+    "readiness_recommended_without_history": 0,
+    "real_external_http_calls": 0,
+    "subsystem_identity_required": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-product-domain-readiness-2026-06-09.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "product_domain_readiness_evidence": {
+    "audit_event_count": 28,
+    "daily_user_requires_subsystem_knowledge": false,
+    "domain_count": 3,
+    "domain_evidence": [
+      {
+        "anchor": "alpha-evidence-anchor",
+        "artifact_id": "art_05b1f8078667b4bf",
+        "brief_id": "brief_daa969415d979bdb",
+        "claim_id": "claim_a2b1d5508674658f",
+        "conversation_id": "conv_e95f015382a0648c",
+        "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+        "found_logistics_terms": [],
+        "key": "research_review",
+        "mission_id": "mission_a088c9eeb4fc1d04",
+        "ok": true,
+        "search_result_count": 1
+      },
+      {
+        "anchor": "water-heater-anchor",
+        "artifact_id": "art_f89d9697d02314ba",
+        "brief_id": "brief_c9fe2efd5aad87c9",
+        "claim_id": "claim_d78e8fbf21635835",
+        "conversation_id": "conv_b9c36f83be39f7ad",
+        "evidence_bundle_id": "evb_5f40e1e58b244563",
+        "found_logistics_terms": [],
+        "key": "home_maintenance",
+        "mission_id": "mission_13ec31adc7103fc1",
+        "ok": true,
+        "search_result_count": 1
+      },
+      {
+        "anchor": "candidate-interview-anchor",
+        "artifact_id": "art_c5e2f058216a3d7f",
+        "brief_id": "brief_de23e255b5c882fa",
+        "claim_id": "claim_5e16682a93cff15d",
+        "conversation_id": "conv_34f51a112cb6f680",
+        "evidence_bundle_id": "evb_ea219365d8b92976",
+        "found_logistics_terms": [],
+        "key": "hiring_review",
+        "mission_id": "mission_ee28ce9ed43a3e6d",
+        "ok": true,
+        "search_result_count": 1
+      }
+    ],
+    "initial_workspace_mode": "assist",
+    "readiness": {
+      "approval_boundary": "Recommendation does not grant authority; a Mission Goal Contract and policy still control execution.",
+      "current_workspace_mode": "autopilot",
+      "generated_at": "2026-06-09T13:24:15.410519Z",
+      "mission_contract_required": true,
+      "progression": [
+        "assist_by_default",
+        "evidence_backed_briefs",
+        "optional_structure_suggestions",
+        "governed_internal_tasks",
+        "successful_playbook_history",
+        "autopilot_recommendation_with_mission_contract"
+      ],
+      "ready": true,
+      "reason": "Fixture history includes an evidence-backed brief, optional durable-output suggestions, a Mission Goal Contract, and a successful low-risk internal playbook/action run.",
+      "recommendation": "recommend_autopilot",
+      "recommended_mode": "autopilot",
+      "schema_version": "cs.autopilot_readiness.v0",
+      "scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      },
+      "signals": {
+        "evidence_backed_brief_count": 3,
+        "mission_contract_count": 3,
+        "optional_suggestion_count": 18,
+        "successful_internal_task_count": 1,
+        "successful_playbook_count": 1
+      },
+      "starts_conservatively": true
+    },
+    "readiness_action_result": {
+      "action_id": "action_202cbcb88ad15ce5",
+      "executed_at": "2026-06-09T13:24:15.353494Z",
+      "external_http_calls": 0,
+      "message": "Action execution was recorded through the governed Workflow/Action path.",
+      "mission_id": "mission_a088c9eeb4fc1d04",
+      "mock_connector_calls": 0,
+      "schema_version": "cs.action_result.v0",
+      "side_effect_boundary": "local_internal_state",
+      "status": "success"
+    },
+    "walkthrough_navigation": [
+      "actions",
+      "artifacts",
+      "claims",
+      "home",
+      "search"
+    ],
+    "walkthrough_one_service": true,
+    "walkthrough_product_name": "CornerStone"
+  },
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone product walkthrough --json"
+      ],
+      "id": "CS-PROD-001",
+      "notes": "Product walkthrough presents one CornerStone service, one navigation model, and capability language that does not require subsystem knowledge.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify vs0-product-domain-readiness --json"
+      ],
+      "id": "CS-PROD-003",
+      "notes": "Three non-logistics domains use the same conversation/artifact/search/evidence/brief/claim/mission concepts.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "cornerstone autopilot readiness --json"
+      ],
+      "id": "CS-AUTO-002",
+      "notes": "Readiness starts from conservative Assist mode, then recommends Autopilot only after evidence-backed briefs, suggestions, mission contract, and successful internal playbook/action history.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    }
+  ],
+  "scenario_set": "vs0-product-domain-readiness",
+  "schema_version": "cs.cli.v0",
+  "state_dir": "tmp/scenario/vs0-product-domain-readiness-74250",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 3,
+    "product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY",
+    "scenario_count": 3
+  },
+  "tenant_id": "local-dev",
+  "transcripts": {
+    "activate_readiness_mission": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "activate",
+        "mission_a088c9eeb4fc1d04",
+        "--mode",
+        "autopilot",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_3187b52c67a638e0",
+          "audit:audit_daa4f8844ef3263d"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission activate",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_a088c9eeb4fc1d04"
+        ],
+        "ids": {
+          "git_commit": "eb76360",
+          "mission_id": "mission_a088c9eeb4fc1d04"
+        },
+        "mission": {
+          "activated_at": "2026-06-09T13:24:15.236962Z",
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "authority_view": {
+            "allowed_actions": [
+              "internal_status_update",
+              "draft_task",
+              "refresh_brief"
+            ],
+            "forbidden_actions": [
+              "external_writeback_without_workflow_action",
+              "cross_namespace_access",
+              "destructive_change",
+              "secret_exfiltration"
+            ],
+            "may_act_in_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "pause_stop_revoke": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T13:24:14.490786Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_05b1f8078667b4bf"
+            ],
+            "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+            "search_snapshot_id": "search_c4890fa60021eaef"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Review research evidence and prepare a safe next step.",
+          "mission_id": "mission_a088c9eeb4fc1d04",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_a2b1d5508674658f",
+            "statement": "The research review should preserve source material before derived summaries.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "active",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "autopilot"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": false,
+            "autonomous_execution_allowed": true,
+            "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            "label": "Autopilot"
+          },
+          "mode": "autopilot",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-09T13:24:15.236420Z"
+        }
+      }
+    },
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 28,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "eb76360"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "autopilot_readiness": {
+      "command": [
+        "cornerstone",
+        "autopilot",
+        "readiness",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "autopilot_readiness": {
+          "approval_boundary": "Recommendation does not grant authority; a Mission Goal Contract and policy still control execution.",
+          "current_workspace_mode": "autopilot",
+          "generated_at": "2026-06-09T13:24:15.410519Z",
+          "mission_contract_required": true,
+          "progression": [
+            "assist_by_default",
+            "evidence_backed_briefs",
+            "optional_structure_suggestions",
+            "governed_internal_tasks",
+            "successful_playbook_history",
+            "autopilot_recommendation_with_mission_contract"
+          ],
+          "ready": true,
+          "reason": "Fixture history includes an evidence-backed brief, optional durable-output suggestions, a Mission Goal Contract, and a successful low-risk internal playbook/action run.",
+          "recommendation": "recommend_autopilot",
+          "recommended_mode": "autopilot",
+          "schema_version": "cs.autopilot_readiness.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "signals": {
+            "evidence_backed_brief_count": 3,
+            "mission_contract_count": 3,
+            "optional_suggestion_count": 18,
+            "successful_internal_task_count": 1,
+            "successful_playbook_count": 1
+          },
+          "starts_conservatively": true
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone autopilot readiness",
+        "errors": [],
+        "evidence_refs": [
+          "workspace:default:autopilot-readiness"
+        ],
+        "ids": {
+          "git_commit": "eb76360",
+          "workspace_id": "default"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "hiring_review_brief_create": {
+      "command": [
+        "cornerstone",
+        "brief",
+        "create",
+        "--evidence-bundle-id",
+        "evb_ea219365d8b92976",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_61d2bb4d55b70d57"
+        ],
+        "brief": {
+          "brief_id": "brief_de23e255b5c882fa",
+          "contradictions": [],
+          "created_at": "2026-06-09T13:24:15.055243Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_c5e2f058216a3d7f"
+            ],
+            "evidence_bundle_id": "evb_ea219365d8b92976",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "candidate-interview-anchor",
+            "search_snapshot_id": "search_14e57bd1bde0e05c"
+          },
+          "evidence_links": [
+            {
+              "artifact_ref": "artifact:art_c5e2f058216a3d7f",
+              "derived_text_ref": "derived/art_c5e2f058216a3d7f.txt",
+              "evidence_bundle_ref": "evidence_bundle:evb_ea219365d8b92976",
+              "original_storage_ref": "sha256:c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0",
+              "search_snapshot_ref": "search_snapshot:search_14e57bd1bde0e05c",
+              "snippet": "candidate-interview-anchor."
+            }
+          ],
+          "key_points": [
+            "candidate-interview-anchor."
+          ],
+          "ontology": {
+            "ontology_suggestions_required_before_brief": false,
+            "preconfigured_ontology_required": false,
+            "suggestions": []
+          },
+          "recommended_next_steps": [
+            "Create a draft claim from this Evidence Bundle if the user wants durable truth work.",
+            "Collect more evidence if the decision requires higher confidence."
+          ],
+          "schema_version": "cs.brief.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "evidence_backed",
+          "suggested_outputs": [
+            {
+              "mode": "optional_promotion",
+              "type": "Claim"
+            },
+            {
+              "mode": "optional_promotion",
+              "type": "Knowledge Capsule"
+            },
+            {
+              "mode": "optional_promotion",
+              "type": "Mission Card"
+            }
+          ],
+          "title": "Brief for candidate-interview-anchor",
+          "uncertainty": [
+            "This brief is grounded only in the attached Evidence Bundle.",
+            "Add more sources before using it as broad organizational truth."
+          ]
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brief create",
+        "errors": [],
+        "evidence_refs": [
+          "brief:brief_de23e255b5c882fa",
+          "evidence_bundle:evb_ea219365d8b92976",
+          "search_snapshot:search_14e57bd1bde0e05c",
+          "artifact:art_c5e2f058216a3d7f"
+        ],
+        "ids": {
+          "audit_event_id": "audit_61d2bb4d55b70d57",
+          "brief_id": "brief_de23e255b5c882fa",
+          "evidence_bundle_id": "evb_ea219365d8b92976",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_14e57bd1bde0e05c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "hiring_review_bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_14e57bd1bde0e05c",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_da879957e4923984"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T13:24:14.998235Z",
+          "evidence_bundle_id": "evb_ea219365d8b92976",
+          "evidence_items": [
+            {
+              "artifact_id": "art_c5e2f058216a3d7f",
+              "derived_text_ref": "derived/art_c5e2f058216a3d7f.txt",
+              "original_storage_ref": "sha256:c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0",
+              "provenance": {
+                "created_at": "2026-06-09T13:24:14.887393Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_14e57bd1bde0e05c",
+              "snippet": "candidate-interview-anchor.",
+              "source": {
+                "ingested_at": "2026-06-09T13:24:14.887393Z",
+                "ref": "conv_34f51a112cb6f680",
+                "type": "conversation_turn"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "candidate-interview-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "candidate-interview-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_c5e2f058216a3d7f",
+                "derived_text_ref": "derived/art_c5e2f058216a3d7f.txt",
+                "evidence_refs": [
+                  "artifact:art_c5e2f058216a3d7f",
+                  "storage:sha256:c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "candidate-interview-anchor",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "candidate-interview-anchor",
+                    "query_term": "candidate-interview-anchor",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "candidate-interview-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_14e57bd1bde0e05c"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_14e57bd1bde0e05c"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_ea219365d8b92976",
+          "search_snapshot:search_14e57bd1bde0e05c",
+          "artifact:art_c5e2f058216a3d7f"
+        ],
+        "ids": {
+          "audit_event_id": "audit_da879957e4923984",
+          "evidence_bundle_id": "evb_ea219365d8b92976",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_14e57bd1bde0e05c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "hiring_review_conversation_promote_claim": {
+      "command": [
+        "cornerstone",
+        "conversation",
+        "promote",
+        "conv_34f51a112cb6f680",
+        "--kind",
+        "claim",
+        "--statement",
+        "The hiring review requires a reference-check follow-up supported by interview feedback.",
+        "--evidence-bundle-id",
+        "evb_ea219365d8b92976",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_6cca10ba6eab6b9d",
+          "audit:audit_c99fa3b9111be765"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_5e16682a93cff15d",
+          "created_at": "2026-06-09T13:24:15.115846Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_c5e2f058216a3d7f"
+            ],
+            "evidence_bundle_id": "evb_ea219365d8b92976",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "candidate-interview-anchor",
+            "result_refs": [
+              "search_snapshot:search_14e57bd1bde0e05c",
+              "evidence_bundle:evb_ea219365d8b92976"
+            ],
+            "search_snapshot_id": "search_14e57bd1bde0e05c"
+          },
+          "provenance": {
+            "created_from": "conversation.promote",
+            "promoted_at": "2026-06-09T13:24:15.116382Z",
+            "source_artifact_id": "art_c5e2f058216a3d7f",
+            "source_conversation_id": "conv_34f51a112cb6f680"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_conversation": {
+            "conversation_id": "conv_34f51a112cb6f680",
+            "source_artifact_ref": "artifact:art_c5e2f058216a3d7f",
+            "turn_refs": [
+              "conversation_turn:turn_394166103f8fa5ab"
+            ]
+          },
+          "statement": "The hiring review requires a reference-check follow-up supported by interview feedback.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone conversation promote",
+        "errors": [],
+        "evidence_refs": [
+          "conversation:conv_34f51a112cb6f680",
+          "claim:claim_5e16682a93cff15d",
+          "evidence_bundle:evb_ea219365d8b92976",
+          "search_snapshot:search_14e57bd1bde0e05c",
+          "artifact:art_c5e2f058216a3d7f"
+        ],
+        "ids": {
+          "claim_id": "claim_5e16682a93cff15d",
+          "conversation_id": "conv_34f51a112cb6f680",
+          "evidence_bundle_id": "evb_ea219365d8b92976",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_14e57bd1bde0e05c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "promoted_object": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_5e16682a93cff15d",
+          "created_at": "2026-06-09T13:24:15.115846Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_c5e2f058216a3d7f"
+            ],
+            "evidence_bundle_id": "evb_ea219365d8b92976",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "candidate-interview-anchor",
+            "result_refs": [
+              "search_snapshot:search_14e57bd1bde0e05c",
+              "evidence_bundle:evb_ea219365d8b92976"
+            ],
+            "search_snapshot_id": "search_14e57bd1bde0e05c"
+          },
+          "provenance": {
+            "created_from": "conversation.promote",
+            "promoted_at": "2026-06-09T13:24:15.116382Z",
+            "source_artifact_id": "art_c5e2f058216a3d7f",
+            "source_conversation_id": "conv_34f51a112cb6f680"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_conversation": {
+            "conversation_id": "conv_34f51a112cb6f680",
+            "source_artifact_ref": "artifact:art_c5e2f058216a3d7f",
+            "turn_refs": [
+              "conversation_turn:turn_394166103f8fa5ab"
+            ]
+          },
+          "statement": "The hiring review requires a reference-check follow-up supported by interview feedback.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "hiring_review_conversation_start": {
+      "command": [
+        "cornerstone",
+        "conversation",
+        "start",
+        "--message",
+        "Hiring review note: candidate interview feedback highlights strong systems debugging and asks for a reference check. Anchor: candidate-interview-anchor.",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_c5e2f058216a3d7f",
+          "checksum_sha256": "c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_c5e2f058216a3d7f.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 152,
+          "original_storage_ref": "sha256:c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0",
+          "provenance": {
+            "created_at": "2026-06-09T13:24:14.887393Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T13:24:14.887393Z",
+            "ref": "conv_34f51a112cb6f680",
+            "type": "conversation_turn"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_fdf751c5a8f9f6d3",
+          "audit:audit_c95b6d0a14ccc29b"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone conversation start",
+        "conversation": {
+          "conversation_id": "conv_34f51a112cb6f680",
+          "created_at": "2026-06-09T13:24:14.886943Z",
+          "pre_modeling_required": false,
+          "required_setup": {
+            "connector_setup": false,
+            "model_provider_setup": false,
+            "ontology_setup": false,
+            "organization_policy_setup": false
+          },
+          "schema_version": "cs.conversation.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_artifact_id": "art_c5e2f058216a3d7f",
+          "started_from": "natural_message",
+          "suggested_outputs": [
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Mission Card"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Knowledge Capsule"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Claim"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Action Card"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Memory"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Playbook Candidate"
+            }
+          ],
+          "turns": [
+            {
+              "artifact_ref": "artifact:art_c5e2f058216a3d7f",
+              "content": "Hiring review note: candidate interview feedback highlights strong systems debugging and asks for a reference check. Anchor: candidate-interview-anchor.",
+              "created_at": "2026-06-09T13:24:14.887757Z",
+              "role": "user",
+              "turn_id": "turn_394166103f8fa5ab"
+            }
+          ],
+          "user_can_continue_without_conversion": true
+        },
+        "errors": [],
+        "evidence_refs": [
+          "conversation:conv_34f51a112cb6f680",
+          "artifact:art_c5e2f058216a3d7f",
+          "storage:sha256:c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0"
+        ],
+        "ids": {
+          "artifact_id": "art_c5e2f058216a3d7f",
+          "conversation_id": "conv_34f51a112cb6f680",
+          "git_commit": "eb76360"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "hiring_review_mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--claim-id",
+        "claim_5e16682a93cff15d",
+        "--goal",
+        "Prepare a hiring review follow-up from evidence.",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_4373b42bfe9d20e4"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_ee28ce9ed43a3e6d",
+          "claim:claim_5e16682a93cff15d",
+          "evidence_bundle:evb_ea219365d8b92976",
+          "artifact:art_c5e2f058216a3d7f"
+        ],
+        "ids": {
+          "audit_event_id": "audit_4373b42bfe9d20e4",
+          "claim_id": "claim_5e16682a93cff15d",
+          "evidence_bundle_id": "evb_ea219365d8b92976",
+          "git_commit": "eb76360",
+          "mission_id": "mission_ee28ce9ed43a3e6d"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T13:24:15.173902Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_c5e2f058216a3d7f"
+            ],
+            "evidence_bundle_id": "evb_ea219365d8b92976",
+            "search_snapshot_id": "search_14e57bd1bde0e05c"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Prepare a hiring review follow-up from evidence.",
+          "mission_id": "mission_ee28ce9ed43a3e6d",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_5e16682a93cff15d",
+            "statement": "The hiring review requires a reference-check follow-up supported by interview feedback.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "assist"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "hiring_review_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "candidate-interview-anchor",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_93ed197ef8b88a4e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_14e57bd1bde0e05c",
+          "artifact:art_c5e2f058216a3d7f",
+          "storage:sha256:c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0"
+        ],
+        "ids": {
+          "audit_event_id": "audit_93ed197ef8b88a4e",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_14e57bd1bde0e05c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T13:24:14.942934Z",
+          "duration_ms": 0.312,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "candidate-interview-anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_c5e2f058216a3d7f",
+              "derived_text_ref": "derived/art_c5e2f058216a3d7f.txt",
+              "evidence_refs": [
+                "artifact:art_c5e2f058216a3d7f",
+                "storage:sha256:c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0"
+              ],
+              "match_reasons": [
+                {
+                  "query": "candidate-interview-anchor",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "candidate-interview-anchor",
+                  "query_term": "candidate-interview-anchor",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:c5e2f058216a3d7f53554013ca2bd9b33a20443fdcfbe310386f239c35a1b6c0",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "candidate-interview-anchor."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_14e57bd1bde0e05c"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "home_maintenance_brief_create": {
+      "command": [
+        "cornerstone",
+        "brief",
+        "create",
+        "--evidence-bundle-id",
+        "evb_5f40e1e58b244563",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_1511e97b7046b40b"
+        ],
+        "brief": {
+          "brief_id": "brief_c9fe2efd5aad87c9",
+          "contradictions": [],
+          "created_at": "2026-06-09T13:24:14.720179Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_f89d9697d02314ba"
+            ],
+            "evidence_bundle_id": "evb_5f40e1e58b244563",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "water-heater-anchor",
+            "search_snapshot_id": "search_86e9c676bc692963"
+          },
+          "evidence_links": [
+            {
+              "artifact_ref": "artifact:art_f89d9697d02314ba",
+              "derived_text_ref": "derived/art_f89d9697d02314ba.txt",
+              "evidence_bundle_ref": "evidence_bundle:evb_5f40e1e58b244563",
+              "original_storage_ref": "sha256:f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5",
+              "search_snapshot_ref": "search_snapshot:search_86e9c676bc692963",
+              "snippet": "water-heater-anchor."
+            }
+          ],
+          "key_points": [
+            "water-heater-anchor."
+          ],
+          "ontology": {
+            "ontology_suggestions_required_before_brief": false,
+            "preconfigured_ontology_required": false,
+            "suggestions": []
+          },
+          "recommended_next_steps": [
+            "Create a draft claim from this Evidence Bundle if the user wants durable truth work.",
+            "Collect more evidence if the decision requires higher confidence."
+          ],
+          "schema_version": "cs.brief.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "evidence_backed",
+          "suggested_outputs": [
+            {
+              "mode": "optional_promotion",
+              "type": "Claim"
+            },
+            {
+              "mode": "optional_promotion",
+              "type": "Knowledge Capsule"
+            },
+            {
+              "mode": "optional_promotion",
+              "type": "Mission Card"
+            }
+          ],
+          "title": "Brief for water-heater-anchor",
+          "uncertainty": [
+            "This brief is grounded only in the attached Evidence Bundle.",
+            "Add more sources before using it as broad organizational truth."
+          ]
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brief create",
+        "errors": [],
+        "evidence_refs": [
+          "brief:brief_c9fe2efd5aad87c9",
+          "evidence_bundle:evb_5f40e1e58b244563",
+          "search_snapshot:search_86e9c676bc692963",
+          "artifact:art_f89d9697d02314ba"
+        ],
+        "ids": {
+          "audit_event_id": "audit_1511e97b7046b40b",
+          "brief_id": "brief_c9fe2efd5aad87c9",
+          "evidence_bundle_id": "evb_5f40e1e58b244563",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_86e9c676bc692963"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "home_maintenance_bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_86e9c676bc692963",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_71bcb95fc74a2325"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T13:24:14.663706Z",
+          "evidence_bundle_id": "evb_5f40e1e58b244563",
+          "evidence_items": [
+            {
+              "artifact_id": "art_f89d9697d02314ba",
+              "derived_text_ref": "derived/art_f89d9697d02314ba.txt",
+              "original_storage_ref": "sha256:f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5",
+              "provenance": {
+                "created_at": "2026-06-09T13:24:14.547248Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_86e9c676bc692963",
+              "snippet": "water-heater-anchor.",
+              "source": {
+                "ingested_at": "2026-06-09T13:24:14.547248Z",
+                "ref": "conv_b9c36f83be39f7ad",
+                "type": "conversation_turn"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "water-heater-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "water-heater-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_f89d9697d02314ba",
+                "derived_text_ref": "derived/art_f89d9697d02314ba.txt",
+                "evidence_refs": [
+                  "artifact:art_f89d9697d02314ba",
+                  "storage:sha256:f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "water-heater-anchor",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "water-heater-anchor",
+                    "query_term": "water-heater-anchor",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "water-heater-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_86e9c676bc692963"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_86e9c676bc692963"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_5f40e1e58b244563",
+          "search_snapshot:search_86e9c676bc692963",
+          "artifact:art_f89d9697d02314ba"
+        ],
+        "ids": {
+          "audit_event_id": "audit_71bcb95fc74a2325",
+          "evidence_bundle_id": "evb_5f40e1e58b244563",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_86e9c676bc692963"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "home_maintenance_conversation_promote_claim": {
+      "command": [
+        "cornerstone",
+        "conversation",
+        "promote",
+        "conv_b9c36f83be39f7ad",
+        "--kind",
+        "claim",
+        "--statement",
+        "The water heater service plan is supported by the home maintenance note.",
+        "--evidence-bundle-id",
+        "evb_5f40e1e58b244563",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_8f12bcfebd73ac32",
+          "audit:audit_6c7f6b5834cc6137"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_d78e8fbf21635835",
+          "created_at": "2026-06-09T13:24:14.774754Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_f89d9697d02314ba"
+            ],
+            "evidence_bundle_id": "evb_5f40e1e58b244563",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "water-heater-anchor",
+            "result_refs": [
+              "search_snapshot:search_86e9c676bc692963",
+              "evidence_bundle:evb_5f40e1e58b244563"
+            ],
+            "search_snapshot_id": "search_86e9c676bc692963"
+          },
+          "provenance": {
+            "created_from": "conversation.promote",
+            "promoted_at": "2026-06-09T13:24:14.775190Z",
+            "source_artifact_id": "art_f89d9697d02314ba",
+            "source_conversation_id": "conv_b9c36f83be39f7ad"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_conversation": {
+            "conversation_id": "conv_b9c36f83be39f7ad",
+            "source_artifact_ref": "artifact:art_f89d9697d02314ba",
+            "turn_refs": [
+              "conversation_turn:turn_fd820f0e89e6ab9c"
+            ]
+          },
+          "statement": "The water heater service plan is supported by the home maintenance note.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone conversation promote",
+        "errors": [],
+        "evidence_refs": [
+          "conversation:conv_b9c36f83be39f7ad",
+          "claim:claim_d78e8fbf21635835",
+          "evidence_bundle:evb_5f40e1e58b244563",
+          "search_snapshot:search_86e9c676bc692963",
+          "artifact:art_f89d9697d02314ba"
+        ],
+        "ids": {
+          "claim_id": "claim_d78e8fbf21635835",
+          "conversation_id": "conv_b9c36f83be39f7ad",
+          "evidence_bundle_id": "evb_5f40e1e58b244563",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_86e9c676bc692963"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "promoted_object": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_d78e8fbf21635835",
+          "created_at": "2026-06-09T13:24:14.774754Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_f89d9697d02314ba"
+            ],
+            "evidence_bundle_id": "evb_5f40e1e58b244563",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "water-heater-anchor",
+            "result_refs": [
+              "search_snapshot:search_86e9c676bc692963",
+              "evidence_bundle:evb_5f40e1e58b244563"
+            ],
+            "search_snapshot_id": "search_86e9c676bc692963"
+          },
+          "provenance": {
+            "created_from": "conversation.promote",
+            "promoted_at": "2026-06-09T13:24:14.775190Z",
+            "source_artifact_id": "art_f89d9697d02314ba",
+            "source_conversation_id": "conv_b9c36f83be39f7ad"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_conversation": {
+            "conversation_id": "conv_b9c36f83be39f7ad",
+            "source_artifact_ref": "artifact:art_f89d9697d02314ba",
+            "turn_refs": [
+              "conversation_turn:turn_fd820f0e89e6ab9c"
+            ]
+          },
+          "statement": "The water heater service plan is supported by the home maintenance note.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "home_maintenance_conversation_start": {
+      "command": [
+        "cornerstone",
+        "conversation",
+        "start",
+        "--message",
+        "Home maintenance note: water heater service is due next Friday and the warranty card should stay attached. Anchor: water-heater-anchor.",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_f89d9697d02314ba",
+          "checksum_sha256": "f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_f89d9697d02314ba.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 135,
+          "original_storage_ref": "sha256:f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5",
+          "provenance": {
+            "created_at": "2026-06-09T13:24:14.547248Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T13:24:14.547248Z",
+            "ref": "conv_b9c36f83be39f7ad",
+            "type": "conversation_turn"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_a2a144494c43c8a7",
+          "audit:audit_5b343b18a8f038a6"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone conversation start",
+        "conversation": {
+          "conversation_id": "conv_b9c36f83be39f7ad",
+          "created_at": "2026-06-09T13:24:14.546834Z",
+          "pre_modeling_required": false,
+          "required_setup": {
+            "connector_setup": false,
+            "model_provider_setup": false,
+            "ontology_setup": false,
+            "organization_policy_setup": false
+          },
+          "schema_version": "cs.conversation.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_artifact_id": "art_f89d9697d02314ba",
+          "started_from": "natural_message",
+          "suggested_outputs": [
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Mission Card"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Knowledge Capsule"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Claim"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Action Card"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Memory"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Playbook Candidate"
+            }
+          ],
+          "turns": [
+            {
+              "artifact_ref": "artifact:art_f89d9697d02314ba",
+              "content": "Home maintenance note: water heater service is due next Friday and the warranty card should stay attached. Anchor: water-heater-anchor.",
+              "created_at": "2026-06-09T13:24:14.547539Z",
+              "role": "user",
+              "turn_id": "turn_fd820f0e89e6ab9c"
+            }
+          ],
+          "user_can_continue_without_conversion": true
+        },
+        "errors": [],
+        "evidence_refs": [
+          "conversation:conv_b9c36f83be39f7ad",
+          "artifact:art_f89d9697d02314ba",
+          "storage:sha256:f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5"
+        ],
+        "ids": {
+          "artifact_id": "art_f89d9697d02314ba",
+          "conversation_id": "conv_b9c36f83be39f7ad",
+          "git_commit": "eb76360"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "home_maintenance_mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--claim-id",
+        "claim_d78e8fbf21635835",
+        "--goal",
+        "Prepare a home maintenance follow-up from evidence.",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_6cbd6e4c19789310"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_13ec31adc7103fc1",
+          "claim:claim_d78e8fbf21635835",
+          "evidence_bundle:evb_5f40e1e58b244563",
+          "artifact:art_f89d9697d02314ba"
+        ],
+        "ids": {
+          "audit_event_id": "audit_6cbd6e4c19789310",
+          "claim_id": "claim_d78e8fbf21635835",
+          "evidence_bundle_id": "evb_5f40e1e58b244563",
+          "git_commit": "eb76360",
+          "mission_id": "mission_13ec31adc7103fc1"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T13:24:14.830831Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_f89d9697d02314ba"
+            ],
+            "evidence_bundle_id": "evb_5f40e1e58b244563",
+            "search_snapshot_id": "search_86e9c676bc692963"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Prepare a home maintenance follow-up from evidence.",
+          "mission_id": "mission_13ec31adc7103fc1",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_d78e8fbf21635835",
+            "statement": "The water heater service plan is supported by the home maintenance note.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "assist"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "home_maintenance_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "water-heater-anchor",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_7ea90f23afd9eeaa"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_86e9c676bc692963",
+          "artifact:art_f89d9697d02314ba",
+          "storage:sha256:f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5"
+        ],
+        "ids": {
+          "audit_event_id": "audit_7ea90f23afd9eeaa",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_86e9c676bc692963"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T13:24:14.605218Z",
+          "duration_ms": 0.399,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "water-heater-anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_f89d9697d02314ba",
+              "derived_text_ref": "derived/art_f89d9697d02314ba.txt",
+              "evidence_refs": [
+                "artifact:art_f89d9697d02314ba",
+                "storage:sha256:f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5"
+              ],
+              "match_reasons": [
+                {
+                  "query": "water-heater-anchor",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "water-heater-anchor",
+                  "query_term": "water-heater-anchor",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:f89d9697d02314baac4d6c95715de81fe84c38759f550249f720dda08d9fe4b5",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "water-heater-anchor."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_86e9c676bc692963"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "product_walkthrough": {
+      "command": [
+        "cornerstone",
+        "product",
+        "walkthrough",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone product walkthrough",
+        "errors": [],
+        "evidence_refs": [
+          "product:CornerStone:first-run-walkthrough"
+        ],
+        "ids": {
+          "git_commit": "eb76360"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "walkthrough": {
+          "boundary_explanation": "Internal engines are implementation boundaries; daily users see one CornerStone workflow.",
+          "capability_language": [
+            "Capture information as immutable artifacts.",
+            "Search and inspect source-backed evidence.",
+            "Create evidence-backed briefs and claims.",
+            "Use governed action cards for safe action.",
+            "Keep audit and learning visible as product surfaces."
+          ],
+          "daily_user_requires_subsystem_knowledge": false,
+          "first_run_path": [
+            "Inbox",
+            "Brief",
+            "Claim",
+            "Action",
+            "Learn"
+          ],
+          "internal_boundaries": [
+            "Archive/Evidence",
+            "Mission/Intelligence",
+            "Connector/Action"
+          ],
+          "one_service": true,
+          "primary_navigation": [
+            {
+              "id": "home",
+              "label": "Home"
+            },
+            {
+              "id": "search",
+              "label": "Search"
+            },
+            {
+              "id": "artifacts",
+              "label": "Artifacts"
+            },
+            {
+              "id": "claims",
+              "label": "Claims"
+            },
+            {
+              "id": "actions",
+              "label": "Actions"
+            }
+          ],
+          "product_name": "CornerStone",
+          "schema_version": "cs.product_walkthrough.v0"
+        },
+        "workspace_id": "default"
+      }
+    },
+    "readiness_action_execute": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_202cbcb88ad15ce5",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_202cbcb88ad15ce5",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": false,
+            "status": "not_required"
+          },
+          "audit_ref": "audit:audit_6fbef16017871866",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T13:24:15.295299Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_a2b1d5508674658f",
+            "created_at": "2026-06-09T13:24:15.295267Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_20e08ee35397adf0",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Record readiness fixture internal follow-up.",
+            "mission_id": "mission_a088c9eeb4fc1d04",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": false,
+              "can_execute_now": true,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T13:24:15.295124Z",
+              "decision": "allow",
+              "execution_status": "ready_to_execute",
+              "id": "policy_b83c936b44bf7cf3",
+              "mission_id": "mission_a088c9eeb4fc1d04",
+              "policy": "low_risk_autopilot_allowed",
+              "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_05b1f8078667b4bf"
+            ],
+            "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_c4890fa60021eaef",
+              "evidence_bundle:evb_56a13b4ee66bcf13"
+            ],
+            "search_snapshot_id": "search_c4890fa60021eaef"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": {
+              "action_id": "action_202cbcb88ad15ce5",
+              "executed_at": "2026-06-09T13:24:15.353494Z",
+              "external_http_calls": 0,
+              "message": "Action execution was recorded through the governed Workflow/Action path.",
+              "mission_id": "mission_a088c9eeb4fc1d04",
+              "mock_connector_calls": 0,
+              "schema_version": "cs.action_result.v0",
+              "side_effect_boundary": "local_internal_state",
+              "status": "success"
+            },
+            "status": "executed"
+          },
+          "goal": "Record readiness fixture internal follow-up.",
+          "mission_id": "mission_a088c9eeb4fc1d04",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T13:24:15.295124Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_b83c936b44bf7cf3",
+            "mission_id": "mission_a088c9eeb4fc1d04",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_a2b1d5508674658f"
+        },
+        "action_result": {
+          "action_id": "action_202cbcb88ad15ce5",
+          "executed_at": "2026-06-09T13:24:15.353494Z",
+          "external_http_calls": 0,
+          "message": "Action execution was recorded through the governed Workflow/Action path.",
+          "mission_id": "mission_a088c9eeb4fc1d04",
+          "mock_connector_calls": 0,
+          "schema_version": "cs.action_result.v0",
+          "side_effect_boundary": "local_internal_state",
+          "status": "success"
+        },
+        "audit_refs": [
+          "audit:audit_6b8817fad153931e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_202cbcb88ad15ce5"
+        ],
+        "ids": {
+          "action_id": "action_202cbcb88ad15ce5",
+          "git_commit": "eb76360",
+          "mission_id": "mission_a088c9eeb4fc1d04"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "readiness_action_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_a088c9eeb4fc1d04",
+        "--claim-id",
+        "claim_a2b1d5508674658f",
+        "--goal",
+        "Record readiness fixture internal follow-up.",
+        "--action-kind",
+        "internal_status_update",
+        "--risk",
+        "low",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_202cbcb88ad15ce5",
+          "action_kind": "internal_status_update",
+          "approval": {
+            "approver": null,
+            "required": false,
+            "status": "not_required"
+          },
+          "audit_ref": "audit:audit_6fbef16017871866",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-09T13:24:15.295299Z",
+          "dry_run": {
+            "action_kind": "internal_status_update",
+            "claim_id": "claim_a2b1d5508674658f",
+            "created_at": "2026-06-09T13:24:15.295267Z",
+            "diff": {
+              "after": "would perform internal_status_update against mock://local-target",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_20e08ee35397adf0",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "external_calls": 0,
+              "risk": "low",
+              "target": "mock://local-target"
+            },
+            "goal": "Record readiness fixture internal follow-up.",
+            "mission_id": "mission_a088c9eeb4fc1d04",
+            "policy_decision": {
+              "action_kind": "internal_status_update",
+              "approval_required": false,
+              "can_execute_now": true,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-09T13:24:15.295124Z",
+              "decision": "allow",
+              "execution_status": "ready_to_execute",
+              "id": "policy_b83c936b44bf7cf3",
+              "mission_id": "mission_a088c9eeb4fc1d04",
+              "policy": "low_risk_autopilot_allowed",
+              "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "low",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_05b1f8078667b4bf"
+            ],
+            "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_c4890fa60021eaef",
+              "evidence_bundle:evb_56a13b4ee66bcf13"
+            ],
+            "search_snapshot_id": "search_c4890fa60021eaef"
+          },
+          "execution": {
+            "can_execute_now": true,
+            "result": null,
+            "status": "ready_to_execute"
+          },
+          "goal": "Record readiness fixture internal follow-up.",
+          "mission_id": "mission_a088c9eeb4fc1d04",
+          "policy_decision": {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T13:24:15.295124Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_b83c936b44bf7cf3",
+            "mission_id": "mission_a088c9eeb4fc1d04",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "low",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_a2b1d5508674658f"
+        },
+        "audit_refs": [
+          "audit:audit_6fbef16017871866"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_202cbcb88ad15ce5",
+          "mission:mission_a088c9eeb4fc1d04",
+          "claim:claim_a2b1d5508674658f",
+          "dry_run:dryrun_20e08ee35397adf0",
+          "evidence_bundle:evb_56a13b4ee66bcf13",
+          "artifact:art_05b1f8078667b4bf"
+        ],
+        "ids": {
+          "action_id": "action_202cbcb88ad15ce5",
+          "audit_event_id": "audit_6fbef16017871866",
+          "claim_id": "claim_a2b1d5508674658f",
+          "dry_run_id": "dryrun_20e08ee35397adf0",
+          "git_commit": "eb76360",
+          "mission_id": "mission_a088c9eeb4fc1d04"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_b83c936b44bf7cf3"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "internal_status_update",
+            "approval_required": false,
+            "can_execute_now": true,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-09T13:24:15.295124Z",
+            "decision": "allow",
+            "execution_status": "ready_to_execute",
+            "id": "policy_b83c936b44bf7cf3",
+            "mission_id": "mission_a088c9eeb4fc1d04",
+            "policy": "low_risk_autopilot_allowed",
+            "reason": "Low-risk action is inside the active Mission Goal Contract and workspace Autopilot boundary.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "low",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "research_review_brief_create": {
+      "command": [
+        "cornerstone",
+        "brief",
+        "create",
+        "--evidence-bundle-id",
+        "evb_56a13b4ee66bcf13",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_1de3c3c1eaeae678"
+        ],
+        "brief": {
+          "brief_id": "brief_daa969415d979bdb",
+          "contradictions": [],
+          "created_at": "2026-06-09T13:24:14.379808Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_05b1f8078667b4bf"
+            ],
+            "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "search_snapshot_id": "search_c4890fa60021eaef"
+          },
+          "evidence_links": [
+            {
+              "artifact_ref": "artifact:art_05b1f8078667b4bf",
+              "derived_text_ref": "derived/art_05b1f8078667b4bf.txt",
+              "evidence_bundle_ref": "evidence_bundle:evb_56a13b4ee66bcf13",
+              "original_storage_ref": "sha256:05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac",
+              "search_snapshot_ref": "search_snapshot:search_c4890fa60021eaef",
+              "snippet": "alpha-evidence-anchor."
+            }
+          ],
+          "key_points": [
+            "alpha-evidence-anchor."
+          ],
+          "ontology": {
+            "ontology_suggestions_required_before_brief": false,
+            "preconfigured_ontology_required": false,
+            "suggestions": []
+          },
+          "recommended_next_steps": [
+            "Create a draft claim from this Evidence Bundle if the user wants durable truth work.",
+            "Collect more evidence if the decision requires higher confidence."
+          ],
+          "schema_version": "cs.brief.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "evidence_backed",
+          "suggested_outputs": [
+            {
+              "mode": "optional_promotion",
+              "type": "Claim"
+            },
+            {
+              "mode": "optional_promotion",
+              "type": "Knowledge Capsule"
+            },
+            {
+              "mode": "optional_promotion",
+              "type": "Mission Card"
+            }
+          ],
+          "title": "Brief for alpha-evidence-anchor",
+          "uncertainty": [
+            "This brief is grounded only in the attached Evidence Bundle.",
+            "Add more sources before using it as broad organizational truth."
+          ]
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone brief create",
+        "errors": [],
+        "evidence_refs": [
+          "brief:brief_daa969415d979bdb",
+          "evidence_bundle:evb_56a13b4ee66bcf13",
+          "search_snapshot:search_c4890fa60021eaef",
+          "artifact:art_05b1f8078667b4bf"
+        ],
+        "ids": {
+          "audit_event_id": "audit_1de3c3c1eaeae678",
+          "brief_id": "brief_daa969415d979bdb",
+          "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_c4890fa60021eaef"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "research_review_bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_c4890fa60021eaef",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_4343078bad63fdf6"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-09T13:24:14.323013Z",
+          "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+          "evidence_items": [
+            {
+              "artifact_id": "art_05b1f8078667b4bf",
+              "derived_text_ref": "derived/art_05b1f8078667b4bf.txt",
+              "original_storage_ref": "sha256:05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac",
+              "provenance": {
+                "created_at": "2026-06-09T13:24:14.206762Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_c4890fa60021eaef",
+              "snippet": "alpha-evidence-anchor.",
+              "source": {
+                "ingested_at": "2026-06-09T13:24:14.206762Z",
+                "ref": "conv_e95f015382a0648c",
+                "type": "conversation_turn"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_05b1f8078667b4bf",
+                "derived_text_ref": "derived/art_05b1f8078667b4bf.txt",
+                "evidence_refs": [
+                  "artifact:art_05b1f8078667b4bf",
+                  "storage:sha256:05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "alpha-evidence-anchor",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "alpha-evidence-anchor",
+                    "query_term": "alpha-evidence-anchor",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "alpha-evidence-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_c4890fa60021eaef"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_c4890fa60021eaef"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_56a13b4ee66bcf13",
+          "search_snapshot:search_c4890fa60021eaef",
+          "artifact:art_05b1f8078667b4bf"
+        ],
+        "ids": {
+          "audit_event_id": "audit_4343078bad63fdf6",
+          "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_c4890fa60021eaef"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "research_review_conversation_promote_claim": {
+      "command": [
+        "cornerstone",
+        "conversation",
+        "promote",
+        "conv_e95f015382a0648c",
+        "--kind",
+        "claim",
+        "--statement",
+        "The research review should preserve source material before derived summaries.",
+        "--evidence-bundle-id",
+        "evb_56a13b4ee66bcf13",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_475fa7a0b55b92e6",
+          "audit:audit_124ffa528bafc7cd"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_a2b1d5508674658f",
+          "created_at": "2026-06-09T13:24:14.435277Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_05b1f8078667b4bf"
+            ],
+            "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_c4890fa60021eaef",
+              "evidence_bundle:evb_56a13b4ee66bcf13"
+            ],
+            "search_snapshot_id": "search_c4890fa60021eaef"
+          },
+          "provenance": {
+            "created_from": "conversation.promote",
+            "promoted_at": "2026-06-09T13:24:14.435797Z",
+            "source_artifact_id": "art_05b1f8078667b4bf",
+            "source_conversation_id": "conv_e95f015382a0648c"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_conversation": {
+            "conversation_id": "conv_e95f015382a0648c",
+            "source_artifact_ref": "artifact:art_05b1f8078667b4bf",
+            "turn_refs": [
+              "conversation_turn:turn_cd9a81bced72e56c"
+            ]
+          },
+          "statement": "The research review should preserve source material before derived summaries.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone conversation promote",
+        "errors": [],
+        "evidence_refs": [
+          "conversation:conv_e95f015382a0648c",
+          "claim:claim_a2b1d5508674658f",
+          "evidence_bundle:evb_56a13b4ee66bcf13",
+          "search_snapshot:search_c4890fa60021eaef",
+          "artifact:art_05b1f8078667b4bf"
+        ],
+        "ids": {
+          "claim_id": "claim_a2b1d5508674658f",
+          "conversation_id": "conv_e95f015382a0648c",
+          "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_c4890fa60021eaef"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "promoted_object": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_a2b1d5508674658f",
+          "created_at": "2026-06-09T13:24:14.435277Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_05b1f8078667b4bf"
+            ],
+            "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_c4890fa60021eaef",
+              "evidence_bundle:evb_56a13b4ee66bcf13"
+            ],
+            "search_snapshot_id": "search_c4890fa60021eaef"
+          },
+          "provenance": {
+            "created_from": "conversation.promote",
+            "promoted_at": "2026-06-09T13:24:14.435797Z",
+            "source_artifact_id": "art_05b1f8078667b4bf",
+            "source_conversation_id": "conv_e95f015382a0648c"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_conversation": {
+            "conversation_id": "conv_e95f015382a0648c",
+            "source_artifact_ref": "artifact:art_05b1f8078667b4bf",
+            "turn_refs": [
+              "conversation_turn:turn_cd9a81bced72e56c"
+            ]
+          },
+          "statement": "The research review should preserve source material before derived summaries.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "research_review_conversation_start": {
+      "command": [
+        "cornerstone",
+        "conversation",
+        "start",
+        "--message",
+        "Research review note: preserve source material before derived summaries. Anchor: alpha-evidence-anchor.",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_05b1f8078667b4bf",
+          "checksum_sha256": "05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_05b1f8078667b4bf.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 103,
+          "original_storage_ref": "sha256:05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac",
+          "provenance": {
+            "created_at": "2026-06-09T13:24:14.206762Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-09T13:24:14.206762Z",
+            "ref": "conv_e95f015382a0648c",
+            "type": "conversation_turn"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_7f2371dcf70ee9b7",
+          "audit:audit_bf4bc124e1f666b2"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone conversation start",
+        "conversation": {
+          "conversation_id": "conv_e95f015382a0648c",
+          "created_at": "2026-06-09T13:24:14.206230Z",
+          "pre_modeling_required": false,
+          "required_setup": {
+            "connector_setup": false,
+            "model_provider_setup": false,
+            "ontology_setup": false,
+            "organization_policy_setup": false
+          },
+          "schema_version": "cs.conversation.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_artifact_id": "art_05b1f8078667b4bf",
+          "started_from": "natural_message",
+          "suggested_outputs": [
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Mission Card"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Knowledge Capsule"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Claim"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Action Card"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Memory"
+            },
+            {
+              "forced": false,
+              "mode": "optional_promotion",
+              "type": "Playbook Candidate"
+            }
+          ],
+          "turns": [
+            {
+              "artifact_ref": "artifact:art_05b1f8078667b4bf",
+              "content": "Research review note: preserve source material before derived summaries. Anchor: alpha-evidence-anchor.",
+              "created_at": "2026-06-09T13:24:14.207110Z",
+              "role": "user",
+              "turn_id": "turn_cd9a81bced72e56c"
+            }
+          ],
+          "user_can_continue_without_conversion": true
+        },
+        "errors": [],
+        "evidence_refs": [
+          "conversation:conv_e95f015382a0648c",
+          "artifact:art_05b1f8078667b4bf",
+          "storage:sha256:05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac"
+        ],
+        "ids": {
+          "artifact_id": "art_05b1f8078667b4bf",
+          "conversation_id": "conv_e95f015382a0648c",
+          "git_commit": "eb76360"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "research_review_mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--claim-id",
+        "claim_a2b1d5508674658f",
+        "--goal",
+        "Review research evidence and prepare a safe next step.",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_1536d6eed0ef0947"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_a088c9eeb4fc1d04",
+          "claim:claim_a2b1d5508674658f",
+          "evidence_bundle:evb_56a13b4ee66bcf13",
+          "artifact:art_05b1f8078667b4bf"
+        ],
+        "ids": {
+          "audit_event_id": "audit_1536d6eed0ef0947",
+          "claim_id": "claim_a2b1d5508674658f",
+          "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+          "git_commit": "eb76360",
+          "mission_id": "mission_a088c9eeb4fc1d04"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-09T13:24:14.490786Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_05b1f8078667b4bf"
+            ],
+            "evidence_bundle_id": "evb_56a13b4ee66bcf13",
+            "search_snapshot_id": "search_c4890fa60021eaef"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Review research evidence and prepare a safe next step.",
+          "mission_id": "mission_a088c9eeb4fc1d04",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_a2b1d5508674658f",
+            "statement": "The research review should preserve source material before derived summaries.",
+            "trust_state": "evidence_backed"
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "assist"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "research_review_search": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "alpha-evidence-anchor",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_ee5215c1000591e1"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_c4890fa60021eaef",
+          "artifact:art_05b1f8078667b4bf",
+          "storage:sha256:05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac"
+        ],
+        "ids": {
+          "audit_event_id": "audit_ee5215c1000591e1",
+          "git_commit": "eb76360",
+          "search_snapshot_id": "search_c4890fa60021eaef"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-09T13:24:14.263511Z",
+          "duration_ms": 0.278,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_05b1f8078667b4bf",
+              "derived_text_ref": "derived/art_05b1f8078667b4bf.txt",
+              "evidence_refs": [
+                "artifact:art_05b1f8078667b4bf",
+                "storage:sha256:05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac"
+              ],
+              "match_reasons": [
+                {
+                  "query": "alpha-evidence-anchor",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "alpha-evidence-anchor",
+                  "query_term": "alpha-evidence-anchor",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:05b1f8078667b4bf0bc8a16e41ec4605a6095522768cf457d0432f1c7d56aaac",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "alpha-evidence-anchor."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_c4890fa60021eaef"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      }
+    },
+    "workspace_initial": {
+      "command": [
+        "cornerstone",
+        "workspace",
+        "show",
+        "--state-dir",
+        "tmp/scenario/vs0-product-domain-readiness-74250",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone workspace show",
+        "errors": [],
+        "evidence_refs": [
+          "workspace:default"
+        ],
+        "ids": {
+          "git_commit": "eb76360",
+          "workspace_id": "default"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace": {
+          "active_scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "active_workspace_label": "personal / default (local-user in local-dev)",
+          "context_boundary": {
+            "allowed_inherited_context_refs": [],
+            "default_context": "active_workspace_only",
+            "implicit_cross_namespace_context": false,
+            "implicit_cross_owner_context": false,
+            "promotion_required_for_cross_namespace_use": true
+          },
+          "explanation": "CornerStone is using only the active tenant, owner, namespace, and workspace unless a governed promotion or reference is recorded.",
+          "schema_version": "cs.workspace_detail.v0",
+          "shown_at": "2026-06-09T13:24:14.147436Z",
+          "visible_navigation": [
+            {
+              "id": "home",
+              "label": "Home"
+            },
+            {
+              "id": "search",
+              "label": "Search"
+            },
+            {
+              "id": "artifacts",
+              "label": "Artifacts"
+            },
+            {
+              "id": "claims",
+              "label": "Claims"
+            },
+            {
+              "id": "actions",
+              "label": "Actions"
+            }
+          ],
+          "workspace_mode": {
+            "available_modes": [
+              {
+                "approval_required_for_execution": true,
+                "autonomous_execution_allowed": false,
+                "label": "Manual",
+                "mode": "manual"
+              },
+              {
+                "approval_required_for_execution": true,
+                "autonomous_execution_allowed": false,
+                "label": "Assist",
+                "mode": "assist"
+              },
+              {
+                "approval_required_for_execution": false,
+                "autonomous_execution_allowed": true,
+                "label": "Autopilot",
+                "mode": "autopilot"
+              },
+              {
+                "approval_required_for_execution": true,
+                "autonomous_execution_allowed": false,
+                "label": "Locked",
+                "mode": "locked"
+              }
+            ],
+            "behaviors": {
+              "action_proposals_allowed": true,
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "description": "CornerStone can draft briefs, claims, mission contracts, and action cards without autonomous execution.",
+              "label": "Assist"
+            },
+            "mode": "assist",
+            "schema_version": "cs.workspace_mode.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "updated_at": "2026-06-09T13:24:14.147281Z"
+          }
+        },
+        "workspace_id": "default"
+      }
+    }
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

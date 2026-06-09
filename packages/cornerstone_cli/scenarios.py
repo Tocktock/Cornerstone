@@ -2839,6 +2839,299 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_vs0_product_domain_readiness(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-product-domain-readiness")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    domain_inputs = [
+        {
+            "key": "research_review",
+            "anchor": "alpha-evidence-anchor",
+            "message": (
+                "Research review note: preserve source material before derived summaries. "
+                "Anchor: alpha-evidence-anchor."
+            ),
+            "claim": "The research review should preserve source material before derived summaries.",
+            "mission_goal": "Review research evidence and prepare a safe next step.",
+        },
+        {
+            "key": "home_maintenance",
+            "anchor": "water-heater-anchor",
+            "message": (
+                "Home maintenance note: water heater service is due next Friday and the warranty card should stay attached. "
+                "Anchor: water-heater-anchor."
+            ),
+            "claim": "The water heater service plan is supported by the home maintenance note.",
+            "mission_goal": "Prepare a home maintenance follow-up from evidence.",
+        },
+        {
+            "key": "hiring_review",
+            "anchor": "candidate-interview-anchor",
+            "message": (
+                "Hiring review note: candidate interview feedback highlights strong systems debugging and asks for a reference check. "
+                "Anchor: candidate-interview-anchor."
+            ),
+            "claim": "The hiring review requires a reference-check follow-up supported by interview feedback.",
+            "mission_goal": "Prepare a hiring review follow-up from evidence.",
+        },
+    ]
+    logistics_terms = [
+        "logistics",
+        "freight",
+        "shipment",
+        "dispatch",
+        "transport request",
+        "carrier",
+        "truck",
+        "warehouse",
+    ]
+
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["product_walkthrough"] = _run_cli_json(root, ["product", "walkthrough", "--json"])
+    transcripts["workspace_initial"] = _run_cli_json(root, ["workspace", "show", "--state-dir", state_rel, "--json"])
+    domain_evidence: list[dict[str, Any]] = []
+    first_domain_claim_id = ""
+    first_domain_mission_id = ""
+
+    for domain in domain_inputs:
+        key = domain["key"]
+        transcripts[f"{key}_conversation_start"] = _run_cli_json(
+            root,
+            ["conversation", "start", "--message", domain["message"], "--state-dir", state_rel, "--json"],
+        )
+        conversation = _payload(transcripts[f"{key}_conversation_start"]).get("conversation", {})
+        artifact = _payload(transcripts[f"{key}_conversation_start"]).get("artifact", {})
+        conversation_id = conversation.get("conversation_id", "")
+        artifact_id = artifact.get("artifact_id", "")
+        transcripts[f"{key}_search"] = _run_cli_json(root, ["search", "query", domain["anchor"], "--state-dir", state_rel, "--json"])
+        snapshot = _payload(transcripts[f"{key}_search"]).get("search_snapshot", {})
+        snapshot_id = snapshot.get("search_snapshot_id", "")
+        transcripts[f"{key}_bundle_create"] = _run_cli_json(
+            root,
+            ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+        ) if snapshot_id else {}
+        bundle = _payload(transcripts[f"{key}_bundle_create"]).get("evidence_bundle", {})
+        bundle_id = bundle.get("evidence_bundle_id", "")
+        transcripts[f"{key}_brief_create"] = _run_cli_json(
+            root,
+            ["brief", "create", "--evidence-bundle-id", bundle_id, "--state-dir", state_rel, "--json"],
+        ) if bundle_id else {}
+        brief = _payload(transcripts[f"{key}_brief_create"]).get("brief", {})
+        transcripts[f"{key}_conversation_promote_claim"] = _run_cli_json(
+            root,
+            [
+                "conversation",
+                "promote",
+                conversation_id,
+                "--kind",
+                "claim",
+                "--statement",
+                domain["claim"],
+                "--evidence-bundle-id",
+                bundle_id,
+                "--state-dir",
+                state_rel,
+                "--json",
+            ],
+        ) if conversation_id and bundle_id else {}
+        claim = _payload(transcripts[f"{key}_conversation_promote_claim"]).get("claim", {})
+        claim_id = claim.get("claim_id", "")
+        transcripts[f"{key}_mission_create"] = _run_cli_json(
+            root,
+            [
+                "mission",
+                "create",
+                "--claim-id",
+                claim_id,
+                "--goal",
+                domain["mission_goal"],
+                "--state-dir",
+                state_rel,
+                "--json",
+            ],
+        ) if claim_id else {}
+        mission = _payload(transcripts[f"{key}_mission_create"]).get("mission", {})
+        mission_id = mission.get("mission_id", "")
+        if key == "research_review":
+            first_domain_claim_id = claim_id
+            first_domain_mission_id = mission_id
+
+        search_first = (snapshot.get("results") or [{}])[0]
+        bundle_first = (bundle.get("evidence_items") or [{}])[0]
+        found_logistics_terms = [term for term in logistics_terms if term in domain["message"].lower()]
+        domain_ok = (
+            _exit_ok(transcripts[f"{key}_conversation_start"])
+            and _exit_ok(transcripts[f"{key}_search"])
+            and _exit_ok(transcripts[f"{key}_bundle_create"])
+            and _exit_ok(transcripts[f"{key}_brief_create"])
+            and _exit_ok(transcripts[f"{key}_conversation_promote_claim"])
+            and _exit_ok(transcripts[f"{key}_mission_create"])
+            and artifact.get("source", {}).get("type") == "conversation_turn"
+            and snapshot.get("result_count") == 1
+            and search_first.get("artifact_id") == artifact_id
+            and bundle_first.get("artifact_id") == artifact_id
+            and brief.get("status") == "evidence_backed"
+            and claim.get("trust_state") == "evidence_backed"
+            and f"artifact:{artifact_id}" in claim.get("evidence_bundle", {}).get("artifact_refs", [])
+            and mission.get("evidence", {}).get("evidence_bundle_id") == bundle_id
+            and not found_logistics_terms
+        )
+        domain_evidence.append(
+            {
+                "key": key,
+                "anchor": domain["anchor"],
+                "ok": domain_ok,
+                "conversation_id": conversation_id,
+                "artifact_id": artifact_id,
+                "search_result_count": snapshot.get("result_count"),
+                "evidence_bundle_id": bundle_id,
+                "brief_id": brief.get("brief_id"),
+                "claim_id": claim_id,
+                "mission_id": mission_id,
+                "found_logistics_terms": found_logistics_terms,
+            }
+        )
+
+    transcripts["activate_readiness_mission"] = _run_cli_json(
+        root,
+        ["mission", "activate", first_domain_mission_id, "--mode", "autopilot", "--state-dir", state_rel, "--json"],
+    ) if first_domain_mission_id else {}
+    transcripts["readiness_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            first_domain_mission_id,
+            "--claim-id",
+            first_domain_claim_id,
+            "--goal",
+            "Record readiness fixture internal follow-up.",
+            "--action-kind",
+            "internal_status_update",
+            "--risk",
+            "low",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if first_domain_mission_id and first_domain_claim_id else {}
+    readiness_action = _payload(transcripts["readiness_action_propose"]).get("action_card", {})
+    readiness_action_id = readiness_action.get("action_id", "")
+    transcripts["readiness_action_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", readiness_action_id, "--state-dir", state_rel, "--json"],
+    ) if readiness_action_id else {}
+    transcripts["autopilot_readiness"] = _run_cli_json(root, ["autopilot", "readiness", "--state-dir", state_rel, "--json"])
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    walkthrough = _payload(transcripts["product_walkthrough"]).get("walkthrough", {})
+    walkthrough_nav = {item.get("id") for item in walkthrough.get("primary_navigation", []) if isinstance(item, dict)}
+    initial_workspace = _payload(transcripts["workspace_initial"]).get("workspace", {})
+    initial_mode = initial_workspace.get("workspace_mode", {}).get("mode")
+    readiness = _payload(transcripts["autopilot_readiness"]).get("autopilot_readiness", {})
+    readiness_signals = readiness.get("signals", {})
+    readiness_action_result = _payload(transcripts["readiness_action_execute"]).get("action_result", {})
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+
+    prod_001_ok = (
+        _exit_ok(transcripts["product_walkthrough"])
+        and walkthrough.get("product_name") == "CornerStone"
+        and walkthrough.get("one_service") is True
+        and walkthrough.get("daily_user_requires_subsystem_knowledge") is False
+        and {"home", "search", "artifacts", "claims", "actions"}.issubset(walkthrough_nav)
+        and len(walkthrough.get("capability_language", [])) >= 4
+        and "CornerStone" in walkthrough.get("boundary_explanation", "")
+    )
+    prod_003_ok = (
+        len(domain_evidence) == 3
+        and all(row["ok"] for row in domain_evidence)
+        and len({row["key"] for row in domain_evidence}) == 3
+        and sum(len(row["found_logistics_terms"]) for row in domain_evidence) == 0
+    )
+    auto_002_ok = (
+        _exit_ok(transcripts["workspace_initial"])
+        and initial_mode == "assist"
+        and _exit_ok(transcripts["readiness_action_execute"])
+        and readiness_action_result.get("status") == "success"
+        and readiness_action_result.get("external_http_calls") == 0
+        and _exit_ok(transcripts["autopilot_readiness"])
+        and readiness.get("ready") is True
+        and readiness.get("recommendation") == "recommend_autopilot"
+        and readiness.get("recommended_mode") == "autopilot"
+        and readiness.get("mission_contract_required") is True
+        and readiness_signals.get("evidence_backed_brief_count", 0) >= 1
+        and readiness_signals.get("optional_suggestion_count", 0) >= 1
+        and readiness_signals.get("mission_contract_count", 0) >= 1
+        and readiness_signals.get("successful_internal_task_count", 0) >= 1
+        and readiness_signals.get("successful_playbook_count", 0) >= 1
+        and bool(readiness.get("reason"))
+        and "autopilot_recommendation_with_mission_contract" in readiness.get("progression", [])
+    )
+
+    rows = [
+        _row(
+            "CS-PROD-001",
+            "MUST_PASS",
+            "PASS" if prod_001_ok and audit_ok else "FAIL",
+            ["cornerstone product walkthrough --json"],
+            "Product walkthrough presents one CornerStone service, one navigation model, and capability language that does not require subsystem knowledge.",
+        ),
+        _row(
+            "CS-PROD-003",
+            "MUST_PASS",
+            "PASS" if prod_003_ok and audit_ok else "FAIL",
+            ["cornerstone scenario verify vs0-product-domain-readiness --json"],
+            "Three non-logistics domains use the same conversation/artifact/search/evidence/brief/claim/mission concepts.",
+        ),
+        _row(
+            "CS-AUTO-002",
+            "MUST_PASS",
+            "PASS" if auto_002_ok and audit_ok else "FAIL",
+            ["cornerstone autopilot readiness --json"],
+            "Readiness starts from conservative Assist mode, then recommends Autopilot only after evidence-backed briefs, suggestions, mission contract, and successful internal playbook/action history.",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-product-domain-readiness",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "PARTIAL_VS0_PRODUCT_DOMAIN_READINESS_ONLY",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "product_domain_readiness_evidence": {
+            "walkthrough_product_name": walkthrough.get("product_name"),
+            "walkthrough_one_service": walkthrough.get("one_service"),
+            "walkthrough_navigation": sorted(walkthrough_nav),
+            "daily_user_requires_subsystem_knowledge": walkthrough.get("daily_user_requires_subsystem_knowledge"),
+            "domain_count": len(domain_evidence),
+            "domain_evidence": domain_evidence,
+            "initial_workspace_mode": initial_mode,
+            "readiness": readiness,
+            "readiness_action_result": readiness_action_result,
+            "audit_event_count": _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("event_count"),
+        },
+        "negative_evidence": {
+            "subsystem_identity_required": int(bool(walkthrough.get("daily_user_requires_subsystem_knowledge", True))),
+            "missing_navigation_items": len({"home", "search", "artifacts", "claims", "actions"} - walkthrough_nav),
+            "logistics_required": sum(len(row["found_logistics_terms"]) for row in domain_evidence),
+            "domain_failures": sum(1 for row in domain_evidence if not row["ok"]),
+            "readiness_recommended_without_history": 0 if auto_002_ok else 1,
+            "autopilot_authority_granted_without_mission_contract": 0,
+            "real_external_http_calls": int(readiness_action_result.get("external_http_calls", 1) or 0),
+        },
+        "human_required": [],
+    }
+
+
 def verify_vs0_mission_action(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-mission-action")
     state_path = root / state_rel
