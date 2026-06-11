@@ -106,6 +106,19 @@ first_implementation_contract:
   scenario_count: 58
   source_package_file: "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT_STRICT.md"
 
+vs0_product_runtime_readiness:
+  contract: "docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md"
+  matrix: "docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_MATRIX.csv"
+  freeze_report: "docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_SCENARIO_FREEZE_REPORT_2026-06-11.md"
+  report: "docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md"
+  authority: "task-scoped verified local deterministic runnable VS0 product runtime readiness"
+  scenario_count: 14
+  ai_verifiable_count: 12
+  human_required_count: 2
+  status: "local deterministic implementation verified; production/live-provider/user acceptance human-required"
+  verifier: "cornerstone scenario verify vs0-product-runtime --json"
+  make_target: "make verify-vs0-runtime"
+
 agent_guidance:
   scenario_first_instruction: "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md"
   project_constitution: "docs/agent/PROJECT_OPERATING_CONSTITUTION.md"

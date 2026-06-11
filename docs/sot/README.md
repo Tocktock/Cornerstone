@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Active SoT bundle after V2 full MUST-PASS handoff, design-system contract, VS-0 scaffold gate, and VS-0 scaffold readiness report
+**Status:** Active SoT bundle after V2 full MUST-PASS handoff, design-system contract, VS-0 scaffold gate, and local deterministic VS0 product runtime readiness
 
 ## Why This Bundle Exists
 
@@ -17,7 +17,7 @@ This bundle resolves authority:
 - The **Local Verification Plane** defines local scenario verification, fixture corpus, model harness, deterministic validators, CLI-native evidence, and release gating.
 - The **Design System Contract** defines the calm workspace/admin visual direction, tokens, component baseline, and design acceptance scenarios.
 - The **VS-0 Scaffold Contract** is the setup-planning gate before scaffold or feature coding.
-- The **VS-0 Scaffold Readiness Report** is the current gate for starting scaffold implementation and blocks product-feature work.
+- The **VS-0 Scaffold Readiness Report** is historical scaffold-gate context; current local VS0 runtime readiness evidence lives in the VS0 Product Runtime Readiness implementation report.
 - The **VS-0 Implementation Contract** is only the first implementation subset.
 - The older technical SoT is no longer product authority; compatible technical defaults are preserved only in `03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`.
 
@@ -35,11 +35,13 @@ This bundle resolves authority:
 10. `docs/design/DESIGN_CONCEPT_SYSTEM_V0_3.md` - source design concept.
 11. `docs/design/tokens/cornerstone_design_tokens_v0_3.json` - canonical design tokens.
 12. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` - setup-planning gate before VS-0 scaffold or feature coding.
-13. `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` - current scaffold implementation readiness gate.
+13. `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` - historical scaffold implementation readiness gate.
 14. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` - first implementation subset when working on VS-0.
-15. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` - implementation defaults where compatible.
-16. Frozen scenario contract for the specific implementation task.
-17. Repository code/docs/tests/logs as implementation evidence.
+15. `docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md` - local runtime readiness implementation contract.
+16. `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md` - local runtime readiness evidence.
+17. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` - implementation defaults where compatible.
+18. Frozen scenario contract for the specific implementation task.
+19. Repository code/docs/tests/logs as implementation evidence.
 
 If lower-priority content conflicts with higher-priority content, report the conflict and follow the higher-priority source.
 
@@ -66,8 +68,12 @@ If lower-priority content conflicts with higher-priority content, report the con
 | `../design/DESIGN_CONCEPT_SYSTEM_V0_3.md` | Source concept, page model, component baseline, and design scenarios |
 | `../design/tokens/cornerstone_design_tokens_v0_3.json` | Canonical design tokens |
 | `../scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` | Setup-planning contract before VS-0 scaffold or feature coding |
-| `../verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` | Current readiness report for scaffold implementation gate |
+| `../verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` | Historical readiness report for scaffold implementation gate |
 | `../scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` | Strict VS-0 scenario subset, 58 scenarios |
+| `../scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md` | Task-scoped VS0 runtime readiness scenarios, 14 rows |
+| `../scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_MATRIX.csv` | Machine-readable matrix for the VS0 runtime readiness task contract |
+| `../verification-reports/VS0_PRODUCT_RUNTIME_READINESS_SCENARIO_FREEZE_REPORT_2026-06-11.md` | Historical freeze report for VS0 runtime readiness scenarios |
+| `../verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md` | Current local deterministic implementation report for VS0 runtime readiness |
 | `../scenario-contracts/SCENARIO_VERIFICATION_REPORT_TEMPLATE.md` | Required report shape for scenario verification |
 | `../verification-reports/template.md` | Required report shape for scaffold, scenario, CLI, and human-required evidence |
 
@@ -103,13 +109,15 @@ It turns fragmented knowledge into:
 
 Before feature coding, `../scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` must be accepted as the setup-planning gate.
 
-Before scaffold implementation, `../verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` must be read. The current next implementation scope is VS-0 scaffold foundation only after preflight and approval; VS-0 product features remain blocked until scaffold/runtime/CLI verification exists.
+Before scaffold implementation, `../verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` must be read as historical gate context. The current local deterministic runtime loop is verified through the VS0 Product Runtime Readiness report; production release, live-provider proof, and human usability acceptance remain out of scope.
 
 The first implementation target is VS-0:
 
 `Personal messy input -> immutable artifact -> search -> evidence-backed brief -> claim -> action card dry-run/approval/execution -> audit`
 
 The full long-term scenario suite remains authoritative, but VS-0 freezes the first slice. Every VS-0 feature must also be operable through the native `cornerstone ...` CLI path and verified with CLI transcript evidence.
+
+The task-scoped runtime scenario contract after the completed local deterministic scaffold proof is `../scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md`. It contains 14 `VS0-RT-*` rows for a runnable local product runtime with CLI, API, and minimal UI parity. It does not change the canonical 206-scenario count or mark production readiness PASS.
 
 ## Deprecated Product Framing
 

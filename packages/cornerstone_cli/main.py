@@ -11,6 +11,7 @@ from cornerstone_cli import __version__
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_vs0_product_runtime,
     verify_full_agent_orchestration,
     verify_full_brain_routing,
     verify_full_claim_collaboration,
@@ -42,6 +43,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_fixtures,
     verify_vs0_scaffold,
 )
+from cornerstone_cli.product_runtime import build_readiness_report, run_server
 from cornerstone_cli.runtime import LocalRuntimeStore
 
 
@@ -164,28 +166,28 @@ def command_health(args: argparse.Namespace) -> int:
 
 def command_ready(args: argparse.Namespace) -> int:
     root = repo_root()
-    checks = [
-        ("native_cli", (root / "cornerstone").exists()),
-        ("scenario_matrix", (root / "docs/scenario-contracts/SCENARIO_MATRIX_FULL.md").exists()),
-        ("vs0_contract", (root / "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md").exists()),
-        ("scenario_tests", (root / "tests/scenario").exists()),
-        ("api_runtime", (root / "services/api").exists()),
-        ("web_runtime", (root / "apps/web").exists()),
-        ("fixture_corpus", (root / "fixtures/vs0").exists()),
-    ]
-    missing = [name for name, ok in checks if not ok]
-    payload = base_response("cornerstone ready", "success" if not missing else "not_ready", root)
-    payload["checks"] = [{"name": name, "present": ok} for name, ok in checks]
-    if missing:
+    report = build_readiness_report(root)
+    readiness = report["readiness"]
+    ready = readiness["local_scenario_ready"] and readiness["vs0_runtime_ready"]
+    missing = [row["name"] for row in report["checks"] if not row["present"]]
+    payload = base_response("cornerstone ready", "success" if ready else "not_ready", root)
+    payload.update(report)
+    if not ready:
         payload["errors"].append(
             {
                 "code": "CS_READY_RUNTIME_MISSING",
-                "message": "The scaffold is not product-runtime ready yet.",
+                "message": "The local VS0 runtime is not ready yet.",
                 "missing": missing,
             }
         )
     print_payload(payload, args.json)
-    return EXIT_SUCCESS if not missing else EXIT_EVIDENCE_MISSING
+    return EXIT_SUCCESS if ready else EXIT_EVIDENCE_MISSING
+
+
+def command_runtime_serve(args: argparse.Namespace) -> int:
+    root = repo_root()
+    run_server(root, state_dir(root, args), host=args.host, port=args.port)
+    return EXIT_SUCCESS
 
 
 def command_product_walkthrough(args: argparse.Namespace) -> int:
@@ -426,6 +428,23 @@ def command_audit_verify(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS if report["status"] == "success" else EXIT_RUNTIME_FAILURE
 
 
+def command_audit_list(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.query_namespace_audit(requested_scope, event_types=args.event_type)
+    export = result["namespace_audit_export"]
+    payload = base_response("cornerstone audit list", "success", root)
+    payload.update(requested_scope)
+    payload["audit_events"] = export["events"]
+    payload["namespace_audit_export"] = export
+    payload["ids"].update({"namespace_audit_export_id": export["namespace_audit_export_id"]})
+    payload["evidence_refs"].append(f"namespace_audit_export:{export['namespace_audit_export_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_egress_test(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -495,6 +514,49 @@ def command_search_query(args: argparse.Namespace) -> int:
         for result_row in snapshot.get("results", [])
         for ref in result_row.get("evidence_refs", [])
     )
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_search_snapshot_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    snapshot = store.get_search_snapshot(args.search_snapshot_id)
+    payload = base_response("cornerstone search snapshot show", "success", root)
+    payload.update(requested_scope)
+    if snapshot is None:
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SEARCH_SNAPSHOT_NOT_FOUND",
+                "message": "Search snapshot was not found.",
+                "search_snapshot_id": args.search_snapshot_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if snapshot.get("filters") != requested_scope:
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Search snapshot is outside the requested scope.",
+                "resource_scope": snapshot.get("filters"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    audit_event = store.append_audit(
+        "search.snapshot.read",
+        requested_scope,
+        {"type": "search_snapshot", "id": args.search_snapshot_id},
+        {"reason": "cli_search_snapshot_show"},
+    )
+    payload["search_snapshot"] = snapshot
+    payload["ids"].update({"search_snapshot_id": args.search_snapshot_id, "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].append(f"search_snapshot:{args.search_snapshot_id}")
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -3378,6 +3440,62 @@ def command_action_execute(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def _action_read_payload(
+    args: argparse.Namespace,
+    command: str,
+    event_type: str,
+    reason: str,
+) -> tuple[int, dict[str, Any], LocalRuntimeStore, dict[str, str]]:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    action = store.get_action(args.action_id)
+    payload = base_response(command, "success", root)
+    payload.update(requested_scope)
+    if action is None:
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_ACTION_NOT_FOUND", "message": "Action Card was not found.", "action_id": args.action_id})
+        return EXIT_NOT_FOUND, payload, store, requested_scope
+    if action.get("scope") != requested_scope:
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_SCOPE_DENIED", "message": "Action Card is outside the requested scope.", "resource_scope": action.get("scope")})
+        return EXIT_SCOPE_DENIED, payload, store, requested_scope
+    audit_event = store.append_audit(
+        event_type,
+        requested_scope,
+        {"type": "action", "id": args.action_id},
+        {"reason": reason, "dry_run_id": action.get("dry_run", {}).get("dry_run_id")},
+    )
+    payload["action_card"] = action
+    payload["ids"].update({"action_id": args.action_id, "audit_event_id": audit_event["event_id"]})
+    payload["evidence_refs"].append(f"action:{args.action_id}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    return EXIT_SUCCESS, payload, store, requested_scope
+
+
+def command_action_show(args: argparse.Namespace) -> int:
+    exit_code, payload, _, _ = _action_read_payload(args, "cornerstone action show", "action.read", "cli_action_show")
+    print_payload(payload, args.json)
+    return exit_code
+
+
+def command_action_dry_run(args: argparse.Namespace) -> int:
+    exit_code, payload, _, _ = _action_read_payload(args, "cornerstone action dry-run", "action.dry_run.read", "cli_action_dry_run")
+    if exit_code == EXIT_SUCCESS:
+        action = payload["action_card"]
+        payload["dry_run"] = action.get("dry_run", {})
+        policy = action.get("policy_decision", {})
+        if policy:
+            payload["policy_decisions"] = [policy]
+            payload["policy_decision_refs"].append(f"policy:{policy['id']}")
+        dry_run_id = action.get("dry_run", {}).get("dry_run_id")
+        if dry_run_id:
+            payload["ids"]["dry_run_id"] = dry_run_id
+            payload["evidence_refs"].append(f"dry_run:{dry_run_id}")
+    print_payload(payload, args.json)
+    return exit_code
+
+
 def command_connector_direct_write_test(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -3959,6 +4077,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_product_domain_readiness(root)
     elif args.contract == "vs0-tenant-security-boundary":
         report = verify_vs0_tenant_security_boundary(root)
+    elif args.contract == "vs0-product-runtime":
+        report = verify_vs0_product_runtime(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-agent-orchestration":
@@ -4038,6 +4158,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-memory-truth-boundary",
                     "vs0-product-domain-readiness",
                     "vs0-tenant-security-boundary",
+                    "vs0-product-runtime",
                     "full-claim-collaboration",
                     "full-agent-orchestration",
                     "full-brain-routing",
@@ -4159,6 +4280,15 @@ def build_parser() -> argparse.ArgumentParser:
     ready.add_argument("--json", action="store_true", help="Emit JSON output")
     ready.set_defaults(func=command_ready)
 
+    runtime = subcommands.add_parser("runtime", help="Local VS0 API/UI runtime commands")
+    runtime_sub = runtime.add_subparsers(dest="runtime_command")
+
+    runtime_serve = runtime_sub.add_parser("serve", help="Serve the local VS0 API/UI runtime")
+    runtime_serve.add_argument("--host", default="127.0.0.1", help="Host interface")
+    runtime_serve.add_argument("--port", type=int, default=8787, help="Port")
+    add_state_argument(runtime_serve)
+    runtime_serve.set_defaults(func=command_runtime_serve)
+
     product = subcommands.add_parser("product", help="Product identity walkthrough commands")
     product_sub = product.add_subparsers(dest="product_command")
 
@@ -4253,6 +4383,20 @@ def build_parser() -> argparse.ArgumentParser:
     audit_verify.add_argument("--json", action="store_true", help="Emit JSON output")
     audit_verify.set_defaults(func=command_audit_verify)
 
+    audit_list = audit_sub.add_parser("list", help="List namespace-scoped audit events")
+    audit_list.add_argument("--event-type", action="append", default=[], help="Optional event type filter")
+    add_state_argument(audit_list)
+    add_scope_arguments(audit_list)
+    audit_list.add_argument("--json", action="store_true", help="Emit JSON output")
+    audit_list.set_defaults(func=command_audit_list)
+
+    audit_export = audit_sub.add_parser("export", help="Export namespace-scoped audit events")
+    audit_export.add_argument("--event-type", action="append", default=[], help="Optional event type filter")
+    add_state_argument(audit_export)
+    add_scope_arguments(audit_export)
+    audit_export.add_argument("--json", action="store_true", help="Emit JSON output")
+    audit_export.set_defaults(func=command_audit_list)
+
     egress = subcommands.add_parser("egress", help="Egress policy commands")
     egress_sub = egress.add_subparsers(dest="egress_command")
 
@@ -4283,6 +4427,16 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(search_query)
     search_query.add_argument("--json", action="store_true", help="Emit JSON output")
     search_query.set_defaults(func=command_search_query)
+
+    search_snapshot = search_sub.add_parser("snapshot", help="Search snapshot operations")
+    search_snapshot_sub = search_snapshot.add_subparsers(dest="search_snapshot_command")
+
+    search_snapshot_show = search_snapshot_sub.add_parser("show", help="Show a reproducible search snapshot")
+    search_snapshot_show.add_argument("search_snapshot_id", help="Search snapshot ID")
+    add_state_argument(search_snapshot_show)
+    add_scope_arguments(search_snapshot_show)
+    search_snapshot_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    search_snapshot_show.set_defaults(func=command_search_snapshot_show)
 
     evidence = subcommands.add_parser("evidence", help="Evidence bundle commands")
     evidence_sub = evidence.add_subparsers(dest="evidence_command")
@@ -5249,6 +5403,20 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(action_execute)
     action_execute.add_argument("--json", action="store_true", help="Emit JSON output")
     action_execute.set_defaults(func=command_action_execute)
+
+    action_show = action_sub.add_parser("show", help="Show an Action Card")
+    action_show.add_argument("action_id", help="Action ID")
+    add_state_argument(action_show)
+    add_scope_arguments(action_show)
+    action_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    action_show.set_defaults(func=command_action_show)
+
+    action_dry_run = action_sub.add_parser("dry-run", help="Show an Action Card dry-run record")
+    action_dry_run.add_argument("action_id", help="Action ID")
+    add_state_argument(action_dry_run)
+    add_scope_arguments(action_dry_run)
+    action_dry_run.add_argument("--json", action="store_true", help="Emit JSON output")
+    action_dry_run.set_defaults(func=command_action_dry_run)
 
     action_idempotency = action_sub.add_parser("idempotency-test", help="Verify duplicate action requests are deduplicated")
     action_idempotency.add_argument("action_id", help="Action ID")

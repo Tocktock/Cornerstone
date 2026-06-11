@@ -62,9 +62,13 @@ set +e
 cornerstone ready --json > "$ready_json"
 ready_code=$?
 set -e
-[ "$ready_code" -eq 4 ] || fail "ready should exit 4 while product runtime is not ready; got $ready_code"
+[ "$ready_code" -eq 0 ] || fail "ready should exit 0 after local VS0 runtime implementation; got $ready_code"
 python3 -m json.tool "$ready_json" >/dev/null
-grep -q '"status": "not_ready"' "$ready_json" || fail "ready JSON did not report not_ready"
+grep -q '"status": "success"' "$ready_json" || fail "ready JSON did not report success"
+grep -q '"local_scenario_ready": true' "$ready_json" || fail "ready JSON did not report local_scenario_ready true"
+grep -q '"vs0_runtime_ready": true' "$ready_json" || fail "ready JSON did not report vs0_runtime_ready true"
+grep -q '"production_release_ready": false' "$ready_json" || fail "ready JSON overclaimed production release readiness"
+grep -q '"human_required": true' "$ready_json" || fail "ready JSON did not preserve human-required boundary"
 
 cornerstone scenario list --set full --json > "$list_json"
 python3 -m json.tool "$list_json" >/dev/null

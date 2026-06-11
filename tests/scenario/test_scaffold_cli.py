@@ -32,16 +32,20 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["schema_version"], "cs.cli.v0")
         self.assertEqual(payload["status"], "success")
 
-    def test_ready_is_honest_not_ready(self) -> None:
+    def test_ready_reports_local_runtime_without_production_overclaim(self) -> None:
         result = run_cli("ready", "--json")
-        self.assertEqual(result.returncode, 4, result.stdout)
+        self.assertEqual(result.returncode, 0, result.stdout)
         payload = json.loads(result.stdout)
-        self.assertEqual(payload["status"], "not_ready")
-        self.assertTrue(payload["errors"])
+        self.assertEqual(payload["status"], "success")
+        self.assertFalse(payload["errors"])
         checks = {row["name"]: row["present"] for row in payload["checks"]}
         self.assertTrue(checks["fixture_corpus"])
-        self.assertFalse(checks["api_runtime"])
-        self.assertFalse(checks["web_runtime"])
+        self.assertTrue(checks["api_runtime"])
+        self.assertTrue(checks["web_runtime"])
+        self.assertTrue(payload["readiness"]["local_scenario_ready"])
+        self.assertTrue(payload["readiness"]["vs0_runtime_ready"])
+        self.assertFalse(payload["readiness"]["production_release_ready"])
+        self.assertTrue(payload["readiness"]["human_required"])
 
     def test_full_scenario_list_count(self) -> None:
         result = run_cli("scenario", "list", "--set", "full", "--json")
@@ -90,6 +94,17 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertEqual(value, 0)
         self.assertTrue(payload["referenced_product_scenarios"])
         self.assertEqual({row["status"] for row in payload["referenced_product_scenarios"]}, {"NOT_VERIFIED"})
+
+    def test_vs0_product_runtime_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-product-runtime", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-product-runtime")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 12)
+        self.assertEqual(payload["summary"]["human_required"], 2)
+        self.assertFalse(payload["runtime_evidence"]["readiness"]["production_release_ready"])
+        self.assertEqual(payload["negative_evidence"]["real_external_http_calls"], 0)
 
     def test_artifact_ingest_show_and_audit_verify(self) -> None:
         state_dir = ROOT / "tmp/test-artifact-cli"

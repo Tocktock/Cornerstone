@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, VS-0 scaffold readiness report, and no-dependency scaffold CLI bootstrap
+**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, and local deterministic VS-0 product runtime readiness
 **Canonical spelling:** Use **CornerStone** for product/project text.
 
 ## Product Definition
@@ -35,9 +35,12 @@ Users should experience one CornerStone product. Internally, the product keeps c
 12. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`
 13. `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md`
 14. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md`
-15. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-16. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-17. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
+15. `docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md`
+16. `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_SCENARIO_FREEZE_REPORT_2026-06-11.md`
+17. `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md`
+18. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+19. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+20. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
 
 ## Active Authority
 
@@ -56,6 +59,9 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` | Frozen setup-planning contract before VS-0 feature coding |
 | `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` | Current implementation gate: scaffold next, product features blocked |
 | `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` | Frozen first implementation subset |
+| `docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md` | Verified task-scoped scenarios for runnable local VS0 product runtime readiness |
+| `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_SCENARIO_FREEZE_REPORT_2026-06-11.md` | Historical scenario-freeze report for VS0 product runtime readiness |
+| `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md` | Current implementation report for local VS0 product runtime readiness |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
 | `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md` | Verification-centered agent workflow |
@@ -85,7 +91,8 @@ export PATH="$PWD:$PATH"
 cornerstone --help
 cornerstone version --json
 cornerstone health --json
-cornerstone ready --json        # exits 4 until product runtime exists
+cornerstone ready --json        # local_scenario_ready=true, vs0_runtime_ready=true, production_release_ready=false
+cornerstone runtime serve --port 8787
 cornerstone scenario list --set full --json
 cornerstone scenario coverage --json
 python3 scripts/verify_scenario_matrix.py
@@ -109,6 +116,7 @@ cornerstone scenario verify vs0-product-loop-identity --json
 cornerstone scenario verify vs0-memory-truth-boundary --json
 cornerstone scenario verify vs0-product-domain-readiness --json
 cornerstone scenario verify vs0-tenant-security-boundary --json
+cornerstone scenario verify vs0-product-runtime --json
 cornerstone scenario verify full-claim-collaboration --json
 cornerstone scenario verify full-memory-wiki --json
 cornerstone scenario verify full-learning-experience --json
@@ -120,15 +128,16 @@ cornerstone scenario verify full-security-operations --json
 cornerstone scenario verify full-namespace-governance --json
 cornerstone scenario verify full-mission-control-autonomy-lifecycle --json
 make verify-local-fast
+make verify-vs0-runtime
 ```
 
-The current scaffold CLI can verify scaffold readiness, scenario registry coverage, deterministic local fixture-validator readiness, the first CLI-native artifact preservation slice, the first redaction/prompt-injection safety slice, the first search/evidence-bundle/draft-claim/evidence-viewer slice, the first deterministic search-understanding slice, the first owner/namespace isolation slice, the first tamper-evident audit-ledger slice, the first universal non-logistics core slice, the first claim evidence-gating slice, the first default-deny egress/sandbox policy slice, the first regression guardrail summary slice, the first evidence-backed briefing slice, the first Mission Goal Contract / Action Card / dry-run / approval / mocked connector-action safety slice, the first detail-surface slice, the first conversation-onboarding slice, the first product-loop identity slice with durable memory and learning records, the first memory truth-boundary slice, the first product/domain/Autopilot-readiness slice, the first deterministic tenant/security boundary slice for namespace promotion, access policy evaluation, and personal-to-organization memory leakage prevention, the first full-suite claim-collaboration slice for Knowledge Capsules, Decision Cards, corrections, and trust-state-aware shared views, the first full-suite memory/wiki slice for permanent wiki views, memory sovereignty controls, correction, rollback/forget, freshness warnings, poisoning quarantine, explainable memory use, product-learning isolation, namespace-local adaptation, and memory export, the first full-suite learning/experience slice for Mission Trajectory Ledger, Experience Library, recommendations, lesson promotion/control, local adaptation, connected outcomes, metrics, and export, the first full-suite understanding/ontology slice for draft structure suggestions, promoted draft ontology items, operational maps, contradictions, stale-context warnings, versioned ontology changes, and unknown-domain draft handling, the first full-suite extension ecosystem slice for local Agent Pack registry/import, install-vs-activation, explicit grants, certification, ConnectorHub mediation, version pin/update/rollback, untrusted/direct-provider denial, and emergency patch policy, the first full-suite agent-orchestration slice for Orchestrator-led mission traces, visible specialist role contracts/cards, evidence-labeled outputs, direct mutation denial, brain replacement, versioned contract changes, prompt authority denial, failure diagnosis, Agent Pack grant enforcement, and replay without hidden chain-of-thought, the first full-suite brain-routing slice for replaceable model brains, policy-aware routing, provider override denial, namespace-local Brain Performance Ledger learning, ensemble gating, LLM-as-judge support limits, objective/owner outcome precedence, disagreement escalation, calibration tracking, and provider-switch evidence continuity, the first full-suite security-operations slice for ConnectorHub credential custody, sensitive-change stop-and-ask gates, explicit human-required reporting, backup/restore rehearsal, helpful failures, action idempotency, retention transparency, operator status, and release-report evidence checks, the first full-suite namespace-governance slice for owner-scoped archive namespaces, classification-aware access, promotion modes, product-learning boundaries, cross-tenant isolation, namespace audit export, retention dry-run, and recovery, and the first full-suite mission-control/autonomy-lifecycle slice for Mission Control, product loop visibility, source-system boundaries, personal-to-organization path, ConnectorHub action trace, autonomy revoke/escalation/outcome/AAR/audit/metrics/reversibility, and repo-split UX guardrails. These commands verify the frozen AI-verifiable scenario rows through deterministic local CLI evidence; they do not claim production UI/API readiness, live provider integration, production tenant isolation, or human-only operational proof.
+The current scaffold CLI can verify scaffold readiness, scenario registry coverage, deterministic local fixture-validator readiness, the first CLI-native artifact preservation slice, the first redaction/prompt-injection safety slice, the first search/evidence-bundle/draft-claim/evidence-viewer slice, the first deterministic search-understanding slice, the first owner/namespace isolation slice, the first tamper-evident audit-ledger slice, the first universal non-logistics core slice, the first claim evidence-gating slice, the first default-deny egress/sandbox policy slice, the first regression guardrail summary slice, the first evidence-backed briefing slice, the first Mission Goal Contract / Action Card / dry-run / approval / mocked connector-action safety slice, the first detail-surface slice, the first conversation-onboarding slice, the first product-loop identity slice with durable memory and learning records, the first memory truth-boundary slice, the first product/domain/Autopilot-readiness slice, the first deterministic tenant/security boundary slice for namespace promotion, access policy evaluation, and personal-to-organization memory leakage prevention, the first local VS-0 product runtime loop with CLI/API/minimal UI parity, the first full-suite claim-collaboration slice for Knowledge Capsules, Decision Cards, corrections, and trust-state-aware shared views, the first full-suite memory/wiki slice for permanent wiki views, memory sovereignty controls, correction, rollback/forget, freshness warnings, poisoning quarantine, explainable memory use, product-learning isolation, namespace-local adaptation, and memory export, the first full-suite learning/experience slice for Mission Trajectory Ledger, Experience Library, recommendations, lesson promotion/control, local adaptation, connected outcomes, metrics, and export, the first full-suite understanding/ontology slice for draft structure suggestions, promoted draft ontology items, operational maps, contradictions, stale-context warnings, versioned ontology changes, and unknown-domain draft handling, the first full-suite extension ecosystem slice for local Agent Pack registry/import, install-vs-activation, explicit grants, certification, ConnectorHub mediation, version pin/update/rollback, untrusted/direct-provider denial, and emergency patch policy, the first full-suite agent-orchestration slice for Orchestrator-led mission traces, visible specialist role contracts/cards, evidence-labeled outputs, direct mutation denial, brain replacement, versioned contract changes, prompt authority denial, failure diagnosis, Agent Pack grant enforcement, and replay without hidden chain-of-thought, the first full-suite brain-routing slice for replaceable model brains, policy-aware routing, provider override denial, namespace-local Brain Performance Ledger learning, ensemble gating, LLM-as-judge support limits, objective/owner outcome precedence, disagreement escalation, calibration tracking, and provider-switch evidence continuity, the first full-suite security-operations slice for ConnectorHub credential custody, sensitive-change stop-and-ask gates, explicit human-required reporting, backup/restore rehearsal, helpful failures, action idempotency, retention transparency, operator status, and release-report evidence checks, the first full-suite namespace-governance slice for owner-scoped archive namespaces, classification-aware access, promotion modes, product-learning boundaries, cross-tenant isolation, namespace audit export, retention dry-run, and recovery, and the first full-suite mission-control/autonomy-lifecycle slice for Mission Control, product loop visibility, source-system boundaries, personal-to-organization path, ConnectorHub action trace, autonomy revoke/escalation/outcome/AAR/audit/metrics/reversibility, and repo-split UX guardrails. These commands verify the frozen AI-verifiable scenario rows through deterministic local CLI evidence and local API/UI evidence where claimed; they do not claim live provider integration, production tenant isolation, production release readiness, or human-only operational proof.
 
 ## First Implementation Target
 
 Before feature coding, the VS-0 setup-planning gate is `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`. It defines the version baseline, monorepo direction, CLI scaffold expectations, verification report shape, and human approval gates for production dependency additions.
 
-Before scaffold implementation, read `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md`. The current gate allows VS-0 scaffold foundation work only after preflight and approval. It does not allow VS-0 product-feature implementation or any claim that local verification is implemented.
+Before scaffold implementation, read `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md`. That report remains historical scaffold-gate context. Current local deterministic runtime evidence is recorded in `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md`; it does not claim production release readiness.
 
 VS-0 starts with:
 

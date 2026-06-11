@@ -6,11 +6,15 @@ import re
 import shutil
 import subprocess
 import csv
+import threading
 from pathlib import Path
 from time import perf_counter
 from typing import Any
+from urllib import request
+from urllib.error import HTTPError
 
 from cornerstone_cli.local_test import LocalTestProvider
+from cornerstone_cli.product_runtime import UI_SURFACES, make_server
 from cornerstone_cli.validators import (
     ValidationIssue,
     count_unredacted_secrets,
@@ -461,6 +465,67 @@ def _artifact(transcript: dict[str, Any]) -> dict[str, Any]:
 
 def _exit_ok(transcript: dict[str, Any]) -> bool:
     return transcript.get("exit_code") == 0 and isinstance(transcript.get("stdout_json"), dict)
+
+
+def _http_json(base_url: str, method: str, path: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
+    data = None if body is None else json.dumps(body).encode("utf-8")
+    req = request.Request(
+        f"{base_url}{path}",
+        data=data,
+        method=method,
+        headers={"content-type": "application/json"},
+    )
+    status_code = 0
+    payload: dict[str, Any] | None = None
+    body_text = ""
+    try:
+        with request.urlopen(req, timeout=5) as response:
+            status_code = response.status
+            body_text = response.read().decode("utf-8")
+    except HTTPError as error:
+        status_code = error.code
+        body_text = error.read().decode("utf-8")
+    except OSError as error:
+        return {
+            "schema_version": "cs.api_transcript.v0",
+            "method": method,
+            "path": path,
+            "status_code": status_code,
+            "stdout_json": None,
+            "error": str(error),
+        }
+    try:
+        payload = json.loads(body_text)
+    except ValueError:
+        payload = None
+    return {
+        "schema_version": "cs.api_transcript.v0",
+        "method": method,
+        "path": path,
+        "status_code": status_code,
+        "stdout_json": payload,
+        "error": None if payload is not None else body_text[:240],
+    }
+
+
+def _http_text(base_url: str, path: str) -> dict[str, Any]:
+    try:
+        with request.urlopen(f"{base_url}{path}", timeout=5) as response:
+            body = response.read().decode("utf-8")
+            return {
+                "schema_version": "cs.ui_trace.v0",
+                "path": path,
+                "status_code": response.status,
+                "body": body,
+            }
+    except OSError as error:
+        return {
+            "schema_version": "cs.ui_trace.v0",
+            "path": path,
+            "status_code": 0,
+            "body": "",
+            "error": str(error),
+        }
 
 
 SCOPE_FIELDS = ["tenant_id", "owner_id", "namespace_id", "workspace_id"]
@@ -9390,6 +9455,592 @@ def verify_vs0_regression_guardrails(root: Path) -> dict[str, Any]:
     }
 
 
+def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-product-runtime")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    input_path = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    prompt_injection_path = "fixtures/vs0/packs/10_prompt_injection/input.txt"
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    transcripts["health"] = _run_cli_json(root, ["health", "--json"])
+    transcripts["ready"] = _run_cli_json(root, ["ready", "--json"])
+    transcripts["ingest"] = _run_cli_json(root, ["artifact", "ingest", input_path, "--state-dir", state_rel, "--json"])
+    artifact = _artifact(transcripts["ingest"])
+    artifact_id = artifact.get("artifact_id", "")
+    transcripts["artifact_show"] = (
+        _run_cli_json(root, ["artifact", "show", artifact_id, "--state-dir", state_rel, "--json"]) if artifact_id else {}
+    )
+    transcripts["search"] = _run_cli_json(root, ["search", "query", "alpha-evidence-anchor", "--state-dir", state_rel, "--json"])
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["search_snapshot_show"] = (
+        _run_cli_json(root, ["search", "snapshot", "show", snapshot_id, "--state-dir", state_rel, "--json"]) if snapshot_id else {}
+    )
+    transcripts["bundle_create"] = (
+        _run_cli_json(root, ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"])
+        if snapshot_id
+        else {}
+    )
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["bundle_show"] = (
+        _run_cli_json(root, ["evidence", "bundle", "show", bundle_id, "--state-dir", state_rel, "--json"]) if bundle_id else {}
+    )
+    transcripts["claim_create"] = (
+        _run_cli_json(
+            root,
+            [
+                "claim",
+                "create",
+                "--evidence-bundle-id",
+                bundle_id,
+                "--statement",
+                "The Alpha evidence anchor is ready for the VS0 runtime loop.",
+                "--state-dir",
+                state_rel,
+                "--json",
+            ],
+        )
+        if bundle_id
+        else {}
+    )
+    claim = _payload(transcripts["claim_create"]).get("claim", {})
+    claim_id = claim.get("claim_id", "")
+    transcripts["claim_show"] = _run_cli_json(root, ["claim", "show", claim_id, "--state-dir", state_rel, "--json"]) if claim_id else {}
+    transcripts["claim_approve"] = _run_cli_json(root, ["claim", "approve", claim_id, "--state-dir", state_rel, "--json"]) if claim_id else {}
+    approved_claim = _payload(transcripts["claim_approve"]).get("claim", {})
+
+    transcripts["unsupported_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--statement",
+            "Unsupported VS0 runtime claim without attached evidence.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    unsupported_claim = _payload(transcripts["unsupported_claim_create"]).get("claim", {})
+    unsupported_claim_id = unsupported_claim.get("claim_id", "")
+    transcripts["unsupported_claim_show"] = (
+        _run_cli_json(root, ["claim", "show", unsupported_claim_id, "--state-dir", state_rel, "--json"]) if unsupported_claim_id else {}
+    )
+    transcripts["unsupported_claim_approve"] = (
+        _run_cli_json(root, ["claim", "approve", unsupported_claim_id, "--state-dir", state_rel, "--json"])
+        if unsupported_claim_id
+        else {}
+    )
+
+    transcripts["mission_create"] = (
+        _run_cli_json(
+            root,
+            [
+                "mission",
+                "create",
+                "--goal",
+                "Complete the VS0 runtime loop through governed mock action",
+                "--claim-id",
+                claim_id,
+                "--state-dir",
+                state_rel,
+                "--json",
+            ],
+        )
+        if claim_id
+        else {}
+    )
+    mission = _payload(transcripts["mission_create"]).get("mission", {})
+    mission_id = mission.get("mission_id", "")
+    transcripts["mission_activate"] = (
+        _run_cli_json(root, ["mission", "activate", mission_id, "--mode", "autopilot", "--state-dir", state_rel, "--json"])
+        if mission_id
+        else {}
+    )
+    transcripts["action_propose"] = (
+        _run_cli_json(
+            root,
+            [
+                "action",
+                "propose",
+                "--mission-id",
+                mission_id,
+                "--claim-id",
+                claim_id,
+                "--goal",
+                "Write a mocked local status through ConnectorHub boundary",
+                "--action-kind",
+                "external_writeback",
+                "--risk",
+                "high",
+                "--connector",
+                "mock_connector",
+                "--target",
+                "mock://vs0-runtime/status",
+                "--state-dir",
+                state_rel,
+                "--json",
+            ],
+        )
+        if mission_id and claim_id
+        else {}
+    )
+    action = _payload(transcripts["action_propose"]).get("action_card", {})
+    action_id = action.get("action_id", "")
+    transcripts["action_show"] = _run_cli_json(root, ["action", "show", action_id, "--state-dir", state_rel, "--json"]) if action_id else {}
+    transcripts["action_dry_run"] = _run_cli_json(root, ["action", "dry-run", action_id, "--state-dir", state_rel, "--json"]) if action_id else {}
+    transcripts["action_execute_before_approval"] = (
+        _run_cli_json(root, ["action", "execute", action_id, "--state-dir", state_rel, "--json"]) if action_id else {}
+    )
+    transcripts["action_approve"] = _run_cli_json(root, ["action", "approve", action_id, "--state-dir", state_rel, "--json"]) if action_id else {}
+    transcripts["action_execute"] = _run_cli_json(root, ["action", "execute", action_id, "--state-dir", state_rel, "--json"]) if action_id else {}
+    executed_action = _payload(transcripts["action_execute"]).get("action_card", {})
+    action_result = _payload(transcripts["action_execute"]).get("action_result", {})
+    transcripts["audit_list"] = _run_cli_json(root, ["audit", "list", "--state-dir", state_rel, "--json"])
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+    transcripts["prompt_injection_ingest"] = _run_cli_json(
+        root,
+        ["artifact", "ingest", prompt_injection_path, "--state-dir", state_rel, "--trust", "untrusted", "--json"],
+    )
+    prompt_artifact = _artifact(transcripts["prompt_injection_ingest"])
+    transcripts["cross_namespace_access"] = _run_cli_json(
+        root,
+        [
+            "access",
+            "evaluate",
+            "--action",
+            "read",
+            "--resource-kind",
+            "artifact",
+            "--resource-id",
+            artifact_id or "missing",
+            "--resource-owner-id",
+            "local-org",
+            "--resource-namespace-id",
+            "organization",
+            "--resource-workspace-id",
+            "ops",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+
+    api_transcripts: dict[str, dict[str, Any]] = {}
+    ui_summary: dict[str, Any] = {}
+    server = make_server(root, state_path)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    host, port = server.server_address
+    base_url = f"http://{host}:{port}"
+    try:
+        api_transcripts["health"] = _http_json(base_url, "GET", "/health")
+        api_transcripts["ready"] = _http_json(base_url, "GET", "/ready")
+        ui_trace = _http_text(base_url, "/")
+        body = ui_trace.get("body", "")
+        ui_summary = {
+            "schema_version": "cs.ui_trace_summary.v0",
+            "path": "/",
+            "status_code": ui_trace.get("status_code"),
+            "body_length": len(body),
+            "surface_presence": {surface: surface in body for surface in UI_SURFACES},
+            "production_overclaim_absent": "production_release_ready=true" not in body,
+            "readiness_labels_present": all(
+                label in body
+                for label in ["local_scenario_ready=true", "vs0_runtime_ready=true", "production_release_ready=false", "external_calls=0"]
+            ),
+        }
+        api_transcripts["artifact_ingest"] = _http_json(base_url, "POST", "/artifacts", {"path": input_path, "trust": "untrusted"})
+        api_artifact = (api_transcripts["artifact_ingest"].get("stdout_json") or {}).get("artifact", {})
+        api_artifact_id = api_artifact.get("artifact_id", "")
+        api_transcripts["artifact_show"] = _http_json(base_url, "GET", f"/artifacts/{api_artifact_id}") if api_artifact_id else {}
+        api_transcripts["search"] = _http_json(base_url, "POST", "/search", {"query": "alpha-evidence-anchor"})
+        api_snapshot = (api_transcripts["search"].get("stdout_json") or {}).get("search_snapshot", {})
+        api_snapshot_id = api_snapshot.get("search_snapshot_id", "")
+        api_transcripts["search_snapshot_show"] = (
+            _http_json(base_url, "GET", f"/search-snapshots/{api_snapshot_id}") if api_snapshot_id else {}
+        )
+        api_transcripts["bundle_create"] = (
+            _http_json(base_url, "POST", "/evidence-bundles", {"search_snapshot_id": api_snapshot_id}) if api_snapshot_id else {}
+        )
+        api_bundle = (api_transcripts["bundle_create"].get("stdout_json") or {}).get("evidence_bundle", {})
+        api_bundle_id = api_bundle.get("evidence_bundle_id", "")
+        api_transcripts["bundle_show"] = _http_json(base_url, "GET", f"/evidence-bundles/{api_bundle_id}") if api_bundle_id else {}
+        api_transcripts["claim_create"] = (
+            _http_json(
+                base_url,
+                "POST",
+                "/claims",
+                {"evidence_bundle_id": api_bundle_id, "statement": "The API path can create an evidence-backed VS0 runtime claim."},
+            )
+            if api_bundle_id
+            else {}
+        )
+        api_claim = (api_transcripts["claim_create"].get("stdout_json") or {}).get("claim", {})
+        api_claim_id = api_claim.get("claim_id", "")
+        api_transcripts["claim_approve"] = (
+            _http_json(base_url, "POST", f"/claims/{api_claim_id}/approve", {}) if api_claim_id else {}
+        )
+        api_transcripts["action_create"] = (
+            _http_json(
+                base_url,
+                "POST",
+                "/actions",
+                {
+                    "claim_id": api_claim_id,
+                    "goal": "Write a mocked local status through the API ConnectorHub boundary.",
+                    "action_kind": "external_writeback",
+                    "risk": "high",
+                    "target": "mock://vs0-runtime/api-status",
+                },
+            )
+            if api_claim_id
+            else {}
+        )
+        api_action = (api_transcripts["action_create"].get("stdout_json") or {}).get("action_card", {})
+        api_action_id = api_action.get("action_id", "")
+        api_transcripts["action_dry_run"] = (
+            _http_json(base_url, "POST", f"/actions/{api_action_id}/dry-run", {}) if api_action_id else {}
+        )
+        api_transcripts["action_approve"] = (
+            _http_json(base_url, "POST", f"/actions/{api_action_id}/approve", {"approver": "owner"}) if api_action_id else {}
+        )
+        api_transcripts["action_execute"] = (
+            _http_json(base_url, "POST", f"/actions/{api_action_id}/execute", {}) if api_action_id else {}
+        )
+        api_transcripts["audit_events"] = _http_json(base_url, "GET", "/audit-events")
+        api_transcripts["audit_verify"] = _http_json(base_url, "POST", "/audit/verify", {})
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+    ready_readiness = _payload(transcripts["ready"]).get("readiness", {})
+    ready_ok = (
+        _exit_ok(transcripts["ready"])
+        and ready_readiness.get("local_scenario_ready") is True
+        and ready_readiness.get("vs0_runtime_ready") is True
+        and ready_readiness.get("production_release_ready") is False
+        and ready_readiness.get("human_required") is True
+    )
+    api_health_ok = (api_transcripts["health"].get("status_code") == 200 and (api_transcripts["health"].get("stdout_json") or {}).get("status") == "success")
+    api_ready = (api_transcripts["ready"].get("stdout_json") or {}).get("readiness", {})
+    api_ready_ok = (
+        api_transcripts["ready"].get("status_code") == 200
+        and api_ready.get("local_scenario_ready") is True
+        and api_ready.get("vs0_runtime_ready") is True
+        and api_ready.get("production_release_ready") is False
+    )
+    ui_ok = (
+        ui_summary.get("status_code") == 200
+        and all(ui_summary.get("surface_presence", {}).values())
+        and ui_summary.get("production_overclaim_absent") is True
+        and ui_summary.get("readiness_labels_present") is True
+    )
+
+    artifact_show = _payload(transcripts["artifact_show"]).get("artifact", {})
+    artifact_ok = (
+        _exit_ok(transcripts["ingest"])
+        and _exit_ok(transcripts["artifact_show"])
+        and artifact.get("artifact_id")
+        and artifact.get("checksum_sha256")
+        and str(artifact.get("original_storage_ref", "")).startswith("sha256:")
+        and artifact.get("scope", {}).get("namespace_id") == "personal"
+        and artifact.get("source", {}).get("path")
+        and artifact.get("derived", {}).get("status") == "ready"
+        and _payload(transcripts["ingest"]).get("evidence_refs")
+        and _payload(transcripts["ingest"]).get("audit_refs")
+        and artifact_show.get("derived_text_preview")
+    )
+    api_artifact_ok = (
+        api_transcripts["artifact_ingest"].get("status_code") == 200
+        and (api_transcripts["artifact_ingest"].get("stdout_json") or {}).get("artifact", {}).get("artifact_id")
+        and (api_transcripts["artifact_show"].get("stdout_json") or {}).get("artifact", {}).get("derived_text_preview")
+    )
+
+    search_ok = (
+        _exit_ok(transcripts["search"])
+        and _exit_ok(transcripts["search_snapshot_show"])
+        and snapshot.get("result_count", 0) >= 1
+        and "alpha-evidence-anchor" in (snapshot.get("results") or [{}])[0].get("snippet", "")
+        and snapshot.get("filters", {}).get("namespace_id") == "personal"
+        and _payload(transcripts["search_snapshot_show"]).get("audit_refs")
+    )
+    api_search_ok = (
+        api_transcripts["search"].get("status_code") == 200
+        and (api_transcripts["search"].get("stdout_json") or {}).get("search_snapshot", {}).get("result_count", 0) >= 1
+        and api_transcripts["search_snapshot_show"].get("status_code") == 200
+    )
+
+    unsupported_show_claim = _payload(transcripts["unsupported_claim_show"]).get("claim", {})
+    zero_evidence_denied = (
+        transcripts["unsupported_claim_approve"].get("exit_code") == 4
+        and "CS_CLAIM_EVIDENCE_REQUIRED" in _error_codes(transcripts["unsupported_claim_approve"])
+        and unsupported_show_claim.get("trust_state") == "draft"
+        and unsupported_show_claim.get("authority", {}).get("can_be_approved") is False
+    )
+    claim_ok = (
+        _exit_ok(transcripts["bundle_create"])
+        and _exit_ok(transcripts["bundle_show"])
+        and _exit_ok(transcripts["claim_create"])
+        and _exit_ok(transcripts["claim_show"])
+        and _exit_ok(transcripts["claim_approve"])
+        and bundle.get("evidence_items")
+        and claim.get("trust_state") == "evidence_backed"
+        and approved_claim.get("trust_state") == "approved"
+        and claim.get("evidence_bundle", {}).get("evidence_bundle_id") == bundle_id
+        and zero_evidence_denied
+    )
+    api_claim_ok = (
+        api_transcripts["bundle_create"].get("status_code") == 200
+        and api_transcripts["claim_create"].get("status_code") == 200
+        and api_transcripts["claim_approve"].get("status_code") == 200
+        and (api_transcripts["claim_approve"].get("stdout_json") or {}).get("claim", {}).get("trust_state") == "approved"
+    )
+
+    dry_run = _payload(transcripts["action_dry_run"]).get("dry_run", {})
+    action_policy = action.get("policy_decision", {})
+    action_dry_run_ok = (
+        _exit_ok(transcripts["action_propose"])
+        and _exit_ok(transcripts["action_show"])
+        and _exit_ok(transcripts["action_dry_run"])
+        and action.get("risk") == "high"
+        and action.get("connector_boundary", {}).get("mediated_by") == "ConnectorHub"
+        and action.get("connector_boundary", {}).get("direct_provider_access") is False
+        and dry_run.get("diff")
+        and dry_run.get("expected_impact")
+        and action_policy.get("decision") == "requires_approval"
+        and action.get("approval", {}).get("status") == "pending"
+        and _payload(transcripts["action_dry_run"]).get("policy_decision_refs")
+        and _payload(transcripts["action_dry_run"]).get("audit_refs")
+    )
+    api_action_dry_run_ok = (
+        api_transcripts["action_create"].get("status_code") == 200
+        and api_transcripts["action_dry_run"].get("status_code") == 200
+        and (api_transcripts["action_dry_run"].get("stdout_json") or {}).get("dry_run", {}).get("diff")
+    )
+
+    api_action_result = (api_transcripts["action_execute"].get("stdout_json") or {}).get("action_result", {})
+    execution_ok = (
+        _action_policy_blocked(transcripts["action_execute_before_approval"])
+        and _exit_ok(transcripts["action_approve"])
+        and _exit_ok(transcripts["action_execute"])
+        and action_result.get("status") == "success"
+        and executed_action.get("execution", {}).get("status") == "executed"
+        and action_result.get("side_effect_boundary") == "mocked_connector"
+        and action_result.get("external_http_calls") == 0
+        and action_result.get("mock_connector_calls") == 1
+        and executed_action.get("connector_boundary", {}).get("credentials_exposed_to_agent") is False
+    )
+    api_execution_ok = (
+        api_transcripts["action_approve"].get("status_code") == 200
+        and api_transcripts["action_execute"].get("status_code") == 200
+        and api_action_result.get("status") == "success"
+        and api_action_result.get("external_http_calls") == 0
+    )
+
+    audit_events_payload = _payload(transcripts["audit_list"]).get("audit_events", [])
+    event_types = {event.get("event_type") for event in audit_events_payload}
+    required_event_types = {
+        "artifact.ingested",
+        "search.snapshot.created",
+        "evidence_bundle.created",
+        "claim.approved",
+        "action.card.proposed",
+        "action.approved",
+        "action.executed",
+    }
+    audit_ok = (
+        _exit_ok(transcripts["audit_list"])
+        and _exit_ok(transcripts["audit_verify"])
+        and required_event_types.issubset(event_types)
+        and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+        and api_transcripts["audit_events"].get("status_code") == 200
+        and api_transcripts["audit_verify"].get("status_code") == 200
+    )
+
+    prompt_safety = prompt_artifact.get("safety", {})
+    prompt_injection_ok = (
+        _exit_ok(transcripts["prompt_injection_ingest"])
+        and prompt_safety.get("untrusted_evidence") is True
+        and prompt_safety.get("unsafe_instruction_detected") is True
+        and prompt_safety.get("tool_calls_created") == 0
+        and prompt_safety.get("action_cards_created_from_untrusted_artifact") == 0
+        and prompt_safety.get("external_http_calls") == 0
+        and prompt_safety.get("authority_expanded") is False
+        and _payload(transcripts["prompt_injection_ingest"]).get("policy_decision_refs")
+    )
+    cross_namespace_ok = _policy_denied(transcripts["cross_namespace_access"], "CS_ACCESS_POLICY_DENIED")
+    production_readiness_ok = ready_ok and api_ready_ok
+
+    rows = [
+        _row(
+            "VS0-RT-001",
+            "MUST_PASS",
+            "PASS" if ready_ok and api_health_ok and api_ready_ok and ui_ok else "FAIL",
+            ["cornerstone ready --json", "GET /health", "GET /ready", "GET /"],
+            "Readiness truthfully separates local scenario readiness, VS0 runtime readiness, and production release readiness; API health and UI shell load.",
+        ),
+        _row(
+            "VS0-RT-002",
+            "MUST_PASS",
+            "PASS" if artifact_ok and api_artifact_ok else "FAIL",
+            ["cornerstone artifact ingest <fixture> --json", "cornerstone artifact show <artifact_id> --json", "POST /artifacts", "GET /artifacts/{id}"],
+            "Artifact ingest preserves original content and exposes checksum, scope, source, derived text, evidence refs, and audit refs through CLI and API.",
+        ),
+        _row(
+            "VS0-RT-003",
+            "MUST_PASS",
+            "PASS" if search_ok and api_search_ok else "FAIL",
+            ["cornerstone search query alpha-evidence-anchor --json", "cornerstone search snapshot show <id> --json", "POST /search"],
+            "Search creates scoped reproducible snapshots with snippets and evidence/audit refs through CLI and API.",
+        ),
+        _row(
+            "VS0-RT-004",
+            "MUST_PASS",
+            "PASS" if claim_ok and api_claim_ok else "FAIL",
+            ["cornerstone evidence bundle create --search-snapshot-id <id> --json", "cornerstone claim create --evidence-bundle-id <id> --json", "cornerstone claim approve <id> --json"],
+            "Evidence Bundle-backed claims can be approved; zero-evidence claims remain draft and cannot be approved.",
+        ),
+        _row(
+            "VS0-RT-005",
+            "MUST_PASS",
+            "PASS" if action_dry_run_ok and api_action_dry_run_ok else "FAIL",
+            ["cornerstone action propose ... --json", "cornerstone action dry-run <action_id> --json", "POST /actions/{id}/dry-run"],
+            "Action Card dry-run exposes diff, expected impact, policy decision, risk, approval state, connector boundary, and audit refs.",
+        ),
+        _row(
+            "VS0-RT-006",
+            "MUST_PASS",
+            "PASS" if execution_ok and api_execution_ok else "FAIL",
+            ["cornerstone action approve <action_id> --json", "cornerstone action execute <action_id> --json", "POST /actions/{id}/execute"],
+            "Approved local/mock ConnectorHub-style execution records a result with zero external HTTP calls and no credential exposure.",
+        ),
+        _row(
+            "VS0-RT-007",
+            "MUST_PASS",
+            "PASS" if audit_ok else "FAIL",
+            ["cornerstone audit list --json", "cornerstone audit verify --json", "GET /audit-events", "POST /audit/verify"],
+            "Audit timeline covers artifact, search, claim, action, approval, execution, and passes hash-chain verification.",
+        ),
+        _row(
+            "VS0-RT-008",
+            "MUST_PASS",
+            "PASS" if ui_ok else "FAIL",
+            ["GET /", "UI surface assertions"],
+            "Minimal Calm Surface UI exposes Home/Ops Inbox, Artifact Viewer, Search, Claim Builder, Action Card, and Audit Detail without production overclaim.",
+        ),
+        _row(
+            "VS0-RT-R01",
+            "REGRESSION_GUARD",
+            "PASS" if prompt_injection_ok else "FAIL",
+            ["cornerstone artifact ingest fixtures/vs0/packs/10_prompt_injection/input.txt --trust untrusted --json"],
+            "Prompt-injection fixture remains untrusted evidence and creates no tool calls, action cards, egress, or authority expansion.",
+        ),
+        _row(
+            "VS0-RT-R02",
+            "REGRESSION_GUARD",
+            "PASS" if cross_namespace_ok else "FAIL",
+            ["cornerstone access evaluate --action read --resource-owner-id local-org --resource-namespace-id organization --json"],
+            "Cross-namespace access is denied with cause, resolution path, policy ref, and audit ref.",
+        ),
+        _row(
+            "VS0-RT-R03",
+            "REGRESSION_GUARD",
+            "PASS" if zero_evidence_denied else "FAIL",
+            ["cornerstone claim approve <unsupported_claim_id> --json"],
+            "Zero-evidence claim approval is rejected and the claim remains draft.",
+        ),
+        _row(
+            "VS0-RT-R04",
+            "REGRESSION_GUARD",
+            "PASS" if production_readiness_ok else "FAIL",
+            ["cornerstone ready --json", "GET /ready"],
+            "Readiness reports local and VS0 runtime readiness while keeping production_release_ready=false and human_required=true.",
+        ),
+        _row(
+            "VS0-RT-H01",
+            "HUMAN_REQUIRED",
+            "HUMAN_REQUIRED",
+            ["human live-provider verification"],
+            "Live connector/provider proof requires credentials and possible third-party mutation; redacted human evidence is required.",
+            owner="Human",
+        ),
+        _row(
+            "VS0-RT-H02",
+            "HUMAN_REQUIRED",
+            "HUMAN_REQUIRED",
+            ["human usability acceptance"],
+            "A human operator must confirm the VS0 flow is understandable and useful.",
+            owner="Human",
+        ),
+    ]
+    blocking = [
+        row
+        for row in rows
+        if row["owner"] != "Human" and row["status"] in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-product-runtime",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "human_required": len([row for row in rows if row["owner"] == "Human"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "LOCAL_VS0_PRODUCT_RUNTIME_READY_PRODUCTION_NOT_READY",
+        },
+        "scenario_results": rows,
+        "cli_transcripts": transcripts,
+        "api_transcripts": api_transcripts,
+        "ui_summary": ui_summary,
+        "runtime_evidence": {
+            "artifact_id": artifact_id,
+            "search_snapshot_id": snapshot_id,
+            "evidence_bundle_id": bundle_id,
+            "claim_id": claim_id,
+            "mission_id": mission_id,
+            "action_id": action_id,
+            "api_action_id": ((api_transcripts.get("action_create", {}).get("stdout_json") or {}).get("action_card", {}) or {}).get("action_id"),
+            "audit_event_count": len(audit_events_payload),
+            "audit_event_types": sorted(str(event_type) for event_type in event_types if event_type),
+            "readiness": ready_readiness,
+        },
+        "negative_evidence": {
+            "tool_calls_from_untrusted_artifact": int(prompt_safety.get("tool_calls_created", 1)),
+            "action_cards_from_untrusted_artifact": int(prompt_safety.get("action_cards_created_from_untrusted_artifact", 1)),
+            "egress_from_untrusted_artifact": int(prompt_safety.get("external_http_calls", 1)),
+            "authority_expanded_from_untrusted_artifact": 0 if prompt_safety.get("authority_expanded") is False else 1,
+            "cross_namespace_read_allowed": 0 if cross_namespace_ok else 1,
+            "zero_evidence_claim_approved": 0 if zero_evidence_denied else 1,
+            "production_release_overclaimed": 0 if ready_readiness.get("production_release_ready") is False else 1,
+            "real_external_http_calls": int(action_result.get("external_http_calls", 1)) + int(api_action_result.get("external_http_calls", 1)),
+            "connector_credentials_exposed": 0 if executed_action.get("connector_boundary", {}).get("credentials_exposed_to_agent") is False else 1,
+        },
+        "human_required": [
+            {
+                "id": "VS0-RT-H01",
+                "why_ai_cannot_verify": "Live connector/provider verification requires credentials and may mutate third-party state.",
+                "required_human_action": "Run approved live-provider dry-run/execution with fake-safe or approved data, then redact evidence.",
+                "expected_evidence": "Redacted provider transcript, policy approval, execution result, and audit refs.",
+                "release_impact": "Blocks production release claim; does not block local VS0 runtime readiness.",
+            },
+            {
+                "id": "VS0-RT-H02",
+                "why_ai_cannot_verify": "Usability acceptance is subjective.",
+                "required_human_action": "Review the VS0 UI/API/CLI loop and record accept/reject with screenshots or recording.",
+                "expected_evidence": "Human acceptance note, screenshots or recording, and follow-up issue list if rejected.",
+                "release_impact": "Blocks human acceptance; does not block deterministic local scenario readiness.",
+            },
+        ],
+    }
+
+
 def verify_vs0_scaffold(root: Path) -> dict[str, Any]:
     docs_result = _run_script(root, "scripts/verify_sot_docs.sh")
     cli_result = _run_script(root, "scripts/verify_cli_native_first_docs.sh")
@@ -9464,7 +10115,7 @@ def verify_vs0_scaffold(root: Path) -> dict[str, Any]:
                 "docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md",
                 "cornerstone ready --json",
             ],
-            "Future product-runtime readiness is still reported honestly as not ready.",
+            "Scaffold readiness docs remain verified; runnable local runtime readiness is now handled by the vs0-product-runtime contract.",
         ),
         _row(
             "VS0-SCAF-005",
