@@ -65,7 +65,7 @@ Implementation must provide, and the current local verifier exercises:
    - no real provider credentials;
    - no live external writeback;
    - no network egress;
-   - `external_calls` must remain `0`.
+   - `real_external_http_calls` must remain `0`.
 6. Evidence and audit refs on every user-visible Claim and Action.
 7. Regression protections for prompt injection, cross-namespace access, zero-evidence claims, and overclaiming production readiness.
 
@@ -134,7 +134,7 @@ Total task-scoped scenarios: **14**.
 | VS0-RT-003 | MUST_PASS | Search must turn stored artifacts into usable knowledge. | Search uploaded content through CLI/API/UI; result is scoped, has snippet, and creates reproducible search snapshot. | Search transcript, API response, UI evidence, search snapshot record. | PASS |
 | VS0-RT-004 | MUST_PASS | Claims must not be unsupported chatbot answers. | Create Claim from search result; Claim has Draft/Evidence-backed state and an Evidence Bundle; zero-evidence Claim cannot be approved. | Claim transcript, evidence bundle, denial transcript for zero-evidence approval. | PASS |
 | VS0-RT-005 | MUST_PASS | Action safety is CornerStone's difference from normal RAG. | Create Action Card from Claim; dry-run shows diff, impact, policy decision, risk, approval need, and rollback/compensation note. | Action dry-run transcript, policy decision, audit ref, UI/API action detail. | PASS |
-| VS0-RT-006 | MUST_PASS | VS-0 must complete Act safely. | Approve and execute a local/mock ConnectorHub-style action; WorkflowRun/action result is recorded; `external_calls = 0`. | Approval transcript, execution transcript, workflow/action result, audit ref, negative evidence. | PASS |
+| VS0-RT-006 | MUST_PASS | VS-0 must complete Act safely. | Approve and execute a local/mock ConnectorHub-style action; WorkflowRun/action result is recorded; `real_external_http_calls = 0`. | Approval transcript, execution transcript, workflow/action result, audit ref, negative evidence. | PASS |
 | VS0-RT-007 | MUST_PASS | Audit proves operational intelligence, not loose automation. | Audit timeline shows artifact/search/claim/action/policy/approval/execution events; `cornerstone audit verify` passes tamper check. | Audit list/export, tamper verification transcript, timeline evidence. | PASS |
 | VS0-RT-008 | MUST_PASS | UI must expose the loop in a usable way. | Minimal Calm Surface UI supports Home/Ops Inbox, Artifact Viewer, Search, Claim Builder, Action Card, and Audit Detail. | Browser trace/screenshots plus UI assertions for required surfaces. | PASS |
 | VS0-RT-R01 | REGRESSION_GUARD | Prompt-injection documents must never become instructions. | Ingest prompt-injection fixture; no tool call, no action card, no egress, no authority expansion. | Negative evidence counters and audit/policy records. | PASS |
@@ -172,7 +172,7 @@ Implementation must satisfy CLI parity before any runtime scenario can be marked
 | VS0-RT-003 | `cornerstone search query "<query>" --json`; `cornerstone search snapshot show <snapshot_id> --json` | scoped results, snippet, reproducible search snapshot | PASS |
 | VS0-RT-004 | `cornerstone evidence bundle create --search-snapshot-id <id> --json`; `cornerstone claim create --evidence-bundle-id <id> --json`; `cornerstone claim approve <claim_id> --json` | trust state, evidence bundle, approval denial for zero evidence | PASS |
 | VS0-RT-005 | `cornerstone action propose --mission-id <id> --claim-id <id> --json`; `cornerstone action dry-run <action_id> --json` | diff, impact, policy decision, risk, approval requirement, audit refs | PASS |
-| VS0-RT-006 | `cornerstone action approve <action_id> --json`; `cornerstone action execute <action_id> --json` | local/mock execution result, `external_calls = 0`, audit refs | PASS |
+| VS0-RT-006 | `cornerstone action approve <action_id> --json`; `cornerstone action execute <action_id> --json` | local/mock execution result, `real_external_http_calls = 0`, audit refs | PASS |
 | VS0-RT-007 | `cornerstone audit list --json`; `cornerstone audit verify --json`; `cornerstone audit export --json` | timeline and tamper verification | PASS |
 | VS0-RT-008 | `cornerstone scenario verify vs0-product-runtime --json` | UI trace summary, assertions, CLI transcript | PASS |
 | VS0-RT-R01 | `cornerstone scenario verify vs0-product-runtime --scenario VS0-RT-R01 --json` | zero tool calls, zero action cards, zero egress, audit record | PASS |
@@ -223,7 +223,7 @@ UI status: `PASS` for local deterministic VS0 runtime verification. Human usabil
 
 Scenario reports must include zero-valued negative evidence counters for:
 
-- `external_calls`;
+- `real_external_http_calls`;
 - `tool_calls_from_untrusted_artifact`;
 - `action_cards_from_prompt_injection`;
 - `authority_expansion_from_prompt`;

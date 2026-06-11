@@ -1,0 +1,45 @@
+{
+  "browser": {
+    "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "headless": true,
+    "name": "Google Chrome",
+    "window_size": "1280,900"
+  },
+  "chrome_exit_codes": {
+    "screenshot": 124
+  },
+  "chrome_timeout_after_screenshot": true,
+  "created_at": "2026-06-11T08:30:25.525144Z",
+  "dom_path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
+  "dom_sha256": "e58ee028d8c09a61e1a83a401e7dae7eb6731cbcc8a0be30028c3891f2ec3479",
+  "errors": [],
+  "production_overclaim_absent": true,
+  "readiness_labels_present": {
+    "local_scenario_ready=true": true,
+    "production_release_ready=false": true,
+    "real_external_http_calls=0": true,
+    "vs0_runtime_ready=true": true
+  },
+  "route": "/",
+  "schema_version": "cs.browser_proof.v0",
+  "screenshot_bytes": 101421,
+  "screenshot_path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
+  "screenshot_sha256": "32ac802f9aa96c9d19da703caf5ab3640ee4b76cc84d03cdcc122cfdd63b1cf9",
+  "status": "passed",
+  "stderr_tail": {
+    "screenshot": [
+      "101421 bytes written to file /Users/jiyong/playground/Cornerstone/reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
+      "[12073:30975743:0611/173017.584708:ERROR:base/process/process_mac.cc:53] task_policy_set TASK_CATEGORY_POLICY: (os/kern) invalid argument (4)",
+      "[12073:30975743:0611/173017.584722:ERROR:base/process/process_mac.cc:98] task_policy_set TASK_SUPPRESSION_POLICY: (os/kern) invalid argument (4)"
+    ]
+  },
+  "surface_presence": {
+    "Action Card": true,
+    "Artifact Viewer": true,
+    "Audit Detail": true,
+    "Claim Builder": true,
+    "Home/Ops Inbox": true,
+    "Search": true
+  },
+  "url": "http://127.0.0.1:64740/"
+}

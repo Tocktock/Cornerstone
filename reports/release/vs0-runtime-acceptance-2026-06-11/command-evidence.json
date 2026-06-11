@@ -1,0 +1,11 @@
+{
+  "commands": [
+    "cornerstone scenario verify vs0-product-runtime --output reports/scenario/vs0-product-runtime-2026-06-11.json --json",
+    "cornerstone scenario verify vs0-runtime-acceptance --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json --json",
+    "cornerstone release evidence collect --scope vs0-runtime-acceptance --json",
+    "make verify-vs0-acceptance",
+    "make verify-vs0-runtime",
+    "make verify-local-fast"
+  ],
+  "schema_version": "cs.release_command_evidence.v0"
+}

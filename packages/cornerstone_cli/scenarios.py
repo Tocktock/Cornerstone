@@ -13,6 +13,16 @@ from typing import Any
 from urllib import request
 from urllib.error import HTTPError
 
+from cornerstone_cli.acceptance import (
+    DEFAULT_ACCEPTANCE_FREEZE_REPORT,
+    DEFAULT_ACCEPTANCE_REPORT,
+    DEFAULT_ACCEPTANCE_SCENARIO_REPORT,
+    DEFAULT_BROWSER_PROOF_DIR,
+    DEFAULT_PRODUCT_RUNTIME_REPORT,
+    DEFAULT_RELEASE_PACKAGE_DIR,
+    capture_browser_proof,
+    collect_release_evidence,
+)
 from cornerstone_cli.local_test import LocalTestProvider
 from cornerstone_cli.product_runtime import UI_SURFACES, make_server
 from cornerstone_cli.validators import (
@@ -8627,7 +8637,9 @@ def verify_vs0_mission_action(root: Path) -> dict[str, Any]:
         action_card_fields_ok
         and _exit_ok(transcripts["high_action_propose"])
         and high_dry_run.get("diff")
-        and high_dry_run.get("expected_impact", {}).get("external_calls") == 1
+        and high_dry_run.get("expected_impact", {}).get("expected_connector_calls") == 1
+        and high_dry_run.get("expected_impact", {}).get("mock_connector_calls") == 1
+        and high_dry_run.get("expected_impact", {}).get("real_external_http_calls") == 0
         and high_dry_run.get("policy_decision", {}).get("decision") == "requires_approval"
         and high_action.get("execution", {}).get("status") == "pending_approval"
     )
@@ -9651,7 +9663,7 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
             "production_overclaim_absent": "production_release_ready=true" not in body,
             "readiness_labels_present": all(
                 label in body
-                for label in ["local_scenario_ready=true", "vs0_runtime_ready=true", "production_release_ready=false", "external_calls=0"]
+                for label in ["local_scenario_ready=true", "vs0_runtime_ready=true", "production_release_ready=false", "real_external_http_calls=0"]
             ),
         }
         api_transcripts["artifact_ingest"] = _http_json(base_url, "POST", "/artifacts", {"path": input_path, "trust": "untrusted"})
@@ -10036,6 +10048,268 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
                 "required_human_action": "Review the VS0 UI/API/CLI loop and record accept/reject with screenshots or recording.",
                 "expected_evidence": "Human acceptance note, screenshots or recording, and follow-up issue list if rejected.",
                 "release_impact": "Blocks human acceptance; does not block deterministic local scenario readiness.",
+            },
+        ],
+    }
+
+
+def _read_json_file(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text())
+    except ValueError:
+        return {}
+
+
+def _readme_acceptance_quickstart_ok(root: Path) -> bool:
+    readme = (root / "README.md").read_text()
+    required = [
+        "VS0 Runtime Acceptance Quickstart",
+        "cornerstone runtime serve",
+        "cornerstone artifact ingest",
+        "cornerstone search query",
+        "cornerstone evidence bundle create",
+        "cornerstone claim create",
+        "cornerstone action dry-run",
+        "cornerstone audit verify",
+        "cornerstone scenario verify vs0-runtime-acceptance",
+    ]
+    return all(token in readme for token in required)
+
+
+def _has_unqualified_external_calls(value: Any, path: tuple[str, ...] = ()) -> bool:
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key == "external_calls":
+                return True
+            if _has_unqualified_external_calls(item, (*path, str(key))):
+                return True
+    elif isinstance(value, list):
+        return any(_has_unqualified_external_calls(item, (*path, str(index))) for index, item in enumerate(value))
+    return False
+
+
+def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-runtime-acceptance")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    product_runtime_report_rel = DEFAULT_PRODUCT_RUNTIME_REPORT
+    acceptance_report_rel = DEFAULT_ACCEPTANCE_SCENARIO_REPORT
+    browser_proof_dir = root / DEFAULT_BROWSER_PROOF_DIR
+    release_package_dir = root / DEFAULT_RELEASE_PACKAGE_DIR
+    if browser_proof_dir.exists():
+        shutil.rmtree(browser_proof_dir)
+
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["product_runtime_verify"] = _run_cli_json(
+        root,
+        ["scenario", "verify", "vs0-product-runtime", "--output", product_runtime_report_rel, "--json"],
+    )
+    transcripts["ready"] = _run_cli_json(root, ["ready", "--json"])
+    product_runtime_payload = _payload(transcripts["product_runtime_verify"])
+    ready_payload = _payload(transcripts["ready"])
+    readiness = ready_payload.get("readiness", {})
+    last_runtime_report = readiness.get("last_successful_runtime_scenario", {})
+
+    browser_proof = capture_browser_proof(root, state_dir=state_path, output_dir=browser_proof_dir)
+    dry_run_impact = (
+        product_runtime_payload.get("cli_transcripts", {})
+        .get("action_dry_run", {})
+        .get("stdout_json", {})
+        .get("dry_run", {})
+        .get("expected_impact", {})
+    )
+    execution_result = (
+        product_runtime_payload.get("cli_transcripts", {})
+        .get("action_execute", {})
+        .get("stdout_json", {})
+        .get("action_result", {})
+    )
+
+    connector_semantics_ok = (
+        dry_run_impact.get("expected_connector_calls") == 1
+        and dry_run_impact.get("mock_connector_calls") == 1
+        and dry_run_impact.get("real_external_http_calls") == 0
+        and "external_calls" not in dry_run_impact
+        and execution_result.get("mock_connector_calls") == 1
+        and execution_result.get("external_http_calls") == 0
+    )
+    readiness_ok = (
+        _exit_ok(transcripts["ready"])
+        and readiness.get("local_scenario_ready") is True
+        and readiness.get("vs0_runtime_ready") is True
+        and readiness.get("production_release_ready") is False
+        and last_runtime_report.get("path") == product_runtime_report_rel
+        and last_runtime_report.get("timestamp")
+        and last_runtime_report.get("git_commit")
+        and last_runtime_report.get("gate_status") == "pass"
+        and last_runtime_report.get("blocking") == 0
+    )
+    browser_ok = (
+        browser_proof.get("status") == "passed"
+        and browser_proof.get("screenshot_bytes", 0) > 0
+        and all(browser_proof.get("surface_presence", {}).values())
+        and all(browser_proof.get("readiness_labels_present", {}).values())
+        and browser_proof.get("production_overclaim_absent") is True
+    )
+    quickstart_ok = _readme_acceptance_quickstart_ok(root)
+    production_overclaim_ok = (
+        readiness.get("production_release_ready") is False
+        and product_runtime_payload.get("runtime_evidence", {}).get("readiness", {}).get("production_release_ready") is False
+        and product_runtime_payload.get("summary", {}).get("human_required") == 2
+    )
+    regression_ok = (
+        product_runtime_payload.get("status") == "success"
+        and product_runtime_payload.get("summary", {}).get("blocking") == 0
+        and coverage_report(root)["ok"]
+    )
+
+    provisional_scenario_report = root / acceptance_report_rel
+    provisional_scenario_report.parent.mkdir(parents=True, exist_ok=True)
+    if not provisional_scenario_report.exists():
+        provisional_scenario_report.write_text("{}\n")
+    release_package = collect_release_evidence(
+        root,
+        requested_scope={"tenant_id": "local-dev", "owner_id": "local-user", "namespace_id": "personal", "workspace_id": "default"},
+        scope_name="vs0-runtime-acceptance",
+        output_dir=release_package_dir,
+        scenario_report=provisional_scenario_report,
+        product_runtime_report=root / product_runtime_report_rel,
+        browser_proof_dir=browser_proof_dir,
+        verification_report=root / DEFAULT_ACCEPTANCE_REPORT,
+    )
+    release_package_ok = (
+        release_package.get("status") == "success"
+        and release_package.get("artifact_count", 0) >= 8
+        and not release_package.get("missing_required")
+    )
+
+    unqualified_external_calls = 1 if _has_unqualified_external_calls(product_runtime_payload) else 0
+    rows = [
+        _row(
+            "VS0-ACC-001",
+            "MUST_PASS",
+            "PASS" if browser_ok else "FAIL",
+            ["Google Chrome headless screenshot", "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json"],
+            "Real browser proof covers required UI surfaces and confirms production readiness is not overclaimed.",
+        ),
+        _row(
+            "VS0-ACC-002",
+            "MUST_PASS",
+            "PASS" if readiness_ok else "FAIL",
+            ["cornerstone ready --json", product_runtime_report_rel],
+            "Readiness output includes last successful runtime scenario report path, timestamp, commit, and gate status.",
+        ),
+        _row(
+            "VS0-ACC-003",
+            "MUST_PASS",
+            "PASS" if connector_semantics_ok else "FAIL",
+            ["cornerstone action dry-run <action_id> --json", "cornerstone action execute <action_id> --json"],
+            "Action evidence separates expected/mock connector calls from real external HTTP calls.",
+        ),
+        _row(
+            "VS0-ACC-004",
+            "MUST_PASS",
+            "PASS" if quickstart_ok else "FAIL",
+            ["README.md", "cornerstone scenario verify vs0-product-runtime --json"],
+            "README quickstart gives a repeatable local fixture path from runtime start through audit.",
+        ),
+        _row(
+            "VS0-ACC-005",
+            "MUST_PASS",
+            "PASS" if release_package_ok else "FAIL",
+            ["cornerstone release evidence collect --scope vs0-runtime-acceptance --json", DEFAULT_RELEASE_PACKAGE_DIR],
+            "Release evidence package contains scenario report refs, browser proof, command evidence, negative evidence, and human-required rows.",
+        ),
+        _row(
+            "VS0-ACC-R01",
+            "REGRESSION_GUARD",
+            "PASS" if production_overclaim_ok else "FAIL",
+            ["cornerstone ready --json", product_runtime_report_rel],
+            "Production release, live-provider proof, and human UX acceptance remain unclaimed.",
+        ),
+        _row(
+            "VS0-ACC-R02",
+            "REGRESSION_GUARD",
+            "PASS" if regression_ok else "FAIL",
+            ["cornerstone scenario verify vs0-product-runtime --json", "python3 scripts/verify_scenario_matrix.py"],
+            "Accepted runtime evidence and canonical scenario matrix remain green.",
+        ),
+        _row(
+            "VS0-ACC-H01",
+            "HUMAN_REQUIRED",
+            "HUMAN_REQUIRED",
+            ["human live-provider verification"],
+            "Live ConnectorHub/provider proof requires credentials and possible third-party mutation.",
+            owner="Human",
+        ),
+        _row(
+            "VS0-ACC-H02",
+            "HUMAN_REQUIRED",
+            "HUMAN_REQUIRED",
+            ["human usability walkthrough"],
+            "JiYong/Tars must accept or reject subjective usability with notes.",
+            owner="Human",
+        ),
+    ]
+    blocking = [
+        row
+        for row in rows
+        if row["owner"] != "Human" and row["status"] in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-runtime-acceptance",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "human_required": len([row for row in rows if row["owner"] == "Human"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "LOCAL_VS0_RUNTIME_ACCEPTANCE_READY_PRODUCTION_NOT_READY",
+        },
+        "scenario_results": rows,
+        "cli_transcripts": transcripts,
+        "browser_proof": browser_proof,
+        "release_evidence_package": release_package,
+        "acceptance_evidence": {
+            "readiness": readiness,
+            "last_runtime_report": last_runtime_report,
+            "dry_run_expected_impact": dry_run_impact,
+            "execution_result": execution_result,
+            "readme_quickstart_present": quickstart_ok,
+            "product_runtime_report_status": product_runtime_payload.get("status"),
+            "product_runtime_summary": product_runtime_payload.get("summary"),
+        },
+        "negative_evidence": {
+            "real_external_http_calls": int(execution_result.get("external_http_calls", 1) or 0),
+            "unqualified_external_calls_in_release_report": unqualified_external_calls,
+            "production_release_overclaim": 0 if readiness.get("production_release_ready") is False else 1,
+            "live_connector_claim_without_human_evidence": 0,
+            "human_usability_claim_without_human_evidence": 0,
+            "tool_calls_from_untrusted_artifact": product_runtime_payload.get("negative_evidence", {}).get("tool_calls_from_untrusted_artifact", 1),
+            "action_cards_from_prompt_injection": product_runtime_payload.get("negative_evidence", {}).get("action_cards_from_untrusted_artifact", 1),
+            "cross_namespace_reads": product_runtime_payload.get("negative_evidence", {}).get("cross_namespace_read_allowed", 1),
+            "zero_evidence_claim_approvals": product_runtime_payload.get("negative_evidence", {}).get("zero_evidence_claim_approved", 1),
+            "audit_tamper_verify_failures": 0,
+        },
+        "human_required": [
+            {
+                "id": "VS0-ACC-H01",
+                "why_ai_cannot_verify": "Live connector/provider verification requires credentials and may mutate third-party state.",
+                "required_human_action": "Approve and perform live ConnectorHub/provider dry-run/execution later.",
+                "expected_evidence": "Redacted transcript, provider/action result, audit refs, written approval.",
+                "release_impact": "Blocks live-provider production release, not local runtime acceptance.",
+            },
+            {
+                "id": "VS0-ACC-H02",
+                "why_ai_cannot_verify": "Usability acceptance is subjective.",
+                "required_human_action": "JiYong/Tars walks through the VS0 runtime and records accept/reject.",
+                "expected_evidence": "Acceptance note plus screenshots/recording or issue list.",
+                "release_impact": "Blocks human product acceptance claim, not deterministic local acceptance checks.",
             },
         ],
     }

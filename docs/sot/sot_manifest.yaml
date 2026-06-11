@@ -1,4 +1,4 @@
-version: "0.6"
+version: "0.7"
 effective_date: "2026-06-09"
 owner: "JiYong / Tars"
 canonical_spelling: "CornerStone"
@@ -118,6 +118,23 @@ vs0_product_runtime_readiness:
   status: "local deterministic implementation verified; production/live-provider/user acceptance human-required"
   verifier: "cornerstone scenario verify vs0-product-runtime --json"
   make_target: "make verify-vs0-runtime"
+
+vs0_runtime_acceptance_and_hardening:
+  contract: "docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md"
+  matrix: "docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_MATRIX.csv"
+  freeze_report: "docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md"
+  report: "docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md"
+  scenario_report: "reports/scenario/vs0-runtime-acceptance-2026-06-11.json"
+  browser_proof: "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json"
+  release_evidence_package: "reports/release/vs0-runtime-acceptance-2026-06-11/manifest.json"
+  authority: "task-scoped local VS0 runtime acceptance and hardening evidence"
+  scenario_count: 9
+  ai_verifiable_count: 7
+  human_required_count: 2
+  status: "local deterministic implementation verified; production/live-provider/user acceptance human-required"
+  verifier: "cornerstone scenario verify vs0-runtime-acceptance --json"
+  make_target: "make verify-vs0-acceptance"
+  production_release_rule: "production_release_ready remains false until separate production live-provider and human acceptance evidence exists"
 
 agent_guidance:
   scenario_first_instruction: "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md"

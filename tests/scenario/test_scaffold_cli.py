@@ -46,6 +46,17 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(payload["readiness"]["vs0_runtime_ready"])
         self.assertFalse(payload["readiness"]["production_release_ready"])
         self.assertTrue(payload["readiness"]["human_required"])
+        self.assertEqual(payload["readiness"]["real_external_http_calls"], 0)
+        runtime_report = payload["readiness"]["last_successful_runtime_scenario"]
+        self.assertEqual(runtime_report["scenario_set"], "vs0-product-runtime")
+        self.assertEqual(runtime_report["path"], "reports/scenario/vs0-product-runtime-2026-06-11.json")
+        self.assertEqual(runtime_report["gate_status"], "pass")
+        self.assertEqual(runtime_report["blocking"], 0)
+        acceptance_report = payload["readiness"]["last_successful_acceptance_scenario"]
+        if acceptance_report["path"] is not None:
+            self.assertEqual(acceptance_report["scenario_set"], "vs0-runtime-acceptance")
+            self.assertEqual(acceptance_report["gate_status"], "pass")
+            self.assertEqual(payload["readiness"]["acceptance_gate"]["status"], "pass")
 
     def test_full_scenario_list_count(self) -> None:
         result = run_cli("scenario", "list", "--set", "full", "--json")
@@ -105,6 +116,27 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["human_required"], 2)
         self.assertFalse(payload["runtime_evidence"]["readiness"]["production_release_ready"])
         self.assertEqual(payload["negative_evidence"]["real_external_http_calls"], 0)
+
+    def test_vs0_runtime_acceptance_verify(self) -> None:
+        result = run_cli("scenario", "verify", "vs0-runtime-acceptance", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-runtime-acceptance")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 7)
+        self.assertEqual(payload["summary"]["human_required"], 2)
+        self.assertEqual(payload["browser_proof"]["status"], "passed")
+        self.assertGreater(payload["browser_proof"]["screenshot_bytes"], 0)
+        self.assertTrue(all(payload["browser_proof"]["surface_presence"].values()))
+        self.assertFalse(payload["acceptance_evidence"]["readiness"]["production_release_ready"])
+        impact = payload["acceptance_evidence"]["dry_run_expected_impact"]
+        self.assertEqual(impact["expected_connector_calls"], 1)
+        self.assertEqual(impact["mock_connector_calls"], 1)
+        self.assertEqual(impact["real_external_http_calls"], 0)
+        self.assertNotIn("external_calls", impact)
+        self.assertEqual(payload["release_evidence_package"]["status"], "success")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
 
     def test_artifact_ingest_show_and_audit_verify(self) -> None:
         state_dir = ROOT / "tmp/test-artifact-cli"

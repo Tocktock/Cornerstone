@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CornerStone VS0 Runtime</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2933;
+      --muted: #5f6f7a;
+      --line: #d8e0e7;
+      --paper: #f7f9fb;
+      --surface: #ffffff;
+      --accent: #285e61;
+      --safe: #216e4e;
+      --warn: #8f5f00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+      padding: 20px 28px;
+    }
+    main {
+      display: grid;
+      grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+      min-height: calc(100vh - 81px);
+    }
+    nav {
+      border-right: 1px solid var(--line);
+      background: #fbfcfd;
+      padding: 20px;
+    }
+    nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    nav a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    section { padding: 22px 28px; border-bottom: 1px solid var(--line); }
+    h1 { margin: 0; font-size: 24px; letter-spacing: 0; }
+    h2 { margin: 0 0 12px; font-size: 18px; letter-spacing: 0; }
+    .status-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--muted);
+      padding: 5px 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .badge.safe { color: var(--safe); }
+    .badge.warn { color: var(--warn); }
+    .panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .label { color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 700; }
+    code { background: #eef3f7; padding: 2px 4px; border-radius: 4px; }
+    @media (max-width: 760px) {
+      main { grid-template-columns: 1fr; }
+      nav { border-right: 0; border-bottom: 1px solid var(--line); }
+      header, section { padding-left: 18px; padding-right: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CornerStone</h1>
+    <div class="status-row">
+      <span class="badge safe">local_scenario_ready=true</span>
+      <span class="badge safe">vs0_runtime_ready=true</span>
+      <span class="badge warn">production_release_ready=false</span>
+      <span class="badge safe">real_external_http_calls=0</span>
+    </div>
+  </header>
+  <main>
+    <nav aria-label="Primary">
+      <ul><li><a href='#home-ops-inbox'>Home/Ops Inbox</a></li>
+<li><a href='#artifact-viewer'>Artifact Viewer</a></li>
+<li><a href='#search'>Search</a></li>
+<li><a href='#claim-builder'>Claim Builder</a></li>
+<li><a href='#action-card'>Action Card</a></li>
+<li><a href='#audit-detail'>Audit Detail</a></li></ul>
+    </nav>
+    <div>
+      <section id="home-ops-inbox">
+        <h2>Home/Ops Inbox</h2>
+        <div class="panel-grid">
+          <div class="panel"><div class="label">Loop</div>Artifact ingest -> search -> evidence -> claim -> action -> audit</div>
+          <div class="panel"><div class="label">Boundary</div>Product, Archive, Connector/Action, Policy, and Audit records share one local runtime.</div>
+        </div>
+      </section>
+      <section id="artifact-viewer"><h2>Artifact Viewer</h2><p>Immutable artifact records expose checksum, scope, source, derived text, evidence refs, and audit refs.</p></section>
+      <section id="search"><h2>Search</h2><p>Search creates reproducible scoped snapshots that can become Evidence Bundles.</p></section>
+      <section id="claim-builder"><h2>Claim Builder</h2><p>Claims stay draft unless backed by an Evidence Bundle and approval evidence.</p></section>
+      <section id="action-card"><h2>Action Card</h2><p>Actions expose dry-run diff, expected impact, policy decision, approval, execution, and mock ConnectorHub boundary.</p></section>
+      <section id="audit-detail"><h2>Audit Detail</h2><p>Audit events form a local tamper-evident hash chain verified by <code>cornerstone audit verify --json</code>.</p></section>
+    </div>
+  </main>
+</body>
+</html>

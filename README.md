@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, and local deterministic VS-0 product runtime readiness
+**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, local deterministic VS-0 product runtime readiness, and local VS0 runtime acceptance/hardening evidence
 **Canonical spelling:** Use **CornerStone** for product/project text.
 
 ## Product Definition
@@ -38,9 +38,12 @@ Users should experience one CornerStone product. Internally, the product keeps c
 15. `docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md`
 16. `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_SCENARIO_FREEZE_REPORT_2026-06-11.md`
 17. `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md`
-18. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-19. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-20. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
+18. `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`
+19. `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md`
+20. `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md`
+21. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+22. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+23. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
 
 ## Active Authority
 
@@ -62,6 +65,10 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md` | Verified task-scoped scenarios for runnable local VS0 product runtime readiness |
 | `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_SCENARIO_FREEZE_REPORT_2026-06-11.md` | Historical scenario-freeze report for VS0 product runtime readiness |
 | `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md` | Current implementation report for local VS0 product runtime readiness |
+| `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md` | Frozen next task-scoped scenarios for turning local VS0 runtime readiness into an operator-acceptable local release candidate |
+| `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_MATRIX.csv` | Machine-readable matrix for the VS0 runtime acceptance and hardening task contract |
+| `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md` | Scenario-freeze report for the next VS0 runtime acceptance and hardening gate |
+| `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md` | Current local deterministic implementation report for VS0 runtime acceptance and hardening |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
 | `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md` | Verification-centered agent workflow |
@@ -71,6 +78,8 @@ Users should experience one CornerStone product. Internally, the product keeps c
 
 - Full scenario standard: 206 scenarios.
 - VS-0 implementation subset: 58 scenarios.
+- VS0 runtime readiness overlay: 14 task-scoped scenarios, already accepted for local deterministic runtime readiness.
+- VS0 runtime acceptance/hardening overlay: 9 task-scoped scenarios, 7 AI-verifiable PASS, 2 HUMAN_REQUIRED, production release still false.
 - Release rule: no PASS without concrete scenario evidence.
 - CLI-native-first rule: no feature scenario can be marked PASS unless its native `cornerstone ...` CLI path is verified or the item is explicitly classified as a non-feature implementation internal.
 
@@ -117,6 +126,7 @@ cornerstone scenario verify vs0-memory-truth-boundary --json
 cornerstone scenario verify vs0-product-domain-readiness --json
 cornerstone scenario verify vs0-tenant-security-boundary --json
 cornerstone scenario verify vs0-product-runtime --json
+cornerstone scenario verify vs0-runtime-acceptance --json
 cornerstone scenario verify full-claim-collaboration --json
 cornerstone scenario verify full-memory-wiki --json
 cornerstone scenario verify full-learning-experience --json
@@ -129,6 +139,7 @@ cornerstone scenario verify full-namespace-governance --json
 cornerstone scenario verify full-mission-control-autonomy-lifecycle --json
 make verify-local-fast
 make verify-vs0-runtime
+make verify-vs0-acceptance
 ```
 
 The current scaffold CLI can verify scaffold readiness, scenario registry coverage, deterministic local fixture-validator readiness, the first CLI-native artifact preservation slice, the first redaction/prompt-injection safety slice, the first search/evidence-bundle/draft-claim/evidence-viewer slice, the first deterministic search-understanding slice, the first owner/namespace isolation slice, the first tamper-evident audit-ledger slice, the first universal non-logistics core slice, the first claim evidence-gating slice, the first default-deny egress/sandbox policy slice, the first regression guardrail summary slice, the first evidence-backed briefing slice, the first Mission Goal Contract / Action Card / dry-run / approval / mocked connector-action safety slice, the first detail-surface slice, the first conversation-onboarding slice, the first product-loop identity slice with durable memory and learning records, the first memory truth-boundary slice, the first product/domain/Autopilot-readiness slice, the first deterministic tenant/security boundary slice for namespace promotion, access policy evaluation, and personal-to-organization memory leakage prevention, the first local VS-0 product runtime loop with CLI/API/minimal UI parity, the first full-suite claim-collaboration slice for Knowledge Capsules, Decision Cards, corrections, and trust-state-aware shared views, the first full-suite memory/wiki slice for permanent wiki views, memory sovereignty controls, correction, rollback/forget, freshness warnings, poisoning quarantine, explainable memory use, product-learning isolation, namespace-local adaptation, and memory export, the first full-suite learning/experience slice for Mission Trajectory Ledger, Experience Library, recommendations, lesson promotion/control, local adaptation, connected outcomes, metrics, and export, the first full-suite understanding/ontology slice for draft structure suggestions, promoted draft ontology items, operational maps, contradictions, stale-context warnings, versioned ontology changes, and unknown-domain draft handling, the first full-suite extension ecosystem slice for local Agent Pack registry/import, install-vs-activation, explicit grants, certification, ConnectorHub mediation, version pin/update/rollback, untrusted/direct-provider denial, and emergency patch policy, the first full-suite agent-orchestration slice for Orchestrator-led mission traces, visible specialist role contracts/cards, evidence-labeled outputs, direct mutation denial, brain replacement, versioned contract changes, prompt authority denial, failure diagnosis, Agent Pack grant enforcement, and replay without hidden chain-of-thought, the first full-suite brain-routing slice for replaceable model brains, policy-aware routing, provider override denial, namespace-local Brain Performance Ledger learning, ensemble gating, LLM-as-judge support limits, objective/owner outcome precedence, disagreement escalation, calibration tracking, and provider-switch evidence continuity, the first full-suite security-operations slice for ConnectorHub credential custody, sensitive-change stop-and-ask gates, explicit human-required reporting, backup/restore rehearsal, helpful failures, action idempotency, retention transparency, operator status, and release-report evidence checks, the first full-suite namespace-governance slice for owner-scoped archive namespaces, classification-aware access, promotion modes, product-learning boundaries, cross-tenant isolation, namespace audit export, retention dry-run, and recovery, and the first full-suite mission-control/autonomy-lifecycle slice for Mission Control, product loop visibility, source-system boundaries, personal-to-organization path, ConnectorHub action trace, autonomy revoke/escalation/outcome/AAR/audit/metrics/reversibility, and repo-split UX guardrails. These commands verify the frozen AI-verifiable scenario rows through deterministic local CLI evidence and local API/UI evidence where claimed; they do not claim live provider integration, production tenant isolation, production release readiness, or human-only operational proof.
@@ -153,6 +164,40 @@ Personal messy input
 ```
 
 The full long-term scenario suite remains authoritative. VS-0 is only the first implementation subset.
+
+The current local acceptance gate is `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`. Local evidence is recorded in `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md`, `reports/scenario/vs0-runtime-acceptance-2026-06-11.json`, `reports/browser/vs0-runtime-acceptance-2026-06-11/`, and `reports/release/vs0-runtime-acceptance-2026-06-11/`. It must not be treated as production release, live-provider, or human UX acceptance.
+
+## VS0 Runtime Acceptance Quickstart
+
+This quickstart is local-only. It uses fixture data, mocked ConnectorHub-style action execution, and zero real external HTTP calls.
+
+```sh
+export PATH="$PWD:$PATH"
+
+# Terminal 1: local API/UI runtime
+cornerstone runtime serve --port 8787
+
+# Terminal 2: repeat the local VS0 loop with native CLI paths
+cornerstone ready --json
+cornerstone artifact ingest fixtures/vs0/packs/01_artifact_basic/input.txt --state-dir data/quickstart-vs0 --json
+cornerstone search query alpha-evidence-anchor --state-dir data/quickstart-vs0 --json
+cornerstone evidence bundle create --search-snapshot-id <search_snapshot_id> --state-dir data/quickstart-vs0 --json
+cornerstone claim create --evidence-bundle-id <evidence_bundle_id> --statement "The Alpha evidence anchor is ready for local VS0 acceptance." --state-dir data/quickstart-vs0 --json
+cornerstone claim approve <claim_id> --state-dir data/quickstart-vs0 --json
+cornerstone mission create --goal "Complete local VS0 acceptance through governed mock action" --claim-id <claim_id> --state-dir data/quickstart-vs0 --json
+cornerstone mission activate <mission_id> --mode autopilot --state-dir data/quickstart-vs0 --json
+cornerstone action propose --mission-id <mission_id> --claim-id <claim_id> --goal "Record local acceptance status" --action-kind external_writeback --risk high --connector mock_connector --target mock://vs0-runtime/acceptance --state-dir data/quickstart-vs0 --json
+cornerstone action dry-run <action_id> --state-dir data/quickstart-vs0 --json
+cornerstone action approve <action_id> --state-dir data/quickstart-vs0 --json
+cornerstone action execute <action_id> --state-dir data/quickstart-vs0 --json
+cornerstone audit verify --state-dir data/quickstart-vs0 --json
+
+# Release-facing local acceptance gate
+cornerstone scenario verify vs0-runtime-acceptance --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json --json
+cornerstone release evidence collect --scope vs0-runtime-acceptance --json
+```
+
+The quickstart does not verify production tenant isolation, live provider execution, or human usability acceptance. Those remain explicit `HUMAN_REQUIRED` rows.
 
 ## CLI Native First
 

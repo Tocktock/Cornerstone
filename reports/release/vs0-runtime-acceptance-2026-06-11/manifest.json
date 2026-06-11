@@ -1,0 +1,153 @@
+{
+  "artifacts": [
+    {
+      "bytes": 317605,
+      "path": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+      "present": true,
+      "required": true,
+      "role": "acceptance_scenario_report",
+      "sha256": "d3368e1fbf0a196737c3d48f90063a32579dabc458fb438c015dc72e6bf7e4d9"
+    },
+    {
+      "bytes": 256254,
+      "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
+      "present": true,
+      "required": true,
+      "role": "product_runtime_scenario_report",
+      "sha256": "abf885a9860c6e54786b539a11442cf37165d8b62bf689901cd139be8cb0bf72"
+    },
+    {
+      "bytes": 1735,
+      "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
+      "present": true,
+      "required": true,
+      "role": "browser_proof_manifest",
+      "sha256": "080078d0bb16cf596e576b5988a252d22c73b46a040be7a399c9d9f122eaab79"
+    },
+    {
+      "bytes": 101421,
+      "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
+      "present": true,
+      "required": true,
+      "role": "browser_screenshot",
+      "sha256": "32ac802f9aa96c9d19da703caf5ab3640ee4b76cc84d03cdcc122cfdd63b1cf9"
+    },
+    {
+      "bytes": 4419,
+      "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
+      "present": true,
+      "required": true,
+      "role": "browser_dom_snapshot",
+      "sha256": "e58ee028d8c09a61e1a83a401e7dae7eb6731cbcc8a0be30028c3891f2ec3479"
+    },
+    {
+      "bytes": 13633,
+      "path": "docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md",
+      "present": true,
+      "required": true,
+      "role": "acceptance_contract",
+      "sha256": "4e9596caf7ddab7be0d469c544bfb3b5af9b15d146c1f02828eada6e48e6173e"
+    },
+    {
+      "bytes": 2507,
+      "path": "docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_MATRIX.csv",
+      "present": true,
+      "required": true,
+      "role": "acceptance_matrix",
+      "sha256": "162933304623cc284a86dcfd57fc8206473e4ea6a970f8b8f94987f0499d60fb"
+    },
+    {
+      "bytes": 10562,
+      "path": "docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md",
+      "present": true,
+      "required": true,
+      "role": "scenario_freeze_report",
+      "sha256": "a1f481c083d04c70e1136c53254a5713f4dc7c001c8237fb7b12b5983363d169"
+    },
+    {
+      "bytes": 6165,
+      "path": "docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md",
+      "present": true,
+      "required": false,
+      "role": "implementation_report",
+      "sha256": "89ff9b2b61813579e9cf6522d49159cad531f64f8b5cce16a4667421f8d396f2"
+    },
+    {
+      "bytes": 18294,
+      "path": "README.md",
+      "present": true,
+      "required": true,
+      "role": "operator_quickstart",
+      "sha256": "2e5da7b21fa6308d04414b94ce5901d6d8d4346361b9ca6e2d7b891697139597"
+    },
+    {
+      "bytes": 924,
+      "path": "reports/release/vs0-runtime-acceptance-2026-06-11/human-usability-walkthrough.md",
+      "present": true,
+      "required": true,
+      "role": "human_usability_walkthrough_checklist",
+      "sha256": "988aec2478e8133050e133741b2c714b8730a0c4a94caceaaa2f47fa728d6579"
+    }
+  ],
+  "browser_proof": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
+  "created_at": "2026-06-11T08:30:25.549077Z",
+  "human_required": [
+    {
+      "id": "VS0-ACC-H01",
+      "required_evidence": "Approved live ConnectorHub/provider transcript with redaction and audit refs.",
+      "status": "HUMAN_REQUIRED"
+    },
+    {
+      "id": "VS0-ACC-H02",
+      "required_evidence": "JiYong/Tars usability acceptance note with screenshots/recording or issue list.",
+      "status": "HUMAN_REQUIRED"
+    }
+  ],
+  "human_usability_accepted": false,
+  "included_summary": {
+    "acceptance_status": "success",
+    "acceptance_summary": {
+      "blocking": 0,
+      "human_required": 2,
+      "pass": 7,
+      "product_feature_claims": "LOCAL_VS0_RUNTIME_ACCEPTANCE_READY_PRODUCTION_NOT_READY",
+      "scenario_count": 9
+    },
+    "browser_status": "passed",
+    "product_runtime_status": "success",
+    "product_runtime_summary": {
+      "blocking": 0,
+      "human_required": 2,
+      "pass": 12,
+      "product_feature_claims": "LOCAL_VS0_PRODUCT_RUNTIME_READY_PRODUCTION_NOT_READY",
+      "scenario_count": 14
+    }
+  },
+  "live_connector_ready": false,
+  "missing_required": [],
+  "negative_evidence": {
+    "action_cards_from_prompt_injection": 0,
+    "audit_tamper_verify_failures": 0,
+    "cross_namespace_reads": 0,
+    "human_usability_claim_without_human_evidence": 0,
+    "live_connector_claim_without_human_evidence": 0,
+    "production_release_overclaim": 0,
+    "real_external_http_calls": 0,
+    "tool_calls_from_untrusted_artifact": 0,
+    "unqualified_external_calls_in_release_report": 0,
+    "zero_evidence_claim_approvals": 0
+  },
+  "package_id": "releasepkg_8713a56a1a755c46",
+  "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
+  "production_release_ready": false,
+  "scenario_report": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+  "schema_version": "cs.release_evidence_package.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "scope_name": "vs0-runtime-acceptance",
+  "status": "success"
+}

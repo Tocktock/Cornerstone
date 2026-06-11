@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Active SoT bundle after V2 full MUST-PASS handoff, design-system contract, VS-0 scaffold gate, and local deterministic VS0 product runtime readiness
+**Status:** Active SoT bundle after V2 full MUST-PASS handoff, design-system contract, VS-0 scaffold gate, local deterministic VS0 product runtime readiness, and local VS0 runtime acceptance/hardening evidence
 
 ## Why This Bundle Exists
 
@@ -39,9 +39,12 @@ This bundle resolves authority:
 14. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` - first implementation subset when working on VS-0.
 15. `docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md` - local runtime readiness implementation contract.
 16. `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md` - local runtime readiness evidence.
-17. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` - implementation defaults where compatible.
-18. Frozen scenario contract for the specific implementation task.
-19. Repository code/docs/tests/logs as implementation evidence.
+17. `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md` - next local runtime acceptance and hardening gate.
+18. `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md` - scenario-freeze report for the next local runtime acceptance gate.
+19. `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md` - local runtime acceptance and hardening evidence.
+20. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` - implementation defaults where compatible.
+21. Frozen scenario contract for the specific implementation task.
+22. Repository code/docs/tests/logs as implementation evidence.
 
 If lower-priority content conflicts with higher-priority content, report the conflict and follow the higher-priority source.
 
@@ -74,6 +77,10 @@ If lower-priority content conflicts with higher-priority content, report the con
 | `../scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_MATRIX.csv` | Machine-readable matrix for the VS0 runtime readiness task contract |
 | `../verification-reports/VS0_PRODUCT_RUNTIME_READINESS_SCENARIO_FREEZE_REPORT_2026-06-11.md` | Historical freeze report for VS0 runtime readiness scenarios |
 | `../verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md` | Current local deterministic implementation report for VS0 runtime readiness |
+| `../scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md` | Next task-scoped VS0 runtime acceptance and hardening scenarios, 9 rows |
+| `../scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_MATRIX.csv` | Machine-readable matrix for the VS0 runtime acceptance and hardening task contract |
+| `../verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md` | Scenario-freeze report for the next VS0 runtime acceptance and hardening gate |
+| `../verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md` | Current local deterministic implementation report for VS0 runtime acceptance and hardening |
 | `../scenario-contracts/SCENARIO_VERIFICATION_REPORT_TEMPLATE.md` | Required report shape for scenario verification |
 | `../verification-reports/template.md` | Required report shape for scaffold, scenario, CLI, and human-required evidence |
 
@@ -118,6 +125,8 @@ The first implementation target is VS-0:
 The full long-term scenario suite remains authoritative, but VS-0 freezes the first slice. Every VS-0 feature must also be operable through the native `cornerstone ...` CLI path and verified with CLI transcript evidence.
 
 The task-scoped runtime scenario contract after the completed local deterministic scaffold proof is `../scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md`. It contains 14 `VS0-RT-*` rows for a runnable local product runtime with CLI, API, and minimal UI parity. It does not change the canonical 206-scenario count or mark production readiness PASS.
+
+The current local acceptance task-scoped scenario contract is `../scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`. It contains 9 `VS0-ACC-*` rows for real browser proof, readiness evidence semantics, connector-call wording, quickstart repeatability, release evidence packaging, and overclaim regression guards. The local deterministic report passes 7 AI-verifiable rows and keeps 2 human-only rows as `HUMAN_REQUIRED`.
 
 ## Deprecated Product Framing
 

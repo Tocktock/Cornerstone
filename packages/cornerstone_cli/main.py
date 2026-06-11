@@ -8,9 +8,18 @@ from pathlib import Path
 from typing import Any
 
 from cornerstone_cli import __version__
+from cornerstone_cli.acceptance import (
+    DEFAULT_ACCEPTANCE_REPORT,
+    DEFAULT_ACCEPTANCE_SCENARIO_REPORT,
+    DEFAULT_BROWSER_PROOF_DIR,
+    DEFAULT_PRODUCT_RUNTIME_REPORT,
+    DEFAULT_RELEASE_PACKAGE_DIR,
+    collect_release_evidence,
+)
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_vs0_runtime_acceptance,
     verify_vs0_product_runtime,
     verify_full_agent_orchestration,
     verify_full_brain_routing,
@@ -3837,6 +3846,43 @@ def command_release_report_check(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_release_evidence_collect(args: argparse.Namespace) -> int:
+    root = repo_root()
+    requested_scope = scope_args(args)
+    scenario_report = (root / args.scenario_report).resolve()
+    product_runtime_report = (root / args.product_runtime_report).resolve()
+    browser_proof_dir = (root / args.browser_proof_dir).resolve()
+    output_dir = (root / args.output_dir).resolve()
+    verification_report = (root / args.verification_report).resolve() if args.verification_report else None
+    result = collect_release_evidence(
+        root,
+        requested_scope=requested_scope,
+        scope_name=args.scope,
+        output_dir=output_dir,
+        scenario_report=scenario_report,
+        product_runtime_report=product_runtime_report,
+        browser_proof_dir=browser_proof_dir,
+        verification_report=verification_report,
+    )
+    payload = base_response("cornerstone release evidence collect", result["status"], root)
+    payload.update(requested_scope)
+    payload["release_evidence_package"] = result
+    payload["ids"].update({"package_id": result.get("package_id")})
+    if result["status"] != "success":
+        payload["errors"].append(
+            {
+                "code": "CS_RELEASE_EVIDENCE_INCOMPLETE",
+                "message": "Release evidence package is missing required artifacts.",
+                "missing_required": result.get("missing_required", []),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+    payload["evidence_refs"].append(f"release_evidence:{result['package_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_conversation_start(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -4079,6 +4125,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_tenant_security_boundary(root)
     elif args.contract == "vs0-product-runtime":
         report = verify_vs0_product_runtime(root)
+    elif args.contract == "vs0-runtime-acceptance":
+        report = verify_vs0_runtime_acceptance(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-agent-orchestration":
@@ -4159,6 +4207,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-product-domain-readiness",
                     "vs0-tenant-security-boundary",
                     "vs0-product-runtime",
+                    "vs0-runtime-acceptance",
                     "full-claim-collaboration",
                     "full-agent-orchestration",
                     "full-brain-routing",
@@ -4203,11 +4252,32 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
 
     payload = base_response(f"cornerstone scenario verify {args.contract}", report["status"], root)
     payload.update(report)
-    if args.output:
-        output_path = (root / args.output).resolve()
+    output_arg = args.output
+    if args.contract == "vs0-runtime-acceptance" and not output_arg:
+        output_arg = DEFAULT_ACCEPTANCE_SCENARIO_REPORT
+    if output_arg:
+        output_path = (root / output_arg).resolve()
         output_path.parent.mkdir(parents=True, exist_ok=True)
         payload["output_path"] = str(output_path)
         output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        if args.contract == "vs0-runtime-acceptance":
+            release_result = collect_release_evidence(
+                root,
+                requested_scope={
+                    "tenant_id": payload["tenant_id"],
+                    "owner_id": payload["owner_id"],
+                    "namespace_id": payload["namespace_id"],
+                    "workspace_id": payload["workspace_id"],
+                },
+                scope_name="vs0-runtime-acceptance",
+                output_dir=root / DEFAULT_RELEASE_PACKAGE_DIR,
+                scenario_report=output_path,
+                product_runtime_report=root / DEFAULT_PRODUCT_RUNTIME_REPORT,
+                browser_proof_dir=root / DEFAULT_BROWSER_PROOF_DIR,
+                verification_report=root / DEFAULT_ACCEPTANCE_REPORT,
+            )
+            payload["release_evidence_package"] = release_result
+            output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
     print_payload(payload, args.json)
     return EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
@@ -5505,6 +5575,21 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(report_check)
     report_check.add_argument("--json", action="store_true", help="Emit JSON output")
     report_check.set_defaults(func=command_release_report_check)
+
+    evidence = release_sub.add_parser("evidence", help="Release evidence package helpers")
+    evidence_sub = evidence.add_subparsers(dest="release_evidence_command")
+
+    collect = evidence_sub.add_parser("collect", help="Collect a release-facing evidence package")
+    collect.add_argument("--scope", default="vs0-runtime-acceptance", help="Evidence package scope")
+    collect.add_argument("--scenario-report", default=DEFAULT_ACCEPTANCE_SCENARIO_REPORT, help="Acceptance scenario report path")
+    collect.add_argument("--product-runtime-report", default=DEFAULT_PRODUCT_RUNTIME_REPORT, help="VS0 product runtime scenario report path")
+    collect.add_argument("--browser-proof-dir", default=DEFAULT_BROWSER_PROOF_DIR, help="Browser proof directory")
+    collect.add_argument("--output-dir", default=DEFAULT_RELEASE_PACKAGE_DIR, help="Evidence package output directory")
+    collect.add_argument("--verification-report", default=DEFAULT_ACCEPTANCE_REPORT, help="Optional implementation verification report")
+    add_state_argument(collect)
+    add_scope_arguments(collect)
+    collect.add_argument("--json", action="store_true", help="Emit JSON output")
+    collect.set_defaults(func=command_release_evidence_collect)
 
     conversation = subcommands.add_parser("conversation", help="Conversation-first work surface commands")
     conversation_sub = conversation.add_subparsers(dest="conversation_command")

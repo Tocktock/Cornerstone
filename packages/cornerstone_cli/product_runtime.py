@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import html
 import json
+import subprocess
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
+from datetime import datetime, timezone
 
 from cornerstone_cli import __version__
 from cornerstone_cli.runtime import LocalRuntimeStore
@@ -75,6 +77,62 @@ def _json_response(status: str, **kwargs: Any) -> dict[str, Any]:
     return response
 
 
+def _utc_from_timestamp(timestamp: float) -> str:
+    return datetime.fromtimestamp(timestamp, timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _git_commit(root: Path) -> str | None:
+    result = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip() or None
+
+
+def _latest_successful_report(root: Path, scenario_set: str) -> dict[str, Any]:
+    report_dir = root / "reports/scenario"
+    candidates = sorted(report_dir.glob(f"{scenario_set}-*.json"), key=lambda path: path.stat().st_mtime, reverse=True)
+    for path in candidates:
+        try:
+            data = json.loads(path.read_text())
+        except (OSError, ValueError):
+            continue
+        summary = data.get("summary", {})
+        if data.get("scenario_set") != scenario_set or data.get("status") != "success" or summary.get("blocking") != 0:
+            continue
+        return {
+            "scenario_set": scenario_set,
+            "path": str(path.relative_to(root)),
+            "timestamp": _utc_from_timestamp(path.stat().st_mtime),
+            "git_commit": data.get("ids", {}).get("git_commit"),
+            "current_git_commit": _git_commit(root),
+            "status": data.get("status"),
+            "gate_status": "pass",
+            "scenario_count": summary.get("scenario_count"),
+            "pass": summary.get("pass"),
+            "human_required": summary.get("human_required"),
+            "blocking": summary.get("blocking"),
+        }
+    return {
+        "scenario_set": scenario_set,
+        "path": None,
+        "timestamp": None,
+        "git_commit": None,
+        "current_git_commit": _git_commit(root),
+        "status": "missing",
+        "gate_status": "missing",
+        "scenario_count": 0,
+        "pass": 0,
+        "human_required": 0,
+        "blocking": None,
+    }
+
+
 def build_readiness_report(root: Path) -> dict[str, Any]:
     runtime_file = root / "packages/cornerstone_cli/product_runtime.py"
     local_checks = [
@@ -102,13 +160,27 @@ def build_readiness_report(root: Path) -> dict[str, Any]:
         == {"Home/Ops Inbox", "Artifact Viewer", "Search", "Claim Builder", "Action Card", "Audit Detail"}
     )
     production_release_ready = False
+    last_runtime_report = _latest_successful_report(root, "vs0-product-runtime")
+    last_acceptance_report = _latest_successful_report(root, "vs0-runtime-acceptance")
+    acceptance_status = "pass" if last_acceptance_report["gate_status"] == "pass" else (
+        "pending" if last_runtime_report["gate_status"] == "pass" else "blocked_on_runtime_report"
+    )
     readiness = {
         "schema_version": "cs.runtime_readiness.v0",
         "local_scenario_ready": local_scenario_ready,
         "vs0_runtime_ready": bool(vs0_runtime_ready),
         "production_release_ready": production_release_ready,
         "human_required": True,
-        "external_calls": 0,
+        "real_external_http_calls": 0,
+        "mock_connector_calls": 0,
+        "last_successful_runtime_scenario": last_runtime_report,
+        "last_successful_acceptance_scenario": last_acceptance_report,
+        "acceptance_gate": {
+            "scenario_set": "vs0-runtime-acceptance",
+            "status": acceptance_status,
+            "contract": "docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md",
+            "report_path": last_acceptance_report["path"],
+        },
         "api_routes": API_ROUTES,
         "ui_surfaces": UI_SURFACES,
         "runtime_boundaries": ["Product/Mission", "Archive/Evidence", "Connector/Action", "Audit/Policy"],
@@ -216,7 +288,7 @@ def render_home(readiness: dict[str, Any]) -> str:
       <span class="badge safe">local_scenario_ready={str(readiness["local_scenario_ready"]).lower()}</span>
       <span class="badge safe">vs0_runtime_ready={runtime_ready}</span>
       <span class="badge warn">production_release_ready={production_ready}</span>
-      <span class="badge safe">external_calls=0</span>
+      <span class="badge safe">real_external_http_calls=0</span>
     </div>
   </header>
   <main>
@@ -317,7 +389,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             self._send_html(render_home(readiness))
             return
         if parts == ["health"]:
-            self._send_json(_json_response("success", service="cornerstone-vs0-runtime", external_calls=0))
+            self._send_json(_json_response("success", service="cornerstone-vs0-runtime", real_external_http_calls=0))
             return
         if parts == ["ready"]:
             report = build_readiness_report(self.root)

@@ -7938,7 +7938,7 @@ class LocalRuntimeStore:
             return {"status": "evidence_required"}
 
         policy = self._action_policy(mission, action_kind, risk, scope, connector)
-        expected_external_calls = 1 if action_kind == "external_writeback" else 0
+        expected_connector_calls = 1 if action_kind == "external_writeback" else 0
         dry_run_base = {
             "schema_version": "cs.action_dry_run.v0",
             "mission_id": mission_id,
@@ -7954,7 +7954,9 @@ class LocalRuntimeStore:
                 "risk": risk,
                 "target": target,
                 "connector": connector,
-                "external_calls": expected_external_calls,
+                "expected_connector_calls": expected_connector_calls,
+                "mock_connector_calls": expected_connector_calls,
+                "real_external_http_calls": 0,
             },
             "policy_decision": policy,
             "created_at": utc_now(),
@@ -8898,11 +8900,14 @@ class LocalRuntimeStore:
             "Gaps And Risks",
         ]
         missing_sections = [section for section in required_markdown_sections if section not in markdown]
-        pass_rows = [row for row in scenario_rows if row.get("status") == "PASS"]
+        ai_rows = [row for row in scenario_rows if row.get("owner", "AI") != "Human"]
+        pass_rows = [row for row in ai_rows if row.get("status") == "PASS"]
+        human_rows = [row for row in scenario_rows if row.get("owner", "AI") == "Human"]
         human_required = scenario_data.get("human_required", []) if isinstance(scenario_data, dict) else []
         no_unverified_pass_claim = (
             bool(scenario_rows)
-            and len(pass_rows) == len(scenario_rows)
+            and len(pass_rows) == len(ai_rows)
+            and all(row.get("status") == "HUMAN_REQUIRED" for row in human_rows)
             and scenario_data.get("summary", {}).get("blocking") == 0
             and "does not mark production" in markdown
         )
