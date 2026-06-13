@@ -1607,7 +1607,100 @@ These scenarios guard the product direction against drift. They should be checke
 
 ---
 
-# 17. Scenario-First Implementation Contract Template
+# 17. VS0 Evidence Cleanup and Interactive Product Loop
+
+**Status:** Proposed next VS-0 hardening slice; frozen in `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md`.
+**Scope:** Local VS-0 product milestone, not production release.
+**Purpose:** Convert the current local VS-0 runtime and acceptance proof into a clean, operator-reviewable product loop with stronger evidence semantics and an interactive UI path.
+
+This task-scoped section does not replace the canonical VS-0 requirement. It tightens acceptance for the existing VS-0 loop:
+
+```text
+Artifact ingest
+-> searchable derived representation
+-> Evidence Bundle
+-> Claim
+-> Action Card dry-run
+-> approval
+-> local/mock action execution
+-> audit timeline
+```
+
+The SoT already requires this vertical slice as the first development milestone. This section adds stricter evidence, browser, quickstart, and UI interaction criteria before the milestone can be cleanly signed off.
+
+## Required Scenario-Contract Cleanup
+
+Existing `VS0_RUNTIME_ACCEPTANCE_AND_HARDENING` rows are acceptance criteria, not source-of-truth implementation status. Scenario contracts define what must be true. Scenario reports and verification reports record `PASS`, `FAIL`, `NOT_VERIFIED`, and `HUMAN_REQUIRED` results.
+
+| Existing issue | Required correction |
+|---|---|
+| Contract mixes future implementation task wording with `PASS` statuses. | Keep the contract status-neutral. Move `PASS`, `FAIL`, `HUMAN_REQUIRED`, and report results to verification reports only. |
+| "Operator-acceptable local release candidate" is too strong while human UX is still `HUMAN_REQUIRED`. | Use **operator-reviewable local release candidate** until a human acceptance note exists. |
+| Browser proof can mark `PASS` even when Chrome times out. | Split browser evidence into DOM proof, screenshot proof, and clean browser-process proof. |
+| README quickstart token presence is treated as quickstart proof. | Require an executable quickstart transcript with IDs, exit codes, evidence refs, and audit refs. |
+| Regression row claims make-target proof but verifier does not enforce it. | Require real command transcript evidence for regression commands. |
+| Report commit metadata can refer to pre-commit HEAD. | Require explicit base/final commit or tree-hash semantics. |
+| Runtime human-required IDs use `VS0-RT-H*`, while acceptance uses `VS0-ACC-H*`. | Preserve both only if grouped as runtime vs acceptance human-required items; otherwise normalize to active scenario IDs. |
+
+## Revised VS0 Runtime Acceptance Scenarios
+
+The `VS0_RUNTIME_ACCEPTANCE_AND_HARDENING` contract must use these strengthened acceptance criteria while keeping current implementation status in reports.
+
+| ID | Type | Why | Required Behavior | Verification Method | Evidence Required | Owner |
+|---|---|---|---|---|---|---|
+| VS0-ACC-001 | MUST_PASS | Browser proof must show more than static HTML presence. | Browser proof covers Home/Ops Inbox, Artifact Viewer, Search, Claim Builder, Action Card, and Audit Detail. It separately reports DOM surface check, screenshot generation, production-overclaim absence, and browser clean exit. | Browser run against local runtime. | `browser-proof.json`, screenshot, DOM snapshot, clean-exit status. If browser times out, status is `PARTIAL` or `NOT_VERIFIED`, not clean `PASS`. | AI |
+| VS0-ACC-002 | MUST_PASS | Readiness evidence must be tied to the exact verified code state. | `cornerstone ready --json` includes last successful runtime report, scenario status, gate status, timestamp, verified base commit, final committed revision or tree hash, and whether report was generated pre-commit. | CLI readiness check and report inspection. | Readiness JSON plus scenario report metadata fields: `verified_base_commit`, `final_commit` or `verified_tree_hash`, `worktree_dirty_at_verification`, `report_generated_before_commit`. | AI |
+| VS0-ACC-003 | MUST_PASS | Mock connector behavior must never be confused with real egress. | Dry-run and execution evidence distinguish `expected_connector_calls`, `mock_connector_calls`, and `real_external_http_calls=0`. | CLI/API action dry-run and execute. | Action dry-run JSON, action result JSON, negative evidence counters. | AI |
+| VS0-ACC-004 | MUST_PASS | Local acceptance must be repeatable, not only documented. | A quickstart verifier runs the local VS-0 loop end-to-end from fixture ingest through audit verify. | Executable script or CLI command. | Transcript with command list, generated IDs, exit codes, evidence refs, audit refs, elapsed time, final audit verification. | AI |
+| VS0-ACC-005 | MUST_PASS | Human review needs one coherent evidence package. | Release package is generated after the final scenario report bytes exist and includes scenario report, browser proof, quickstart transcript, command transcript, negative evidence, human-required rows, and manifest hashes. | Release evidence collection. | Manifest with hashes/stable refs; no missing required artifacts; package generated from final report, not placeholder/provisional report. | AI |
+| VS0-ACC-R01 | REGRESSION_GUARD | Local acceptance must not imply production readiness. | `production_release_ready=false`; live connector and human usability remain `HUMAN_REQUIRED`; local acceptance cannot unlock production release. | Readiness JSON, report, manifest. | Negative evidence counters for production overclaim, live-provider overclaim, human-usability overclaim. | AI |
+| VS0-ACC-R02 | REGRESSION_GUARD | Acceptance hardening must not regress earlier local deterministic gates. | `make verify-local-fast`, `make verify-vs0-runtime`, and `make verify-vs0-acceptance` or equivalent targeted commands are actually run and captured. | Command transcript artifact. | Command names, start/end time, exit codes, relevant stdout/stderr tail, report refs. | AI |
+| VS0-ACC-H01 | HUMAN_REQUIRED | Live connector/provider verification requires credentials and may mutate third-party systems. | Human later approves and performs live ConnectorHub/provider dry-run/execution. | Human-run live provider test. | Written approval, redacted transcript, provider/action result, policy decision, audit refs. | Human |
+| VS0-ACC-H02 | HUMAN_REQUIRED | Usability acceptance is subjective. | JiYong/Tars completes walkthrough and records accept/reject. | Human walkthrough. | Acceptance note, screenshots/recording or issue list. | Human |
+
+## New Scenario Set: VS0-EVUX - Evidence Cleanup and Interactive UI Loop
+
+Add this as the next task-scoped scenario set after `VS0_RUNTIME_ACCEPTANCE_AND_HARDENING`.
+
+| ID | Type | Why | Trigger / Action | Expected Result | Affected Layers | Verification Method | Evidence Required | Owner |
+|---|---|---|---|---|---|---|---|---|
+| VS0-EVUX-001 | MUST_PASS | The product must be usable from the UI, not only CLI/API. | User opens local UI and uploads or selects one fixture file. | Artifact is created and UI shows artifact ID, checksum, source, derived status, evidence refs, and audit refs. | UI, API, artifact store, audit | Browser interaction plus API/storage inspection | Browser trace/screenshot, artifact JSON, audit event refs | AI |
+| VS0-EVUX-002 | MUST_PASS | Drop to search immediately is a SoT UX contract. | User searches uploaded content in UI. | Search result appears with scoped snippet and reproducible search snapshot ID. | UI, API, search, evidence | Browser interaction plus search snapshot inspection | Browser trace, search snapshot JSON, evidence/audit refs | AI |
+| VS0-EVUX-003 | MUST_PASS | Claim creation must be evidence-first. | User creates an Evidence Bundle and Claim from selected search result in UI. | Claim is Draft/Evidence-backed and links to Evidence Bundle, search snapshot, and artifact refs. | UI, API, claim, evidence | Browser interaction plus claim/evidence inspection | Claim JSON, Evidence Bundle JSON, UI screenshot, audit refs | AI |
+| VS0-EVUX-004 | MUST_PASS | Unsupported claims must not become product truth. | User attempts to approve a zero-evidence Claim. | Approval is denied or Claim remains Draft; UI shows cause and resolution guide. | UI, API, claim policy | Browser/API negative test | Denial response, UI error message, unchanged claim state, audit ref | AI |
+| VS0-EVUX-005 | MUST_PASS | Action Card is a core CornerStone differentiator. | User creates Action Card from evidence-backed Claim in UI. | UI shows diff, expected impact, evidence, policy decision, risk, approval state, rollback/compensation note, and audit refs on one screen. | UI, API, workflow/action, policy | Browser interaction plus action JSON inspection | Action Card screenshot, dry-run JSON, policy decision refs, audit refs | AI |
+| VS0-EVUX-006 | MUST_PASS | VS-0 must complete Act safely. | User approves and executes local/mock Action from UI. | Execution result is stored; `mock_connector_calls=1`; `real_external_http_calls=0`; no credential exposure. | UI, API, action runtime, audit | Browser interaction plus execution result inspection | Action result JSON, UI execution state, audit event refs, negative evidence | AI |
+| VS0-EVUX-007 | MUST_PASS | Audit must be inspectable by operators. | User opens Audit Detail after action execution. | UI shows artifact/search/evidence/claim/action/policy/approval/execution timeline and audit verification status. | UI, API, audit | Browser interaction plus audit verify | Audit timeline screenshot, audit JSON, `audit verify` output | AI |
+| VS0-EVUX-008 | MUST_PASS | Evidence package must bind to exact code state. | User runs final evidence package command. | Evidence package records verified base commit, final commit or tree hash, dirty state, command transcripts, browser traces, and scenario reports. | CLI, release evidence, reports | Release evidence collect/check | Manifest JSON, command transcript, tree/commit metadata | AI |
+| VS0-EVUX-R01 | REGRESSION_GUARD | Static UI label checks must not replace workflow proof. | Browser proof runs. | Scenario fails if only labels are present and the UI workflow was not executed. | UI, verifier | Browser scenario assertions | Trace showing actual upload/search/claim/action/audit steps | AI |
+| VS0-EVUX-R02 | REGRESSION_GUARD | README quickstart must remain executable. | Quickstart verifier runs. | Fixture loop completes end-to-end with generated IDs and audit verification. | CLI, docs, runtime | Quickstart script/CLI verifier | Quickstart transcript with exit codes and refs | AI |
+| VS0-EVUX-R03 | REGRESSION_GUARD | Existing local gates must remain green. | Regression command gate runs. | Prior local deterministic scenario matrix and VS0 runtime gates pass. | CLI, scenario verifier, reports | Command transcript | Exit-code transcript for `verify-local-fast`, `verify-vs0-runtime`, `verify-vs0-acceptance`, or documented equivalent | AI |
+| VS0-EVUX-R04 | REGRESSION_GUARD | Browser timeout must not become clean PASS. | Browser exits non-zero or times out. | Browser proof is marked `PARTIAL`, `FAIL`, or `NOT_VERIFIED`; clean `PASS` requires clean exit or documented exception accepted by scenario contract. | Browser verifier | Browser proof validator | Browser exit code, timeout flag, proof status | AI |
+| VS0-EVUX-H01 | HUMAN_REQUIRED | Human usability cannot be judged by automated tests. | JiYong/Tars completes UI walkthrough. | Human accepts or rejects operator usability. | Product, UI/UX | Human review | Acceptance note, screenshots/recording, issue list if rejected | Human |
+| VS0-EVUX-H02 | HUMAN_REQUIRED | Live provider proof requires real credentials and external state. | Human later runs approved live ConnectorHub/provider test. | Live connector result is verified without exposing secrets. | Connector, workflow/action, audit | Human-approved live test | Redacted provider transcript, approval, execution result, audit refs | Human |
+
+## Definition Of Scenario PASS For VS0 Evidence Cleanup
+
+For this section, `PASS` means:
+
+1. The expected user/system behavior occurred.
+2. The verification method was actually run.
+3. Evidence exists in a committed or generated artifact.
+4. Evidence includes exact command/browser/API output or file references.
+5. No AI-verifiable `MUST_PASS` or `REGRESSION_GUARD` row is `FAIL`, `NOT_VERIFIED`, or `NOT_RUN`.
+6. Human-only rows remain `HUMAN_REQUIRED` until the named human evidence exists.
+
+Do **not** mark `PASS` from:
+
+- README token presence alone.
+- Static UI labels alone.
+- Narrative report text alone.
+- A screenshot when the browser process failed unless the scenario explicitly allows `PARTIAL` evidence.
+- A report generated before commit without tree/commit semantics explaining what was verified.
+
+---
+
+# 18. Scenario-First Implementation Contract Template
 
 Future implementation tasks should copy the relevant scenarios into this template before coding.
 
@@ -1639,7 +1732,7 @@ Scenario Contract:
 
 ---
 
-# 18. Minimum Release Gate Summary
+# 19. Minimum Release Gate Summary
 
 A release or milestone should not claim “complete” unless:
 
@@ -1653,7 +1746,7 @@ A release or milestone should not claim “complete” unless:
 
 ---
 
-# 19. Initial Priority Recommendation
+# 20. Initial Priority Recommendation
 
 Because the full scenario suite is intentionally comprehensive, implementation should start by freezing a smaller v0.1 scenario subset.
 
@@ -1672,7 +1765,7 @@ This subset gives the product a coherent first implementation standard while pre
 
 ---
 
-# 20. Final Product Scenario Statement
+# 21. Final Product Scenario Statement
 
 CornerStone must pass these scenarios not because the product needs more process, but because the product is powerful enough to require proof.
 
@@ -1685,4 +1778,3 @@ The standard is:
 > No memory without visibility and control.  
 > No self-improvement without outcome evidence, scope, and rollback.  
 > No release claim without scenario verification.
-

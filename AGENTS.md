@@ -20,9 +20,12 @@ Before non-trivial planning, architecture, migration, or implementation work, re
 10. `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` before VS-0 scaffold or feature coding
 11. `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` before VS-0 scaffold implementation
 12. `docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md` when working on v0.1/VS-0
-13. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-14. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-15. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
+13. `docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md` when working on local VS0 runtime readiness
+14. `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md` when working on local VS0 runtime acceptance evidence
+15. `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md` before implementing the VS0 evidence-cleanup and interactive UI loop
+16. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+17. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+18. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
 
 The product SoT is the product authority. Repository files show implementation reality, not permission to drift.
 

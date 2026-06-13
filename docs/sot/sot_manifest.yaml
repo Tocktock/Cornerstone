@@ -136,6 +136,23 @@ vs0_runtime_acceptance_and_hardening:
   make_target: "make verify-vs0-acceptance"
   production_release_rule: "production_release_ready remains false until separate production live-provider and human acceptance evidence exists"
 
+vs0_evidence_cleanup_and_interactive_ui_loop:
+  contract: "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md"
+  matrix: "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv"
+  expected_scenario_report: "reports/scenario/vs0-evux-YYYY-MM-DD.json"
+  expected_browser_proof_dir: "reports/browser/vs0-evux-YYYY-MM-DD/"
+  expected_quickstart_transcript: "reports/quickstart/vs0-evux-quickstart.json"
+  expected_release_evidence_package: "reports/release/vs0-evux-YYYY-MM-DD/manifest.json"
+  expected_verification_report: "docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_YYYY-MM-DD.md"
+  authority: "frozen next task-scoped scenarios for evidence cleanup and interactive UI workflow proof"
+  scenario_count: 14
+  ai_verifiable_count: 12
+  human_required_count: 2
+  status: "scenario contract frozen; implementation not started; AI rows NOT_VERIFIED and human rows HUMAN_REQUIRED"
+  verifier: "cornerstone scenario verify vs0-evux --json"
+  quickstart_verifier: "cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json"
+  production_release_rule: "production_release_ready remains false until separate production live-provider and human acceptance evidence exists"
+
 agent_guidance:
   scenario_first_instruction: "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md"
   project_constitution: "docs/agent/PROJECT_OPERATING_CONSTITUTION.md"

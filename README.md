@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, local deterministic VS-0 product runtime readiness, and local VS0 runtime acceptance/hardening evidence
+**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, local deterministic VS-0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, and frozen VS0 evidence-cleanup/interactive-UI-loop scenarios
 **Canonical spelling:** Use **CornerStone** for product/project text.
 
 ## Product Definition
@@ -41,9 +41,11 @@ Users should experience one CornerStone product. Internally, the product keeps c
 18. `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`
 19. `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md`
 20. `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md`
-21. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-22. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-23. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
+21. `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md`
+22. `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv`
+23. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+24. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+25. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
 
 ## Active Authority
 
@@ -65,10 +67,12 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md` | Verified task-scoped scenarios for runnable local VS0 product runtime readiness |
 | `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_SCENARIO_FREEZE_REPORT_2026-06-11.md` | Historical scenario-freeze report for VS0 product runtime readiness |
 | `docs/verification-reports/VS0_PRODUCT_RUNTIME_READINESS_REPORT_2026-06-11.md` | Current implementation report for local VS0 product runtime readiness |
-| `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md` | Frozen next task-scoped scenarios for turning local VS0 runtime readiness into an operator-acceptable local release candidate |
+| `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md` | Frozen task-scoped acceptance criteria for turning local VS0 runtime readiness into an operator-reviewable local release candidate; PASS/FAIL status belongs to reports |
 | `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_MATRIX.csv` | Machine-readable matrix for the VS0 runtime acceptance and hardening task contract |
 | `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md` | Scenario-freeze report for the next VS0 runtime acceptance and hardening gate |
 | `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md` | Current local deterministic implementation report for VS0 runtime acceptance and hardening |
+| `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md` | Frozen next task-scoped scenarios for evidence cleanup and real interactive UI workflow proof |
+| `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv` | Machine-readable matrix for the VS0 evidence cleanup and interactive UI loop contract |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
 | `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md` | Verification-centered agent workflow |
@@ -79,7 +83,8 @@ Users should experience one CornerStone product. Internally, the product keeps c
 - Full scenario standard: 206 scenarios.
 - VS-0 implementation subset: 58 scenarios.
 - VS0 runtime readiness overlay: 14 task-scoped scenarios, already accepted for local deterministic runtime readiness.
-- VS0 runtime acceptance/hardening overlay: 9 task-scoped scenarios, 7 AI-verifiable PASS, 2 HUMAN_REQUIRED, production release still false.
+- VS0 runtime acceptance/hardening overlay: 9 task-scoped scenarios; reports show 7 AI-verifiable PASS, 2 HUMAN_REQUIRED, production release still false.
+- VS0 evidence cleanup and interactive UI loop overlay: 14 task-scoped scenarios, 12 AI-verifiable NOT_VERIFIED, 2 HUMAN_REQUIRED, frozen before implementation.
 - Release rule: no PASS without concrete scenario evidence.
 - CLI-native-first rule: no feature scenario can be marked PASS unless its native `cornerstone ...` CLI path is verified or the item is explicitly classified as a non-feature implementation internal.
 
@@ -165,7 +170,9 @@ Personal messy input
 
 The full long-term scenario suite remains authoritative. VS-0 is only the first implementation subset.
 
-The current local acceptance gate is `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`. Local evidence is recorded in `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md`, `reports/scenario/vs0-runtime-acceptance-2026-06-11.json`, `reports/browser/vs0-runtime-acceptance-2026-06-11/`, and `reports/release/vs0-runtime-acceptance-2026-06-11/`. It must not be treated as production release, live-provider, or human UX acceptance.
+The current local acceptance criteria are in `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`. Local evidence is recorded in `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md`, `reports/scenario/vs0-runtime-acceptance-2026-06-11.json`, `reports/browser/vs0-runtime-acceptance-2026-06-11/`, and `reports/release/vs0-runtime-acceptance-2026-06-11/`. The contract is status-neutral; PASS/FAIL status belongs to those reports. It must not be treated as production release, live-provider, or human UX acceptance.
+
+The next frozen scenario contract before implementation is `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md`. It requires real interactive UI workflow proof for upload/select artifact, search, evidence bundle, claim, action dry-run/approval/mock execution, and audit timeline. AI-verifiable rows are `NOT_VERIFIED` until the implementation and verifier evidence exist.
 
 ## VS0 Runtime Acceptance Quickstart
 
@@ -195,9 +202,26 @@ cornerstone audit verify --state-dir data/quickstart-vs0 --json
 # Release-facing local acceptance gate
 cornerstone scenario verify vs0-runtime-acceptance --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json --json
 cornerstone release evidence collect --scope vs0-runtime-acceptance --json
+
+# Planned EVUX verification gate after implementation
+cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json
+# or:
+scripts/verify_vs0_evux_quickstart.sh
 ```
 
+The quickstart commands above are operator guidance. Placeholder IDs are for manual walkthrough only. Scenario `PASS` requires a generated quickstart transcript with generated IDs, exit codes, evidence refs, and audit refs; README token presence alone is not proof.
+
 The quickstart does not verify production tenant isolation, live provider execution, or human usability acceptance. Those remain explicit `HUMAN_REQUIRED` rows.
+
+Expected EVUX evidence outputs after implementation:
+
+```text
+reports/scenario/vs0-evux-YYYY-MM-DD.json
+reports/browser/vs0-evux-YYYY-MM-DD/
+reports/quickstart/vs0-evux-quickstart.json
+reports/release/vs0-evux-YYYY-MM-DD/manifest.json
+docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_YYYY-MM-DD.md
+```
 
 ## CLI Native First
 
