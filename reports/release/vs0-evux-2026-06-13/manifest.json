@@ -1,12 +1,12 @@
 {
   "artifacts": [
     {
-      "bytes": 317291,
-      "path": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+      "bytes": 526979,
+      "path": "reports/scenario/vs0-evux-2026-06-13.json",
       "present": true,
       "required": true,
       "role": "acceptance_scenario_report",
-      "sha256": "354f38c2fdef075faa13ad8ac89d18fded0465fb4b5a6b4eab3aafca8ff222fa"
+      "sha256": "c9f5b579f9da50426ef5410a3489c9030fa26990ef58aafafea7aee0da247e3d"
     },
     {
       "bytes": 256247,
@@ -17,66 +17,68 @@
       "sha256": "789fcf20a4672f7c43a8f57fd37432ed6b773bf47cf93806b5e0711aba6db5b5"
     },
     {
-      "bytes": 1430,
-      "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
+      "bytes": 93256,
+      "path": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
       "present": true,
       "required": true,
       "role": "browser_proof_manifest",
-      "sha256": "8aaa26328abf91b121ba23fe02bcd89b798cf49d740f1b06742130c0b74345d9"
+      "sha256": "aece04c615ed09d0480e6b478ed237bc01b5daed1dc604f10445fbba09c97cee"
     },
     {
-      "bytes": 89394,
-      "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
+      "bytes": 101350,
+      "path": "reports/browser/vs0-evux-2026-06-13/workflow.png",
       "present": true,
       "required": true,
       "role": "browser_screenshot",
-      "sha256": "4814197a8ed32519720be02c91995ff31293826c256a4d1706aaebb2005776ed"
+      "sha256": "5a0b8e428ac0e65113f6806312bac1f7adc2d17a1d3f4740edac24f1a48db25d"
     },
     {
-      "bytes": 11954,
-      "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
+      "bytes": 96116,
+      "path": "reports/browser/vs0-evux-2026-06-13/workflow.dom.html",
       "present": true,
       "required": true,
       "role": "browser_dom_snapshot",
-      "sha256": "a721ec486df001aca3283c81face1b80fbaae8b30c8e4301a7223712ff3fce1c"
+      "sha256": "1e2184fc909cf2c456a6d58cdb97b17b6c2d9f0a784d2b093a706a84f252ecdf"
     },
     {
-      "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/workflow-trace.json",
-      "present": false,
-      "required": false,
-      "role": "browser_workflow_trace"
+      "bytes": 84102,
+      "path": "reports/browser/vs0-evux-2026-06-13/workflow-trace.json",
+      "present": true,
+      "required": true,
+      "role": "browser_workflow_trace",
+      "sha256": "dba79dd18e7fe52c0478919c9c18014dafd268859a8c51427ab79025c2a7bd31"
     },
     {
-      "bytes": 15586,
-      "path": "docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md",
+      "bytes": 13987,
+      "path": "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md",
       "present": true,
       "required": true,
       "role": "acceptance_contract",
-      "sha256": "5097b94f64d94ab7c4a14ddadc00f8b60738da3615e750816003924eea59d0f4"
+      "sha256": "f4e58585acfef9ee33744e9723694c78c28af26aac7d539513a5c641250e83e6"
     },
     {
-      "bytes": 2563,
-      "path": "docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_MATRIX.csv",
+      "bytes": 3323,
+      "path": "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv",
       "present": true,
       "required": true,
       "role": "acceptance_matrix",
-      "sha256": "f413e3a4d81d56d1eaa76232be03880c7dfcd98e94058e5d436237bbfbbdd0d1"
+      "sha256": "341f73d7956d9e2ddcbb84180dae286ced5d04e139b44226276b422e334ad114"
     },
     {
       "bytes": 10562,
       "path": "docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md",
       "present": true,
-      "required": true,
+      "required": false,
       "role": "scenario_freeze_report",
       "sha256": "a1f481c083d04c70e1136c53254a5713f4dc7c001c8237fb7b12b5983363d169"
     },
     {
-      "bytes": 6165,
-      "path": "docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md",
+      "bytes": 7544,
+      "path": "docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md",
       "present": true,
       "required": false,
       "role": "implementation_report",
-      "sha256": "89ff9b2b61813579e9cf6522d49159cad531f64f8b5cce16a4667421f8d396f2"
+      "sha256": "3d3cb562208480687a5f96fcf1301f9280710b53c5f0251d4e513069d8d8e2a0"
     },
     {
       "bytes": 20912,
@@ -87,24 +89,24 @@
       "sha256": "4986b5e80507d344afd97395a9e938d7056d1af223fd5f5b29a258b8c65b1249"
     },
     {
-      "bytes": 924,
-      "path": "reports/release/vs0-runtime-acceptance-2026-06-11/human-usability-walkthrough.md",
+      "bytes": 848,
+      "path": "reports/release/vs0-evux-2026-06-13/human-usability-walkthrough.md",
       "present": true,
       "required": true,
       "role": "human_usability_walkthrough_checklist",
-      "sha256": "988aec2478e8133050e133741b2c714b8730a0c4a94caceaaa2f47fa728d6579"
+      "sha256": "c0c9899dc4dd68eed80b02fd82edd7f57c7f991d01c33410aaf9736eddfc1152"
     }
   ],
-  "browser_proof": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
-  "created_at": "2026-06-13T09:30:32.634020Z",
+  "browser_proof": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
+  "created_at": "2026-06-13T09:31:47.265201Z",
   "human_required": [
     {
-      "id": "VS0-ACC-H01",
+      "id": "VS0-EVUX-H02",
       "required_evidence": "Approved live ConnectorHub/provider transcript with redaction and audit refs.",
       "status": "HUMAN_REQUIRED"
     },
     {
-      "id": "VS0-ACC-H02",
+      "id": "VS0-EVUX-H01",
       "required_evidence": "JiYong/Tars usability acceptance note with screenshots/recording or issue list.",
       "status": "HUMAN_REQUIRED"
     }
@@ -115,11 +117,11 @@
     "acceptance_summary": {
       "blocking": 0,
       "human_required": 2,
-      "pass": 7,
-      "product_feature_claims": "LOCAL_VS0_RUNTIME_ACCEPTANCE_READY_PRODUCTION_NOT_READY",
-      "scenario_count": 9
+      "pass": 12,
+      "product_feature_claims": "LOCAL_VS0_EVUX_READY_PRODUCTION_NOT_READY",
+      "scenario_count": 14
     },
-    "browser_status": "passed",
+    "browser_status": "PASS",
     "product_runtime_status": "success",
     "product_runtime_summary": {
       "blocking": 0,
@@ -133,7 +135,7 @@
   "missing_required": [],
   "negative_evidence": {
     "action_cards_from_prompt_injection": 0,
-    "audit_tamper_verify_failures": 0,
+    "browser_timeout_marked_pass": 0,
     "cross_namespace_reads": 0,
     "human_usability_claim_without_human_evidence": 0,
     "live_connector_claim_without_human_evidence": 0,
@@ -141,12 +143,12 @@
     "real_external_http_calls": 0,
     "tool_calls_from_untrusted_artifact": 0,
     "unqualified_external_calls_in_release_report": 0,
-    "zero_evidence_claim_approvals": 0
+    "zero_evidence_claim_approved": 0
   },
-  "package_id": "releasepkg_323750ddfb4e4496",
+  "package_id": "releasepkg_5e40b1c1170ef6a5",
   "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
   "production_release_ready": false,
-  "scenario_report": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+  "scenario_report": "reports/scenario/vs0-evux-2026-06-13.json",
   "schema_version": "cs.release_evidence_package.v0",
   "scope": {
     "namespace_id": "personal",
@@ -154,6 +156,6 @@
     "tenant_id": "local-dev",
     "workspace_id": "default"
   },
-  "scope_name": "vs0-runtime-acceptance",
+  "scope_name": "vs0-evux",
   "status": "success"
 }

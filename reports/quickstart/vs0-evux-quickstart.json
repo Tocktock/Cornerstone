@@ -1,0 +1,2766 @@
+{
+  "audit_refs": [
+    "audit:audit_ad2c77f66f286070"
+  ],
+  "command_transcripts": {
+    "action_approve": {
+      "command": [
+        "cornerstone",
+        "action",
+        "approve",
+        "action_358903d8448a0da0",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.967555Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.897279Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_358903d8448a0da0",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approved_at": "2026-06-13T09:30:33.949074Z",
+            "approver": "owner",
+            "required": true,
+            "status": "approved"
+          },
+          "audit_ref": "audit:audit_500a288298a38d24",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-13T09:30:33.806247Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_ccea3ecc34408418",
+            "created_at": "2026-06-13T09:30:33.806218Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://vs0-evux/acceptance",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_dfdd550e1dce373e",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "expected_connector_calls": 1,
+              "mock_connector_calls": 1,
+              "real_external_http_calls": 0,
+              "risk": "high",
+              "target": "mock://vs0-evux/acceptance"
+            },
+            "goal": "Record local EVUX acceptance status",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-13T09:30:33.806095Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_df6845d4e4ddbfe7",
+              "mission_id": "mission_49d82fc5e070ca1c",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_bb6553638535df6f",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_e35d06543277c827",
+              "evidence_bundle:evb_bb6553638535df6f"
+            ],
+            "search_snapshot_id": "search_e35d06543277c827"
+          },
+          "execution": {
+            "can_execute_now": true,
+            "result": null,
+            "status": "ready_to_execute"
+          },
+          "goal": "Record local EVUX acceptance status",
+          "mission_id": "mission_49d82fc5e070ca1c",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-13T09:30:33.806095Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_df6845d4e4ddbfe7",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_ccea3ecc34408418"
+        },
+        "audit_refs": [
+          "audit:audit_5ed89badcbce957e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action approve",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_358903d8448a0da0"
+        ],
+        "ids": {
+          "action_id": "action_358903d8448a0da0",
+          "git_commit": "3b28807"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "action_dry_run": {
+      "command": [
+        "cornerstone",
+        "action",
+        "dry-run",
+        "action_358903d8448a0da0",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.897230Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.826186Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_358903d8448a0da0",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_500a288298a38d24",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-13T09:30:33.806247Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_ccea3ecc34408418",
+            "created_at": "2026-06-13T09:30:33.806218Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://vs0-evux/acceptance",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_dfdd550e1dce373e",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "expected_connector_calls": 1,
+              "mock_connector_calls": 1,
+              "real_external_http_calls": 0,
+              "risk": "high",
+              "target": "mock://vs0-evux/acceptance"
+            },
+            "goal": "Record local EVUX acceptance status",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-13T09:30:33.806095Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_df6845d4e4ddbfe7",
+              "mission_id": "mission_49d82fc5e070ca1c",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_bb6553638535df6f",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_e35d06543277c827",
+              "evidence_bundle:evb_bb6553638535df6f"
+            ],
+            "search_snapshot_id": "search_e35d06543277c827"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "pending_approval"
+          },
+          "goal": "Record local EVUX acceptance status",
+          "mission_id": "mission_49d82fc5e070ca1c",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-13T09:30:33.806095Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_df6845d4e4ddbfe7",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_ccea3ecc34408418"
+        },
+        "audit_refs": [
+          "audit:audit_00b034636297e802"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action dry-run",
+        "dry_run": {
+          "action_kind": "external_writeback",
+          "claim_id": "claim_ccea3ecc34408418",
+          "created_at": "2026-06-13T09:30:33.806218Z",
+          "diff": {
+            "after": "would perform external_writeback against mock://vs0-evux/acceptance",
+            "before": "no side effect applied"
+          },
+          "dry_run_id": "dryrun_dfdd550e1dce373e",
+          "expected_impact": {
+            "connector": "mock_connector",
+            "expected_connector_calls": 1,
+            "mock_connector_calls": 1,
+            "real_external_http_calls": 0,
+            "risk": "high",
+            "target": "mock://vs0-evux/acceptance"
+          },
+          "goal": "Record local EVUX acceptance status",
+          "mission_id": "mission_49d82fc5e070ca1c",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-13T09:30:33.806095Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_df6845d4e4ddbfe7",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "schema_version": "cs.action_dry_run.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          }
+        },
+        "errors": [],
+        "evidence_refs": [
+          "action:action_358903d8448a0da0",
+          "dry_run:dryrun_dfdd550e1dce373e"
+        ],
+        "ids": {
+          "action_id": "action_358903d8448a0da0",
+          "audit_event_id": "audit_00b034636297e802",
+          "dry_run_id": "dryrun_dfdd550e1dce373e",
+          "git_commit": "3b28807"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_df6845d4e4ddbfe7"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-13T09:30:33.806095Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_df6845d4e4ddbfe7",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "action_execute": {
+      "command": [
+        "cornerstone",
+        "action",
+        "execute",
+        "action_358903d8448a0da0",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:34.036361Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.967599Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_358903d8448a0da0",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approved_at": "2026-06-13T09:30:33.949074Z",
+            "approver": "owner",
+            "required": true,
+            "status": "approved"
+          },
+          "audit_ref": "audit:audit_500a288298a38d24",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-13T09:30:33.806247Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_ccea3ecc34408418",
+            "created_at": "2026-06-13T09:30:33.806218Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://vs0-evux/acceptance",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_dfdd550e1dce373e",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "expected_connector_calls": 1,
+              "mock_connector_calls": 1,
+              "real_external_http_calls": 0,
+              "risk": "high",
+              "target": "mock://vs0-evux/acceptance"
+            },
+            "goal": "Record local EVUX acceptance status",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-13T09:30:33.806095Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_df6845d4e4ddbfe7",
+              "mission_id": "mission_49d82fc5e070ca1c",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_bb6553638535df6f",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_e35d06543277c827",
+              "evidence_bundle:evb_bb6553638535df6f"
+            ],
+            "search_snapshot_id": "search_e35d06543277c827"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": {
+              "action_id": "action_358903d8448a0da0",
+              "executed_at": "2026-06-13T09:30:34.018969Z",
+              "external_http_calls": 0,
+              "message": "Action execution was recorded through the governed Workflow/Action path.",
+              "mission_id": "mission_49d82fc5e070ca1c",
+              "mock_connector_calls": 1,
+              "schema_version": "cs.action_result.v0",
+              "side_effect_boundary": "mocked_connector",
+              "status": "success"
+            },
+            "status": "executed"
+          },
+          "goal": "Record local EVUX acceptance status",
+          "mission_id": "mission_49d82fc5e070ca1c",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-13T09:30:33.806095Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_df6845d4e4ddbfe7",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_ccea3ecc34408418"
+        },
+        "action_result": {
+          "action_id": "action_358903d8448a0da0",
+          "executed_at": "2026-06-13T09:30:34.018969Z",
+          "external_http_calls": 0,
+          "message": "Action execution was recorded through the governed Workflow/Action path.",
+          "mission_id": "mission_49d82fc5e070ca1c",
+          "mock_connector_calls": 1,
+          "schema_version": "cs.action_result.v0",
+          "side_effect_boundary": "mocked_connector",
+          "status": "success"
+        },
+        "audit_refs": [
+          "audit:audit_8d5d0f74a39be6c4"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action execute",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_358903d8448a0da0"
+        ],
+        "ids": {
+          "action_id": "action_358903d8448a0da0",
+          "git_commit": "3b28807",
+          "mission_id": "mission_49d82fc5e070ca1c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "action_propose": {
+      "command": [
+        "cornerstone",
+        "action",
+        "propose",
+        "--mission-id",
+        "mission_49d82fc5e070ca1c",
+        "--claim-id",
+        "claim_ccea3ecc34408418",
+        "--goal",
+        "Record local EVUX acceptance status",
+        "--action-kind",
+        "external_writeback",
+        "--risk",
+        "high",
+        "--connector",
+        "mock_connector",
+        "--target",
+        "mock://vs0-evux/acceptance",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.826130Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.753141Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "action_card": {
+          "action_id": "action_358903d8448a0da0",
+          "action_kind": "external_writeback",
+          "approval": {
+            "approver": null,
+            "required": true,
+            "status": "pending"
+          },
+          "audit_ref": "audit:audit_500a288298a38d24",
+          "connector_boundary": {
+            "connector": "mock_connector",
+            "credentials_exposed_to_agent": false,
+            "direct_provider_access": false,
+            "mediated_by": "ConnectorHub",
+            "mocked": true
+          },
+          "created_at": "2026-06-13T09:30:33.806247Z",
+          "dry_run": {
+            "action_kind": "external_writeback",
+            "claim_id": "claim_ccea3ecc34408418",
+            "created_at": "2026-06-13T09:30:33.806218Z",
+            "diff": {
+              "after": "would perform external_writeback against mock://vs0-evux/acceptance",
+              "before": "no side effect applied"
+            },
+            "dry_run_id": "dryrun_dfdd550e1dce373e",
+            "expected_impact": {
+              "connector": "mock_connector",
+              "expected_connector_calls": 1,
+              "mock_connector_calls": 1,
+              "real_external_http_calls": 0,
+              "risk": "high",
+              "target": "mock://vs0-evux/acceptance"
+            },
+            "goal": "Record local EVUX acceptance status",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy_decision": {
+              "action_kind": "external_writeback",
+              "approval_required": true,
+              "can_execute_now": false,
+              "connector": "mock_connector",
+              "decided_at": "2026-06-13T09:30:33.806095Z",
+              "decision": "requires_approval",
+              "execution_status": "pending_approval",
+              "id": "policy_df6845d4e4ddbfe7",
+              "mission_id": "mission_49d82fc5e070ca1c",
+              "policy": "high_risk_action_requires_approval",
+              "reason": "High-risk or external writeback action requires owner approval before execution.",
+              "resolution_path": [
+                "Use an active Mission Goal Contract.",
+                "Keep action inside allowed actions and owner namespace.",
+                "Run dry-run and request owner approval when policy requires it."
+              ],
+              "risk": "high",
+              "schema_version": "cs.policy_decision.v0",
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "workspace_mode": "autopilot"
+            },
+            "schema_version": "cs.action_dry_run.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            }
+          },
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_bb6553638535df6f",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_e35d06543277c827",
+              "evidence_bundle:evb_bb6553638535df6f"
+            ],
+            "search_snapshot_id": "search_e35d06543277c827"
+          },
+          "execution": {
+            "can_execute_now": false,
+            "result": null,
+            "status": "pending_approval"
+          },
+          "goal": "Record local EVUX acceptance status",
+          "mission_id": "mission_49d82fc5e070ca1c",
+          "policy_decision": {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-13T09:30:33.806095Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_df6845d4e4ddbfe7",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          },
+          "risk": "high",
+          "schema_version": "cs.action_card.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim_id": "claim_ccea3ecc34408418"
+        },
+        "audit_refs": [
+          "audit:audit_500a288298a38d24"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone action propose",
+        "errors": [],
+        "evidence_refs": [
+          "action:action_358903d8448a0da0",
+          "mission:mission_49d82fc5e070ca1c",
+          "claim:claim_ccea3ecc34408418",
+          "dry_run:dryrun_dfdd550e1dce373e",
+          "evidence_bundle:evb_bb6553638535df6f",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "action_id": "action_358903d8448a0da0",
+          "audit_event_id": "audit_500a288298a38d24",
+          "claim_id": "claim_ccea3ecc34408418",
+          "dry_run_id": "dryrun_dfdd550e1dce373e",
+          "git_commit": "3b28807",
+          "mission_id": "mission_49d82fc5e070ca1c"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [
+          "policy:policy_df6845d4e4ddbfe7"
+        ],
+        "policy_decisions": [
+          {
+            "action_kind": "external_writeback",
+            "approval_required": true,
+            "can_execute_now": false,
+            "connector": "mock_connector",
+            "decided_at": "2026-06-13T09:30:33.806095Z",
+            "decision": "requires_approval",
+            "execution_status": "pending_approval",
+            "id": "policy_df6845d4e4ddbfe7",
+            "mission_id": "mission_49d82fc5e070ca1c",
+            "policy": "high_risk_action_requires_approval",
+            "reason": "High-risk or external writeback action requires owner approval before execution.",
+            "resolution_path": [
+              "Use an active Mission Goal Contract.",
+              "Keep action inside allowed actions and owner namespace.",
+              "Run dry-run and request owner approval when policy requires it."
+            ],
+            "risk": "high",
+            "schema_version": "cs.policy_decision.v0",
+            "scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "workspace_mode": "autopilot"
+          }
+        ],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "artifact_ingest": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "ingest",
+        "fixtures/vs0/packs/01_artifact_basic/input.txt",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.055675Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:32.987168Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-13T09:30:33.048014Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-13T09:30:33.048014Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_040ec562bf1442aa"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact ingest",
+        "deduplicated": false,
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_040ec562bf1442aa",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "3b28807"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "artifact_show": {
+      "command": [
+        "cornerstone",
+        "artifact",
+        "show",
+        "art_2735313e0cb92563",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.124746Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.055707Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "artifact": {
+          "artifact_id": "art_2735313e0cb92563",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "content_identity": {
+            "algorithm": "sha256",
+            "value": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+          },
+          "derived": {
+            "media_type": "text/plain",
+            "redacted": false,
+            "status": "ready",
+            "text_ref": "derived/art_2735313e0cb92563.txt"
+          },
+          "derived_text_preview": "CornerStone fixture note.  Project: Alpha research review. Decision candidate: Keep original source material before derived summaries. Known risk: extraction may fail for an unknown binary attachment. Search phrase: alpha-evidence-anchor.",
+          "media_type": "text/plain",
+          "original_size_bytes": 239,
+          "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "provenance": {
+            "created_at": "2026-06-13T09:30:33.048014Z",
+            "lineage_from": null,
+            "transformations": [
+              "hash_calculated",
+              "original_preserved",
+              "derived_text_created"
+            ]
+          },
+          "raw_original_access": {
+            "display": "controlled",
+            "policy": "owner_scope_required"
+          },
+          "related_claims": [],
+          "related_missions": [],
+          "safety": {
+            "action_cards_created_from_untrusted_artifact": 0,
+            "authority_expanded": false,
+            "blocked_attempt_count": 0,
+            "blocked_attempts": [],
+            "external_http_calls": 0,
+            "tool_calls_created": 0,
+            "unsafe_instruction_detected": false,
+            "untrusted_evidence": true
+          },
+          "schema_version": "cs.artifact.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source": {
+            "ingested_at": "2026-06-13T09:30:33.048014Z",
+            "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "type": "local_file"
+          },
+          "trust_state": "untrusted"
+        },
+        "audit_refs": [
+          "audit:audit_4b2c87b2ee2ce25c"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone artifact show",
+        "errors": [],
+        "evidence_refs": [
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "artifact_id": "art_2735313e0cb92563",
+          "audit_event_id": "audit_4b2c87b2ee2ce25c",
+          "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+          "git_commit": "3b28807"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "audit_list": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "list",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:34.105271Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:34.036406Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_events": [
+          {
+            "details": {
+              "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "derived_status": "ready",
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "trust_state": "untrusted"
+            },
+            "event_id": "audit_040ec562bf1442aa",
+            "event_type": "artifact.ingested",
+            "occurred_at": "2026-06-13T09:30:33.048473Z",
+            "subject": {
+              "id": "art_2735313e0cb92563",
+              "type": "artifact"
+            }
+          },
+          {
+            "details": {
+              "reason": "cli_artifact_show"
+            },
+            "event_id": "audit_4b2c87b2ee2ce25c",
+            "event_type": "artifact.read",
+            "occurred_at": "2026-06-13T09:30:33.117545Z",
+            "subject": {
+              "id": "art_2735313e0cb92563",
+              "type": "artifact"
+            }
+          },
+          {
+            "details": {
+              "duration_ms": 0.212,
+              "query": "alpha-evidence-anchor",
+              "result_count": 1
+            },
+            "event_id": "audit_4804e1b362e8386d",
+            "event_type": "search.snapshot.created",
+            "occurred_at": "2026-06-13T09:30:33.176284Z",
+            "subject": {
+              "id": "search_e35d06543277c827",
+              "type": "search_snapshot"
+            }
+          },
+          {
+            "details": {
+              "evidence_item_count": 1,
+              "search_snapshot_id": "search_e35d06543277c827"
+            },
+            "event_id": "audit_06602d953494bd1e",
+            "event_type": "evidence_bundle.created",
+            "occurred_at": "2026-06-13T09:30:33.265562Z",
+            "subject": {
+              "id": "evb_bb6553638535df6f",
+              "type": "evidence_bundle"
+            }
+          },
+          {
+            "details": {
+              "evidence_bundle_id": "evb_bb6553638535df6f",
+              "search_snapshot_id": "search_e35d06543277c827"
+            },
+            "event_id": "audit_96e8cd69237eb2b3",
+            "event_type": "claim.draft.created",
+            "occurred_at": "2026-06-13T09:30:33.362602Z",
+            "subject": {
+              "id": "claim_ccea3ecc34408418",
+              "type": "claim"
+            }
+          },
+          {
+            "details": {
+              "evidence_bundle_id": null,
+              "evidence_item_count": 0
+            },
+            "event_id": "audit_3f1bb352759951e8",
+            "event_type": "claim.draft.created",
+            "occurred_at": "2026-06-13T09:30:33.445418Z",
+            "subject": {
+              "id": "claim_e84659d2bce1fc86",
+              "type": "claim"
+            }
+          },
+          {
+            "details": {
+              "reason": "missing_evidence_bundle",
+              "required": "Attach an Evidence Bundle with at least one artifact reference before approval."
+            },
+            "event_id": "audit_2b375fe3d9ae2074",
+            "event_type": "claim.approval.denied",
+            "occurred_at": "2026-06-13T09:30:33.518558Z",
+            "subject": {
+              "id": "claim_e84659d2bce1fc86",
+              "type": "claim"
+            }
+          },
+          {
+            "details": {
+              "artifact_refs": [
+                "artifact:art_2735313e0cb92563"
+              ],
+              "evidence_bundle_id": "evb_bb6553638535df6f",
+              "evidence_item_count": 1
+            },
+            "event_id": "audit_51d68424af8c5c4e",
+            "event_type": "claim.approved",
+            "occurred_at": "2026-06-13T09:30:33.591337Z",
+            "subject": {
+              "id": "claim_ccea3ecc34408418",
+              "type": "claim"
+            }
+          },
+          {
+            "details": {
+              "allowed_actions": [
+                "internal_status_update",
+                "draft_task",
+                "refresh_brief"
+              ],
+              "claim_id": "claim_ccea3ecc34408418",
+              "evidence_bundle_id": "evb_bb6553638535df6f",
+              "workspace_mode": "assist"
+            },
+            "event_id": "audit_89545e4d21bb44f1",
+            "event_type": "mission.contract.created",
+            "occurred_at": "2026-06-13T09:30:33.662840Z",
+            "subject": {
+              "id": "mission_49d82fc5e070ca1c",
+              "type": "mission"
+            }
+          },
+          {
+            "details": {
+              "autonomous_execution_allowed": true,
+              "mode": "autopilot"
+            },
+            "event_id": "audit_832ea347fa89f2ba",
+            "event_type": "workspace.mode.set",
+            "occurred_at": "2026-06-13T09:30:33.733368Z",
+            "subject": {
+              "id": "3e548f87d142e49b",
+              "type": "workspace"
+            }
+          },
+          {
+            "details": {
+              "allowed_actions": [
+                "internal_status_update",
+                "draft_task",
+                "refresh_brief"
+              ],
+              "forbidden_actions": [
+                "external_writeback_without_workflow_action",
+                "cross_namespace_access",
+                "destructive_change",
+                "secret_exfiltration"
+              ],
+              "mode": "autopilot"
+            },
+            "event_id": "audit_4233eaa6e28d4898",
+            "event_type": "mission.activated",
+            "occurred_at": "2026-06-13T09:30:33.733546Z",
+            "subject": {
+              "id": "mission_49d82fc5e070ca1c",
+              "type": "mission"
+            }
+          },
+          {
+            "details": {
+              "action_kind": "external_writeback",
+              "claim_id": "claim_ccea3ecc34408418",
+              "decision": "requires_approval",
+              "dry_run_id": "dryrun_dfdd550e1dce373e",
+              "mission_id": "mission_49d82fc5e070ca1c",
+              "policy": "high_risk_action_requires_approval",
+              "risk": "high"
+            },
+            "event_id": "audit_500a288298a38d24",
+            "event_type": "action.card.proposed",
+            "occurred_at": "2026-06-13T09:30:33.806574Z",
+            "subject": {
+              "id": "action_358903d8448a0da0",
+              "type": "action"
+            }
+          },
+          {
+            "details": {
+              "dry_run_id": "dryrun_dfdd550e1dce373e",
+              "reason": "cli_action_dry_run"
+            },
+            "event_id": "audit_00b034636297e802",
+            "event_type": "action.dry_run.read",
+            "occurred_at": "2026-06-13T09:30:33.889144Z",
+            "subject": {
+              "id": "action_358903d8448a0da0",
+              "type": "action"
+            }
+          },
+          {
+            "details": {
+              "approver": "owner",
+              "mission_id": "mission_49d82fc5e070ca1c",
+              "policy": "high_risk_action_requires_approval"
+            },
+            "event_id": "audit_5ed89badcbce957e",
+            "event_type": "action.approved",
+            "occurred_at": "2026-06-13T09:30:33.949467Z",
+            "subject": {
+              "id": "action_358903d8448a0da0",
+              "type": "action"
+            }
+          },
+          {
+            "details": {
+              "action_kind": "external_writeback",
+              "external_http_calls": 0,
+              "mission_id": "mission_49d82fc5e070ca1c",
+              "mock_connector_calls": 1
+            },
+            "event_id": "audit_8d5d0f74a39be6c4",
+            "event_type": "action.executed",
+            "occurred_at": "2026-06-13T09:30:34.019212Z",
+            "subject": {
+              "id": "action_358903d8448a0da0",
+              "type": "action"
+            }
+          }
+        ],
+        "audit_refs": [
+          "audit:audit_ad2c77f66f286070"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit list",
+        "errors": [],
+        "evidence_refs": [
+          "namespace_audit_export:nsaudit_382f6d996ce20f6b"
+        ],
+        "ids": {
+          "git_commit": "3b28807",
+          "namespace_audit_export_id": "nsaudit_382f6d996ce20f6b"
+        },
+        "mode": "local_scaffold",
+        "namespace_audit_export": {
+          "coverage": {
+            "actions": true,
+            "agent_activity": false,
+            "approvals": true,
+            "data_access": true,
+            "learning_events": false,
+            "memory_writes": false,
+            "model_routing": false,
+            "promotions": false
+          },
+          "created_at": "2026-06-13T09:30:34.087213Z",
+          "event_count": 15,
+          "event_type_counts": {
+            "action.approved": 1,
+            "action.card.proposed": 1,
+            "action.dry_run.read": 1,
+            "action.executed": 1,
+            "artifact.ingested": 1,
+            "artifact.read": 1,
+            "claim.approval.denied": 1,
+            "claim.approved": 1,
+            "claim.draft.created": 2,
+            "evidence_bundle.created": 1,
+            "mission.activated": 1,
+            "mission.contract.created": 1,
+            "search.snapshot.created": 1,
+            "workspace.mode.set": 1
+          },
+          "events": [
+            {
+              "details": {
+                "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+                "derived_status": "ready",
+                "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+                "trust_state": "untrusted"
+              },
+              "event_id": "audit_040ec562bf1442aa",
+              "event_type": "artifact.ingested",
+              "occurred_at": "2026-06-13T09:30:33.048473Z",
+              "subject": {
+                "id": "art_2735313e0cb92563",
+                "type": "artifact"
+              }
+            },
+            {
+              "details": {
+                "reason": "cli_artifact_show"
+              },
+              "event_id": "audit_4b2c87b2ee2ce25c",
+              "event_type": "artifact.read",
+              "occurred_at": "2026-06-13T09:30:33.117545Z",
+              "subject": {
+                "id": "art_2735313e0cb92563",
+                "type": "artifact"
+              }
+            },
+            {
+              "details": {
+                "duration_ms": 0.212,
+                "query": "alpha-evidence-anchor",
+                "result_count": 1
+              },
+              "event_id": "audit_4804e1b362e8386d",
+              "event_type": "search.snapshot.created",
+              "occurred_at": "2026-06-13T09:30:33.176284Z",
+              "subject": {
+                "id": "search_e35d06543277c827",
+                "type": "search_snapshot"
+              }
+            },
+            {
+              "details": {
+                "evidence_item_count": 1,
+                "search_snapshot_id": "search_e35d06543277c827"
+              },
+              "event_id": "audit_06602d953494bd1e",
+              "event_type": "evidence_bundle.created",
+              "occurred_at": "2026-06-13T09:30:33.265562Z",
+              "subject": {
+                "id": "evb_bb6553638535df6f",
+                "type": "evidence_bundle"
+              }
+            },
+            {
+              "details": {
+                "evidence_bundle_id": "evb_bb6553638535df6f",
+                "search_snapshot_id": "search_e35d06543277c827"
+              },
+              "event_id": "audit_96e8cd69237eb2b3",
+              "event_type": "claim.draft.created",
+              "occurred_at": "2026-06-13T09:30:33.362602Z",
+              "subject": {
+                "id": "claim_ccea3ecc34408418",
+                "type": "claim"
+              }
+            },
+            {
+              "details": {
+                "evidence_bundle_id": null,
+                "evidence_item_count": 0
+              },
+              "event_id": "audit_3f1bb352759951e8",
+              "event_type": "claim.draft.created",
+              "occurred_at": "2026-06-13T09:30:33.445418Z",
+              "subject": {
+                "id": "claim_e84659d2bce1fc86",
+                "type": "claim"
+              }
+            },
+            {
+              "details": {
+                "reason": "missing_evidence_bundle",
+                "required": "Attach an Evidence Bundle with at least one artifact reference before approval."
+              },
+              "event_id": "audit_2b375fe3d9ae2074",
+              "event_type": "claim.approval.denied",
+              "occurred_at": "2026-06-13T09:30:33.518558Z",
+              "subject": {
+                "id": "claim_e84659d2bce1fc86",
+                "type": "claim"
+              }
+            },
+            {
+              "details": {
+                "artifact_refs": [
+                  "artifact:art_2735313e0cb92563"
+                ],
+                "evidence_bundle_id": "evb_bb6553638535df6f",
+                "evidence_item_count": 1
+              },
+              "event_id": "audit_51d68424af8c5c4e",
+              "event_type": "claim.approved",
+              "occurred_at": "2026-06-13T09:30:33.591337Z",
+              "subject": {
+                "id": "claim_ccea3ecc34408418",
+                "type": "claim"
+              }
+            },
+            {
+              "details": {
+                "allowed_actions": [
+                  "internal_status_update",
+                  "draft_task",
+                  "refresh_brief"
+                ],
+                "claim_id": "claim_ccea3ecc34408418",
+                "evidence_bundle_id": "evb_bb6553638535df6f",
+                "workspace_mode": "assist"
+              },
+              "event_id": "audit_89545e4d21bb44f1",
+              "event_type": "mission.contract.created",
+              "occurred_at": "2026-06-13T09:30:33.662840Z",
+              "subject": {
+                "id": "mission_49d82fc5e070ca1c",
+                "type": "mission"
+              }
+            },
+            {
+              "details": {
+                "autonomous_execution_allowed": true,
+                "mode": "autopilot"
+              },
+              "event_id": "audit_832ea347fa89f2ba",
+              "event_type": "workspace.mode.set",
+              "occurred_at": "2026-06-13T09:30:33.733368Z",
+              "subject": {
+                "id": "3e548f87d142e49b",
+                "type": "workspace"
+              }
+            },
+            {
+              "details": {
+                "allowed_actions": [
+                  "internal_status_update",
+                  "draft_task",
+                  "refresh_brief"
+                ],
+                "forbidden_actions": [
+                  "external_writeback_without_workflow_action",
+                  "cross_namespace_access",
+                  "destructive_change",
+                  "secret_exfiltration"
+                ],
+                "mode": "autopilot"
+              },
+              "event_id": "audit_4233eaa6e28d4898",
+              "event_type": "mission.activated",
+              "occurred_at": "2026-06-13T09:30:33.733546Z",
+              "subject": {
+                "id": "mission_49d82fc5e070ca1c",
+                "type": "mission"
+              }
+            },
+            {
+              "details": {
+                "action_kind": "external_writeback",
+                "claim_id": "claim_ccea3ecc34408418",
+                "decision": "requires_approval",
+                "dry_run_id": "dryrun_dfdd550e1dce373e",
+                "mission_id": "mission_49d82fc5e070ca1c",
+                "policy": "high_risk_action_requires_approval",
+                "risk": "high"
+              },
+              "event_id": "audit_500a288298a38d24",
+              "event_type": "action.card.proposed",
+              "occurred_at": "2026-06-13T09:30:33.806574Z",
+              "subject": {
+                "id": "action_358903d8448a0da0",
+                "type": "action"
+              }
+            },
+            {
+              "details": {
+                "dry_run_id": "dryrun_dfdd550e1dce373e",
+                "reason": "cli_action_dry_run"
+              },
+              "event_id": "audit_00b034636297e802",
+              "event_type": "action.dry_run.read",
+              "occurred_at": "2026-06-13T09:30:33.889144Z",
+              "subject": {
+                "id": "action_358903d8448a0da0",
+                "type": "action"
+              }
+            },
+            {
+              "details": {
+                "approver": "owner",
+                "mission_id": "mission_49d82fc5e070ca1c",
+                "policy": "high_risk_action_requires_approval"
+              },
+              "event_id": "audit_5ed89badcbce957e",
+              "event_type": "action.approved",
+              "occurred_at": "2026-06-13T09:30:33.949467Z",
+              "subject": {
+                "id": "action_358903d8448a0da0",
+                "type": "action"
+              }
+            },
+            {
+              "details": {
+                "action_kind": "external_writeback",
+                "external_http_calls": 0,
+                "mission_id": "mission_49d82fc5e070ca1c",
+                "mock_connector_calls": 1
+              },
+              "event_id": "audit_8d5d0f74a39be6c4",
+              "event_type": "action.executed",
+              "occurred_at": "2026-06-13T09:30:34.019212Z",
+              "subject": {
+                "id": "action_358903d8448a0da0",
+                "type": "action"
+              }
+            }
+          ],
+          "format": "json",
+          "namespace_audit_export_id": "nsaudit_382f6d996ce20f6b",
+          "schema_version": "cs.namespace_audit_export.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "status": "ready"
+        },
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "audit_verify": {
+      "command": [
+        "cornerstone",
+        "audit",
+        "verify",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:34.173706Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:34.105321Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_integrity": {
+          "errors": [],
+          "event_count": 16,
+          "status": "success"
+        },
+        "audit_refs": [],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone audit verify",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "3b28807"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "claim_approve": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "approve",
+        "claim_ccea3ecc34408418",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.609464Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.537184Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_51d68424af8c5c4e"
+        ],
+        "claim": {
+          "approved_at": "2026-06-13T09:30:33.591026Z",
+          "authority": {
+            "blocked_reason": "Autonomous action still requires a governed action or mission path.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": true
+          },
+          "claim_id": "claim_ccea3ecc34408418",
+          "created_at": "2026-06-13T09:30:33.362263Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_bb6553638535df6f",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_e35d06543277c827",
+              "evidence_bundle:evb_bb6553638535df6f"
+            ],
+            "search_snapshot_id": "search_e35d06543277c827"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The Alpha evidence anchor is ready for local VS0 EVUX acceptance.",
+          "status": "approved",
+          "trust_state": "approved"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim approve",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_ccea3ecc34408418",
+          "evidence_bundle:evb_bb6553638535df6f",
+          "search_snapshot:search_e35d06543277c827",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_51d68424af8c5c4e",
+          "claim_id": "claim_ccea3ecc34408418",
+          "evidence_bundle_id": "evb_bb6553638535df6f",
+          "git_commit": "3b28807",
+          "search_snapshot_id": "search_e35d06543277c827"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--evidence-bundle-id",
+        "evb_bb6553638535df6f",
+        "--statement",
+        "The Alpha evidence anchor is ready for local VS0 EVUX acceptance.",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.384780Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.292748Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_96e8cd69237eb2b3"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+            "can_be_approved": true,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_ccea3ecc34408418",
+          "created_at": "2026-06-13T09:30:33.362263Z",
+          "evidence_bundle": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_bb6553638535df6f",
+            "evidence_item_count": 1,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_refs": [
+              "search_snapshot:search_e35d06543277c827",
+              "evidence_bundle:evb_bb6553638535df6f"
+            ],
+            "search_snapshot_id": "search_e35d06543277c827"
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "The Alpha evidence anchor is ready for local VS0 EVUX acceptance.",
+          "status": "draft",
+          "trust_state": "evidence_backed"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_ccea3ecc34408418",
+          "evidence_bundle:evb_bb6553638535df6f",
+          "search_snapshot:search_e35d06543277c827",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_96e8cd69237eb2b3",
+          "claim_id": "claim_ccea3ecc34408418",
+          "evidence_bundle_id": "evb_bb6553638535df6f",
+          "git_commit": "3b28807",
+          "search_snapshot_id": "search_e35d06543277c827"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "evidence_bundle_create": {
+      "command": [
+        "cornerstone",
+        "evidence",
+        "bundle",
+        "create",
+        "--search-snapshot-id",
+        "search_e35d06543277c827",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.292698Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.193250Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_06602d953494bd1e"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone evidence bundle create",
+        "errors": [],
+        "evidence_bundle": {
+          "created_at": "2026-06-13T09:30:33.265159Z",
+          "evidence_bundle_id": "evb_bb6553638535df6f",
+          "evidence_items": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "provenance": {
+                "created_at": "2026-06-13T09:30:33.048014Z",
+                "lineage_from": null,
+                "transformations": [
+                  "hash_calculated",
+                  "original_preserved",
+                  "derived_text_created"
+                ]
+              },
+              "search_snapshot_id": "search_e35d06543277c827",
+              "snippet": "alpha-evidence-anchor.",
+              "source": {
+                "ingested_at": "2026-06-13T09:30:33.048014Z",
+                "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "type": "local_file"
+              }
+            }
+          ],
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_snapshot": {
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": "alpha-evidence-anchor",
+            "result_count": 1,
+            "results": [
+              {
+                "artifact_id": "art_2735313e0cb92563",
+                "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+                "evidence_refs": [
+                  "artifact:art_2735313e0cb92563",
+                  "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+                ],
+                "match_reasons": [
+                  {
+                    "query": "alpha-evidence-anchor",
+                    "type": "exact"
+                  },
+                  {
+                    "matched_term": "alpha-evidence-anchor",
+                    "query_term": "alpha-evidence-anchor",
+                    "type": "keyword"
+                  }
+                ],
+                "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+                "retrieval_modes": [
+                  "exact",
+                  "keyword"
+                ],
+                "scope": {
+                  "namespace_id": "personal",
+                  "owner_id": "local-user",
+                  "tenant_id": "local-dev",
+                  "workspace_id": "default"
+                },
+                "score": 11,
+                "snippet": "alpha-evidence-anchor."
+              }
+            ],
+            "search_snapshot_id": "search_e35d06543277c827"
+          },
+          "schema_version": "cs.evidence_bundle.v0",
+          "search_snapshot_id": "search_e35d06543277c827"
+        },
+        "evidence_refs": [
+          "evidence_bundle:evb_bb6553638535df6f",
+          "search_snapshot:search_e35d06543277c827",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_06602d953494bd1e",
+          "evidence_bundle_id": "evb_bb6553638535df6f",
+          "git_commit": "3b28807",
+          "search_snapshot_id": "search_e35d06543277c827"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "mission_activate": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "activate",
+        "mission_49d82fc5e070ca1c",
+        "--mode",
+        "autopilot",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.753086Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.680438Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_832ea347fa89f2ba",
+          "audit:audit_4233eaa6e28d4898"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission activate",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_49d82fc5e070ca1c"
+        ],
+        "ids": {
+          "git_commit": "3b28807",
+          "mission_id": "mission_49d82fc5e070ca1c"
+        },
+        "mission": {
+          "activated_at": "2026-06-13T09:30:33.733460Z",
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "authority_view": {
+            "allowed_actions": [
+              "internal_status_update",
+              "draft_task",
+              "refresh_brief"
+            ],
+            "forbidden_actions": [
+              "external_writeback_without_workflow_action",
+              "cross_namespace_access",
+              "destructive_change",
+              "secret_exfiltration"
+            ],
+            "may_act_in_scope": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "pause_stop_revoke": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-13T09:30:33.662575Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_bb6553638535df6f",
+            "search_snapshot_id": "search_e35d06543277c827"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Complete local VS0 EVUX through governed mock action",
+          "mission_id": "mission_49d82fc5e070ca1c",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_ccea3ecc34408418",
+            "statement": "The Alpha evidence anchor is ready for local VS0 EVUX acceptance.",
+            "trust_state": "approved"
+          },
+          "status": "active",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "autopilot"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default",
+        "workspace_mode": {
+          "available_modes": [
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Manual",
+              "mode": "manual"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Assist",
+              "mode": "assist"
+            },
+            {
+              "approval_required_for_execution": false,
+              "autonomous_execution_allowed": true,
+              "label": "Autopilot",
+              "mode": "autopilot"
+            },
+            {
+              "approval_required_for_execution": true,
+              "autonomous_execution_allowed": false,
+              "label": "Locked",
+              "mode": "locked"
+            }
+          ],
+          "behaviors": {
+            "action_proposals_allowed": true,
+            "approval_required_for_execution": false,
+            "autonomous_execution_allowed": true,
+            "description": "CornerStone may execute allowed low-risk mission actions inside the active scope and policy boundary.",
+            "label": "Autopilot"
+          },
+          "mode": "autopilot",
+          "schema_version": "cs.workspace_mode.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "updated_at": "2026-06-13T09:30:33.733023Z"
+        }
+      },
+      "timed_out": false
+    },
+    "mission_create": {
+      "command": [
+        "cornerstone",
+        "mission",
+        "create",
+        "--goal",
+        "Complete local VS0 EVUX through governed mock action",
+        "--claim-id",
+        "claim_ccea3ecc34408418",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.680384Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.609522Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_89545e4d21bb44f1"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone mission create",
+        "errors": [],
+        "evidence_refs": [
+          "mission:mission_49d82fc5e070ca1c",
+          "claim:claim_ccea3ecc34408418",
+          "evidence_bundle:evb_bb6553638535df6f",
+          "artifact:art_2735313e0cb92563"
+        ],
+        "ids": {
+          "audit_event_id": "audit_89545e4d21bb44f1",
+          "claim_id": "claim_ccea3ecc34408418",
+          "evidence_bundle_id": "evb_bb6553638535df6f",
+          "git_commit": "3b28807",
+          "mission_id": "mission_49d82fc5e070ca1c"
+        },
+        "mission": {
+          "allowed_actions": [
+            "internal_status_update",
+            "draft_task",
+            "refresh_brief"
+          ],
+          "authority": {
+            "controls": [
+              "pause",
+              "stop",
+              "revoke",
+              "reduce_scope"
+            ],
+            "may_do": [
+              "propose action cards",
+              "run allowed low-risk internal actions in Autopilot mode"
+            ],
+            "may_not_do": [
+              "direct external writeback",
+              "cross-namespace action",
+              "destructive action without approval"
+            ],
+            "requires_escalation": [
+              "high-risk",
+              "external_writeback",
+              "sensitive",
+              "out_of_contract"
+            ]
+          },
+          "created_at": "2026-06-13T09:30:33.662575Z",
+          "escalation_rules": [
+            "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
+            "Escalate when evidence coverage is insufficient or policy decision is deny."
+          ],
+          "evidence": {
+            "artifact_refs": [
+              "artifact:art_2735313e0cb92563"
+            ],
+            "evidence_bundle_id": "evb_bb6553638535df6f",
+            "search_snapshot_id": "search_e35d06543277c827"
+          },
+          "evidence_expectations": [
+            "Evidence Bundle with at least one artifact reference.",
+            "Dry-run diff and expected impact before side-effecting action.",
+            "Audit refs for every policy and action transition."
+          ],
+          "forbidden_actions": [
+            "external_writeback_without_workflow_action",
+            "cross_namespace_access",
+            "destructive_change",
+            "secret_exfiltration"
+          ],
+          "goal": "Complete local VS0 EVUX through governed mock action",
+          "mission_id": "mission_49d82fc5e070ca1c",
+          "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
+          "risk_state": "controlled_policy_required",
+          "schema_version": "cs.mission_goal_contract.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "source_claim": {
+            "claim_id": "claim_ccea3ecc34408418",
+            "statement": "The Alpha evidence anchor is ready for local VS0 EVUX acceptance.",
+            "trust_state": "approved"
+          },
+          "status": "draft",
+          "stop_conditions": [
+            "Policy denies scope, egress, connector capability, data sensitivity, or workspace mode.",
+            "A required approval is missing.",
+            "A requested action is outside the mission contract."
+          ],
+          "success_criteria": [
+            "Use attached evidence refs for every durable claim or action.",
+            "Record every action proposal, dry-run, policy decision, approval, result, and audit event."
+          ],
+          "workspace_mode": "assist"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "ready": {
+      "command": [
+        "cornerstone",
+        "ready",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:32.987138Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:32.899225Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [],
+        "checks": [
+          {
+            "name": "native_cli",
+            "path": "cornerstone",
+            "present": true
+          },
+          {
+            "name": "scenario_matrix",
+            "path": "docs/scenario-contracts/SCENARIO_MATRIX_FULL.md",
+            "present": true
+          },
+          {
+            "name": "vs0_contract",
+            "path": "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md",
+            "present": true
+          },
+          {
+            "name": "vs0_runtime_contract",
+            "path": "docs/scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md",
+            "present": true
+          },
+          {
+            "name": "scenario_tests",
+            "path": "tests/scenario",
+            "present": true
+          },
+          {
+            "name": "fixture_corpus",
+            "path": "fixtures/vs0",
+            "present": true
+          },
+          {
+            "name": "shared_local_runtime_store",
+            "path": "packages/cornerstone_cli/runtime.py",
+            "present": true
+          },
+          {
+            "name": "api_runtime",
+            "path": "packages/cornerstone_cli/product_runtime.py",
+            "present": true
+          },
+          {
+            "name": "web_runtime",
+            "path": "packages/cornerstone_cli/product_runtime.py",
+            "present": true
+          }
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone ready",
+        "errors": [],
+        "evidence_refs": [],
+        "ids": {
+          "git_commit": "3b28807"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "readiness": {
+          "acceptance_gate": {
+            "contract": "docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md",
+            "report_path": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+            "scenario_set": "vs0-runtime-acceptance",
+            "status": "pass"
+          },
+          "api_routes": [
+            "GET /health",
+            "GET /ready",
+            "POST /artifacts",
+            "GET /artifacts/{artifact_id}",
+            "POST /search",
+            "GET /search-snapshots/{snapshot_id}",
+            "POST /evidence-bundles",
+            "GET /evidence-bundles/{evidence_bundle_id}",
+            "POST /claims",
+            "GET /claims/{claim_id}",
+            "POST /claims/{claim_id}/approve",
+            "POST /actions",
+            "GET /actions/{action_id}",
+            "POST /actions/{action_id}/dry-run",
+            "POST /actions/{action_id}/approve",
+            "POST /actions/{action_id}/execute",
+            "GET /audit-events",
+            "POST /audit/verify"
+          ],
+          "human_required": true,
+          "human_required_items": [
+            {
+              "id": "VS0-RT-H01",
+              "reason": "Live connector/provider verification requires credentials and may mutate third-party systems.",
+              "required_evidence": "Redacted live-provider dry-run/execution transcript, approval record, and audit refs."
+            },
+            {
+              "id": "VS0-RT-H02",
+              "reason": "Usability acceptance is subjective and must be confirmed by a human operator.",
+              "required_evidence": "Human acceptance note with screenshots or recording and issue list if rejected."
+            }
+          ],
+          "last_successful_acceptance_scenario": {
+            "blocking": 0,
+            "current_git_commit": "3b28807",
+            "gate_status": "pass",
+            "git_commit": "3b28807",
+            "human_required": 2,
+            "pass": 7,
+            "path": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+            "scenario_count": 9,
+            "scenario_set": "vs0-runtime-acceptance",
+            "status": "success",
+            "timestamp": "2026-06-13T09:30:32.492706Z"
+          },
+          "last_successful_runtime_scenario": {
+            "blocking": 0,
+            "current_git_commit": "3b28807",
+            "gate_status": "pass",
+            "git_commit": "3b28807",
+            "human_required": 2,
+            "pass": 12,
+            "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
+            "scenario_count": 14,
+            "scenario_set": "vs0-product-runtime",
+            "status": "success",
+            "timestamp": "2026-06-13T09:30:30.399144Z"
+          },
+          "local_scenario_ready": true,
+          "mock_connector_calls": 0,
+          "production_release_ready": false,
+          "real_external_http_calls": 0,
+          "runtime_boundaries": [
+            "Product/Mission",
+            "Archive/Evidence",
+            "Connector/Action",
+            "Audit/Policy"
+          ],
+          "schema_version": "cs.runtime_readiness.v0",
+          "ui_surfaces": [
+            "Home/Ops Inbox",
+            "Artifact Viewer",
+            "Search",
+            "Claim Builder",
+            "Action Card",
+            "Audit Detail"
+          ],
+          "vs0_runtime_ready": true
+        },
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "search_query": {
+      "command": [
+        "cornerstone",
+        "search",
+        "query",
+        "alpha-evidence-anchor",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.193203Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.124786Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_4804e1b362e8386d"
+        ],
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone search query",
+        "errors": [],
+        "evidence_refs": [
+          "search_snapshot:search_e35d06543277c827",
+          "artifact:art_2735313e0cb92563",
+          "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+        ],
+        "ids": {
+          "audit_event_id": "audit_4804e1b362e8386d",
+          "git_commit": "3b28807",
+          "search_snapshot_id": "search_e35d06543277c827"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "search_snapshot": {
+          "created_at": "2026-06-13T09:30:33.175903Z",
+          "duration_ms": 0.212,
+          "filters": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "query": "alpha-evidence-anchor",
+          "result_count": 1,
+          "results": [
+            {
+              "artifact_id": "art_2735313e0cb92563",
+              "derived_text_ref": "derived/art_2735313e0cb92563.txt",
+              "evidence_refs": [
+                "artifact:art_2735313e0cb92563",
+                "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
+              ],
+              "match_reasons": [
+                {
+                  "query": "alpha-evidence-anchor",
+                  "type": "exact"
+                },
+                {
+                  "matched_term": "alpha-evidence-anchor",
+                  "query_term": "alpha-evidence-anchor",
+                  "type": "keyword"
+                }
+              ],
+              "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
+              "retrieval_modes": [
+                "exact",
+                "keyword"
+              ],
+              "scope": {
+                "namespace_id": "personal",
+                "owner_id": "local-user",
+                "tenant_id": "local-dev",
+                "workspace_id": "default"
+              },
+              "score": 11,
+              "snippet": "alpha-evidence-anchor."
+            }
+          ],
+          "schema_version": "cs.search_snapshot.v0",
+          "search_snapshot_id": "search_e35d06543277c827"
+        },
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "zero_evidence_claim_approve": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "approve",
+        "claim_e84659d2bce1fc86",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.537138Z",
+      "exit_code": 4,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.464646Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_2b375fe3d9ae2074"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Evidence Bundle is required before approval or authority use.",
+            "can_be_approved": false,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_e84659d2bce1fc86",
+          "created_at": "2026-06-13T09:30:33.445074Z",
+          "evidence_bundle": {
+            "artifact_refs": [],
+            "evidence_bundle_id": null,
+            "evidence_item_count": 0,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": null,
+            "result_refs": [],
+            "search_snapshot_id": null
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "This unsupported EVUX claim should stay draft.",
+          "status": "draft",
+          "trust_state": "draft"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim approve",
+        "errors": [
+          {
+            "code": "CS_CLAIM_EVIDENCE_REQUIRED",
+            "message": "Claim approval requires an Evidence Bundle with at least one artifact reference.",
+            "resolution_path": [
+              "Run cornerstone search query ... --json.",
+              "Run cornerstone evidence bundle create --search-snapshot-id <id> --json.",
+              "Create or recreate the claim with --evidence-bundle-id <id>."
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "ids": {
+          "audit_event_id": "audit_2b375fe3d9ae2074",
+          "claim_id": "claim_e84659d2bce1fc86",
+          "git_commit": "3b28807"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "failed",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    },
+    "zero_evidence_claim_create": {
+      "command": [
+        "cornerstone",
+        "claim",
+        "create",
+        "--statement",
+        "This unsupported EVUX claim should stay draft.",
+        "--state-dir",
+        "tmp/quickstart/vs0-evux-28169",
+        "--json"
+      ],
+      "ended_at": "2026-06-13T09:30:33.464596Z",
+      "exit_code": 0,
+      "json_error": null,
+      "schema_version": "cs.cli_transcript.v0",
+      "started_at": "2026-06-13T09:30:33.384828Z",
+      "stderr_redacted": "",
+      "stdout_json": {
+        "audit_refs": [
+          "audit:audit_3f1bb352759951e8"
+        ],
+        "claim": {
+          "authority": {
+            "blocked_reason": "Evidence Bundle is required before approval or authority use.",
+            "can_be_approved": false,
+            "can_drive_autonomous_action": false,
+            "can_publish_shared_truth": false
+          },
+          "claim_id": "claim_e84659d2bce1fc86",
+          "created_at": "2026-06-13T09:30:33.445074Z",
+          "evidence_bundle": {
+            "artifact_refs": [],
+            "evidence_bundle_id": null,
+            "evidence_item_count": 0,
+            "filters": {
+              "namespace_id": "personal",
+              "owner_id": "local-user",
+              "tenant_id": "local-dev",
+              "workspace_id": "default"
+            },
+            "query": null,
+            "result_refs": [],
+            "search_snapshot_id": null
+          },
+          "schema_version": "cs.claim.v0",
+          "scope": {
+            "namespace_id": "personal",
+            "owner_id": "local-user",
+            "tenant_id": "local-dev",
+            "workspace_id": "default"
+          },
+          "statement": "This unsupported EVUX claim should stay draft.",
+          "status": "draft",
+          "trust_state": "draft"
+        },
+        "cli_schema_version": "cs.cli.v0",
+        "command": "cornerstone claim create",
+        "errors": [],
+        "evidence_refs": [
+          "claim:claim_e84659d2bce1fc86"
+        ],
+        "ids": {
+          "audit_event_id": "audit_3f1bb352759951e8",
+          "claim_id": "claim_e84659d2bce1fc86",
+          "git_commit": "3b28807"
+        },
+        "mode": "local_scaffold",
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_decision_refs": [],
+        "product": "CornerStone",
+        "schema_version": "cs.cli.v0",
+        "status": "success",
+        "tenant_id": "local-dev",
+        "version": "0.0.0-scaffold",
+        "workspace_id": "default"
+      },
+      "timed_out": false
+    }
+  },
+  "created_at": "2026-06-13T09:30:34.173776Z",
+  "errors": [],
+  "evidence_refs": [
+    "artifact:art_2735313e0cb92563",
+    "search_snapshot:search_e35d06543277c827",
+    "evidence_bundle:evb_bb6553638535df6f",
+    "claim:claim_ccea3ecc34408418",
+    "action:action_358903d8448a0da0"
+  ],
+  "final_audit_verification": {
+    "errors": [],
+    "event_count": 16,
+    "status": "success"
+  },
+  "fixture": "fixtures/vs0/packs/01_artifact_basic/input.txt",
+  "generated_ids": {
+    "action_id": "action_358903d8448a0da0",
+    "artifact_id": "art_2735313e0cb92563",
+    "claim_id": "claim_ccea3ecc34408418",
+    "evidence_bundle_id": "evb_bb6553638535df6f",
+    "mission_id": "mission_49d82fc5e070ca1c",
+    "search_snapshot_id": "search_e35d06543277c827",
+    "zero_evidence_claim_id": "claim_e84659d2bce1fc86"
+  },
+  "negative_evidence": {
+    "commands_failed": 0,
+    "connector_credentials_exposed": 0,
+    "human_usability_claim_without_human_evidence": 0,
+    "live_connector_claim_without_human_evidence": 0,
+    "mock_connector_calls": 1,
+    "production_release_overclaim": 0,
+    "real_external_http_calls": 0,
+    "zero_evidence_claim_approved": 0
+  },
+  "scenario_set": "vs0-evux",
+  "schema_version": "cs.evux_quickstart_report.v0",
+  "state_dir": "tmp/quickstart/vs0-evux-28169",
+  "status": "success"
+}

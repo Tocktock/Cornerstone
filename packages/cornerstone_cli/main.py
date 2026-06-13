@@ -12,13 +12,20 @@ from cornerstone_cli.acceptance import (
     DEFAULT_ACCEPTANCE_REPORT,
     DEFAULT_ACCEPTANCE_SCENARIO_REPORT,
     DEFAULT_BROWSER_PROOF_DIR,
+    DEFAULT_EVUX_BROWSER_PROOF_DIR,
+    DEFAULT_EVUX_QUICKSTART_REPORT,
+    DEFAULT_EVUX_RELEASE_PACKAGE_DIR,
+    DEFAULT_EVUX_REPORT,
+    DEFAULT_EVUX_SCENARIO_REPORT,
     DEFAULT_PRODUCT_RUNTIME_REPORT,
     DEFAULT_RELEASE_PACKAGE_DIR,
     collect_release_evidence,
+    run_evux_quickstart,
 )
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
+    verify_vs0_evux,
     verify_vs0_runtime_acceptance,
     verify_vs0_product_runtime,
     verify_full_agent_orchestration,
@@ -3849,11 +3856,21 @@ def command_release_report_check(args: argparse.Namespace) -> int:
 def command_release_evidence_collect(args: argparse.Namespace) -> int:
     root = repo_root()
     requested_scope = scope_args(args)
-    scenario_report = (root / args.scenario_report).resolve()
-    product_runtime_report = (root / args.product_runtime_report).resolve()
-    browser_proof_dir = (root / args.browser_proof_dir).resolve()
-    output_dir = (root / args.output_dir).resolve()
-    verification_report = (root / args.verification_report).resolve() if args.verification_report else None
+    if args.scope == "vs0-evux":
+        scenario_report_arg = args.scenario_report or DEFAULT_EVUX_SCENARIO_REPORT
+        browser_proof_dir_arg = args.browser_proof_dir or DEFAULT_EVUX_BROWSER_PROOF_DIR
+        output_dir_arg = args.output_dir or DEFAULT_EVUX_RELEASE_PACKAGE_DIR
+        verification_report_arg = args.verification_report or DEFAULT_EVUX_REPORT
+    else:
+        scenario_report_arg = args.scenario_report or DEFAULT_ACCEPTANCE_SCENARIO_REPORT
+        browser_proof_dir_arg = args.browser_proof_dir or DEFAULT_BROWSER_PROOF_DIR
+        output_dir_arg = args.output_dir or DEFAULT_RELEASE_PACKAGE_DIR
+        verification_report_arg = args.verification_report or DEFAULT_ACCEPTANCE_REPORT
+    scenario_report = (root / scenario_report_arg).resolve()
+    product_runtime_report = (root / (args.product_runtime_report or DEFAULT_PRODUCT_RUNTIME_REPORT)).resolve()
+    browser_proof_dir = (root / browser_proof_dir_arg).resolve()
+    output_dir = (root / output_dir_arg).resolve()
+    verification_report = (root / verification_report_arg).resolve() if verification_report_arg else None
     result = collect_release_evidence(
         root,
         requested_scope=requested_scope,
@@ -3879,6 +3896,35 @@ def command_release_evidence_collect(args: argparse.Namespace) -> int:
         print_payload(payload, args.json)
         return EXIT_EVIDENCE_MISSING
     payload["evidence_refs"].append(f"release_evidence:{result['package_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_quickstart_verify(args: argparse.Namespace) -> int:
+    root = repo_root()
+    if args.quickstart != "vs0-evux":
+        payload = base_response("cornerstone quickstart verify", "failed", root)
+        payload["errors"].append(
+            {
+                "code": "CS_QUICKSTART_UNSUPPORTED",
+                "message": "The requested quickstart verifier is not implemented.",
+                "supported": ["vs0-evux"],
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    output_path = (root / (args.output or DEFAULT_EVUX_QUICKSTART_REPORT)).resolve()
+    result = run_evux_quickstart(root, output_path=output_path)
+    payload = base_response("cornerstone quickstart verify vs0-evux", result["status"], root)
+    payload.update(result)
+    payload["output_path"] = str(output_path)
+    payload["ids"].update(result.get("generated_ids", {}))
+    payload["evidence_refs"].extend(result.get("evidence_refs", []))
+    payload["audit_refs"].extend(result.get("audit_refs", []))
+    if result["status"] != "success":
+        payload["errors"].extend(result.get("errors", []))
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -4127,6 +4173,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_product_runtime(root)
     elif args.contract == "vs0-runtime-acceptance":
         report = verify_vs0_runtime_acceptance(root)
+    elif args.contract == "vs0-evux":
+        report = verify_vs0_evux(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-agent-orchestration":
@@ -4208,6 +4256,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-tenant-security-boundary",
                     "vs0-product-runtime",
                     "vs0-runtime-acceptance",
+                    "vs0-evux",
                     "full-claim-collaboration",
                     "full-agent-orchestration",
                     "full-brain-routing",
@@ -4255,6 +4304,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
     output_arg = args.output
     if args.contract == "vs0-runtime-acceptance" and not output_arg:
         output_arg = DEFAULT_ACCEPTANCE_SCENARIO_REPORT
+    if args.contract == "vs0-evux" and not output_arg:
+        output_arg = DEFAULT_EVUX_SCENARIO_REPORT
     if output_arg:
         output_path = (root / output_arg).resolve()
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -4278,6 +4329,23 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
             )
             payload["release_evidence_package"] = release_result
             output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        if args.contract == "vs0-evux":
+            release_result = collect_release_evidence(
+                root,
+                requested_scope={
+                    "tenant_id": payload["tenant_id"],
+                    "owner_id": payload["owner_id"],
+                    "namespace_id": payload["namespace_id"],
+                    "workspace_id": payload["workspace_id"],
+                },
+                scope_name="vs0-evux",
+                output_dir=root / DEFAULT_EVUX_RELEASE_PACKAGE_DIR,
+                scenario_report=output_path,
+                product_runtime_report=root / DEFAULT_PRODUCT_RUNTIME_REPORT,
+                browser_proof_dir=root / DEFAULT_EVUX_BROWSER_PROOF_DIR,
+                verification_report=root / DEFAULT_EVUX_REPORT,
+            )
+            payload["release_evidence_package_final_report_bytes"] = release_result
 
     print_payload(payload, args.json)
     return EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
@@ -4349,6 +4417,14 @@ def build_parser() -> argparse.ArgumentParser:
     ready = subcommands.add_parser("ready", help="Check local runtime readiness")
     ready.add_argument("--json", action="store_true", help="Emit JSON output")
     ready.set_defaults(func=command_ready)
+
+    quickstart = subcommands.add_parser("quickstart", help="Executable quickstart verification commands")
+    quickstart_sub = quickstart.add_subparsers(dest="quickstart_command")
+    quickstart_verify = quickstart_sub.add_parser("verify", help="Verify an executable local quickstart")
+    quickstart_verify.add_argument("quickstart", choices=["vs0-evux"], help="Quickstart verifier")
+    quickstart_verify.add_argument("--output", help="Quickstart transcript output path")
+    quickstart_verify.add_argument("--json", action="store_true", help="Emit JSON output")
+    quickstart_verify.set_defaults(func=command_quickstart_verify)
 
     runtime = subcommands.add_parser("runtime", help="Local VS0 API/UI runtime commands")
     runtime_sub = runtime.add_subparsers(dest="runtime_command")
@@ -5581,11 +5657,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     collect = evidence_sub.add_parser("collect", help="Collect a release-facing evidence package")
     collect.add_argument("--scope", default="vs0-runtime-acceptance", help="Evidence package scope")
-    collect.add_argument("--scenario-report", default=DEFAULT_ACCEPTANCE_SCENARIO_REPORT, help="Acceptance scenario report path")
-    collect.add_argument("--product-runtime-report", default=DEFAULT_PRODUCT_RUNTIME_REPORT, help="VS0 product runtime scenario report path")
-    collect.add_argument("--browser-proof-dir", default=DEFAULT_BROWSER_PROOF_DIR, help="Browser proof directory")
-    collect.add_argument("--output-dir", default=DEFAULT_RELEASE_PACKAGE_DIR, help="Evidence package output directory")
-    collect.add_argument("--verification-report", default=DEFAULT_ACCEPTANCE_REPORT, help="Optional implementation verification report")
+    collect.add_argument("--scenario-report", help="Acceptance scenario report path")
+    collect.add_argument("--product-runtime-report", help="VS0 product runtime scenario report path")
+    collect.add_argument("--browser-proof-dir", help="Browser proof directory")
+    collect.add_argument("--output-dir", help="Evidence package output directory")
+    collect.add_argument("--verification-report", help="Optional implementation verification report")
     add_state_argument(collect)
     add_scope_arguments(collect)
     collect.add_argument("--json", action="store_true", help="Emit JSON output")

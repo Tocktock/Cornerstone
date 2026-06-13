@@ -138,6 +138,34 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs0_evux_quickstart_verify(self) -> None:
+        output_path = ROOT / "tmp/test-vs0-evux-quickstart.json"
+        if output_path.exists():
+            output_path.unlink()
+        result = run_cli(
+            "quickstart",
+            "verify",
+            "vs0-evux",
+            "--json",
+            "--output",
+            "tmp/test-vs0-evux-quickstart.json",
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs0-evux")
+        self.assertEqual(payload["status"], "success")
+        ids = payload["generated_ids"]
+        self.assertTrue(ids["artifact_id"].startswith("art_"))
+        self.assertTrue(ids["search_snapshot_id"].startswith("search_"))
+        self.assertTrue(ids["evidence_bundle_id"].startswith("evb_"))
+        self.assertTrue(ids["claim_id"].startswith("claim_"))
+        self.assertTrue(ids["action_id"].startswith("action_"))
+        self.assertEqual(payload["final_audit_verification"]["status"], "success")
+        self.assertEqual(payload["negative_evidence"]["commands_failed"], 0)
+        self.assertEqual(payload["negative_evidence"]["zero_evidence_claim_approved"], 0)
+        self.assertEqual(payload["negative_evidence"]["real_external_http_calls"], 0)
+        self.assertEqual(payload["negative_evidence"]["mock_connector_calls"], 1)
+
     def test_artifact_ingest_show_and_audit_verify(self) -> None:
         state_dir = ROOT / "tmp/test-artifact-cli"
         shutil.rmtree(state_dir, ignore_errors=True)

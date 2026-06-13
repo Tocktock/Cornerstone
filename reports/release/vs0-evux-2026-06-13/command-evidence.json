@@ -1,0 +1,10 @@
+{
+  "commands": [
+    "cornerstone scenario verify vs0-evux --json --output reports/scenario/vs0-evux-2026-06-13.json",
+    "cornerstone scenario gate reports/scenario/vs0-evux-2026-06-13.json --json",
+    "cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json",
+    "cornerstone release evidence collect --scope vs0-evux --json",
+    "make verify-vs0-evux"
+  ],
+  "schema_version": "cs.release_command_evidence.v0"
+}

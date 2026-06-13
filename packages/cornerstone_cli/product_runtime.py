@@ -200,13 +200,14 @@ def build_readiness_report(root: Path) -> dict[str, Any]:
     return {"checks": checks, "readiness": readiness}
 
 
-def render_home(readiness: dict[str, Any]) -> str:
+def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
     surfaces = "\n".join(
         f"<li><a href='#{html.escape(surface.lower().replace('/', '-').replace(' ', '-'))}'>{html.escape(surface)}</a></li>"
         for surface in UI_SURFACES
     )
     production_ready = str(readiness["production_release_ready"]).lower()
     runtime_ready = str(readiness["vs0_runtime_ready"]).lower()
+    autorun_evux = "true" if scenario == "vs0-evux" else "false"
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -274,6 +275,20 @@ def render_home(readiness: dict[str, Any]) -> str:
     }}
     .label {{ color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 700; }}
     code {{ background: #eef3f7; padding: 2px 4px; border-radius: 4px; }}
+    button {{
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent);
+      color: white;
+      padding: 8px 12px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }}
+    button:disabled {{ opacity: 0.65; cursor: wait; }}
+    .evidence-list {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin: 12px 0; }}
+    .evidence-list div {{ border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 8px; min-height: 54px; }}
+    pre {{ white-space: pre-wrap; word-break: break-word; background: #eef3f7; border: 1px solid var(--line); border-radius: 6px; padding: 10px; max-height: 320px; overflow: auto; }}
     @media (max-width: 760px) {{
       main {{ grid-template-columns: 1fr; }}
       nav {{ border-right: 0; border-bottom: 1px solid var(--line); }}
@@ -308,8 +323,147 @@ def render_home(readiness: dict[str, Any]) -> str:
       <section id="claim-builder"><h2>Claim Builder</h2><p>Claims stay draft unless backed by an Evidence Bundle and approval evidence.</p></section>
       <section id="action-card"><h2>Action Card</h2><p>Actions expose dry-run diff, expected impact, policy decision, approval, execution, and mock ConnectorHub boundary.</p></section>
       <section id="audit-detail"><h2>Audit Detail</h2><p>Audit events form a local tamper-evident hash chain verified by <code>cornerstone audit verify --json</code>.</p></section>
+      <section id="vs0-evux-loop" data-evux-clicked="false">
+        <h2>VS0 Evidence Cleanup Loop</h2>
+        <p>Local fixture workflow: artifact, search, evidence bundle, claim, action dry-run, approval, mock execution, and audit.</p>
+        <button id="run-evux" type="button">Run local VS0 loop</button>
+        <div class="status-row">
+          <span id="evux-status" class="badge warn" data-evux-status="idle">idle</span>
+          <span id="evux-zero-evidence-denial" class="badge">zero-evidence claim pending</span>
+          <span id="evux-mock-calls" class="badge">mock_connector_calls=0</span>
+          <span id="evux-real-external-calls" class="badge safe">real_external_http_calls=0</span>
+          <span id="evux-audit-verify" class="badge">audit not verified</span>
+        </div>
+        <div class="evidence-list">
+          <div><span class="label">Artifact</span><br><code id="evux-artifact-id">not-run</code></div>
+          <div><span class="label">Search Snapshot</span><br><code id="evux-search-snapshot-id">not-run</code></div>
+          <div><span class="label">Evidence Bundle</span><br><code id="evux-evidence-bundle-id">not-run</code></div>
+          <div><span class="label">Claim</span><br><code id="evux-claim-id">not-run</code></div>
+          <div><span class="label">Action Card</span><br><code id="evux-action-id">not-run</code></div>
+        </div>
+        <pre id="evux-trace" aria-label="EVUX workflow trace">{{}}</pre>
+      </section>
     </div>
   </main>
+  <script>
+    const evuxAutorun = {autorun_evux};
+    const evuxScope = {{
+      tenant_id: "local-dev",
+      owner_id: "local-user",
+      namespace_id: "personal",
+      workspace_id: "default"
+    }};
+    const evuxTrace = [];
+    function setText(id, value) {{
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    }}
+    function traceStep(name, payload) {{
+      evuxTrace.push({{ step: name, payload }});
+      setText("evux-trace", JSON.stringify({{ workflow: "vs0-evux", steps: evuxTrace }}, null, 2));
+    }}
+    async function api(path, body) {{
+      const response = await fetch(path, {{
+        method: "POST",
+        headers: {{ "content-type": "application/json" }},
+        body: JSON.stringify(Object.assign({{}}, evuxScope, body || {{}}))
+      }});
+      const payload = await response.json();
+      traceStep(path, {{ status: response.status, payload }});
+      return {{ response, payload }};
+    }}
+    async function getJson(path) {{
+      const response = await fetch(path);
+      const payload = await response.json();
+      traceStep(path, {{ status: response.status, payload }});
+      return {{ response, payload }};
+    }}
+    async function runEvux() {{
+      const section = document.getElementById("vs0-evux-loop");
+      const status = document.getElementById("evux-status");
+      const button = document.getElementById("run-evux");
+      section.dataset.evuxClicked = "true";
+      button.disabled = true;
+      status.dataset.evuxStatus = "running";
+      status.textContent = "running";
+      evuxTrace.length = 0;
+      try {{
+        const artifact = await api("/artifacts", {{
+          path: "fixtures/vs0/packs/01_artifact_basic/input.txt",
+          source: "local_fixture",
+          media_type: "text/plain",
+          trust: "untrusted"
+        }});
+        const artifactId = artifact.payload.artifact.artifact_id;
+        setText("evux-artifact-id", artifactId);
+
+        const search = await api("/search", {{ query: "alpha-evidence-anchor" }});
+        const snapshotId = search.payload.search_snapshot.search_snapshot_id;
+        setText("evux-search-snapshot-id", snapshotId);
+
+        const bundle = await api("/evidence-bundles", {{ search_snapshot_id: snapshotId }});
+        const bundleId = bundle.payload.evidence_bundle.evidence_bundle_id;
+        setText("evux-evidence-bundle-id", bundleId);
+
+        const zeroClaim = await api("/claims", {{ statement: "Unsupported EVUX browser claim should remain draft." }});
+        const zeroClaimId = zeroClaim.payload.claim.claim_id;
+        const zeroApproval = await api("/claims/" + zeroClaimId + "/approve", {{}});
+        const zeroDenied = zeroApproval.response.status === 400 &&
+          zeroApproval.payload.errors.some((error) => error.code === "CS_CLAIM_EVIDENCE_REQUIRED");
+        setText("evux-zero-evidence-denial", zeroDenied ? "CS_CLAIM_EVIDENCE_REQUIRED" : "zero-evidence approval unexpected");
+
+        const claim = await api("/claims", {{
+          evidence_bundle_id: bundleId,
+          statement: "The Alpha evidence anchor is ready for local VS0 EVUX acceptance."
+        }});
+        const claimId = claim.payload.claim.claim_id;
+        setText("evux-claim-id", claimId);
+        await api("/claims/" + claimId + "/approve", {{}});
+
+        const action = await api("/actions", {{
+          claim_id: claimId,
+          goal: "Record local EVUX acceptance status",
+          action_kind: "external_writeback",
+          risk: "high",
+          connector: "mock_connector",
+          target: "mock://vs0-evux/browser"
+        }});
+        const actionId = action.payload.action_card.action_id;
+        setText("evux-action-id", actionId);
+
+        const dryRun = await api("/actions/" + actionId + "/dry-run", {{}});
+        await api("/actions/" + actionId + "/approve", {{ approver: "owner" }});
+        const executed = await api("/actions/" + actionId + "/execute", {{}});
+        const actionResult = executed.payload.action_result;
+        setText("evux-mock-calls", "mock_connector_calls=" + actionResult.mock_connector_calls);
+        setText("evux-real-external-calls", "real_external_http_calls=" + actionResult.external_http_calls);
+
+        await getJson("/audit-events");
+        const audit = await api("/audit/verify", {{}});
+        setText("evux-audit-verify", audit.payload.audit_integrity.status);
+        const impact = dryRun.payload.dry_run.expected_impact;
+        const passed = zeroDenied &&
+          impact.expected_connector_calls === 1 &&
+          impact.mock_connector_calls === 1 &&
+          impact.real_external_http_calls === 0 &&
+          actionResult.mock_connector_calls === 1 &&
+          actionResult.external_http_calls === 0 &&
+          audit.payload.audit_integrity.status === "success";
+        status.dataset.evuxStatus = passed ? "passed" : "failed";
+        status.textContent = passed ? "passed" : "failed";
+      }} catch (error) {{
+        traceStep("browser_error", {{ message: String(error) }});
+        status.dataset.evuxStatus = "failed";
+        status.textContent = "failed";
+      }} finally {{
+        button.disabled = false;
+      }}
+    }}
+    document.getElementById("run-evux").addEventListener("click", runEvux);
+    if (evuxAutorun) {{
+      window.addEventListener("load", () => setTimeout(() => document.getElementById("run-evux").click(), 50));
+    }}
+  </script>
 </body>
 </html>
 """
@@ -386,7 +540,8 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         parts = self._path_parts()
         if not parts:
             readiness = build_readiness_report(self.root)["readiness"]
-            self._send_html(render_home(readiness))
+            scenario = parse_qs(urlparse(self.path).query).get("scenario", [None])[-1]
+            self._send_html(render_home(readiness, scenario=scenario))
             return
         if parts == ["health"]:
             self._send_json(_json_response("success", service="cornerstone-vs0-runtime", real_external_http_calls=0))

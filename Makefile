@@ -1,4 +1,4 @@
-.PHONY: verify-docs verify-scenario-matrix verify-scaffold-cli verify-vs0-runtime verify-vs0-acceptance verify-local-fast
+.PHONY: verify-docs verify-scenario-matrix verify-scaffold-cli verify-vs0-runtime verify-vs0-acceptance verify-vs0-evux verify-local-fast
 
 verify-docs:
 	scripts/verify_sot_docs.sh
@@ -19,5 +19,11 @@ verify-vs0-acceptance:
 	PATH="$(PWD):$$PATH" cornerstone scenario verify vs0-runtime-acceptance --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json
 	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/vs0-runtime-acceptance-2026-06-11.json --json
 	PATH="$(PWD):$$PATH" cornerstone release evidence collect --scope vs0-runtime-acceptance --json
+
+verify-vs0-evux:
+	PATH="$(PWD):$$PATH" cornerstone scenario verify vs0-evux --json --output reports/scenario/vs0-evux-2026-06-13.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/vs0-evux-2026-06-13.json --json
+	PATH="$(PWD):$$PATH" cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json
+	PATH="$(PWD):$$PATH" cornerstone release evidence collect --scope vs0-evux --json
 
 verify-local-fast: verify-docs verify-scenario-matrix verify-scaffold-cli

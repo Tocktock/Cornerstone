@@ -18,10 +18,19 @@ from cornerstone_cli.acceptance import (
     DEFAULT_ACCEPTANCE_REPORT,
     DEFAULT_ACCEPTANCE_SCENARIO_REPORT,
     DEFAULT_BROWSER_PROOF_DIR,
+    DEFAULT_EVUX_BROWSER_PROOF_DIR,
+    DEFAULT_EVUX_QUICKSTART_REPORT,
+    DEFAULT_EVUX_RELEASE_PACKAGE_DIR,
+    DEFAULT_EVUX_REPORT,
+    DEFAULT_EVUX_SCENARIO_REPORT,
     DEFAULT_PRODUCT_RUNTIME_REPORT,
     DEFAULT_RELEASE_PACKAGE_DIR,
+    capture_evux_browser_proof,
     capture_browser_proof,
     collect_release_evidence,
+    git_verification_metadata,
+    relative_to_root,
+    run_evux_quickstart,
 )
 from cornerstone_cli.local_test import LocalTestProvider
 from cornerstone_cli.product_runtime import UI_SURFACES, make_server
@@ -10310,6 +10319,469 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
                 "required_human_action": "JiYong/Tars walks through the VS0 runtime and records accept/reject.",
                 "expected_evidence": "Acceptance note plus screenshots/recording or issue list.",
                 "release_impact": "Blocks human product acceptance claim, not deterministic local acceptance checks.",
+            },
+        ],
+    }
+
+
+def _run_command(root: Path, command: list[str], *, timeout: int = 900) -> dict[str, Any]:
+    env = os.environ.copy()
+    env["PATH"] = f"{root}{os.pathsep}{env.get('PATH', '')}"
+    started_at = perf_counter()
+    try:
+        result = subprocess.run(
+            command,
+            cwd=root,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout,
+        )
+        timed_out = False
+        stdout = result.stdout
+        stderr = result.stderr
+        exit_code = result.returncode
+    except subprocess.TimeoutExpired as error:
+        timed_out = True
+        stdout = error.stdout.decode("utf-8", errors="replace") if isinstance(error.stdout, bytes) else (error.stdout or "")
+        stderr = error.stderr.decode("utf-8", errors="replace") if isinstance(error.stderr, bytes) else (error.stderr or "")
+        exit_code = 124
+    return {
+        "schema_version": "cs.command_transcript.v0",
+        "command": command,
+        "exit_code": exit_code,
+        "timed_out": timed_out,
+        "elapsed_seconds": round(perf_counter() - started_at, 3),
+        "stdout_tail": stdout.strip().splitlines()[-30:],
+        "stderr_tail": redact_text(stderr).strip().splitlines()[-30:],
+    }
+
+
+def _api_payload(transcript: dict[str, Any]) -> dict[str, Any]:
+    payload = transcript.get("stdout_json")
+    return payload if isinstance(payload, dict) else {}
+
+
+def _run_evux_api_workflow(root: Path, state_path: Path) -> dict[str, Any]:
+    if state_path.exists():
+        shutil.rmtree(state_path)
+    server = make_server(root, state_path)
+    host, port = server.server_address
+    base_url = f"http://{host}:{port}"
+    thread_error: list[str] = []
+
+    def serve() -> None:
+        try:
+            server.serve_forever()
+        except Exception as error:  # pragma: no cover - defensive thread boundary
+            thread_error.append(str(error))
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    transcripts: dict[str, dict[str, Any]] = {}
+    ids: dict[str, str] = {}
+    try:
+        transcripts["home"] = _http_json(base_url, "GET", "/ready")
+        transcripts["artifact_create"] = _http_json(
+            base_url,
+            "POST",
+            "/artifacts",
+            {
+                "path": "fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "source": "local_fixture",
+                "media_type": "text/plain",
+                "trust": "untrusted",
+            },
+        )
+        ids["artifact_id"] = _api_payload(transcripts["artifact_create"]).get("artifact", {}).get("artifact_id", "")
+        transcripts["artifact_show"] = _http_json(base_url, "GET", f"/artifacts/{ids['artifact_id']}") if ids["artifact_id"] else {}
+        transcripts["search"] = _http_json(base_url, "POST", "/search", {"query": "alpha-evidence-anchor"})
+        ids["search_snapshot_id"] = _api_payload(transcripts["search"]).get("search_snapshot", {}).get("search_snapshot_id", "")
+        transcripts["search_show"] = _http_json(base_url, "GET", f"/search-snapshots/{ids['search_snapshot_id']}") if ids["search_snapshot_id"] else {}
+        transcripts["bundle_create"] = _http_json(base_url, "POST", "/evidence-bundles", {"search_snapshot_id": ids["search_snapshot_id"]})
+        ids["evidence_bundle_id"] = _api_payload(transcripts["bundle_create"]).get("evidence_bundle", {}).get("evidence_bundle_id", "")
+        transcripts["bundle_show"] = _http_json(base_url, "GET", f"/evidence-bundles/{ids['evidence_bundle_id']}") if ids["evidence_bundle_id"] else {}
+        transcripts["zero_claim_create"] = _http_json(base_url, "POST", "/claims", {"statement": "Unsupported EVUX API claim should remain draft."})
+        ids["zero_evidence_claim_id"] = _api_payload(transcripts["zero_claim_create"]).get("claim", {}).get("claim_id", "")
+        transcripts["zero_claim_approve"] = (
+            _http_json(base_url, "POST", f"/claims/{ids['zero_evidence_claim_id']}/approve", {}) if ids["zero_evidence_claim_id"] else {}
+        )
+        transcripts["claim_create"] = _http_json(
+            base_url,
+            "POST",
+            "/claims",
+            {
+                "evidence_bundle_id": ids["evidence_bundle_id"],
+                "statement": "The Alpha evidence anchor is ready for local VS0 EVUX acceptance.",
+            },
+        )
+        ids["claim_id"] = _api_payload(transcripts["claim_create"]).get("claim", {}).get("claim_id", "")
+        transcripts["claim_approve"] = _http_json(base_url, "POST", f"/claims/{ids['claim_id']}/approve", {}) if ids["claim_id"] else {}
+        transcripts["action_create"] = _http_json(
+            base_url,
+            "POST",
+            "/actions",
+            {
+                "claim_id": ids["claim_id"],
+                "goal": "Record local EVUX acceptance status",
+                "action_kind": "external_writeback",
+                "risk": "high",
+                "connector": "mock_connector",
+                "target": "mock://vs0-evux/api",
+            },
+        )
+        action_payload = _api_payload(transcripts["action_create"])
+        ids["mission_id"] = (action_payload.get("mission") or {}).get("mission_id", "")
+        ids["action_id"] = action_payload.get("action_card", {}).get("action_id", "")
+        transcripts["action_show"] = _http_json(base_url, "GET", f"/actions/{ids['action_id']}") if ids["action_id"] else {}
+        transcripts["action_dry_run"] = _http_json(base_url, "POST", f"/actions/{ids['action_id']}/dry-run", {}) if ids["action_id"] else {}
+        transcripts["action_approve"] = _http_json(base_url, "POST", f"/actions/{ids['action_id']}/approve", {"approver": "owner"}) if ids["action_id"] else {}
+        transcripts["action_execute"] = _http_json(base_url, "POST", f"/actions/{ids['action_id']}/execute", {}) if ids["action_id"] else {}
+        transcripts["audit_events"] = _http_json(base_url, "GET", "/audit-events")
+        transcripts["audit_verify"] = _http_json(base_url, "POST", "/audit/verify", {})
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+    artifact = _api_payload(transcripts["artifact_show"]).get("artifact", {})
+    snapshot = _api_payload(transcripts["search_show"]).get("search_snapshot", {})
+    bundle = _api_payload(transcripts["bundle_show"]).get("evidence_bundle", {})
+    claim = _api_payload(transcripts["claim_approve"]).get("claim", {})
+    action = _api_payload(transcripts["action_show"]).get("action_card", {})
+    dry_run = _api_payload(transcripts["action_dry_run"]).get("dry_run", {})
+    action_result = _api_payload(transcripts["action_execute"]).get("action_result", {})
+    audit_events = _api_payload(transcripts["audit_events"]).get("audit_events", [])
+    audit_event_types = {event.get("event_type") for event in audit_events if isinstance(event, dict)}
+    zero_errors = _api_payload(transcripts["zero_claim_approve"]).get("errors", [])
+    required_events = {
+        "artifact.ingested",
+        "search.snapshot.created",
+        "evidence_bundle.created",
+        "claim.draft.created",
+        "claim.approved",
+        "action.card.proposed",
+        "action.approved",
+        "action.executed",
+    }
+    checks = {
+        "artifact_created": transcripts["artifact_create"].get("status_code") == 200 and bool(ids.get("artifact_id")),
+        "artifact_detail": bool(
+            artifact.get("checksum_sha256")
+            and artifact.get("derived", {}).get("status") == "ready"
+            and _api_payload(transcripts["artifact_create"]).get("evidence_refs")
+            and _api_payload(transcripts["artifact_show"]).get("audit_refs")
+        ),
+        "search_snapshot": transcripts["search"].get("status_code") == 200 and snapshot.get("result_count") == 1,
+        "evidence_bundle": transcripts["bundle_create"].get("status_code") == 200 and bool(bundle.get("evidence_items")),
+        "zero_evidence_denied": transcripts["zero_claim_approve"].get("status_code") == 400
+        and any(error.get("code") == "CS_CLAIM_EVIDENCE_REQUIRED" for error in zero_errors),
+        "claim_approved": transcripts["claim_approve"].get("status_code") == 200 and claim.get("trust_state") == "approved",
+        "action_card": transcripts["action_create"].get("status_code") == 200
+        and action.get("policy_decision", {}).get("decision") == "requires_approval"
+        and action.get("connector_boundary", {}).get("mediated_by") == "ConnectorHub",
+        "dry_run": transcripts["action_dry_run"].get("status_code") == 200
+        and dry_run.get("diff")
+        and dry_run.get("expected_impact", {}).get("expected_connector_calls") == 1
+        and dry_run.get("expected_impact", {}).get("mock_connector_calls") == 1
+        and dry_run.get("expected_impact", {}).get("real_external_http_calls") == 0,
+        "execution": transcripts["action_execute"].get("status_code") == 200
+        and action_result.get("status") == "success"
+        and action_result.get("mock_connector_calls") == 1
+        and action_result.get("external_http_calls") == 0,
+        "audit_timeline": required_events.issubset(audit_event_types),
+        "audit_verify": _api_payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success",
+        "server_thread": not thread_error,
+    }
+    return {
+        "schema_version": "cs.evux_api_workflow.v0",
+        "status": "success" if all(checks.values()) else "failed",
+        "base_url": base_url,
+        "state_dir": relative_to_root(root, state_path),
+        "ids": ids,
+        "checks": checks,
+        "api_transcripts": transcripts,
+        "artifact": artifact,
+        "search_snapshot": snapshot,
+        "evidence_bundle": bundle,
+        "claim": claim,
+        "action_card": action,
+        "dry_run": dry_run,
+        "action_result": action_result,
+        "audit_event_types": sorted(str(event_type) for event_type in audit_event_types if event_type),
+        "audit_event_count": len(audit_events),
+        "thread_errors": thread_error,
+    }
+
+
+def verify_vs0_evux(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-evux")
+    state_path = root / state_rel
+    browser_state_path = root / f"{state_rel}-browser"
+    candidate_report_path = root / f"{state_rel}-candidate-report.json"
+    for path in [state_path, browser_state_path, root / DEFAULT_EVUX_BROWSER_PROOF_DIR, root / DEFAULT_EVUX_RELEASE_PACKAGE_DIR]:
+        if path.exists():
+            shutil.rmtree(path)
+
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["product_runtime_verify"] = _run_cli_json(
+        root,
+        ["scenario", "verify", "vs0-product-runtime", "--output", DEFAULT_PRODUCT_RUNTIME_REPORT, "--json"],
+    )
+    transcripts["ready"] = _run_cli_json(root, ["ready", "--json"])
+    api_workflow = _run_evux_api_workflow(root, state_path)
+    quickstart = run_evux_quickstart(root, output_path=root / DEFAULT_EVUX_QUICKSTART_REPORT)
+    browser_proof = capture_evux_browser_proof(root, state_dir=browser_state_path, output_dir=root / DEFAULT_EVUX_BROWSER_PROOF_DIR)
+
+    regression_command_transcript = {
+        "verify-local-fast": _run_command(root, ["make", "verify-local-fast"]),
+        "verify-vs0-runtime": _run_command(root, ["make", "verify-vs0-runtime"]),
+        "verify-vs0-acceptance": _run_command(root, ["make", "verify-vs0-acceptance"]),
+    }
+
+    metadata = git_verification_metadata(root)
+    product_runtime_payload = _payload(transcripts["product_runtime_verify"])
+    ready_payload = _payload(transcripts["ready"])
+    browser_markers = browser_proof.get("required_markers", {})
+    browser_ok = (
+        browser_proof.get("status") == "PASS"
+        and browser_proof.get("clean_browser_exit") is True
+        and browser_proof.get("screenshot_bytes", 0) > 0
+        and all(browser_markers.values())
+    )
+    browser_timeout_guard_ok = (
+        (browser_proof.get("clean_browser_exit") is True and browser_proof.get("status") == "PASS")
+        or (browser_proof.get("clean_browser_exit") is not True and browser_proof.get("status") != "PASS")
+    )
+    api_checks = api_workflow.get("checks", {})
+    quickstart_ok = quickstart.get("status") == "success" and quickstart.get("negative_evidence", {}).get("real_external_http_calls") == 0
+    regression_ok = all(entry.get("exit_code") == 0 and not entry.get("timed_out") for entry in regression_command_transcript.values())
+    product_runtime_ok = (
+        transcripts["product_runtime_verify"].get("exit_code") == 0
+        and product_runtime_payload.get("status") == "success"
+        and product_runtime_payload.get("summary", {}).get("blocking") == 0
+    )
+    readiness_ok = (
+        transcripts["ready"].get("exit_code") == 0
+        and ready_payload.get("readiness", {}).get("production_release_ready") is False
+        and ready_payload.get("readiness", {}).get("real_external_http_calls") == 0
+    )
+
+    preliminary_rows = [
+        _row(
+            "VS0-EVUX-001",
+            "MUST_PASS",
+            "PASS" if api_checks.get("artifact_created") and api_checks.get("artifact_detail") and browser_markers.get("artifact_id") else "FAIL",
+            ["POST /artifacts", "GET /artifacts/{artifact_id}", DEFAULT_EVUX_BROWSER_PROOF_DIR],
+            "UI/API workflow creates an Artifact and exposes checksum, source, derived status, evidence refs, and audit refs.",
+        ),
+        _row(
+            "VS0-EVUX-002",
+            "MUST_PASS",
+            "PASS" if api_checks.get("search_snapshot") and browser_markers.get("search_snapshot_id") else "FAIL",
+            ["POST /search", "GET /search-snapshots/{snapshot_id}", DEFAULT_EVUX_BROWSER_PROOF_DIR],
+            "Search returns the uploaded fixture content and records a reproducible search snapshot.",
+        ),
+        _row(
+            "VS0-EVUX-003",
+            "MUST_PASS",
+            "PASS" if api_checks.get("evidence_bundle") and api_checks.get("claim_approved") and browser_markers.get("evidence_bundle_id") and browser_markers.get("claim_id") else "FAIL",
+            ["POST /evidence-bundles", "POST /claims", "POST /claims/{claim_id}/approve"],
+            "Evidence Bundle-backed Claim moves through evidence-backed draft to approved state with refs.",
+        ),
+        _row(
+            "VS0-EVUX-004",
+            "MUST_PASS",
+            "PASS" if api_checks.get("zero_evidence_denied") and browser_markers.get("zero_evidence_denied") else "FAIL",
+            ["POST /claims without evidence", "POST /claims/{claim_id}/approve"],
+            "Zero-evidence Claim approval is denied with CS_CLAIM_EVIDENCE_REQUIRED.",
+        ),
+        _row(
+            "VS0-EVUX-005",
+            "MUST_PASS",
+            "PASS" if api_checks.get("action_card") and api_checks.get("dry_run") and browser_markers.get("action_id") else "FAIL",
+            ["POST /actions", "POST /actions/{action_id}/dry-run"],
+            "Action Card exposes diff, expected impact, evidence, policy decision, risk, approval state, connector boundary, and audit refs.",
+        ),
+        _row(
+            "VS0-EVUX-006",
+            "MUST_PASS",
+            "PASS" if api_checks.get("execution") and browser_markers.get("mock_connector_calls") and browser_markers.get("real_external_http_calls_zero") else "FAIL",
+            ["POST /actions/{action_id}/approve", "POST /actions/{action_id}/execute"],
+            "Approved local/mock Action execution records mock_connector_calls=1 and real_external_http_calls=0.",
+        ),
+        _row(
+            "VS0-EVUX-007",
+            "MUST_PASS",
+            "PASS" if api_checks.get("audit_timeline") and api_checks.get("audit_verify") and browser_markers.get("audit_verified") else "FAIL",
+            ["GET /audit-events", "POST /audit/verify"],
+            "Audit timeline includes artifact/search/evidence/claim/action/policy/approval/execution and verifies successfully.",
+        ),
+        _row(
+            "VS0-EVUX-008",
+            "MUST_PASS",
+            "PASS" if metadata.get("verified_base_commit") and metadata.get("verified_tree_hash") and browser_ok and quickstart_ok else "FAIL",
+            ["cornerstone release evidence collect --scope vs0-evux --json", DEFAULT_EVUX_RELEASE_PACKAGE_DIR],
+            "Evidence package has enough verified inputs to bind scenario report bytes, browser trace, quickstart, commands, and code-state metadata.",
+        ),
+        _row(
+            "VS0-EVUX-R01",
+            "REGRESSION_GUARD",
+            "PASS" if browser_ok and browser_markers.get("workflow_passed") and browser_markers.get("button_clicked") else "FAIL",
+            [f"{DEFAULT_EVUX_BROWSER_PROOF_DIR}/browser-proof.json", f"{DEFAULT_EVUX_BROWSER_PROOF_DIR}/workflow-trace.json"],
+            "Browser proof requires an actual clicked workflow with generated IDs, not static UI labels.",
+        ),
+        _row(
+            "VS0-EVUX-R02",
+            "REGRESSION_GUARD",
+            "PASS" if quickstart_ok else "FAIL",
+            ["cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json"],
+            "Executable quickstart completes fixture ingest through audit verification with generated IDs and exit codes.",
+        ),
+        _row(
+            "VS0-EVUX-R03",
+            "REGRESSION_GUARD",
+            "PASS" if regression_ok and product_runtime_ok and readiness_ok else "FAIL",
+            ["make verify-local-fast", "make verify-vs0-runtime", "make verify-vs0-acceptance"],
+            "Existing local deterministic gates and runtime/acceptance gates still pass with exit-code transcripts.",
+        ),
+        _row(
+            "VS0-EVUX-R04",
+            "REGRESSION_GUARD",
+            "PASS" if browser_timeout_guard_ok else "FAIL",
+            [f"{DEFAULT_EVUX_BROWSER_PROOF_DIR}/browser-proof.json"],
+            "Browser timeout cannot become clean PASS; clean PASS requires CDP workflow completion and browser process exit.",
+        ),
+        _row(
+            "VS0-EVUX-H01",
+            "HUMAN_REQUIRED",
+            "HUMAN_REQUIRED",
+            ["human UI walkthrough"],
+            "Human usability cannot be judged by automated tests.",
+            owner="Human",
+        ),
+        _row(
+            "VS0-EVUX-H02",
+            "HUMAN_REQUIRED",
+            "HUMAN_REQUIRED",
+            ["human-approved live ConnectorHub/provider test"],
+            "Live provider proof requires credentials and external state.",
+            owner="Human",
+        ),
+    ]
+    candidate_blocking = [
+        row
+        for row in preliminary_rows
+        if row["owner"] != "Human" and row["status"] in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    candidate_payload = {
+        "schema_version": "cs.cli.v0",
+        "status": "success" if not candidate_blocking else "failed",
+        "scenario_set": "vs0-evux",
+        "summary": {
+            "scenario_count": len(preliminary_rows),
+            "pass": len([row for row in preliminary_rows if row["status"] == "PASS"]),
+            "human_required": len([row for row in preliminary_rows if row["owner"] == "Human"]),
+            "blocking": len(candidate_blocking),
+        },
+        "scenario_results": preliminary_rows,
+    }
+    candidate_report_path.parent.mkdir(parents=True, exist_ok=True)
+    candidate_report_path.write_text(json.dumps(candidate_payload, indent=2, sort_keys=True) + "\n")
+    release_package = collect_release_evidence(
+        root,
+        requested_scope={"tenant_id": "local-dev", "owner_id": "local-user", "namespace_id": "personal", "workspace_id": "default"},
+        scope_name="vs0-evux",
+        output_dir=root / DEFAULT_EVUX_RELEASE_PACKAGE_DIR,
+        scenario_report=candidate_report_path,
+        product_runtime_report=root / DEFAULT_PRODUCT_RUNTIME_REPORT,
+        browser_proof_dir=root / DEFAULT_EVUX_BROWSER_PROOF_DIR,
+        verification_report=root / DEFAULT_EVUX_REPORT,
+    )
+    gate_candidate = _run_cli_json(root, ["scenario", "gate", relative_to_root(root, candidate_report_path), "--json"])
+    regression_command_transcript["vs0-evux-candidate-gate"] = gate_candidate
+
+    rows = []
+    for row in preliminary_rows:
+        if row["id"] == "VS0-EVUX-008":
+            status = "PASS" if row["status"] == "PASS" and release_package.get("status") == "success" else "FAIL"
+            row = dict(row, status=status)
+        if row["id"] == "VS0-EVUX-R03":
+            status = "PASS" if row["status"] == "PASS" and gate_candidate.get("exit_code") == 0 else "FAIL"
+            row = dict(row, status=status)
+        rows.append(row)
+
+    blocking = [
+        row
+        for row in rows
+        if row["owner"] != "Human" and row["status"] in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    action_result = api_workflow.get("action_result", {})
+    quickstart_negative = quickstart.get("negative_evidence", {})
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-evux",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "human_required": len([row for row in rows if row["owner"] == "Human"]),
+            "blocking": len(blocking),
+            "product_feature_claims": "LOCAL_VS0_EVUX_READY_PRODUCTION_NOT_READY",
+        },
+        "scenario_results": rows,
+        "verification_metadata": metadata,
+        "cli_transcripts": transcripts,
+        "api_workflow": api_workflow,
+        "quickstart": {
+            "status": quickstart.get("status"),
+            "report_path": DEFAULT_EVUX_QUICKSTART_REPORT,
+            "generated_ids": quickstart.get("generated_ids"),
+            "final_audit_verification": quickstart.get("final_audit_verification"),
+            "negative_evidence": quickstart_negative,
+        },
+        "browser_proof": browser_proof,
+        "regression_command_transcript": regression_command_transcript,
+        "release_evidence_package": release_package,
+        "evux_evidence": {
+            "artifact_id": api_workflow.get("ids", {}).get("artifact_id"),
+            "search_snapshot_id": api_workflow.get("ids", {}).get("search_snapshot_id"),
+            "evidence_bundle_id": api_workflow.get("ids", {}).get("evidence_bundle_id"),
+            "claim_id": api_workflow.get("ids", {}).get("claim_id"),
+            "action_id": api_workflow.get("ids", {}).get("action_id"),
+            "audit_event_count": api_workflow.get("audit_event_count"),
+            "browser_trace": f"{DEFAULT_EVUX_BROWSER_PROOF_DIR}/workflow-trace.json",
+            "browser_screenshot": f"{DEFAULT_EVUX_BROWSER_PROOF_DIR}/workflow.png",
+            "quickstart_report": DEFAULT_EVUX_QUICKSTART_REPORT,
+            "release_manifest": f"{DEFAULT_EVUX_RELEASE_PACKAGE_DIR}/manifest.json",
+        },
+        "negative_evidence": {
+            "real_external_http_calls": int(action_result.get("external_http_calls", 1) or 0)
+            + int(quickstart_negative.get("real_external_http_calls", 1) or 0),
+            "zero_evidence_claim_approved": 0 if api_checks.get("zero_evidence_denied") and quickstart_negative.get("zero_evidence_claim_approved") == 0 else 1,
+            "production_release_overclaim": 0 if ready_payload.get("readiness", {}).get("production_release_ready") is False else 1,
+            "live_connector_claim_without_human_evidence": 0,
+            "human_usability_claim_without_human_evidence": 0,
+            "browser_timeout_marked_pass": 0 if browser_timeout_guard_ok else 1,
+            "tool_calls_from_untrusted_artifact": product_runtime_payload.get("negative_evidence", {}).get("tool_calls_from_untrusted_artifact", 1),
+            "action_cards_from_prompt_injection": product_runtime_payload.get("negative_evidence", {}).get("action_cards_from_untrusted_artifact", 1),
+            "cross_namespace_reads": product_runtime_payload.get("negative_evidence", {}).get("cross_namespace_read_allowed", 1),
+        },
+        "human_required": [
+            {
+                "id": "VS0-EVUX-H01",
+                "why_ai_cannot_verify": "Human usability is subjective.",
+                "required_human_action": "JiYong/Tars completes the local UI walkthrough and records accept or reject.",
+                "expected_evidence": "Acceptance note plus screenshots/recording or issue list.",
+                "release_impact": "Blocks operator-accepted product claim, not AI-verifiable local EVUX gate.",
+            },
+            {
+                "id": "VS0-EVUX-H02",
+                "why_ai_cannot_verify": "Live provider verification requires credentials and may mutate third-party state.",
+                "required_human_action": "Human approves and performs live ConnectorHub/provider dry-run or execution later.",
+                "expected_evidence": "Redacted provider transcript, written approval, execution result, audit refs.",
+                "release_impact": "Blocks live-provider production release, not local EVUX proof.",
             },
         ],
     }

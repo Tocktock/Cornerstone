@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, local deterministic VS-0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, and frozen VS0 evidence-cleanup/interactive-UI-loop scenarios
+**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, local deterministic VS-0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, and local VS0 evidence-cleanup/interactive-UI-loop evidence
 **Canonical spelling:** Use **CornerStone** for product/project text.
 
 ## Product Definition
@@ -73,6 +73,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md` | Current local deterministic implementation report for VS0 runtime acceptance and hardening |
 | `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md` | Frozen next task-scoped scenarios for evidence cleanup and real interactive UI workflow proof |
 | `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv` | Machine-readable matrix for the VS0 evidence cleanup and interactive UI loop contract |
+| `docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md` | Current local deterministic implementation report for VS0 evidence cleanup and interactive UI loop |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
 | `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md` | Verification-centered agent workflow |
@@ -84,7 +85,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 - VS-0 implementation subset: 58 scenarios.
 - VS0 runtime readiness overlay: 14 task-scoped scenarios, already accepted for local deterministic runtime readiness.
 - VS0 runtime acceptance/hardening overlay: 9 task-scoped scenarios; reports show 7 AI-verifiable PASS, 2 HUMAN_REQUIRED, production release still false.
-- VS0 evidence cleanup and interactive UI loop overlay: 14 task-scoped scenarios, 12 AI-verifiable NOT_VERIFIED, 2 HUMAN_REQUIRED, frozen before implementation.
+- VS0 evidence cleanup and interactive UI loop overlay: 14 task-scoped scenarios; reports show 12 AI-verifiable PASS, 2 HUMAN_REQUIRED, production release still false.
 - Release rule: no PASS without concrete scenario evidence.
 - CLI-native-first rule: no feature scenario can be marked PASS unless its native `cornerstone ...` CLI path is verified or the item is explicitly classified as a non-feature implementation internal.
 
@@ -145,6 +146,7 @@ cornerstone scenario verify full-mission-control-autonomy-lifecycle --json
 make verify-local-fast
 make verify-vs0-runtime
 make verify-vs0-acceptance
+make verify-vs0-evux
 ```
 
 The current scaffold CLI can verify scaffold readiness, scenario registry coverage, deterministic local fixture-validator readiness, the first CLI-native artifact preservation slice, the first redaction/prompt-injection safety slice, the first search/evidence-bundle/draft-claim/evidence-viewer slice, the first deterministic search-understanding slice, the first owner/namespace isolation slice, the first tamper-evident audit-ledger slice, the first universal non-logistics core slice, the first claim evidence-gating slice, the first default-deny egress/sandbox policy slice, the first regression guardrail summary slice, the first evidence-backed briefing slice, the first Mission Goal Contract / Action Card / dry-run / approval / mocked connector-action safety slice, the first detail-surface slice, the first conversation-onboarding slice, the first product-loop identity slice with durable memory and learning records, the first memory truth-boundary slice, the first product/domain/Autopilot-readiness slice, the first deterministic tenant/security boundary slice for namespace promotion, access policy evaluation, and personal-to-organization memory leakage prevention, the first local VS-0 product runtime loop with CLI/API/minimal UI parity, the first full-suite claim-collaboration slice for Knowledge Capsules, Decision Cards, corrections, and trust-state-aware shared views, the first full-suite memory/wiki slice for permanent wiki views, memory sovereignty controls, correction, rollback/forget, freshness warnings, poisoning quarantine, explainable memory use, product-learning isolation, namespace-local adaptation, and memory export, the first full-suite learning/experience slice for Mission Trajectory Ledger, Experience Library, recommendations, lesson promotion/control, local adaptation, connected outcomes, metrics, and export, the first full-suite understanding/ontology slice for draft structure suggestions, promoted draft ontology items, operational maps, contradictions, stale-context warnings, versioned ontology changes, and unknown-domain draft handling, the first full-suite extension ecosystem slice for local Agent Pack registry/import, install-vs-activation, explicit grants, certification, ConnectorHub mediation, version pin/update/rollback, untrusted/direct-provider denial, and emergency patch policy, the first full-suite agent-orchestration slice for Orchestrator-led mission traces, visible specialist role contracts/cards, evidence-labeled outputs, direct mutation denial, brain replacement, versioned contract changes, prompt authority denial, failure diagnosis, Agent Pack grant enforcement, and replay without hidden chain-of-thought, the first full-suite brain-routing slice for replaceable model brains, policy-aware routing, provider override denial, namespace-local Brain Performance Ledger learning, ensemble gating, LLM-as-judge support limits, objective/owner outcome precedence, disagreement escalation, calibration tracking, and provider-switch evidence continuity, the first full-suite security-operations slice for ConnectorHub credential custody, sensitive-change stop-and-ask gates, explicit human-required reporting, backup/restore rehearsal, helpful failures, action idempotency, retention transparency, operator status, and release-report evidence checks, the first full-suite namespace-governance slice for owner-scoped archive namespaces, classification-aware access, promotion modes, product-learning boundaries, cross-tenant isolation, namespace audit export, retention dry-run, and recovery, and the first full-suite mission-control/autonomy-lifecycle slice for Mission Control, product loop visibility, source-system boundaries, personal-to-organization path, ConnectorHub action trace, autonomy revoke/escalation/outcome/AAR/audit/metrics/reversibility, and repo-split UX guardrails. These commands verify the frozen AI-verifiable scenario rows through deterministic local CLI evidence and local API/UI evidence where claimed; they do not claim live provider integration, production tenant isolation, production release readiness, or human-only operational proof.
@@ -172,7 +174,7 @@ The full long-term scenario suite remains authoritative. VS-0 is only the first 
 
 The current local acceptance criteria are in `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`. Local evidence is recorded in `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md`, `reports/scenario/vs0-runtime-acceptance-2026-06-11.json`, `reports/browser/vs0-runtime-acceptance-2026-06-11/`, and `reports/release/vs0-runtime-acceptance-2026-06-11/`. The contract is status-neutral; PASS/FAIL status belongs to those reports. It must not be treated as production release, live-provider, or human UX acceptance.
 
-The next frozen scenario contract before implementation is `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md`. It requires real interactive UI workflow proof for upload/select artifact, search, evidence bundle, claim, action dry-run/approval/mock execution, and audit timeline. AI-verifiable rows are `NOT_VERIFIED` until the implementation and verifier evidence exist.
+The current local evidence-cleanup and interactive UI loop criteria are in `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md`. Local evidence is recorded in `docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md`, `reports/scenario/vs0-evux-2026-06-13.json`, `reports/browser/vs0-evux-2026-06-13/`, `reports/quickstart/vs0-evux-quickstart.json`, and `reports/release/vs0-evux-2026-06-13/`. It proves local/mock EVUX only; production release, live-provider readiness, and human UX acceptance remain unclaimed.
 
 ## VS0 Runtime Acceptance Quickstart
 
@@ -203,24 +205,25 @@ cornerstone audit verify --state-dir data/quickstart-vs0 --json
 cornerstone scenario verify vs0-runtime-acceptance --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json --json
 cornerstone release evidence collect --scope vs0-runtime-acceptance --json
 
-# Planned EVUX verification gate after implementation
+# EVUX verification gate
+cornerstone scenario verify vs0-evux --json --output reports/scenario/vs0-evux-2026-06-13.json
+cornerstone scenario gate reports/scenario/vs0-evux-2026-06-13.json --json
 cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json
-# or:
-scripts/verify_vs0_evux_quickstart.sh
+cornerstone release evidence collect --scope vs0-evux --json
 ```
 
 The quickstart commands above are operator guidance. Placeholder IDs are for manual walkthrough only. Scenario `PASS` requires a generated quickstart transcript with generated IDs, exit codes, evidence refs, and audit refs; README token presence alone is not proof.
 
 The quickstart does not verify production tenant isolation, live provider execution, or human usability acceptance. Those remain explicit `HUMAN_REQUIRED` rows.
 
-Expected EVUX evidence outputs after implementation:
+EVUX evidence outputs:
 
 ```text
-reports/scenario/vs0-evux-YYYY-MM-DD.json
-reports/browser/vs0-evux-YYYY-MM-DD/
+reports/scenario/vs0-evux-2026-06-13.json
+reports/browser/vs0-evux-2026-06-13/
 reports/quickstart/vs0-evux-quickstart.json
-reports/release/vs0-evux-YYYY-MM-DD/manifest.json
-docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_YYYY-MM-DD.md
+reports/release/vs0-evux-2026-06-13/manifest.json
+docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md
 ```
 
 ## CLI Native First

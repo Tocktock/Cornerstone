@@ -6,12 +6,13 @@
     "window_size": "1280,900"
   },
   "chrome_exit_codes": {
-    "screenshot": 124
+    "screenshot": 0
   },
-  "chrome_timeout_after_screenshot": true,
-  "created_at": "2026-06-11T08:30:25.525144Z",
+  "chrome_timeout_after_screenshot": false,
+  "clean_browser_exit": true,
+  "created_at": "2026-06-13T09:30:32.451382Z",
   "dom_path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
-  "dom_sha256": "e58ee028d8c09a61e1a83a401e7dae7eb6731cbcc8a0be30028c3891f2ec3479",
+  "dom_sha256": "a721ec486df001aca3283c81face1b80fbaae8b30c8e4301a7223712ff3fce1c",
   "errors": [],
   "production_overclaim_absent": true,
   "readiness_labels_present": {
@@ -22,15 +23,13 @@
   },
   "route": "/",
   "schema_version": "cs.browser_proof.v0",
-  "screenshot_bytes": 101421,
+  "screenshot_bytes": 89394,
   "screenshot_path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
-  "screenshot_sha256": "32ac802f9aa96c9d19da703caf5ab3640ee4b76cc84d03cdcc122cfdd63b1cf9",
+  "screenshot_sha256": "4814197a8ed32519720be02c91995ff31293826c256a4d1706aaebb2005776ed",
   "status": "passed",
   "stderr_tail": {
     "screenshot": [
-      "101421 bytes written to file /Users/jiyong/playground/Cornerstone/reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
-      "[12073:30975743:0611/173017.584708:ERROR:base/process/process_mac.cc:53] task_policy_set TASK_CATEGORY_POLICY: (os/kern) invalid argument (4)",
-      "[12073:30975743:0611/173017.584722:ERROR:base/process/process_mac.cc:98] task_policy_set TASK_SUPPRESSION_POLICY: (os/kern) invalid argument (4)"
+      "DevTools listening on ws://127.0.0.1:60855/devtools/browser/1b80cfc3-4288-474b-a5b7-a6171dcb57ab"
     ]
   },
   "surface_presence": {
@@ -41,5 +40,5 @@
     "Home/Ops Inbox": true,
     "Search": true
   },
-  "url": "http://127.0.0.1:64740/"
+  "url": "http://127.0.0.1:60854/"
 }

@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Active SoT bundle after V2 full MUST-PASS handoff, design-system contract, VS-0 scaffold gate, local deterministic VS0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, and frozen VS0 evidence-cleanup/interactive-UI-loop scenarios
+**Status:** Active SoT bundle after V2 full MUST-PASS handoff, design-system contract, VS-0 scaffold gate, local deterministic VS0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, and local VS0 evidence-cleanup/interactive-UI-loop evidence
 
 ## Why This Bundle Exists
 
@@ -42,11 +42,12 @@ This bundle resolves authority:
 17. `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md` - local runtime acceptance and hardening criteria.
 18. `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md` - scenario-freeze report for the next local runtime acceptance gate.
 19. `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md` - local runtime acceptance and hardening evidence.
-20. `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md` - frozen next scenario contract for evidence cleanup and interactive UI workflow proof.
+20. `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md` - local evidence cleanup and interactive UI workflow proof criteria.
 21. `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv` - machine-readable EVUX scenario matrix.
-22. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` - implementation defaults where compatible.
-23. Frozen scenario contract for the specific implementation task.
-24. Repository code/docs/tests/logs as implementation evidence.
+22. `docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md` - local EVUX implementation evidence.
+23. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` - implementation defaults where compatible.
+24. Frozen scenario contract for the specific implementation task.
+25. Repository code/docs/tests/logs as implementation evidence.
 
 If lower-priority content conflicts with higher-priority content, report the conflict and follow the higher-priority source.
 
@@ -85,6 +86,7 @@ If lower-priority content conflicts with higher-priority content, report the con
 | `../verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md` | Current local deterministic implementation report for VS0 runtime acceptance and hardening |
 | `../scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md` | Frozen VS0 evidence cleanup and interactive UI loop scenarios, 14 rows |
 | `../scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv` | Machine-readable matrix for the VS0 evidence cleanup and interactive UI loop task contract |
+| `../verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md` | Current local deterministic implementation report for VS0 evidence cleanup and interactive UI loop |
 | `../scenario-contracts/SCENARIO_VERIFICATION_REPORT_TEMPLATE.md` | Required report shape for scenario verification |
 | `../verification-reports/template.md` | Required report shape for scaffold, scenario, CLI, and human-required evidence |
 
@@ -132,7 +134,7 @@ The task-scoped runtime scenario contract after the completed local deterministi
 
 The current local acceptance task-scoped scenario contract is `../scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`. It contains 9 `VS0-ACC-*` rows for real browser proof, readiness evidence semantics, connector-call wording, quickstart repeatability, release evidence packaging, and overclaim regression guards. The contract is status-neutral; the local deterministic report passes 7 AI-verifiable rows and keeps 2 human-only rows as `HUMAN_REQUIRED`.
 
-The next frozen scenario contract before implementation is `../scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md`. It contains 14 `VS0-EVUX-*` rows: 12 AI-verifiable rows that start `NOT_VERIFIED` and 2 human-only rows that remain `HUMAN_REQUIRED`. It requires actual UI workflow proof for artifact upload/select, search, evidence bundle, claim, action, mock execution, and audit timeline.
+The current local evidence-cleanup and interactive UI loop scenario contract is `../scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md`. It contains 14 `VS0-EVUX-*` rows for actual UI workflow proof across artifact upload/select, search, evidence bundle, claim, action, mock execution, and audit timeline. The local deterministic report passes 12 AI-verifiable rows and keeps 2 human-only rows as `HUMAN_REQUIRED`.
 
 ## Deprecated Product Framing
 
