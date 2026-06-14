@@ -107,6 +107,21 @@ Negative evidence:
 }
 ```
 
+## Model And LLM Boundary
+
+The governance PASS decision is deterministic. It uses fixture artifacts, mocked connector/action evidence, CLI transcripts, browser proof, hashes, and audit/policy records. It does not use an LLM as the PASS judge.
+
+Local Ollama availability was checked after the governance pass:
+
+```text
+ollama list
+nemotron3:33b
+qwen3-embedding:0.6b
+qwen3.6:27b
+```
+
+This confirms a local semantic-smoke backend is available, but no `vs0-llm` scenario is part of this governance gate.
+
 ## Changed Files
 
 - `packages/cornerstone_cli/acceptance.py`
