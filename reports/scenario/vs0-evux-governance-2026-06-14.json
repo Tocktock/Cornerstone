@@ -13,7 +13,7 @@
     "manifest_command_hash_ok": true,
     "metadata_ok": true,
     "overclaim_guard_ok": true,
-    "post_commit_rollup_ok": false,
+    "post_commit_rollup_ok": true,
     "report_wording_ok": true,
     "scenario_hash_ok": true,
     "source_snapshot_ok": true
@@ -35,7 +35,7 @@
     }
   ],
   "ids": {
-    "git_commit": "6c30597"
+    "git_commit": "1a29cc3"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -144,7 +144,7 @@
       "id": "VS0-GOV-009",
       "notes": "Post-commit rollup records final commit/tree hash, evidence artifact hashes, and relationship to verified base/source snapshot.",
       "owner": "AI",
-      "status": "FAIL",
+      "status": "PASS",
       "type": "MUST_PASS"
     },
     {
@@ -231,15 +231,15 @@
       "--output",
       "reports/scenario/vs0-evux-governance-2026-06-14.json"
     ],
-    "elapsed_seconds": 0.034,
-    "exit_code": 4,
+    "elapsed_seconds": 0.023,
+    "exit_code": 0,
     "name": "scenario_verify_vs0-evux-governance",
     "required": true,
     "schema_version": "cs.command_transcript.v0",
     "source": "observed",
     "stderr_tail": [],
     "stdout_tail": [
-      "{\"scenario_set\": \"vs0-evux-governance\", \"status\": \"failed\", \"summary\": {\"blocking\": 1, \"human_required\": 2, \"pass\": 13, \"product_feature_claims\": \"LOCAL_VS0_EVUX_GOVERNANCE_READY_PRODUCTION_NOT_READY\", \"scenario_count\": 16}}"
+      "{\"scenario_set\": \"vs0-evux-governance\", \"status\": \"success\", \"summary\": {\"blocking\": 0, \"human_required\": 2, \"pass\": 14, \"product_feature_claims\": \"LOCAL_VS0_EVUX_GOVERNANCE_READY_PRODUCTION_NOT_READY\", \"scenario_count\": 16}}"
     ],
     "timed_out": false
   },
@@ -251,11 +251,11 @@
     "evux_release_manifest": "reports/release/vs0-evux-2026-06-13/manifest.json",
     "evux_scenario_report": "reports/scenario/vs0-evux-2026-06-13.json"
   },
-  "status": "failed",
+  "status": "success",
   "summary": {
-    "blocking": 1,
+    "blocking": 0,
     "human_required": 2,
-    "pass": 13,
+    "pass": 14,
     "product_feature_claims": "LOCAL_VS0_EVUX_GOVERNANCE_READY_PRODUCTION_NOT_READY",
     "scenario_count": 16
   },
