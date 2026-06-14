@@ -1700,7 +1700,59 @@ Do **not** mark `PASS` from:
 
 ---
 
-# 18. Scenario-First Implementation Contract Template
+# 18. VS0 EVUX Clean Sign-off Governance
+
+**Status:** Proposed next VS-0 governance slice; frozen in `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md`.
+**Scope:** Evidence governance for the existing local VS0 EVUX milestone, not product feature expansion or production release.
+**Purpose:** Make the existing local VS0 EVUX milestone cleanly sign-offable by aligning matrix/report semantics, commit/tree metadata, command transcript evidence, release manifest hashes, and final report wording.
+
+This task-scoped section does not replace the canonical VS-0 requirement or the `VS0-EVUX-*` product-loop scenarios. It adds sign-off governance rows for the evidence package around that milestone.
+
+The target evidence posture is:
+
+```text
+local VS0 EVUX: PASS
+production release: false / not claimed
+live provider: HUMAN_REQUIRED
+human usability acceptance: HUMAN_REQUIRED
+```
+
+## VS0 EVUX Clean Sign-off Governance Scenarios
+
+| ID | Type | Expected Result | Verification Method | Evidence Required | Owner |
+|---|---|---|---|---|---|
+| VS0-GOV-001 | MUST_PASS | EVUX matrix no longer contradicts EVUX report. | Inspect matrix and scenario report. | Either current matrix AI rows show `PASS`, or files are split into `FREEZE_MATRIX` and `VERIFICATION_MATRIX` with clear semantics. | AI |
+| VS0-GOV-002 | MUST_PASS | Scenario contract remains status-neutral. | Source review. | Contract defines criteria; current `PASS`/`FAIL` status lives in scenario and verification reports only. | AI |
+| VS0-GOV-003 | MUST_PASS | Verification metadata accurately represents dirty-worktree vs committed tree state. | Run EVUX verifier and inspect `verification_metadata`. | Clear fields such as `verified_base_tree_hash`, `verified_source_worktree_hash`, `dirty_paths`, `final_commit`, and `report_generated_before_commit`; no misleading `verified_tree_hash`. | AI |
+| VS0-GOV-004 | MUST_PASS | If worktree is dirty during verification, the verified source snapshot is hashable and reproducible. | Run metadata helper or EVUX verifier. | Deterministic hash over relevant source/doc dirty paths, excluding self-referential generated output, plus path list used for the hash. | AI |
+| VS0-GOV-005 | MUST_PASS | Final release evidence includes a compact command transcript with exit codes. | Inspect release package. | `reports/release/vs0-evux-YYYY-MM-DD/command-transcript.json` or equivalent includes command, start/end or elapsed time, exit code, timed_out, and stdout/stderr tail. | AI |
+| VS0-GOV-006 | MUST_PASS | Release manifest includes and hashes command transcript evidence. | Inspect manifest. | Manifest has required artifact entry for command transcript, with path, bytes, sha256, and `present=true`. | AI |
+| VS0-GOV-007 | MUST_PASS | Release evidence package is generated from final scenario report bytes, not placeholder or provisional report bytes. | Run scenario verify with output, then release collect/check. | Manifest hash for scenario report matches the committed/generated `reports/scenario/vs0-evux-YYYY-MM-DD.json`. | AI |
+| VS0-GOV-008 | MUST_PASS | Final report wording is no stronger than evidence. | Source/report review. | Report says local VS0 EVUX evidence is clean; production release, live provider, and human usability remain unclaimed. | AI |
+| VS0-GOV-009 | MUST_PASS | Post-commit rollup is present if commit/push is in scope. | Inspect post-commit artifact. | `post_commit_rollup.json` or report section records final commit, final tree hash, evidence artifact hashes, and relationship to verified base/worktree snapshot. If commit is not in scope, this row may be `NOT_RUN` and final verdict cannot be clean sign-off. | AI |
+| VS0-GOV-R01 | REGRESSION_GUARD | Existing EVUX behavior still passes. | `make verify-vs0-evux`. | Exit code 0 and scenario summary `blocking=0`, `pass=12`, `human_required=2`. | AI |
+| VS0-GOV-R02 | REGRESSION_GUARD | Existing local gates still pass. | Run regression commands. | Exit-code transcript for `make verify-local-fast`, `make verify-vs0-runtime`, and `make verify-vs0-acceptance`. | AI |
+| VS0-GOV-R03 | REGRESSION_GUARD | Browser timeout cannot be marked clean PASS. | Inspect browser proof and/or targeted test. | Clean PASS requires `clean_browser_exit=true`, `chrome_exit_code=0`, and `chrome_timeout=false`; timeout path must be `PARTIAL`, `FAIL`, or `NOT_VERIFIED`. | AI |
+| VS0-GOV-R04 | REGRESSION_GUARD | No production/live-provider/human UX overclaim. | Inspect scenario report and release manifest. | `production_release_ready=false`, `live_connector_ready=false`, `human_usability_accepted=false`, and human-required rows preserved. | AI |
+| VS0-GOV-R05 | REGRESSION_GUARD | No new production dependency or broad architecture migration. | `git diff` and manifest review. | No new dependency lockfiles or production service migration unless explicitly approved. | AI |
+| VS0-GOV-H01 | HUMAN_REQUIRED | Human usability acceptance. | Human walkthrough. | JiYong/Tars records accept/reject with screenshots/recording or issue list. | Human |
+| VS0-GOV-H02 | HUMAN_REQUIRED | Live ConnectorHub/provider proof. | Human-approved live provider test. | Redacted provider transcript, approval record, action result, and audit refs. | Human |
+
+## Definition Of Scenario PASS For VS0 EVUX Clean Sign-off Governance
+
+For this section, `PASS` means:
+
+1. Every AI-owned `VS0-GOV-*` MUST_PASS row is verified with concrete evidence.
+2. Every AI-owned `VS0-GOV-*` REGRESSION_GUARD row is verified with concrete evidence.
+3. No AI-owned row is `FAIL`, `NOT_VERIFIED`, or `NOT_RUN`.
+4. Human-required rows remain `HUMAN_REQUIRED` with clear required action, expected evidence, and release impact.
+5. Scenario report, matrix, release manifest, and verification report do not contradict each other.
+6. Evidence package contains concrete command/browser/API/report artifacts with hashes.
+7. Final verdict does not claim production release, live-provider readiness, or human usability acceptance.
+
+---
+
+# 19. Scenario-First Implementation Contract Template
 
 Future implementation tasks should copy the relevant scenarios into this template before coding.
 

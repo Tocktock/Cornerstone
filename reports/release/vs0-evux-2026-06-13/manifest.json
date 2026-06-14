@@ -1,28 +1,28 @@
 {
   "artifacts": [
     {
-      "bytes": 526979,
+      "bytes": 533540,
       "path": "reports/scenario/vs0-evux-2026-06-13.json",
       "present": true,
       "required": true,
       "role": "acceptance_scenario_report",
-      "sha256": "c9f5b579f9da50426ef5410a3489c9030fa26990ef58aafafea7aee0da247e3d"
+      "sha256": "c4b0475c8f25a238e1b20a799033b1a5cc436ad43e659223874edfd2e714faf0"
     },
     {
-      "bytes": 256247,
+      "bytes": 257017,
       "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "product_runtime_scenario_report",
-      "sha256": "789fcf20a4672f7c43a8f57fd37432ed6b773bf47cf93806b5e0711aba6db5b5"
+      "sha256": "8aea4f3693bdff7bb5d2d753dcf842d19891855ebbe52dc8ae26d67403dacc66"
     },
     {
-      "bytes": 93256,
+      "bytes": 93255,
       "path": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
       "present": true,
       "required": true,
       "role": "browser_proof_manifest",
-      "sha256": "aece04c615ed09d0480e6b478ed237bc01b5daed1dc604f10445fbba09c97cee"
+      "sha256": "78bd6a50578b27e71f6469aab0efa3d3c75288586fc3ba515607a73c26f05a94"
     },
     {
       "bytes": 101350,
@@ -33,36 +33,52 @@
       "sha256": "5a0b8e428ac0e65113f6806312bac1f7adc2d17a1d3f4740edac24f1a48db25d"
     },
     {
-      "bytes": 96116,
+      "bytes": 96115,
       "path": "reports/browser/vs0-evux-2026-06-13/workflow.dom.html",
       "present": true,
       "required": true,
       "role": "browser_dom_snapshot",
-      "sha256": "1e2184fc909cf2c456a6d58cdb97b17b6c2d9f0a784d2b093a706a84f252ecdf"
+      "sha256": "664c4f71a45d9cdd092f5a984a8fdb0ac3fd97a6b8dee5327061e681eec2c8f4"
     },
     {
-      "bytes": 84102,
+      "bytes": 84101,
       "path": "reports/browser/vs0-evux-2026-06-13/workflow-trace.json",
       "present": true,
       "required": true,
       "role": "browser_workflow_trace",
-      "sha256": "dba79dd18e7fe52c0478919c9c18014dafd268859a8c51427ab79025c2a7bd31"
+      "sha256": "51ecfaf92f0bbb8f33fcfef38732cb15c5e036504eea157633da7a646fabecb2"
     },
     {
-      "bytes": 13987,
+      "bytes": 14572,
       "path": "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md",
       "present": true,
       "required": true,
       "role": "acceptance_contract",
-      "sha256": "f4e58585acfef9ee33744e9723694c78c28af26aac7d539513a5c641250e83e6"
+      "sha256": "ae5dd5eabc8a282fe19fa3d116c2572453f665be0f53363d513ccba1f015a785"
     },
     {
       "bytes": 3323,
       "path": "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv",
       "present": true,
       "required": true,
-      "role": "acceptance_matrix",
+      "role": "acceptance_freeze_matrix",
       "sha256": "341f73d7956d9e2ddcbb84180dae286ced5d04e139b44226276b422e334ad114"
+    },
+    {
+      "bytes": 3200,
+      "path": "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_VERIFICATION_MATRIX.csv",
+      "present": true,
+      "required": true,
+      "role": "acceptance_verification_matrix",
+      "sha256": "3a30f7800308263ba5f8078e01509ef7cbba818f0e27c138bcbc2cb8243644cb"
+    },
+    {
+      "bytes": 124064,
+      "path": "reports/quickstart/vs0-evux-quickstart.json",
+      "present": true,
+      "required": true,
+      "role": "quickstart_report",
+      "sha256": "9c517665718181b8f4916f8c334e58b65ff322b6e60843d69bc1349b459ee8d7"
     },
     {
       "bytes": 10562,
@@ -73,20 +89,20 @@
       "sha256": "a1f481c083d04c70e1136c53254a5713f4dc7c001c8237fb7b12b5983363d169"
     },
     {
-      "bytes": 7544,
+      "bytes": 8694,
       "path": "docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md",
       "present": true,
-      "required": false,
+      "required": true,
       "role": "implementation_report",
-      "sha256": "3d3cb562208480687a5f96fcf1301f9280710b53c5f0251d4e513069d8d8e2a0"
+      "sha256": "3a6073a2c593055fd4c43a75b36ad3dd68eeb77da84364429d724822776753cf"
     },
     {
-      "bytes": 20912,
+      "bytes": 22802,
       "path": "README.md",
       "present": true,
       "required": true,
       "role": "operator_quickstart",
-      "sha256": "4986b5e80507d344afd97395a9e938d7056d1af223fd5f5b29a258b8c65b1249"
+      "sha256": "e885a555be86bafed0fad615f24c968b1871830a91869f44ab62540b9ad83e62"
     },
     {
       "bytes": 848,
@@ -95,10 +111,26 @@
       "required": true,
       "role": "human_usability_walkthrough_checklist",
       "sha256": "c0c9899dc4dd68eed80b02fd82edd7f57c7f991d01c33410aaf9736eddfc1152"
+    },
+    {
+      "bytes": 11513,
+      "path": "reports/release/vs0-evux-2026-06-13/command-transcript.json",
+      "present": true,
+      "required": true,
+      "role": "command_transcript",
+      "sha256": "6d3d344b0507a5ff4303ac2265451930d2ac0b2a15aff95e13a95248926bc7f9"
+    },
+    {
+      "bytes": 700,
+      "path": "reports/release/vs0-evux-2026-06-13/command-evidence.json",
+      "present": true,
+      "required": false,
+      "role": "command_evidence",
+      "sha256": "d52adcc3f2e07ed0e5e7ecb7f60edff85ad1af81b556b51c430afe88bdbb7921"
     }
   ],
   "browser_proof": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
-  "created_at": "2026-06-13T09:31:47.265201Z",
+  "created_at": "2026-06-14T09:36:21.729198Z",
   "human_required": [
     {
       "id": "VS0-EVUX-H02",
@@ -122,6 +154,7 @@
       "scenario_count": 14
     },
     "browser_status": "PASS",
+    "command_transcript_status": "success",
     "product_runtime_status": "success",
     "product_runtime_summary": {
       "blocking": 0,
@@ -129,7 +162,8 @@
       "pass": 12,
       "product_feature_claims": "LOCAL_VS0_PRODUCT_RUNTIME_READY_PRODUCTION_NOT_READY",
       "scenario_count": 14
-    }
+    },
+    "quickstart_status": "success"
   },
   "live_connector_ready": false,
   "missing_required": [],
@@ -145,7 +179,7 @@
     "unqualified_external_calls_in_release_report": 0,
     "zero_evidence_claim_approved": 0
   },
-  "package_id": "releasepkg_5e40b1c1170ef6a5",
+  "package_id": "releasepkg_65fc24d616db8142",
   "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
   "production_release_ready": false,
   "scenario_report": "reports/scenario/vs0-evux-2026-06-13.json",

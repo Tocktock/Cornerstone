@@ -1,0 +1,273 @@
+{
+  "commands": [
+    {
+      "command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs0-evux",
+        "--json",
+        "--output",
+        "reports/scenario/vs0-evux-2026-06-13.json"
+      ],
+      "elapsed_seconds": 182.42,
+      "exit_code": 0,
+      "name": "scenario_verify_vs0_evux",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "scenario_report",
+      "stderr_tail": [],
+      "stdout_tail": [
+        "{\"scenario_set\": \"vs0-evux\", \"status\": \"success\", \"summary\": {\"blocking\": 0, \"human_required\": 2, \"pass\": 12, \"product_feature_claims\": \"LOCAL_VS0_EVUX_READY_PRODUCTION_NOT_READY\", \"scenario_count\": 14}}"
+      ],
+      "timed_out": false
+    },
+    {
+      "command": [
+        "cornerstone",
+        "scenario",
+        "gate",
+        "reports/scenario/vs0-evux-2026-06-13.json",
+        "--json"
+      ],
+      "elapsed_seconds": 0.078,
+      "exit_code": 0,
+      "name": "scenario_gate",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "observed",
+      "stderr_tail": [],
+      "stdout_tail": [
+        "{",
+        "  \"audit_refs\": [],",
+        "  \"blocking\": [],",
+        "  \"blocking_count\": 0,",
+        "  \"checked_report\": \"/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-evux-2026-06-13.json\",",
+        "  \"cli_schema_version\": \"cs.cli.v0\",",
+        "  \"command\": \"cornerstone scenario gate\",",
+        "  \"errors\": [],",
+        "  \"evidence_refs\": [],",
+        "  \"ids\": {",
+        "    \"git_commit\": \"43d7cc5\"",
+        "  },",
+        "  \"mode\": \"local_scaffold\",",
+        "  \"namespace_id\": \"personal\",",
+        "  \"owner_id\": \"local-user\",",
+        "  \"policy_decision_refs\": [],",
+        "  \"product\": \"CornerStone\",",
+        "  \"scenario_count\": 14,",
+        "  \"schema_version\": \"cs.cli.v0\",",
+        "  \"status\": \"success\",",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "timed_out": false
+    },
+    {
+      "command": [
+        "cornerstone",
+        "quickstart",
+        "verify",
+        "vs0-evux",
+        "--json",
+        "--output",
+        "reports/quickstart/vs0-evux-quickstart.json"
+      ],
+      "elapsed_seconds": 1.208,
+      "exit_code": 0,
+      "name": "quickstart_verify_vs0_evux",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "quickstart_report",
+      "stderr_tail": [],
+      "stdout_tail": [
+        "{\"generated_ids\": {\"action_id\": \"action_645e93af8db18adf\", \"artifact_id\": \"art_2735313e0cb92563\", \"claim_id\": \"claim_bdeeb9de0882a501\", \"evidence_bundle_id\": \"evb_52922bc96c6ec991\", \"mission_id\": \"mission_dd9de280bd8f0778\", \"search_snapshot_id\": \"search_673a3f2f0d176230\", \"zero_evidence_claim_id\": \"claim_83e691be7ccd114e\"}, \"negative_evidence\": {\"commands_failed\": 0, \"connector_credentials_exposed\": 0, \"human_usability_claim_without_human_evidence\": 0, \"live_connector_claim_without_human_evidence\": 0, \"mock_connector_calls\": 1, \"production_release_overclaim\": 0, \"real_external_http_calls\": 0, \"zero_evidence_claim_approved\": 0}, \"status\": \"success\"}"
+      ],
+      "timed_out": false
+    },
+    {
+      "command": [
+        "make",
+        "verify-local-fast"
+      ],
+      "elapsed_seconds": 108.516,
+      "exit_code": 0,
+      "name": "verify-local-fast",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "scenario_report_regression",
+      "stderr_tail": [
+        "............................................",
+        "----------------------------------------------------------------------",
+        "Ran 44 tests in 59.599s",
+        "",
+        "OK"
+      ],
+      "stdout_tail": [
+        "scripts/verify_sot_docs.sh",
+        "PASS: CornerStone CLI native-first docs verified (39 feature-family rows; all CLI-required and release-blocking).",
+        "PASS: CornerStone local verification plane docs verified (20 numbered sections; deterministic PASS gate documented).",
+        "PASS: design tokens verified (11 state tokens, 8 color groups).",
+        "PASS: CornerStone design system docs verified.",
+        "PASS: CornerStone VS-0 scaffold readiness docs verified.",
+        "PASS: CornerStone SoT docs verified (206 full scenarios, design system, VS-0 scaffold readiness, VS-0 scaffold gate, 58 VS-0 scenarios, CLI native-first gate, local verification plane).",
+        "python3 scripts/generate_scenario_verification_matrix.py --check",
+        "PASS: scenario verification matrix is current.",
+        "python3 scripts/verify_scenario_matrix.py",
+        "PASS: scenario verification matrix verified (206 scenarios; no missing rows; no unevidenced PASS claims).",
+        "scripts/verify_scaffold_cli.sh",
+        "PASS: scenario verification matrix is current.",
+        "PASS: scenario verification matrix verified (206 scenarios; no missing rows; no unevidenced PASS claims).",
+        "PASS: CornerStone scaffold CLI verified (version, health, honest ready, scenario list, coverage, vs0-scaffold verify, vs0-fixtures verify, vs0-artifacts verify, vs0-security verify, vs0-search-evidence verify, vs0-search-understanding verify, vs0-namespace-isolation verify, vs0-audit-ledger verify, vs0-universal-core verify, vs0-claim-evidence verify, vs0-security-policy verify, vs0-regression-guardrails verify, vs0-briefing verify, vs0-mission-action verify, vs0-detail-surfaces verify, vs0-conversation-onboarding verify, vs0-product-loop-identity verify, vs0-memory-truth-boundary verify, vs0-tenant-security-boundary verify, full-claim-collaboration verify, full-memory-wiki verify, full-learning-experience verify, full-understanding-ontology verify, full-extension-ecosystem verify, full-agent-orchestration verify, full-brain-routing verify, full-security-operations verify, full-namespace-governance verify, full-mission-control-autonomy-lifecycle verify, vs0-product-domain-readiness verify, unittest)."
+      ],
+      "timed_out": false
+    },
+    {
+      "command": [
+        "make",
+        "verify-vs0-runtime"
+      ],
+      "elapsed_seconds": 62.223,
+      "exit_code": 0,
+      "name": "verify-vs0-runtime",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "scenario_report_regression",
+      "stderr_tail": [
+        "............................................",
+        "----------------------------------------------------------------------",
+        "Ran 44 tests in 59.606s",
+        "",
+        "OK"
+      ],
+      "stdout_tail": [
+        "PATH=\"/Users/jiyong/playground/Cornerstone:$PATH\" cornerstone scenario verify vs0-product-runtime --output reports/scenario/vs0-product-runtime-2026-06-11.json",
+        "cornerstone scenario verify vs0-product-runtime: success",
+        "PATH=\"/Users/jiyong/playground/Cornerstone:$PATH\" cornerstone scenario gate reports/scenario/vs0-product-runtime-2026-06-11.json --json",
+        "{",
+        "  \"audit_refs\": [],",
+        "  \"blocking\": [],",
+        "  \"blocking_count\": 0,",
+        "  \"checked_report\": \"/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-product-runtime-2026-06-11.json\",",
+        "  \"cli_schema_version\": \"cs.cli.v0\",",
+        "  \"command\": \"cornerstone scenario gate\",",
+        "  \"errors\": [],",
+        "  \"evidence_refs\": [],",
+        "  \"ids\": {",
+        "    \"git_commit\": \"43d7cc5\"",
+        "  },",
+        "  \"mode\": \"local_scaffold\",",
+        "  \"namespace_id\": \"personal\",",
+        "  \"owner_id\": \"local-user\",",
+        "  \"policy_decision_refs\": [],",
+        "  \"product\": \"CornerStone\",",
+        "  \"scenario_count\": 14,",
+        "  \"schema_version\": \"cs.cli.v0\",",
+        "  \"status\": \"success\",",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}",
+        "python3 -m unittest tests.scenario.test_scaffold_cli"
+      ],
+      "timed_out": false
+    },
+    {
+      "command": [
+        "make",
+        "verify-vs0-acceptance"
+      ],
+      "elapsed_seconds": 5.01,
+      "exit_code": 0,
+      "name": "verify-vs0-acceptance",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "scenario_report_regression",
+      "stderr_tail": [],
+      "stdout_tail": [
+        "  \"policy_decision_refs\": [],",
+        "  \"product\": \"CornerStone\",",
+        "  \"release_evidence_package\": {",
+        "    \"artifact_count\": 14,",
+        "    \"command_transcript_path\": \"reports/release/vs0-runtime-acceptance-2026-06-11/command-transcript.json\",",
+        "    \"manifest_path\": \"reports/release/vs0-runtime-acceptance-2026-06-11/manifest.json\",",
+        "    \"missing_required\": [],",
+        "    \"negative_evidence\": {",
+        "      \"action_cards_from_prompt_injection\": 0,",
+        "      \"audit_tamper_verify_failures\": 0,",
+        "      \"cross_namespace_reads\": 0,",
+        "      \"human_usability_claim_without_human_evidence\": 0,",
+        "      \"live_connector_claim_without_human_evidence\": 0,",
+        "      \"production_release_overclaim\": 0,",
+        "      \"real_external_http_calls\": 0,",
+        "      \"tool_calls_from_untrusted_artifact\": 0,",
+        "      \"unqualified_external_calls_in_release_report\": 0,",
+        "      \"zero_evidence_claim_approvals\": 0",
+        "    },",
+        "    \"output_dir\": \"reports/release/vs0-runtime-acceptance-2026-06-11\",",
+        "    \"package_id\": \"releasepkg_526b4a1b05bf8185\",",
+        "    \"schema_version\": \"cs.release_evidence_collect_result.v0\",",
+        "    \"status\": \"success\"",
+        "  },",
+        "  \"schema_version\": \"cs.cli.v0\",",
+        "  \"status\": \"success\",",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "timed_out": false
+    },
+    {
+      "command": [
+        "cornerstone",
+        "scenario",
+        "gate",
+        "tmp/scenario/vs0-evux-33370-candidate-report.json",
+        "--json"
+      ],
+      "elapsed_seconds": 0.0,
+      "exit_code": 0,
+      "name": "vs0-evux-candidate-gate",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "scenario_report_regression",
+      "stderr_tail": [],
+      "stdout_tail": [],
+      "timed_out": false
+    },
+    {
+      "command": [
+        "cornerstone",
+        "release",
+        "evidence",
+        "collect",
+        "--scope",
+        "vs0-evux",
+        "--json"
+      ],
+      "elapsed_seconds": 0.081,
+      "exit_code": 0,
+      "name": "release_evidence_collect",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "release_evidence_collect",
+      "stderr_tail": [],
+      "stdout_tail": [
+        "{\"status\": \"success\", \"summary\": {\"browser_status\": \"PASS\", \"missing_required\": []}}"
+      ],
+      "timed_out": false
+    }
+  ],
+  "created_at": "2026-06-14T09:36:21.728356Z",
+  "schema_version": "cs.release_command_transcript.v0",
+  "scope_name": "vs0-evux",
+  "summary": {
+    "blocking": 0,
+    "blocking_commands": [],
+    "command_count": 8,
+    "pass": 8
+  }
+}

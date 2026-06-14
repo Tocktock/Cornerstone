@@ -56,9 +56,107 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _tail_lines(text: str, limit: int = 30) -> list[str]:
+    return text.strip().splitlines()[-limit:]
+
+
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+
+
+def command_transcript_entry(
+    *,
+    name: str,
+    command: list[str],
+    exit_code: int,
+    timed_out: bool,
+    elapsed_seconds: float,
+    stdout_tail: list[str] | None = None,
+    stderr_tail: list[str] | None = None,
+    required: bool = True,
+    source: str = "observed",
+) -> dict[str, Any]:
+    return {
+        "schema_version": "cs.command_transcript.v0",
+        "name": name,
+        "required": required,
+        "source": source,
+        "command": command,
+        "exit_code": exit_code,
+        "timed_out": timed_out,
+        "elapsed_seconds": round(elapsed_seconds, 3),
+        "stdout_tail": stdout_tail or [],
+        "stderr_tail": stderr_tail or [],
+    }
+
+
+def _run_command_transcript(
+    root: Path,
+    name: str,
+    command: list[str],
+    *,
+    timeout: int = 60,
+    required: bool = True,
+) -> dict[str, Any]:
+    env = os.environ.copy()
+    env["PATH"] = f"{root}{os.pathsep}{env.get('PATH', '')}"
+    executable = [str(root / "cornerstone"), *command[1:]] if command and command[0] == "cornerstone" else command
+    started = time.monotonic()
+    try:
+        result = subprocess.run(
+            executable,
+            cwd=root,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout,
+        )
+        timed_out = False
+        stdout = result.stdout
+        stderr = result.stderr
+        exit_code = result.returncode
+    except subprocess.TimeoutExpired as error:
+        timed_out = True
+        stdout = error.stdout.decode("utf-8", errors="replace") if isinstance(error.stdout, bytes) else (error.stdout or "")
+        stderr = error.stderr.decode("utf-8", errors="replace") if isinstance(error.stderr, bytes) else (error.stderr or "")
+        exit_code = 124
+    return command_transcript_entry(
+        name=name,
+        command=command,
+        exit_code=exit_code,
+        timed_out=timed_out,
+        elapsed_seconds=time.monotonic() - started,
+        stdout_tail=_tail_lines(stdout),
+        stderr_tail=_tail_lines(redact_text(stderr)),
+        required=required,
+    )
+
+
+def _summarized_transcript(
+    *,
+    name: str,
+    command: list[str],
+    status: str,
+    summary: dict[str, Any] | None = None,
+    elapsed_seconds: float = 0.0,
+    required: bool = True,
+    source: str,
+) -> dict[str, Any]:
+    exit_code = 0 if status == "success" else 4
+    stdout_tail = [json.dumps({"status": status, "summary": summary or {}}, sort_keys=True)]
+    return command_transcript_entry(
+        name=name,
+        command=command,
+        exit_code=exit_code,
+        timed_out=False,
+        elapsed_seconds=elapsed_seconds,
+        stdout_tail=stdout_tail,
+        stderr_tail=[],
+        required=required,
+        source=source,
+    )
 
 
 def find_chrome() -> Path | None:
@@ -645,6 +743,29 @@ def _artifact_entry(root: Path, path: Path, role: str, *, required: bool = True)
     return entry
 
 
+def _release_transcript_entry(
+    name: str,
+    transcript: dict[str, Any],
+    *,
+    command: list[str] | None = None,
+    source: str,
+    required: bool = True,
+) -> dict[str, Any]:
+    raw_exit_code = transcript.get("exit_code")
+    exit_code = int(raw_exit_code) if raw_exit_code is not None else 4
+    return command_transcript_entry(
+        name=name,
+        command=command or list(transcript.get("command") or []),
+        exit_code=exit_code,
+        timed_out=bool(transcript.get("timed_out", False)),
+        elapsed_seconds=float(transcript.get("elapsed_seconds", 0.0) or 0.0),
+        stdout_tail=list(transcript.get("stdout_tail") or []),
+        stderr_tail=list(transcript.get("stderr_tail") or _tail_lines(str(transcript.get("stderr_redacted") or ""))),
+        required=required,
+        source=source,
+    )
+
+
 def collect_release_evidence(
     root: Path,
     *,
@@ -656,6 +777,7 @@ def collect_release_evidence(
     browser_proof_dir: Path,
     verification_report: Path | None = None,
 ) -> dict[str, Any]:
+    collect_started = time.monotonic()
     output_dir.mkdir(parents=True, exist_ok=True)
     walkthrough_path = output_dir / "human-usability-walkthrough.md"
     is_evux = scope_name == "vs0-evux"
@@ -697,6 +819,9 @@ def collect_release_evidence(
     browser_screenshot = browser_proof_dir / ("workflow.png" if is_evux else "home.png")
     browser_dom = browser_proof_dir / ("workflow.dom.html" if is_evux else "home.dom.html")
     browser_trace = browser_proof_dir / "workflow-trace.json"
+    quickstart_report = root / DEFAULT_EVUX_QUICKSTART_REPORT if is_evux else None
+    command_transcript_path = output_dir / "command-transcript.json"
+    command_evidence_path = output_dir / "command-evidence.json"
     acceptance_contract = root / (
         "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md"
         if is_evux
@@ -707,43 +832,37 @@ def collect_release_evidence(
         if is_evux
         else "docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_MATRIX.csv"
     )
+    verification_matrix = (
+        root / "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_VERIFICATION_MATRIX.csv"
+        if is_evux
+        else None
+    )
     freeze_report = root / DEFAULT_ACCEPTANCE_FREEZE_REPORT
     verification_report_path = verification_report or root / (DEFAULT_EVUX_REPORT if is_evux else DEFAULT_ACCEPTANCE_REPORT)
-
-    artifacts = [
-        _artifact_entry(root, scenario_report, "acceptance_scenario_report"),
-        _artifact_entry(root, product_runtime_report, "product_runtime_scenario_report"),
-        _artifact_entry(root, browser_proof, "browser_proof_manifest"),
-        _artifact_entry(root, browser_screenshot, "browser_screenshot"),
-        _artifact_entry(root, browser_dom, "browser_dom_snapshot"),
-        _artifact_entry(root, browser_trace, "browser_workflow_trace", required=is_evux),
-        _artifact_entry(root, acceptance_contract, "acceptance_contract"),
-        _artifact_entry(root, acceptance_matrix, "acceptance_matrix"),
-        _artifact_entry(root, freeze_report, "scenario_freeze_report", required=not is_evux),
-        _artifact_entry(root, verification_report_path, "implementation_report", required=False),
-        _artifact_entry(root, root / "README.md", "operator_quickstart"),
-        _artifact_entry(root, walkthrough_path, "human_usability_walkthrough_checklist"),
-    ]
-
-    missing_required = [entry["path"] for entry in artifacts if entry["required"] and not entry["present"]]
     scenario_data: dict[str, Any] = {}
     product_runtime_data: dict[str, Any] = {}
     browser_data: dict[str, Any] = {}
+    quickstart_data: dict[str, Any] = {}
     if scenario_report.exists():
         try:
             scenario_data = json.loads(scenario_report.read_text())
         except ValueError:
-            missing_required.append(relative_to_root(root, scenario_report) + ":invalid_json")
+            scenario_data = {"status": "failed", "errors": ["invalid_json"]}
     if product_runtime_report.exists():
         try:
             product_runtime_data = json.loads(product_runtime_report.read_text())
         except ValueError:
-            missing_required.append(relative_to_root(root, product_runtime_report) + ":invalid_json")
+            product_runtime_data = {"status": "failed", "errors": ["invalid_json"]}
     if browser_proof.exists():
         try:
             browser_data = json.loads(browser_proof.read_text())
         except ValueError:
-            missing_required.append(relative_to_root(root, browser_proof) + ":invalid_json")
+            browser_data = {"status": "failed", "errors": ["invalid_json"]}
+    if quickstart_report and quickstart_report.exists():
+        try:
+            quickstart_data = json.loads(quickstart_report.read_text())
+        except ValueError:
+            quickstart_data = {"status": "failed", "errors": ["invalid_json"]}
 
     negative = dict(scenario_data.get("negative_evidence") or {})
     negative.setdefault("real_external_http_calls", 0)
@@ -752,9 +871,135 @@ def collect_release_evidence(
     negative.setdefault("human_usability_claim_without_human_evidence", 0)
     negative.setdefault("unqualified_external_calls_in_release_report", 0)
 
+    base_artifacts = [
+        _artifact_entry(root, scenario_report, "acceptance_scenario_report"),
+        _artifact_entry(root, product_runtime_report, "product_runtime_scenario_report"),
+        _artifact_entry(root, browser_proof, "browser_proof_manifest"),
+        _artifact_entry(root, browser_screenshot, "browser_screenshot"),
+        _artifact_entry(root, browser_dom, "browser_dom_snapshot"),
+        _artifact_entry(root, browser_trace, "browser_workflow_trace", required=is_evux),
+        _artifact_entry(root, acceptance_contract, "acceptance_contract"),
+        _artifact_entry(root, acceptance_matrix, "acceptance_freeze_matrix" if is_evux else "acceptance_matrix"),
+        _artifact_entry(root, verification_matrix, "acceptance_verification_matrix", required=True) if verification_matrix else None,
+        _artifact_entry(root, quickstart_report, "quickstart_report", required=is_evux) if quickstart_report else None,
+        _artifact_entry(root, freeze_report, "scenario_freeze_report", required=not is_evux),
+        _artifact_entry(root, verification_report_path, "implementation_report", required=is_evux),
+        _artifact_entry(root, root / "README.md", "operator_quickstart"),
+        _artifact_entry(root, walkthrough_path, "human_usability_walkthrough_checklist"),
+    ]
+    artifacts_without_transcripts = [entry for entry in base_artifacts if entry is not None]
+    preliminary_missing = [entry["path"] for entry in artifacts_without_transcripts if entry["required"] and not entry["present"]]
+
+    command_entries: list[dict[str, Any]] = []
+    scenario_self = scenario_data.get("self_command_transcript")
+    if isinstance(scenario_self, dict):
+        command_entries.append(_release_transcript_entry("scenario_verify_vs0_evux", scenario_self, source="scenario_report"))
+    else:
+        command_entries.append(
+            _summarized_transcript(
+                name="scenario_verify_vs0_evux",
+                command=[
+                    "cornerstone",
+                    "scenario",
+                    "verify",
+                    scope_name,
+                    "--json",
+                    "--output",
+                    relative_to_root(root, scenario_report),
+                ],
+                status=str(scenario_data.get("status") or "failed"),
+                summary=scenario_data.get("summary") if isinstance(scenario_data.get("summary"), dict) else {},
+                source="scenario_report_summary",
+            )
+        )
+    command_entries.append(
+        _run_command_transcript(
+            root,
+            "scenario_gate",
+            ["cornerstone", "scenario", "gate", relative_to_root(root, scenario_report), "--json"],
+            timeout=60,
+        )
+    )
+    quickstart_self = quickstart_data.get("self_command_transcript")
+    if isinstance(quickstart_self, dict):
+        command_entries.append(_release_transcript_entry("quickstart_verify_vs0_evux", quickstart_self, source="quickstart_report"))
+    elif is_evux:
+        command_entries.append(
+            _summarized_transcript(
+                name="quickstart_verify_vs0_evux",
+                command=[
+                    "cornerstone",
+                    "quickstart",
+                    "verify",
+                    "vs0-evux",
+                    "--json",
+                    "--output",
+                    DEFAULT_EVUX_QUICKSTART_REPORT,
+                ],
+                status=str(quickstart_data.get("status") or "failed"),
+                summary={
+                    "generated_ids": quickstart_data.get("generated_ids"),
+                    "negative_evidence": quickstart_data.get("negative_evidence"),
+                },
+                source="quickstart_report_summary",
+            )
+        )
+    regression_transcripts = scenario_data.get("regression_command_transcript") or {}
+    if isinstance(regression_transcripts, dict):
+        for name in ["verify-local-fast", "verify-vs0-runtime", "verify-vs0-acceptance", "vs0-evux-candidate-gate"]:
+            transcript = regression_transcripts.get(name)
+            if isinstance(transcript, dict):
+                command_entries.append(_release_transcript_entry(name, transcript, source="scenario_report_regression"))
+
+    preliminary_status = "success" if not preliminary_missing and browser_data.get("status") in {"passed", "PASS"} else "failed"
+    command_entries.append(
+        _summarized_transcript(
+            name="release_evidence_collect",
+            command=["cornerstone", "release", "evidence", "collect", "--scope", scope_name, "--json"],
+            status=preliminary_status,
+            summary={"missing_required": preliminary_missing, "browser_status": browser_data.get("status")},
+            elapsed_seconds=time.monotonic() - collect_started,
+            source="release_evidence_collect",
+        )
+    )
+    command_blocking = [
+        entry["name"]
+        for entry in command_entries
+        if entry.get("required") and (entry.get("exit_code") != 0 or entry.get("timed_out"))
+    ]
+    command_transcript = {
+        "schema_version": "cs.release_command_transcript.v0",
+        "scope_name": scope_name,
+        "created_at": utc_now(),
+        "commands": command_entries,
+        "summary": {
+            "command_count": len(command_entries),
+            "pass": len([entry for entry in command_entries if entry.get("exit_code") == 0 and not entry.get("timed_out")]),
+            "blocking": len(command_blocking),
+            "blocking_commands": command_blocking,
+        },
+    }
+    write_json(command_transcript_path, command_transcript)
+
+    command_evidence = {
+        "schema_version": "cs.release_command_evidence.v0",
+        "replaced_by": relative_to_root(root, command_transcript_path),
+        "commands": [" ".join(entry["command"]) for entry in command_entries],
+    }
+    write_json(command_evidence_path, command_evidence)
+
+    artifacts = [
+        *artifacts_without_transcripts,
+        _artifact_entry(root, command_transcript_path, "command_transcript"),
+        _artifact_entry(root, command_evidence_path, "command_evidence", required=False),
+    ]
+    missing_required = [entry["path"] for entry in artifacts if entry["required"] and not entry["present"]]
+
     manifest_base = {
         "schema_version": "cs.release_evidence_package.v0",
-        "status": "success" if not missing_required and browser_data.get("status") in {"passed", "PASS"} else "failed",
+        "status": "success"
+        if not missing_required and browser_data.get("status") in {"passed", "PASS"} and not command_blocking
+        else "failed",
         "scope_name": scope_name,
         "scope": requested_scope,
         "created_at": utc_now(),
@@ -784,6 +1029,8 @@ def collect_release_evidence(
             "product_runtime_status": product_runtime_data.get("status"),
             "product_runtime_summary": product_runtime_data.get("summary"),
             "browser_status": browser_data.get("status"),
+            "quickstart_status": quickstart_data.get("status"),
+            "command_transcript_status": "success" if not command_blocking else "failed",
         },
         "missing_required": missing_required,
     }
@@ -793,37 +1040,120 @@ def collect_release_evidence(
     manifest_path = output_dir / "manifest.json"
     write_json(manifest_path, manifest)
 
-    command_evidence = {
-        "schema_version": "cs.release_command_evidence.v0",
-        "commands": [
-            "cornerstone scenario verify vs0-evux --json --output reports/scenario/vs0-evux-2026-06-13.json",
-            "cornerstone scenario gate reports/scenario/vs0-evux-2026-06-13.json --json",
-            "cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json",
-            "cornerstone release evidence collect --scope vs0-evux --json",
-            "make verify-vs0-evux",
-        ]
-        if is_evux
-        else [
-            "cornerstone scenario verify vs0-product-runtime --output reports/scenario/vs0-product-runtime-2026-06-11.json --json",
-            "cornerstone scenario verify vs0-runtime-acceptance --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json --json",
-            "cornerstone release evidence collect --scope vs0-runtime-acceptance --json",
-            "make verify-vs0-acceptance",
-            "make verify-vs0-runtime",
-            "make verify-local-fast",
-        ],
-    }
-    command_evidence_path = output_dir / "command-evidence.json"
-    write_json(command_evidence_path, command_evidence)
-
     return {
         "schema_version": "cs.release_evidence_collect_result.v0",
         "status": manifest["status"],
         "package_id": manifest["package_id"],
         "manifest_path": relative_to_root(root, manifest_path),
         "output_dir": relative_to_root(root, output_dir),
-        "artifact_count": len(artifacts) + 1,
+        "command_transcript_path": relative_to_root(root, command_transcript_path),
+        "artifact_count": len(artifacts),
         "missing_required": missing_required,
         "negative_evidence": negative,
+    }
+
+
+def finalize_release_evidence(
+    root: Path,
+    *,
+    requested_scope: dict[str, str],
+    scope_name: str,
+    output_dir: Path,
+) -> dict[str, Any]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = output_dir / "manifest.json"
+    rollup_path = output_dir / "post_commit_rollup.json"
+    if not manifest_path.exists():
+        return {
+            "schema_version": "cs.release_evidence_finalize_result.v0",
+            "status": "failed",
+            "errors": [
+                {
+                    "code": "CS_RELEASE_MANIFEST_MISSING",
+                    "message": "Release evidence manifest is required before finalization.",
+                    "path": relative_to_root(root, manifest_path),
+                }
+            ],
+        }
+    try:
+        manifest = json.loads(manifest_path.read_text())
+    except ValueError as error:
+        return {
+            "schema_version": "cs.release_evidence_finalize_result.v0",
+            "status": "failed",
+            "errors": [
+                {
+                    "code": "CS_RELEASE_MANIFEST_INVALID_JSON",
+                    "message": str(error),
+                    "path": relative_to_root(root, manifest_path),
+                }
+            ],
+        }
+
+    metadata = git_verification_metadata(root)
+    artifact_hashes: list[dict[str, Any]] = []
+    for artifact in manifest.get("artifacts", []):
+        path_value = artifact.get("path")
+        if not isinstance(path_value, str):
+            continue
+        path = root / path_value
+        entry = {
+            "role": artifact.get("role"),
+            "path": path_value,
+            "present": path.exists(),
+            "sha256": sha256_file(path) if path.exists() and path.is_file() else None,
+            "bytes": path.stat().st_size if path.exists() and path.is_file() else 0,
+        }
+        artifact_hashes.append(entry)
+
+    rollup = {
+        "schema_version": "cs.release_post_commit_rollup.v0",
+        "scope_name": scope_name,
+        "scope": requested_scope,
+        "created_at": utc_now(),
+        "final_commit": metadata.get("verified_base_commit"),
+        "final_commit_full": metadata.get("verified_base_commit_full"),
+        "final_tree_hash": metadata.get("verified_base_tree_hash"),
+        "worktree_dirty_before_rollup": metadata.get("worktree_dirty_at_verification"),
+        "dirty_paths_before_rollup": metadata.get("dirty_paths"),
+        "manifest_path": relative_to_root(root, manifest_path),
+        "manifest_sha256_before_rollup": sha256_file(manifest_path),
+        "evidence_artifacts": artifact_hashes,
+        "relationship_to_verified_snapshot": {
+            "verified_base_commit": metadata.get("verified_base_commit"),
+            "verified_base_tree_hash": metadata.get("verified_base_tree_hash"),
+            "verified_source_worktree_hash": metadata.get("verified_source_worktree_hash"),
+            "verified_source_snapshot_paths": metadata.get("verified_source_snapshot_paths"),
+        },
+    }
+    write_json(rollup_path, rollup)
+
+    artifacts = [entry for entry in manifest.get("artifacts", []) if entry.get("role") != "post_commit_rollup"]
+    artifacts.append(_artifact_entry(root, rollup_path, "post_commit_rollup", required=True))
+    manifest["artifacts"] = artifacts
+    manifest["post_commit_rollup"] = relative_to_root(root, rollup_path)
+    manifest["finalized_at"] = utc_now()
+    manifest["final_commit"] = rollup["final_commit"]
+    manifest["final_tree_hash"] = rollup["final_tree_hash"]
+    manifest["status"] = "success" if manifest.get("status") == "success" and not rollup["worktree_dirty_before_rollup"] else "failed"
+    manifest["missing_required"] = [
+        entry["path"] for entry in artifacts if entry.get("required") and not entry.get("present")
+    ]
+    if manifest["missing_required"]:
+        manifest["status"] = "failed"
+    write_json(manifest_path, manifest)
+
+    return {
+        "schema_version": "cs.release_evidence_finalize_result.v0",
+        "status": manifest["status"],
+        "scope_name": scope_name,
+        "manifest_path": relative_to_root(root, manifest_path),
+        "post_commit_rollup_path": relative_to_root(root, rollup_path),
+        "final_commit": rollup["final_commit"],
+        "final_tree_hash": rollup["final_tree_hash"],
+        "worktree_dirty_before_rollup": rollup["worktree_dirty_before_rollup"],
+        "artifact_count": len(artifacts),
+        "missing_required": manifest["missing_required"],
     }
 
 
@@ -834,6 +1164,7 @@ def _run_cli(
     timeout: int = 60,
 ) -> dict[str, Any]:
     started_at = utc_now()
+    started = time.monotonic()
     command = [str(root / "cornerstone"), *args]
     try:
         result = subprocess.run(
@@ -866,6 +1197,9 @@ def _run_cli(
         "ended_at": utc_now(),
         "exit_code": exit_code,
         "timed_out": timed_out,
+        "elapsed_seconds": round(time.monotonic() - started, 3),
+        "stdout_tail": _tail_lines(stdout),
+        "stderr_tail": _tail_lines(redact_text(stderr)),
         "stdout_json": stdout_json,
         "stderr_redacted": redact_text(stderr),
         "json_error": json_error,
@@ -1075,6 +1409,67 @@ def _git_output(root: Path, args: list[str]) -> str | None:
     return result.stdout.strip() or None
 
 
+GENERATED_EVIDENCE_PREFIXES = (
+    "reports/browser/",
+    "reports/quickstart/",
+    "reports/release/",
+    "reports/scenario/",
+    "tmp/",
+    "data/local/",
+)
+
+
+def _parse_git_status(status: str) -> list[dict[str, str]]:
+    entries: list[dict[str, str]] = []
+    for line in status.splitlines():
+        if not line:
+            continue
+        code = line[:2]
+        path = line[3:] if len(line) > 3 else line[2:].strip()
+        if " -> " in path:
+            path = path.rsplit(" -> ", 1)[1]
+        entries.append({"status": code.strip() or "modified", "path": path})
+    return entries
+
+
+def _is_generated_evidence_path(path: str) -> bool:
+    return path.startswith(GENERATED_EVIDENCE_PREFIXES)
+
+
+def _source_snapshot(root: Path, base_commit: str | None, base_tree_hash: str | None, entries: list[dict[str, str]]) -> dict[str, Any]:
+    source_entries = [entry for entry in entries if not _is_generated_evidence_path(entry["path"])]
+    digest = hashlib.sha256()
+    digest.update(f"base_commit={base_commit or ''}\n".encode("utf-8"))
+    digest.update(f"base_tree_hash={base_tree_hash or ''}\n".encode("utf-8"))
+    snapshot_paths: list[dict[str, Any]] = []
+    for entry in sorted(source_entries, key=lambda item: item["path"]):
+        rel_path = entry["path"]
+        path = root / rel_path
+        file_digest = None
+        size = 0
+        state = "missing"
+        if path.exists() and path.is_file():
+            file_digest = sha256_file(path)
+            size = path.stat().st_size
+            state = "present"
+        elif path.exists():
+            state = "non_file"
+        digest.update(f"{entry['status']} {rel_path} {state} {file_digest or ''} {size}\n".encode("utf-8"))
+        snapshot_paths.append(
+            {
+                "path": rel_path,
+                "status": entry["status"],
+                "state": state,
+                "sha256": file_digest,
+                "bytes": size,
+            }
+        )
+    return {
+        "hash": digest.hexdigest(),
+        "paths": snapshot_paths,
+    }
+
+
 def git_verification_metadata(root: Path) -> dict[str, Any]:
     status_result = subprocess.run(
         ["git", "status", "--porcelain=v1"],
@@ -1084,16 +1479,22 @@ def git_verification_metadata(root: Path) -> dict[str, Any]:
         check=False,
     )
     status = status_result.stdout if status_result.returncode == 0 else ""
-    dirty_paths = []
-    for line in status.splitlines():
-        if len(line) >= 4 and line[2] == " ":
-            dirty_paths.append(line[3:])
-        else:
-            dirty_paths.append(line[2:].strip() or line.strip())
+    dirty_entries = _parse_git_status(status)
+    dirty_paths = [entry["path"] for entry in dirty_entries]
+    generated_dirty_paths = [entry["path"] for entry in dirty_entries if _is_generated_evidence_path(entry["path"])]
+    base_commit = _git_output(root, ["rev-parse", "--short", "HEAD"])
+    base_commit_full = _git_output(root, ["rev-parse", "HEAD"])
+    base_tree_hash = _git_output(root, ["rev-parse", "HEAD^{tree}"])
+    source_snapshot = _source_snapshot(root, base_commit_full, base_tree_hash, dirty_entries)
     return {
-        "verified_base_commit": _git_output(root, ["rev-parse", "--short", "HEAD"]),
-        "final_commit": _git_output(root, ["rev-parse", "--short", "HEAD"]) if not status else None,
-        "verified_tree_hash": _git_output(root, ["rev-parse", "HEAD^{tree}"]),
+        "verified_base_commit": base_commit,
+        "verified_base_commit_full": base_commit_full,
+        "verified_base_tree_hash": base_tree_hash,
+        "verified_source_worktree_hash": source_snapshot["hash"],
+        "verified_source_snapshot_paths": source_snapshot["paths"],
+        "generated_dirty_paths": generated_dirty_paths,
+        "final_commit": base_commit if not status else None,
+        "final_commit_pending_reason": None if not status else "worktree_dirty_at_verification",
         "worktree_dirty_at_verification": bool(status),
         "report_generated_before_commit": bool(status),
         "dirty_paths": dirty_paths,

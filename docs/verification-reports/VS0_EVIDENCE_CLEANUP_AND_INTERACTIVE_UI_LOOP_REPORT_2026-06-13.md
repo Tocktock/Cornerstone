@@ -6,7 +6,10 @@
 - Scope: local/mock EVUX milestone evidence only.
 - Date: 2026-06-13
 - Owner: JiYong / Tars
-- Verified base commit: `3b28807`
+- Verified base commit: `43d7cc5`
+- Verified base tree hash: `037592d2b90e959b18c9ba1bb11d60ef9d5edd78`
+- Verified source worktree hash: `f31f0ed75cf134015411fa7d02572f619465f2d5ad6396a783b76fb5da9be61c`
+- Final commit: pending while this report is generated from a dirty worktree; see the governance post-commit rollup after commit.
 
 This report does not mark production release, live connector readiness, or human usability acceptance complete.
 
@@ -30,13 +33,13 @@ upload/select Artifact
 | ID | Type | Status | Evidence |
 |---|---|---|---|
 | VS0-EVUX-001 | MUST_PASS | PASS | API transcript `POST /artifacts`, `GET /artifacts/{artifact_id}`; browser proof `reports/browser/vs0-evux-2026-06-13/browser-proof.json`; generated Artifact `art_2735313e0cb92563`. |
-| VS0-EVUX-002 | MUST_PASS | PASS | API transcript `POST /search`, `GET /search-snapshots/{snapshot_id}`; browser marker `search_snapshot_id`; generated Search Snapshot `search_e35d06543277c827`. |
-| VS0-EVUX-003 | MUST_PASS | PASS | API transcript `POST /evidence-bundles`, `POST /claims`, `POST /claims/{claim_id}/approve`; generated Evidence Bundle `evb_bb6553638535df6f`; Claim `claim_ccea3ecc34408418`. |
+| VS0-EVUX-002 | MUST_PASS | PASS | API transcript `POST /search`, `GET /search-snapshots/{snapshot_id}`; browser marker `search_snapshot_id`; generated Search Snapshot `search_a1e48168ccb61ece`. |
+| VS0-EVUX-003 | MUST_PASS | PASS | API transcript `POST /evidence-bundles`, `POST /claims`, `POST /claims/{claim_id}/approve`; generated Evidence Bundle `evb_ce31988b959efa38`; Claim `claim_ffca2b21989599d3`. |
 | VS0-EVUX-004 | MUST_PASS | PASS | Zero-evidence Claim approval returns `CS_CLAIM_EVIDENCE_REQUIRED`; browser proof includes denial marker. |
-| VS0-EVUX-005 | MUST_PASS | PASS | Action Card API transcript and dry-run JSON expose diff, expected impact, policy decision, risk, approval state, ConnectorHub boundary, evidence refs, and audit refs. |
+| VS0-EVUX-005 | MUST_PASS | PASS | Action Card `action_837b4356b6ee5eab` API transcript and dry-run JSON expose diff, expected impact, policy decision, risk, approval state, ConnectorHub boundary, evidence refs, and audit refs. |
 | VS0-EVUX-006 | MUST_PASS | PASS | Action approval/execution transcript records `mock_connector_calls=1`, `real_external_http_calls=0`, and no credential exposure. |
 | VS0-EVUX-007 | MUST_PASS | PASS | Audit timeline includes artifact, search, evidence bundle, claim approval, action proposal, approval, execution, and `audit verify` success. |
-| VS0-EVUX-008 | MUST_PASS | PASS | Release evidence manifest `reports/release/vs0-evux-2026-06-13/manifest.json` includes scenario report, browser proof, screenshot, DOM, workflow trace, quickstart transcript, command evidence, human-required checklist, and hashes. |
+| VS0-EVUX-008 | MUST_PASS | PASS | Release evidence manifest `reports/release/vs0-evux-2026-06-13/manifest.json` includes scenario report, browser proof, screenshot, DOM, workflow trace, quickstart report, command transcript, command evidence, human-required checklist, verification matrix, and hashes. |
 | VS0-EVUX-R01 | REGRESSION_GUARD | PASS | Browser proof uses Chrome DevTools Protocol, clicks `#run-evux`, captures workflow trace, and requires generated IDs; static labels alone cannot pass. |
 | VS0-EVUX-R02 | REGRESSION_GUARD | PASS | `cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json` exits 0 and records generated IDs plus audit success. |
 | VS0-EVUX-R03 | REGRESSION_GUARD | PASS | Regression transcript records exit 0 for `make verify-local-fast`, `make verify-vs0-runtime`, `make verify-vs0-acceptance`, and the EVUX candidate gate. |
@@ -130,8 +133,20 @@ Release package:
 {
   "status": "success",
   "manifest_path": "reports/release/vs0-evux-2026-06-13/manifest.json",
-  "artifact_count": 13,
+  "artifact_count": 16,
+  "command_transcript_path": "reports/release/vs0-evux-2026-06-13/command-transcript.json",
   "missing_required": []
+}
+```
+
+Command transcript:
+
+```json
+{
+  "schema_version": "cs.release_command_transcript.v0",
+  "command_count": 8,
+  "pass": 8,
+  "blocking": 0
 }
 ```
 
@@ -157,6 +172,9 @@ Negative evidence:
 - `README.md`
 - `docs/sot/README.md`
 - `docs/sot/sot_manifest.yaml`
+- `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_VERIFICATION_MATRIX.csv`
+- `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md`
+- `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_MATRIX.csv`
 - `docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md`
 - `packages/cornerstone_cli/acceptance.py`
 - `packages/cornerstone_cli/main.py`
@@ -167,13 +185,15 @@ Negative evidence:
 - `reports/quickstart/vs0-evux-quickstart.json`
 - `reports/scenario/vs0-evux-2026-06-13.json`
 - `reports/release/vs0-evux-2026-06-13/*`
+- `reports/release/vs0-runtime-acceptance-2026-06-11/command-transcript.json`
 
 ## Gaps And Risks
 
 - Human usability acceptance remains `HUMAN_REQUIRED`.
 - Live ConnectorHub/provider execution remains `HUMAN_REQUIRED`.
 - Production release readiness remains false by design.
-- The report was generated before the final implementation/evidence commit, so scenario metadata records dirty worktree state and `report_generated_before_commit=true`.
+- The report was generated before the implementation/evidence commit, so scenario metadata records `worktree_dirty_at_verification=true`, `report_generated_before_commit=true`, `final_commit=null`, and `final_commit_pending_reason=worktree_dirty_at_verification`.
+- Commit/push sign-off must use the `VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE` post-commit rollup before claiming clean governance closure.
 
 ## Verdict
 

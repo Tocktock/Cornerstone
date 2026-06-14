@@ -3,8 +3,12 @@
     "cornerstone scenario verify vs0-evux --json --output reports/scenario/vs0-evux-2026-06-13.json",
     "cornerstone scenario gate reports/scenario/vs0-evux-2026-06-13.json --json",
     "cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json",
-    "cornerstone release evidence collect --scope vs0-evux --json",
-    "make verify-vs0-evux"
+    "make verify-local-fast",
+    "make verify-vs0-runtime",
+    "make verify-vs0-acceptance",
+    "cornerstone scenario gate tmp/scenario/vs0-evux-33370-candidate-report.json --json",
+    "cornerstone release evidence collect --scope vs0-evux --json"
   ],
+  "replaced_by": "reports/release/vs0-evux-2026-06-13/command-transcript.json",
   "schema_version": "cs.release_command_evidence.v0"
 }

@@ -6,6 +6,7 @@ import re
 import shutil
 import subprocess
 import csv
+import hashlib
 import threading
 from pathlib import Path
 from time import perf_counter
@@ -10621,9 +10622,15 @@ def verify_vs0_evux(root: Path) -> dict[str, Any]:
         _row(
             "VS0-EVUX-008",
             "MUST_PASS",
-            "PASS" if metadata.get("verified_base_commit") and metadata.get("verified_tree_hash") and browser_ok and quickstart_ok else "FAIL",
+            "PASS"
+            if metadata.get("verified_base_commit")
+            and metadata.get("verified_base_tree_hash")
+            and metadata.get("verified_source_worktree_hash")
+            and browser_ok
+            and quickstart_ok
+            else "FAIL",
             ["cornerstone release evidence collect --scope vs0-evux --json", DEFAULT_EVUX_RELEASE_PACKAGE_DIR],
-            "Evidence package has enough verified inputs to bind scenario report bytes, browser trace, quickstart, commands, and code-state metadata.",
+            "Evidence package has enough verified inputs to bind scenario report bytes, browser trace, quickstart, commands, and explicit base/source code-state metadata.",
         ),
         _row(
             "VS0-EVUX-R01",
@@ -10782,6 +10789,427 @@ def verify_vs0_evux(root: Path) -> dict[str, Any]:
                 "required_human_action": "Human approves and performs live ConnectorHub/provider dry-run or execution later.",
                 "expected_evidence": "Redacted provider transcript, written approval, execution result, audit refs.",
                 "release_impact": "Blocks live-provider production release, not local EVUX proof.",
+            },
+        ],
+    }
+
+
+def _read_json_report(path: Path) -> tuple[dict[str, Any], str | None]:
+    if not path.exists():
+        return {}, f"missing:{path}"
+    try:
+        payload = json.loads(path.read_text())
+    except ValueError as error:
+        return {}, f"invalid_json:{path}:{error}"
+    if not isinstance(payload, dict):
+        return {}, f"invalid_shape:{path}"
+    return payload, None
+
+
+def _read_csv_rows(path: Path) -> tuple[list[dict[str, str]], str | None]:
+    if not path.exists():
+        return [], f"missing:{path}"
+    with path.open(newline="") as file:
+        return list(csv.DictReader(file)), None
+
+
+def _sha256_matches(path: Path, expected: str | None) -> bool:
+    if not expected or not path.exists() or not path.is_file():
+        return False
+    return hashlib.sha256(path.read_bytes()).hexdigest() == expected
+
+
+def _manifest_artifact(manifest: dict[str, Any], role: str) -> dict[str, Any]:
+    for artifact in manifest.get("artifacts", []):
+        if artifact.get("role") == role:
+            return artifact
+    return {}
+
+
+def _governance_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    blocking = [
+        row
+        for row in rows
+        if row.get("owner") != "Human" and row.get("status") in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    return {
+        "scenario_count": len(rows),
+        "pass": len([row for row in rows if row.get("status") == "PASS"]),
+        "human_required": len([row for row in rows if row.get("owner") == "Human"]),
+        "blocking": len(blocking),
+        "product_feature_claims": "LOCAL_VS0_EVUX_GOVERNANCE_READY_PRODUCTION_NOT_READY",
+    }
+
+
+def verify_vs0_evux_governance(root: Path) -> dict[str, Any]:
+    evux_contract_path = root / "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md"
+    evux_freeze_matrix_path = root / "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv"
+    evux_verification_matrix_path = root / "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_VERIFICATION_MATRIX.csv"
+    governance_contract_path = root / "docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md"
+    governance_matrix_path = root / "docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_MATRIX.csv"
+    scenario_report_path = root / DEFAULT_EVUX_SCENARIO_REPORT
+    quickstart_report_path = root / DEFAULT_EVUX_QUICKSTART_REPORT
+    browser_proof_path = root / DEFAULT_EVUX_BROWSER_PROOF_DIR / "browser-proof.json"
+    release_manifest_path = root / DEFAULT_EVUX_RELEASE_PACKAGE_DIR / "manifest.json"
+    command_transcript_path = root / DEFAULT_EVUX_RELEASE_PACKAGE_DIR / "command-transcript.json"
+    post_commit_rollup_path = root / DEFAULT_EVUX_RELEASE_PACKAGE_DIR / "post_commit_rollup.json"
+    implementation_report_path = root / DEFAULT_EVUX_REPORT
+
+    scenario_report, scenario_error = _read_json_report(scenario_report_path)
+    quickstart_report, quickstart_error = _read_json_report(quickstart_report_path)
+    browser_proof, browser_error = _read_json_report(browser_proof_path)
+    release_manifest, manifest_error = _read_json_report(release_manifest_path)
+    command_transcript, transcript_error = _read_json_report(command_transcript_path)
+    post_commit_rollup, rollup_error = _read_json_report(post_commit_rollup_path)
+    evux_verification_rows, evux_verification_error = _read_csv_rows(evux_verification_matrix_path)
+
+    evux_contract_text = evux_contract_path.read_text() if evux_contract_path.exists() else ""
+    governance_contract_text = governance_contract_path.read_text() if governance_contract_path.exists() else ""
+    implementation_report_text = implementation_report_path.read_text() if implementation_report_path.exists() else ""
+
+    metadata = scenario_report.get("verification_metadata", {})
+    dirty_source_paths = list(metadata.get("verified_source_snapshot_paths") or [])
+    dirty_source_paths_ok = all(
+        isinstance(entry, dict)
+        and isinstance(entry.get("path"), str)
+        and not entry["path"].startswith(("reports/", "tmp/", "data/local/"))
+        and (entry.get("state") != "present" or isinstance(entry.get("sha256"), str))
+        for entry in dirty_source_paths
+    )
+    metadata_ok = (
+        isinstance(metadata, dict)
+        and bool(metadata.get("verified_base_tree_hash"))
+        and bool(metadata.get("verified_source_worktree_hash"))
+        and "dirty_paths" in metadata
+        and "final_commit" in metadata
+        and "report_generated_before_commit" in metadata
+        and "verified_tree_hash" not in metadata
+    )
+    source_snapshot_ok = (
+        metadata_ok
+        and isinstance(metadata.get("verified_source_worktree_hash"), str)
+        and len(metadata["verified_source_worktree_hash"]) == 64
+        and isinstance(dirty_source_paths, list)
+        and dirty_source_paths_ok
+    )
+
+    evux_ai_rows = [row for row in evux_verification_rows if row.get("verification_owner") == "AI"]
+    evux_human_rows = [row for row in evux_verification_rows if row.get("verification_owner") == "Human"]
+    evux_matrix_split_ok = (
+        not evux_verification_error
+        and evux_freeze_matrix_path.exists()
+        and "VERIFICATION_MATRIX" in evux_contract_text
+        and evux_ai_rows
+        and all(row.get("status") == "PASS" for row in evux_ai_rows)
+        and evux_human_rows
+        and all(row.get("status") == "HUMAN_REQUIRED" for row in evux_human_rows)
+    )
+    contract_neutral_ok = (
+        governance_contract_path.exists()
+        and "Scenario contracts define criteria." in governance_contract_text
+        and "Current `PASS`, `FAIL`, `NOT_VERIFIED`, `NOT_RUN`, and `HUMAN_REQUIRED` status belongs" in governance_contract_text
+        and "| VS0-GOV-001 | MUST_PASS | EVUX matrix no longer contradicts EVUX report." in governance_contract_text
+    )
+
+    transcript_commands = command_transcript.get("commands", [])
+    transcript_entries_ok = bool(transcript_commands) and all(
+        isinstance(entry.get("command"), list)
+        and isinstance(entry.get("exit_code"), int)
+        and isinstance(entry.get("timed_out"), bool)
+        and isinstance(entry.get("elapsed_seconds"), (int, float))
+        and isinstance(entry.get("stdout_tail"), list)
+        and isinstance(entry.get("stderr_tail"), list)
+        and (not entry.get("required", True) or (entry.get("exit_code") == 0 and not entry.get("timed_out")))
+        for entry in transcript_commands
+    )
+    transcript_ok = (
+        not transcript_error
+        and command_transcript.get("schema_version") == "cs.release_command_transcript.v0"
+        and command_transcript.get("summary", {}).get("blocking") == 0
+        and transcript_entries_ok
+    )
+
+    command_transcript_artifact = _manifest_artifact(release_manifest, "command_transcript")
+    scenario_artifact = _manifest_artifact(release_manifest, "acceptance_scenario_report")
+    rollup_artifact = _manifest_artifact(release_manifest, "post_commit_rollup")
+    manifest_command_hash_ok = (
+        not manifest_error
+        and command_transcript_artifact.get("present") is True
+        and command_transcript_artifact.get("bytes", 0) > 0
+        and _sha256_matches(root / command_transcript_artifact.get("path", ""), command_transcript_artifact.get("sha256"))
+    )
+    scenario_hash_ok = (
+        not manifest_error
+        and scenario_artifact.get("present") is True
+        and scenario_artifact.get("path") == DEFAULT_EVUX_SCENARIO_REPORT
+        and _sha256_matches(scenario_report_path, scenario_artifact.get("sha256"))
+    )
+
+    report_wording_ok = (
+        implementation_report_path.exists()
+        and "production release not ready" in implementation_report_text.lower()
+        and "HUMAN_REQUIRED" in implementation_report_text
+        and "live-provider" in implementation_report_text
+        and release_manifest.get("production_release_ready") is False
+        and release_manifest.get("live_connector_ready") is False
+        and release_manifest.get("human_usability_accepted") is False
+        and scenario_report.get("summary", {}).get("product_feature_claims") == "LOCAL_VS0_EVUX_READY_PRODUCTION_NOT_READY"
+    )
+
+    rollup_ok = (
+        not rollup_error
+        and post_commit_rollup.get("schema_version") == "cs.release_post_commit_rollup.v0"
+        and bool(post_commit_rollup.get("final_commit"))
+        and bool(post_commit_rollup.get("final_tree_hash"))
+        and isinstance(post_commit_rollup.get("evidence_artifacts"), list)
+        and bool(post_commit_rollup.get("relationship_to_verified_snapshot", {}).get("verified_base_tree_hash"))
+        and rollup_artifact.get("present") is True
+        and _sha256_matches(root / rollup_artifact.get("path", ""), rollup_artifact.get("sha256"))
+    )
+
+    evux_summary = scenario_report.get("summary", {})
+    evux_behavior_ok = (
+        scenario_report.get("status") == "success"
+        and evux_summary.get("scenario_count") == 14
+        and evux_summary.get("pass") == 12
+        and evux_summary.get("human_required") == 2
+        and evux_summary.get("blocking") == 0
+    )
+    transcript_by_name = {entry.get("name"): entry for entry in transcript_commands if isinstance(entry, dict)}
+    local_gate_transcripts_ok = all(
+        name in transcript_by_name
+        and transcript_by_name[name].get("exit_code") == 0
+        and transcript_by_name[name].get("timed_out") is False
+        for name in ["verify-local-fast", "verify-vs0-runtime", "verify-vs0-acceptance", "vs0-evux-candidate-gate"]
+    )
+    browser_timeout_guard_ok = (
+        not browser_error
+        and browser_proof.get("status") == "PASS"
+        and browser_proof.get("clean_browser_exit") is True
+        and browser_proof.get("chrome_exit_code") == 0
+        and browser_proof.get("chrome_timeout") is False
+    )
+    negative = scenario_report.get("negative_evidence", {})
+    overclaim_guard_ok = (
+        release_manifest.get("production_release_ready") is False
+        and release_manifest.get("live_connector_ready") is False
+        and release_manifest.get("human_usability_accepted") is False
+        and negative.get("production_release_overclaim") == 0
+        and negative.get("live_connector_claim_without_human_evidence") == 0
+        and negative.get("human_usability_claim_without_human_evidence") == 0
+        and len([row for row in scenario_report.get("scenario_results", []) if row.get("owner") == "Human"]) == 2
+    )
+    diff_result = subprocess.run(
+        ["git", "diff", "--name-only"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    changed_paths = diff_result.stdout.splitlines() if diff_result.returncode == 0 else []
+    dependency_path_keywords = (
+        "requirements.txt",
+        "pyproject.toml",
+        "poetry.lock",
+        "Pipfile.lock",
+        "package-lock.json",
+        "pnpm-lock.yaml",
+        "yarn.lock",
+        "Cargo.lock",
+        "go.mod",
+        "go.sum",
+    )
+    dependency_guard_ok = diff_result.returncode == 0 and not any(path.endswith(dependency_path_keywords) for path in changed_paths)
+
+    errors = [
+        error
+        for error in [
+            scenario_error,
+            quickstart_error,
+            browser_error,
+            manifest_error,
+            transcript_error,
+            evux_verification_error,
+            rollup_error if post_commit_rollup_path.exists() else None,
+        ]
+        if error
+    ]
+
+    rows = [
+        _row(
+            "VS0-GOV-001",
+            "MUST_PASS",
+            "PASS" if evux_matrix_split_ok else "FAIL",
+            [
+                relative_to_root(root, evux_freeze_matrix_path),
+                relative_to_root(root, evux_verification_matrix_path),
+                relative_to_root(root, scenario_report_path),
+            ],
+            "EVUX frozen matrix is separated from the current verification matrix; EVUX AI rows are PASS and human rows are HUMAN_REQUIRED.",
+        ),
+        _row(
+            "VS0-GOV-002",
+            "MUST_PASS",
+            "PASS" if contract_neutral_ok else "FAIL",
+            [relative_to_root(root, governance_contract_path)],
+            "Governance contract defines criteria and routes current status to matrices, scenario reports, release manifests, and verification reports.",
+        ),
+        _row(
+            "VS0-GOV-003",
+            "MUST_PASS",
+            "PASS" if metadata_ok else "FAIL",
+            [relative_to_root(root, scenario_report_path)],
+            "Verification metadata uses explicit base tree/source snapshot/final commit fields and omits ambiguous verified_tree_hash.",
+        ),
+        _row(
+            "VS0-GOV-004",
+            "MUST_PASS",
+            "PASS" if source_snapshot_ok else "FAIL",
+            [relative_to_root(root, scenario_report_path)],
+            "Dirty source snapshot hash excludes generated evidence paths and lists hashable source/doc paths.",
+        ),
+        _row(
+            "VS0-GOV-005",
+            "MUST_PASS",
+            "PASS" if transcript_ok else "FAIL",
+            [relative_to_root(root, command_transcript_path)],
+            "Release command transcript includes command arrays, exit codes, timeout flags, elapsed seconds, and stdout/stderr tails.",
+        ),
+        _row(
+            "VS0-GOV-006",
+            "MUST_PASS",
+            "PASS" if manifest_command_hash_ok else "FAIL",
+            [relative_to_root(root, release_manifest_path), relative_to_root(root, command_transcript_path)],
+            "Release manifest includes a present command_transcript artifact with matching bytes and sha256.",
+        ),
+        _row(
+            "VS0-GOV-007",
+            "MUST_PASS",
+            "PASS" if scenario_hash_ok else "FAIL",
+            [relative_to_root(root, release_manifest_path), relative_to_root(root, scenario_report_path)],
+            "Release manifest scenario report hash matches the final generated scenario report bytes.",
+        ),
+        _row(
+            "VS0-GOV-008",
+            "MUST_PASS",
+            "PASS" if report_wording_ok else "FAIL",
+            [relative_to_root(root, implementation_report_path), relative_to_root(root, release_manifest_path)],
+            "Final report and manifest claim local EVUX evidence only; production, live provider, and human usability remain unclaimed.",
+        ),
+        _row(
+            "VS0-GOV-009",
+            "MUST_PASS",
+            "PASS" if rollup_ok else "FAIL",
+            [relative_to_root(root, post_commit_rollup_path), relative_to_root(root, release_manifest_path)],
+            "Post-commit rollup records final commit/tree hash, evidence artifact hashes, and relationship to verified base/source snapshot.",
+        ),
+        _row(
+            "VS0-GOV-R01",
+            "REGRESSION_GUARD",
+            "PASS" if evux_behavior_ok else "FAIL",
+            [relative_to_root(root, scenario_report_path)],
+            "Existing EVUX behavior report remains success with 12 PASS, 2 HUMAN_REQUIRED, and 0 blocking rows.",
+        ),
+        _row(
+            "VS0-GOV-R02",
+            "REGRESSION_GUARD",
+            "PASS" if local_gate_transcripts_ok else "FAIL",
+            [relative_to_root(root, command_transcript_path)],
+            "Command transcript records successful local fast, runtime, acceptance, and EVUX candidate-gate commands.",
+        ),
+        _row(
+            "VS0-GOV-R03",
+            "REGRESSION_GUARD",
+            "PASS" if browser_timeout_guard_ok else "FAIL",
+            [relative_to_root(root, browser_proof_path)],
+            "Clean browser PASS requires clean_browser_exit=true, chrome_exit_code=0, and chrome_timeout=false.",
+        ),
+        _row(
+            "VS0-GOV-R04",
+            "REGRESSION_GUARD",
+            "PASS" if overclaim_guard_ok else "FAIL",
+            [relative_to_root(root, scenario_report_path), relative_to_root(root, release_manifest_path)],
+            "Production release, live provider readiness, and human usability are false/unclaimed; human rows remain HUMAN_REQUIRED.",
+        ),
+        _row(
+            "VS0-GOV-R05",
+            "REGRESSION_GUARD",
+            "PASS" if dependency_guard_ok else "FAIL",
+            ["git diff --name-only"],
+            "No dependency lockfile or production dependency manifest changed in the governance cleanup diff.",
+        ),
+        _row(
+            "VS0-GOV-H01",
+            "HUMAN_REQUIRED",
+            "HUMAN_REQUIRED",
+            ["human UI walkthrough"],
+            "Human usability acceptance requires JiYong/Tars operator judgment with screenshots/recording or issue list.",
+            owner="Human",
+        ),
+        _row(
+            "VS0-GOV-H02",
+            "HUMAN_REQUIRED",
+            "HUMAN_REQUIRED",
+            ["human-approved live ConnectorHub/provider test"],
+            "Live provider proof requires credentials, external state, redacted transcript, approval record, action result, and audit refs.",
+            owner="Human",
+        ),
+    ]
+    summary = _governance_summary(rows)
+    blocking = [
+        row
+        for row in rows
+        if row.get("owner") != "Human" and row.get("status") in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-evux-governance",
+        "summary": summary,
+        "scenario_results": rows,
+        "errors": errors,
+        "source_reports": {
+            "evux_scenario_report": DEFAULT_EVUX_SCENARIO_REPORT,
+            "evux_quickstart_report": DEFAULT_EVUX_QUICKSTART_REPORT,
+            "evux_browser_proof": f"{DEFAULT_EVUX_BROWSER_PROOF_DIR}/browser-proof.json",
+            "evux_release_manifest": f"{DEFAULT_EVUX_RELEASE_PACKAGE_DIR}/manifest.json",
+            "evux_command_transcript": f"{DEFAULT_EVUX_RELEASE_PACKAGE_DIR}/command-transcript.json",
+            "evux_post_commit_rollup": f"{DEFAULT_EVUX_RELEASE_PACKAGE_DIR}/post_commit_rollup.json",
+        },
+        "governance_checks": {
+            "metadata_ok": metadata_ok,
+            "source_snapshot_ok": source_snapshot_ok,
+            "command_transcript_ok": transcript_ok,
+            "manifest_command_hash_ok": manifest_command_hash_ok,
+            "scenario_hash_ok": scenario_hash_ok,
+            "report_wording_ok": report_wording_ok,
+            "post_commit_rollup_ok": rollup_ok,
+            "evux_behavior_ok": evux_behavior_ok,
+            "local_gate_transcripts_ok": local_gate_transcripts_ok,
+            "browser_timeout_guard_ok": browser_timeout_guard_ok,
+            "overclaim_guard_ok": overclaim_guard_ok,
+            "dependency_guard_ok": dependency_guard_ok,
+        },
+        "negative_evidence": {
+            "real_external_http_calls": negative.get("real_external_http_calls"),
+            "production_release_overclaim": negative.get("production_release_overclaim"),
+            "live_connector_claim_without_human_evidence": negative.get("live_connector_claim_without_human_evidence"),
+            "human_usability_claim_without_human_evidence": negative.get("human_usability_claim_without_human_evidence"),
+            "browser_timeout_marked_pass": negative.get("browser_timeout_marked_pass"),
+        },
+        "human_required": [
+            {
+                "id": "VS0-GOV-H01",
+                "why_ai_cannot_verify": "Human usability is subjective and requires real operator judgment.",
+                "required_human_action": "JiYong/Tars completes the local UI walkthrough and records accept or reject.",
+                "expected_evidence": "Acceptance note plus screenshots/recording or issue list.",
+                "release_impact": "Blocks operator-accepted product claim, not AI-verifiable local governance gate.",
+            },
+            {
+                "id": "VS0-GOV-H02",
+                "why_ai_cannot_verify": "Live provider verification requires credentials and may mutate third-party state.",
+                "required_human_action": "Human approves and performs live ConnectorHub/provider dry-run or execution later.",
+                "expected_evidence": "Redacted provider transcript, written approval, execution result, and audit refs.",
+                "release_impact": "Blocks live-provider production release, not local governance proof.",
             },
         ],
     }

@@ -5,6 +5,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 
 from cornerstone_cli import __version__
@@ -19,13 +20,17 @@ from cornerstone_cli.acceptance import (
     DEFAULT_EVUX_SCENARIO_REPORT,
     DEFAULT_PRODUCT_RUNTIME_REPORT,
     DEFAULT_RELEASE_PACKAGE_DIR,
+    command_transcript_entry,
     collect_release_evidence,
+    finalize_release_evidence,
     run_evux_quickstart,
+    write_json,
 )
 from cornerstone_cli.scenarios import (
     coverage_report,
     list_scenarios,
     verify_vs0_evux,
+    verify_vs0_evux_governance,
     verify_vs0_runtime_acceptance,
     verify_vs0_product_runtime,
     verify_full_agent_orchestration,
@@ -3900,8 +3905,43 @@ def command_release_evidence_collect(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_release_evidence_finalize(args: argparse.Namespace) -> int:
+    root = repo_root()
+    requested_scope = scope_args(args)
+    if args.scope == "vs0-evux":
+        output_dir_arg = args.output_dir or DEFAULT_EVUX_RELEASE_PACKAGE_DIR
+    else:
+        output_dir_arg = args.output_dir or DEFAULT_RELEASE_PACKAGE_DIR
+    result = finalize_release_evidence(
+        root,
+        requested_scope=requested_scope,
+        scope_name=args.scope,
+        output_dir=(root / output_dir_arg).resolve(),
+    )
+    payload = base_response("cornerstone release evidence finalize", result["status"], root)
+    payload.update(requested_scope)
+    payload["release_evidence_finalize"] = result
+    if result["status"] != "success":
+        payload["errors"].extend(result.get("errors", []))
+        if not payload["errors"]:
+            payload["errors"].append(
+                {
+                    "code": "CS_RELEASE_EVIDENCE_FINALIZE_FAILED",
+                    "message": "Release evidence finalization did not produce a clean post-commit rollup.",
+                    "missing_required": result.get("missing_required", []),
+                    "worktree_dirty_before_rollup": result.get("worktree_dirty_before_rollup"),
+                }
+            )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+    payload["evidence_refs"].append(f"release_post_commit_rollup:{result['post_commit_rollup_path']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_quickstart_verify(args: argparse.Namespace) -> int:
     root = repo_root()
+    started = perf_counter()
     if args.quickstart != "vs0-evux":
         payload = base_response("cornerstone quickstart verify", "failed", root)
         payload["errors"].append(
@@ -3915,6 +3955,34 @@ def command_quickstart_verify(args: argparse.Namespace) -> int:
         return EXIT_INVALID
     output_path = (root / (args.output or DEFAULT_EVUX_QUICKSTART_REPORT)).resolve()
     result = run_evux_quickstart(root, output_path=output_path)
+    exit_code = EXIT_SUCCESS if result["status"] == "success" else EXIT_EVIDENCE_MISSING
+    result["self_command_transcript"] = command_transcript_entry(
+        name="quickstart_verify_vs0_evux",
+        command=[
+            "cornerstone",
+            "quickstart",
+            "verify",
+            "vs0-evux",
+            "--json",
+            "--output",
+            args.output or DEFAULT_EVUX_QUICKSTART_REPORT,
+        ],
+        exit_code=exit_code,
+        timed_out=False,
+        elapsed_seconds=perf_counter() - started,
+        stdout_tail=[
+            json.dumps(
+                {
+                    "status": result.get("status"),
+                    "generated_ids": result.get("generated_ids"),
+                    "negative_evidence": result.get("negative_evidence"),
+                },
+                sort_keys=True,
+            )
+        ],
+        stderr_tail=[],
+    )
+    write_json(output_path, result)
     payload = base_response("cornerstone quickstart verify vs0-evux", result["status"], root)
     payload.update(result)
     payload["output_path"] = str(output_path)
@@ -3924,9 +3992,9 @@ def command_quickstart_verify(args: argparse.Namespace) -> int:
     if result["status"] != "success":
         payload["errors"].extend(result.get("errors", []))
         print_payload(payload, args.json)
-        return EXIT_EVIDENCE_MISSING
+        return exit_code
     print_payload(payload, args.json)
-    return EXIT_SUCCESS
+    return exit_code
 
 
 def command_conversation_start(args: argparse.Namespace) -> int:
@@ -4115,6 +4183,7 @@ def command_scenario_coverage(args: argparse.Namespace) -> int:
 
 def command_scenario_verify(args: argparse.Namespace) -> int:
     root = repo_root()
+    started = perf_counter()
     if args.contract == "vs0-scaffold":
         report = verify_vs0_scaffold(root)
     elif args.contract == "vs0-fixtures":
@@ -4175,6 +4244,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_runtime_acceptance(root)
     elif args.contract == "vs0-evux":
         report = verify_vs0_evux(root)
+    elif args.contract == "vs0-evux-governance":
+        report = verify_vs0_evux_governance(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-agent-orchestration":
@@ -4257,6 +4328,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-product-runtime",
                     "vs0-runtime-acceptance",
                     "vs0-evux",
+                    "vs0-evux-governance",
                     "full-claim-collaboration",
                     "full-agent-orchestration",
                     "full-brain-routing",
@@ -4306,6 +4378,34 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         output_arg = DEFAULT_ACCEPTANCE_SCENARIO_REPORT
     if args.contract == "vs0-evux" and not output_arg:
         output_arg = DEFAULT_EVUX_SCENARIO_REPORT
+    if args.contract == "vs0-evux-governance" and not output_arg:
+        output_arg = "reports/scenario/vs0-evux-governance-2026-06-14.json"
+    exit_code = EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
+    transcript_command = ["cornerstone", "scenario", "verify", args.contract]
+    for scenario_id in args.scenario or []:
+        transcript_command.extend(["--scenario", scenario_id])
+    if args.corpus != "fixtures/vs0":
+        transcript_command.extend(["--corpus", args.corpus])
+    if args.model_provider != "local_test":
+        transcript_command.extend(["--model-provider", args.model_provider])
+    if args.json:
+        transcript_command.append("--json")
+    if output_arg:
+        transcript_command.extend(["--output", output_arg])
+    payload["self_command_transcript"] = command_transcript_entry(
+        name=f"scenario_verify_{args.contract}",
+        command=transcript_command,
+        exit_code=exit_code,
+        timed_out=False,
+        elapsed_seconds=perf_counter() - started,
+        stdout_tail=[
+            json.dumps(
+                {"status": report.get("status"), "scenario_set": report.get("scenario_set"), "summary": report.get("summary")},
+                sort_keys=True,
+            )
+        ],
+        stderr_tail=[],
+    )
     if output_arg:
         output_path = (root / output_arg).resolve()
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -4348,7 +4448,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
             payload["release_evidence_package_final_report_bytes"] = release_result
 
     print_payload(payload, args.json)
-    return EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
+    return exit_code
 
 
 def command_scenario_gate(args: argparse.Namespace) -> int:
@@ -5666,6 +5766,14 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(collect)
     collect.add_argument("--json", action="store_true", help="Emit JSON output")
     collect.set_defaults(func=command_release_evidence_collect)
+
+    finalize = evidence_sub.add_parser("finalize", help="Finalize release evidence with a post-commit rollup")
+    finalize.add_argument("--scope", default="vs0-runtime-acceptance", help="Evidence package scope")
+    finalize.add_argument("--output-dir", help="Evidence package output directory")
+    add_state_argument(finalize)
+    add_scope_arguments(finalize)
+    finalize.add_argument("--json", action="store_true", help="Emit JSON output")
+    finalize.set_defaults(func=command_release_evidence_finalize)
 
     conversation = subcommands.add_parser("conversation", help="Conversation-first work surface commands")
     conversation_sub = conversation.add_subparsers(dest="conversation_command")

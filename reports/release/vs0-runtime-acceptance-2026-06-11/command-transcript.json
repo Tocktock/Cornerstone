@@ -1,0 +1,99 @@
+{
+  "commands": [
+    {
+      "command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs0-runtime-acceptance",
+        "--output",
+        "reports/scenario/vs0-runtime-acceptance-2026-06-11.json"
+      ],
+      "elapsed_seconds": 4.66,
+      "exit_code": 0,
+      "name": "scenario_verify_vs0_evux",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "scenario_report",
+      "stderr_tail": [],
+      "stdout_tail": [
+        "{\"scenario_set\": \"vs0-runtime-acceptance\", \"status\": \"success\", \"summary\": {\"blocking\": 0, \"human_required\": 2, \"pass\": 7, \"product_feature_claims\": \"LOCAL_VS0_RUNTIME_ACCEPTANCE_READY_PRODUCTION_NOT_READY\", \"scenario_count\": 9}}"
+      ],
+      "timed_out": false
+    },
+    {
+      "command": [
+        "cornerstone",
+        "scenario",
+        "gate",
+        "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+        "--json"
+      ],
+      "elapsed_seconds": 0.068,
+      "exit_code": 0,
+      "name": "scenario_gate",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "observed",
+      "stderr_tail": [],
+      "stdout_tail": [
+        "{",
+        "  \"audit_refs\": [],",
+        "  \"blocking\": [],",
+        "  \"blocking_count\": 0,",
+        "  \"checked_report\": \"/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-runtime-acceptance-2026-06-11.json\",",
+        "  \"cli_schema_version\": \"cs.cli.v0\",",
+        "  \"command\": \"cornerstone scenario gate\",",
+        "  \"errors\": [],",
+        "  \"evidence_refs\": [],",
+        "  \"ids\": {",
+        "    \"git_commit\": \"43d7cc5\"",
+        "  },",
+        "  \"mode\": \"local_scaffold\",",
+        "  \"namespace_id\": \"personal\",",
+        "  \"owner_id\": \"local-user\",",
+        "  \"policy_decision_refs\": [],",
+        "  \"product\": \"CornerStone\",",
+        "  \"scenario_count\": 9,",
+        "  \"schema_version\": \"cs.cli.v0\",",
+        "  \"status\": \"success\",",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "timed_out": false
+    },
+    {
+      "command": [
+        "cornerstone",
+        "release",
+        "evidence",
+        "collect",
+        "--scope",
+        "vs0-runtime-acceptance",
+        "--json"
+      ],
+      "elapsed_seconds": 0.071,
+      "exit_code": 0,
+      "name": "release_evidence_collect",
+      "required": true,
+      "schema_version": "cs.command_transcript.v0",
+      "source": "release_evidence_collect",
+      "stderr_tail": [],
+      "stdout_tail": [
+        "{\"status\": \"success\", \"summary\": {\"browser_status\": \"passed\", \"missing_required\": []}}"
+      ],
+      "timed_out": false
+    }
+  ],
+  "created_at": "2026-06-14T09:33:53.158211Z",
+  "schema_version": "cs.release_command_transcript.v0",
+  "scope_name": "vs0-runtime-acceptance",
+  "summary": {
+    "blocking": 0,
+    "blocking_commands": [],
+    "command_count": 3,
+    "pass": 3
+  }
+}

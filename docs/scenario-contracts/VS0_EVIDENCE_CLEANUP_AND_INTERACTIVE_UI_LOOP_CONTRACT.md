@@ -31,6 +31,8 @@ Artifact ingest
 
 The SoT already requires this vertical slice as the first development milestone. This contract adds stricter evidence, browser, quickstart, and UI interaction criteria before the milestone can be cleanly signed off.
 
+`VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv` is the frozen scenario matrix and may retain initial `NOT_VERIFIED` rows to preserve pre-implementation contract semantics. Current implementation status belongs in `VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_VERIFICATION_MATRIX.csv`, scenario reports, release manifests, and verification reports.
+
 ## Goal
 
 The user must be able to complete the core CornerStone flow locally:
@@ -159,14 +161,17 @@ Scenario and release reports should include:
 ```json
 {
   "verified_base_commit": "...",
+  "verified_base_tree_hash": "...",
+  "verified_source_worktree_hash": "...",
+  "verified_source_snapshot_paths": [],
   "final_commit": "...",
-  "verified_tree_hash": "...",
+  "final_commit_pending_reason": null,
   "worktree_dirty_at_verification": false,
   "report_generated_before_commit": false
 }
 ```
 
-For self-referential reports, prefer `verified_tree_hash` over requiring the report to know its own final commit hash.
+For self-referential reports, distinguish the committed base tree from a dirty source snapshot. A report generated before commit must say so and must not label a dirty generated-evidence tree as a final committed tree.
 
 ## Human Required
 

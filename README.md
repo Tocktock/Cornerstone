@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, local deterministic VS-0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, and local VS0 evidence-cleanup/interactive-UI-loop evidence
+**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, local deterministic VS-0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, local VS0 evidence-cleanup/interactive-UI-loop evidence, and frozen VS0 EVUX clean sign-off governance scenarios
 **Canonical spelling:** Use **CornerStone** for product/project text.
 
 ## Product Definition
@@ -43,9 +43,12 @@ Users should experience one CornerStone product. Internally, the product keeps c
 20. `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md`
 21. `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md`
 22. `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv`
-23. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-24. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-25. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
+23. `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_VERIFICATION_MATRIX.csv`
+24. `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md`
+25. `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_MATRIX.csv`
+26. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+27. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+28. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
 
 ## Active Authority
 
@@ -72,8 +75,12 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md` | Scenario-freeze report for the next VS0 runtime acceptance and hardening gate |
 | `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md` | Current local deterministic implementation report for VS0 runtime acceptance and hardening |
 | `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md` | Frozen next task-scoped scenarios for evidence cleanup and real interactive UI workflow proof |
-| `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv` | Machine-readable matrix for the VS0 evidence cleanup and interactive UI loop contract |
+| `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv` | Frozen machine-readable matrix for the VS0 evidence cleanup and interactive UI loop contract |
+| `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_VERIFICATION_MATRIX.csv` | Machine-readable current verification matrix for the VS0 evidence cleanup and interactive UI loop report |
 | `docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md` | Current local deterministic implementation report for VS0 evidence cleanup and interactive UI loop |
+| `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md` | Frozen task-scoped criteria for VS0 EVUX clean sign-off governance |
+| `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_MATRIX.csv` | Machine-readable verification matrix for the VS0 EVUX clean sign-off governance contract |
+| `docs/verification-reports/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_REPORT_2026-06-14.md` | Final local governance sign-off report for VS0 EVUX evidence cleanup |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
 | `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md` | Verification-centered agent workflow |
@@ -86,6 +93,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 - VS0 runtime readiness overlay: 14 task-scoped scenarios, already accepted for local deterministic runtime readiness.
 - VS0 runtime acceptance/hardening overlay: 9 task-scoped scenarios; reports show 7 AI-verifiable PASS, 2 HUMAN_REQUIRED, production release still false.
 - VS0 evidence cleanup and interactive UI loop overlay: 14 task-scoped scenarios; reports show 12 AI-verifiable PASS, 2 HUMAN_REQUIRED, production release still false.
+- VS0 EVUX clean sign-off governance overlay: 16 task-scoped scenarios; verifier path `cornerstone scenario verify vs0-evux-governance`, 14 AI-verifiable rows, 2 HUMAN_REQUIRED, production release still false.
 - Release rule: no PASS without concrete scenario evidence.
 - CLI-native-first rule: no feature scenario can be marked PASS unless its native `cornerstone ...` CLI path is verified or the item is explicitly classified as a non-feature implementation internal.
 
@@ -175,6 +183,8 @@ The full long-term scenario suite remains authoritative. VS-0 is only the first 
 The current local acceptance criteria are in `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`. Local evidence is recorded in `docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_REPORT_2026-06-11.md`, `reports/scenario/vs0-runtime-acceptance-2026-06-11.json`, `reports/browser/vs0-runtime-acceptance-2026-06-11/`, and `reports/release/vs0-runtime-acceptance-2026-06-11/`. The contract is status-neutral; PASS/FAIL status belongs to those reports. It must not be treated as production release, live-provider, or human UX acceptance.
 
 The current local evidence-cleanup and interactive UI loop criteria are in `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md`. Local evidence is recorded in `docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md`, `reports/scenario/vs0-evux-2026-06-13.json`, `reports/browser/vs0-evux-2026-06-13/`, `reports/quickstart/vs0-evux-quickstart.json`, and `reports/release/vs0-evux-2026-06-13/`. It proves local/mock EVUX only; production release, live-provider readiness, and human UX acceptance remain unclaimed.
+
+The clean sign-off governance criteria are in `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md`. They add `VS0-GOV-*` rows for matrix/report consistency, dirty-worktree metadata semantics, command transcript evidence, release manifest hashing, post-commit rollup behavior, and overclaim/dependency regression guards. Current PASS/HUMAN_REQUIRED status is recorded by `cornerstone scenario verify vs0-evux-governance`, `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_MATRIX.csv`, and `docs/verification-reports/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_REPORT_2026-06-14.md`; production release, live-provider readiness, and human usability acceptance remain unclaimed.
 
 ## VS0 Runtime Acceptance Quickstart
 

@@ -1,20 +1,20 @@
 {
   "artifacts": [
     {
-      "bytes": 317291,
+      "bytes": 319065,
       "path": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "acceptance_scenario_report",
-      "sha256": "354f38c2fdef075faa13ad8ac89d18fded0465fb4b5a6b4eab3aafca8ff222fa"
+      "sha256": "b1133545b546ab349dd2b6c0bf6765ec07e3c8236b61ac057e57f33c40b3d73b"
     },
     {
-      "bytes": 256247,
+      "bytes": 257017,
       "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "product_runtime_scenario_report",
-      "sha256": "789fcf20a4672f7c43a8f57fd37432ed6b773bf47cf93806b5e0711aba6db5b5"
+      "sha256": "8aea4f3693bdff7bb5d2d753dcf842d19891855ebbe52dc8ae26d67403dacc66"
     },
     {
       "bytes": 1430,
@@ -22,7 +22,7 @@
       "present": true,
       "required": true,
       "role": "browser_proof_manifest",
-      "sha256": "8aaa26328abf91b121ba23fe02bcd89b798cf49d740f1b06742130c0b74345d9"
+      "sha256": "c73ea7782f9310df57fc676afa275f03ce7e42785c431acb3b43c2729ac98dfc"
     },
     {
       "bytes": 89394,
@@ -79,12 +79,12 @@
       "sha256": "89ff9b2b61813579e9cf6522d49159cad531f64f8b5cce16a4667421f8d396f2"
     },
     {
-      "bytes": 20912,
+      "bytes": 22355,
       "path": "README.md",
       "present": true,
       "required": true,
       "role": "operator_quickstart",
-      "sha256": "4986b5e80507d344afd97395a9e938d7056d1af223fd5f5b29a258b8c65b1249"
+      "sha256": "51804d0d0b9ebe646b042db75998d75d24b4f2950d51f99da395911148b5c9bd"
     },
     {
       "bytes": 924,
@@ -93,10 +93,26 @@
       "required": true,
       "role": "human_usability_walkthrough_checklist",
       "sha256": "988aec2478e8133050e133741b2c714b8730a0c4a94caceaaa2f47fa728d6579"
+    },
+    {
+      "bytes": 3084,
+      "path": "reports/release/vs0-runtime-acceptance-2026-06-11/command-transcript.json",
+      "present": true,
+      "required": true,
+      "role": "command_transcript",
+      "sha256": "6cf8efe91750cc581e4ae5db4d0776f0c31af855901994242d12785bbed54ee3"
+    },
+    {
+      "bytes": 472,
+      "path": "reports/release/vs0-runtime-acceptance-2026-06-11/command-evidence.json",
+      "present": true,
+      "required": false,
+      "role": "command_evidence",
+      "sha256": "e38192c84aec718a511a09f130396c2be4a83e005bf5bf5baea207687d548185"
     }
   ],
   "browser_proof": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
-  "created_at": "2026-06-13T09:30:32.634020Z",
+  "created_at": "2026-06-14T09:33:53.158881Z",
   "human_required": [
     {
       "id": "VS0-ACC-H01",
@@ -120,6 +136,7 @@
       "scenario_count": 9
     },
     "browser_status": "passed",
+    "command_transcript_status": "success",
     "product_runtime_status": "success",
     "product_runtime_summary": {
       "blocking": 0,
@@ -127,7 +144,8 @@
       "pass": 12,
       "product_feature_claims": "LOCAL_VS0_PRODUCT_RUNTIME_READY_PRODUCTION_NOT_READY",
       "scenario_count": 14
-    }
+    },
+    "quickstart_status": null
   },
   "live_connector_ready": false,
   "missing_required": [],
@@ -143,7 +161,7 @@
     "unqualified_external_calls_in_release_report": 0,
     "zero_evidence_claim_approvals": 0
   },
-  "package_id": "releasepkg_323750ddfb4e4496",
+  "package_id": "releasepkg_526b4a1b05bf8185",
   "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
   "production_release_ready": false,
   "scenario_report": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",

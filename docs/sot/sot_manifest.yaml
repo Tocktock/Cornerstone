@@ -139,6 +139,7 @@ vs0_runtime_acceptance_and_hardening:
 vs0_evidence_cleanup_and_interactive_ui_loop:
   contract: "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md"
   matrix: "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv"
+  verification_matrix: "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_VERIFICATION_MATRIX.csv"
   expected_scenario_report: "reports/scenario/vs0-evux-YYYY-MM-DD.json"
   expected_browser_proof_dir: "reports/browser/vs0-evux-YYYY-MM-DD/"
   expected_quickstart_transcript: "reports/quickstart/vs0-evux-quickstart.json"
@@ -156,6 +157,29 @@ vs0_evidence_cleanup_and_interactive_ui_loop:
   status: "local deterministic implementation report passes 12 AI-verifiable rows; 2 human rows remain HUMAN_REQUIRED; production release remains false"
   verifier: "cornerstone scenario verify vs0-evux --json"
   quickstart_verifier: "cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json"
+  make_target: "make verify-vs0-evux"
+  production_release_rule: "production_release_ready remains false until separate production live-provider and human acceptance evidence exists"
+
+vs0_evux_clean_signoff_governance:
+  contract: "docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md"
+  matrix: "docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_MATRIX.csv"
+  verification_report: "docs/verification-reports/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_REPORT_2026-06-14.md"
+  expected_governance_scenario_report: "reports/scenario/vs0-evux-governance-YYYY-MM-DD.json"
+  expected_scenario_report: "reports/scenario/vs0-evux-YYYY-MM-DD.json"
+  expected_quickstart_transcript: "reports/quickstart/vs0-evux-quickstart.json"
+  expected_release_evidence_package: "reports/release/vs0-evux-YYYY-MM-DD/manifest.json"
+  expected_command_transcript: "reports/release/vs0-evux-YYYY-MM-DD/command-transcript.json"
+  expected_post_commit_rollup: "reports/release/vs0-evux-YYYY-MM-DD/post_commit_rollup.json"
+  authority: "task-scoped criteria and verification path for clean local EVUX sign-off governance"
+  scenario_count: 16
+  ai_verifiable_count: 14
+  human_required_count: 2
+  status: "local governance verification path implemented; AI-verifiable rows pass only when vs0-evux-governance report is success; human rows remain HUMAN_REQUIRED; production release remains false"
+  verifier: "cornerstone scenario verify vs0-evux-governance --json --output reports/scenario/vs0-evux-governance-YYYY-MM-DD.json"
+  gate: "cornerstone scenario gate reports/scenario/vs0-evux-governance-YYYY-MM-DD.json --json"
+  quickstart_verifier: "cornerstone quickstart verify vs0-evux --json --output reports/quickstart/vs0-evux-quickstart.json"
+  release_evidence_command: "cornerstone release evidence collect --scope vs0-evux --json"
+  optional_finalize_command: "cornerstone release evidence finalize --scope vs0-evux --json"
   make_target: "make verify-vs0-evux"
   production_release_rule: "production_release_ready remains false until separate production live-provider and human acceptance evidence exists"
 
