@@ -1,0 +1,265 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-evux-governance",
+  "errors": [],
+  "evidence_refs": [],
+  "governance_checks": {
+    "browser_timeout_guard_ok": true,
+    "command_transcript_ok": true,
+    "dependency_guard_ok": true,
+    "evux_behavior_ok": true,
+    "local_gate_transcripts_ok": true,
+    "manifest_command_hash_ok": true,
+    "metadata_ok": true,
+    "overclaim_guard_ok": true,
+    "post_commit_rollup_ok": true,
+    "report_wording_ok": true,
+    "scenario_hash_ok": true,
+    "source_snapshot_ok": true
+  },
+  "human_required": [
+    {
+      "expected_evidence": "Acceptance note plus screenshots/recording or issue list.",
+      "id": "VS0-GOV-H01",
+      "release_impact": "Blocks operator-accepted product claim, not AI-verifiable local governance gate.",
+      "required_human_action": "JiYong/Tars completes the local UI walkthrough and records accept or reject.",
+      "why_ai_cannot_verify": "Human usability is subjective and requires real operator judgment."
+    },
+    {
+      "expected_evidence": "Redacted provider transcript, written approval, execution result, and audit refs.",
+      "id": "VS0-GOV-H02",
+      "release_impact": "Blocks live-provider production release, not local governance proof.",
+      "required_human_action": "Human approves and performs live ConnectorHub/provider dry-run or execution later.",
+      "why_ai_cannot_verify": "Live provider verification requires credentials and may mutate third-party state."
+    }
+  ],
+  "ids": {
+    "git_commit": "349dea7"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "browser_timeout_marked_pass": 0,
+    "human_usability_claim_without_human_evidence": 0,
+    "live_connector_claim_without_human_evidence": 0,
+    "production_release_overclaim": 0,
+    "real_external_http_calls": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-evux-governance-2026-06-14.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv",
+        "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_VERIFICATION_MATRIX.csv",
+        "reports/scenario/vs0-evux-2026-06-13.json"
+      ],
+      "id": "VS0-GOV-001",
+      "notes": "EVUX frozen matrix is separated from the current verification matrix; EVUX AI rows are PASS and human rows are HUMAN_REQUIRED.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md"
+      ],
+      "id": "VS0-GOV-002",
+      "notes": "Governance contract defines criteria and routes current status to matrices, scenario reports, release manifests, and verification reports.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/scenario/vs0-evux-2026-06-13.json"
+      ],
+      "id": "VS0-GOV-003",
+      "notes": "Verification metadata uses explicit base tree/source snapshot/final commit fields and omits ambiguous verified_tree_hash.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/scenario/vs0-evux-2026-06-13.json"
+      ],
+      "id": "VS0-GOV-004",
+      "notes": "Dirty source snapshot hash excludes generated evidence paths and lists hashable source/doc paths.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/release/vs0-evux-2026-06-13/command-transcript.json"
+      ],
+      "id": "VS0-GOV-005",
+      "notes": "Release command transcript includes command arrays, exit codes, timeout flags, elapsed seconds, and stdout/stderr tails.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/release/vs0-evux-2026-06-13/manifest.json",
+        "reports/release/vs0-evux-2026-06-13/command-transcript.json"
+      ],
+      "id": "VS0-GOV-006",
+      "notes": "Release manifest includes a present command_transcript artifact with matching bytes and sha256.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/release/vs0-evux-2026-06-13/manifest.json",
+        "reports/scenario/vs0-evux-2026-06-13.json"
+      ],
+      "id": "VS0-GOV-007",
+      "notes": "Release manifest scenario report hash matches the final generated scenario report bytes.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md",
+        "reports/release/vs0-evux-2026-06-13/manifest.json"
+      ],
+      "id": "VS0-GOV-008",
+      "notes": "Final report and manifest claim local EVUX evidence only; production, live provider, and human usability remain unclaimed.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
+        "reports/release/vs0-evux-2026-06-13/manifest.json"
+      ],
+      "id": "VS0-GOV-009",
+      "notes": "Post-commit rollup records final commit/tree hash, evidence artifact hashes, and relationship to verified base/source snapshot.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/scenario/vs0-evux-2026-06-13.json"
+      ],
+      "id": "VS0-GOV-R01",
+      "notes": "Existing EVUX behavior report remains success with 12 PASS, 2 HUMAN_REQUIRED, and 0 blocking rows.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "reports/release/vs0-evux-2026-06-13/command-transcript.json"
+      ],
+      "id": "VS0-GOV-R02",
+      "notes": "Command transcript records successful local fast, runtime, acceptance, and EVUX candidate-gate commands.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "reports/browser/vs0-evux-2026-06-13/browser-proof.json"
+      ],
+      "id": "VS0-GOV-R03",
+      "notes": "Clean browser PASS requires clean_browser_exit=true, chrome_exit_code=0, and chrome_timeout=false.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "reports/scenario/vs0-evux-2026-06-13.json",
+        "reports/release/vs0-evux-2026-06-13/manifest.json"
+      ],
+      "id": "VS0-GOV-R04",
+      "notes": "Production release, live provider readiness, and human usability are false/unclaimed; human rows remain HUMAN_REQUIRED.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "git diff --name-only"
+      ],
+      "id": "VS0-GOV-R05",
+      "notes": "No dependency lockfile or production dependency manifest changed in the governance cleanup diff.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "human UI walkthrough"
+      ],
+      "id": "VS0-GOV-H01",
+      "notes": "Human usability acceptance requires JiYong/Tars operator judgment with screenshots/recording or issue list.",
+      "owner": "Human",
+      "status": "HUMAN_REQUIRED",
+      "type": "HUMAN_REQUIRED"
+    },
+    {
+      "evidence": [
+        "human-approved live ConnectorHub/provider test"
+      ],
+      "id": "VS0-GOV-H02",
+      "notes": "Live provider proof requires credentials, external state, redacted transcript, approval record, action result, and audit refs.",
+      "owner": "Human",
+      "status": "HUMAN_REQUIRED",
+      "type": "HUMAN_REQUIRED"
+    }
+  ],
+  "scenario_set": "vs0-evux-governance",
+  "schema_version": "cs.cli.v0",
+  "self_command_transcript": {
+    "command": [
+      "cornerstone",
+      "scenario",
+      "verify",
+      "vs0-evux-governance",
+      "--json",
+      "--output",
+      "reports/scenario/vs0-evux-governance-2026-06-14.json"
+    ],
+    "elapsed_seconds": 0.025,
+    "exit_code": 0,
+    "name": "scenario_verify_vs0-evux-governance",
+    "required": true,
+    "schema_version": "cs.command_transcript.v0",
+    "source": "observed",
+    "stderr_tail": [],
+    "stdout_tail": [
+      "{\"scenario_set\": \"vs0-evux-governance\", \"status\": \"success\", \"summary\": {\"blocking\": 0, \"human_required\": 2, \"pass\": 14, \"product_feature_claims\": \"LOCAL_VS0_EVUX_GOVERNANCE_READY_PRODUCTION_NOT_READY\", \"scenario_count\": 16}}"
+    ],
+    "timed_out": false
+  },
+  "source_reports": {
+    "evux_browser_proof": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
+    "evux_command_transcript": "reports/release/vs0-evux-2026-06-13/command-transcript.json",
+    "evux_post_commit_rollup": "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
+    "evux_quickstart_report": "reports/quickstart/vs0-evux-quickstart.json",
+    "evux_release_manifest": "reports/release/vs0-evux-2026-06-13/manifest.json",
+    "evux_scenario_report": "reports/scenario/vs0-evux-2026-06-13.json"
+  },
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "human_required": 2,
+    "pass": 14,
+    "product_feature_claims": "LOCAL_VS0_EVUX_GOVERNANCE_READY_PRODUCTION_NOT_READY",
+    "scenario_count": 16
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

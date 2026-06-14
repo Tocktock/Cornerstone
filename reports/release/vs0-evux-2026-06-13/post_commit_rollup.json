@@ -1,10 +1,11 @@
 {
-  "artifacts": [
+  "created_at": "2026-06-14T09:37:01.868768Z",
+  "dirty_paths_before_rollup": [],
+  "evidence_artifacts": [
     {
       "bytes": 533540,
       "path": "reports/scenario/vs0-evux-2026-06-13.json",
       "present": true,
-      "required": true,
       "role": "acceptance_scenario_report",
       "sha256": "c4b0475c8f25a238e1b20a799033b1a5cc436ad43e659223874edfd2e714faf0"
     },
@@ -12,7 +13,6 @@
       "bytes": 257017,
       "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
       "present": true,
-      "required": true,
       "role": "product_runtime_scenario_report",
       "sha256": "8aea4f3693bdff7bb5d2d753dcf842d19891855ebbe52dc8ae26d67403dacc66"
     },
@@ -20,7 +20,6 @@
       "bytes": 93255,
       "path": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
       "present": true,
-      "required": true,
       "role": "browser_proof_manifest",
       "sha256": "78bd6a50578b27e71f6469aab0efa3d3c75288586fc3ba515607a73c26f05a94"
     },
@@ -28,7 +27,6 @@
       "bytes": 101350,
       "path": "reports/browser/vs0-evux-2026-06-13/workflow.png",
       "present": true,
-      "required": true,
       "role": "browser_screenshot",
       "sha256": "5a0b8e428ac0e65113f6806312bac1f7adc2d17a1d3f4740edac24f1a48db25d"
     },
@@ -36,7 +34,6 @@
       "bytes": 96115,
       "path": "reports/browser/vs0-evux-2026-06-13/workflow.dom.html",
       "present": true,
-      "required": true,
       "role": "browser_dom_snapshot",
       "sha256": "664c4f71a45d9cdd092f5a984a8fdb0ac3fd97a6b8dee5327061e681eec2c8f4"
     },
@@ -44,7 +41,6 @@
       "bytes": 84101,
       "path": "reports/browser/vs0-evux-2026-06-13/workflow-trace.json",
       "present": true,
-      "required": true,
       "role": "browser_workflow_trace",
       "sha256": "51ecfaf92f0bbb8f33fcfef38732cb15c5e036504eea157633da7a646fabecb2"
     },
@@ -52,7 +48,6 @@
       "bytes": 14572,
       "path": "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md",
       "present": true,
-      "required": true,
       "role": "acceptance_contract",
       "sha256": "ae5dd5eabc8a282fe19fa3d116c2572453f665be0f53363d513ccba1f015a785"
     },
@@ -60,7 +55,6 @@
       "bytes": 3323,
       "path": "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_MATRIX.csv",
       "present": true,
-      "required": true,
       "role": "acceptance_freeze_matrix",
       "sha256": "341f73d7956d9e2ddcbb84180dae286ced5d04e139b44226276b422e334ad114"
     },
@@ -68,7 +62,6 @@
       "bytes": 3200,
       "path": "docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_VERIFICATION_MATRIX.csv",
       "present": true,
-      "required": true,
       "role": "acceptance_verification_matrix",
       "sha256": "3a30f7800308263ba5f8078e01509ef7cbba818f0e27c138bcbc2cb8243644cb"
     },
@@ -76,7 +69,6 @@
       "bytes": 124064,
       "path": "reports/quickstart/vs0-evux-quickstart.json",
       "present": true,
-      "required": true,
       "role": "quickstart_report",
       "sha256": "9c517665718181b8f4916f8c334e58b65ff322b6e60843d69bc1349b459ee8d7"
     },
@@ -84,7 +76,6 @@
       "bytes": 10562,
       "path": "docs/verification-reports/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_SCENARIO_FREEZE_REPORT_2026-06-11.md",
       "present": true,
-      "required": false,
       "role": "scenario_freeze_report",
       "sha256": "a1f481c083d04c70e1136c53254a5713f4dc7c001c8237fb7b12b5983363d169"
     },
@@ -92,7 +83,6 @@
       "bytes": 8694,
       "path": "docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md",
       "present": true,
-      "required": true,
       "role": "implementation_report",
       "sha256": "3a6073a2c593055fd4c43a75b36ad3dd68eeb77da84364429d724822776753cf"
     },
@@ -100,7 +90,6 @@
       "bytes": 22802,
       "path": "README.md",
       "present": true,
-      "required": true,
       "role": "operator_quickstart",
       "sha256": "e885a555be86bafed0fad615f24c968b1871830a91869f44ab62540b9ad83e62"
     },
@@ -108,7 +97,6 @@
       "bytes": 848,
       "path": "reports/release/vs0-evux-2026-06-13/human-usability-walkthrough.md",
       "present": true,
-      "required": true,
       "role": "human_usability_walkthrough_checklist",
       "sha256": "c0c9899dc4dd68eed80b02fd82edd7f57c7f991d01c33410aaf9736eddfc1152"
     },
@@ -116,7 +104,6 @@
       "bytes": 11513,
       "path": "reports/release/vs0-evux-2026-06-13/command-transcript.json",
       "present": true,
-      "required": true,
       "role": "command_transcript",
       "sha256": "6d3d344b0507a5ff4303ac2265451930d2ac0b2a15aff95e13a95248926bc7f9"
     },
@@ -124,78 +111,22 @@
       "bytes": 700,
       "path": "reports/release/vs0-evux-2026-06-13/command-evidence.json",
       "present": true,
-      "required": false,
       "role": "command_evidence",
       "sha256": "d52adcc3f2e07ed0e5e7ecb7f60edff85ad1af81b556b51c430afe88bdbb7921"
-    },
-    {
-      "bytes": 5191,
-      "path": "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
-      "present": true,
-      "required": true,
-      "role": "post_commit_rollup",
-      "sha256": "449056eb2e4f8c15d4107a6e6bdda3348737f693900c0ebde6f85db24544d90d"
     }
   ],
-  "browser_proof": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
-  "created_at": "2026-06-14T09:36:21.729198Z",
   "final_commit": "349dea7",
+  "final_commit_full": "349dea7dad8b785965ed189721918280213e5519",
   "final_tree_hash": "f12b9393f957a72f1eb26af252b92f19a4f126bb",
-  "finalized_at": "2026-06-14T09:37:01.869612Z",
-  "human_required": [
-    {
-      "id": "VS0-EVUX-H02",
-      "required_evidence": "Approved live ConnectorHub/provider transcript with redaction and audit refs.",
-      "status": "HUMAN_REQUIRED"
-    },
-    {
-      "id": "VS0-EVUX-H01",
-      "required_evidence": "JiYong/Tars usability acceptance note with screenshots/recording or issue list.",
-      "status": "HUMAN_REQUIRED"
-    }
-  ],
-  "human_usability_accepted": false,
-  "included_summary": {
-    "acceptance_status": "success",
-    "acceptance_summary": {
-      "blocking": 0,
-      "human_required": 2,
-      "pass": 12,
-      "product_feature_claims": "LOCAL_VS0_EVUX_READY_PRODUCTION_NOT_READY",
-      "scenario_count": 14
-    },
-    "browser_status": "PASS",
-    "command_transcript_status": "success",
-    "product_runtime_status": "success",
-    "product_runtime_summary": {
-      "blocking": 0,
-      "human_required": 2,
-      "pass": 12,
-      "product_feature_claims": "LOCAL_VS0_PRODUCT_RUNTIME_READY_PRODUCTION_NOT_READY",
-      "scenario_count": 14
-    },
-    "quickstart_status": "success"
+  "manifest_path": "reports/release/vs0-evux-2026-06-13/manifest.json",
+  "manifest_sha256_before_rollup": "ff45a06a6956b311cf676f550dbaf73970677158398a80e7927b9eb1c58fe529",
+  "relationship_to_verified_snapshot": {
+    "verified_base_commit": "349dea7",
+    "verified_base_tree_hash": "f12b9393f957a72f1eb26af252b92f19a4f126bb",
+    "verified_source_snapshot_paths": [],
+    "verified_source_worktree_hash": "8e5934b54d9d3ecad7cf6ac8ee36e331e597459c9895c42eb61cac97c8c8d0b5"
   },
-  "live_connector_ready": false,
-  "missing_required": [],
-  "negative_evidence": {
-    "action_cards_from_prompt_injection": 0,
-    "browser_timeout_marked_pass": 0,
-    "cross_namespace_reads": 0,
-    "human_usability_claim_without_human_evidence": 0,
-    "live_connector_claim_without_human_evidence": 0,
-    "production_release_overclaim": 0,
-    "real_external_http_calls": 0,
-    "tool_calls_from_untrusted_artifact": 0,
-    "unqualified_external_calls_in_release_report": 0,
-    "zero_evidence_claim_approved": 0
-  },
-  "package_id": "releasepkg_65fc24d616db8142",
-  "post_commit_rollup": "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
-  "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
-  "production_release_ready": false,
-  "scenario_report": "reports/scenario/vs0-evux-2026-06-13.json",
-  "schema_version": "cs.release_evidence_package.v0",
+  "schema_version": "cs.release_post_commit_rollup.v0",
   "scope": {
     "namespace_id": "personal",
     "owner_id": "local-user",
@@ -203,5 +134,5 @@
     "workspace_id": "default"
   },
   "scope_name": "vs0-evux",
-  "status": "success"
+  "worktree_dirty_before_rollup": false
 }
