@@ -61,6 +61,7 @@ This report does not claim production release, live-provider readiness, or human
 | `reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.dom.html` | DOM snapshot after the guided operator flow completed. |
 | `reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.png` | Browser screenshot after the guided operator flow completed. |
 | `reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow-trace.json` | API/UI workflow trace including artifact, search, evidence, claim, action, approval, execution, and audit payloads. |
+| `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_TEMPLATE_2026-06-14.md` | Human-only `VS0-UI-H01` accept/reject evidence capture template. |
 
 ## Command Evidence
 
@@ -207,6 +208,8 @@ Observed visible state after the guided proof completed:
 
 - acceptance note with screenshot or recording; or
 - rejection note with issue list.
+
+Use `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_TEMPLATE_2026-06-14.md` as the evidence capture template.
 
 Full VS-1 main implementation remains blocked until that human evidence exists.
 
