@@ -1,35 +1,6 @@
 {
-  "created_at": "2026-06-14T12:55:05.818274Z",
-  "dirty_paths_before_rollup": [
-    "Makefile",
-    "README.md",
-    "docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_MATRIX.csv",
-    "docs/sot/README.md",
-    "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md",
-    "packages/cornerstone_cli/acceptance.py",
-    "packages/cornerstone_cli/main.py",
-    "packages/cornerstone_cli/product_runtime.py",
-    "packages/cornerstone_cli/scenarios.py",
-    "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
-    "reports/browser/vs0-evux-2026-06-13/workflow-trace.json",
-    "reports/browser/vs0-evux-2026-06-13/workflow.dom.html",
-    "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
-    "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
-    "reports/quickstart/vs0-evux-quickstart.json",
-    "reports/release/vs0-evux-2026-06-13/command-evidence.json",
-    "reports/release/vs0-evux-2026-06-13/command-transcript.json",
-    "reports/release/vs0-evux-2026-06-13/manifest.json",
-    "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
-    "reports/release/vs0-runtime-acceptance-2026-06-11/command-transcript.json",
-    "reports/release/vs0-runtime-acceptance-2026-06-11/manifest.json",
-    "reports/scenario/vs0-evux-2026-06-13.json",
-    "reports/scenario/vs0-evux-governance-2026-06-14.json",
-    "reports/scenario/vs0-product-runtime-2026-06-11.json",
-    "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
-    "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md",
-    "reports/browser/vs0-operator-acceptance-ui-2026-06-14/",
-    "reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json"
-  ],
+  "created_at": "2026-06-14T12:57:43.313941Z",
+  "dirty_paths_before_rollup": [],
   "evidence_artifacts": [
     {
       "bytes": 544008,
@@ -134,7 +105,7 @@
       "path": "reports/release/vs0-evux-2026-06-13/command-transcript.json",
       "present": true,
       "role": "command_transcript",
-      "sha256": "bc7fa619e9fce6288f94f647033b09e7103bdcac2ab7ed11489ff85df4fcefd3"
+      "sha256": "8791268c036d59ba7d296f23ad9fbe1492802e5c256bc8e1f229304eef5a04cd"
     },
     {
       "bytes": 700,
@@ -144,87 +115,16 @@
       "sha256": "1af18ba5b5d589c436bcd471f5db70c58ccd59eb5853c5eb148bf426d834edcc"
     }
   ],
-  "final_commit": "0c077a3",
-  "final_commit_full": "0c077a3a921852b3f6c4cdd912b9780abfae2b51",
-  "final_tree_hash": "d4ea08817acc339e291e5c1054e444b769161703",
+  "final_commit": "450a31c",
+  "final_commit_full": "450a31cd5f66414a7350eda416577cf10d4f129e",
+  "final_tree_hash": "37d5118a8506c4dca51278142bde19b88f182f15",
   "manifest_path": "reports/release/vs0-evux-2026-06-13/manifest.json",
-  "manifest_sha256_before_rollup": "358a653b969764d7164e1077833432ce35fe77c01260212aec0945e29485f9c0",
+  "manifest_sha256_before_rollup": "8fb9a6ea1536da0201d8b13208a79f22688d0ceadef5023db9d1e263ca9b65f5",
   "relationship_to_verified_snapshot": {
-    "verified_base_commit": "0c077a3",
-    "verified_base_tree_hash": "d4ea08817acc339e291e5c1054e444b769161703",
-    "verified_source_snapshot_paths": [
-      {
-        "bytes": 1880,
-        "path": "Makefile",
-        "sha256": "865654ca6d7646ec5e389a30aeeb9f9598276a73235ad016558a80d014e97321",
-        "state": "present",
-        "status": "M"
-      },
-      {
-        "bytes": 24871,
-        "path": "README.md",
-        "sha256": "64622f1a9c5c307727c8eb6b4200bf4f00e04511cb0db757d65dbfd26b4ac4d1",
-        "state": "present",
-        "status": "M"
-      },
-      {
-        "bytes": 2907,
-        "path": "docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_MATRIX.csv",
-        "sha256": "5730b30b1d346d2cb0d745771f6df6a26094120bc08dc6325cf6e7f213d895da",
-        "state": "present",
-        "status": "M"
-      },
-      {
-        "bytes": 15975,
-        "path": "docs/sot/README.md",
-        "sha256": "9772801909334d5173dbfac1fb44519b52dd097fa0edbddadfe035c34d73ab0c",
-        "state": "present",
-        "status": "M"
-      },
-      {
-        "bytes": 5914,
-        "path": "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md",
-        "sha256": "a51fdd5ddeae300f109ee3d1a45ba5ab60eb2edb2647dacc57a5513d5056d5ab",
-        "state": "present",
-        "status": "??"
-      },
-      {
-        "bytes": 5915,
-        "path": "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md",
-        "sha256": "5a1f9a1043e419056e9ae9978fc96108070842be0fe83b648803d94d7d703a6e",
-        "state": "present",
-        "status": "M"
-      },
-      {
-        "bytes": 68045,
-        "path": "packages/cornerstone_cli/acceptance.py",
-        "sha256": "8a3c713f6329c07b61cd0acc88aff36afb4258f5f66b74f2e4c88035abe5ff87",
-        "state": "present",
-        "status": "M"
-      },
-      {
-        "bytes": 287338,
-        "path": "packages/cornerstone_cli/main.py",
-        "sha256": "42d5dde92c4aae810ec4c9b58acd6eb34751703ff142fd18f7034706433b702b",
-        "state": "present",
-        "status": "M"
-      },
-      {
-        "bytes": 67495,
-        "path": "packages/cornerstone_cli/product_runtime.py",
-        "sha256": "2bfdfc58f7790b73cb4f7683b5fb5dbea88ab45e833168bae333cdcd620ab86c",
-        "state": "present",
-        "status": "M"
-      },
-      {
-        "bytes": 593419,
-        "path": "packages/cornerstone_cli/scenarios.py",
-        "sha256": "dc752049cb74bc15e430e9ba8fec17b6ff0263bfa3ce2f3ef89ac302b3b23212",
-        "state": "present",
-        "status": "M"
-      }
-    ],
-    "verified_source_worktree_hash": "dc64b6df31482a47af61a372e8d90ddfc2cb2d5147c4b2175eae4ba5b265d657"
+    "verified_base_commit": "450a31c",
+    "verified_base_tree_hash": "37d5118a8506c4dca51278142bde19b88f182f15",
+    "verified_source_snapshot_paths": [],
+    "verified_source_worktree_hash": "8e282ae064266a06d9ce38e70a86fba2ea94757ed7397d93305b21d7e92ba795"
   },
   "schema_version": "cs.release_post_commit_rollup.v0",
   "scope": {
@@ -234,5 +134,5 @@
     "workspace_id": "default"
   },
   "scope_name": "vs0-evux",
-  "worktree_dirty_before_rollup": true
+  "worktree_dirty_before_rollup": false
 }

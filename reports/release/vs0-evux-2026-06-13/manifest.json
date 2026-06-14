@@ -127,10 +127,21 @@
       "required": false,
       "role": "command_evidence",
       "sha256": "1af18ba5b5d589c436bcd471f5db70c58ccd59eb5853c5eb148bf426d834edcc"
+    },
+    {
+      "bytes": 5193,
+      "path": "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
+      "present": true,
+      "required": true,
+      "role": "post_commit_rollup",
+      "sha256": "4ff9b2e319bb1b4c22febc60615211aa0336c808ed6755a9159f25a150e2dcc2"
     }
   ],
   "browser_proof": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
   "created_at": "2026-06-14T12:56:36.247462Z",
+  "final_commit": "450a31c",
+  "final_tree_hash": "37d5118a8506c4dca51278142bde19b88f182f15",
+  "finalized_at": "2026-06-14T12:57:43.314705Z",
   "human_required": [
     {
       "id": "VS0-EVUX-H02",
@@ -180,6 +191,7 @@
     "zero_evidence_claim_approved": 0
   },
   "package_id": "releasepkg_3306b9baaa7b5532",
+  "post_commit_rollup": "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
   "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
   "production_release_ready": false,
   "scenario_report": "reports/scenario/vs0-evux-2026-06-13.json",
