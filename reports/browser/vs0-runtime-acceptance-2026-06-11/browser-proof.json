@@ -10,9 +10,9 @@
   },
   "chrome_timeout_after_screenshot": false,
   "clean_browser_exit": true,
-  "created_at": "2026-06-14T12:51:15.837294Z",
+  "created_at": "2026-06-14T14:22:57.952462Z",
   "dom_path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
-  "dom_sha256": "0e1cc1271cc3fd0d8ac383a2291eb616f1e7a5e5ad280566cc8dcf2ee9ef9ea1",
+  "dom_sha256": "e4ae8a98b25fee79a45027e9620e7f33b5b9b1695767ed514cd88019cbe62b5a",
   "errors": [],
   "production_overclaim_absent": true,
   "readiness_labels_present": {
@@ -29,7 +29,7 @@
   "status": "passed",
   "stderr_tail": {
     "screenshot": [
-      "DevTools listening on ws://127.0.0.1:50565/devtools/browser/573c9f23-664d-4b71-8f8c-20d4747e83d5"
+      "DevTools listening on ws://127.0.0.1:55287/devtools/browser/85630384-fb6e-4920-b479-0cb0d6f92ad5"
     ]
   },
   "surface_presence": {
@@ -40,5 +40,5 @@
     "Home/Ops Inbox": true,
     "Search": true
   },
-  "url": "http://127.0.0.1:50564/"
+  "url": "http://127.0.0.1:55286/"
 }

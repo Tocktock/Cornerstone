@@ -200,14 +200,14 @@ def build_readiness_report(root: Path) -> dict[str, Any]:
     return {"checks": checks, "readiness": readiness}
 
 
-def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
+def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_evux: bool = False) -> str:
     surfaces = "\n".join(
         f"<li><a href='#{html.escape(surface.lower().replace('/', '-').replace(' ', '-'))}'>{html.escape(surface)}</a></li>"
         for surface in UI_SURFACES
     )
     production_ready = str(readiness["production_release_ready"]).lower()
     runtime_ready = str(readiness["vs0_runtime_ready"]).lower()
-    autorun_evux = "true" if scenario == "vs0-evux" else "false"
+    autorun_evux_value = "true" if scenario == "vs0-evux" and autorun_evux else "false"
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -506,7 +506,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
     </div>
   </main>
   <script>
-    const evuxAutorun = {autorun_evux};
+    const evuxAutorun = {autorun_evux_value};
     const evuxScope = {{
       tenant_id: "local-dev",
       owner_id: "local-user",
@@ -733,7 +733,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
       }};
       setText("ui-dry-run-id", dryRunRecord.dry_run_id);
       setText("ui-dry-run-diff", (dryRunRecord.diff && dryRunRecord.diff.before) + " -> " + (dryRunRecord.diff && dryRunRecord.diff.after));
-      setText("ui-dry-run-calls", "expected_connector_calls=" + impact.expected_connector_calls);
+      setText("ui-dry-run-calls", "expected_connector_calls=" + impact.expected_connector_calls + "; real_external_http_calls=" + impact.real_external_http_calls);
       setDisabled("step-approve-run", false);
       completeStep(6);
       return dryRunRecord;
@@ -789,6 +789,12 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
       setText("ui-audit-verification", audit.payload.audit_integrity.status + "; events=" + audit.payload.audit_integrity.event_count);
       setText("evux-audit-verify", audit.payload.audit_integrity.status);
       completeStep(9);
+      const passed = operatorPasses();
+      const section = document.getElementById("vs0-evux-loop");
+      const status = document.getElementById("evux-status");
+      section.dataset.operatorFlowComplete = passed ? "true" : "false";
+      status.dataset.evuxStatus = passed ? "passed" : "failed";
+      status.textContent = passed ? "passed" : "failed";
       return operatorState.audit;
     }}
     function operatorPasses() {{
@@ -949,8 +955,10 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         parts = self._path_parts()
         if not parts:
             readiness = build_readiness_report(self.root)["readiness"]
-            scenario = parse_qs(urlparse(self.path).query).get("scenario", [None])[-1]
-            self._send_html(render_home(readiness, scenario=scenario))
+            query = parse_qs(urlparse(self.path).query)
+            scenario = query.get("scenario", [None])[-1]
+            autorun = query.get("autorun", ["false"])[-1].lower() in {"1", "true", "yes"}
+            self._send_html(render_home(readiness, scenario=scenario, autorun_evux=autorun))
             return
         if parts == ["health"]:
             self._send_json(_json_response("success", service="cornerstone-vs0-runtime", real_external_http_calls=0))

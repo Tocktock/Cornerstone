@@ -10,7 +10,7 @@
         "--output",
         "reports/scenario/vs0-evux-2026-06-13.json"
       ],
-      "elapsed_seconds": 220.499,
+      "elapsed_seconds": 184.845,
       "exit_code": 0,
       "name": "scenario_verify_vs0_evux",
       "required": true,
@@ -30,7 +30,7 @@
         "reports/scenario/vs0-evux-2026-06-13.json",
         "--json"
       ],
-      "elapsed_seconds": 0.082,
+      "elapsed_seconds": 0.073,
       "exit_code": 0,
       "name": "scenario_gate",
       "required": true,
@@ -48,7 +48,7 @@
         "  \"errors\": [],",
         "  \"evidence_refs\": [],",
         "  \"ids\": {",
-        "    \"git_commit\": \"0c077a3\"",
+        "    \"git_commit\": \"6c30597\"",
         "  },",
         "  \"mode\": \"local_scaffold\",",
         "  \"namespace_id\": \"personal\",",
@@ -75,7 +75,7 @@
         "--output",
         "reports/quickstart/vs0-evux-quickstart.json"
       ],
-      "elapsed_seconds": 1.402,
+      "elapsed_seconds": 1.244,
       "exit_code": 0,
       "name": "quickstart_verify_vs0_evux",
       "required": true,
@@ -83,7 +83,7 @@
       "source": "quickstart_report",
       "stderr_tail": [],
       "stdout_tail": [
-        "{\"generated_ids\": {\"action_id\": \"action_ac168847e8d53dd2\", \"artifact_id\": \"art_2735313e0cb92563\", \"claim_id\": \"claim_7167f8dd400bd11d\", \"evidence_bundle_id\": \"evb_bf97849e419b8ed2\", \"mission_id\": \"mission_412fc388d6cad082\", \"search_snapshot_id\": \"search_7ac479df33455d85\", \"zero_evidence_claim_id\": \"claim_b6fe71bc5563cdfb\"}, \"negative_evidence\": {\"commands_failed\": 0, \"connector_credentials_exposed\": 0, \"human_usability_claim_without_human_evidence\": 0, \"live_connector_claim_without_human_evidence\": 0, \"mock_connector_calls\": 1, \"production_release_overclaim\": 0, \"real_external_http_calls\": 0, \"zero_evidence_claim_approved\": 0}, \"status\": \"success\"}"
+        "{\"generated_ids\": {\"action_id\": \"action_7f643bbaf631eb85\", \"artifact_id\": \"art_2735313e0cb92563\", \"claim_id\": \"claim_683e736a30b790d8\", \"evidence_bundle_id\": \"evb_3a85fc6dc5e628c7\", \"mission_id\": \"mission_781ac2310f472cf3\", \"search_snapshot_id\": \"search_319df59bf64f64d2\", \"zero_evidence_claim_id\": \"claim_150c13c93b32c974\"}, \"negative_evidence\": {\"commands_failed\": 0, \"connector_credentials_exposed\": 0, \"human_usability_claim_without_human_evidence\": 0, \"live_connector_claim_without_human_evidence\": 0, \"mock_connector_calls\": 1, \"production_release_overclaim\": 0, \"real_external_http_calls\": 0, \"zero_evidence_claim_approved\": 0}, \"status\": \"success\"}"
       ],
       "timed_out": false
     },
@@ -92,7 +92,7 @@
         "make",
         "verify-local-fast"
       ],
-      "elapsed_seconds": 135.135,
+      "elapsed_seconds": 110.078,
       "exit_code": 0,
       "name": "verify-local-fast",
       "required": true,
@@ -101,7 +101,7 @@
       "stderr_tail": [
         "............................................",
         "----------------------------------------------------------------------",
-        "Ran 44 tests in 72.461s",
+        "Ran 44 tests in 60.541s",
         "",
         "OK"
       ],
@@ -129,7 +129,7 @@
         "make",
         "verify-vs0-runtime"
       ],
-      "elapsed_seconds": 72.316,
+      "elapsed_seconds": 63.145,
       "exit_code": 0,
       "name": "verify-vs0-runtime",
       "required": true,
@@ -138,7 +138,7 @@
       "stderr_tail": [
         "............................................",
         "----------------------------------------------------------------------",
-        "Ran 44 tests in 69.242s",
+        "Ran 44 tests in 60.486s",
         "",
         "OK"
       ],
@@ -156,7 +156,7 @@
         "  \"errors\": [],",
         "  \"evidence_refs\": [],",
         "  \"ids\": {",
-        "    \"git_commit\": \"0c077a3\"",
+        "    \"git_commit\": \"6c30597\"",
         "  },",
         "  \"mode\": \"local_scaffold\",",
         "  \"namespace_id\": \"personal\",",
@@ -179,7 +179,7 @@
         "make",
         "verify-vs0-acceptance"
       ],
-      "elapsed_seconds": 5.173,
+      "elapsed_seconds": 5.042,
       "exit_code": 0,
       "name": "verify-vs0-acceptance",
       "required": true,
@@ -207,7 +207,7 @@
         "      \"zero_evidence_claim_approvals\": 0",
         "    },",
         "    \"output_dir\": \"reports/release/vs0-runtime-acceptance-2026-06-11\",",
-        "    \"package_id\": \"releasepkg_f2be882f7cb8abbf\",",
+        "    \"package_id\": \"releasepkg_3257432928ea0a58\",",
         "    \"schema_version\": \"cs.release_evidence_collect_result.v0\",",
         "    \"status\": \"success\"",
         "  },",
@@ -225,7 +225,7 @@
         "cornerstone",
         "scenario",
         "gate",
-        "tmp/scenario/vs0-evux-67915-candidate-report.json",
+        "tmp/scenario/vs0-evux-85321-candidate-report.json",
         "--json"
       ],
       "elapsed_seconds": 0.0,
@@ -248,7 +248,7 @@
         "vs0-evux",
         "--json"
       ],
-      "elapsed_seconds": 0.087,
+      "elapsed_seconds": 0.076,
       "exit_code": 0,
       "name": "release_evidence_collect",
       "required": true,
@@ -261,7 +261,7 @@
       "timed_out": false
     }
   ],
-  "created_at": "2026-06-14T12:56:36.246659Z",
+  "created_at": "2026-06-14T14:23:00.173903Z",
   "schema_version": "cs.release_command_transcript.v0",
   "scope_name": "vs0-evux",
   "summary": {

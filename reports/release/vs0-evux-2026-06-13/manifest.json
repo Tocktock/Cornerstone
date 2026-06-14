@@ -1,12 +1,12 @@
 {
   "artifacts": [
     {
-      "bytes": 544008,
+      "bytes": 522620,
       "path": "reports/scenario/vs0-evux-2026-06-13.json",
       "present": true,
       "required": true,
       "role": "acceptance_scenario_report",
-      "sha256": "b89b36d818ee5cd63bb41f496e7d9ddcf611e83e8eda352bfcf435eb8b3e710c"
+      "sha256": "d9af03bd3978ad2fc1cc729a85787714fcfa4a6f09a5df9aeeff493136cb7063"
     },
     {
       "bytes": 257023,
@@ -14,15 +14,15 @@
       "present": true,
       "required": true,
       "role": "product_runtime_scenario_report",
-      "sha256": "177523fd77af51c3574d957d688c4c4c70b98ddfa3516c0ddf26d961b5b56fac"
+      "sha256": "afa2bb541df86c5d1e7c81c012e053239451e17c1c77ab5adb6711eed557bdc6"
     },
     {
-      "bytes": 103526,
+      "bytes": 84472,
       "path": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
       "present": true,
       "required": true,
       "role": "browser_proof_manifest",
-      "sha256": "451df462c324786108f234e0ebb75ec4bd278c9de28972988312feb7274b8226"
+      "sha256": "bb083b2d19c3851d642caa154a75bf321696002d5570d05f427a1120d938b21b"
     },
     {
       "bytes": 101350,
@@ -33,20 +33,20 @@
       "sha256": "5a0b8e428ac0e65113f6806312bac1f7adc2d17a1d3f4740edac24f1a48db25d"
     },
     {
-      "bytes": 125949,
+      "bytes": 108920,
       "path": "reports/browser/vs0-evux-2026-06-13/workflow.dom.html",
       "present": true,
       "required": true,
       "role": "browser_dom_snapshot",
-      "sha256": "39f6e0a8a8b821d6757ec2a2c57ffaddb7f6bcb651c969f6f12d4b5b601a0166"
+      "sha256": "de61095cda5fe213b42d88c5850d0bb6ac8db0a1d8b1bbb2abde59d227ea3f5e"
     },
     {
-      "bytes": 88519,
+      "bytes": 71087,
       "path": "reports/browser/vs0-evux-2026-06-13/workflow-trace.json",
       "present": true,
       "required": true,
       "role": "browser_workflow_trace",
-      "sha256": "b29f1926a92f235561ee2dc6973f392f9bea371c96de1828c5b4eb598af37baf"
+      "sha256": "8eda2e2a1ccea5480d3f14c980c74ea259e7276d5d429ed88b53e2ed969ede6e"
     },
     {
       "bytes": 14572,
@@ -73,12 +73,12 @@
       "sha256": "3a30f7800308263ba5f8078e01509ef7cbba818f0e27c138bcbc2cb8243644cb"
     },
     {
-      "bytes": 124063,
+      "bytes": 124065,
       "path": "reports/quickstart/vs0-evux-quickstart.json",
       "present": true,
       "required": true,
       "role": "quickstart_report",
-      "sha256": "7f68c465f08b519f0e85a2b19192244f324709c0f4f9da05ebfb1dc18fa01dc0"
+      "sha256": "ac83309f69115fb3a8541f8a32e8be61fce33596add09a96986967034f0b0110"
     },
     {
       "bytes": 10562,
@@ -118,7 +118,7 @@
       "present": true,
       "required": true,
       "role": "command_transcript",
-      "sha256": "8791268c036d59ba7d296f23ad9fbe1492802e5c256bc8e1f229304eef5a04cd"
+      "sha256": "e15bc091391c2428ce7231e30ac7176d8aea02cffb9facdc657dbfafe9e411f2"
     },
     {
       "bytes": 700,
@@ -126,22 +126,11 @@
       "present": true,
       "required": false,
       "role": "command_evidence",
-      "sha256": "1af18ba5b5d589c436bcd471f5db70c58ccd59eb5853c5eb148bf426d834edcc"
-    },
-    {
-      "bytes": 5193,
-      "path": "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
-      "present": true,
-      "required": true,
-      "role": "post_commit_rollup",
-      "sha256": "4ff9b2e319bb1b4c22febc60615211aa0336c808ed6755a9159f25a150e2dcc2"
+      "sha256": "0d3b77f892e30d426cc8eb7ba444729fcd5d1dabc659c584b15af9198b88deac"
     }
   ],
   "browser_proof": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
-  "created_at": "2026-06-14T12:56:36.247462Z",
-  "final_commit": "450a31c",
-  "final_tree_hash": "37d5118a8506c4dca51278142bde19b88f182f15",
-  "finalized_at": "2026-06-14T12:57:43.314705Z",
+  "created_at": "2026-06-14T14:23:00.174644Z",
   "human_required": [
     {
       "id": "VS0-EVUX-H02",
@@ -190,8 +179,7 @@
     "unqualified_external_calls_in_release_report": 0,
     "zero_evidence_claim_approved": 0
   },
-  "package_id": "releasepkg_3306b9baaa7b5532",
-  "post_commit_rollup": "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
+  "package_id": "releasepkg_7c70e767661d57d2",
   "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
   "production_release_ready": false,
   "scenario_report": "reports/scenario/vs0-evux-2026-06-13.json",

@@ -516,7 +516,7 @@
       };
       setText("ui-dry-run-id", dryRunRecord.dry_run_id);
       setText("ui-dry-run-diff", (dryRunRecord.diff && dryRunRecord.diff.before) + " -> " + (dryRunRecord.diff && dryRunRecord.diff.after));
-      setText("ui-dry-run-calls", "expected_connector_calls=" + impact.expected_connector_calls);
+      setText("ui-dry-run-calls", "expected_connector_calls=" + impact.expected_connector_calls + "; real_external_http_calls=" + impact.real_external_http_calls);
       setDisabled("step-approve-run", false);
       completeStep(6);
       return dryRunRecord;
@@ -572,6 +572,12 @@
       setText("ui-audit-verification", audit.payload.audit_integrity.status + "; events=" + audit.payload.audit_integrity.event_count);
       setText("evux-audit-verify", audit.payload.audit_integrity.status);
       completeStep(9);
+      const passed = operatorPasses();
+      const section = document.getElementById("vs0-evux-loop");
+      const status = document.getElementById("evux-status");
+      section.dataset.operatorFlowComplete = passed ? "true" : "false";
+      status.dataset.evuxStatus = passed ? "passed" : "failed";
+      status.textContent = passed ? "passed" : "failed";
       return operatorState.audit;
     }
     function operatorPasses() {
