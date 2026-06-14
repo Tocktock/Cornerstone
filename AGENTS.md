@@ -24,9 +24,11 @@ Before non-trivial planning, architecture, migration, or implementation work, re
 14. `docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md` when working on local VS0 runtime acceptance evidence
 15. `docs/scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md` before implementing the VS0 evidence-cleanup and interactive UI loop
 16. `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md` before implementing VS0 EVUX clean sign-off governance
-17. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-18. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-19. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
+17. `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md` before implementing VS0 operator UI acceptance work or starting full VS-1 implementation
+18. `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md` before claiming VS0 human operator UX acceptance or moving full VS-1 onto the main implementation track
+19. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+20. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+21. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
 
 The product SoT is the product authority. Repository files show implementation reality, not permission to drift.
 

@@ -1752,7 +1752,78 @@ For this section, `PASS` means:
 
 ---
 
-# 19. Scenario-First Implementation Contract Template
+# 19. VS0 Operator Acceptance UI Gate
+
+**Status:** Frozen in `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md`.
+**Scope:** Human-understandable local VS0 operator UI acceptance, not production release, live-provider readiness, or VS-1 ontology implementation.
+**Purpose:** Turn the existing AI-verifiable EVUX loop from a one-click scenario proof into an operator-controllable UI flow before full VS-1 implementation starts.
+
+This task-scoped section does not replace `VS0-EVUX-*` product-loop scenarios or `VS0-GOV-*` clean sign-off governance. It closes the human operator usability gap left as `HUMAN_REQUIRED`.
+
+The required UI flow is:
+
+```text
+Select/upload Artifact
+-> Search
+-> Review Evidence
+-> Create Claim
+-> Review Action Card
+-> Dry-run
+-> Approve
+-> Execute local/mock action
+-> Inspect Audit
+```
+
+The operator must be able to see:
+
+```text
+Where am I?
+What happened?
+What evidence supports this?
+What is safe or unsafe?
+What will the action do?
+Is this real external writeback or mock/local only?
+What was recorded in audit?
+What is not production-ready?
+```
+
+Full VS-1 implementation waits until this gate is accepted by JiYong/Tars. VS-1 scenario planning and backend preparation may continue only when it does not claim VS-1 milestone progress and does not add ontology complexity to the current VS0 UI before this gate is accepted.
+
+## VS0 Operator Acceptance UI Gate Scenarios
+
+| ID | Type | Expected Result | Verification Method | Evidence Required | Owner |
+|---|---|---|---|---|---|
+| VS0-UI-001 | MUST_PASS | UI shows a clear step-by-step VS0 flow, not one opaque run-loop button. | Browser walkthrough plus DOM/state inspection. | Browser proof showing distinct Artifact, Search, Evidence, Claim, Action, Execution, and Audit steps. | AI |
+| VS0-UI-002 | MUST_PASS | Artifact step shows artifact ID, checksum, source, derived status, evidence refs, and audit refs. | Browser interaction plus artifact/API inspection. | Screenshot/DOM snapshot, artifact JSON, evidence refs, audit refs. | AI |
+| VS0-UI-003 | MUST_PASS | Search step shows query, result snippet, search snapshot ID, and evidence eligibility. | Browser interaction plus search snapshot inspection. | Screenshot/DOM snapshot, search snapshot JSON, eligibility marker, audit refs. | AI |
+| VS0-UI-004 | MUST_PASS | Evidence step shows what supports the Claim and what would be insufficient. | Browser interaction plus evidence bundle inspection. | Evidence bundle JSON, UI state showing included support and insufficient-evidence guidance. | AI |
+| VS0-UI-005 | MUST_PASS | Claim step shows Draft, Evidence-backed, and Approved state clearly. | Browser/API claim-state inspection. | Claim JSON plus UI proof for each reachable state in the local flow. | AI |
+| VS0-UI-006 | MUST_PASS | Zero-evidence Claim approval is denied with cause and resolution guide. | Browser/API negative test. | Denial response, unchanged claim state, UI cause/resolution text, audit ref. | AI |
+| VS0-UI-007 | MUST_PASS | Action Card shows diff, expected impact, evidence, policy decision, risk, approval state, mock/local boundary, and rollback/compensation note. | Browser interaction plus action/policy inspection. | Action Card screenshot/DOM snapshot, action JSON, policy decision, audit refs. | AI |
+| VS0-UI-008 | MUST_PASS | Execution step shows `mock_connector_calls=1` and `real_external_http_calls=0`. | Browser interaction plus execution result inspection. | Execution JSON, UI execution state, negative egress evidence, audit refs. | AI |
+| VS0-UI-009 | MUST_PASS | Audit step shows artifact/search/evidence/claim/action/approval/execution events and audit verification status. | Browser interaction plus `audit verify`. | Audit timeline screenshot/DOM snapshot, audit JSON, audit verification output. | AI |
+| VS0-UI-010 | MUST_PASS | UI clearly says local VS0 proof only; production release, live connector, and human acceptance are not claimed. | Browser text/state inspection plus report review. | UI proof and scenario/report fields showing production release false, live connector false, human acceptance unclaimed until H01. | AI |
+| VS0-UI-R01 | REGRESSION_GUARD | Existing EVUX governance remains PASS. | Run governance verifier and/or `make verify-vs0-evux`. | Exit-code transcript and scenario summary with no AI-verifiable failures. | AI |
+| VS0-UI-R02 | REGRESSION_GUARD | Browser proof still cannot mark timeout as clean PASS. | Browser proof validator or targeted timeout test. | Timeout flag, browser exit status, and proof status showing timeout is not clean PASS. | AI |
+| VS0-UI-H01 | HUMAN_REQUIRED | JiYong/Tars uses the UI and records accept/reject. | Human walkthrough. | Acceptance note with screenshots/recording, or rejection note with issue list. | Human |
+
+## Definition Of Scenario PASS For VS0 Operator Acceptance UI
+
+For this section, `PASS` means:
+
+1. Every AI-owned `VS0-UI-*` MUST_PASS row is verified with concrete evidence.
+2. Every AI-owned `VS0-UI-*` REGRESSION_GUARD row is verified with concrete evidence.
+3. No AI-owned row is `FAIL`, `NOT_VERIFIED`, or `NOT_RUN`.
+4. Human-required `VS0-UI-H01` is accepted by JiYong/Tars with explicit human evidence.
+5. Existing EVUX governance still passes.
+6. Evidence includes browser/UI, CLI/API, action-result, audit, and report artifacts.
+7. Final verdict does not claim production release, live-provider readiness, or human acceptance beyond the recorded human walkthrough.
+
+If `VS0-UI-H01` remains rejected or unreviewed, do not move full VS-1 onto the main implementation track.
+
+---
+
+# 20. Scenario-First Implementation Contract Template
 
 Future implementation tasks should copy the relevant scenarios into this template before coding.
 
@@ -1784,7 +1855,7 @@ Scenario Contract:
 
 ---
 
-# 19. Minimum Release Gate Summary
+# 21. Minimum Release Gate Summary
 
 A release or milestone should not claim “complete” unless:
 
@@ -1798,7 +1869,7 @@ A release or milestone should not claim “complete” unless:
 
 ---
 
-# 20. Initial Priority Recommendation
+# 22. Initial Priority Recommendation
 
 Because the full scenario suite is intentionally comprehensive, implementation should start by freezing a smaller v0.1 scenario subset.
 
@@ -1817,7 +1888,7 @@ This subset gives the product a coherent first implementation standard while pre
 
 ---
 
-# 21. Final Product Scenario Statement
+# 23. Final Product Scenario Statement
 
 CornerStone must pass these scenarios not because the product needs more process, but because the product is powerful enough to require proof.
 
