@@ -18,6 +18,7 @@ from cornerstone_cli.acceptance import (
     DEFAULT_EVUX_RELEASE_PACKAGE_DIR,
     DEFAULT_EVUX_REPORT,
     DEFAULT_EVUX_SCENARIO_REPORT,
+    DEFAULT_OPERATOR_UI_SCENARIO_REPORT,
     DEFAULT_PRODUCT_RUNTIME_REPORT,
     DEFAULT_RELEASE_PACKAGE_DIR,
     command_transcript_entry,
@@ -31,6 +32,7 @@ from cornerstone_cli.scenarios import (
     list_scenarios,
     verify_vs0_evux,
     verify_vs0_evux_governance,
+    verify_vs0_operator_acceptance_ui,
     verify_vs0_runtime_acceptance,
     verify_vs0_product_runtime,
     verify_full_agent_orchestration,
@@ -4246,6 +4248,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_evux(root)
     elif args.contract == "vs0-evux-governance":
         report = verify_vs0_evux_governance(root)
+    elif args.contract == "vs0-operator-acceptance-ui":
+        report = verify_vs0_operator_acceptance_ui(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-agent-orchestration":
@@ -4329,6 +4333,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-runtime-acceptance",
                     "vs0-evux",
                     "vs0-evux-governance",
+                    "vs0-operator-acceptance-ui",
                     "full-claim-collaboration",
                     "full-agent-orchestration",
                     "full-brain-routing",
@@ -4380,6 +4385,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         output_arg = DEFAULT_EVUX_SCENARIO_REPORT
     if args.contract == "vs0-evux-governance" and not output_arg:
         output_arg = "reports/scenario/vs0-evux-governance-2026-06-14.json"
+    if args.contract == "vs0-operator-acceptance-ui" and not output_arg:
+        output_arg = DEFAULT_OPERATOR_UI_SCENARIO_REPORT
     exit_code = EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
     transcript_command = ["cornerstone", "scenario", "verify", args.contract]
     for scenario_id in args.scenario or []:

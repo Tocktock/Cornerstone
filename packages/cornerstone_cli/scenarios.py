@@ -24,6 +24,9 @@ from cornerstone_cli.acceptance import (
     DEFAULT_EVUX_RELEASE_PACKAGE_DIR,
     DEFAULT_EVUX_REPORT,
     DEFAULT_EVUX_SCENARIO_REPORT,
+    DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR,
+    DEFAULT_OPERATOR_UI_REPORT,
+    DEFAULT_OPERATOR_UI_SCENARIO_REPORT,
     DEFAULT_PRODUCT_RUNTIME_REPORT,
     DEFAULT_RELEASE_PACKAGE_DIR,
     capture_evux_browser_proof,
@@ -11212,6 +11215,179 @@ def verify_vs0_evux_governance(root: Path) -> dict[str, Any]:
                 "release_impact": "Blocks live-provider production release, not local governance proof.",
             },
         ],
+    }
+
+
+def verify_vs0_operator_acceptance_ui(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs0-operator-acceptance-ui")
+    state_path = root / state_rel
+    browser_proof_dir = root / DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR
+    for path in [state_path, browser_proof_dir]:
+        if path.exists():
+            shutil.rmtree(path)
+
+    browser_proof = capture_evux_browser_proof(root, state_dir=state_path, output_dir=browser_proof_dir, window_size="1440,1200")
+    operator_markers = browser_proof.get("operator_markers", {})
+    operator_state = browser_proof.get("operator_state", {})
+    state = operator_state.get("state", {}) if isinstance(operator_state.get("state"), dict) else {}
+    governance_report = verify_vs0_evux_governance(root)
+    governance_summary = governance_report.get("summary", {})
+    governance_ok = (
+        governance_report.get("status") == "success"
+        and governance_summary.get("scenario_count") == 16
+        and governance_summary.get("pass") == 14
+        and governance_summary.get("human_required") == 2
+        and governance_summary.get("blocking") == 0
+    )
+    browser_timeout_guard_ok = (
+        (
+            browser_proof.get("clean_browser_exit") is True
+            and browser_proof.get("status") == "PASS"
+            and browser_proof.get("chrome_exit_code") == 0
+            and browser_proof.get("chrome_timeout") is False
+        )
+        or (browser_proof.get("clean_browser_exit") is not True and browser_proof.get("status") != "PASS")
+    )
+
+    rows = [
+        _row(
+            "VS0-UI-001",
+            "MUST_PASS",
+            "PASS" if operator_markers.get("step_by_step_flow") and operator_markers.get("operator_controls_present") else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json", f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/workflow.dom.html"],
+            "UI exposes nine visible Artifact/Search/Evidence/Claim/Action/Dry-run/Approval/Execution/Audit steps, not only one opaque run button.",
+        ),
+        _row(
+            "VS0-UI-002",
+            "MUST_PASS",
+            "PASS" if operator_markers.get("artifact_step_details") else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json"],
+            "Artifact step shows artifact ID, checksum, source, derived status, evidence refs, and audit refs.",
+        ),
+        _row(
+            "VS0-UI-003",
+            "MUST_PASS",
+            "PASS" if operator_markers.get("search_step_details") else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json"],
+            "Search step shows query, result snippet, search snapshot ID, and evidence eligibility.",
+        ),
+        _row(
+            "VS0-UI-004",
+            "MUST_PASS",
+            "PASS" if operator_markers.get("evidence_step_details") else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json"],
+            "Evidence step shows supporting evidence and insufficient-evidence guidance.",
+        ),
+        _row(
+            "VS0-UI-005",
+            "MUST_PASS",
+            "PASS" if operator_markers.get("claim_step_states") else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json"],
+            "Claim step shows Draft, Evidence-backed, and Approved states clearly.",
+        ),
+        _row(
+            "VS0-UI-006",
+            "MUST_PASS",
+            "PASS" if operator_markers.get("zero_evidence_denial") else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json"],
+            "Zero-evidence Claim approval is denied with CS_CLAIM_EVIDENCE_REQUIRED and resolution guidance.",
+        ),
+        _row(
+            "VS0-UI-007",
+            "MUST_PASS",
+            "PASS" if operator_markers.get("action_card_details") else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json"],
+            "Action Card shows diff, expected impact, evidence, policy, risk, approval state, mock/local boundary, and rollback/compensation note.",
+        ),
+        _row(
+            "VS0-UI-008",
+            "MUST_PASS",
+            "PASS" if operator_markers.get("execution_details") else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json"],
+            "Execution step shows mock_connector_calls=1 and real_external_http_calls=0.",
+        ),
+        _row(
+            "VS0-UI-009",
+            "MUST_PASS",
+            "PASS" if operator_markers.get("audit_timeline_details") else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json"],
+            "Audit step shows artifact/search/evidence/claim/action/approval/execution events and successful audit verification.",
+        ),
+        _row(
+            "VS0-UI-010",
+            "MUST_PASS",
+            "PASS" if operator_markers.get("local_only_disclaimer") else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json", f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/workflow.dom.html"],
+            "UI states local VS0 proof only and does not claim production release, live connector readiness, or human acceptance.",
+        ),
+        _row(
+            "VS0-UI-R01",
+            "REGRESSION_GUARD",
+            "PASS" if governance_ok else "FAIL",
+            ["cornerstone scenario verify vs0-evux-governance --json", "reports/scenario/vs0-evux-governance-2026-06-14.json"],
+            "Existing EVUX governance remains PASS with 14 AI rows and 2 HUMAN_REQUIRED rows.",
+        ),
+        _row(
+            "VS0-UI-R02",
+            "REGRESSION_GUARD",
+            "PASS" if browser_timeout_guard_ok else "FAIL",
+            [f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json"],
+            "Browser timeout cannot become clean PASS; clean PASS requires clean_browser_exit=true, chrome_exit_code=0, and chrome_timeout=false.",
+        ),
+        _row(
+            "VS0-UI-H01",
+            "HUMAN_REQUIRED",
+            "HUMAN_REQUIRED",
+            ["human UI walkthrough"],
+            "JiYong/Tars must use the UI and record accept or reject.",
+            owner="Human",
+        ),
+    ]
+    summary = _governance_summary(rows)
+    summary["product_feature_claims"] = "LOCAL_VS0_OPERATOR_UI_READY_HUMAN_REQUIRED_PRODUCTION_NOT_READY"
+    blocking = [
+        row
+        for row in rows
+        if row.get("owner") != "Human" and row.get("status") in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    execution = state.get("execution", {}) if isinstance(state.get("execution"), dict) else {}
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs0-operator-acceptance-ui",
+        "state_dir": state_rel,
+        "summary": summary,
+        "scenario_results": rows,
+        "browser_proof": browser_proof,
+        "operator_evidence": {
+            "browser_proof": f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/browser-proof.json",
+            "browser_dom": f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/workflow.dom.html",
+            "browser_screenshot": f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/workflow.png",
+            "browser_trace": f"{DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR}/workflow-trace.json",
+            "operator_state": operator_state,
+        },
+        "regression_evidence": {
+            "evux_governance_status": governance_report.get("status"),
+            "evux_governance_summary": governance_summary,
+            "evux_governance_checks": governance_report.get("governance_checks", {}),
+        },
+        "negative_evidence": {
+            "real_external_http_calls": execution.get("real_external_http_calls"),
+            "mock_connector_calls": execution.get("mock_connector_calls"),
+            "production_release_overclaim": 0 if operator_state.get("production_release_claimed") is False else 1,
+            "live_connector_claim_without_human_evidence": 0 if operator_state.get("live_connector_claimed") is False else 1,
+            "human_usability_claim_without_human_evidence": 0 if operator_state.get("human_acceptance_claimed") is False else 1,
+            "browser_timeout_marked_pass": 0 if browser_timeout_guard_ok else 1,
+        },
+        "human_required": [
+            {
+                "id": "VS0-UI-H01",
+                "why_ai_cannot_verify": "Human operator acceptance is subjective and requires JiYong/Tars to judge whether the local UI is understandable and controllable.",
+                "required_human_action": "JiYong/Tars completes the local UI walkthrough and records accept or reject.",
+                "expected_evidence": "Acceptance note with screenshots/recording, or rejection note with issue list.",
+                "release_impact": "Blocks full VS-1 main implementation and operator-accepted VS0 claim; does not invalidate AI-verifiable EVUX governance PASS.",
+            }
+        ],
+        "implementation_report": DEFAULT_OPERATOR_UI_REPORT,
     }
 
 

@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, local deterministic VS-0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, local VS0 evidence-cleanup/interactive-UI-loop evidence, frozen VS0 EVUX clean sign-off governance scenarios, and frozen VS0 operator acceptance UI gate
+**Status:** Documentation authority reset with full AI-agent handoff, MUST-PASS scenarios, CLI-native gate, local verification plane, design-system contract, VS-0 scaffold gate, no-dependency scaffold CLI bootstrap, local deterministic VS-0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, local VS0 evidence-cleanup/interactive-UI-loop evidence, frozen VS0 EVUX clean sign-off governance scenarios, and local VS0 operator acceptance UI gate evidence
 **Canonical spelling:** Use **CornerStone** for product/project text.
 
 ## Product Definition
@@ -49,9 +49,10 @@ Users should experience one CornerStone product. Internally, the product keeps c
 26. `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md`
 27. `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_MATRIX.csv`
 28. `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md`
-29. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-30. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-31. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
+29. `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md`
+30. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+31. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+32. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
 
 ## Active Authority
 
@@ -87,6 +88,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md` | Frozen task-scoped criteria for human-understandable VS0 operator UI acceptance before full VS-1 |
 | `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_MATRIX.csv` | Frozen machine-readable matrix for the VS0 operator acceptance UI gate |
 | `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md` | Current human review record: operator UX acceptance not yet accepted; full VS-1 waits |
+| `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md` | Current local deterministic implementation evidence for the VS0 operator UI gate |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
 | `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md` | Verification-centered agent workflow |
@@ -100,7 +102,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 - VS0 runtime acceptance/hardening overlay: 9 task-scoped scenarios; reports show 7 AI-verifiable PASS, 2 HUMAN_REQUIRED, production release still false.
 - VS0 evidence cleanup and interactive UI loop overlay: 14 task-scoped scenarios; reports show 12 AI-verifiable PASS, 2 HUMAN_REQUIRED, production release still false.
 - VS0 EVUX clean sign-off governance overlay: 16 task-scoped scenarios; verifier path `cornerstone scenario verify vs0-evux-governance`, 14 AI-verifiable rows, 2 HUMAN_REQUIRED, production release still false.
-- VS0 operator acceptance UI gate overlay: 13 task-scoped scenarios; frozen documentation-only gate, 12 AI-verifiable rows start `NOT_VERIFIED`, 1 `HUMAN_REQUIRED`, full VS-1 main implementation waits until JiYong/Tars accepts the operator UI.
+- VS0 operator acceptance UI gate overlay: 13 task-scoped scenarios; local verifier path `cornerstone scenario verify vs0-operator-acceptance-ui`, 12 AI-verifiable PASS, 1 `HUMAN_REQUIRED`, full VS-1 main implementation waits until JiYong/Tars accepts the operator UI.
 - Release rule: no PASS without concrete scenario evidence.
 - CLI-native-first rule: no feature scenario can be marked PASS unless its native `cornerstone ...` CLI path is verified or the item is explicitly classified as a non-feature implementation internal.
 
@@ -193,7 +195,7 @@ The current local evidence-cleanup and interactive UI loop criteria are in `docs
 
 The clean sign-off governance criteria are in `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md`. They add `VS0-GOV-*` rows for matrix/report consistency, dirty-worktree metadata semantics, command transcript evidence, release manifest hashing, post-commit rollup behavior, and overclaim/dependency regression guards. Current PASS/HUMAN_REQUIRED status is recorded by `cornerstone scenario verify vs0-evux-governance`, `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_MATRIX.csv`, and `docs/verification-reports/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_REPORT_2026-06-14.md`; production release, live-provider readiness, and human usability acceptance remain unclaimed.
 
-The VS0 operator acceptance UI gate is in `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md`. It freezes the narrow UI acceptance slice required before full VS-1: the local VS0 UI must expose Artifact, Search, Evidence, Claim, Action Card, dry-run, approval, mock execution, and Audit as understandable operator steps. Current human review is recorded in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md`: AI-verifiable VS0 EVUX governance remains PASS, human operator UX acceptance is not yet accepted, full VS-1 implementation waits, and VS-1 planning/backend prep may continue only without milestone or release claims.
+The VS0 operator acceptance UI gate is in `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md`. It freezes the narrow UI acceptance slice required before full VS-1: the local VS0 UI must expose Artifact, Search, Evidence, Claim, Action Card, dry-run, approval, mock execution, and Audit as understandable operator steps. Current local implementation evidence is recorded in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md`, `reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json`, and `reports/browser/vs0-operator-acceptance-ui-2026-06-14/`: 12 AI-verifiable rows pass, human operator UX acceptance remains `HUMAN_REQUIRED`, full VS-1 implementation waits, and VS-1 planning/backend prep may continue only without milestone or release claims.
 
 ## VS0 Runtime Acceptance Quickstart
 

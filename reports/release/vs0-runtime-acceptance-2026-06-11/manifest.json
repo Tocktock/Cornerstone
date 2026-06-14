@@ -1,20 +1,20 @@
 {
   "artifacts": [
     {
-      "bytes": 319065,
+      "bytes": 319072,
       "path": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "acceptance_scenario_report",
-      "sha256": "b1133545b546ab349dd2b6c0bf6765ec07e3c8236b61ac057e57f33c40b3d73b"
+      "sha256": "2eaae78288c246033c5bd8a2ed722e61dae619462bf2e4e259fd449e6c9e710c"
     },
     {
-      "bytes": 257017,
+      "bytes": 257023,
       "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "product_runtime_scenario_report",
-      "sha256": "8aea4f3693bdff7bb5d2d753dcf842d19891855ebbe52dc8ae26d67403dacc66"
+      "sha256": "177523fd77af51c3574d957d688c4c4c70b98ddfa3516c0ddf26d961b5b56fac"
     },
     {
       "bytes": 1430,
@@ -22,7 +22,7 @@
       "present": true,
       "required": true,
       "role": "browser_proof_manifest",
-      "sha256": "c73ea7782f9310df57fc676afa275f03ce7e42785c431acb3b43c2729ac98dfc"
+      "sha256": "51ff96736e9b85e446ed480e7b8c8c65fa9249babd75eee06c903cbcbf21e6ee"
     },
     {
       "bytes": 89394,
@@ -33,12 +33,12 @@
       "sha256": "4814197a8ed32519720be02c91995ff31293826c256a4d1706aaebb2005776ed"
     },
     {
-      "bytes": 11954,
+      "bytes": 36006,
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
       "present": true,
       "required": true,
       "role": "browser_dom_snapshot",
-      "sha256": "a721ec486df001aca3283c81face1b80fbaae8b30c8e4301a7223712ff3fce1c"
+      "sha256": "0e1cc1271cc3fd0d8ac383a2291eb616f1e7a5e5ad280566cc8dcf2ee9ef9ea1"
     },
     {
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/workflow-trace.json",
@@ -79,12 +79,12 @@
       "sha256": "89ff9b2b61813579e9cf6522d49159cad531f64f8b5cce16a4667421f8d396f2"
     },
     {
-      "bytes": 22355,
+      "bytes": 24871,
       "path": "README.md",
       "present": true,
       "required": true,
       "role": "operator_quickstart",
-      "sha256": "51804d0d0b9ebe646b042db75998d75d24b4f2950d51f99da395911148b5c9bd"
+      "sha256": "64622f1a9c5c307727c8eb6b4200bf4f00e04511cb0db757d65dbfd26b4ac4d1"
     },
     {
       "bytes": 924,
@@ -95,12 +95,12 @@
       "sha256": "988aec2478e8133050e133741b2c714b8730a0c4a94caceaaa2f47fa728d6579"
     },
     {
-      "bytes": 3084,
+      "bytes": 3085,
       "path": "reports/release/vs0-runtime-acceptance-2026-06-11/command-transcript.json",
       "present": true,
       "required": true,
       "role": "command_transcript",
-      "sha256": "6cf8efe91750cc581e4ae5db4d0776f0c31af855901994242d12785bbed54ee3"
+      "sha256": "2bef592f8143f7a55fe2fbb6b36d542ca686f637b59bbada4bdb3e08e8f694e9"
     },
     {
       "bytes": 472,
@@ -112,7 +112,7 @@
     }
   ],
   "browser_proof": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
-  "created_at": "2026-06-14T09:33:53.158881Z",
+  "created_at": "2026-06-14T12:51:16.288732Z",
   "human_required": [
     {
       "id": "VS0-ACC-H01",
@@ -161,7 +161,7 @@
     "unqualified_external_calls_in_release_report": 0,
     "zero_evidence_claim_approvals": 0
   },
-  "package_id": "releasepkg_526b4a1b05bf8185",
+  "package_id": "releasepkg_f2be882f7cb8abbf",
   "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
   "production_release_ready": false,
   "scenario_report": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",

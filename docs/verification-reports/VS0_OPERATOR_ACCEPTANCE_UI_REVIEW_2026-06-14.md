@@ -3,13 +3,23 @@
 **Owner:** JiYong / Tars
 **Scope:** Local VS0 operator UI acceptance, not production release and not live-provider readiness.
 **Related gate:** `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md`
-**Status:** Human operator UX acceptance is **NOT YET ACCEPTED**.
+**Status:** Human operator UX acceptance is **NOT YET ACCEPTED**. AI-verifiable UI gate rows now have local deterministic PASS evidence in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md`.
 
 ## Summary
 
 The existing local VS0 EVUX automation and governance evidence remains useful for AI-verifiable scenario proof.
 
-However, the current UI is not yet acceptable as a human operator flow because it exposes the VS0 loop primarily as one opaque run action rather than clear, controllable steps across Artifact, Search, Evidence, Claim, Action, Execution, and Audit.
+The initial human review did not accept the prior UI as a human operator flow because it exposed the VS0 loop primarily as one opaque run action rather than clear, controllable steps across Artifact, Search, Evidence, Claim, Action, Execution, and Audit.
+
+## Post-Implementation Evidence Update
+
+The AI-verifiable gap has been closed by the local VS0 operator UI gate implementation. Evidence is recorded in:
+
+- `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md`
+- `reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json`
+- `reports/browser/vs0-operator-acceptance-ui-2026-06-14/`
+
+This automated evidence does not replace `VS0-UI-H01`. JiYong/Tars still must complete the local walkthrough and explicitly accept or reject the UI before full VS-1 main implementation proceeds.
 
 ## Human Review Decision
 
@@ -74,18 +84,18 @@ The operator must be able to see:
 
 | ID | Current Status | Notes |
 |---|---|---|
-| VS0-UI-001 | NOT_VERIFIED | New gate; current one-button flow is insufficient. |
-| VS0-UI-002 | NOT_VERIFIED | Artifact details must become operator-visible in UI. |
-| VS0-UI-003 | NOT_VERIFIED | Search snapshot details must become operator-visible in UI. |
-| VS0-UI-004 | NOT_VERIFIED | Evidence support and insufficient-evidence guidance must become visible. |
-| VS0-UI-005 | NOT_VERIFIED | Claim trust states must become visible. |
-| VS0-UI-006 | NOT_VERIFIED | Zero-evidence denial must be proven in UI. |
-| VS0-UI-007 | NOT_VERIFIED | Action Card review details must become visible. |
-| VS0-UI-008 | NOT_VERIFIED | Local/mock execution counters must become visible. |
-| VS0-UI-009 | NOT_VERIFIED | Audit timeline and verification must become visible. |
-| VS0-UI-010 | NOT_VERIFIED | Local-only overclaim guard must be proven in UI. |
-| VS0-UI-R01 | NOT_VERIFIED | Existing EVUX governance must remain PASS after implementation. |
-| VS0-UI-R02 | NOT_VERIFIED | Browser timeout must remain unable to produce clean PASS. |
+| VS0-UI-001 | PASS | Browser proof shows distinct step-by-step Artifact through Audit operator flow. |
+| VS0-UI-002 | PASS | Artifact details are visible in DOM and browser proof state. |
+| VS0-UI-003 | PASS | Search query, snippet, snapshot ID, and evidence eligibility are visible. |
+| VS0-UI-004 | PASS | Evidence support and insufficient-evidence guidance are visible. |
+| VS0-UI-005 | PASS | Draft, evidence-backed, and approved Claim states are visible. |
+| VS0-UI-006 | PASS | Zero-evidence approval denial shows cause and resolution guidance. |
+| VS0-UI-007 | PASS | Action Card diff, impact, policy, risk, approval, boundary, and rollback details are visible. |
+| VS0-UI-008 | PASS | Execution shows `mock_connector_calls=1` and `real_external_http_calls=0`. |
+| VS0-UI-009 | PASS | Audit timeline events and verification status are visible. |
+| VS0-UI-010 | PASS | UI and scenario report avoid production release, live connector, and human acceptance overclaim. |
+| VS0-UI-R01 | PASS | Existing EVUX governance remains PASS in the regression check. |
+| VS0-UI-R02 | PASS | Browser timeout remains unable to produce a clean PASS. |
 | VS0-UI-H01 | HUMAN_REQUIRED | JiYong/Tars must perform a new walkthrough and accept or reject. |
 
 ## VS-1 Boundary

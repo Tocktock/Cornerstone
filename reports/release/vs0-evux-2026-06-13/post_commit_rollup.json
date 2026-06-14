@@ -1,27 +1,56 @@
 {
-  "created_at": "2026-06-14T09:37:01.868768Z",
-  "dirty_paths_before_rollup": [],
+  "created_at": "2026-06-14T12:55:05.818274Z",
+  "dirty_paths_before_rollup": [
+    "Makefile",
+    "README.md",
+    "docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_MATRIX.csv",
+    "docs/sot/README.md",
+    "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md",
+    "packages/cornerstone_cli/acceptance.py",
+    "packages/cornerstone_cli/main.py",
+    "packages/cornerstone_cli/product_runtime.py",
+    "packages/cornerstone_cli/scenarios.py",
+    "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
+    "reports/browser/vs0-evux-2026-06-13/workflow-trace.json",
+    "reports/browser/vs0-evux-2026-06-13/workflow.dom.html",
+    "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
+    "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
+    "reports/quickstart/vs0-evux-quickstart.json",
+    "reports/release/vs0-evux-2026-06-13/command-evidence.json",
+    "reports/release/vs0-evux-2026-06-13/command-transcript.json",
+    "reports/release/vs0-evux-2026-06-13/manifest.json",
+    "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
+    "reports/release/vs0-runtime-acceptance-2026-06-11/command-transcript.json",
+    "reports/release/vs0-runtime-acceptance-2026-06-11/manifest.json",
+    "reports/scenario/vs0-evux-2026-06-13.json",
+    "reports/scenario/vs0-evux-governance-2026-06-14.json",
+    "reports/scenario/vs0-product-runtime-2026-06-11.json",
+    "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+    "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md",
+    "reports/browser/vs0-operator-acceptance-ui-2026-06-14/",
+    "reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json"
+  ],
   "evidence_artifacts": [
     {
-      "bytes": 533540,
+      "bytes": 544008,
       "path": "reports/scenario/vs0-evux-2026-06-13.json",
       "present": true,
       "role": "acceptance_scenario_report",
-      "sha256": "c4b0475c8f25a238e1b20a799033b1a5cc436ad43e659223874edfd2e714faf0"
+      "sha256": "b89b36d818ee5cd63bb41f496e7d9ddcf611e83e8eda352bfcf435eb8b3e710c"
     },
     {
-      "bytes": 257017,
+      "bytes": 257023,
       "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
       "present": true,
       "role": "product_runtime_scenario_report",
-      "sha256": "8aea4f3693bdff7bb5d2d753dcf842d19891855ebbe52dc8ae26d67403dacc66"
+      "sha256": "177523fd77af51c3574d957d688c4c4c70b98ddfa3516c0ddf26d961b5b56fac"
     },
     {
-      "bytes": 93255,
+      "bytes": 103526,
       "path": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
       "present": true,
       "role": "browser_proof_manifest",
-      "sha256": "78bd6a50578b27e71f6469aab0efa3d3c75288586fc3ba515607a73c26f05a94"
+      "sha256": "451df462c324786108f234e0ebb75ec4bd278c9de28972988312feb7274b8226"
     },
     {
       "bytes": 101350,
@@ -31,18 +60,18 @@
       "sha256": "5a0b8e428ac0e65113f6806312bac1f7adc2d17a1d3f4740edac24f1a48db25d"
     },
     {
-      "bytes": 96115,
+      "bytes": 125949,
       "path": "reports/browser/vs0-evux-2026-06-13/workflow.dom.html",
       "present": true,
       "role": "browser_dom_snapshot",
-      "sha256": "664c4f71a45d9cdd092f5a984a8fdb0ac3fd97a6b8dee5327061e681eec2c8f4"
+      "sha256": "39f6e0a8a8b821d6757ec2a2c57ffaddb7f6bcb651c969f6f12d4b5b601a0166"
     },
     {
-      "bytes": 84101,
+      "bytes": 88519,
       "path": "reports/browser/vs0-evux-2026-06-13/workflow-trace.json",
       "present": true,
       "role": "browser_workflow_trace",
-      "sha256": "51ecfaf92f0bbb8f33fcfef38732cb15c5e036504eea157633da7a646fabecb2"
+      "sha256": "b29f1926a92f235561ee2dc6973f392f9bea371c96de1828c5b4eb598af37baf"
     },
     {
       "bytes": 14572,
@@ -66,11 +95,11 @@
       "sha256": "3a30f7800308263ba5f8078e01509ef7cbba818f0e27c138bcbc2cb8243644cb"
     },
     {
-      "bytes": 124064,
+      "bytes": 124063,
       "path": "reports/quickstart/vs0-evux-quickstart.json",
       "present": true,
       "role": "quickstart_report",
-      "sha256": "9c517665718181b8f4916f8c334e58b65ff322b6e60843d69bc1349b459ee8d7"
+      "sha256": "7f68c465f08b519f0e85a2b19192244f324709c0f4f9da05ebfb1dc18fa01dc0"
     },
     {
       "bytes": 10562,
@@ -87,11 +116,11 @@
       "sha256": "3a6073a2c593055fd4c43a75b36ad3dd68eeb77da84364429d724822776753cf"
     },
     {
-      "bytes": 22802,
+      "bytes": 24871,
       "path": "README.md",
       "present": true,
       "role": "operator_quickstart",
-      "sha256": "e885a555be86bafed0fad615f24c968b1871830a91869f44ab62540b9ad83e62"
+      "sha256": "64622f1a9c5c307727c8eb6b4200bf4f00e04511cb0db757d65dbfd26b4ac4d1"
     },
     {
       "bytes": 848,
@@ -101,30 +130,101 @@
       "sha256": "c0c9899dc4dd68eed80b02fd82edd7f57c7f991d01c33410aaf9736eddfc1152"
     },
     {
-      "bytes": 11513,
+      "bytes": 11515,
       "path": "reports/release/vs0-evux-2026-06-13/command-transcript.json",
       "present": true,
       "role": "command_transcript",
-      "sha256": "6d3d344b0507a5ff4303ac2265451930d2ac0b2a15aff95e13a95248926bc7f9"
+      "sha256": "bc7fa619e9fce6288f94f647033b09e7103bdcac2ab7ed11489ff85df4fcefd3"
     },
     {
       "bytes": 700,
       "path": "reports/release/vs0-evux-2026-06-13/command-evidence.json",
       "present": true,
       "role": "command_evidence",
-      "sha256": "d52adcc3f2e07ed0e5e7ecb7f60edff85ad1af81b556b51c430afe88bdbb7921"
+      "sha256": "1af18ba5b5d589c436bcd471f5db70c58ccd59eb5853c5eb148bf426d834edcc"
     }
   ],
-  "final_commit": "349dea7",
-  "final_commit_full": "349dea7dad8b785965ed189721918280213e5519",
-  "final_tree_hash": "f12b9393f957a72f1eb26af252b92f19a4f126bb",
+  "final_commit": "0c077a3",
+  "final_commit_full": "0c077a3a921852b3f6c4cdd912b9780abfae2b51",
+  "final_tree_hash": "d4ea08817acc339e291e5c1054e444b769161703",
   "manifest_path": "reports/release/vs0-evux-2026-06-13/manifest.json",
-  "manifest_sha256_before_rollup": "ff45a06a6956b311cf676f550dbaf73970677158398a80e7927b9eb1c58fe529",
+  "manifest_sha256_before_rollup": "358a653b969764d7164e1077833432ce35fe77c01260212aec0945e29485f9c0",
   "relationship_to_verified_snapshot": {
-    "verified_base_commit": "349dea7",
-    "verified_base_tree_hash": "f12b9393f957a72f1eb26af252b92f19a4f126bb",
-    "verified_source_snapshot_paths": [],
-    "verified_source_worktree_hash": "8e5934b54d9d3ecad7cf6ac8ee36e331e597459c9895c42eb61cac97c8c8d0b5"
+    "verified_base_commit": "0c077a3",
+    "verified_base_tree_hash": "d4ea08817acc339e291e5c1054e444b769161703",
+    "verified_source_snapshot_paths": [
+      {
+        "bytes": 1880,
+        "path": "Makefile",
+        "sha256": "865654ca6d7646ec5e389a30aeeb9f9598276a73235ad016558a80d014e97321",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 24871,
+        "path": "README.md",
+        "sha256": "64622f1a9c5c307727c8eb6b4200bf4f00e04511cb0db757d65dbfd26b4ac4d1",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 2907,
+        "path": "docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_MATRIX.csv",
+        "sha256": "5730b30b1d346d2cb0d745771f6df6a26094120bc08dc6325cf6e7f213d895da",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 15975,
+        "path": "docs/sot/README.md",
+        "sha256": "9772801909334d5173dbfac1fb44519b52dd097fa0edbddadfe035c34d73ab0c",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 5914,
+        "path": "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md",
+        "sha256": "a51fdd5ddeae300f109ee3d1a45ba5ab60eb2edb2647dacc57a5513d5056d5ab",
+        "state": "present",
+        "status": "??"
+      },
+      {
+        "bytes": 5915,
+        "path": "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md",
+        "sha256": "5a1f9a1043e419056e9ae9978fc96108070842be0fe83b648803d94d7d703a6e",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 68045,
+        "path": "packages/cornerstone_cli/acceptance.py",
+        "sha256": "8a3c713f6329c07b61cd0acc88aff36afb4258f5f66b74f2e4c88035abe5ff87",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 287338,
+        "path": "packages/cornerstone_cli/main.py",
+        "sha256": "42d5dde92c4aae810ec4c9b58acd6eb34751703ff142fd18f7034706433b702b",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 67495,
+        "path": "packages/cornerstone_cli/product_runtime.py",
+        "sha256": "2bfdfc58f7790b73cb4f7683b5fb5dbea88ab45e833168bae333cdcd620ab86c",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 593419,
+        "path": "packages/cornerstone_cli/scenarios.py",
+        "sha256": "dc752049cb74bc15e430e9ba8fec17b6ff0263bfa3ce2f3ef89ac302b3b23212",
+        "state": "present",
+        "status": "M"
+      }
+    ],
+    "verified_source_worktree_hash": "dc64b6df31482a47af61a372e8d90ddfc2cb2d5147c4b2175eae4ba5b265d657"
   },
   "schema_version": "cs.release_post_commit_rollup.v0",
   "scope": {
@@ -134,5 +234,5 @@
     "workspace_id": "default"
   },
   "scope_name": "vs0-evux",
-  "worktree_dirty_before_rollup": false
+  "worktree_dirty_before_rollup": true
 }

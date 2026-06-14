@@ -35,6 +35,9 @@ DEFAULT_EVUX_BROWSER_PROOF_DIR = "reports/browser/vs0-evux-2026-06-13"
 DEFAULT_EVUX_QUICKSTART_REPORT = "reports/quickstart/vs0-evux-quickstart.json"
 DEFAULT_EVUX_RELEASE_PACKAGE_DIR = "reports/release/vs0-evux-2026-06-13"
 DEFAULT_EVUX_REPORT = "docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md"
+DEFAULT_OPERATOR_UI_SCENARIO_REPORT = "reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json"
+DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR = "reports/browser/vs0-operator-acceptance-ui-2026-06-14"
+DEFAULT_OPERATOR_UI_REPORT = "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md"
 
 
 def utc_now() -> str:
@@ -400,6 +403,7 @@ def capture_evux_browser_proof(
     chrome_stderr_tail: list[str] = []
     browser_error: str | None = None
     workflow_state: dict[str, Any] = {}
+    operator_state: dict[str, Any] = {}
     html = ""
     clean_browser_exit = False
 
@@ -453,6 +457,12 @@ def capture_evux_browser_proof(
                         break
                     time.sleep(0.25)
                 html = str(_runtime_eval(page, "document.documentElement.outerHTML", timeout=5) or "")
+                operator_candidate = _runtime_eval(
+                    page,
+                    "window.__cornerstoneOperatorEvidence ? window.__cornerstoneOperatorEvidence() : {}",
+                    timeout=5,
+                )
+                operator_state = operator_candidate if isinstance(operator_candidate, dict) else {}
                 dom_path.write_text(html)
                 screenshot = page.command("Page.captureScreenshot", {"format": "png", "fromSurface": True}, timeout=10)
                 screenshot_path.write_bytes(base64.b64decode(str(screenshot.get("data", ""))))
@@ -512,7 +522,104 @@ def capture_evux_browser_proof(
         "mock_connector_calls": "mock_connector_calls=1" in html,
         "real_external_http_calls_zero": "real_external_http_calls=0" in html,
     }
-    status = "PASS" if screenshot_exists and clean_browser_exit and all(required_markers.values()) and not thread_error and not browser_error else "FAIL"
+    state = operator_state.get("state", {}) if isinstance(operator_state.get("state"), dict) else {}
+    artifact = state.get("artifact", {}) if isinstance(state.get("artifact"), dict) else {}
+    search = state.get("search", {}) if isinstance(state.get("search"), dict) else {}
+    evidence = state.get("evidence", {}) if isinstance(state.get("evidence"), dict) else {}
+    claims = state.get("claims", {}) if isinstance(state.get("claims"), dict) else {}
+    action = state.get("action", {}) if isinstance(state.get("action"), dict) else {}
+    dry_run = state.get("dryRun", {}) if isinstance(state.get("dryRun"), dict) else {}
+    approvals = state.get("approvals", {}) if isinstance(state.get("approvals"), dict) else {}
+    execution = state.get("execution", {}) if isinstance(state.get("execution"), dict) else {}
+    audit = state.get("audit", {}) if isinstance(state.get("audit"), dict) else {}
+    event_types = set(audit.get("event_types") or [])
+    required_audit_events = {
+        "artifact.ingested",
+        "search.snapshot.created",
+        "evidence_bundle.created",
+        "claim.draft.created",
+        "claim.approval.denied",
+        "claim.approved",
+        "action.card.proposed",
+        "action.dry_run.read",
+        "action.approved",
+        "action.executed",
+    }
+    operator_step_button_ids = [
+        "step-artifact-run",
+        "step-search-run",
+        "step-evidence-run",
+        "step-claim-run",
+        "step-action-run",
+        "step-dry-run",
+        "step-approve-run",
+        "step-execute-run",
+        "step-audit-run",
+    ]
+    operator_markers = {
+        "step_by_step_flow": "data-operator-flow=\"step-by-step\"" in html and "data-operator-step-count=\"9\"" in html,
+        "operator_controls_present": all(f"id=\"{button_id}\"" in html for button_id in operator_step_button_ids),
+        "artifact_step_details": bool(
+            artifact.get("artifact_id")
+            and artifact.get("checksum_sha256")
+            and artifact.get("source")
+            and artifact.get("derived_status") == "ready"
+            and artifact.get("evidence_refs")
+            and artifact.get("audit_refs")
+        ),
+        "search_step_details": bool(
+            search.get("query")
+            and search.get("search_snapshot_id")
+            and search.get("snippet")
+            and search.get("evidence_eligible") is True
+        ),
+        "evidence_step_details": bool(
+            evidence.get("evidence_bundle_id")
+            and evidence.get("supports_claim") is True
+            and evidence.get("insufficient_guidance")
+        ),
+        "claim_step_states": bool(
+            claims.get("zero_evidence_state") == "draft"
+            and claims.get("evidence_claim_state") == "evidence_backed"
+            and claims.get("approved_claim_state") == "approved"
+        ),
+        "zero_evidence_denial": claims.get("zero_evidence_denial_code") == "CS_CLAIM_EVIDENCE_REQUIRED",
+        "action_card_details": bool(
+            action.get("action_id")
+            and action.get("diff")
+            and action.get("expected_impact")
+            and action.get("evidence_bundle_id")
+            and action.get("policy_decision")
+            and action.get("risk")
+            and action.get("approval_state")
+            and action.get("mock_local_boundary") is True
+            and action.get("rollback_note")
+        ),
+        "dry_run_details": bool(
+            dry_run.get("dry_run_id")
+            and dry_run.get("diff")
+            and dry_run.get("expected_impact", {}).get("real_external_http_calls") == 0
+        ),
+        "approval_details": approvals.get("claim") == "approved" and approvals.get("action") == "approved",
+        "execution_details": execution.get("mock_connector_calls") == 1 and execution.get("real_external_http_calls") == 0,
+        "audit_timeline_details": audit.get("verification_status") == "success" and required_audit_events.issubset(event_types),
+        "local_only_disclaimer": (
+            operator_state.get("production_release_claimed") is False
+            and operator_state.get("live_connector_claimed") is False
+            and operator_state.get("human_acceptance_claimed") is False
+            and "Local VS0 proof only" in html
+        ),
+    }
+    status = (
+        "PASS"
+        if screenshot_exists
+        and clean_browser_exit
+        and all(required_markers.values())
+        and all(operator_markers.values())
+        and not thread_error
+        and not browser_error
+        else "FAIL"
+    )
     if status == "FAIL" and screenshot_exists and any(required_markers.values()):
         status = "PARTIAL"
     proof = {
@@ -539,7 +646,9 @@ def capture_evux_browser_proof(
         "trace_path": relative_to_root(root, trace_path),
         "trace_sha256": sha256_file(trace_path) if trace_path.exists() else None,
         "workflow_state": workflow_state,
+        "operator_state": operator_state,
         "required_markers": required_markers,
+        "operator_markers": operator_markers,
         "errors": [error for error in [browser_error, *thread_error] if error],
         "stderr_tail": chrome_stderr_tail,
     }

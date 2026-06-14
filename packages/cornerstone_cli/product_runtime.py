@@ -273,6 +273,45 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
       border-radius: 8px;
       padding: 14px;
     }}
+    .stepper {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+      margin: 16px 0;
+      padding: 0;
+      list-style: none;
+    }}
+    .stepper li {{
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 9px 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }}
+    .stepper li[data-step-status="complete"] {{ border-color: #9ac2ad; color: var(--safe); }}
+    .stepper li[data-step-status="current"] {{ border-color: var(--accent); color: var(--accent); }}
+    .step-grid {{ display: grid; gap: 12px; margin-top: 14px; }}
+    .step-card {{
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+    }}
+    .step-card h3 {{ margin: 0 0 12px; font-size: 16px; }}
+    .step-card label {{ display: block; margin-bottom: 5px; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }}
+    input, select {{
+      width: min(100%, 560px);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcfd;
+      color: var(--ink);
+      padding: 8px 10px;
+      font: inherit;
+      margin: 0 8px 10px 0;
+    }}
+    .detail-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-top: 12px; }}
+    .detail-grid div {{ border-top: 1px solid var(--line); padding-top: 8px; min-height: 54px; }}
     .label {{ color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 700; }}
     code {{ background: #eef3f7; padding: 2px 4px; border-radius: 4px; }}
     button {{
@@ -323,10 +362,36 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
       <section id="claim-builder"><h2>Claim Builder</h2><p>Claims stay draft unless backed by an Evidence Bundle and approval evidence.</p></section>
       <section id="action-card"><h2>Action Card</h2><p>Actions expose dry-run diff, expected impact, policy decision, approval, execution, and mock ConnectorHub boundary.</p></section>
       <section id="audit-detail"><h2>Audit Detail</h2><p>Audit events form a local tamper-evident hash chain verified by <code>cornerstone audit verify --json</code>.</p></section>
-      <section id="vs0-evux-loop" data-evux-clicked="false">
-        <h2>VS0 Evidence Cleanup Loop</h2>
-        <p>Local fixture workflow: artifact, search, evidence bundle, claim, action dry-run, approval, mock execution, and audit.</p>
-        <button id="run-evux" type="button">Run local VS0 loop</button>
+      <section
+        id="vs0-evux-loop"
+        data-evux-clicked="false"
+        data-operator-flow="step-by-step"
+        data-operator-step-count="9"
+        data-current-step="1"
+        data-completed-steps="0"
+        data-production-release-claimed="false"
+        data-live-connector-claimed="false"
+        data-human-acceptance-claimed="false"
+      >
+        <h2>VS0 Operator Flow</h2>
+        <p>Local VS0 proof only. Production release, live connector readiness, autonomous external writeback, and human acceptance are not claimed.</p>
+        <div class="panel-grid" aria-label="VS0 operator boundary">
+          <div class="panel"><div class="label">Mode</div><strong>local/mock</strong><br><span id="ui-local-boundary">Connector writes are mocked; real external writeback stays disabled.</span></div>
+          <div class="panel"><div class="label">Current position</div><strong id="ui-current-step">1. Select / upload Artifact</strong><br><span id="ui-workflow-position">Step 1 of 9</span></div>
+          <div class="panel"><div class="label">Not claimed</div><span id="ui-not-production-ready">production release=false; live connector=false; human acceptance=HUMAN_REQUIRED</span></div>
+        </div>
+        <ol class="stepper" aria-label="VS0 operator steps">
+          <li id="operator-step-1" data-step-status="current">1. Select/upload Artifact</li>
+          <li id="operator-step-2" data-step-status="pending">2. Search</li>
+          <li id="operator-step-3" data-step-status="pending">3. Review Evidence</li>
+          <li id="operator-step-4" data-step-status="pending">4. Create Claim</li>
+          <li id="operator-step-5" data-step-status="pending">5. Review Action Card</li>
+          <li id="operator-step-6" data-step-status="pending">6. Dry-run</li>
+          <li id="operator-step-7" data-step-status="pending">7. Approve</li>
+          <li id="operator-step-8" data-step-status="pending">8. Execute local/mock action</li>
+          <li id="operator-step-9" data-step-status="pending">9. Inspect Audit</li>
+        </ol>
+        <button id="run-evux" type="button">Run guided proof through visible steps</button>
         <div class="status-row">
           <span id="evux-status" class="badge warn" data-evux-status="idle">idle</span>
           <span id="evux-zero-evidence-denial" class="badge">zero-evidence claim pending</span>
@@ -334,12 +399,107 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
           <span id="evux-real-external-calls" class="badge safe">real_external_http_calls=0</span>
           <span id="evux-audit-verify" class="badge">audit not verified</span>
         </div>
-        <div class="evidence-list">
-          <div><span class="label">Artifact</span><br><code id="evux-artifact-id">not-run</code></div>
-          <div><span class="label">Search Snapshot</span><br><code id="evux-search-snapshot-id">not-run</code></div>
-          <div><span class="label">Evidence Bundle</span><br><code id="evux-evidence-bundle-id">not-run</code></div>
-          <div><span class="label">Claim</span><br><code id="evux-claim-id">not-run</code></div>
-          <div><span class="label">Action Card</span><br><code id="evux-action-id">not-run</code></div>
+        <div class="step-grid">
+          <article class="step-card" data-operator-step-card="artifact">
+            <h3>1. Select / upload Artifact</h3>
+            <label for="artifact-fixture-select">Fixture artifact</label>
+            <select id="artifact-fixture-select">
+              <option value="fixtures/vs0/packs/01_artifact_basic/input.txt">fixtures/vs0/packs/01_artifact_basic/input.txt</option>
+            </select>
+            <button id="step-artifact-run" type="button">Select fixture artifact</button>
+            <div class="detail-grid">
+              <div><span class="label">Artifact ID</span><code id="evux-artifact-id">not-run</code></div>
+              <div><span class="label">Checksum</span><code id="ui-artifact-checksum">not-run</code></div>
+              <div><span class="label">Source</span><code id="ui-artifact-source">not-run</code></div>
+              <div><span class="label">Derived status</span><code id="ui-artifact-derived-status">not-run</code></div>
+              <div><span class="label">Evidence refs</span><code id="ui-artifact-evidence-refs">not-run</code></div>
+              <div><span class="label">Audit refs</span><code id="ui-artifact-audit-refs">not-run</code></div>
+            </div>
+          </article>
+          <article class="step-card" data-operator-step-card="search">
+            <h3>2. Search</h3>
+            <label for="search-query">Query</label>
+            <input id="search-query" value="alpha-evidence-anchor">
+            <button id="step-search-run" type="button" disabled>Search selected artifact</button>
+            <div class="detail-grid">
+              <div><span class="label">Query</span><code id="ui-search-query">not-run</code></div>
+              <div><span class="label">Search Snapshot</span><code id="evux-search-snapshot-id">not-run</code></div>
+              <div><span class="label">Evidence eligibility</span><code id="ui-search-evidence-eligibility">not-run</code></div>
+              <div><span class="label">Result snippet</span><span id="ui-search-snippet">not-run</span></div>
+            </div>
+          </article>
+          <article class="step-card" data-operator-step-card="evidence">
+            <h3>3. Review Evidence</h3>
+            <button id="step-evidence-run" type="button" disabled>Create Evidence Bundle</button>
+            <div class="detail-grid">
+              <div><span class="label">Evidence Bundle</span><code id="evux-evidence-bundle-id">not-run</code></div>
+              <div><span class="label">Supports Claim</span><span id="ui-evidence-support">not-run</span></div>
+              <div><span class="label">Insufficient when</span><span id="ui-evidence-insufficient">not-run</span></div>
+            </div>
+          </article>
+          <article class="step-card" data-operator-step-card="claim">
+            <h3>4. Create Claim</h3>
+            <label for="claim-statement">Claim statement</label>
+            <input id="claim-statement" value="The Alpha evidence anchor is ready for local VS0 operator acceptance.">
+            <button id="step-claim-run" type="button" disabled>Create evidence-backed Claim</button>
+            <div class="detail-grid">
+              <div><span class="label">Draft zero-evidence Claim</span><code id="ui-claim-draft-state">not-run</code></div>
+              <div><span class="label">Evidence-backed Claim</span><code id="ui-claim-evidence-state">not-run</code></div>
+              <div><span class="label">Approved Claim</span><code id="ui-claim-approved-state">pending approval</code></div>
+              <div><span class="label">Claim ID</span><code id="evux-claim-id">not-run</code></div>
+              <div><span class="label">Zero-evidence denial cause</span><span id="ui-zero-evidence-cause">not-run</span></div>
+              <div><span class="label">Resolution guide</span><span id="ui-zero-evidence-resolution">not-run</span></div>
+            </div>
+          </article>
+          <article class="step-card" data-operator-step-card="action">
+            <h3>5. Review Action Card</h3>
+            <button id="step-action-run" type="button" disabled>Create Action Card</button>
+            <div class="detail-grid">
+              <div><span class="label">Action Card</span><code id="evux-action-id">not-run</code></div>
+              <div><span class="label">Diff</span><span id="ui-action-diff">not-run</span></div>
+              <div><span class="label">Expected impact</span><span id="ui-action-impact">not-run</span></div>
+              <div><span class="label">Evidence</span><span id="ui-action-evidence">not-run</span></div>
+              <div><span class="label">Policy decision</span><code id="ui-action-policy">not-run</code></div>
+              <div><span class="label">Risk</span><code id="ui-action-risk">not-run</code></div>
+              <div><span class="label">Approval state</span><code id="ui-action-approval">not-run</code></div>
+              <div><span class="label">Mock/local boundary</span><span id="ui-action-boundary">not-run</span></div>
+              <div><span class="label">Rollback / compensation</span><span id="ui-action-rollback">not-run</span></div>
+            </div>
+          </article>
+          <article class="step-card" data-operator-step-card="dry-run">
+            <h3>6. Dry-run</h3>
+            <button id="step-dry-run" type="button" disabled>Run dry-run</button>
+            <div class="detail-grid">
+              <div><span class="label">Dry-run ID</span><code id="ui-dry-run-id">not-run</code></div>
+              <div><span class="label">Dry-run diff</span><span id="ui-dry-run-diff">not-run</span></div>
+              <div><span class="label">Expected connector calls</span><code id="ui-dry-run-calls">not-run</code></div>
+            </div>
+          </article>
+          <article class="step-card" data-operator-step-card="approve">
+            <h3>7. Approve</h3>
+            <button id="step-approve-run" type="button" disabled>Approve Claim and Action</button>
+            <div class="detail-grid">
+              <div><span class="label">Claim approval</span><code id="ui-claim-approval-result">not-run</code></div>
+              <div><span class="label">Action approval</span><code id="ui-action-approval-result">not-run</code></div>
+            </div>
+          </article>
+          <article class="step-card" data-operator-step-card="execute">
+            <h3>8. Execute local/mock action</h3>
+            <button id="step-execute-run" type="button" disabled>Execute local/mock action</button>
+            <div class="detail-grid">
+              <div><span class="label">Execution status</span><code id="ui-execution-status">not-run</code></div>
+              <div><span class="label">Mock connector calls</span><code id="ui-execution-mock-calls">mock_connector_calls=0</code></div>
+              <div><span class="label">Real external HTTP calls</span><code id="ui-execution-real-calls">real_external_http_calls=0</code></div>
+            </div>
+          </article>
+          <article class="step-card" data-operator-step-card="audit">
+            <h3>9. Inspect Audit</h3>
+            <button id="step-audit-run" type="button" disabled>Inspect audit timeline</button>
+            <div class="detail-grid">
+              <div><span class="label">Audit events</span><span id="ui-audit-events">not-run</span></div>
+              <div><span class="label">Audit verification</span><code id="ui-audit-verification">not-run</code></div>
+            </div>
+          </article>
         </div>
         <pre id="evux-trace" aria-label="EVUX workflow trace">{{}}</pre>
       </section>
@@ -354,13 +514,62 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
       workspace_id: "default"
     }};
     const evuxTrace = [];
+    const operatorState = {{
+      completedSteps: 0,
+      artifact: {{}},
+      search: {{}},
+      evidence: {{}},
+      claims: {{}},
+      action: {{}},
+      dryRun: {{}},
+      approvals: {{}},
+      execution: {{}},
+      audit: {{}}
+    }};
+    const stepNames = [
+      "Select / upload Artifact",
+      "Search",
+      "Review Evidence",
+      "Create Claim",
+      "Review Action Card",
+      "Dry-run",
+      "Approve",
+      "Execute local/mock action",
+      "Inspect Audit"
+    ];
     function setText(id, value) {{
       const node = document.getElementById(id);
       if (node) node.textContent = value;
     }}
+    function setDisabled(id, disabled) {{
+      const node = document.getElementById(id);
+      if (node) node.disabled = disabled;
+    }}
+    function asList(value) {{
+      if (!value) return "none";
+      if (Array.isArray(value)) return value.length ? value.join(", ") : "none";
+      return String(value);
+    }}
+    function shortHash(value) {{
+      return value ? String(value).slice(0, 16) + "..." : "not-run";
+    }}
+    function markStep(step, status) {{
+      const node = document.getElementById("operator-step-" + step);
+      if (node) node.dataset.stepStatus = status;
+    }}
+    function completeStep(step) {{
+      markStep(step, "complete");
+      if (step < 9) markStep(step + 1, "current");
+      operatorState.completedSteps = Math.max(operatorState.completedSteps, step);
+      const section = document.getElementById("vs0-evux-loop");
+      section.dataset.completedSteps = String(operatorState.completedSteps);
+      section.dataset.currentStep = String(Math.min(step + 1, 9));
+      setText("ui-current-step", Math.min(step + 1, 9) + ". " + stepNames[Math.min(step, 8)]);
+      setText("ui-workflow-position", "Step " + Math.min(step + 1, 9) + " of 9");
+    }}
     function traceStep(name, payload) {{
       evuxTrace.push({{ step: name, payload }});
-      setText("evux-trace", JSON.stringify({{ workflow: "vs0-evux", steps: evuxTrace }}, null, 2));
+      setText("evux-trace", JSON.stringify({{ workflow: "vs0-operator-acceptance-ui", operator_state: operatorState, steps: evuxTrace }}, null, 2));
     }}
     async function api(path, body) {{
       const response = await fetch(path, {{
@@ -378,6 +587,247 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
       traceStep(path, {{ status: response.status, payload }});
       return {{ response, payload }};
     }}
+    async function selectArtifactStep() {{
+      const artifact = await api("/artifacts", {{
+        path: document.getElementById("artifact-fixture-select").value,
+        source: "local_fixture",
+        media_type: "text/plain",
+        trust: "untrusted"
+      }});
+      const artifactRecord = artifact.payload.artifact;
+      const artifactId = artifactRecord.artifact_id;
+      operatorState.artifact = {{
+        artifact_id: artifactId,
+        checksum_sha256: artifactRecord.checksum_sha256,
+        source: artifactRecord.source && artifactRecord.source.type,
+        derived_status: artifactRecord.derived && artifactRecord.derived.status,
+        evidence_refs: artifact.payload.evidence_refs || [],
+        audit_refs: artifact.payload.audit_refs || []
+      }};
+      setText("evux-artifact-id", artifactId);
+      setText("ui-artifact-checksum", shortHash(artifactRecord.checksum_sha256));
+      setText("ui-artifact-source", operatorState.artifact.source);
+      setText("ui-artifact-derived-status", operatorState.artifact.derived_status);
+      setText("ui-artifact-evidence-refs", asList(operatorState.artifact.evidence_refs));
+      setText("ui-artifact-audit-refs", asList(operatorState.artifact.audit_refs));
+      setDisabled("step-search-run", false);
+      completeStep(1);
+      return artifactRecord;
+    }}
+    async function searchStep() {{
+      const query = document.getElementById("search-query").value;
+      const search = await api("/search", {{ query }});
+      const snapshot = search.payload.search_snapshot;
+      const result = (snapshot.results || [])[0] || {{}};
+      operatorState.search = {{
+        query,
+        search_snapshot_id: snapshot.search_snapshot_id,
+        snippet: result.snippet || "",
+        evidence_eligible: snapshot.result_count > 0 && (result.evidence_refs || []).length > 0,
+        evidence_refs: result.evidence_refs || [],
+        audit_refs: search.payload.audit_refs || []
+      }};
+      setText("ui-search-query", query);
+      setText("evux-search-snapshot-id", snapshot.search_snapshot_id);
+      setText("ui-search-snippet", operatorState.search.snippet || "no result");
+      setText("ui-search-evidence-eligibility", operatorState.search.evidence_eligible ? "eligible: result has artifact evidence refs" : "not eligible");
+      setDisabled("step-evidence-run", false);
+      completeStep(2);
+      return snapshot;
+    }}
+    async function evidenceStep() {{
+      const bundle = await api("/evidence-bundles", {{ search_snapshot_id: operatorState.search.search_snapshot_id }});
+      const evidenceBundle = bundle.payload.evidence_bundle;
+      const firstItem = (evidenceBundle.evidence_items || [])[0] || {{}};
+      operatorState.evidence = {{
+        evidence_bundle_id: evidenceBundle.evidence_bundle_id,
+        search_snapshot_id: evidenceBundle.search_snapshot_id,
+        supports_claim: Boolean(firstItem.snippet),
+        support_snippet: firstItem.snippet || "",
+        insufficient_guidance: "Insufficient: no Evidence Bundle, zero artifact refs, empty search result, or unsupported source. Attach eligible evidence before approval.",
+        audit_refs: bundle.payload.audit_refs || []
+      }};
+      setText("evux-evidence-bundle-id", evidenceBundle.evidence_bundle_id);
+      setText("ui-evidence-support", firstItem.snippet || "no supporting snippet");
+      setText("ui-evidence-insufficient", operatorState.evidence.insufficient_guidance);
+      setDisabled("step-claim-run", false);
+      completeStep(3);
+      return evidenceBundle;
+    }}
+    async function claimStep() {{
+      const zeroClaim = await api("/claims", {{ statement: "Unsupported operator UI claim should remain draft." }});
+      const zeroClaimRecord = zeroClaim.payload.claim;
+      const zeroApproval = await api("/claims/" + zeroClaimRecord.claim_id + "/approve", {{}});
+      const zeroDenied = zeroApproval.response.status === 400 &&
+        zeroApproval.payload.errors.some((error) => error.code === "CS_CLAIM_EVIDENCE_REQUIRED");
+      const claim = await api("/claims", {{
+        evidence_bundle_id: operatorState.evidence.evidence_bundle_id,
+        statement: document.getElementById("claim-statement").value
+      }});
+      const claimRecord = claim.payload.claim;
+      operatorState.claims = {{
+        zero_evidence_claim_id: zeroClaimRecord.claim_id,
+        zero_evidence_state: zeroClaimRecord.trust_state,
+        zero_evidence_denied: zeroDenied,
+        zero_evidence_denial_code: zeroDenied ? "CS_CLAIM_EVIDENCE_REQUIRED" : "unexpected",
+        evidence_claim_id: claimRecord.claim_id,
+        evidence_claim_state: claimRecord.trust_state,
+        approved_claim_state: "pending",
+        resolution_guide: "Attach an Evidence Bundle with at least one artifact ref, then request owner approval."
+      }};
+      setText("evux-zero-evidence-denial", operatorState.claims.zero_evidence_denial_code);
+      setText("ui-zero-evidence-cause", operatorState.claims.zero_evidence_denial_code + ": Claim approval requires evidence.");
+      setText("ui-zero-evidence-resolution", operatorState.claims.resolution_guide);
+      setText("ui-claim-draft-state", "Draft: " + zeroClaimRecord.claim_id);
+      setText("ui-claim-evidence-state", "Evidence-backed: " + claimRecord.claim_id);
+      setText("evux-claim-id", claimRecord.claim_id);
+      setDisabled("step-action-run", false);
+      completeStep(4);
+      return claimRecord;
+    }}
+    async function actionStep() {{
+      const action = await api("/actions", {{
+        claim_id: operatorState.claims.evidence_claim_id,
+        goal: "Record local operator acceptance status",
+        action_kind: "external_writeback",
+        risk: "high",
+        connector: "mock_connector",
+        target: "mock://vs0-operator-ui/browser"
+      }});
+      const card = action.payload.action_card;
+      const dryRun = card.dry_run || {{}};
+      const impact = dryRun.expected_impact || {{}};
+      operatorState.action = {{
+        action_id: card.action_id,
+        diff: dryRun.diff || {{}},
+        expected_impact: impact,
+        evidence_bundle_id: card.evidence && card.evidence.evidence_bundle_id,
+        policy_decision: card.policy_decision && card.policy_decision.decision,
+        policy_reason: card.policy_decision && card.policy_decision.reason,
+        risk: card.risk,
+        approval_state: card.approval && card.approval.status,
+        mock_local_boundary: card.connector_boundary && card.connector_boundary.mocked === true && card.connector_boundary.direct_provider_access === false,
+        rollback_note: "Mock/local action only: no real external side effect. Compensate by recording a correcting Claim/Action and audit entry."
+      }};
+      setText("evux-action-id", card.action_id);
+      setText("ui-action-diff", (dryRun.diff && dryRun.diff.before) + " -> " + (dryRun.diff && dryRun.diff.after));
+      setText("ui-action-impact", "expected_connector_calls=" + impact.expected_connector_calls + "; mock_connector_calls=" + impact.mock_connector_calls + "; real_external_http_calls=" + impact.real_external_http_calls);
+      setText("ui-action-evidence", "evidence_bundle:" + operatorState.action.evidence_bundle_id);
+      setText("ui-action-policy", operatorState.action.policy_decision);
+      setText("ui-action-risk", operatorState.action.risk);
+      setText("ui-action-approval", operatorState.action.approval_state);
+      setText("ui-action-boundary", "ConnectorHub mediated; mock_connector; direct_provider_access=false; credentials_exposed=false");
+      setText("ui-action-rollback", operatorState.action.rollback_note);
+      setDisabled("step-dry-run", false);
+      completeStep(5);
+      return card;
+    }}
+    async function dryRunStep() {{
+      const dryRun = await api("/actions/" + operatorState.action.action_id + "/dry-run", {{}});
+      const dryRunRecord = dryRun.payload.dry_run;
+      const impact = dryRunRecord.expected_impact || {{}};
+      operatorState.dryRun = {{
+        dry_run_id: dryRunRecord.dry_run_id,
+        diff: dryRunRecord.diff || {{}},
+        expected_impact: impact
+      }};
+      setText("ui-dry-run-id", dryRunRecord.dry_run_id);
+      setText("ui-dry-run-diff", (dryRunRecord.diff && dryRunRecord.diff.before) + " -> " + (dryRunRecord.diff && dryRunRecord.diff.after));
+      setText("ui-dry-run-calls", "expected_connector_calls=" + impact.expected_connector_calls);
+      setDisabled("step-approve-run", false);
+      completeStep(6);
+      return dryRunRecord;
+    }}
+    async function approveStep() {{
+      const claimApproval = await api("/claims/" + operatorState.claims.evidence_claim_id + "/approve", {{}});
+      const actionApproval = await api("/actions/" + operatorState.action.action_id + "/approve", {{ approver: "owner" }});
+      operatorState.claims.approved_claim_state = claimApproval.payload.claim.trust_state;
+      operatorState.approvals = {{
+        claim: claimApproval.payload.claim.trust_state,
+        action: actionApproval.payload.action_card.approval.status,
+        audit_refs: [...(claimApproval.payload.audit_refs || []), ...(actionApproval.payload.audit_refs || [])]
+      }};
+      setText("ui-claim-approved-state", "Approved: " + claimApproval.payload.claim.claim_id);
+      setText("ui-claim-approval-result", operatorState.approvals.claim);
+      setText("ui-action-approval", operatorState.approvals.action);
+      setText("ui-action-approval-result", operatorState.approvals.action);
+      setDisabled("step-execute-run", false);
+      completeStep(7);
+      return actionApproval.payload.action_card;
+    }}
+    async function executeStep() {{
+      const executed = await api("/actions/" + operatorState.action.action_id + "/execute", {{}});
+      const actionResult = executed.payload.action_result;
+      operatorState.execution = {{
+        status: actionResult.status,
+        mock_connector_calls: actionResult.mock_connector_calls,
+        real_external_http_calls: actionResult.external_http_calls,
+        side_effect_boundary: actionResult.side_effect_boundary,
+        audit_refs: executed.payload.audit_refs || []
+      }};
+      setText("ui-execution-status", actionResult.status + " / " + actionResult.side_effect_boundary);
+      setText("ui-execution-mock-calls", "mock_connector_calls=" + actionResult.mock_connector_calls);
+      setText("ui-execution-real-calls", "real_external_http_calls=" + actionResult.external_http_calls);
+      setText("evux-mock-calls", "mock_connector_calls=" + actionResult.mock_connector_calls);
+      setText("evux-real-external-calls", "real_external_http_calls=" + actionResult.external_http_calls);
+      setDisabled("step-audit-run", false);
+      completeStep(8);
+      return actionResult;
+    }}
+    async function auditStep() {{
+      const auditEvents = await getJson("/audit-events");
+      const audit = await api("/audit/verify", {{}});
+      const events = auditEvents.payload.audit_events || [];
+      const eventTypes = [...new Set(events.map((event) => event.event_type).filter(Boolean))];
+      operatorState.audit = {{
+        event_types: eventTypes,
+        event_count: events.length,
+        verification_status: audit.payload.audit_integrity.status,
+        verification_event_count: audit.payload.audit_integrity.event_count
+      }};
+      setText("ui-audit-events", eventTypes.join(", "));
+      setText("ui-audit-verification", audit.payload.audit_integrity.status + "; events=" + audit.payload.audit_integrity.event_count);
+      setText("evux-audit-verify", audit.payload.audit_integrity.status);
+      completeStep(9);
+      return operatorState.audit;
+    }}
+    function operatorPasses() {{
+      const requiredEvents = [
+        "artifact.ingested",
+        "search.snapshot.created",
+        "evidence_bundle.created",
+        "claim.draft.created",
+        "claim.approval.denied",
+        "claim.approved",
+        "action.card.proposed",
+        "action.dry_run.read",
+        "action.approved",
+        "action.executed"
+      ];
+      return operatorState.completedSteps === 9 &&
+        Boolean(operatorState.artifact.artifact_id && operatorState.artifact.checksum_sha256 && operatorState.artifact.derived_status === "ready") &&
+        Boolean(operatorState.search.search_snapshot_id && operatorState.search.snippet && operatorState.search.evidence_eligible) &&
+        Boolean(operatorState.evidence.evidence_bundle_id && operatorState.evidence.supports_claim && operatorState.evidence.insufficient_guidance) &&
+        Boolean(operatorState.claims.zero_evidence_denied && operatorState.claims.evidence_claim_state === "evidence_backed" && operatorState.claims.approved_claim_state === "approved") &&
+        Boolean(operatorState.action.action_id && operatorState.action.diff && operatorState.action.expected_impact && operatorState.action.policy_decision && operatorState.action.risk && operatorState.action.rollback_note) &&
+        Boolean(operatorState.dryRun.dry_run_id && operatorState.dryRun.expected_impact && operatorState.dryRun.expected_impact.real_external_http_calls === 0) &&
+        Boolean(operatorState.approvals.claim === "approved" && operatorState.approvals.action === "approved") &&
+        Boolean(operatorState.execution.mock_connector_calls === 1 && operatorState.execution.real_external_http_calls === 0) &&
+        Boolean(operatorState.audit.verification_status === "success" && requiredEvents.every((eventType) => operatorState.audit.event_types.includes(eventType)));
+    }}
+    window.__cornerstoneOperatorEvidence = function() {{
+      return {{
+        schema_version: "cs.operator_ui_state.v0",
+        completed_steps: operatorState.completedSteps,
+        current_step: document.getElementById("vs0-evux-loop").dataset.currentStep,
+        production_release_claimed: document.getElementById("vs0-evux-loop").dataset.productionReleaseClaimed === "true",
+        live_connector_claimed: document.getElementById("vs0-evux-loop").dataset.liveConnectorClaimed === "true",
+        human_acceptance_claimed: document.getElementById("vs0-evux-loop").dataset.humanAcceptanceClaimed === "true",
+        local_only_disclaimer: document.getElementById("ui-not-production-ready").textContent,
+        operator_passes: operatorPasses(),
+        state: operatorState
+      }};
+    }};
     async function runEvux() {{
       const section = document.getElementById("vs0-evux-loop");
       const status = document.getElementById("evux-status");
@@ -388,69 +838,19 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
       status.textContent = "running";
       evuxTrace.length = 0;
       try {{
-        const artifact = await api("/artifacts", {{
-          path: "fixtures/vs0/packs/01_artifact_basic/input.txt",
-          source: "local_fixture",
-          media_type: "text/plain",
-          trust: "untrusted"
-        }});
-        const artifactId = artifact.payload.artifact.artifact_id;
-        setText("evux-artifact-id", artifactId);
-
-        const search = await api("/search", {{ query: "alpha-evidence-anchor" }});
-        const snapshotId = search.payload.search_snapshot.search_snapshot_id;
-        setText("evux-search-snapshot-id", snapshotId);
-
-        const bundle = await api("/evidence-bundles", {{ search_snapshot_id: snapshotId }});
-        const bundleId = bundle.payload.evidence_bundle.evidence_bundle_id;
-        setText("evux-evidence-bundle-id", bundleId);
-
-        const zeroClaim = await api("/claims", {{ statement: "Unsupported EVUX browser claim should remain draft." }});
-        const zeroClaimId = zeroClaim.payload.claim.claim_id;
-        const zeroApproval = await api("/claims/" + zeroClaimId + "/approve", {{}});
-        const zeroDenied = zeroApproval.response.status === 400 &&
-          zeroApproval.payload.errors.some((error) => error.code === "CS_CLAIM_EVIDENCE_REQUIRED");
-        setText("evux-zero-evidence-denial", zeroDenied ? "CS_CLAIM_EVIDENCE_REQUIRED" : "zero-evidence approval unexpected");
-
-        const claim = await api("/claims", {{
-          evidence_bundle_id: bundleId,
-          statement: "The Alpha evidence anchor is ready for local VS0 EVUX acceptance."
-        }});
-        const claimId = claim.payload.claim.claim_id;
-        setText("evux-claim-id", claimId);
-        await api("/claims/" + claimId + "/approve", {{}});
-
-        const action = await api("/actions", {{
-          claim_id: claimId,
-          goal: "Record local EVUX acceptance status",
-          action_kind: "external_writeback",
-          risk: "high",
-          connector: "mock_connector",
-          target: "mock://vs0-evux/browser"
-        }});
-        const actionId = action.payload.action_card.action_id;
-        setText("evux-action-id", actionId);
-
-        const dryRun = await api("/actions/" + actionId + "/dry-run", {{}});
-        await api("/actions/" + actionId + "/approve", {{ approver: "owner" }});
-        const executed = await api("/actions/" + actionId + "/execute", {{}});
-        const actionResult = executed.payload.action_result;
-        setText("evux-mock-calls", "mock_connector_calls=" + actionResult.mock_connector_calls);
-        setText("evux-real-external-calls", "real_external_http_calls=" + actionResult.external_http_calls);
-
-        await getJson("/audit-events");
-        const audit = await api("/audit/verify", {{}});
-        setText("evux-audit-verify", audit.payload.audit_integrity.status);
-        const impact = dryRun.payload.dry_run.expected_impact;
-        const passed = zeroDenied &&
-          impact.expected_connector_calls === 1 &&
-          impact.mock_connector_calls === 1 &&
-          impact.real_external_http_calls === 0 &&
-          actionResult.mock_connector_calls === 1 &&
-          actionResult.external_http_calls === 0 &&
-          audit.payload.audit_integrity.status === "success";
+        await selectArtifactStep();
+        await searchStep();
+        await evidenceStep();
+        await claimStep();
+        await actionStep();
+        await dryRunStep();
+        await approveStep();
+        await executeStep();
+        await auditStep();
+        const passed = operatorPasses();
         status.dataset.evuxStatus = passed ? "passed" : "failed";
         status.textContent = passed ? "passed" : "failed";
+        section.dataset.operatorFlowComplete = passed ? "true" : "false";
       }} catch (error) {{
         traceStep("browser_error", {{ message: String(error) }});
         status.dataset.evuxStatus = "failed";
@@ -459,6 +859,15 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None) -> str:
         button.disabled = false;
       }}
     }}
+    document.getElementById("step-artifact-run").addEventListener("click", selectArtifactStep);
+    document.getElementById("step-search-run").addEventListener("click", searchStep);
+    document.getElementById("step-evidence-run").addEventListener("click", evidenceStep);
+    document.getElementById("step-claim-run").addEventListener("click", claimStep);
+    document.getElementById("step-action-run").addEventListener("click", actionStep);
+    document.getElementById("step-dry-run").addEventListener("click", dryRunStep);
+    document.getElementById("step-approve-run").addEventListener("click", approveStep);
+    document.getElementById("step-execute-run").addEventListener("click", executeStep);
+    document.getElementById("step-audit-run").addEventListener("click", auditStep);
     document.getElementById("run-evux").addEventListener("click", runEvux);
     if (evuxAutorun) {{
       window.addEventListener("load", () => setTimeout(() => document.getElementById("run-evux").click(), 50));
