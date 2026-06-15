@@ -1823,7 +1823,67 @@ If `VS0-UI-H01` remains rejected or unreviewed, do not move full VS-1 onto the m
 
 ---
 
-# 20. Scenario-First Implementation Contract Template
+# 20. VS-1 Ontology Auto-Suggest Promote Canonical Scenarios
+
+**Status:** Proposed canonical VS-1 task-scoped scenario standard; full natural-language scenarios live in `docs/scenario-contracts/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_CONTRACT.md`.
+**Scope:** Local VS-1 ontology auto-suggest, review, and promote; not production release, live-provider readiness, full schema editor, or final customer-facing UI acceptance.
+**Purpose:** Make VS-1 verifiable as an evidence-first ontology understanding layer rather than a schema-first admin feature.
+
+This task-scoped section installs the detailed `VS1-ONT-*` contract as the canonical standard for deciding whether VS-1 is correctly implemented. VS-1 is complete only when CornerStone can do this locally:
+
+```text
+Artifact / Search result
+-> draft ontology suggestions
+-> review suggested objects, properties, and links
+-> promote selected suggestions
+-> create versioned ontology change set
+-> show promoted objects in search and Object/Entity profile
+-> preserve evidence, provenance, and audit
+```
+
+Correct VS-1 UX:
+
+```text
+Drop / Ask / Search / Inspect
+-> CornerStone suggests objects, properties, and links
+-> user reviews suggestions in context
+-> user promotes selected items
+```
+
+Wrong VS-1 UX:
+
+```text
+Create ontology type first
+-> configure schema
+-> then search or inspect evidence
+```
+
+## VS-1 Scenario Inventory
+
+| Range | Type | Purpose |
+|---|---|---|
+| `VS1-ONT-001` - `VS1-ONT-022` | MUST_PASS | Verify evidence-derived suggestions, user review, explicit promotion, versioned change sets, object profiles, search/artifact/claim/action integration, auditability, correction, and multi-domain generality. |
+| `VS1-ONT-R01` - `VS1-ONT-R10` | REGRESSION_GUARD | Prevent forced modeling, prompt-injection promotion, LLM-as-truth, cross-namespace promotion, low-confidence truth promotion, evidence-erasing merges, VS-0 regression, overclaim, evidence-bundle bypass, and invalid graph mutation. |
+| `VS1-ONT-H01` - `VS1-ONT-H03` | HUMAN_REQUIRED | Human UX acceptance, domain semantic review, and live-provider/production proof remain separate from the AI-verifiable local gate. |
+
+## Definition Of Scenario PASS For VS-1 Ontology
+
+For this section, `PASS` means:
+
+1. The described user/system behavior occurred.
+2. The result is backed by concrete evidence such as browser observation, CLI/API transcript, scenario report, audit record, or generated artifact.
+3. Every durable ontology object, property, link, claim, or change set has evidence refs.
+4. Every suggestion remains `draft` until explicit user promotion.
+5. Promotion creates a versioned, auditable change.
+6. Search, Artifact Viewer, Claim Builder, and Object/Profile surfaces remain consistent.
+7. No production release, live connector, final UI acceptance, or autonomous promotion is overclaimed.
+8. No AI-verifiable `MUST_PASS` or `REGRESSION_GUARD` row is `FAIL`, `NOT_VERIFIED`, or `NOT_RUN`.
+
+Use `docs/scenario-contracts/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_CONTRACT.md` for the detailed natural-language scenarios with scenario ID, scenario name, detailed scenario, expected outcome, pass criteria, and risk covered.
+
+---
+
+# 21. Scenario-First Implementation Contract Template
 
 Future implementation tasks should copy the relevant scenarios into this template before coding.
 
@@ -1855,7 +1915,7 @@ Scenario Contract:
 
 ---
 
-# 21. Minimum Release Gate Summary
+# 22. Minimum Release Gate Summary
 
 A release or milestone should not claim “complete” unless:
 
@@ -1869,7 +1929,7 @@ A release or milestone should not claim “complete” unless:
 
 ---
 
-# 22. Initial Priority Recommendation
+# 23. Initial Priority Recommendation
 
 Because the full scenario suite is intentionally comprehensive, implementation should start by freezing a smaller v0.1 scenario subset.
 
@@ -1888,7 +1948,7 @@ This subset gives the product a coherent first implementation standard while pre
 
 ---
 
-# 23. Final Product Scenario Statement
+# 24. Final Product Scenario Statement
 
 CornerStone must pass these scenarios not because the product needs more process, but because the product is powerful enough to require proof.
 

@@ -104,6 +104,8 @@ If lower-priority content conflicts with higher-priority content, report the con
 | `../verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md` | Human review record: operator UX acceptance accepted and full VS-1 unblocked |
 | `../verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md` | Current local deterministic implementation evidence for the VS0 operator UI gate |
 | `../verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md` | Human acceptance evidence for `VS0-UI-H01` |
+| `../scenario-contracts/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_CONTRACT.md` | Canonical task-scoped VS-1 natural-language scenario standard for ontology auto-suggest, review, and promote |
+| `../scenario-contracts/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_MATRIX.csv` | Machine-readable VS-1 ontology scenario matrix: 22 MUST_PASS, 10 REGRESSION_GUARD, 3 HUMAN_REQUIRED rows |
 | `../verification-reports/VS0_IMPLEMENTATION_FINAL_REPORT_2026-06-15.md` | Final VS0 implementation closure report for VS1 transition |
 | `../scenario-contracts/SCENARIO_VERIFICATION_REPORT_TEMPLATE.md` | Required report shape for scenario verification |
 | `../verification-reports/template.md` | Required report shape for scaffold, scenario, CLI, and human-required evidence |

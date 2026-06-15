@@ -204,6 +204,23 @@ vs0_operator_acceptance_ui_gate:
   vs1_boundary: "Full VS1 main implementation is unblocked after VS0-UI-H01 acceptance; VS1 completion still requires its own scenario contract and evidence"
   production_release_rule: "production_release_ready remains false until separate production release and live-provider evidence exists"
 
+vs1_ontology_auto_suggest_promote:
+  contract: "docs/scenario-contracts/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_CONTRACT.md"
+  matrix: "docs/scenario-contracts/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_MATRIX.csv"
+  expected_scenario_report: "reports/scenario/vs1-ontology-suggest-promote-YYYY-MM-DD.json"
+  expected_browser_proof_dir: "reports/browser/vs1-ontology-suggest-promote-YYYY-MM-DD/"
+  expected_verification_report: "docs/verification-reports/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_REPORT_YYYY-MM-DD.md"
+  authority: "task-scoped canonical natural-language verification standard for VS1 ontology auto-suggest, review, and promote"
+  scenario_count: 35
+  must_pass_count: 22
+  regression_guard_count: 10
+  human_required_count: 3
+  status: "scenario contract proposed; AI-verifiable rows remain NOT_VERIFIED until implementation evidence exists"
+  verifier: "cornerstone scenario verify vs1-ontology-suggest-promote --json --output reports/scenario/vs1-ontology-suggest-promote-YYYY-MM-DD.json"
+  gate: "cornerstone scenario gate reports/scenario/vs1-ontology-suggest-promote-YYYY-MM-DD.json --json"
+  production_release_rule: "production_release_ready remains false until separate production release and live-provider evidence exists"
+  llm_rule: "LLM output alone never proves PASS; suggestions remain draft until evidence-backed user promotion"
+
 agent_guidance:
   scenario_first_instruction: "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md"
   project_constitution: "docs/agent/PROJECT_OPERATING_CONSTITUTION.md"
