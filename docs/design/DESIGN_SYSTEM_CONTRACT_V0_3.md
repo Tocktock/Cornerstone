@@ -5,6 +5,7 @@
 **Source documents:**
 - `docs/design/DESIGN_CONCEPT_SYSTEM_V0_3.md`
 - `docs/design/tokens/cornerstone_design_tokens_v0_3.json`
+- `docs/design/reference-images/README.md`
 **Doctrine:** Calm Surface. Deep Evidence. Safe Action.
 
 ## 1. Purpose
@@ -14,6 +15,8 @@ This contract turns the supplied design concept, design tokens, and reference im
 It does not implement UI code. It defines what future CornerStone UI work must preserve before it can claim product-design readiness.
 
 ## 2. Reference Image Reading
+
+The current reference image set is indexed in `docs/design/reference-images/README.md`.
 
 The reference images show a light, calm product shell with two related but distinct operating modes:
 

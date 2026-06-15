@@ -3,7 +3,7 @@
 **Owner:** JiYong / Tars
 **Scope:** Local VS0 operator UI acceptance, not production release and not live-provider readiness.
 **Related gate:** `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md`
-**Status:** Human operator UX acceptance is **NOT YET ACCEPTED**. AI-verifiable UI gate rows now have local deterministic PASS evidence in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md`.
+**Status:** Human operator UX acceptance is **ACCEPTED** by JiYong/Tars as of 2026-06-15. AI-verifiable UI gate rows have local deterministic PASS evidence in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md`; human acceptance evidence is recorded in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md`.
 
 ## Summary
 
@@ -19,16 +19,16 @@ The AI-verifiable gap has been closed by the local VS0 operator UI gate implemen
 - `reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json`
 - `reports/browser/vs0-operator-acceptance-ui-2026-06-14/`
 
-This automated evidence does not replace `VS0-UI-H01`. JiYong/Tars still must complete the local walkthrough and explicitly accept or reject the UI before full VS-1 main implementation proceeds.
+This automated evidence did not replace `VS0-UI-H01`. JiYong/Tars completed the local guided review and accepted the UI on 2026-06-15 in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md`.
 
 ## Human Review Decision
 
 | Review Item | Decision |
 |---|---|
 | AI-verifiable VS0 EVUX governance | PASS, based on the existing governance evidence surface |
-| Human operator UX acceptance | NOT_ACCEPTED |
-| Full VS-1 main implementation | WAIT |
-| VS-1 scenario planning/backend preparation | ALLOWED only without milestone, release, or usable-ontology claims |
+| Human operator UX acceptance | ACCEPTED |
+| Full VS-1 main implementation | UNBLOCKED |
+| VS-1 scenario planning/backend preparation | ALLOWED |
 
 ## Observed Current UI Gap
 
@@ -96,29 +96,31 @@ The operator must be able to see:
 | VS0-UI-010 | PASS | UI and scenario report avoid production release, live connector, and human acceptance overclaim. |
 | VS0-UI-R01 | PASS | Existing EVUX governance remains PASS in the regression check. |
 | VS0-UI-R02 | PASS | Browser timeout remains unable to produce a clean PASS. |
-| VS0-UI-H01 | HUMAN_REQUIRED | JiYong/Tars must perform a new walkthrough and accept or reject. |
+| VS0-UI-H01 | ACCEPTED_BY_HUMAN | JiYong/Tars accepted the local operator UI in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md`. |
 
 ## VS-1 Boundary
 
-Allowed before acceptance:
+Allowed after acceptance:
 
 - freeze VS-1 ontology scenario contract;
 - design ontology suggestion data model;
 - add backend-only draft suggestion fixtures if they do not depend on UI acceptance;
 - identify reusable UI components needed by VS0 and VS1.
 
-Not allowed before acceptance:
+Still not allowed without separate evidence:
 
-- claim VS-1 started as the main product milestone;
 - claim ontology UX is usable;
-- add ontology complexity to the current UI before the VS0 operator flow is accepted;
 - use automated browser proof as a substitute for `VS0-UI-H01`.
+- claim production release readiness;
+- claim live ConnectorHub/provider readiness;
+- claim autonomous external writeback readiness.
 
 ## Verdict
 
 ```text
 AI-verifiable VS0 EVUX governance: PASS
-Human operator UX acceptance: NOT YET
-Main VS-1 implementation: WAIT
-VS-1 planning/backend prep: OK, but do not claim VS-1 milestone progress yet
+Human operator UX acceptance: ACCEPTED
+Main VS-1 implementation: UNBLOCKED
+Production release readiness: NOT CLAIMED
+Live-provider readiness: NOT CLAIMED
 ```

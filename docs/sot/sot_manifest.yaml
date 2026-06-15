@@ -187,6 +187,8 @@ vs0_operator_acceptance_ui_gate:
   contract: "docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md"
   matrix: "docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_MATRIX.csv"
   current_human_review: "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md"
+  human_acceptance_evidence: "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md"
+  final_implementation_report: "docs/verification-reports/VS0_IMPLEMENTATION_FINAL_REPORT_2026-06-15.md"
   expected_scenario_report: "reports/scenario/vs0-operator-acceptance-ui-YYYY-MM-DD.json"
   expected_browser_proof_dir: "reports/browser/vs0-operator-acceptance-ui-YYYY-MM-DD/"
   expected_verification_report: "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_YYYY-MM-DD.md"
@@ -194,13 +196,13 @@ vs0_operator_acceptance_ui_gate:
   scenario_count: 13
   ai_verifiable_count: 12
   human_required_count: 1
-  status: "documentation-only freeze; current human review says operator UX acceptance not yet accepted; AI rows start NOT_VERIFIED; full VS1 implementation waits"
+  status: "local deterministic implementation passes 12 AI-verifiable rows; VS0-UI-H01 accepted by JiYong/Tars; full VS1 main implementation unblocked"
   verifier: "cornerstone scenario verify vs0-operator-acceptance-ui --json --output reports/scenario/vs0-operator-acceptance-ui-YYYY-MM-DD.json"
   gate: "cornerstone scenario gate reports/scenario/vs0-operator-acceptance-ui-YYYY-MM-DD.json --json"
   regression_verifier: "cornerstone scenario verify vs0-evux-governance --json --output reports/scenario/vs0-evux-governance-YYYY-MM-DD.json"
   regression_make_target: "make verify-vs0-evux"
-  vs1_boundary: "VS1 scenario planning and backend prep may continue only without milestone release or usable ontology claims; full VS1 implementation waits for VS0-UI-H01 acceptance"
-  production_release_rule: "production_release_ready remains false until separate production live-provider and human acceptance evidence exists"
+  vs1_boundary: "Full VS1 main implementation is unblocked after VS0-UI-H01 acceptance; VS1 completion still requires its own scenario contract and evidence"
+  production_release_rule: "production_release_ready remains false until separate production release and live-provider evidence exists"
 
 agent_guidance:
   scenario_first_instruction: "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md"

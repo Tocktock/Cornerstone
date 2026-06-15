@@ -5,7 +5,7 @@
 **Contract:** `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md`  
 **Scenario report:** `reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json`  
 **Browser proof:** `reports/browser/vs0-operator-acceptance-ui-2026-06-14/`  
-**Status:** AI-verifiable rows PASS; human operator acceptance remains `HUMAN_REQUIRED`.
+**Status:** AI-verifiable rows PASS; human operator acceptance was later accepted by JiYong/Tars in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md`.
 
 ## Goal
 
@@ -23,7 +23,7 @@ Select/upload Artifact
 -> Inspect Audit
 ```
 
-This report does not claim production release, live-provider readiness, or human acceptance.
+This report does not claim production release or live-provider readiness. The automated proof in this report did not claim human acceptance; that human-only row is closed separately by `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md`.
 
 ## Implementation Summary
 
@@ -50,7 +50,7 @@ This report does not claim production release, live-provider readiness, or human
 | VS0-UI-010 | MUST_PASS | PASS | Browser proof and scenario report show local-only proof with production release false, live connector false, and no human acceptance claim. |
 | VS0-UI-R01 | REGRESSION_GUARD | PASS | Scenario report embeds EVUX governance summary: 16 rows, 14 PASS, 2 HUMAN_REQUIRED, 0 blocking. |
 | VS0-UI-R02 | REGRESSION_GUARD | PASS | Browser proof status requires no timeout before PASS. Timeout remains non-clean PASS. |
-| VS0-UI-H01 | HUMAN_REQUIRED | HUMAN_REQUIRED | JiYong/Tars must complete the UI walkthrough and record accept/reject evidence. |
+| VS0-UI-H01 | HUMAN_REQUIRED | ACCEPTED_BY_HUMAN | Human acceptance is recorded in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md`; the generated scenario JSON remains human-required because AI cannot verify subjective acceptance. |
 
 ## Evidence Artifacts
 
@@ -61,7 +61,8 @@ This report does not claim production release, live-provider readiness, or human
 | `reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.dom.html` | DOM snapshot after the guided operator flow completed. |
 | `reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.png` | Browser screenshot after the guided operator flow completed. |
 | `reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow-trace.json` | API/UI workflow trace including artifact, search, evidence, claim, action, approval, execution, and audit payloads. |
-| `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_TEMPLATE_2026-06-14.md` | Human-only `VS0-UI-H01` accept/reject evidence capture template. |
+| `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md` | Human-only `VS0-UI-H01` acceptance evidence. |
+| `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_TEMPLATE_2026-06-14.md` | Historical human-only accept/reject evidence capture template. |
 
 ## Command Evidence
 
@@ -204,21 +205,16 @@ Observed visible state after the guided proof completed:
 
 ## Human Required
 
-`VS0-UI-H01` remains unresolved until JiYong/Tars uses the local UI and records one of:
+`VS0-UI-H01` is closed by human acceptance evidence in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md`.
 
-- acceptance note with screenshot or recording; or
-- rejection note with issue list.
-
-Use `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_TEMPLATE_2026-06-14.md` as the evidence capture template.
-
-Full VS-1 main implementation remains blocked until that human evidence exists.
+Full VS-1 main implementation is unblocked by that human evidence.
 
 ## Verdict
 
 ```text
 AI-verifiable VS0 operator UI gate: PASS
-Human operator UX acceptance: HUMAN_REQUIRED
+Human operator UX acceptance: ACCEPTED_BY_HUMAN
 Production release readiness: NOT CLAIMED
 Live-provider readiness: NOT CLAIMED
-Full VS-1 main implementation: WAIT
+Full VS-1 main implementation: UNBLOCKED
 ```
