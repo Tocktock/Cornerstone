@@ -1,0 +1,4 @@
+Document: Vendor Risk Follow-up
+Organization: Northstar Labs
+Property: Northstar Labs.risk_level = high
+Evidence note: A later review claims Northstar Labs risk level is high, which conflicts with the earlier medium value and requires review.

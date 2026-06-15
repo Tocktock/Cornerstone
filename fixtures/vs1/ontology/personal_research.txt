@@ -1,0 +1,10 @@
+Document: Home Office Research Note
+Person: JiYong
+Asset: Walking Desk
+Location: Seoul
+Event: Ergonomic Review 2026-06-15
+Property: Walking Desk.priority = optional
+Property: Home Office Research Note.topic = ergonomic setup
+Link: JiYong evaluates Walking Desk
+Link: Home Office Research Note mentions Walking Desk
+Evidence note: This personal research artifact uses the same universal ontology seed without a domain-specific pack.

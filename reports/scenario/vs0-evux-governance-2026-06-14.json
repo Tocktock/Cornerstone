@@ -35,7 +35,7 @@
     }
   ],
   "ids": {
-    "git_commit": "1a29cc3"
+    "git_commit": "1849c7f"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -231,7 +231,7 @@
       "--output",
       "reports/scenario/vs0-evux-governance-2026-06-14.json"
     ],
-    "elapsed_seconds": 0.023,
+    "elapsed_seconds": 0.033,
     "exit_code": 0,
     "name": "scenario_verify_vs0-evux-governance",
     "required": true,

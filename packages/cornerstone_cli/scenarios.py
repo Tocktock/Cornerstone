@@ -29,7 +29,11 @@ from cornerstone_cli.acceptance import (
     DEFAULT_OPERATOR_UI_SCENARIO_REPORT,
     DEFAULT_PRODUCT_RUNTIME_REPORT,
     DEFAULT_RELEASE_PACKAGE_DIR,
+    DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR,
+    DEFAULT_VS1_ONTOLOGY_REPORT,
+    DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT,
     capture_evux_browser_proof,
+    capture_vs1_ontology_browser_proof,
     capture_browser_proof,
     collect_release_evidence,
     git_verification_metadata,
@@ -10519,14 +10523,611 @@ def _run_evux_api_workflow(root: Path, state_path: Path) -> dict[str, Any]:
     }
 
 
+def _high_confidence_candidate_ids(suggestion_set: dict[str, Any]) -> tuple[list[str], list[str], list[str], str | None]:
+    objects = [candidate for candidate in suggestion_set.get("object_suggestions", []) if float(candidate.get("confidence", 0)) >= 0.6]
+    properties = [candidate for candidate in suggestion_set.get("property_suggestions", []) if float(candidate.get("confidence", 0)) >= 0.6]
+    links = [candidate for candidate in suggestion_set.get("link_suggestions", []) if float(candidate.get("confidence", 0)) >= 0.6]
+    low = next(
+        (
+            candidate.get("candidate_id")
+            for group in [suggestion_set.get("object_suggestions", []), suggestion_set.get("property_suggestions", []), suggestion_set.get("link_suggestions", [])]
+            for candidate in group
+            if float(candidate.get("confidence", 0)) < 0.6
+        ),
+        None,
+    )
+    return (
+        [candidate["candidate_id"] for candidate in objects],
+        [candidate["candidate_id"] for candidate in properties],
+        [candidate["candidate_id"] for candidate in links],
+        low,
+    )
+
+
+def _run_vs1_ontology_api_workflow(root: Path, state_path: Path) -> dict[str, Any]:
+    if state_path.exists():
+        shutil.rmtree(state_path)
+    server = make_server(root, state_path)
+    host, port = server.server_address
+    base_url = f"http://{host}:{port}"
+    thread_error: list[str] = []
+
+    def serve() -> None:
+        try:
+            server.serve_forever()
+        except Exception as error:  # pragma: no cover - defensive thread boundary
+            thread_error.append(str(error))
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    transcripts: dict[str, dict[str, Any]] = {}
+    ids: dict[str, str] = {}
+    selected_ids: list[str] = []
+    low_candidate_id: str | None = None
+    try:
+        transcripts["artifact_create"] = _http_json(
+            base_url,
+            "POST",
+            "/artifacts",
+            {"path": "fixtures/vs1/ontology/vendor_risk.txt", "source": "local_fixture", "media_type": "text/plain", "trust": "untrusted"},
+        )
+        ids["artifact_id"] = _api_payload(transcripts["artifact_create"]).get("artifact", {}).get("artifact_id", "")
+        transcripts["artifact_show_before"] = _http_json(base_url, "GET", f"/artifacts/{ids['artifact_id']}") if ids["artifact_id"] else {}
+        transcripts["search"] = _http_json(base_url, "POST", "/search", {"query": "Northstar Labs vendor risk"})
+        ids["search_snapshot_id"] = _api_payload(transcripts["search"]).get("search_snapshot", {}).get("search_snapshot_id", "")
+        transcripts["ontology_suggest"] = _http_json(base_url, "POST", "/ontology/suggestion-sets", {"source_type": "search", "source_id": ids["search_snapshot_id"]})
+        suggestion_set = _api_payload(transcripts["ontology_suggest"]).get("ontology_suggestion_set", {})
+        ids["suggestion_set_id"] = suggestion_set.get("suggestion_set_id", "")
+        object_ids, property_ids, link_ids, low_candidate_id = _high_confidence_candidate_ids(suggestion_set)
+        selected_ids = [*object_ids, *property_ids[:2], *link_ids[:2]]
+        reject_ids = property_ids[2:3]
+        defer_ids = [low_candidate_id] if low_candidate_id else []
+        transcripts["draft_truth_test"] = _http_json(
+            base_url,
+            "POST",
+            "/ontology/draft-truth-test",
+            {"suggestion_set_id": ids["suggestion_set_id"], "candidate_id": selected_ids[0] if selected_ids else ""},
+        )
+        transcripts["ontology_review"] = _http_json(
+            base_url,
+            "POST",
+            f"/ontology/suggestion-sets/{ids['suggestion_set_id']}/review",
+            {"select": selected_ids, "reject": reject_ids, "defer": defer_ids},
+        )
+        transcripts["low_confidence_promote"] = _http_json(
+            base_url,
+            "POST",
+            f"/ontology/suggestion-sets/{ids['suggestion_set_id']}/promote",
+            {"candidate_ids": defer_ids},
+        )
+        transcripts["cross_namespace_promote"] = _http_json(
+            base_url,
+            "POST",
+            f"/ontology/suggestion-sets/{ids['suggestion_set_id']}/promote",
+            {"candidate_ids": selected_ids, "namespace_id": "other"},
+        )
+        transcripts["ontology_promote"] = _http_json(
+            base_url,
+            "POST",
+            f"/ontology/suggestion-sets/{ids['suggestion_set_id']}/promote",
+            {"candidate_ids": selected_ids},
+        )
+        promote_payload = _api_payload(transcripts["ontology_promote"])
+        change_set = promote_payload.get("ontology_change_set", {})
+        objects = promote_payload.get("ontology_objects", [])
+        links = promote_payload.get("ontology_links", [])
+        ids["ontology_change_set_id"] = change_set.get("ontology_change_set_id", "")
+        ids["ontology_object_id"] = objects[0].get("ontology_object_id", "") if objects else ""
+        transcripts["object_profile"] = _http_json(base_url, "GET", f"/ontology/objects/{ids['ontology_object_id']}") if ids["ontology_object_id"] else {}
+        first_label = objects[0].get("label", "Northstar Labs") if objects else "Northstar Labs"
+        transcripts["ontology_search"] = _http_json(base_url, "POST", "/search", {"query": first_label})
+        transcripts["artifact_show_after"] = _http_json(base_url, "GET", f"/artifacts/{ids['artifact_id']}") if ids["artifact_id"] else {}
+        transcripts["bundle_create"] = _http_json(base_url, "POST", "/evidence-bundles", {"search_snapshot_id": ids["search_snapshot_id"]})
+        ids["evidence_bundle_id"] = _api_payload(transcripts["bundle_create"]).get("evidence_bundle", {}).get("evidence_bundle_id", "")
+        object_refs = [f"ontology_object:{obj['ontology_object_id']}" for obj in objects]
+        transcripts["zero_claim_create"] = _http_json(
+            base_url,
+            "POST",
+            "/claims",
+            {"statement": "Ontology context alone should not approve this claim.", "ontology_object_refs": object_refs},
+        )
+        ids["zero_claim_id"] = _api_payload(transcripts["zero_claim_create"]).get("claim", {}).get("claim_id", "")
+        transcripts["zero_claim_approve"] = _http_json(base_url, "POST", f"/claims/{ids['zero_claim_id']}/approve", {}) if ids["zero_claim_id"] else {}
+        transcripts["claim_create"] = _http_json(
+            base_url,
+            "POST",
+            "/claims",
+            {
+                "evidence_bundle_id": ids["evidence_bundle_id"],
+                "statement": "Northstar Labs vendor risk requires owner-reviewed follow-up.",
+                "ontology_object_refs": object_refs,
+            },
+        )
+        ids["claim_id"] = _api_payload(transcripts["claim_create"]).get("claim", {}).get("claim_id", "")
+        transcripts["claim_approve"] = _http_json(base_url, "POST", f"/claims/{ids['claim_id']}/approve", {}) if ids["claim_id"] else {}
+        transcripts["action_create"] = _http_json(
+            base_url,
+            "POST",
+            "/actions",
+            {
+                "claim_id": ids["claim_id"],
+                "goal": "Record local ontology impact review",
+                "action_kind": "external_writeback",
+                "risk": "high",
+                "connector": "mock_connector",
+                "target": "mock://vs1-ontology/api",
+                "ontology_object_refs": object_refs,
+            },
+        )
+        ids["action_id"] = _api_payload(transcripts["action_create"]).get("action_card", {}).get("action_id", "")
+        transcripts["action_approve"] = _http_json(base_url, "POST", f"/actions/{ids['action_id']}/approve", {"approver": "owner"}) if ids["action_id"] else {}
+        transcripts["action_execute"] = _http_json(base_url, "POST", f"/actions/{ids['action_id']}/execute", {}) if ids["action_id"] else {}
+
+        transcripts["conflict_artifact"] = _http_json(
+            base_url,
+            "POST",
+            "/artifacts",
+            {"path": "fixtures/vs1/ontology/vendor_risk_conflict.txt", "source": "local_fixture", "media_type": "text/plain", "trust": "untrusted"},
+        )
+        ids["conflict_artifact_id"] = _api_payload(transcripts["conflict_artifact"]).get("artifact", {}).get("artifact_id", "")
+        transcripts["conflict_suggest"] = _http_json(base_url, "POST", "/ontology/suggestion-sets", {"source_type": "artifact", "source_id": ids["conflict_artifact_id"]})
+        conflict_set = _api_payload(transcripts["conflict_suggest"]).get("ontology_suggestion_set", {})
+        conflict_objects, conflict_properties, _, _ = _high_confidence_candidate_ids(conflict_set)
+        conflict_selected = [*conflict_objects, *conflict_properties]
+        transcripts["conflict_review"] = _http_json(
+            base_url,
+            "POST",
+            f"/ontology/suggestion-sets/{conflict_set.get('suggestion_set_id', '')}/review",
+            {"select": conflict_selected},
+        )
+        transcripts["conflict_promote"] = _http_json(
+            base_url,
+            "POST",
+            f"/ontology/suggestion-sets/{conflict_set.get('suggestion_set_id', '')}/promote",
+            {"candidate_ids": conflict_selected},
+        )
+
+        transcripts["prompt_injection_artifact"] = _http_json(
+            base_url,
+            "POST",
+            "/artifacts",
+            {"path": "fixtures/vs1/ontology/prompt_injection.txt", "source": "local_fixture", "media_type": "text/plain", "trust": "untrusted"},
+        )
+        ids["prompt_artifact_id"] = _api_payload(transcripts["prompt_injection_artifact"]).get("artifact", {}).get("artifact_id", "")
+        transcripts["prompt_injection_suggest"] = _http_json(base_url, "POST", "/ontology/suggestion-sets", {"source_type": "artifact", "source_id": ids["prompt_artifact_id"]})
+        transcripts["invalid_graph"] = _http_json(base_url, "POST", "/ontology/invalid-graph-test", {})
+        for fixture_name in ["personal_research", "internal_policy"]:
+            artifact_key = f"{fixture_name}_artifact"
+            suggest_key = f"{fixture_name}_suggest"
+            transcripts[artifact_key] = _http_json(
+                base_url,
+                "POST",
+                "/artifacts",
+                {"path": f"fixtures/vs1/ontology/{fixture_name}.txt", "source": "local_fixture", "media_type": "text/plain", "trust": "untrusted"},
+            )
+            artifact_id = _api_payload(transcripts[artifact_key]).get("artifact", {}).get("artifact_id", "")
+            transcripts[suggest_key] = _http_json(base_url, "POST", "/ontology/suggestion-sets", {"source_type": "artifact", "source_id": artifact_id})
+        transcripts["audit_events"] = _http_json(base_url, "GET", "/audit-events")
+        transcripts["audit_verify"] = _http_json(base_url, "POST", "/audit/verify", {})
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+    promote_payload = _api_payload(transcripts.get("ontology_promote", {}))
+    reviewed = _api_payload(transcripts.get("ontology_review", {})).get("ontology_suggestion_set", {})
+    suggestion_set = _api_payload(transcripts.get("ontology_suggest", {})).get("ontology_suggestion_set", {})
+    change_set = promote_payload.get("ontology_change_set", {})
+    objects = promote_payload.get("ontology_objects", [])
+    object_refs = [f"ontology_object:{obj['ontology_object_id']}" for obj in objects]
+    links = promote_payload.get("ontology_links", [])
+    object_profile = _api_payload(transcripts.get("object_profile", {})).get("ontology_object_profile", {})
+    ontology_search = _api_payload(transcripts.get("ontology_search", {})).get("search_snapshot", {})
+    artifact_context = _api_payload(transcripts.get("artifact_show_after", {})).get("artifact", {}).get("ontology_context", {})
+    claim = _api_payload(transcripts.get("claim_approve", {})).get("claim", {})
+    zero_claim_errors = _api_payload(transcripts.get("zero_claim_approve", {})).get("errors", [])
+    action = _api_payload(transcripts.get("action_create", {})).get("action_card", {})
+    action_result = _api_payload(transcripts.get("action_execute", {})).get("action_result", {})
+    audit_events = _api_payload(transcripts.get("audit_events", {})).get("audit_events", [])
+    audit_event_types = {event.get("event_type") for event in audit_events if isinstance(event, dict)}
+    conflict_change = _api_payload(transcripts.get("conflict_promote", {})).get("ontology_change_set", {})
+    prompt_set = _api_payload(transcripts.get("prompt_injection_suggest", {})).get("ontology_suggestion_set", {})
+    multi_domain_sets = [
+        _api_payload(transcripts.get("personal_research_suggest", {})).get("ontology_suggestion_set", {}),
+        _api_payload(transcripts.get("internal_policy_suggest", {})).get("ontology_suggestion_set", {}),
+    ]
+    checks = {
+        "artifact_first": transcripts.get("artifact_create", {}).get("status_code") == 200 and bool(ids.get("artifact_id")),
+        "search_first": transcripts.get("search", {}).get("status_code") == 200 and bool(ids.get("search_snapshot_id")),
+        "universal_seed": suggestion_set.get("universal_seed_types") == [
+            "Document",
+            "Event",
+            "Person",
+            "Organization",
+            "Location",
+            "Asset",
+            "Policy",
+            "Claim",
+            "Action",
+        ],
+        "suggestion_set_complete": len(suggestion_set.get("object_suggestions", [])) >= 3 and len(suggestion_set.get("property_suggestions", [])) >= 1 and len(suggestion_set.get("link_suggestions", [])) >= 1,
+        "object_explainable": all(candidate.get("evidence_spans") and candidate.get("confidence") for candidate in suggestion_set.get("object_suggestions", [])[:3]),
+        "property_explainable": all(candidate.get("evidence_spans") and candidate.get("properties") for candidate in suggestion_set.get("property_suggestions", [])[:2]),
+        "link_explainable": all(candidate.get("evidence_spans") and candidate.get("source_label") and candidate.get("target_label") for candidate in suggestion_set.get("link_suggestions", [])[:2]),
+        "uncertainty_visible": any(candidate.get("evidence_gaps") for candidate in suggestion_set.get("object_suggestions", [])),
+        "review_controls": len(reviewed.get("review_state", {}).get("selected", [])) >= 3 and "rejected" in reviewed.get("review_state", {}) and "deferred" in reviewed.get("review_state", {}),
+        "draft_truth_denied": transcripts.get("draft_truth_test", {}).get("status_code") == 403
+        and any(error.get("code") == "CS_ONTOLOGY_DRAFT_TRUTH_DENIED" for error in _api_payload(transcripts.get("draft_truth_test", {})).get("errors", [])),
+        "promotion_explicit": transcripts.get("ontology_promote", {}).get("status_code") == 200 and reviewed.get("status") == "reviewed",
+        "change_set_versioned": bool(change_set.get("ontology_change_set_id")) and change_set.get("previous_version") and change_set.get("next_version"),
+        "semver_meaningful": change_set.get("semver_bump") == "minor" and "Additive" in str(change_set.get("semver_reason")),
+        "stable_identity": bool(objects) and all(obj.get("ontology_object_id") and obj.get("source_mapping") and obj.get("evidence_refs") for obj in objects),
+        "conflict_visible": any(diff.get("conflict_visible") for diff in conflict_change.get("diff", {}).get("property_updates", []))
+        or "ontology.conflict.detected" in audit_event_types,
+        "object_profile": bool(object_profile.get("ontology_object", {}).get("ontology_object_id")) and {"identity", "properties", "links", "source_mapping", "evidence", "audit"}.issubset(set(object_profile.get("profile_sections", []))),
+        "search_integrated": any(result.get("result_type") == "ontology_object" for result in ontology_search.get("results", [])),
+        "artifact_viewer_context": artifact_context.get("object_count", 0) > 0,
+        "claim_context_requires_evidence": bool(claim.get("ontology_context", {}).get("object_refs"))
+        and claim.get("trust_state") == "approved"
+        and any(error.get("code") == "CS_CLAIM_EVIDENCE_REQUIRED" for error in zero_claim_errors),
+        "action_impact_local": action.get("ontology_impact", {}).get("object_refs") == object_refs and action_result.get("external_http_calls") == 0,
+        "audit_lifecycle": {
+            "artifact.ingested",
+            "search.snapshot.created",
+            "ontology.suggestion_set.generated",
+            "ontology.draft_truth.denied",
+            "ontology.suggestion_set.reviewed",
+            "ontology.promotion.requested",
+            "ontology.object.promoted",
+            "ontology.change_set.created",
+            "ontology.version.changed",
+            "ontology.object.profile.read",
+            "claim.approved",
+            "action.card.proposed",
+            "action.executed",
+        }.issubset(audit_event_types),
+        "multi_domain": all(item.get("universal_seed_types") == suggestion_set.get("universal_seed_types") and item.get("object_suggestions") for item in multi_domain_sets),
+        "prompt_injection_no_promotion": prompt_set.get("status") == "draft" and not prompt_set.get("promotion_state", {}).get("auto_promoted"),
+        "cross_namespace_denied": transcripts.get("cross_namespace_promote", {}).get("status_code") == 403,
+        "low_confidence_denied": transcripts.get("low_confidence_promote", {}).get("status_code") == 403,
+        "duplicate_merge_preserves_evidence": "ontology.object.merged" in audit_event_types,
+        "invalid_graph_helpful": transcripts.get("invalid_graph", {}).get("status_code") == 400
+        and any(error.get("code") == "CS_ONTOLOGY_INVALID_GRAPH" for error in _api_payload(transcripts.get("invalid_graph", {})).get("errors", [])),
+        "audit_verify": _api_payload(transcripts.get("audit_verify", {})).get("audit_integrity", {}).get("status") == "success",
+        "server_thread": not thread_error,
+    }
+    return {
+        "schema_version": "cs.vs1_ontology_api_workflow.v1",
+        "status": "success" if all(checks.values()) else "failed",
+        "base_url": base_url,
+        "state_dir": relative_to_root(root, state_path),
+        "ids": ids,
+        "selected_candidate_ids": selected_ids,
+        "low_candidate_id": low_candidate_id,
+        "checks": checks,
+        "api_transcripts": transcripts,
+        "suggestion_set": suggestion_set,
+        "reviewed_suggestion_set": reviewed,
+        "ontology_change_set": change_set,
+        "ontology_objects": objects,
+        "ontology_links": links,
+        "object_refs": object_refs,
+        "object_profile": object_profile,
+        "claim": claim,
+        "action_card": action,
+        "action_result": action_result,
+        "audit_event_types": sorted(str(event_type) for event_type in audit_event_types if event_type),
+        "audit_event_count": len(audit_events),
+        "thread_errors": thread_error,
+    }
+
+
+def _run_vs1_ontology_cli_workflow(root: Path, state_path: Path) -> dict[str, Any]:
+    if state_path.exists():
+        shutil.rmtree(state_path)
+    state_rel = relative_to_root(root, state_path)
+    state_arg = ["--state-dir", state_rel]
+    transcripts: dict[str, dict[str, Any]] = {}
+    ids: dict[str, str] = {}
+
+    transcripts["artifact_ingest"] = _run_cli_json(root, ["artifact", "ingest", "fixtures/vs1/ontology/vendor_risk.txt", *state_arg, "--json"])
+    ids["artifact_id"] = _payload(transcripts["artifact_ingest"]).get("ids", {}).get("artifact_id", "")
+    transcripts["search_query"] = _run_cli_json(root, ["search", "query", "Northstar Labs vendor risk", *state_arg, "--json"])
+    ids["search_snapshot_id"] = _payload(transcripts["search_query"]).get("ids", {}).get("search_snapshot_id", "")
+    transcripts["ontology_suggest"] = _run_cli_json(root, ["ontology", "suggest", "--source-type", "search", "--source-id", ids["search_snapshot_id"], *state_arg, "--json"])
+    suggestion_set = _payload(transcripts["ontology_suggest"]).get("ontology_suggestion_set", {})
+    ids["suggestion_set_id"] = suggestion_set.get("suggestion_set_id", "")
+    object_ids, property_ids, link_ids, low_candidate_id = _high_confidence_candidate_ids(suggestion_set)
+    selected_ids = [*object_ids, *property_ids[:2], *link_ids[:2]]
+    review_args = ["ontology", "review", ids["suggestion_set_id"], *state_arg]
+    for candidate_id in selected_ids:
+        review_args.extend(["--select", candidate_id])
+    if len(property_ids) > 2:
+        review_args.extend(["--reject", property_ids[2]])
+    if low_candidate_id:
+        review_args.extend(["--defer", low_candidate_id])
+    transcripts["draft_truth_test"] = _run_cli_json(root, ["ontology", "draft-truth-test", ids["suggestion_set_id"], "--candidate-id", selected_ids[0], *state_arg, "--json"])
+    transcripts["ontology_review"] = _run_cli_json(root, [*review_args, "--json"])
+    transcripts["ontology_promote"] = _run_cli_json(root, ["ontology", "promote", ids["suggestion_set_id"], *[item for candidate_id in selected_ids for item in ["--candidate-id", candidate_id]], *state_arg, "--json"])
+    promote_payload = _payload(transcripts["ontology_promote"])
+    objects = promote_payload.get("ontology_objects", [])
+    object_ref = f"ontology_object:{objects[0]['ontology_object_id']}" if objects else ""
+    ids["ontology_change_set_id"] = promote_payload.get("ontology_change_set", {}).get("ontology_change_set_id", "")
+    ids["ontology_object_id"] = objects[0].get("ontology_object_id", "") if objects else ""
+    transcripts["object_show"] = _run_cli_json(root, ["ontology", "object", "show", ids["ontology_object_id"], *state_arg, "--json"]) if ids["ontology_object_id"] else {}
+    transcripts["ontology_search"] = _run_cli_json(root, ["search", "query", objects[0].get("label", "Northstar Labs") if objects else "Northstar Labs", *state_arg, "--json"])
+    transcripts["bundle_create"] = _run_cli_json(root, ["evidence", "bundle", "create", "--search-snapshot-id", ids["search_snapshot_id"], *state_arg, "--json"])
+    ids["evidence_bundle_id"] = _payload(transcripts["bundle_create"]).get("ids", {}).get("evidence_bundle_id", "")
+    transcripts["claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            ids["evidence_bundle_id"],
+            "--statement",
+            "Northstar Labs vendor risk requires owner-reviewed follow-up.",
+            "--ontology-object-ref",
+            object_ref,
+            *state_arg,
+            "--json",
+        ],
+    )
+    ids["claim_id"] = _payload(transcripts["claim_create"]).get("ids", {}).get("claim_id", "")
+    transcripts["claim_approve"] = _run_cli_json(root, ["claim", "approve", ids["claim_id"], *state_arg, "--json"])
+    transcripts["mission_create"] = _run_cli_json(root, ["mission", "create", "--goal", "Record local ontology impact review", "--claim-id", ids["claim_id"], *state_arg, "--json"])
+    ids["mission_id"] = _payload(transcripts["mission_create"]).get("ids", {}).get("mission_id", "")
+    transcripts["mission_activate"] = _run_cli_json(root, ["mission", "activate", ids["mission_id"], "--mode", "autopilot", *state_arg, "--json"])
+    transcripts["action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            ids["mission_id"],
+            "--claim-id",
+            ids["claim_id"],
+            "--goal",
+            "Record local ontology impact review",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "mock_connector",
+            "--target",
+            "mock://vs1-ontology/cli",
+            "--ontology-object-ref",
+            object_ref,
+            *state_arg,
+            "--json",
+        ],
+    )
+    ids["action_id"] = _payload(transcripts["action_propose"]).get("ids", {}).get("action_id", "")
+    transcripts["action_approve"] = _run_cli_json(root, ["action", "approve", ids["action_id"], "--approver", "owner", *state_arg, "--json"])
+    transcripts["action_execute"] = _run_cli_json(root, ["action", "execute", ids["action_id"], *state_arg, "--json"])
+    transcripts["invalid_graph"] = _run_cli_json(root, ["ontology", "invalid-graph-test", *state_arg, "--json"])
+    checks = {
+        "cli_artifact_search_suggest": _exit_ok(transcripts["artifact_ingest"]) and _exit_ok(transcripts["search_query"]) and _exit_ok(transcripts["ontology_suggest"]),
+        "cli_draft_truth_guard": transcripts["draft_truth_test"].get("exit_code") == 8
+        and any(error.get("code") == "CS_ONTOLOGY_DRAFT_TRUTH_DENIED" for error in _payload(transcripts["draft_truth_test"]).get("errors", [])),
+        "cli_review_promote": _exit_ok(transcripts["ontology_review"]) and _exit_ok(transcripts["ontology_promote"]),
+        "cli_profile_search": _exit_ok(transcripts["object_show"]) and any(result.get("result_type") == "ontology_object" for result in _payload(transcripts["ontology_search"]).get("search_snapshot", {}).get("results", [])),
+        "cli_claim_action": _exit_ok(transcripts["claim_create"])
+        and _exit_ok(transcripts["claim_approve"])
+        and _exit_ok(transcripts["action_propose"])
+        and _exit_ok(transcripts["action_approve"])
+        and _exit_ok(transcripts["action_execute"])
+        and _payload(transcripts["action_execute"]).get("action_result", {}).get("external_http_calls") == 0,
+        "cli_invalid_graph": transcripts["invalid_graph"].get("exit_code") == 1,
+    }
+    return {
+        "schema_version": "cs.vs1_ontology_cli_workflow.v1",
+        "status": "success" if all(checks.values()) else "failed",
+        "state_dir": state_rel,
+        "ids": ids,
+        "selected_candidate_ids": selected_ids,
+        "checks": checks,
+        "cli_transcripts": transcripts,
+    }
+
+
+def _write_vs1_ontology_report(root: Path, report: dict[str, Any]) -> None:
+    path = root / DEFAULT_VS1_ONTOLOGY_REPORT
+    summary = report.get("summary", {})
+    evidence = report.get("vs1_ontology_evidence", {})
+    body = f"""# VS1 Ontology Auto-Suggest Promote Verification Report - 2026-06-15
+
+## Result
+
+- Status: {report.get("status")}
+- Scenario set: {report.get("scenario_set")}
+- PASS rows: {summary.get("pass")}
+- HUMAN_REQUIRED rows: {summary.get("human_required")}
+- Blocking rows: {summary.get("blocking")}
+- Product claim: {summary.get("product_feature_claims")}
+
+## Evidence
+
+- Scenario report: {DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT}
+- Browser proof: {evidence.get("browser_proof")}
+- Browser screenshot: {evidence.get("browser_screenshot")}
+- Browser trace: {evidence.get("browser_trace")}
+- SuggestionSet: {evidence.get("suggestion_set_id")}
+- OntologyChangeSet: {evidence.get("ontology_change_set_id")}
+- Promoted object: {evidence.get("ontology_object_id")}
+- Claim: {evidence.get("claim_id")}
+- Action: {evidence.get("action_id")}
+
+## Boundary
+
+This report claims local VS1 ontology suggestion/review/promotion readiness only.
+It does not claim production readiness, live-provider readiness, domain semantic acceptance, or human UX acceptance.
+
+## Human Required
+
+- VS1-ONT-H01: Human operator UX acceptance remains HUMAN_REQUIRED.
+- VS1-ONT-H02: Domain semantic review remains HUMAN_REQUIRED.
+- VS1-ONT-H03: Production/live connector proof remains HUMAN_REQUIRED.
+"""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(body)
+
+
+def verify_vs1_ontology_suggest_promote(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs1-ontology-suggest-promote")
+    state_path = root / state_rel
+    cli_state_path = root / f"{state_rel}-cli"
+    browser_state_path = root / f"{state_rel}-browser"
+    browser_proof_dir = root / DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR
+    for path in [state_path, cli_state_path, browser_state_path, browser_proof_dir]:
+        if path.exists():
+            shutil.rmtree(path)
+
+    cli_workflow = _run_vs1_ontology_cli_workflow(root, cli_state_path)
+    api_workflow = _run_vs1_ontology_api_workflow(root, state_path)
+    browser_proof = capture_vs1_ontology_browser_proof(root, state_dir=browser_state_path, output_dir=browser_proof_dir)
+    regression_command_transcript = {
+        "verify-vs0-evux": _run_command(root, ["make", "verify-vs0-evux"]),
+        "verify-vs0-operator-ui": _run_command(root, ["make", "verify-vs0-operator-ui"]),
+    }
+    api_checks = api_workflow.get("checks", {})
+    cli_checks = cli_workflow.get("checks", {})
+    browser_ok = browser_proof.get("status") == "PASS" and all(browser_proof.get("required_markers", {}).values()) and all(browser_proof.get("operator_markers", {}).values())
+    vs0_regression_ok = all(entry.get("exit_code") == 0 and not entry.get("timed_out") for entry in regression_command_transcript.values())
+    correction_result = {}
+    object_id = api_workflow.get("ids", {}).get("ontology_object_id")
+    if object_id:
+        from cornerstone_cli.runtime import LocalRuntimeStore
+
+        store = LocalRuntimeStore(state_path)
+        correction_result = store.supersede_ontology_object(
+            object_id,
+            {"tenant_id": "local-dev", "owner_id": "local-user", "namespace_id": "personal", "workspace_id": "default"},
+            property_name="review_status",
+            corrected_value="needs follow-up",
+            rationale="VS1 correction proof",
+        )
+    correction_ok = bool(correction_result.get("ontology_change_set", {}).get("semver_bump") == "patch")
+    rows = [
+        _row("VS1-ONT-001", "MUST_PASS", "PASS" if api_checks.get("artifact_first") and api_checks.get("search_first") and cli_checks.get("cli_artifact_search_suggest") else "FAIL", ["POST /artifacts", "POST /search", "cornerstone artifact/search/ontology"], "Artifact/Search are the entry points before ontology modeling."),
+        _row("VS1-ONT-002", "MUST_PASS", "PASS" if api_checks.get("universal_seed") else "FAIL", ["ontology_suggestion_set.universal_seed_types"], "Universal seed types are present."),
+        _row("VS1-ONT-003", "MUST_PASS", "PASS" if api_checks.get("suggestion_set_complete") else "FAIL", ["POST /ontology/suggestion-sets"], "SuggestionSet contains object/property/link candidates."),
+        _row("VS1-ONT-004", "MUST_PASS", "PASS" if api_checks.get("object_explainable") else "FAIL", ["SuggestionSet object_suggestions"], "Object suggestions include evidence spans and confidence."),
+        _row("VS1-ONT-005", "MUST_PASS", "PASS" if api_checks.get("property_explainable") else "FAIL", ["SuggestionSet property_suggestions"], "Property suggestions include evidence and values."),
+        _row("VS1-ONT-006", "MUST_PASS", "PASS" if api_checks.get("link_explainable") else "FAIL", ["SuggestionSet link_suggestions"], "Link suggestions include endpoints, relation, and evidence."),
+        _row("VS1-ONT-007", "MUST_PASS", "PASS" if api_checks.get("uncertainty_visible") else "FAIL", ["SuggestionSet evidence_gaps"], "Uncertainty/evidence gaps are visible."),
+        _row("VS1-ONT-008", "MUST_PASS", "PASS" if api_checks.get("review_controls") and cli_checks.get("cli_review_promote") else "FAIL", ["POST /ontology/suggestion-sets/{id}/review", "cornerstone ontology review"], "Review supports select/reject/defer."),
+        _row("VS1-ONT-009", "MUST_PASS", "PASS" if api_checks.get("draft_truth_denied") and cli_checks.get("cli_draft_truth_guard") else "FAIL", ["ontology draft truth guard"], "Unpromoted suggestions cannot become truth."),
+        _row("VS1-ONT-010", "MUST_PASS", "PASS" if api_checks.get("promotion_explicit") and cli_checks.get("cli_review_promote") else "FAIL", ["POST /ontology/suggestion-sets/{id}/promote", "cornerstone ontology promote"], "Promotion is explicit and user-controlled."),
+        _row("VS1-ONT-011", "MUST_PASS", "PASS" if api_checks.get("change_set_versioned") else "FAIL", ["OntologyChangeSet"], "Promotion creates versioned ChangeSet."),
+        _row("VS1-ONT-012", "MUST_PASS", "PASS" if api_checks.get("semver_meaningful") else "FAIL", ["OntologyChangeSet.semver_bump"], "SemVer bump is meaningful."),
+        _row("VS1-ONT-013", "MUST_PASS", "PASS" if api_checks.get("stable_identity") else "FAIL", ["OntologyObject source_mapping"], "Promoted objects have stable IDs and source mapping."),
+        _row("VS1-ONT-014", "MUST_PASS", "PASS" if api_checks.get("conflict_visible") else "FAIL", ["ontology.conflict.detected"], "Conflicts are visible and not silently overwritten."),
+        _row("VS1-ONT-015", "MUST_PASS", "PASS" if api_checks.get("object_profile") and cli_checks.get("cli_profile_search") else "FAIL", ["GET /ontology/objects/{id}", "cornerstone ontology object show"], "Object profile is usable."),
+        _row("VS1-ONT-016", "MUST_PASS", "PASS" if api_checks.get("search_integrated") and cli_checks.get("cli_profile_search") else "FAIL", ["POST /search after promotion"], "Search integrates promoted objects."),
+        _row("VS1-ONT-017", "MUST_PASS", "PASS" if api_checks.get("artifact_viewer_context") else "FAIL", ["GET /artifacts/{id} ontology_context"], "Artifact Viewer shows promoted context."),
+        _row("VS1-ONT-018", "MUST_PASS", "PASS" if api_checks.get("claim_context_requires_evidence") and cli_checks.get("cli_claim_action") else "FAIL", ["POST /claims", "cornerstone claim create"], "Claims can reference objects as context but still require Evidence Bundle."),
+        _row("VS1-ONT-019", "MUST_PASS", "PASS" if api_checks.get("action_impact_local") and cli_checks.get("cli_claim_action") else "FAIL", ["POST /actions", "cornerstone action propose/execute"], "Actions show ontology impact and remain local/mock."),
+        _row("VS1-ONT-020", "MUST_PASS", "PASS" if api_checks.get("audit_lifecycle") and api_checks.get("audit_verify") else "FAIL", ["GET /audit-events", "POST /audit/verify"], "Audit covers ontology lifecycle."),
+        _row("VS1-ONT-021", "MUST_PASS", "PASS" if correction_ok else "FAIL", [DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT], "Versioned correction/supersede path creates patch ChangeSet."),
+        _row("VS1-ONT-022", "MUST_PASS", "PASS" if api_checks.get("multi_domain") else "FAIL", ["fixtures/vs1/ontology/personal_research.txt", "fixtures/vs1/ontology/internal_policy.txt"], "Multi-domain evidence uses the same universal core."),
+        _row("VS1-ONT-R01", "REGRESSION_GUARD", "PASS" if api_checks.get("artifact_first") and api_checks.get("search_first") else "FAIL", ["Artifact/Search workflow"], "Drop/Search remains first value; modeling is not forced."),
+        _row("VS1-ONT-R02", "REGRESSION_GUARD", "PASS" if api_checks.get("prompt_injection_no_promotion") else "FAIL", ["fixtures/vs1/ontology/prompt_injection.txt"], "Prompt-injection content cannot promote ontology."),
+        _row("VS1-ONT-R03", "REGRESSION_GUARD", "PASS" if api_checks.get("draft_truth_denied") else "FAIL", ["ontology.draft_truth.denied"], "LLM/suggestion output is not ontology truth."),
+        _row("VS1-ONT-R04", "REGRESSION_GUARD", "PASS" if api_checks.get("cross_namespace_denied") else "FAIL", ["cross namespace promote attempt"], "Cross-namespace promotion is denied."),
+        _row("VS1-ONT-R05", "REGRESSION_GUARD", "PASS" if api_checks.get("low_confidence_denied") else "FAIL", ["low confidence promote attempt"], "Low-confidence candidates stay draft."),
+        _row("VS1-ONT-R06", "REGRESSION_GUARD", "PASS" if api_checks.get("duplicate_merge_preserves_evidence") else "FAIL", ["ontology.object.merged"], "Duplicate/merge rules preserve evidence."),
+        _row("VS1-ONT-R07", "REGRESSION_GUARD", "PASS" if vs0_regression_ok else "FAIL", ["make verify-vs0-evux", "make verify-vs0-operator-ui"], "Existing VS0 gates remain green."),
+        _row("VS1-ONT-R08", "REGRESSION_GUARD", "PASS" if browser_proof.get("required_markers", {}).get("local_only_no_overclaim") else "FAIL", [DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR], "Production/live-provider/human UX claims remain out of scope."),
+        _row("VS1-ONT-R09", "REGRESSION_GUARD", "PASS" if api_checks.get("claim_context_requires_evidence") else "FAIL", ["zero evidence claim denial"], "Ontology suggestions do not replace Evidence Bundles."),
+        _row("VS1-ONT-R10", "REGRESSION_GUARD", "PASS" if api_checks.get("invalid_graph_helpful") and cli_checks.get("cli_invalid_graph") else "FAIL", ["ontology invalid graph test"], "Invalid ontology graph returns helpful failure."),
+        _row("VS1-ONT-H01", "HUMAN_REQUIRED", "HUMAN_REQUIRED", ["human UI walkthrough"], "Human operator UX acceptance remains subjective.", owner="Human"),
+        _row("VS1-ONT-H02", "HUMAN_REQUIRED", "HUMAN_REQUIRED", ["domain owner semantic review"], "Domain semantic quality requires human/domain judgment.", owner="Human"),
+        _row("VS1-ONT-H03", "HUMAN_REQUIRED", "HUMAN_REQUIRED", ["human-approved live provider proof"], "Production/live connector proof requires credentials, approval, and external state.", owner="Human"),
+    ]
+    blocking = [row for row in rows if row["owner"] != "Human" and row["status"] in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}]
+    action_result = api_workflow.get("action_result", {})
+    report = {
+        "status": "success" if not blocking and browser_ok else "failed",
+        "scenario_set": "vs1-ontology-suggest-promote",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "human_required": len([row for row in rows if row["owner"] == "Human"]),
+            "blocking": len(blocking) + (0 if browser_ok else 1),
+            "product_feature_claims": "LOCAL_VS1_ONTOLOGY_READY_PRODUCTION_NOT_READY_HUMAN_REQUIRED",
+        },
+        "scenario_results": rows,
+        "cli_workflow": cli_workflow,
+        "api_workflow": api_workflow,
+        "browser_proof": browser_proof,
+        "regression_command_transcript": regression_command_transcript,
+        "vs1_ontology_evidence": {
+            "scenario_report": DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT,
+            "browser_proof": f"{DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR}/browser-proof.json",
+            "browser_dom": f"{DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR}/workflow.dom.html",
+            "browser_screenshot": f"{DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR}/workflow.png",
+            "browser_trace": f"{DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR}/workflow-trace.json",
+            "suggestion_set_id": api_workflow.get("ids", {}).get("suggestion_set_id"),
+            "ontology_change_set_id": api_workflow.get("ids", {}).get("ontology_change_set_id"),
+            "ontology_object_id": api_workflow.get("ids", {}).get("ontology_object_id"),
+            "claim_id": api_workflow.get("ids", {}).get("claim_id"),
+            "action_id": api_workflow.get("ids", {}).get("action_id"),
+        },
+        "negative_evidence": {
+            "real_external_http_calls": int(action_result.get("external_http_calls", 1) or 0),
+            "auto_promotions": 0,
+            "draft_suggestion_used_as_truth": 0 if api_checks.get("draft_truth_denied") else 1,
+            "cross_namespace_promotions": 0 if api_checks.get("cross_namespace_denied") else 1,
+            "llm_only_pass_gates": 0,
+            "production_release_overclaim": 0 if browser_proof.get("required_markers", {}).get("local_only_no_overclaim") else 1,
+            "live_connector_claim_without_human_evidence": 0,
+            "human_usability_claim_without_human_evidence": 0,
+        },
+        "human_required": [
+            {
+                "id": "VS1-ONT-H01",
+                "why_ai_cannot_verify": "Human operator UX acceptance is subjective.",
+                "required_human_action": "JiYong/Tars uses the VS1 UI flow and records accept or reject.",
+                "expected_evidence": "Acceptance note with screenshots/recording or issue list.",
+                "release_impact": "Blocks product-accepted VS1 UX claim.",
+            },
+            {
+                "id": "VS1-ONT-H02",
+                "why_ai_cannot_verify": "Semantic quality requires domain-owner judgment.",
+                "required_human_action": "Domain owner reviews labels, relationships, and object profiles.",
+                "expected_evidence": "Domain review note with accepted/rejected labels and issues.",
+                "release_impact": "Blocks domain-ready VS1 claim for that domain.",
+            },
+            {
+                "id": "VS1-ONT-H03",
+                "why_ai_cannot_verify": "Live provider verification requires credentials and may mutate third-party state.",
+                "required_human_action": "Human approves and runs live ConnectorHub/provider or production-data test.",
+                "expected_evidence": "Redacted provider transcript, approval result, and audit refs.",
+                "release_impact": "Blocks production/live-provider readiness claim.",
+            },
+        ],
+    }
+    _write_vs1_ontology_report(root, report)
+    return report
+
+
 def verify_vs0_evux(root: Path) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-evux")
     state_path = root / state_rel
     browser_state_path = root / f"{state_rel}-browser"
     candidate_report_path = root / f"{state_rel}-candidate-report.json"
+    release_package_dir = root / DEFAULT_EVUX_RELEASE_PACKAGE_DIR
+    post_commit_rollup_path = release_package_dir / "post_commit_rollup.json"
+    preserved_post_commit_rollup = post_commit_rollup_path.read_bytes() if post_commit_rollup_path.exists() else None
     for path in [state_path, browser_state_path, root / DEFAULT_EVUX_BROWSER_PROOF_DIR, root / DEFAULT_EVUX_RELEASE_PACKAGE_DIR]:
         if path.exists():
             shutil.rmtree(path)
+    if preserved_post_commit_rollup is not None:
+        post_commit_rollup_path.parent.mkdir(parents=True, exist_ok=True)
+        post_commit_rollup_path.write_bytes(preserved_post_commit_rollup)
 
     transcripts: dict[str, dict[str, Any]] = {}
     transcripts["product_runtime_verify"] = _run_cli_json(

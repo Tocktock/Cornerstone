@@ -1,0 +1,16 @@
+Document: Vendor Risk Brief
+Organization: Northstar Labs
+Person: Mina Park
+Policy: Vendor Risk Policy
+Event: Vendor Review 2026-06-15
+Location: Seoul
+Asset: Payment API
+Claim: Northstar Labs requires owner-reviewed renewal before production use
+Action: Draft vendor follow-up task
+Property: Northstar Labs.risk_level = medium
+Property: Vendor Risk Policy.requires = owner approval before renewal
+Property: Vendor Review 2026-06-15.date = 2026-06-15
+Link: Northstar Labs governed_by Vendor Risk Policy
+Link: Mina Park reviews Northstar Labs
+Link: Vendor Risk Brief describes Northstar Labs
+Evidence note: Northstar Labs has pending security questionnaire items and no production writeback authority.

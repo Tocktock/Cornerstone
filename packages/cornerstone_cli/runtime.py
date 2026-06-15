@@ -29,6 +29,18 @@ SEMANTIC_ALIASES = {
     "preserved": ["keep", "stored", "original"],
 }
 
+UNIVERSAL_ONTOLOGY_SEED_TYPES = [
+    "Document",
+    "Event",
+    "Person",
+    "Organization",
+    "Location",
+    "Asset",
+    "Policy",
+    "Claim",
+    "Action",
+]
+
 ANSWER_STOP_TERMS = {
     "a",
     "an",
@@ -339,6 +351,9 @@ class LocalRuntimeStore:
         self.correction_dir = state_dir / "corrections"
         self.share_dir = state_dir / "shares"
         self.understanding_suggestion_dir = state_dir / "understanding_suggestions"
+        self.ontology_suggestion_set_dir = state_dir / "ontology_suggestion_sets"
+        self.ontology_object_dir = state_dir / "ontology_objects"
+        self.ontology_link_dir = state_dir / "ontology_links"
         self.ontology_item_dir = state_dir / "ontology_items"
         self.operational_map_dir = state_dir / "operational_maps"
         self.contradiction_dir = state_dir / "contradictions"
@@ -546,6 +561,15 @@ class LocalRuntimeStore:
 
     def understanding_suggestion_path(self, suggestion_id: str) -> Path:
         return self.understanding_suggestion_dir / f"{suggestion_id}.json"
+
+    def ontology_suggestion_set_path(self, suggestion_set_id: str) -> Path:
+        return self.ontology_suggestion_set_dir / f"{suggestion_set_id}.json"
+
+    def ontology_object_path(self, object_id: str) -> Path:
+        return self.ontology_object_dir / f"{object_id}.json"
+
+    def ontology_link_path(self, link_id: str) -> Path:
+        return self.ontology_link_dir / f"{link_id}.json"
 
     def ontology_item_path(self, item_id: str) -> Path:
         return self.ontology_item_dir / f"{item_id}.json"
@@ -900,6 +924,24 @@ class LocalRuntimeStore:
             return None
         return _read_json(path)
 
+    def get_ontology_suggestion_set(self, suggestion_set_id: str) -> dict[str, Any] | None:
+        path = self.ontology_suggestion_set_path(suggestion_set_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_ontology_object(self, object_id: str) -> dict[str, Any] | None:
+        path = self.ontology_object_path(object_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_ontology_link(self, link_id: str) -> dict[str, Any] | None:
+        path = self.ontology_link_path(link_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
     def get_ontology_item(self, item_id: str) -> dict[str, Any] | None:
         path = self.ontology_item_path(item_id)
         if not path.exists():
@@ -1127,6 +1169,36 @@ class LocalRuntimeStore:
             return []
         records = []
         for path in sorted(self.understanding_suggestion_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _ontology_suggestion_set_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.ontology_suggestion_set_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.ontology_suggestion_set_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _ontology_object_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.ontology_object_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.ontology_object_dir.glob("*.json")):
+            record = _read_json(path)
+            if record.get("scope") == scope:
+                records.append(record)
+        return records
+
+    def _ontology_link_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+        if not self.ontology_link_dir.exists():
+            return []
+        records = []
+        for path in sorted(self.ontology_link_dir.glob("*.json")):
             record = _read_json(path)
             if record.get("scope") == scope:
                 records.append(record)
@@ -6273,6 +6345,817 @@ class LocalRuntimeStore:
     def derived_text_preview(self, artifact: dict[str, Any], limit: int = 500) -> str:
         return self._derived_text(artifact)[:limit].replace("\n", " ").strip()
 
+    def _ontology_label_key(self, value: str) -> str:
+        normalized = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+        return normalized or "unnamed"
+
+    def _ontology_candidate(
+        self,
+        *,
+        candidate_kind: str,
+        seed_type: str,
+        label: str,
+        evidence_span: dict[str, Any],
+        confidence: float,
+        trust_marker: str = "evidence_suggested",
+        properties: dict[str, Any] | None = None,
+        source_label: str | None = None,
+        target_label: str | None = None,
+        relation: str | None = None,
+        evidence_gaps: list[str] | None = None,
+    ) -> dict[str, Any]:
+        base = {
+            "candidate_kind": candidate_kind,
+            "seed_type": seed_type,
+            "label": redact_text(label),
+            "normalized_key": self._ontology_label_key(label),
+            "source_label": redact_text(source_label) if source_label else None,
+            "target_label": redact_text(target_label) if target_label else None,
+            "relation": relation,
+            "properties": properties or {},
+            "evidence_spans": [evidence_span],
+            "confidence": confidence,
+            "trust_marker": trust_marker,
+            "status": "draft",
+            "truth_state": "draft_only",
+            "selected": False,
+            "promoted": False,
+            "evidence_gaps": evidence_gaps or [],
+            "created_at": utc_now(),
+        }
+        candidate = dict(base)
+        candidate["candidate_id"] = f"ocand_{_json_hash(base)[:16]}"
+        return candidate
+
+    def _candidate_groups(self, suggestion_set: dict[str, Any]) -> list[list[dict[str, Any]]]:
+        return [
+            suggestion_set.get("object_suggestions", []),
+            suggestion_set.get("property_suggestions", []),
+            suggestion_set.get("link_suggestions", []),
+        ]
+
+    def _find_ontology_candidate(self, suggestion_set: dict[str, Any], candidate_id: str) -> dict[str, Any] | None:
+        for group in self._candidate_groups(suggestion_set):
+            for candidate in group:
+                if candidate.get("candidate_id") == candidate_id:
+                    return candidate
+        return None
+
+    def _ontology_source_text(self, source_type: str, source_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        if source_type == "artifact":
+            artifact = self.get_artifact(source_id, scope)
+            if artifact is None:
+                return {"status": "not_found", "resource": "artifact"}
+            if artifact.get("scope") != scope:
+                return {"status": "scope_denied", "resource_scope": artifact.get("scope")}
+            text = self._derived_text(artifact)
+            return {
+                "source_refs": [{"type": "artifact", "id": source_id}],
+                "source_artifacts": [artifact],
+                "text": text,
+                "evidence_refs": [f"artifact:{source_id}", f"storage:{artifact.get('original_storage_ref')}"],
+            }
+        if source_type == "search":
+            snapshot = self.get_search_snapshot(source_id)
+            if snapshot is None:
+                return {"status": "not_found", "resource": "search_snapshot"}
+            if snapshot.get("filters") != scope:
+                return {"status": "scope_denied", "resource_scope": snapshot.get("filters")}
+            artifacts = []
+            text_parts = []
+            evidence_refs = [f"search_snapshot:{source_id}"]
+            for result in snapshot.get("results", []):
+                artifact_id = result.get("artifact_id")
+                if not artifact_id:
+                    continue
+                artifact = self.get_artifact(str(artifact_id), scope)
+                if artifact is None:
+                    continue
+                artifacts.append(artifact)
+                text_parts.append(self._derived_text(artifact))
+                evidence_refs.extend(result.get("evidence_refs", []))
+            return {
+                "source_refs": [{"type": "search_snapshot", "id": source_id}],
+                "source_artifacts": artifacts,
+                "text": "\n".join(text_parts),
+                "evidence_refs": sorted(set(evidence_refs)),
+            }
+        return {"status": "invalid_source"}
+
+    def _evidence_span(self, artifact: dict[str, Any] | None, line_no: int, snippet: str) -> dict[str, Any]:
+        return {
+            "artifact_id": artifact.get("artifact_id") if artifact else None,
+            "line_no": line_no,
+            "snippet": redact_text(snippet.strip())[:280],
+            "evidence_refs": (
+                [f"artifact:{artifact['artifact_id']}", f"storage:{artifact.get('original_storage_ref')}"]
+                if artifact and artifact.get("artifact_id")
+                else []
+            ),
+        }
+
+    def create_ontology_suggestion_set(self, source_type: str, source_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        source = self._ontology_source_text(source_type, source_id, scope)
+        if source.get("status"):
+            return source
+        artifacts = source.get("source_artifacts", [])
+        primary_artifact = artifacts[0] if artifacts else None
+        text = str(source.get("text", ""))
+        object_suggestions: list[dict[str, Any]] = []
+        property_suggestions: list[dict[str, Any]] = []
+        link_suggestions: list[dict[str, Any]] = []
+        label_index: dict[str, dict[str, Any]] = {}
+
+        seed_aliases = {seed.lower(): seed for seed in UNIVERSAL_ONTOLOGY_SEED_TYPES}
+        for line_no, line in enumerate(text.splitlines(), start=1):
+            stripped = line.strip()
+            object_match = re.match(r"^(Document|Event|Person|Organization|Location|Asset|Policy|Claim|Action):\s*(.+)$", stripped, re.I)
+            if object_match:
+                seed_type = seed_aliases[object_match.group(1).lower()]
+                label = object_match.group(2).strip()
+                candidate = self._ontology_candidate(
+                    candidate_kind="object",
+                    seed_type=seed_type,
+                    label=label,
+                    evidence_span=self._evidence_span(primary_artifact, line_no, stripped),
+                    confidence=0.86,
+                )
+                object_suggestions.append(candidate)
+                label_index[candidate["normalized_key"]] = candidate
+                continue
+            property_match = re.match(r"^Property:\s*([^.=]+)\.([a-zA-Z0-9_-]+)\s*=\s*(.+)$", stripped)
+            if property_match:
+                object_label = property_match.group(1).strip()
+                property_name = property_match.group(2).strip()
+                property_value = property_match.group(3).strip()
+                property_suggestions.append(
+                    self._ontology_candidate(
+                        candidate_kind="property",
+                        seed_type="Property",
+                        label=f"{object_label}.{property_name}",
+                        source_label=object_label,
+                        properties={"name": property_name, "value": redact_text(property_value)},
+                        evidence_span=self._evidence_span(primary_artifact, line_no, stripped),
+                        confidence=0.8,
+                    )
+                )
+                continue
+            if stripped.lower().startswith("link:"):
+                link_body = stripped.split(":", 1)[1].strip()
+                source_label = ""
+                relation = ""
+                target_label = ""
+                for relation_candidate in ["governed_by", "reviews", "describes", "mentions", "evaluates", "owns"]:
+                    marker = f" {relation_candidate} "
+                    if marker in link_body:
+                        source_label, target_label = [part.strip() for part in link_body.split(marker, 1)]
+                        relation = relation_candidate
+                        break
+                if not relation:
+                    link_match = re.match(r"^(.+?)\s+([a-zA-Z0-9_-]+)\s+(.+)$", link_body)
+                    if not link_match:
+                        continue
+                    source_label = link_match.group(1).strip()
+                    relation = link_match.group(2).strip()
+                    target_label = link_match.group(3).strip()
+                link_suggestions.append(
+                    self._ontology_candidate(
+                        candidate_kind="link",
+                        seed_type="Link",
+                        label=f"{source_label} {relation} {target_label}",
+                        source_label=source_label,
+                        target_label=target_label,
+                        relation=relation,
+                        evidence_span=self._evidence_span(primary_artifact, line_no, stripped),
+                        confidence=0.78,
+                    )
+                )
+                continue
+
+        if not any(candidate.get("seed_type") == "Document" for candidate in object_suggestions):
+            document_label = f"Artifact {source_id}"
+            object_suggestions.append(
+                self._ontology_candidate(
+                    candidate_kind="object",
+                    seed_type="Document",
+                    label=document_label,
+                    evidence_span=self._evidence_span(primary_artifact, 1, text.splitlines()[0] if text.splitlines() else document_label),
+                    confidence=0.68,
+                    evidence_gaps=["Document label was inferred from the source ref; review before promotion."],
+                )
+            )
+        if text:
+            object_suggestions.append(
+                self._ontology_candidate(
+                    candidate_kind="object",
+                    seed_type="Organization",
+                    label="Unverified low confidence entity",
+                    evidence_span=self._evidence_span(primary_artifact, 1, text.splitlines()[0]),
+                    confidence=0.42,
+                    trust_marker="low_confidence_draft",
+                    evidence_gaps=["Low confidence candidate remains draft until stronger evidence is added."],
+                )
+            )
+
+        base = {
+            "schema_version": "cs.ontology_suggestion_set.v1",
+            "status": "draft",
+            "scope": scope,
+            "source": {"type": source_type, "id": source_id, "refs": source.get("source_refs", [])},
+            "universal_seed_types": UNIVERSAL_ONTOLOGY_SEED_TYPES,
+            "object_suggestions": object_suggestions,
+            "property_suggestions": property_suggestions,
+            "link_suggestions": link_suggestions,
+            "source_artifact_ids": [artifact["artifact_id"] for artifact in artifacts if artifact.get("artifact_id")],
+            "evidence_refs": sorted(set(source.get("evidence_refs", []))),
+            "review_state": {"selected": [], "rejected": [], "deferred": []},
+            "promotion_state": {
+                "auto_promoted": False,
+                "draft_suggestions_are_truth": False,
+                "requires_explicit_promotion": True,
+            },
+            "created_at": utc_now(),
+        }
+        suggestion_set = dict(base)
+        suggestion_set["suggestion_set_id"] = f"oset_{_json_hash(base)[:16]}"
+        _write_json(self.ontology_suggestion_set_path(suggestion_set["suggestion_set_id"]), suggestion_set)
+        event = self.append_audit(
+            "ontology.suggestion_set.generated",
+            scope,
+            {"type": "ontology_suggestion_set", "id": suggestion_set["suggestion_set_id"]},
+            {
+                "source_type": source_type,
+                "source_id": source_id,
+                "object_candidate_count": len(object_suggestions),
+                "property_candidate_count": len(property_suggestions),
+                "link_candidate_count": len(link_suggestions),
+                "auto_promoted": False,
+            },
+        )
+        suggestion_set["audit_refs"] = [f"audit:{event['event_id']}"]
+        _write_json(self.ontology_suggestion_set_path(suggestion_set["suggestion_set_id"]), suggestion_set)
+        return {"suggestion_set": suggestion_set, "audit_event": event}
+
+    def review_ontology_suggestion_set(
+        self,
+        suggestion_set_id: str,
+        scope: dict[str, str],
+        *,
+        select: list[str] | None = None,
+        reject: list[str] | None = None,
+        defer: list[str] | None = None,
+    ) -> dict[str, Any]:
+        suggestion_set = self.get_ontology_suggestion_set(suggestion_set_id)
+        if suggestion_set is None:
+            return {"status": "not_found", "resource": "ontology_suggestion_set"}
+        if suggestion_set.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": suggestion_set.get("scope")}
+
+        select_set = set(select or [])
+        reject_set = set(reject or [])
+        defer_set = set(defer or [])
+        known = {candidate["candidate_id"] for group in self._candidate_groups(suggestion_set) for candidate in group}
+        unknown = sorted((select_set | reject_set | defer_set) - known)
+        if unknown:
+            return {"status": "not_found", "resource": "ontology_candidate", "missing": unknown}
+
+        reviewed = dict(suggestion_set)
+        for group in self._candidate_groups(reviewed):
+            for candidate in group:
+                candidate_id = candidate.get("candidate_id")
+                if candidate_id in select_set:
+                    candidate["status"] = "selected"
+                    candidate["selected"] = True
+                elif candidate_id in reject_set:
+                    candidate["status"] = "rejected"
+                    candidate["selected"] = False
+                elif candidate_id in defer_set:
+                    candidate["status"] = "deferred"
+                    candidate["selected"] = False
+        reviewed["status"] = "reviewed"
+        reviewed["review_state"] = {
+            "selected": sorted(select_set),
+            "rejected": sorted(reject_set),
+            "deferred": sorted(defer_set),
+        }
+        reviewed["reviewed_at"] = utc_now()
+        _write_json(self.ontology_suggestion_set_path(suggestion_set_id), reviewed)
+        event = self.append_audit(
+            "ontology.suggestion_set.reviewed",
+            scope,
+            {"type": "ontology_suggestion_set", "id": suggestion_set_id},
+            {
+                "selected_count": len(select_set),
+                "rejected_count": len(reject_set),
+                "deferred_count": len(defer_set),
+            },
+        )
+        reviewed["audit_refs"] = [*reviewed.get("audit_refs", []), f"audit:{event['event_id']}"]
+        _write_json(self.ontology_suggestion_set_path(suggestion_set_id), reviewed)
+        return {"suggestion_set": reviewed, "audit_event": event}
+
+    def _latest_ontology_version(self, scope: dict[str, str]) -> str:
+        versions = [
+            str(record.get("next_version"))
+            for record in self._ontology_change_records(scope)
+            if record.get("schema_version") == "cs.ontology_change_set.v1" and record.get("next_version")
+        ]
+        return sorted(versions, key=lambda version: [int(part) for part in version.split(".")])[-1] if versions else "0.0.0"
+
+    def _next_ontology_version(self, scope: dict[str, str], bump: str) -> tuple[str, str]:
+        previous = self._latest_ontology_version(scope)
+        major, minor, patch = [int(part) for part in previous.split(".")]
+        if bump == "major":
+            major += 1
+            minor = 0
+            patch = 0
+        elif bump == "minor":
+            minor += 1
+            patch = 0
+        else:
+            patch += 1
+        return previous, f"{major}.{minor}.{patch}"
+
+    def _ontology_object_id(self, seed_type: str, normalized_key: str, scope: dict[str, str]) -> str:
+        return f"obj_{_json_hash({'scope': scope_key(scope), 'seed_type': seed_type, 'key': normalized_key})[:16]}"
+
+    def promote_ontology_suggestions(self, suggestion_set_id: str, candidate_ids: list[str], scope: dict[str, str]) -> dict[str, Any]:
+        suggestion_set = self.get_ontology_suggestion_set(suggestion_set_id)
+        if suggestion_set is None:
+            return {"status": "not_found", "resource": "ontology_suggestion_set"}
+        if suggestion_set.get("scope") != scope:
+            event = self.append_audit(
+                "ontology.promotion.denied",
+                scope,
+                {"type": "ontology_suggestion_set", "id": suggestion_set_id},
+                {"reason": "scope_denied", "resource_scope": suggestion_set.get("scope"), "cross_namespace_promotions": 0},
+            )
+            return {"status": "scope_denied", "resource_scope": suggestion_set.get("scope"), "audit_event": event}
+
+        requested_ids = candidate_ids or list(suggestion_set.get("review_state", {}).get("selected", []))
+        if not requested_ids:
+            return {"status": "invalid_request", "reason": "candidate_id_required"}
+        requested = [self._find_ontology_candidate(suggestion_set, candidate_id) for candidate_id in requested_ids]
+        missing = [candidate_id for candidate_id, candidate in zip(requested_ids, requested) if candidate is None]
+        if missing:
+            return {"status": "not_found", "resource": "ontology_candidate", "missing": missing}
+        low_confidence = [candidate for candidate in requested if candidate and float(candidate.get("confidence", 0)) < 0.6]
+        if low_confidence:
+            event = self.append_audit(
+                "ontology.promotion.denied",
+                scope,
+                {"type": "ontology_suggestion_set", "id": suggestion_set_id},
+                {
+                    "reason": "low_confidence_candidate",
+                    "candidate_ids": [candidate["candidate_id"] for candidate in low_confidence],
+                    "promoted_count": 0,
+                },
+            )
+            return {"status": "policy_denied", "reason": "low_confidence_candidate", "audit_event": event}
+        not_selected = [candidate for candidate in requested if candidate and candidate.get("status") != "selected"]
+        if not_selected:
+            event = self.append_audit(
+                "ontology.promotion.denied",
+                scope,
+                {"type": "ontology_suggestion_set", "id": suggestion_set_id},
+                {"reason": "candidate_not_selected", "candidate_ids": [candidate["candidate_id"] for candidate in not_selected]},
+            )
+            return {"status": "policy_denied", "reason": "candidate_not_selected", "audit_event": event}
+
+        requested_candidates = [candidate for candidate in requested if candidate]
+        selected_objects = {
+            candidate["normalized_key"]: candidate
+            for candidate in requested_candidates
+            if candidate.get("candidate_kind") == "object"
+        }
+        existing_objects = {
+            record.get("normalized_key"): record
+            for record in self._ontology_object_records(scope)
+            if record.get("status") == "promoted"
+        }
+        available_object_keys = set(selected_objects) | set(existing_objects)
+        invalid_links = [
+            candidate
+            for candidate in requested_candidates
+            if candidate.get("candidate_kind") == "link"
+            and (
+                self._ontology_label_key(str(candidate.get("source_label", ""))) not in available_object_keys
+                or self._ontology_label_key(str(candidate.get("target_label", ""))) not in available_object_keys
+            )
+        ]
+        invalid_properties = [
+            candidate
+            for candidate in requested_candidates
+            if candidate.get("candidate_kind") == "property"
+            and self._ontology_label_key(str(candidate.get("source_label", ""))) not in available_object_keys
+        ]
+        if invalid_links or invalid_properties:
+            event = self.append_audit(
+                "ontology.graph.invalid",
+                scope,
+                {"type": "ontology_suggestion_set", "id": suggestion_set_id},
+                {
+                    "reason": "missing_endpoint",
+                    "invalid_candidate_ids": [candidate["candidate_id"] for candidate in [*invalid_links, *invalid_properties]],
+                    "helpful_failure": "Promote referenced endpoint objects before promoting properties or links.",
+                },
+            )
+            return {"status": "invalid_graph", "reason": "missing_endpoint", "audit_event": event}
+
+        request_event = self.append_audit(
+            "ontology.promotion.requested",
+            scope,
+            {"type": "ontology_suggestion_set", "id": suggestion_set_id},
+            {"candidate_ids": requested_ids, "explicit_user_controlled": True},
+        )
+
+        object_records: dict[str, dict[str, Any]] = {}
+        object_events: list[dict[str, Any]] = []
+        for candidate in requested_candidates:
+            if candidate.get("candidate_kind") != "object":
+                continue
+            object_id = self._ontology_object_id(str(candidate.get("seed_type")), str(candidate.get("normalized_key")), scope)
+            existing = self.get_ontology_object(object_id)
+            evidence_refs = sorted(set(candidate.get("evidence_spans", [{}])[0].get("evidence_refs", []) + suggestion_set.get("evidence_refs", [])))
+            if existing:
+                merged = dict(existing)
+                merged["evidence_refs"] = sorted(set(merged.get("evidence_refs", []) + evidence_refs))
+                merged["source_suggestion_sets"] = sorted(set(merged.get("source_suggestion_sets", []) + [suggestion_set_id]))
+                merged["merged_without_erasing_evidence"] = True
+                _write_json(self.ontology_object_path(object_id), merged)
+                event = self.append_audit(
+                    "ontology.object.merged",
+                    scope,
+                    {"type": "ontology_object", "id": object_id},
+                    {"suggestion_set_id": suggestion_set_id, "evidence_refs_preserved": True},
+                )
+                object_records[candidate["normalized_key"]] = merged
+                object_events.append(event)
+                continue
+            record_base = {
+                "schema_version": "cs.ontology_object.v1",
+                "status": "promoted",
+                "trust_state": "promoted_evidence_backed",
+                "scope": scope,
+                "seed_type": candidate.get("seed_type"),
+                "label": candidate.get("label"),
+                "normalized_key": candidate.get("normalized_key"),
+                "properties": {},
+                "source_suggestion_sets": [suggestion_set_id],
+                "source_candidate_ids": [candidate.get("candidate_id")],
+                "source_mapping": {
+                    "source_type": suggestion_set.get("source", {}).get("type"),
+                    "source_id": suggestion_set.get("source", {}).get("id"),
+                    "source_artifact_ids": suggestion_set.get("source_artifact_ids", []),
+                },
+                "evidence_spans": candidate.get("evidence_spans", []),
+                "evidence_refs": evidence_refs,
+                "audit_refs": [f"audit:{request_event['event_id']}"],
+                "version": 1,
+                "created_at": utc_now(),
+            }
+            record = dict(record_base)
+            record["ontology_object_id"] = object_id
+            _write_json(self.ontology_object_path(object_id), record)
+            event = self.append_audit(
+                "ontology.object.promoted",
+                scope,
+                {"type": "ontology_object", "id": object_id},
+                {"suggestion_set_id": suggestion_set_id, "candidate_id": candidate.get("candidate_id"), "evidence_refs": evidence_refs},
+            )
+            record["audit_refs"].append(f"audit:{event['event_id']}")
+            _write_json(self.ontology_object_path(object_id), record)
+            object_records[candidate["normalized_key"]] = record
+            object_events.append(event)
+
+        property_diffs = []
+        property_events: list[dict[str, Any]] = []
+        for candidate in requested_candidates:
+            if candidate.get("candidate_kind") != "property":
+                continue
+            object_key = self._ontology_label_key(str(candidate.get("source_label", "")))
+            obj = object_records.get(object_key) or existing_objects.get(object_key)
+            if not obj:
+                continue
+            updated = dict(obj)
+            properties = dict(updated.get("properties", {}))
+            name = candidate.get("properties", {}).get("name")
+            value = candidate.get("properties", {}).get("value")
+            new_property = {
+                "value": value,
+                "source_candidate_id": candidate.get("candidate_id"),
+                "evidence_spans": candidate.get("evidence_spans", []),
+                "evidence_refs": sorted(set(candidate.get("evidence_spans", [{}])[0].get("evidence_refs", []) + suggestion_set.get("evidence_refs", []))),
+            }
+            existing_property = properties.get(str(name))
+            if isinstance(existing_property, dict) and existing_property.get("value") != value:
+                conflicts = list(updated.get("property_conflicts", []))
+                conflicts.append(
+                    {
+                        "property": name,
+                        "existing_value": existing_property.get("value"),
+                        "candidate_value": value,
+                        "existing_evidence_refs": existing_property.get("evidence_refs", []),
+                        "candidate_evidence_refs": new_property["evidence_refs"],
+                        "status": "needs_review",
+                    }
+                )
+                updated["property_conflicts"] = conflicts
+                event = self.append_audit(
+                    "ontology.conflict.detected",
+                    scope,
+                    {"type": "ontology_object", "id": updated["ontology_object_id"]},
+                    {"property": name, "resolution": "needs_review", "silent_overwrite": False},
+                )
+                property_events.append(event)
+                property_diffs.append({"object_id": updated["ontology_object_id"], "property": name, "conflict_visible": True})
+            else:
+                properties[str(name)] = new_property
+                property_diffs.append({"object_id": updated["ontology_object_id"], "property": name, "to": value})
+            updated["properties"] = properties
+            updated["updated_at"] = utc_now()
+            _write_json(self.ontology_object_path(updated["ontology_object_id"]), updated)
+            object_records[object_key] = updated
+
+        link_records = []
+        link_events = []
+        for candidate in requested_candidates:
+            if candidate.get("candidate_kind") != "link":
+                continue
+            source_key = self._ontology_label_key(str(candidate.get("source_label", "")))
+            target_key = self._ontology_label_key(str(candidate.get("target_label", "")))
+            source_obj = object_records.get(source_key) or existing_objects.get(source_key)
+            target_obj = object_records.get(target_key) or existing_objects.get(target_key)
+            if not source_obj or not target_obj:
+                continue
+            link_base = {
+                "schema_version": "cs.ontology_link.v1",
+                "status": "promoted",
+                "scope": scope,
+                "source_object_id": source_obj["ontology_object_id"],
+                "target_object_id": target_obj["ontology_object_id"],
+                "relation": candidate.get("relation"),
+                "label": candidate.get("label"),
+                "source_suggestion_set_id": suggestion_set_id,
+                "source_candidate_id": candidate.get("candidate_id"),
+                "evidence_spans": candidate.get("evidence_spans", []),
+                "evidence_refs": sorted(set(candidate.get("evidence_spans", [{}])[0].get("evidence_refs", []) + suggestion_set.get("evidence_refs", []))),
+                "created_at": utc_now(),
+            }
+            link = dict(link_base)
+            link["ontology_link_id"] = f"olink_{_json_hash(link_base)[:16]}"
+            _write_json(self.ontology_link_path(link["ontology_link_id"]), link)
+            event = self.append_audit(
+                "ontology.link.promoted",
+                scope,
+                {"type": "ontology_link", "id": link["ontology_link_id"]},
+                {"suggestion_set_id": suggestion_set_id, "relation": candidate.get("relation")},
+            )
+            link["audit_refs"] = [f"audit:{event['event_id']}"]
+            _write_json(self.ontology_link_path(link["ontology_link_id"]), link)
+            link_records.append(link)
+            link_events.append(event)
+
+        promoted_object_refs = [f"ontology_object:{record['ontology_object_id']}" for record in object_records.values()]
+        promoted_link_refs = [f"ontology_link:{record['ontology_link_id']}" for record in link_records]
+        previous_version, next_version = self._next_ontology_version(scope, "minor")
+        change_base = {
+            "schema_version": "cs.ontology_change_set.v1",
+            "status": "applied",
+            "scope": scope,
+            "suggestion_set_id": suggestion_set_id,
+            "previous_version": previous_version,
+            "next_version": next_version,
+            "semver_bump": "minor",
+            "semver_reason": "Additive ontology objects, properties, or links were promoted from reviewed evidence suggestions.",
+            "diff": {
+                "added_objects": promoted_object_refs,
+                "added_links": promoted_link_refs,
+                "property_updates": property_diffs,
+            },
+            "impact": {
+                "search_index_updated": True,
+                "object_profiles_updated": True,
+                "claims_may_reference_context_but_require_evidence_bundle": True,
+                "actions_may_show_ontology_impact_but_real_external_http_calls": 0,
+            },
+            "migration_note": "No production migration. Local JSON ontology state gained additive records; rollback by superseding with a patch change set.",
+            "evidence_refs": sorted(set(suggestion_set.get("evidence_refs", []))),
+            "audit_refs": [f"audit:{request_event['event_id']}", *[f"audit:{event['event_id']}" for event in [*object_events, *property_events, *link_events]]],
+            "created_at": utc_now(),
+        }
+        change_set = dict(change_base)
+        change_set["ontology_change_set_id"] = f"ochset_{_json_hash(change_base)[:16]}"
+        _write_json(self.ontology_change_path(change_set["ontology_change_set_id"]), change_set)
+        change_event = self.append_audit(
+            "ontology.change_set.created",
+            scope,
+            {"type": "ontology_change_set", "id": change_set["ontology_change_set_id"]},
+            {"previous_version": previous_version, "next_version": next_version, "semver_bump": "minor"},
+        )
+        version_event = self.append_audit(
+            "ontology.version.changed",
+            scope,
+            {"type": "ontology_version", "id": next_version},
+            {"previous_version": previous_version, "next_version": next_version, "change_set_id": change_set["ontology_change_set_id"]},
+        )
+        change_set["audit_refs"].extend([f"audit:{change_event['event_id']}", f"audit:{version_event['event_id']}"])
+        _write_json(self.ontology_change_path(change_set["ontology_change_set_id"]), change_set)
+
+        promoted = dict(suggestion_set)
+        promoted["status"] = "promoted"
+        promoted["promotion_state"] = {
+            "auto_promoted": False,
+            "draft_suggestions_are_truth": False,
+            "requires_explicit_promotion": True,
+            "promoted_candidate_ids": requested_ids,
+            "ontology_change_set_id": change_set["ontology_change_set_id"],
+        }
+        promoted["audit_refs"] = [
+            *promoted.get("audit_refs", []),
+            f"audit:{request_event['event_id']}",
+            f"audit:{change_event['event_id']}",
+            f"audit:{version_event['event_id']}",
+        ]
+        for group in self._candidate_groups(promoted):
+            for candidate in group:
+                if candidate.get("candidate_id") in requested_ids:
+                    candidate["status"] = "promoted"
+                    candidate["promoted"] = True
+                    candidate["truth_state"] = "promoted_local_ontology"
+        _write_json(self.ontology_suggestion_set_path(suggestion_set_id), promoted)
+        return {
+            "suggestion_set": promoted,
+            "ontology_objects": list(object_records.values()),
+            "ontology_links": link_records,
+            "ontology_change_set": change_set,
+            "audit_events": [request_event, *object_events, *property_events, *link_events, change_event, version_event],
+        }
+
+    def deny_draft_ontology_truth_use(
+        self,
+        suggestion_set_id: str,
+        candidate_id: str,
+        scope: dict[str, str],
+        *,
+        purpose: str = "claim_or_action_truth",
+    ) -> dict[str, Any]:
+        suggestion_set = self.get_ontology_suggestion_set(suggestion_set_id)
+        if suggestion_set is None:
+            return {"status": "not_found", "resource": "ontology_suggestion_set"}
+        if suggestion_set.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": suggestion_set.get("scope")}
+        candidate = self._find_ontology_candidate(suggestion_set, candidate_id)
+        if candidate is None:
+            return {"status": "not_found", "resource": "ontology_candidate"}
+        decision = {
+            "schema_version": "cs.policy_decision.v0",
+            "id": f"policy_{_json_hash({'suggestion_set_id': suggestion_set_id, 'candidate_id': candidate_id, 'purpose': purpose})[:16]}",
+            "decision": "deny",
+            "policy": "draft_ontology_suggestion_not_truth",
+            "reason": "Unpromoted ontology suggestions are draft review material and cannot approve Claims or drive Actions.",
+            "scope": scope,
+            "candidate_id": candidate_id,
+            "candidate_status": candidate.get("status"),
+            "resolution_path": ["Review the suggestion.", "Promote selected candidates.", "Attach an Evidence Bundle before Claim approval or Action use."],
+            "real_external_http_calls": 0,
+            "decided_at": utc_now(),
+        }
+        event = self.append_audit(
+            "ontology.draft_truth.denied",
+            scope,
+            {"type": "ontology_candidate", "id": candidate_id},
+            {"suggestion_set_id": suggestion_set_id, "purpose": purpose, "policy_decision_id": decision["id"]},
+        )
+        return {"status": "policy_denied", "policy_decision": decision, "candidate": candidate, "audit_event": event}
+
+    def reject_invalid_ontology_graph(self, scope: dict[str, str]) -> dict[str, Any]:
+        event = self.append_audit(
+            "ontology.graph.invalid",
+            scope,
+            {"type": "ontology_graph", "id": scope_key(scope)},
+            {
+                "reason": "missing_endpoint",
+                "helpful_failure": "Every promoted link must resolve source and target ontology objects in the same namespace.",
+            },
+        )
+        return {
+            "status": "invalid_graph",
+            "error": {
+                "code": "CS_ONTOLOGY_INVALID_GRAPH",
+                "message": "Link promotion requires existing source and target objects in the same namespace.",
+                "resolution_path": ["Promote endpoint objects first.", "Retry link promotion with selected object candidates."],
+            },
+            "audit_event": event,
+        }
+
+    def ontology_object_profile(self, object_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        obj = self.get_ontology_object(object_id)
+        if obj is None:
+            return {"status": "not_found", "resource": "ontology_object"}
+        if obj.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": obj.get("scope")}
+        linked = [
+            link
+            for link in self._ontology_link_records(scope)
+            if link.get("source_object_id") == object_id or link.get("target_object_id") == object_id
+        ]
+        profile = {
+            "schema_version": "cs.ontology_object_profile.v1",
+            "ontology_object": obj,
+            "links": linked,
+            "evidence_refs": obj.get("evidence_refs", []),
+            "audit_refs": obj.get("audit_refs", []),
+            "profile_sections": ["identity", "properties", "links", "source_mapping", "evidence", "audit"],
+            "opened_at": utc_now(),
+        }
+        event = self.append_audit(
+            "ontology.object.profile.read",
+            scope,
+            {"type": "ontology_object", "id": object_id},
+            {"link_count": len(linked), "evidence_ref_count": len(obj.get("evidence_refs", []))},
+        )
+        profile["audit_refs"] = [*profile["audit_refs"], f"audit:{event['event_id']}"]
+        return {"profile": profile, "audit_event": event}
+
+    def ontology_context_for_artifact(self, artifact_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        artifact_ref = f"artifact:{artifact_id}"
+        objects = [
+            obj
+            for obj in self._ontology_object_records(scope)
+            if artifact_ref in set(obj.get("evidence_refs", []))
+        ]
+        return {
+            "schema_version": "cs.artifact_ontology_context.v1",
+            "artifact_id": artifact_id,
+            "promoted_object_refs": [f"ontology_object:{obj['ontology_object_id']}" for obj in objects],
+            "object_count": len(objects),
+        }
+
+    def supersede_ontology_object(
+        self,
+        object_id: str,
+        scope: dict[str, str],
+        *,
+        property_name: str,
+        corrected_value: str,
+        rationale: str,
+    ) -> dict[str, Any]:
+        obj = self.get_ontology_object(object_id)
+        if obj is None:
+            return {"status": "not_found", "resource": "ontology_object"}
+        if obj.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": obj.get("scope")}
+        previous_version, next_version = self._next_ontology_version(scope, "patch")
+        updated = dict(obj)
+        properties = dict(updated.get("properties", {}))
+        previous_value = properties.get(property_name, {}).get("value") if isinstance(properties.get(property_name), dict) else None
+        properties[property_name] = {
+            "value": redact_text(corrected_value),
+            "correction_rationale": redact_text(rationale),
+            "corrected_at": utc_now(),
+            "evidence_refs": obj.get("evidence_refs", []),
+        }
+        updated["properties"] = properties
+        updated["version"] = int(updated.get("version", 1)) + 1
+        updated["updated_at"] = utc_now()
+        change_base = {
+            "schema_version": "cs.ontology_change_set.v1",
+            "status": "applied",
+            "scope": scope,
+            "previous_version": previous_version,
+            "next_version": next_version,
+            "semver_bump": "patch",
+            "semver_reason": "Versioned correction superseded one promoted object property.",
+            "diff": {
+                "corrected_object": f"ontology_object:{object_id}",
+                "property": property_name,
+                "from": previous_value,
+                "to": redact_text(corrected_value),
+            },
+            "impact": {
+                "requires_claim_review": True,
+                "requires_action_review": True,
+                "real_external_http_calls": 0,
+            },
+            "migration_note": "Local patch correction only; review dependent Claims and Actions before relying on the corrected property.",
+            "evidence_refs": obj.get("evidence_refs", []),
+            "created_at": utc_now(),
+        }
+        change_set = dict(change_base)
+        change_set["ontology_change_set_id"] = f"ochset_{_json_hash(change_base)[:16]}"
+        _write_json(self.ontology_object_path(object_id), updated)
+        _write_json(self.ontology_change_path(change_set["ontology_change_set_id"]), change_set)
+        event = self.append_audit(
+            "ontology.object.superseded",
+            scope,
+            {"type": "ontology_object", "id": object_id},
+            {"ontology_change_set_id": change_set["ontology_change_set_id"], "property": property_name},
+        )
+        change_set["audit_refs"] = [f"audit:{event['event_id']}"]
+        _write_json(self.ontology_change_path(change_set["ontology_change_set_id"]), change_set)
+        return {"ontology_object": updated, "ontology_change_set": change_set, "audit_event": event}
+
     def search(self, query: str, *, tenant_id: str, owner_id: str, namespace_id: str, workspace_id: str) -> dict[str, Any]:
         started = perf_counter()
         scope = {
@@ -6316,6 +7199,7 @@ class LocalRuntimeStore:
             snippet = text[start : start + 180].replace("\n", " ").strip()
             results.append(
                 {
+                    "result_type": "artifact",
                     "artifact_id": artifact["artifact_id"],
                     "score": score,
                     "snippet": snippet,
@@ -6330,7 +7214,47 @@ class LocalRuntimeStore:
                     ],
                 }
             )
-        results.sort(key=lambda row: (-int(row["score"]), row["artifact_id"]))
+        for ontology_object in self._ontology_object_records(scope):
+            haystack_parts = [
+                str(ontology_object.get("label", "")),
+                str(ontology_object.get("seed_type", "")),
+                json.dumps(ontology_object.get("properties", {}), sort_keys=True),
+            ]
+            haystack = " ".join(haystack_parts).lower()
+            score = 0
+            match_reasons = []
+            retrieval_modes = set()
+            if query.lower() in haystack:
+                score += 8
+                retrieval_modes.add("ontology_exact")
+                match_reasons.append({"type": "ontology_exact", "query": query})
+            for term in query_terms:
+                if term in haystack:
+                    score += 2
+                    retrieval_modes.add("ontology_keyword")
+                    match_reasons.append({"type": "ontology_keyword", "query_term": term, "matched_term": term})
+            if score <= 0:
+                continue
+            evidence_refs = list(ontology_object.get("evidence_refs", []))
+            artifact_ref = next((ref for ref in evidence_refs if str(ref).startswith("artifact:")), "")
+            artifact_id = artifact_ref.split(":", 1)[1] if artifact_ref else None
+            snippet = f"{ontology_object.get('seed_type')}: {ontology_object.get('label')}"
+            if ontology_object.get("properties"):
+                snippet = f"{snippet} properties={json.dumps(ontology_object.get('properties'), sort_keys=True)[:160]}"
+            results.append(
+                {
+                    "result_type": "ontology_object",
+                    "ontology_object_id": ontology_object["ontology_object_id"],
+                    "artifact_id": artifact_id,
+                    "score": score,
+                    "snippet": snippet,
+                    "scope": ontology_object.get("scope"),
+                    "retrieval_modes": sorted(retrieval_modes),
+                    "match_reasons": match_reasons,
+                    "evidence_refs": [f"ontology_object:{ontology_object['ontology_object_id']}", *evidence_refs],
+                }
+            )
+        results.sort(key=lambda row: (-int(row["score"]), str(row.get("artifact_id") or row.get("ontology_object_id") or "")))
         duration_ms = round((perf_counter() - started) * 1000, 3)
         snapshot_base = {
             "schema_version": "cs.search_snapshot.v0",
@@ -6361,9 +7285,12 @@ class LocalRuntimeStore:
             return {"status": "scope_denied", "resource_scope": snapshot.get("filters")}
         evidence_items = []
         for result in snapshot.get("results", []):
-            artifact = self.get_artifact(result["artifact_id"], scope)
+            artifact_id = result.get("artifact_id")
+            if not artifact_id:
+                continue
+            artifact = self.get_artifact(str(artifact_id), scope)
             if artifact is None:
-                return {"status": "not_found", "artifact_id": result["artifact_id"]}
+                return {"status": "not_found", "artifact_id": artifact_id}
             if artifact.get("scope") != scope:
                 return {"status": "scope_denied", "resource_scope": artifact.get("scope")}
             derived_text = self._derived_text(artifact)
@@ -6607,12 +7534,27 @@ class LocalRuntimeStore:
         )
         return {"claim": claim, "audit_event": event}
 
-    def create_claim_from_evidence_bundle(self, bundle_id: str, statement: str, scope: dict[str, str]) -> dict[str, Any]:
+    def create_claim_from_evidence_bundle(
+        self,
+        bundle_id: str,
+        statement: str,
+        scope: dict[str, str],
+        ontology_object_refs: list[str] | None = None,
+    ) -> dict[str, Any]:
         bundle = self.get_evidence_bundle(bundle_id)
         if bundle is None:
             return {"status": "not_found"}
         if bundle.get("filters") != scope:
             return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        ontology_context_objects = []
+        for ref in ontology_object_refs or []:
+            object_id = ref.split(":", 1)[1] if ref.startswith("ontology_object:") else ref
+            ontology_object = self.get_ontology_object(object_id)
+            if ontology_object is None:
+                return {"status": "not_found", "resource": "ontology_object", "object_id": object_id}
+            if ontology_object.get("scope") != scope:
+                return {"status": "scope_denied", "resource_scope": ontology_object.get("scope")}
+            ontology_context_objects.append(ontology_object)
 
         claim_base = {
             "schema_version": "cs.claim.v0",
@@ -6632,6 +7574,21 @@ class LocalRuntimeStore:
                     f"evidence_bundle:{bundle_id}",
                 ],
             },
+            "ontology_context": {
+                "object_refs": [f"ontology_object:{obj['ontology_object_id']}" for obj in ontology_context_objects],
+                "objects": [
+                    {
+                        "ontology_object_id": obj["ontology_object_id"],
+                        "seed_type": obj.get("seed_type"),
+                        "label": obj.get("label"),
+                        "trust_state": obj.get("trust_state"),
+                        "evidence_refs": obj.get("evidence_refs", []),
+                    }
+                    for obj in ontology_context_objects
+                ],
+                "can_replace_evidence_bundle": False,
+                "usage_boundary": "context_only",
+            },
             "authority": {
                 "can_be_approved": True,
                 "can_publish_shared_truth": False,
@@ -6648,7 +7605,11 @@ class LocalRuntimeStore:
             "claim.draft.created",
             scope,
             {"type": "claim", "id": claim_id},
-            {"evidence_bundle_id": bundle_id, "search_snapshot_id": bundle.get("search_snapshot_id")},
+            {
+                "evidence_bundle_id": bundle_id,
+                "search_snapshot_id": bundle.get("search_snapshot_id"),
+                "ontology_context_refs": [f"ontology_object:{obj['ontology_object_id']}" for obj in ontology_context_objects],
+            },
         )
         return {"claim": claim, "audit_event": event}
 
@@ -6719,6 +7680,7 @@ class LocalRuntimeStore:
         if evidence.get("search_snapshot_id"):
             refs.append(f"search_snapshot:{evidence['search_snapshot_id']}")
         refs.extend(evidence.get("artifact_refs", []))
+        refs.extend(claim.get("ontology_context", {}).get("object_refs", []))
         return refs
 
     def _scoped_target(self, target_kind: str, target_id: str, scope: dict[str, str]) -> dict[str, Any]:
@@ -7923,6 +8885,7 @@ class LocalRuntimeStore:
         goal: str,
         connector: str = "mock_connector",
         target: str = "mock://local-target",
+        ontology_object_refs: list[str] | None = None,
     ) -> dict[str, Any]:
         mission = self.get_mission(mission_id)
         if mission is None:
@@ -7939,6 +8902,7 @@ class LocalRuntimeStore:
 
         policy = self._action_policy(mission, action_kind, risk, scope, connector)
         expected_connector_calls = 1 if action_kind == "external_writeback" else 0
+        ontology_refs = ontology_object_refs or claim.get("ontology_context", {}).get("object_refs", [])
         dry_run_base = {
             "schema_version": "cs.action_dry_run.v0",
             "mission_id": mission_id,
@@ -7957,6 +8921,8 @@ class LocalRuntimeStore:
                 "expected_connector_calls": expected_connector_calls,
                 "mock_connector_calls": expected_connector_calls,
                 "real_external_http_calls": 0,
+                "ontology_object_refs": ontology_refs,
+                "ontology_impact_visible": bool(ontology_refs),
             },
             "policy_decision": policy,
             "created_at": utc_now(),
@@ -7978,6 +8944,11 @@ class LocalRuntimeStore:
                 "direct_provider_access": False,
                 "credentials_exposed_to_agent": False,
                 "mocked": True,
+            },
+            "ontology_impact": {
+                "object_refs": ontology_refs,
+                "impact_note": "Ontology context can shape local impact review, but it does not authorize external writeback.",
+                "real_external_http_calls": 0,
             },
             "dry_run": dry_run,
             "policy_decision": policy,
@@ -8009,6 +8980,7 @@ class LocalRuntimeStore:
                 "policy": policy["policy"],
                 "decision": policy["decision"],
                 "dry_run_id": dry_run["dry_run_id"],
+                "ontology_object_refs": ontology_refs,
             },
         )
         card["audit_ref"] = f"audit:{event['event_id']}"

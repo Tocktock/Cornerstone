@@ -38,6 +38,9 @@ DEFAULT_EVUX_REPORT = "docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERA
 DEFAULT_OPERATOR_UI_SCENARIO_REPORT = "reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json"
 DEFAULT_OPERATOR_UI_BROWSER_PROOF_DIR = "reports/browser/vs0-operator-acceptance-ui-2026-06-14"
 DEFAULT_OPERATOR_UI_REPORT = "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md"
+DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT = "reports/scenario/vs1-ontology-suggest-promote-2026-06-15.json"
+DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR = "reports/browser/vs1-ontology-suggest-promote-2026-06-15"
+DEFAULT_VS1_ONTOLOGY_REPORT = "docs/verification-reports/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_REPORT_2026-06-15.md"
 
 
 def utc_now() -> str:
@@ -656,6 +659,266 @@ def capture_evux_browser_proof(
     return proof
 
 
+def capture_vs1_ontology_browser_proof(
+    root: Path,
+    *,
+    state_dir: Path,
+    output_dir: Path,
+    window_size: str = "1440,1200",
+) -> dict[str, Any]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    chrome = find_chrome()
+    proof_path = output_dir / "browser-proof.json"
+    screenshot_path = output_dir / "workflow.png"
+    dom_path = output_dir / "workflow.dom.html"
+    trace_path = output_dir / "workflow-trace.json"
+
+    if chrome is None:
+        proof = {
+            "schema_version": "cs.vs1_ontology_browser_proof.v1",
+            "status": "NOT_VERIFIED",
+            "created_at": utc_now(),
+            "browser": None,
+            "errors": ["chrome_not_found"],
+            "screenshot_path": relative_to_root(root, screenshot_path),
+            "dom_path": relative_to_root(root, dom_path),
+        }
+        write_json(proof_path, proof)
+        return proof
+
+    server = make_server(root, state_dir)
+    host, port = server.server_address
+    url = f"http://{host}:{port}/?scenario=vs1-ontology&autorun=true"
+    thread_error: list[str] = []
+
+    import threading
+
+    def serve() -> None:
+        try:
+            server.serve_forever()
+        except Exception as error:  # pragma: no cover - defensive thread boundary
+            thread_error.append(str(error))
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+
+    chrome_exit_code: int | None = None
+    chrome_stderr_tail: list[str] = []
+    browser_error: str | None = None
+    workflow_state: dict[str, Any] = {}
+    ontology_state: dict[str, Any] = {}
+    html = ""
+    clean_browser_exit = False
+
+    try:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs1-ontology-chrome-profile-") as profile_tmp:
+            profile_dir = Path(profile_tmp)
+            debug_port = _free_local_port()
+            process = _launch_cdp_chrome(chrome, profile_dir, debug_port, window_size)
+            page: _CDPClient | None = None
+            browser: _CDPClient | None = None
+            try:
+                version: dict[str, Any] | None = None
+                deadline = time.monotonic() + 10
+                while time.monotonic() < deadline:
+                    try:
+                        version = _json_urlopen(f"http://127.0.0.1:{debug_port}/json/version")
+                        break
+                    except OSError:
+                        time.sleep(0.1)
+                if version is None:
+                    raise TimeoutError("devtools_version")
+                browser = _CDPClient(str(version["webSocketDebuggerUrl"]))
+                new_target_req = request.Request(
+                    f"http://127.0.0.1:{debug_port}/json/new?{parse.quote(url, safe=':/?=&')}",
+                    method="PUT",
+                )
+                with request.urlopen(new_target_req, timeout=5) as response:
+                    target = json.loads(response.read().decode("utf-8"))
+                page = _CDPClient(str(target["webSocketDebuggerUrl"]))
+                page.command("Page.enable")
+                page.command("Runtime.enable")
+                page.command("Page.navigate", {"url": url})
+                page.wait_event("Page.loadEventFired", timeout=10)
+                deadline = time.monotonic() + 35
+                while time.monotonic() < deadline:
+                    workflow_state = _runtime_eval(
+                        page,
+                        """(() => {
+                          const status = document.getElementById('vs1-ontology-status');
+                          const trace = document.getElementById('vs1-ontology-trace');
+                          return {
+                            status: status ? status.dataset.vs1Status || '' : '',
+                            statusText: status ? status.textContent || '' : '',
+                            traceText: trace ? trace.textContent || '' : ''
+                          };
+                        })()""",
+                        timeout=5,
+                    ) or {}
+                    if workflow_state.get("status") in {"passed", "failed"}:
+                        break
+                    time.sleep(0.25)
+                html = str(_runtime_eval(page, "document.documentElement.outerHTML", timeout=5) or "")
+                ontology_candidate = _runtime_eval(
+                    page,
+                    "window.__cornerstoneVs1OntologyEvidence ? window.__cornerstoneVs1OntologyEvidence() : {}",
+                    timeout=5,
+                )
+                ontology_state = ontology_candidate if isinstance(ontology_candidate, dict) else {}
+                dom_path.write_text(html)
+                screenshot = page.command("Page.captureScreenshot", {"format": "png", "fromSurface": True}, timeout=10)
+                screenshot_path.write_bytes(base64.b64decode(str(screenshot.get("data", ""))))
+                try:
+                    trace_json = json.loads(str(workflow_state.get("traceText") or "{}"))
+                except ValueError:
+                    trace_json = {"raw": workflow_state.get("traceText")}
+                write_json(trace_path, trace_json if isinstance(trace_json, dict) else {"trace": trace_json})
+                try:
+                    browser.command("Browser.close", timeout=5)
+                except Exception:
+                    page.command("Browser.close", timeout=5)
+                try:
+                    chrome_exit_code = process.wait(timeout=10)
+                    clean_browser_exit = chrome_exit_code == 0
+                except subprocess.TimeoutExpired:
+                    process.terminate()
+                    chrome_exit_code = process.wait(timeout=5)
+            except Exception as error:
+                browser_error = str(error)
+                try:
+                    if process.poll() is None:
+                        process.terminate()
+                        chrome_exit_code = process.wait(timeout=5)
+                    else:
+                        chrome_exit_code = process.returncode
+                except Exception:
+                    chrome_exit_code = process.returncode
+            finally:
+                if page is not None:
+                    page.close()
+                if browser is not None:
+                    browser.close()
+                stderr = ""
+                try:
+                    if process.stderr is not None:
+                        stderr = process.stderr.read() or ""
+                except Exception:
+                    stderr = ""
+                chrome_stderr_tail = stderr.strip().splitlines()[-5:]
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+    screenshot_exists = screenshot_path.exists() and screenshot_path.stat().st_size > 0
+    state = ontology_state.get("state", {}) if isinstance(ontology_state.get("state"), dict) else {}
+    suggestion = state.get("suggestionSet", {}) if isinstance(state.get("suggestionSet"), dict) else {}
+    review = state.get("review", {}) if isinstance(state.get("review"), dict) else {}
+    promotion = state.get("promotion", {}) if isinstance(state.get("promotion"), dict) else {}
+    profile = state.get("profile", {}) if isinstance(state.get("profile"), dict) else {}
+    claim = state.get("claim", {}) if isinstance(state.get("claim"), dict) else {}
+    action = state.get("action", {}) if isinstance(state.get("action"), dict) else {}
+    audit = state.get("audit", {}) if isinstance(state.get("audit"), dict) else {}
+    event_types = set(audit.get("event_types") or [])
+    required_audit_events = {
+        "artifact.ingested",
+        "search.snapshot.created",
+        "ontology.suggestion_set.generated",
+        "ontology.draft_truth.denied",
+        "ontology.suggestion_set.reviewed",
+        "ontology.promotion.requested",
+        "ontology.object.promoted",
+        "ontology.change_set.created",
+        "ontology.version.changed",
+        "ontology.object.profile.read",
+        "claim.approved",
+        "action.card.proposed",
+        "action.executed",
+    }
+    required_markers = {
+        "workflow_passed": workflow_state.get("status") == "passed" and ontology_state.get("ontology_passes") is True,
+        "button_clicked": "data-vs1-clicked=\"true\"" in html,
+        "artifact_id": "id=\"vs1-artifact-id\"" in html and "art_" in html,
+        "search_snapshot_id": "id=\"vs1-search-snapshot-id\"" in html and "search_" in html,
+        "suggestion_set_id": "id=\"vs1-suggestion-set-id\"" in html and "oset_" in html,
+        "change_set_id": "id=\"vs1-change-set-id\"" in html and "ochset_" in html,
+        "object_profile_id": "id=\"vs1-object-profile-id\"" in html and "obj_" in html,
+        "draft_truth_denied": "CS_ONTOLOGY_DRAFT_TRUTH_DENIED" in html or state.get("guards", {}).get("draft_truth_denied") is True,
+        "search_integrated": state.get("search", {}).get("promoted_object_result") is True,
+        "claim_context": claim.get("zero_evidence_denied") is True and claim.get("approved") is True and bool(claim.get("ontology_context_refs")),
+        "action_ontology_impact": action.get("real_external_http_calls") == 0 and bool(action.get("ontology_impact", {}).get("object_refs")),
+        "audit_verified": audit.get("verification_status") == "success" and required_audit_events.issubset(event_types),
+        "local_only_no_overclaim": (
+            ontology_state.get("production_release_claimed") is False
+            and ontology_state.get("live_connector_claimed") is False
+            and ontology_state.get("human_acceptance_claimed") is False
+            and "Local VS1 proof only" in html
+        ),
+    }
+    operator_markers = {
+        "universal_seed_types": suggestion.get("seed_types") == [
+            "Document",
+            "Event",
+            "Person",
+            "Organization",
+            "Location",
+            "Asset",
+            "Policy",
+            "Claim",
+            "Action",
+        ],
+        "suggestion_set_complete": suggestion.get("object_count", 0) >= 3 and suggestion.get("property_count", 0) >= 1 and suggestion.get("link_count", 0) >= 1,
+        "review_controls": len(review.get("selected", [])) >= 3 and "rejected" in review and "deferred" in review,
+        "promotion_changeset": bool(promotion.get("ontology_change_set_id")) and promotion.get("semver_bump") == "minor",
+        "object_profile": bool(profile.get("ontology_object_id")) and {"identity", "properties", "links", "source_mapping", "evidence", "audit"}.issubset(set(profile.get("sections") or [])),
+        "real_external_http_calls_zero": action.get("real_external_http_calls") == 0,
+    }
+    status = (
+        "PASS"
+        if screenshot_exists
+        and clean_browser_exit
+        and all(required_markers.values())
+        and all(operator_markers.values())
+        and not thread_error
+        and not browser_error
+        else "FAIL"
+    )
+    if status == "FAIL" and screenshot_exists and any(required_markers.values()):
+        status = "PARTIAL"
+    proof = {
+        "schema_version": "cs.vs1_ontology_browser_proof.v1",
+        "status": status,
+        "created_at": utc_now(),
+        "browser": {
+            "name": "Google Chrome" if "Google Chrome" in str(chrome) else chrome.name,
+            "executable": str(chrome),
+            "headless": True,
+            "window_size": window_size,
+            "driver": "chrome_devtools_protocol",
+        },
+        "url": url,
+        "route": "/?scenario=vs1-ontology&autorun=true",
+        "clean_browser_exit": clean_browser_exit,
+        "chrome_exit_code": chrome_exit_code,
+        "chrome_timeout": not clean_browser_exit,
+        "screenshot_path": relative_to_root(root, screenshot_path),
+        "screenshot_sha256": sha256_file(screenshot_path) if screenshot_exists else None,
+        "screenshot_bytes": screenshot_path.stat().st_size if screenshot_exists else 0,
+        "dom_path": relative_to_root(root, dom_path),
+        "dom_sha256": sha256_file(dom_path) if dom_path.exists() else None,
+        "trace_path": relative_to_root(root, trace_path),
+        "trace_sha256": sha256_file(trace_path) if trace_path.exists() else None,
+        "workflow_state": workflow_state,
+        "ontology_state": ontology_state,
+        "required_markers": required_markers,
+        "operator_markers": operator_markers,
+        "errors": [error for error in [browser_error, *thread_error] if error],
+        "stderr_tail": chrome_stderr_tail,
+    }
+    write_json(proof_path, proof)
+    return proof
+
+
 def capture_browser_proof(
     root: Path,
     *,
@@ -1102,6 +1365,9 @@ def collect_release_evidence(
         _artifact_entry(root, command_transcript_path, "command_transcript"),
         _artifact_entry(root, command_evidence_path, "command_evidence", required=False),
     ]
+    post_commit_rollup_path = output_dir / "post_commit_rollup.json"
+    if post_commit_rollup_path.exists():
+        artifacts.append(_artifact_entry(root, post_commit_rollup_path, "post_commit_rollup", required=True))
     missing_required = [entry["path"] for entry in artifacts if entry["required"] and not entry["present"]]
 
     manifest_base = {
@@ -1119,6 +1385,7 @@ def collect_release_evidence(
         "product_runtime_report": relative_to_root(root, product_runtime_report),
         "browser_proof": relative_to_root(root, browser_proof),
         "artifacts": artifacts,
+        "post_commit_rollup": relative_to_root(root, post_commit_rollup_path) if post_commit_rollup_path.exists() else None,
         "negative_evidence": negative,
         "human_required": [
             {

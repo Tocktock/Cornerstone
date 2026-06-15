@@ -21,6 +21,7 @@ from cornerstone_cli.acceptance import (
     DEFAULT_OPERATOR_UI_SCENARIO_REPORT,
     DEFAULT_PRODUCT_RUNTIME_REPORT,
     DEFAULT_RELEASE_PACKAGE_DIR,
+    DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT,
     command_transcript_entry,
     collect_release_evidence,
     finalize_release_evidence,
@@ -33,6 +34,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_evux,
     verify_vs0_evux_governance,
     verify_vs0_operator_acceptance_ui,
+    verify_vs1_ontology_suggest_promote,
     verify_vs0_runtime_acceptance,
     verify_vs0_product_runtime,
     verify_full_agent_orchestration,
@@ -873,7 +875,12 @@ def command_claim_create(args: argparse.Namespace) -> int:
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
     if args.evidence_bundle_id:
-        result = store.create_claim_from_evidence_bundle(args.evidence_bundle_id, args.statement, requested_scope)
+        result = store.create_claim_from_evidence_bundle(
+            args.evidence_bundle_id,
+            args.statement,
+            requested_scope,
+            ontology_object_refs=args.ontology_object_ref or [],
+        )
     else:
         result = store.create_unsupported_claim(args.statement, requested_scope)
     payload = base_response("cornerstone claim create", "success", root)
@@ -917,6 +924,7 @@ def command_claim_create(args: argparse.Namespace) -> int:
     if evidence.get("search_snapshot_id"):
         payload["evidence_refs"].append(f"search_snapshot:{evidence['search_snapshot_id']}")
     payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    payload["evidence_refs"].extend(claim.get("ontology_context", {}).get("object_refs", []))
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -1399,6 +1407,213 @@ def command_understand_ontology_change(args: argparse.Namespace) -> int:
     payload["ids"].update({"ontology_change_id": change["ontology_change_id"], "ontology_item_id": item["ontology_item_id"], "audit_event_id": audit_event["event_id"]})
     payload["evidence_refs"].extend([f"ontology_change:{change['ontology_change_id']}", *change.get("evidence_refs", [])])
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def _ontology_failure(payload: dict[str, Any], result: dict[str, Any]) -> int:
+    status = result.get("status")
+    payload["status"] = "failed" if status != "policy_denied" else "denied"
+    if status == "not_found":
+        payload["errors"].append(
+            {
+                "code": "CS_ONTOLOGY_NOT_FOUND",
+                "message": "Required ontology source record was not found.",
+                "resource": result.get("resource"),
+                "missing": result.get("missing"),
+            }
+        )
+        return EXIT_NOT_FOUND
+    if status == "scope_denied":
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Ontology source is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        return EXIT_SCOPE_DENIED
+    if status == "policy_denied":
+        payload["policy_decisions"].append(result.get("policy_decision", {}))
+        if result.get("policy_decision", {}).get("id"):
+            payload["policy_decision_refs"].append(f"policy:{result['policy_decision']['id']}")
+        payload["errors"].append(
+            {
+                "code": "CS_ONTOLOGY_POLICY_DENIED",
+                "message": result.get("reason") or result.get("policy_decision", {}).get("reason") or "Ontology policy denied the operation.",
+            }
+        )
+        if result.get("audit_event"):
+            payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+        return EXIT_POLICY_DENIED
+    if status == "invalid_graph":
+        payload["errors"].append(result.get("error") or {"code": "CS_ONTOLOGY_INVALID_GRAPH", "message": "Ontology graph is invalid."})
+        if result.get("audit_event"):
+            payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+        return EXIT_INVALID
+    payload["errors"].append({"code": "CS_ONTOLOGY_INVALID", "message": "The requested ontology operation is invalid."})
+    return EXIT_INVALID
+
+
+def command_ontology_suggest(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_ontology_suggestion_set(args.source_type, args.source_id, requested_scope)
+    payload = base_response("cornerstone ontology suggest", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _ontology_failure(payload, result)
+        print_payload(payload, args.json)
+        return exit_code
+    suggestion_set = result["suggestion_set"]
+    payload["ontology_suggestion_set"] = suggestion_set
+    payload["ids"].update(
+        {
+            "ontology_suggestion_set_id": suggestion_set["suggestion_set_id"],
+            "audit_event_id": result["audit_event"]["event_id"],
+        }
+    )
+    payload["evidence_refs"].extend([f"ontology_suggestion_set:{suggestion_set['suggestion_set_id']}", *suggestion_set.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_ontology_review(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.review_ontology_suggestion_set(
+        args.suggestion_set_id,
+        requested_scope,
+        select=args.select or [],
+        reject=args.reject or [],
+        defer=args.defer or [],
+    )
+    payload = base_response("cornerstone ontology review", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _ontology_failure(payload, result)
+        print_payload(payload, args.json)
+        return exit_code
+    suggestion_set = result["suggestion_set"]
+    payload["ontology_suggestion_set"] = suggestion_set
+    payload["ids"].update({"ontology_suggestion_set_id": suggestion_set["suggestion_set_id"], "audit_event_id": result["audit_event"]["event_id"]})
+    payload["evidence_refs"].extend([f"ontology_suggestion_set:{suggestion_set['suggestion_set_id']}", *suggestion_set.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_ontology_promote(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.promote_ontology_suggestions(args.suggestion_set_id, args.candidate_id or [], requested_scope)
+    payload = base_response("cornerstone ontology promote", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _ontology_failure(payload, result)
+        print_payload(payload, args.json)
+        return exit_code
+    change_set = result["ontology_change_set"]
+    payload["ontology_suggestion_set"] = result["suggestion_set"]
+    payload["ontology_objects"] = result["ontology_objects"]
+    payload["ontology_links"] = result["ontology_links"]
+    payload["ontology_change_set"] = change_set
+    payload["ids"].update(
+        {
+            "ontology_suggestion_set_id": args.suggestion_set_id,
+            "ontology_change_set_id": change_set["ontology_change_set_id"],
+        }
+    )
+    if result["ontology_objects"]:
+        payload["ids"]["ontology_object_id"] = result["ontology_objects"][0]["ontology_object_id"]
+    payload["evidence_refs"].extend([f"ontology_change_set:{change_set['ontology_change_set_id']}", *change_set.get("evidence_refs", [])])
+    payload["evidence_refs"].extend(f"ontology_object:{obj['ontology_object_id']}" for obj in result["ontology_objects"])
+    payload["evidence_refs"].extend(f"ontology_link:{link['ontology_link_id']}" for link in result["ontology_links"])
+    payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in result.get("audit_events", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_ontology_object_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.ontology_object_profile(args.object_id, requested_scope)
+    payload = base_response("cornerstone ontology object show", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _ontology_failure(payload, result)
+        print_payload(payload, args.json)
+        return exit_code
+    profile = result["profile"]
+    payload["ontology_object_profile"] = profile
+    payload["ids"].update({"ontology_object_id": args.object_id, "audit_event_id": result["audit_event"]["event_id"]})
+    payload["evidence_refs"].extend([f"ontology_object:{args.object_id}", *profile.get("evidence_refs", [])])
+    payload["audit_refs"].extend(profile.get("audit_refs", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_ontology_draft_truth_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.deny_draft_ontology_truth_use(args.suggestion_set_id, args.candidate_id, requested_scope, purpose=args.purpose)
+    payload = base_response("cornerstone ontology draft-truth-test", "denied", root)
+    payload.update(requested_scope)
+    if result.get("status") != "policy_denied":
+        exit_code = _ontology_failure(payload, result)
+        print_payload(payload, args.json)
+        return exit_code
+    payload["candidate"] = result["candidate"]
+    payload["policy_decisions"] = [result["policy_decision"]]
+    payload["policy_decision_refs"].append(f"policy:{result['policy_decision']['id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    payload["errors"].append({"code": "CS_ONTOLOGY_DRAFT_TRUTH_DENIED", "message": result["policy_decision"]["reason"]})
+    print_payload(payload, args.json)
+    return EXIT_POLICY_DENIED
+
+
+def command_ontology_invalid_graph_test(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.reject_invalid_ontology_graph(requested_scope)
+    payload = base_response("cornerstone ontology invalid-graph-test", "failed", root)
+    payload.update(requested_scope)
+    payload["errors"].append(result["error"])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_INVALID
+
+
+def command_ontology_supersede(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.supersede_ontology_object(
+        args.object_id,
+        requested_scope,
+        property_name=args.property,
+        corrected_value=args.to_value,
+        rationale=args.rationale,
+    )
+    payload = base_response("cornerstone ontology supersede", "success", root)
+    payload.update(requested_scope)
+    if result.get("status"):
+        exit_code = _ontology_failure(payload, result)
+        print_payload(payload, args.json)
+        return exit_code
+    change_set = result["ontology_change_set"]
+    payload["ontology_object"] = result["ontology_object"]
+    payload["ontology_change_set"] = change_set
+    payload["ids"].update({"ontology_object_id": args.object_id, "ontology_change_set_id": change_set["ontology_change_set_id"], "audit_event_id": result["audit_event"]["event_id"]})
+    payload["evidence_refs"].extend([f"ontology_object:{args.object_id}", f"ontology_change_set:{change_set['ontology_change_set_id']}", *change_set.get("evidence_refs", [])])
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -3328,6 +3543,7 @@ def command_action_propose(args: argparse.Namespace) -> int:
         goal=args.goal,
         connector=args.connector,
         target=args.target,
+        ontology_object_refs=args.ontology_object_ref or [],
     )
     payload = base_response("cornerstone action propose", "success", root)
     payload.update(requested_scope)
@@ -3391,6 +3607,7 @@ def command_action_propose(args: argparse.Namespace) -> int:
     if evidence_bundle_id:
         payload["evidence_refs"].append(f"evidence_bundle:{evidence_bundle_id}")
     payload["evidence_refs"].extend(card.get("evidence", {}).get("artifact_refs", []))
+    payload["evidence_refs"].extend(card.get("ontology_impact", {}).get("object_refs", []))
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -4250,6 +4467,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_evux_governance(root)
     elif args.contract == "vs0-operator-acceptance-ui":
         report = verify_vs0_operator_acceptance_ui(root)
+    elif args.contract == "vs1-ontology-suggest-promote":
+        report = verify_vs1_ontology_suggest_promote(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-agent-orchestration":
@@ -4334,6 +4553,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-evux",
                     "vs0-evux-governance",
                     "vs0-operator-acceptance-ui",
+                    "vs1-ontology-suggest-promote",
                     "full-claim-collaboration",
                     "full-agent-orchestration",
                     "full-brain-routing",
@@ -4387,6 +4607,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         output_arg = "reports/scenario/vs0-evux-governance-2026-06-14.json"
     if args.contract == "vs0-operator-acceptance-ui" and not output_arg:
         output_arg = DEFAULT_OPERATOR_UI_SCENARIO_REPORT
+    if args.contract == "vs1-ontology-suggest-promote" and not output_arg:
+        output_arg = DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT
     exit_code = EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
     transcript_command = ["cornerstone", "scenario", "verify", args.contract]
     for scenario_id in args.scenario or []:
@@ -4741,6 +4963,7 @@ def build_parser() -> argparse.ArgumentParser:
     claim_create = claim_sub.add_parser("create", help="Create a draft claim from an evidence bundle")
     claim_create.add_argument("--evidence-bundle-id", help="Evidence bundle ID")
     claim_create.add_argument("--statement", required=True, help="Draft claim statement")
+    claim_create.add_argument("--ontology-object-ref", action="append", default=[], help="Promoted ontology object ref used as context only")
     add_state_argument(claim_create)
     add_scope_arguments(claim_create)
     claim_create.add_argument("--json", action="store_true", help="Emit JSON output")
@@ -4885,6 +5108,69 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(understand_change)
     understand_change.add_argument("--json", action="store_true", help="Emit JSON output")
     understand_change.set_defaults(func=command_understand_ontology_change)
+
+    ontology = subcommands.add_parser("ontology", help="Ontology suggestion, review, promotion, and profile commands")
+    ontology_sub = ontology.add_subparsers(dest="ontology_command")
+
+    ontology_suggest = ontology_sub.add_parser("suggest", help="Generate a draft ontology SuggestionSet from Artifact or Search evidence")
+    ontology_suggest.add_argument("--source-type", choices=["artifact", "search"], required=True)
+    ontology_suggest.add_argument("--source-id", required=True)
+    add_state_argument(ontology_suggest)
+    add_scope_arguments(ontology_suggest)
+    ontology_suggest.add_argument("--json", action="store_true", help="Emit JSON output")
+    ontology_suggest.set_defaults(func=command_ontology_suggest)
+
+    ontology_review = ontology_sub.add_parser("review", help="Select, reject, or defer draft ontology candidates")
+    ontology_review.add_argument("suggestion_set_id")
+    ontology_review.add_argument("--select", action="append", default=[])
+    ontology_review.add_argument("--reject", action="append", default=[])
+    ontology_review.add_argument("--defer", action="append", default=[])
+    add_state_argument(ontology_review)
+    add_scope_arguments(ontology_review)
+    ontology_review.add_argument("--json", action="store_true", help="Emit JSON output")
+    ontology_review.set_defaults(func=command_ontology_review)
+
+    ontology_promote = ontology_sub.add_parser("promote", help="Explicitly promote selected ontology candidates")
+    ontology_promote.add_argument("suggestion_set_id")
+    ontology_promote.add_argument("--candidate-id", action="append", default=[])
+    add_state_argument(ontology_promote)
+    add_scope_arguments(ontology_promote)
+    ontology_promote.add_argument("--json", action="store_true", help="Emit JSON output")
+    ontology_promote.set_defaults(func=command_ontology_promote)
+
+    ontology_object = ontology_sub.add_parser("object", help="Ontology Object profile commands")
+    ontology_object_sub = ontology_object.add_subparsers(dest="ontology_object_command")
+    ontology_object_show = ontology_object_sub.add_parser("show", help="Show promoted object profile")
+    ontology_object_show.add_argument("object_id")
+    add_state_argument(ontology_object_show)
+    add_scope_arguments(ontology_object_show)
+    ontology_object_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    ontology_object_show.set_defaults(func=command_ontology_object_show)
+
+    ontology_draft = ontology_sub.add_parser("draft-truth-test", help="Verify draft suggestions cannot be used as truth")
+    ontology_draft.add_argument("suggestion_set_id")
+    ontology_draft.add_argument("--candidate-id", required=True)
+    ontology_draft.add_argument("--purpose", default="claim_or_action_truth")
+    add_state_argument(ontology_draft)
+    add_scope_arguments(ontology_draft)
+    ontology_draft.add_argument("--json", action="store_true", help="Emit JSON output")
+    ontology_draft.set_defaults(func=command_ontology_draft_truth_test)
+
+    ontology_invalid = ontology_sub.add_parser("invalid-graph-test", help="Verify helpful failure for invalid ontology graph")
+    add_state_argument(ontology_invalid)
+    add_scope_arguments(ontology_invalid)
+    ontology_invalid.add_argument("--json", action="store_true", help="Emit JSON output")
+    ontology_invalid.set_defaults(func=command_ontology_invalid_graph_test)
+
+    ontology_supersede = ontology_sub.add_parser("supersede", help="Supersede a promoted object property with a patch ChangeSet")
+    ontology_supersede.add_argument("object_id")
+    ontology_supersede.add_argument("--property", required=True)
+    ontology_supersede.add_argument("--to-value", required=True)
+    ontology_supersede.add_argument("--rationale", required=True)
+    add_state_argument(ontology_supersede)
+    add_scope_arguments(ontology_supersede)
+    ontology_supersede.add_argument("--json", action="store_true", help="Emit JSON output")
+    ontology_supersede.set_defaults(func=command_ontology_supersede)
 
     workspace = subcommands.add_parser("workspace", help="Workspace governance commands")
     workspace_sub = workspace.add_subparsers(dest="workspace_command")
@@ -5637,6 +5923,7 @@ def build_parser() -> argparse.ArgumentParser:
     action_propose.add_argument("--risk", choices=["low", "medium", "high", "destructive", "sensitive"], default="low")
     action_propose.add_argument("--connector", default="mock_connector")
     action_propose.add_argument("--target", default="mock://local-target")
+    action_propose.add_argument("--ontology-object-ref", action="append", default=[], help="Promoted ontology object ref used for local impact context")
     add_state_argument(action_propose)
     add_scope_arguments(action_propose)
     action_propose.add_argument("--json", action="store_true", help="Emit JSON output")

@@ -1,4 +1,4 @@
-.PHONY: verify-docs verify-scenario-matrix verify-scaffold-cli verify-vs0-runtime verify-vs0-acceptance verify-vs0-evux verify-vs0-operator-ui verify-local-fast
+.PHONY: verify-docs verify-scenario-matrix verify-scaffold-cli verify-vs0-runtime verify-vs0-acceptance verify-vs0-evux verify-vs0-operator-ui verify-vs1-ontology verify-local-fast
 
 verify-docs:
 	scripts/verify_sot_docs.sh
@@ -29,5 +29,9 @@ verify-vs0-evux:
 verify-vs0-operator-ui:
 	PATH="$(PWD):$$PATH" cornerstone scenario verify vs0-operator-acceptance-ui --json --output reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json
 	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json --json
+
+verify-vs1-ontology:
+	PATH="$(PWD):$$PATH" cornerstone scenario verify vs1-ontology-suggest-promote --json --output reports/scenario/vs1-ontology-suggest-promote-2026-06-15.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/vs1-ontology-suggest-promote-2026-06-15.json --json
 
 verify-local-fast: verify-docs verify-scenario-matrix verify-scaffold-cli

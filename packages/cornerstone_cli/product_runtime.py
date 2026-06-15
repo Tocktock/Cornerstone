@@ -29,6 +29,12 @@ API_ROUTES = [
     "GET /search-snapshots/{snapshot_id}",
     "POST /evidence-bundles",
     "GET /evidence-bundles/{evidence_bundle_id}",
+    "POST /ontology/suggestion-sets",
+    "POST /ontology/suggestion-sets/{suggestion_set_id}/review",
+    "POST /ontology/suggestion-sets/{suggestion_set_id}/promote",
+    "GET /ontology/objects/{ontology_object_id}",
+    "POST /ontology/draft-truth-test",
+    "POST /ontology/invalid-graph-test",
     "POST /claims",
     "GET /claims/{claim_id}",
     "POST /claims/{claim_id}/approve",
@@ -208,6 +214,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     production_ready = str(readiness["production_release_ready"]).lower()
     runtime_ready = str(readiness["vs0_runtime_ready"]).lower()
     autorun_evux_value = "true" if scenario == "vs0-evux" and autorun_evux else "false"
+    autorun_vs1_value = "true" if scenario == "vs1-ontology" and autorun_evux else "false"
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -359,6 +366,36 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       </section>
       <section id="artifact-viewer"><h2>Artifact Viewer</h2><p>Immutable artifact records expose checksum, scope, source, derived text, evidence refs, and audit refs.</p></section>
       <section id="search"><h2>Search</h2><p>Search creates reproducible scoped snapshots that can become Evidence Bundles.</p></section>
+      <section
+        id="vs1-ontology-loop"
+        data-vs1-clicked="false"
+        data-vs1-flow-complete="false"
+        data-production-release-claimed="false"
+        data-live-connector-claimed="false"
+        data-human-acceptance-claimed="false"
+      >
+        <h2>VS1 Ontology Review</h2>
+        <p>Local VS1 proof only. Suggestions stay draft until selected and explicitly promoted; production, live connector readiness, and human UX acceptance are not claimed.</p>
+        <button id="run-vs1-ontology" type="button">Run ontology proof</button>
+        <div class="status-row">
+          <span id="vs1-ontology-status" class="badge warn" data-vs1-status="idle">idle</span>
+          <span id="vs1-real-external-calls" class="badge safe">real_external_http_calls=0</span>
+          <span id="vs1-audit-verify" class="badge">audit not verified</span>
+        </div>
+        <div class="detail-grid">
+          <div><span class="label">Artifact</span><code id="vs1-artifact-id">not-run</code></div>
+          <div><span class="label">Search Snapshot</span><code id="vs1-search-snapshot-id">not-run</code></div>
+          <div><span class="label">SuggestionSet</span><code id="vs1-suggestion-set-id">not-run</code></div>
+          <div><span class="label">Review</span><code id="vs1-review-state">not-run</code></div>
+          <div><span class="label">ChangeSet</span><code id="vs1-change-set-id">not-run</code></div>
+          <div><span class="label">Object Profile</span><code id="vs1-object-profile-id">not-run</code></div>
+          <div><span class="label">Search Integration</span><span id="vs1-search-integration">not-run</span></div>
+          <div><span class="label">Claim Context</span><span id="vs1-claim-context">not-run</span></div>
+          <div><span class="label">Action Impact</span><span id="vs1-action-impact">not-run</span></div>
+          <div><span class="label">Draft Truth Guard</span><span id="vs1-draft-truth-guard">not-run</span></div>
+        </div>
+        <pre id="vs1-ontology-trace" aria-label="VS1 ontology workflow trace">{{}}</pre>
+      </section>
       <section id="claim-builder"><h2>Claim Builder</h2><p>Claims stay draft unless backed by an Evidence Bundle and approval evidence.</p></section>
       <section id="action-card"><h2>Action Card</h2><p>Actions expose dry-run diff, expected impact, policy decision, approval, execution, and mock ConnectorHub boundary.</p></section>
       <section id="audit-detail"><h2>Audit Detail</h2><p>Audit events form a local tamper-evident hash chain verified by <code>cornerstone audit verify --json</code>.</p></section>
@@ -587,6 +624,265 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       traceStep(path, {{ status: response.status, payload }});
       return {{ response, payload }};
     }}
+    const vs1Autorun = {autorun_vs1_value};
+    const vs1Trace = [];
+    const vs1State = {{
+      completed: false,
+      artifact: {{}},
+      search: {{}},
+      suggestionSet: {{}},
+      review: {{}},
+      promotion: {{}},
+      profile: {{}},
+      claim: {{}},
+      action: {{}},
+      guards: {{}},
+      audit: {{}}
+    }};
+    function traceVs1(name, payload) {{
+      vs1Trace.push({{ step: name, payload }});
+      setText("vs1-ontology-trace", JSON.stringify({{ workflow: "vs1-ontology-suggest-promote", state: vs1State, steps: vs1Trace }}, null, 2));
+    }}
+    async function vs1Api(path, body) {{
+      const response = await fetch(path, {{
+        method: "POST",
+        headers: {{ "content-type": "application/json" }},
+        body: JSON.stringify(Object.assign({{}}, evuxScope, body || {{}}))
+      }});
+      const payload = await response.json();
+      traceVs1(path, {{ status: response.status, payload }});
+      return {{ response, payload }};
+    }}
+    async function vs1Get(path) {{
+      const response = await fetch(path);
+      const payload = await response.json();
+      traceVs1(path, {{ status: response.status, payload }});
+      return {{ response, payload }};
+    }}
+    function firstByKind(suggestionSet, kind, minConfidence) {{
+      const groups = [
+        ...(suggestionSet.object_suggestions || []),
+        ...(suggestionSet.property_suggestions || []),
+        ...(suggestionSet.link_suggestions || [])
+      ];
+      return groups.find((candidate) => candidate.candidate_kind === kind && candidate.confidence >= minConfidence);
+    }}
+    function allCandidates(suggestionSet) {{
+      return [
+        ...(suggestionSet.object_suggestions || []),
+        ...(suggestionSet.property_suggestions || []),
+        ...(suggestionSet.link_suggestions || [])
+      ];
+    }}
+    async function runVs1Ontology() {{
+      const button = document.getElementById("run-vs1-ontology");
+      const status = document.getElementById("vs1-ontology-status");
+      const section = document.getElementById("vs1-ontology-loop");
+      section.dataset.vs1Clicked = "true";
+      button.disabled = true;
+      status.dataset.vs1Status = "running";
+      status.textContent = "running";
+      vs1Trace.length = 0;
+      try {{
+        const artifactResponse = await vs1Api("/artifacts", {{
+          path: "fixtures/vs1/ontology/vendor_risk.txt",
+          source: "local_fixture",
+          media_type: "text/plain",
+          trust: "untrusted"
+        }});
+        const artifact = artifactResponse.payload.artifact;
+        vs1State.artifact = {{ artifact_id: artifact.artifact_id, evidence_refs: artifactResponse.payload.evidence_refs || [] }};
+        setText("vs1-artifact-id", artifact.artifact_id);
+
+        const searchResponse = await vs1Api("/search", {{ query: "Northstar Labs vendor risk" }});
+        const snapshot = searchResponse.payload.search_snapshot;
+        vs1State.search = {{ search_snapshot_id: snapshot.search_snapshot_id, result_count: snapshot.result_count }};
+        setText("vs1-search-snapshot-id", snapshot.search_snapshot_id);
+
+        const suggestResponse = await vs1Api("/ontology/suggestion-sets", {{
+          source_type: "search",
+          source_id: snapshot.search_snapshot_id
+        }});
+        const suggestionSet = suggestResponse.payload.ontology_suggestion_set;
+        const objectCandidates = suggestionSet.object_suggestions || [];
+        const propertyCandidates = suggestionSet.property_suggestions || [];
+        const linkCandidates = suggestionSet.link_suggestions || [];
+        const selected = [
+          ...objectCandidates.filter((candidate) => candidate.confidence >= 0.6),
+          ...propertyCandidates.filter((candidate) => candidate.confidence >= 0.6).slice(0, 2),
+          ...linkCandidates.filter((candidate) => candidate.confidence >= 0.6).slice(0, 2)
+        ].map((candidate) => candidate.candidate_id);
+        const lowCandidate = allCandidates(suggestionSet).find((candidate) => candidate.confidence < 0.6);
+        const rejected = propertyCandidates.slice(2, 3).map((candidate) => candidate.candidate_id);
+        const deferred = lowCandidate ? [lowCandidate.candidate_id] : [];
+        vs1State.suggestionSet = {{
+          suggestion_set_id: suggestionSet.suggestion_set_id,
+          seed_types: suggestionSet.universal_seed_types,
+          object_count: objectCandidates.length,
+          property_count: propertyCandidates.length,
+          link_count: linkCandidates.length,
+          low_candidate_id: lowCandidate && lowCandidate.candidate_id
+        }};
+        setText("vs1-suggestion-set-id", suggestionSet.suggestion_set_id);
+
+        const draftGuard = await vs1Api("/ontology/draft-truth-test", {{
+          suggestion_set_id: suggestionSet.suggestion_set_id,
+          candidate_id: selected[0],
+          purpose: "claim_or_action_truth"
+        }});
+        vs1State.guards.draft_truth_denied = draftGuard.response.status === 403 &&
+          draftGuard.payload.errors.some((error) => error.code === "CS_ONTOLOGY_DRAFT_TRUTH_DENIED");
+        setText("vs1-draft-truth-guard", vs1State.guards.draft_truth_denied ? "denied before promotion" : "unexpected");
+
+        const reviewResponse = await vs1Api("/ontology/suggestion-sets/" + suggestionSet.suggestion_set_id + "/review", {{
+          select: selected,
+          reject: rejected,
+          defer: deferred
+        }});
+        const reviewed = reviewResponse.payload.ontology_suggestion_set;
+        vs1State.review = reviewed.review_state;
+        setText("vs1-review-state", "selected=" + reviewed.review_state.selected.length + "; rejected=" + reviewed.review_state.rejected.length + "; deferred=" + reviewed.review_state.deferred.length);
+
+        const promoteResponse = await vs1Api("/ontology/suggestion-sets/" + suggestionSet.suggestion_set_id + "/promote", {{
+          candidate_ids: selected
+        }});
+        const changeSet = promoteResponse.payload.ontology_change_set;
+        const firstObject = (promoteResponse.payload.ontology_objects || [])[0];
+        vs1State.promotion = {{
+          ontology_change_set_id: changeSet.ontology_change_set_id,
+          previous_version: changeSet.previous_version,
+          next_version: changeSet.next_version,
+          semver_bump: changeSet.semver_bump,
+          object_refs: (promoteResponse.payload.ontology_objects || []).map((object) => "ontology_object:" + object.ontology_object_id),
+          link_refs: (promoteResponse.payload.ontology_links || []).map((link) => "ontology_link:" + link.ontology_link_id)
+        }};
+        setText("vs1-change-set-id", changeSet.ontology_change_set_id);
+
+        const profileResponse = await vs1Get("/ontology/objects/" + firstObject.ontology_object_id);
+        vs1State.profile = {{
+          ontology_object_id: firstObject.ontology_object_id,
+          sections: profileResponse.payload.ontology_object_profile.profile_sections,
+          evidence_refs: profileResponse.payload.ontology_object_profile.evidence_refs || []
+        }};
+        setText("vs1-object-profile-id", firstObject.ontology_object_id);
+
+        const ontologySearch = await vs1Api("/search", {{ query: firstObject.label }});
+        const ontologyResult = (ontologySearch.payload.search_snapshot.results || []).find((result) => result.result_type === "ontology_object");
+        vs1State.search.promoted_object_result = Boolean(ontologyResult);
+        setText("vs1-search-integration", vs1State.search.promoted_object_result ? "promoted object returned in search" : "not returned");
+
+        const bundleResponse = await vs1Api("/evidence-bundles", {{ search_snapshot_id: snapshot.search_snapshot_id }});
+        const evidenceBundle = bundleResponse.payload.evidence_bundle;
+        const zeroClaim = await vs1Api("/claims", {{
+          statement: "Ontology context alone should not approve this claim.",
+          ontology_object_refs: vs1State.promotion.object_refs
+        }});
+        const zeroApprove = await vs1Api("/claims/" + zeroClaim.payload.claim.claim_id + "/approve", {{}});
+        const claimResponse = await vs1Api("/claims", {{
+          evidence_bundle_id: evidenceBundle.evidence_bundle_id,
+          statement: "Northstar Labs vendor risk requires owner-reviewed follow-up.",
+          ontology_object_refs: vs1State.promotion.object_refs
+        }});
+        const claim = claimResponse.payload.claim;
+        const claimApprove = await vs1Api("/claims/" + claim.claim_id + "/approve", {{}});
+        vs1State.claim = {{
+          claim_id: claim.claim_id,
+          ontology_context_refs: claim.ontology_context.object_refs,
+          zero_evidence_denied: zeroApprove.response.status === 400,
+          approved: claimApprove.payload.claim.trust_state === "approved"
+        }};
+        setText("vs1-claim-context", "context_refs=" + vs1State.claim.ontology_context_refs.length + "; evidence_required=" + vs1State.claim.zero_evidence_denied);
+
+        const actionResponse = await vs1Api("/actions", {{
+          claim_id: claim.claim_id,
+          goal: "Record local ontology impact review",
+          action_kind: "external_writeback",
+          risk: "high",
+          connector: "mock_connector",
+          target: "mock://vs1-ontology/browser",
+          ontology_object_refs: vs1State.promotion.object_refs
+        }});
+        const action = actionResponse.payload.action_card;
+        const actionApprove = await vs1Api("/actions/" + action.action_id + "/approve", {{ approver: "owner" }});
+        const actionExecute = await vs1Api("/actions/" + action.action_id + "/execute", {{}});
+        vs1State.action = {{
+          action_id: action.action_id,
+          ontology_impact: action.ontology_impact,
+          real_external_http_calls: actionExecute.payload.action_result.external_http_calls,
+          mock_connector_calls: actionExecute.payload.action_result.mock_connector_calls,
+          approved: actionApprove.payload.action_card.approval.status === "approved"
+        }};
+        setText("vs1-action-impact", "objects=" + action.ontology_impact.object_refs.length + "; real_external_http_calls=" + vs1State.action.real_external_http_calls);
+        setText("vs1-real-external-calls", "real_external_http_calls=" + vs1State.action.real_external_http_calls);
+
+        const auditEvents = await vs1Get("/audit-events");
+        const auditVerify = await vs1Api("/audit/verify", {{}});
+        const eventTypes = [...new Set((auditEvents.payload.audit_events || []).map((event) => event.event_type).filter(Boolean))];
+        vs1State.audit = {{
+          event_types: eventTypes,
+          event_count: eventTypes.length,
+          verification_status: auditVerify.payload.audit_integrity.status
+        }};
+        setText("vs1-audit-verify", auditVerify.payload.audit_integrity.status);
+        vs1State.completed = vs1Passes();
+        section.dataset.vs1FlowComplete = vs1State.completed ? "true" : "false";
+        status.dataset.vs1Status = vs1State.completed ? "passed" : "failed";
+        status.textContent = vs1State.completed ? "passed" : "failed";
+      }} catch (error) {{
+        traceVs1("browser_error", {{ message: String(error) }});
+        status.dataset.vs1Status = "failed";
+        status.textContent = "failed";
+      }} finally {{
+        button.disabled = false;
+      }}
+    }}
+    function vs1Passes() {{
+      const required = [
+        "ontology.suggestion_set.generated",
+        "ontology.suggestion_set.reviewed",
+        "ontology.promotion.requested",
+        "ontology.object.promoted",
+        "ontology.change_set.created",
+        "ontology.version.changed",
+        "ontology.object.profile.read",
+        "claim.approved",
+        "action.card.proposed",
+        "action.executed"
+      ];
+      return Boolean(
+        vs1State.artifact.artifact_id &&
+        vs1State.search.search_snapshot_id &&
+        vs1State.suggestionSet.suggestion_set_id &&
+        vs1State.suggestionSet.seed_types &&
+        vs1State.suggestionSet.seed_types.length === 9 &&
+        vs1State.suggestionSet.object_count >= 3 &&
+        vs1State.suggestionSet.property_count >= 1 &&
+        vs1State.suggestionSet.link_count >= 1 &&
+        vs1State.guards.draft_truth_denied &&
+        vs1State.review.selected &&
+        vs1State.review.selected.length >= 3 &&
+        vs1State.promotion.ontology_change_set_id &&
+        vs1State.promotion.semver_bump === "minor" &&
+        vs1State.profile.ontology_object_id &&
+        vs1State.search.promoted_object_result &&
+        vs1State.claim.zero_evidence_denied &&
+        vs1State.claim.approved &&
+        vs1State.action.real_external_http_calls === 0 &&
+        vs1State.audit.verification_status === "success" &&
+        required.every((eventType) => vs1State.audit.event_types.includes(eventType))
+      );
+    }}
+    window.__cornerstoneVs1OntologyEvidence = function() {{
+      const section = document.getElementById("vs1-ontology-loop");
+      return {{
+        schema_version: "cs.vs1_ontology_ui_state.v1",
+        ontology_passes: vs1Passes(),
+        production_release_claimed: section.dataset.productionReleaseClaimed === "true",
+        live_connector_claimed: section.dataset.liveConnectorClaimed === "true",
+        human_acceptance_claimed: section.dataset.humanAcceptanceClaimed === "true",
+        state: vs1State
+      }};
+    }};
     async function selectArtifactStep() {{
       const artifact = await api("/artifacts", {{
         path: document.getElementById("artifact-fixture-select").value,
@@ -875,8 +1171,12 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     document.getElementById("step-execute-run").addEventListener("click", executeStep);
     document.getElementById("step-audit-run").addEventListener("click", auditStep);
     document.getElementById("run-evux").addEventListener("click", runEvux);
+    document.getElementById("run-vs1-ontology").addEventListener("click", runVs1Ontology);
     if (evuxAutorun) {{
       window.addEventListener("load", () => setTimeout(() => document.getElementById("run-evux").click(), 50));
+    }}
+    if (vs1Autorun) {{
+      window.addEventListener("load", () => setTimeout(() => document.getElementById("run-vs1-ontology").click(), 50));
     }}
   </script>
 </body>
@@ -982,6 +1282,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if len(parts) == 2 and parts[0] == "actions":
             self._show_action(parts[1])
             return
+        if len(parts) == 3 and parts[0] == "ontology" and parts[1] == "objects":
+            self._show_ontology_object(parts[2])
+            return
         if parts == ["audit-events"]:
             self._audit_events()
             return
@@ -1002,6 +1305,21 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             return
         if parts == ["evidence-bundles"]:
             self._create_evidence_bundle(body)
+            return
+        if parts == ["ontology", "suggestion-sets"]:
+            self._create_ontology_suggestion_set(body)
+            return
+        if len(parts) == 4 and parts[0] == "ontology" and parts[1] == "suggestion-sets" and parts[3] == "review":
+            self._review_ontology_suggestion_set(parts[2], body)
+            return
+        if len(parts) == 4 and parts[0] == "ontology" and parts[1] == "suggestion-sets" and parts[3] == "promote":
+            self._promote_ontology_suggestion_set(parts[2], body)
+            return
+        if parts == ["ontology", "draft-truth-test"]:
+            self._draft_ontology_truth_test(body)
+            return
+        if parts == ["ontology", "invalid-graph-test"]:
+            self._invalid_ontology_graph_test(body)
             return
         if parts == ["claims"]:
             self._create_claim(body)
@@ -1026,6 +1344,146 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             return
         self._send_json(_json_response("not_found", errors=[{"code": "CS_API_NOT_FOUND", "message": "Route not found."}]), 404)
 
+    def _ontology_error(self, result: dict[str, Any], *, default_code: str = "CS_ONTOLOGY_ERROR") -> bool:
+        status = result.get("status")
+        if not status:
+            return False
+        if status == "not_found":
+            self._send_json(_json_response("failed", errors=[{"code": "CS_ONTOLOGY_NOT_FOUND", "message": "Ontology source was not found.", "resource": result.get("resource")}]), 404)
+            return True
+        if status == "scope_denied":
+            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Ontology source is outside the requested scope.", "resource_scope": result.get("resource_scope")}]), 403)
+            return True
+        if status == "policy_denied":
+            refs = []
+            if result.get("audit_event"):
+                refs.append(f"audit:{result['audit_event']['event_id']}")
+            self._send_json(
+                _json_response(
+                    "denied",
+                    policy_decisions=[result.get("policy_decision")],
+                    policy_decision_refs=[f"policy:{result.get('policy_decision', {}).get('id')}"] if result.get("policy_decision", {}).get("id") else [],
+                    audit_refs=refs,
+                    errors=[{"code": "CS_ONTOLOGY_POLICY_DENIED", "message": result.get("reason") or result.get("policy_decision", {}).get("reason", "Ontology policy denied the operation.")}],
+                ),
+                403,
+            )
+            return True
+        if status == "invalid_graph":
+            refs = []
+            if result.get("audit_event"):
+                refs.append(f"audit:{result['audit_event']['event_id']}")
+            self._send_json(_json_response("failed", audit_refs=refs, errors=[result.get("error") or {"code": "CS_ONTOLOGY_INVALID_GRAPH", "message": "Ontology graph is invalid."}]), 400)
+            return True
+        self._send_json(_json_response("failed", errors=[{"code": default_code, "message": "Ontology operation failed.", "status": status}]), 400)
+        return True
+
+    def _create_ontology_suggestion_set(self, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.create_ontology_suggestion_set(str(body.get("source_type", "")), str(body.get("source_id", "")), scope)
+        if self._ontology_error(result):
+            return
+        suggestion_set = result["suggestion_set"]
+        self._send_json(
+            _json_response(
+                "success",
+                ontology_suggestion_set=suggestion_set,
+                evidence_refs=[f"ontology_suggestion_set:{suggestion_set['suggestion_set_id']}", *suggestion_set.get("evidence_refs", [])],
+                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+            )
+        )
+
+    def _review_ontology_suggestion_set(self, suggestion_set_id: str, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.review_ontology_suggestion_set(
+            suggestion_set_id,
+            scope,
+            select=[str(value) for value in body.get("select", []) if isinstance(value, str)],
+            reject=[str(value) for value in body.get("reject", []) if isinstance(value, str)],
+            defer=[str(value) for value in body.get("defer", []) if isinstance(value, str)],
+        )
+        if self._ontology_error(result):
+            return
+        suggestion_set = result["suggestion_set"]
+        self._send_json(
+            _json_response(
+                "success",
+                ontology_suggestion_set=suggestion_set,
+                evidence_refs=[f"ontology_suggestion_set:{suggestion_set_id}", *suggestion_set.get("evidence_refs", [])],
+                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+            )
+        )
+
+    def _promote_ontology_suggestion_set(self, suggestion_set_id: str, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.promote_ontology_suggestions(
+            suggestion_set_id,
+            [str(value) for value in body.get("candidate_ids", []) if isinstance(value, str)],
+            scope,
+        )
+        if self._ontology_error(result):
+            return
+        change_set = result["ontology_change_set"]
+        self._send_json(
+            _json_response(
+                "success",
+                ontology_suggestion_set=result["suggestion_set"],
+                ontology_objects=result["ontology_objects"],
+                ontology_links=result["ontology_links"],
+                ontology_change_set=change_set,
+                evidence_refs=[
+                    f"ontology_change_set:{change_set['ontology_change_set_id']}",
+                    *[f"ontology_object:{obj['ontology_object_id']}" for obj in result["ontology_objects"]],
+                    *[f"ontology_link:{link['ontology_link_id']}" for link in result["ontology_links"]],
+                    *change_set.get("evidence_refs", []),
+                ],
+                audit_refs=[f"audit:{event['event_id']}" for event in result.get("audit_events", [])],
+            )
+        )
+
+    def _show_ontology_object(self, object_id: str) -> None:
+        scope = self._query_scope()
+        result = self.store.ontology_object_profile(object_id, scope)
+        if self._ontology_error(result):
+            return
+        profile = result["profile"]
+        self._send_json(
+            _json_response(
+                "success",
+                ontology_object_profile=profile,
+                evidence_refs=[f"ontology_object:{object_id}", *profile.get("evidence_refs", [])],
+                audit_refs=profile.get("audit_refs", []),
+            )
+        )
+
+    def _draft_ontology_truth_test(self, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.deny_draft_ontology_truth_use(
+            str(body.get("suggestion_set_id", "")),
+            str(body.get("candidate_id", "")),
+            scope,
+            purpose=str(body.get("purpose", "claim_or_action_truth")),
+        )
+        if result.get("status") != "policy_denied":
+            self._ontology_error(result)
+            return
+        self._send_json(
+            _json_response(
+                "denied",
+                candidate=result["candidate"],
+                policy_decisions=[result["policy_decision"]],
+                policy_decision_refs=[f"policy:{result['policy_decision']['id']}"],
+                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+                errors=[{"code": "CS_ONTOLOGY_DRAFT_TRUTH_DENIED", "message": result["policy_decision"]["reason"]}],
+            ),
+            403,
+        )
+
+    def _invalid_ontology_graph_test(self, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.reject_invalid_ontology_graph(scope)
+        self._send_json(_json_response("failed", audit_refs=[f"audit:{result['audit_event']['event_id']}"], errors=[result["error"]]), 400)
+
     def _show_artifact(self, artifact_id: str) -> None:
         scope = self._query_scope()
         artifact = self.store.get_artifact(artifact_id, scope)
@@ -1035,6 +1493,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         event = self.store.append_audit("artifact.read", scope, {"type": "artifact", "id": artifact_id}, {"reason": "api_artifact_show"})
         detail = dict(artifact)
         detail["derived_text_preview"] = self.store.derived_text_preview(artifact)
+        detail["ontology_context"] = self.store.ontology_context_for_artifact(artifact_id, scope)
         self._send_json(
             _json_response(
                 "success",
@@ -1194,7 +1653,8 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         scope = _scope_from_body(body)
         bundle_id = body.get("evidence_bundle_id")
         if isinstance(bundle_id, str) and bundle_id:
-            result = self.store.create_claim_from_evidence_bundle(bundle_id, str(body.get("statement", "")), scope)
+            ontology_refs = [str(value) for value in body.get("ontology_object_refs", []) if isinstance(value, str)]
+            result = self.store.create_claim_from_evidence_bundle(bundle_id, str(body.get("statement", "")), scope, ontology_object_refs=ontology_refs)
         else:
             result = self.store.create_unsupported_claim(str(body.get("statement", "")), scope)
         if result.get("status") == "not_found":
@@ -1209,6 +1669,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if evidence.get("evidence_bundle_id"):
             refs.append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
         refs.extend(evidence.get("artifact_refs", []))
+        refs.extend(claim.get("ontology_context", {}).get("object_refs", []))
         self._send_json(_json_response("success", claim=claim, evidence_refs=refs, audit_refs=[f"audit:{result['audit_event']['event_id']}"]))
 
     def _approve_claim(self, claim_id: str, body: dict[str, Any]) -> None:
@@ -1267,6 +1728,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             goal=str(body.get("goal", "Run a local mock ConnectorHub action.")),
             connector=str(body.get("connector", "mock_connector")),
             target=str(body.get("target", "mock://local-target")),
+            ontology_object_refs=[str(value) for value in body.get("ontology_object_refs", []) if isinstance(value, str)],
         )
         if result.get("status"):
             self._send_json(_json_response("failed", errors=[{"code": "CS_ACTION_PROPOSE_FAILED", "message": result["status"]}]), 400)
@@ -1281,7 +1743,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 mission=created_mission,
                 workspace_mode=activation.get("workspace_mode") if activation else None,
                 action_card=card,
-                evidence_refs=[f"action:{card['action_id']}", f"claim:{claim_id}", f"mission:{mission_id}"],
+                evidence_refs=[f"action:{card['action_id']}", f"claim:{claim_id}", f"mission:{mission_id}", *card.get("ontology_impact", {}).get("object_refs", [])],
                 audit_refs=audit_refs,
                 policy_decisions=[card["policy_decision"]],
                 policy_decision_refs=[f"policy:{card['policy_decision']['id']}"],

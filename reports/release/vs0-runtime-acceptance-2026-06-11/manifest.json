@@ -1,44 +1,44 @@
 {
   "artifacts": [
     {
-      "bytes": 319072,
+      "bytes": 326926,
       "path": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "acceptance_scenario_report",
-      "sha256": "e6c6996c6d7b5ed3e893256c26444449d508e330702de1a6e5e41811ea16675e"
+      "sha256": "5c48e71629e2ca51f8c0257d55b9b8a01e2b0bca7476cd3f9db2bf80633fce35"
     },
     {
-      "bytes": 257023,
+      "bytes": 263270,
       "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "product_runtime_scenario_report",
-      "sha256": "afa2bb541df86c5d1e7c81c012e053239451e17c1c77ab5adb6711eed557bdc6"
+      "sha256": "a91d8c4eb58493f104541b72c48d9f95457cf39d8a0020533e6dc19049fde376"
     },
     {
-      "bytes": 1430,
+      "bytes": 1431,
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
       "present": true,
       "required": true,
       "role": "browser_proof_manifest",
-      "sha256": "9577c93dfae25dbd04fd09da60c2661a2550932ba55e0ca4a18f98a016233c82"
+      "sha256": "f94731cdd2f4f78d89cb42ece0523579c93e1751e5f69da7429fb865f637d681"
     },
     {
-      "bytes": 89394,
+      "bytes": 100535,
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
       "present": true,
       "required": true,
       "role": "browser_screenshot",
-      "sha256": "4814197a8ed32519720be02c91995ff31293826c256a4d1706aaebb2005776ed"
+      "sha256": "6e8efc16dfa527acbedc98815e33e4b305d7d01ca74df21a8da76cb1926b956f"
     },
     {
-      "bytes": 36429,
+      "bytes": 51923,
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
       "present": true,
       "required": true,
       "role": "browser_dom_snapshot",
-      "sha256": "e4ae8a98b25fee79a45027e9620e7f33b5b9b1695767ed514cd88019cbe62b5a"
+      "sha256": "5b038a6629503711c74785059c67a8b12ad3f6b92f47dcb32cb87b1c6a74a321"
     },
     {
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/workflow-trace.json",
@@ -79,12 +79,12 @@
       "sha256": "89ff9b2b61813579e9cf6522d49159cad531f64f8b5cce16a4667421f8d396f2"
     },
     {
-      "bytes": 24871,
+      "bytes": 25509,
       "path": "README.md",
       "present": true,
       "required": true,
       "role": "operator_quickstart",
-      "sha256": "64622f1a9c5c307727c8eb6b4200bf4f00e04511cb0db757d65dbfd26b4ac4d1"
+      "sha256": "f02de3fa516120ab4b62efdb3f9a0ad32363a5fe8966c90773e4c5d1a703b3ae"
     },
     {
       "bytes": 924,
@@ -95,24 +95,24 @@
       "sha256": "988aec2478e8133050e133741b2c714b8730a0c4a94caceaaa2f47fa728d6579"
     },
     {
-      "bytes": 3084,
+      "bytes": 3103,
       "path": "reports/release/vs0-runtime-acceptance-2026-06-11/command-transcript.json",
       "present": true,
       "required": true,
       "role": "command_transcript",
-      "sha256": "eba7a2b44dda4e8c45520460aebe76d2bb7219138ce51b4b9b7147553041dc84"
+      "sha256": "df9cbbf4088b8859ef6e0099d4fbce6e2398d8559f9e921635b50013c23845ef"
     },
     {
-      "bytes": 472,
+      "bytes": 479,
       "path": "reports/release/vs0-runtime-acceptance-2026-06-11/command-evidence.json",
       "present": true,
       "required": false,
       "role": "command_evidence",
-      "sha256": "e38192c84aec718a511a09f130396c2be4a83e005bf5bf5baea207687d548185"
+      "sha256": "a6ae55481c04840e59e53fd042e23c2f5136b9a6883316a4503611eda7ca53f7"
     }
   ],
   "browser_proof": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
-  "created_at": "2026-06-14T14:22:58.350709Z",
+  "created_at": "2026-06-15T12:20:04.111167Z",
   "human_required": [
     {
       "id": "VS0-ACC-H01",
@@ -161,7 +161,8 @@
     "unqualified_external_calls_in_release_report": 0,
     "zero_evidence_claim_approvals": 0
   },
-  "package_id": "releasepkg_3257432928ea0a58",
+  "package_id": "releasepkg_bf2f0088f581cb14",
+  "post_commit_rollup": null,
   "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
   "production_release_ready": false,
   "scenario_report": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",

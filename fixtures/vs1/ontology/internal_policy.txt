@@ -1,0 +1,10 @@
+Document: Internal Approval Policy Memo
+Organization: CornerStone Team
+Policy: Local Action Approval Policy
+Action: Mock ConnectorHub Writeback
+Event: Policy Review 2026-06-15
+Property: Local Action Approval Policy.requires = dry-run and owner approval
+Property: Mock ConnectorHub Writeback.mode = local mock only
+Link: Mock ConnectorHub Writeback governed_by Local Action Approval Policy
+Link: CornerStone Team owns Local Action Approval Policy
+Evidence note: The memo explicitly forbids live provider claims without separate human-approved evidence.

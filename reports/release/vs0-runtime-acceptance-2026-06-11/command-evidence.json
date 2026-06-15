@@ -1,6 +1,6 @@
 {
   "commands": [
-    "cornerstone scenario verify vs0-runtime-acceptance --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+    "cornerstone scenario verify vs0-runtime-acceptance --json --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
     "cornerstone scenario gate reports/scenario/vs0-runtime-acceptance-2026-06-11.json --json",
     "cornerstone release evidence collect --scope vs0-runtime-acceptance --json"
   ],
