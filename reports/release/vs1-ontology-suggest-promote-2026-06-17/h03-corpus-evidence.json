@@ -1,0 +1,65 @@
+{
+  "created_at": "2026-06-16T23:03:09.659951Z",
+  "h03_live_provider_pass_claimed": false,
+  "llm_provider_review_required_later": true,
+  "negative_evidence": {
+    "credentials_used": 0,
+    "llm_provider_used": 0,
+    "mutating_requests": 0,
+    "private_or_customer_data_used": 0,
+    "production_readiness_claimed": 0
+  },
+  "purpose": "Select a safe public read-only corpus for future VS1-ONT-H03 live-provider rehearsal without claiming production/live-provider readiness.",
+  "records": [
+    {
+      "credentials_required": false,
+      "first_result": {
+        "author_count": 2,
+        "id": "https://openalex.org/W4220682629",
+        "primary_topic": "Information and Cyber Security",
+        "publication_year": 2022,
+        "title": "Top Five Challenges in Software Supply Chain Security: Observations From 30 Industry and Government Organizations"
+      },
+      "fit": "best: public graph-shaped scholarly corpus with works, authors, institutions, topics, sources, and concepts",
+      "meta_count": 219331,
+      "mode": "public_read_only_live_api",
+      "mutation_risk": "none_observed_read_only_get",
+      "provider": "OpenAlex",
+      "result_count": 3,
+      "url": "https://api.openalex.org/works?search=software+supply+chain+security&per-page=3&select=id%2Cdoi%2Ctitle%2Cpublication_year%2Cauthorships%2Cprimary_topic%2Cconcepts"
+    },
+    {
+      "credentials_required": false,
+      "first_result": {
+        "author_count": 1,
+        "doi": "10.1007/979-8-8688-0799-2_10",
+        "title": "Emerging Trends in Software Supply Chain Security"
+      },
+      "fit": "fallback: public DOI metadata corpus, less graph-shaped than OpenAlex",
+      "mode": "public_read_only_live_api",
+      "mutation_risk": "none_observed_read_only_get",
+      "provider": "Crossref",
+      "result_count": 3,
+      "url": "https://api.crossref.org/works?query.bibliographic=software+supply+chain+security&rows=3&select=DOI%2Ctitle%2Cpublished-print%2Cpublished-online%2Cauthor%2Ccontainer-title%2Csubject%2Clicense%2Cfunder"
+    },
+    {
+      "credentials_required": false,
+      "first_result": {
+        "has_public_user": true,
+        "label_count": 9,
+        "number": 139797,
+        "state": "open",
+        "title": "refactor: use AddEventHandlerWithOptions in node controllers"
+      },
+      "fit": "fallback: operational issue corpus, volatile and contains public usernames",
+      "mode": "public_read_only_live_api",
+      "mutation_risk": "none_observed_read_only_get",
+      "provider": "GitHub public issues",
+      "result_count": 3,
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/issues?state=open&per_page=3"
+    }
+  ],
+  "schema_version": "cs.vs1_h03_corpus_selection_evidence.v1",
+  "selected_provider": "OpenAlex",
+  "selected_query": "software supply chain security"
+}

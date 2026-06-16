@@ -1,6 +1,6 @@
 # VS1 Evidence Map Human Acceptance
 
-Status: H01_H02_ACCEPTED
+Status: H01_H02_ACCEPTED_H03_DEFERRED
 Owner: JiYong / Tars
 Date: 2026-06-17
 
@@ -27,3 +27,9 @@ Date: 2026-06-17
 |---|---|---|---|
 | VS1-ONT-H03 | HUMAN_REQUIRED | Human-approved live provider or production-data proof with redacted transcript, approval result, and audit refs. | H01/H02 acceptance does not claim production or live connector readiness. |
 
+## H03 Corpus Review
+
+- Report: `reports/release/vs1-ontology-suggest-promote-2026-06-17/h03-live-provider-corpus-review.md`
+- Evidence: `reports/release/vs1-ontology-suggest-promote-2026-06-17/h03-corpus-evidence.json`
+- Decision: OpenAlex is the recommended public read-only corpus for future H03 rehearsal.
+- Boundary: H03 remains deferred until the actual live-provider or LLM-provider path has approval, redacted transcript, audit refs, and execution/result evidence.

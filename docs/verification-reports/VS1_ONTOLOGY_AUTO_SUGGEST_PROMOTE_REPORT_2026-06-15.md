@@ -21,6 +21,7 @@
 - Browser screenshot: reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png
 - Browser trace: reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow-trace.json
 - Human acceptance note: reports/release/vs1-ontology-suggest-promote-2026-06-17/human-acceptance.md
+- H03 corpus review: reports/release/vs1-ontology-suggest-promote-2026-06-17/h03-live-provider-corpus-review.md
 - SuggestionSet: oset_0fc605cda9edfee2
 - OntologyChangeSet: ochset_bb6b642271878e64
 - Promoted object: obj_1a13e0127536c3de
@@ -92,7 +93,8 @@
 
 This report claims local VS1 ontology suggestion/review/promotion readiness only.
 Post-review human evidence accepts VS1-ONT-H01 and VS1-ONT-H02 for the local vendor-risk evidence-map UX.
-It does not claim production readiness or live-provider readiness; VS1-ONT-H03 remains HUMAN_REQUIRED.
+Post-review H03 evidence selects OpenAlex as a future safe public read-only corpus but does not claim production readiness, live-provider readiness, or LLM-provider semantic readiness.
+VS1-ONT-H03 remains HUMAN_REQUIRED until the actual live-provider or LLM-provider path has approval, redacted transcript, audit refs, and execution/result evidence.
 
 ## Human Required
 
@@ -100,7 +102,7 @@ It does not claim production readiness or live-provider readiness; VS1-ONT-H03 r
 |---|---|---|---|---|---|
 | VS1-ONT-H01 | ACCEPTED on 2026-06-17 | Human operator UX acceptance is subjective. | JiYong/Tars uses the VS1 UI flow and records accept or reject. | Acceptance note with screenshots/recording or issue list. | No longer blocks local product-accepted VS1 UX claim. |
 | VS1-ONT-H02 | ACCEPTED on 2026-06-17 | Semantic quality requires domain-owner judgment. | Domain owner reviews labels, relationships, and object profiles. | Domain review note with accepted/rejected labels and issues. | No longer blocks local vendor-risk domain-ready VS1 claim. |
-| VS1-ONT-H03 | HUMAN_REQUIRED | Live provider verification requires credentials and may mutate third-party state. | Human approves and runs live ConnectorHub/provider or production-data test. | Redacted provider transcript, approval result, and audit refs. | Blocks production/live-provider readiness claim. |
+| VS1-ONT-H03 | DEFERRED; OpenAlex corpus selected for future rehearsal | Live provider verification requires credentials and may mutate third-party state. | Human approves and runs live ConnectorHub/provider or production-data test. | Redacted provider transcript, approval result, and audit refs. | Blocks production/live-provider readiness claim until actual live/LLM-provider proof exists. |
 
 ## Failure Reverse Engineering
 
@@ -110,4 +112,4 @@ None. No AI-owned VS1 row is `FAIL`, `NOT_VERIFIED`, or `NOT_RUN` in this genera
 
 - Human acceptance is recorded as external evidence, not as an AI-owned scenario PASS.
 - VS1-ONT-H02 acceptance is scoped to the local vendor-risk fixture reviewed on 2026-06-17.
-- Production/live-provider readiness remains unclaimed and requires separate approved evidence.
+- Production/live-provider readiness and LLM-provider semantic readiness remain unclaimed and require separate approved evidence.
