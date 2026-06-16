@@ -707,6 +707,7 @@ def capture_vs1_ontology_browser_proof(
     browser_error: str | None = None
     workflow_state: dict[str, Any] = {}
     ontology_state: dict[str, Any] = {}
+    edge_review_rows: list[dict[str, str]] = []
     html = ""
     clean_browser_exit = False
 
@@ -765,6 +766,17 @@ def capture_vs1_ontology_browser_proof(
                     timeout=5,
                 )
                 ontology_state = ontology_candidate if isinstance(ontology_candidate, dict) else {}
+                edge_review_candidate = _runtime_eval(
+                    page,
+                    """(() => Array.from(document.querySelectorAll('#vs1-edge-review .edge-row')).map((row) => ({
+                      edge: row.querySelector('.edge-label') ? row.querySelector('.edge-label').textContent || '' : '',
+                      weight: row.querySelector('.edge-weight') ? row.querySelector('.edge-weight').textContent || '' : '',
+                      description: row.querySelector('.edge-description') ? row.querySelector('.edge-description').textContent || '' : '',
+                      why: row.querySelector('.edge-why') ? row.querySelector('.edge-why').textContent || '' : ''
+                    })))()""",
+                    timeout=5,
+                )
+                edge_review_rows = edge_review_candidate if isinstance(edge_review_candidate, list) else []
                 dom_path.write_text(html)
                 screenshot = page.command("Page.captureScreenshot", {"format": "png", "fromSurface": True}, timeout=10)
                 screenshot_path.write_bytes(base64.b64decode(str(screenshot.get("data", ""))))
@@ -848,6 +860,17 @@ def capture_vs1_ontology_browser_proof(
         "claim_context": claim.get("zero_evidence_denied") is True and claim.get("approved") is True and bool(claim.get("ontology_context_refs")),
         "action_ontology_impact": action.get("real_external_http_calls") == 0 and bool(action.get("ontology_impact", {}).get("object_refs")),
         "audit_verified": audit.get("verification_status") == "success" and required_audit_events.issubset(event_types),
+        "edge_review_explainable": (
+            len(edge_review_rows) >= 3
+            and all(
+                row.get("edge", "").startswith("Edge: ")
+                and row.get("weight", "").startswith("weight ")
+                and row.get("description", "").startswith("Description: ")
+                and row.get("why", "").startswith("Why: line ")
+                for row in edge_review_rows[:3]
+            )
+            and any("Northstar Labs -> governed_by -> Vendor Risk Policy" in row.get("edge", "") for row in edge_review_rows)
+        ),
         "local_only_no_overclaim": (
             ontology_state.get("production_release_claimed") is False
             and ontology_state.get("live_connector_claimed") is False
@@ -919,6 +942,10 @@ def capture_vs1_ontology_browser_proof(
         "trace_sha256": sha256_file(trace_path) if trace_path.exists() else None,
         "workflow_state": workflow_state,
         "ontology_state": ontology_state,
+        "edge_review": {
+            "row_count": len(edge_review_rows),
+            "rows": edge_review_rows,
+        },
         "required_markers": required_markers,
         "operator_markers": operator_markers,
         "errors": [error for error in [browser_error, *thread_error] if error],

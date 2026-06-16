@@ -1,20 +1,20 @@
 {
   "artifacts": [
     {
-      "bytes": 326876,
+      "bytes": 326909,
       "path": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "acceptance_scenario_report",
-      "sha256": "997d634b901b219e3a4f35843d784b0f10d193db8dfde86cbcb67ccf85018098"
+      "sha256": "dd1d9b8d26c7d119b989ad7a353e204778ea95e85d29c62d4a7e4220e83adba8"
     },
     {
-      "bytes": 263237,
+      "bytes": 263269,
       "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "product_runtime_scenario_report",
-      "sha256": "3b85a5faa51d716155a9cb849b08129077413538252f0fdfc4b9b607faf3b506"
+      "sha256": "9cf559b2a49d46d96c745dd263c178846b19b5204dbe394cbe481a167b74bf33"
     },
     {
       "bytes": 1431,
@@ -22,23 +22,23 @@
       "present": true,
       "required": true,
       "role": "browser_proof_manifest",
-      "sha256": "aafb71229ff9487cbddb95581512f676d13ba056eeea40d7ba483a1c391dafb6"
+      "sha256": "8dc731d592ab8ad3d47caee963fbb78a83e9519df1b6483e54e0b6afd69a6b97"
     },
     {
-      "bytes": 100535,
+      "bytes": 120309,
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
       "present": true,
       "required": true,
       "role": "browser_screenshot",
-      "sha256": "6e8efc16dfa527acbedc98815e33e4b305d7d01ca74df21a8da76cb1926b956f"
+      "sha256": "643daa67bd6595e441ac9a08e21a717d4a378384ea03882af34701357a88a667"
     },
     {
-      "bytes": 54010,
+      "bytes": 66570,
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
       "present": true,
       "required": true,
       "role": "browser_dom_snapshot",
-      "sha256": "a73d89ba65f2c0420cb198699e9571afc7776fc8ea2f3f3bbd1c357aea4037d6"
+      "sha256": "de8e8078949a999af94a822e5368887ba37d0576b4d66e9c7482b6a97f3219f4"
     },
     {
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/workflow-trace.json",
@@ -100,7 +100,7 @@
       "present": true,
       "required": true,
       "role": "command_transcript",
-      "sha256": "9ea34972e17c212e0e79888718ab8614e93128bc61ace14c9f4178c22f185a67"
+      "sha256": "876098f0b7e8fd0bf4da84dfc80e83fe0a8968139b74626d97f864ddd85e11d3"
     },
     {
       "bytes": 472,
@@ -112,7 +112,7 @@
     }
   ],
   "browser_proof": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
-  "created_at": "2026-06-16T11:19:04.651984Z",
+  "created_at": "2026-06-16T22:13:04.762821Z",
   "human_required": [
     {
       "id": "VS0-ACC-H01",
@@ -161,7 +161,7 @@
     "unqualified_external_calls_in_release_report": 0,
     "zero_evidence_claim_approvals": 0
   },
-  "package_id": "releasepkg_70aef1bba59fd070",
+  "package_id": "releasepkg_eda8673493207eb8",
   "post_commit_rollup": null,
   "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
   "production_release_ready": false,

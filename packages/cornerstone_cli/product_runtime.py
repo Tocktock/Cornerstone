@@ -334,6 +334,80 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     button:disabled {{ opacity: 0.65; cursor: wait; }}
     .evidence-list {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin: 12px 0; }}
     .evidence-list div {{ border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 8px; min-height: 54px; }}
+    .operator-summary {{
+      border: 1px solid var(--line);
+      background: #fbfcfd;
+      border-radius: 6px;
+      padding: 14px;
+      margin: 12px 0;
+    }}
+    .operator-summary h3 {{
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }}
+    .operator-summary p {{
+      margin: 0;
+      max-width: 82ch;
+    }}
+    .concept-list, .flow-steps {{
+      margin: 12px 0;
+      padding-left: 22px;
+    }}
+    .concept-list li, .flow-steps li {{
+      margin: 6px 0;
+    }}
+    .flow-steps li[data-step-status="complete"]::marker {{ color: var(--safe); }}
+    .flow-steps li[data-step-status="current"]::marker {{ color: var(--warn); }}
+    .edge-list {{ display: grid; gap: 8px; margin-top: 12px; }}
+    .edge-row {{
+      display: grid;
+      gap: 6px;
+      border-top: 1px solid var(--line);
+      padding: 10px 0;
+    }}
+    .edge-row:first-child {{ border-top: 0; padding-top: 0; }}
+    .edge-topline {{
+      display: flex;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 8px;
+    }}
+    .edge-label {{ color: var(--ink); font-weight: 700; }}
+    .edge-weight {{
+      border: 1px solid #ead6aa;
+      background: #fff8ea;
+      color: #5a4519;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 700;
+    }}
+    .edge-description, .edge-why {{
+      font-size: 13px;
+      line-height: 1.45;
+    }}
+    .edge-description {{ color: var(--ink); }}
+    .edge-why {{ color: var(--muted); }}
+    .edge-empty {{
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+    }}
+    .review-callout {{
+      border-left: 4px solid var(--warn);
+      background: #fff8ea;
+      padding: 10px 12px;
+      margin: 12px 0;
+    }}
+    details.raw-evidence {{
+      margin-top: 12px;
+    }}
+    details.raw-evidence summary {{
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--accent);
+    }}
     pre {{ white-space: pre-wrap; word-break: break-word; background: #eef3f7; border: 1px solid var(--line); border-radius: 6px; padding: 10px; max-height: 320px; overflow: auto; }}
     @media (max-width: 760px) {{
       main {{ grid-template-columns: 1fr; }}
@@ -374,27 +448,63 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         data-live-connector-claimed="false"
         data-human-acceptance-claimed="false"
       >
-        <h2>VS1 Ontology Review</h2>
-        <p>Local VS1 proof only. Suggestions stay draft until selected and explicitly promoted; production, live connector readiness, and human UX acceptance are not claimed.</p>
-        <button id="run-vs1-ontology" type="button">Run ontology proof</button>
+        <h2>Review Suggested Evidence Map</h2>
+        <div class="operator-summary">
+          <h3>What is an evidence map?</h3>
+          <p>An evidence map is a reviewable summary of what CornerStone noticed in a document. It lists the important entities, their details, and their relationships so later claims and actions can reuse context without treating suggestions as truth.</p>
+          <ol class="concept-list">
+            <li><strong>Entities</strong>: the things found in evidence, such as an organization, policy, person, event, asset, claim, or action.</li>
+            <li><strong>Details</strong>: facts about an entity, such as risk level or review date.</li>
+            <li><strong>Relationships</strong>: how entities connect, such as an organization governed by a policy.</li>
+          </ol>
+        </div>
+        <div class="review-callout">
+          Local VS1 proof only. This page does not claim production readiness, live connector readiness, or human acceptance.
+        </div>
+        <button id="run-vs1-ontology" type="button">Run evidence map review</button>
         <div class="status-row">
           <span id="vs1-ontology-status" class="badge warn" data-vs1-status="idle">idle</span>
           <span id="vs1-real-external-calls" class="badge safe">real_external_http_calls=0</span>
           <span id="vs1-audit-verify" class="badge">audit not verified</span>
         </div>
+        <div class="operator-summary">
+          <h3>What happened?</h3>
+          <ol class="flow-steps" aria-label="VS1 evidence map review steps">
+            <li id="vs1-flow-artifact" data-step-status="current">Artifact waits to be ingested.</li>
+            <li id="vs1-flow-search" data-step-status="pending">Search waits for evidence snapshot.</li>
+            <li id="vs1-flow-suggest" data-step-status="pending">Suggested map waits for extracted entities, details, and relationships.</li>
+            <li id="vs1-flow-review" data-step-status="pending">Review waits for selected, rejected, and deferred suggestions.</li>
+            <li id="vs1-flow-promote" data-step-status="pending">Approval waits for a versioned Map Update.</li>
+            <li id="vs1-flow-profile" data-step-status="pending">Entity Profile waits for relationships, related claim/action, version, and audit evidence.</li>
+            <li id="vs1-flow-boundary" data-step-status="pending">Safety boundary waits for evidence-required claims and zero real external calls.</li>
+          </ol>
+        </div>
+        <div class="operator-summary edge-review">
+          <h3>Why are these connected?</h3>
+          <p>Review each relationship before promotion. Every row shows the edge, weight, plain-language description, and evidence line that suggested the connection.</p>
+          <div id="vs1-edge-review" class="edge-list" aria-label="Evidence map connection review">
+            <div class="edge-empty">Run the review to see relationship edges, weights, and evidence reasons.</div>
+          </div>
+        </div>
         <div class="detail-grid">
           <div><span class="label">Artifact</span><code id="vs1-artifact-id">not-run</code></div>
           <div><span class="label">Search Snapshot</span><code id="vs1-search-snapshot-id">not-run</code></div>
-          <div><span class="label">SuggestionSet</span><code id="vs1-suggestion-set-id">not-run</code></div>
+          <div><span class="label">Suggested Map</span><code id="vs1-suggestion-set-id">not-run</code></div>
           <div><span class="label">Review</span><code id="vs1-review-state">not-run</code></div>
-          <div><span class="label">ChangeSet</span><code id="vs1-change-set-id">not-run</code></div>
-          <div><span class="label">Object Profile</span><code id="vs1-object-profile-id">not-run</code></div>
+          <div><span class="label">Map Update</span><code id="vs1-change-set-id">not-run</code></div>
+          <div><span class="label">Entity Profile</span><code id="vs1-object-profile-id">not-run</code></div>
+          <div><span class="label">Entities / Details / Relationships</span><span id="vs1-ontology-counts">not-run</span></div>
+          <div><span class="label">Map Meaning</span><span id="vs1-ontology-preview">not-run</span></div>
+          <div><span class="label">Entity Connections</span><span id="vs1-profile-connections">not-run</span></div>
           <div><span class="label">Search Integration</span><span id="vs1-search-integration">not-run</span></div>
           <div><span class="label">Claim Context</span><span id="vs1-claim-context">not-run</span></div>
           <div><span class="label">Action Impact</span><span id="vs1-action-impact">not-run</span></div>
-          <div><span class="label">Draft Truth Guard</span><span id="vs1-draft-truth-guard">not-run</span></div>
+          <div><span class="label">Draft Safety Guard</span><span id="vs1-draft-truth-guard">not-run</span></div>
         </div>
-        <pre id="vs1-ontology-trace" aria-label="VS1 ontology workflow trace">{{}}</pre>
+        <details class="raw-evidence">
+          <summary>Raw workflow evidence</summary>
+          <pre id="vs1-ontology-trace" aria-label="VS1 ontology workflow trace">{{}}</pre>
+        </details>
       </section>
       <section id="claim-builder"><h2>Claim Builder</h2><p>Claims stay draft unless backed by an Evidence Bundle and approval evidence.</p></section>
       <section id="action-card"><h2>Action Card</h2><p>Actions expose dry-run diff, expected impact, policy decision, approval, execution, and mock ConnectorHub boundary.</p></section>
@@ -578,6 +688,12 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       const node = document.getElementById(id);
       if (node) node.textContent = value;
     }}
+    function setVs1Step(id, text, status) {{
+      const node = document.getElementById(id);
+      if (!node) return;
+      node.textContent = text;
+      node.dataset.stepStatus = status;
+    }}
     function setDisabled(id, disabled) {{
       const node = document.getElementById(id);
       if (node) node.disabled = disabled;
@@ -674,6 +790,94 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         ...(suggestionSet.link_suggestions || [])
       ];
     }}
+    function candidateLabels(candidates, limit) {{
+      return (candidates || [])
+        .slice(0, limit)
+        .map((candidate) => candidate.label)
+        .filter(Boolean)
+        .join("; ");
+    }}
+    function relationPhrase(relation) {{
+      const phrases = {{
+        governed_by: "is governed by",
+        reviews: "reviews",
+        describes: "describes",
+        mentions: "mentions",
+        evaluates: "evaluates",
+        owns: "owns"
+      }};
+      return phrases[relation] || String(relation || "is related to").replace(/_/g, " ");
+    }}
+    function edgeLabel(candidate) {{
+      const source = candidate.source_label || "unknown source";
+      const relation = candidate.relation || "related_to";
+      const target = candidate.target_label || "unknown target";
+      return source + " -> " + relation + " -> " + target;
+    }}
+    function edgeWeight(candidate) {{
+      const confidence = Number(candidate.confidence);
+      if (!Number.isFinite(confidence)) return "weight unknown";
+      return "weight " + Math.round(confidence * 100) + "%";
+    }}
+    function edgeDescription(candidate) {{
+      const source = candidate.source_label || "unknown source";
+      const target = candidate.target_label || "unknown target";
+      return source + " " + relationPhrase(candidate.relation) + " " + target + ".";
+    }}
+    function edgeWhy(candidate) {{
+      const span = ((candidate.evidence_spans || [])[0]) || {{}};
+      const line = span.line_no ? "line " + span.line_no : "source line";
+      const snippet = span.snippet || candidate.label || "Evidence line not available.";
+      return "Why: " + line + ": " + snippet;
+    }}
+    function clearNode(node) {{
+      while (node.firstChild) {{
+        node.removeChild(node.firstChild);
+      }}
+    }}
+    function renderEdgeReview(candidates) {{
+      const container = document.getElementById("vs1-edge-review");
+      if (!container) return;
+      clearNode(container);
+      const items = (candidates || [])
+        .filter((candidate) => candidate && candidate.candidate_kind === "link")
+        .slice(0, 8);
+      if (!items.length) {{
+        const empty = document.createElement("div");
+        empty.className = "edge-empty";
+        empty.textContent = "No relationship edge is ready to review yet.";
+        container.appendChild(empty);
+        return;
+      }}
+      items.forEach((candidate) => {{
+        const row = document.createElement("div");
+        row.className = "edge-row";
+
+        const topLine = document.createElement("div");
+        topLine.className = "edge-topline";
+        const edge = document.createElement("div");
+        edge.className = "edge-label";
+        edge.textContent = "Edge: " + edgeLabel(candidate);
+        const weight = document.createElement("span");
+        weight.className = "edge-weight";
+        weight.textContent = edgeWeight(candidate);
+        topLine.appendChild(edge);
+        topLine.appendChild(weight);
+
+        const description = document.createElement("div");
+        description.className = "edge-description";
+        description.textContent = "Description: " + edgeDescription(candidate);
+
+        const why = document.createElement("div");
+        why.className = "edge-why";
+        why.textContent = edgeWhy(candidate);
+
+        row.appendChild(topLine);
+        row.appendChild(description);
+        row.appendChild(why);
+        container.appendChild(row);
+      }});
+    }}
     async function runVs1Ontology() {{
       const button = document.getElementById("run-vs1-ontology");
       const status = document.getElementById("vs1-ontology-status");
@@ -683,6 +887,14 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       status.dataset.vs1Status = "running";
       status.textContent = "running";
       vs1Trace.length = 0;
+      renderEdgeReview([]);
+      setVs1Step("vs1-flow-artifact", "Reading the vendor-risk artifact as untrusted evidence.", "current");
+      setVs1Step("vs1-flow-search", "Search waits for evidence snapshot.", "pending");
+      setVs1Step("vs1-flow-suggest", "Suggested map waits for extracted entities, details, and relationships.", "pending");
+      setVs1Step("vs1-flow-review", "Review waits for selected, rejected, and deferred suggestions.", "pending");
+      setVs1Step("vs1-flow-promote", "Approval waits for a versioned Map Update.", "pending");
+      setVs1Step("vs1-flow-profile", "Entity Profile waits for relationships, related claim/action, version, and audit evidence.", "pending");
+      setVs1Step("vs1-flow-boundary", "Safety boundary waits for evidence-required claims and zero real external calls.", "pending");
       try {{
         const artifactResponse = await vs1Api("/artifacts", {{
           path: "fixtures/vs1/ontology/vendor_risk.txt",
@@ -693,11 +905,15 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         const artifact = artifactResponse.payload.artifact;
         vs1State.artifact = {{ artifact_id: artifact.artifact_id, evidence_refs: artifactResponse.payload.evidence_refs || [] }};
         setText("vs1-artifact-id", artifact.artifact_id);
+        setVs1Step("vs1-flow-artifact", "Artifact ingested: the original vendor-risk text is preserved as evidence.", "complete");
+        setVs1Step("vs1-flow-search", "Searching the artifact for vendor-risk evidence.", "current");
 
         const searchResponse = await vs1Api("/search", {{ query: "Northstar Labs vendor risk" }});
         const snapshot = searchResponse.payload.search_snapshot;
         vs1State.search = {{ search_snapshot_id: snapshot.search_snapshot_id, result_count: snapshot.result_count }};
         setText("vs1-search-snapshot-id", snapshot.search_snapshot_id);
+        setVs1Step("vs1-flow-search", "Search snapshot created with " + snapshot.result_count + " evidence result(s).", "complete");
+        setVs1Step("vs1-flow-suggest", "Extracting draft objects, properties, and links from the evidence.", "current");
 
         const suggestResponse = await vs1Api("/ontology/suggestion-sets", {{
           source_type: "search",
@@ -724,6 +940,18 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
           low_candidate_id: lowCandidate && lowCandidate.candidate_id
         }};
         setText("vs1-suggestion-set-id", suggestionSet.suggestion_set_id);
+        setText("vs1-ontology-counts", objectCandidates.length + " entities; " + propertyCandidates.length + " details; " + linkCandidates.length + " relationships");
+        setText(
+          "vs1-ontology-preview",
+          "Entities: " + candidateLabels(objectCandidates, 3) + " | Details: " + candidateLabels(propertyCandidates, 2) + " | Relationships: " + candidateLabels(linkCandidates, 2)
+        );
+        renderEdgeReview(linkCandidates);
+        setVs1Step(
+          "vs1-flow-suggest",
+          "Suggested evidence map created: " + objectCandidates.length + " entities, " + propertyCandidates.length + " details, and " + linkCandidates.length + " relationships with edge, weight, description, and why.",
+          "complete"
+        );
+        setVs1Step("vs1-flow-review", "Checking that draft suggestions cannot be used as truth before review.", "current");
 
         const draftGuard = await vs1Api("/ontology/draft-truth-test", {{
           suggestion_set_id: suggestionSet.suggestion_set_id,
@@ -733,6 +961,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         vs1State.guards.draft_truth_denied = draftGuard.response.status === 403 &&
           draftGuard.payload.errors.some((error) => error.code === "CS_ONTOLOGY_DRAFT_TRUTH_DENIED");
         setText("vs1-draft-truth-guard", vs1State.guards.draft_truth_denied ? "denied before promotion" : "unexpected");
+        setVs1Step("vs1-flow-review", "Draft truth guard checked; now applying selected/rejected/deferred review choices.", "current");
 
         const reviewResponse = await vs1Api("/ontology/suggestion-sets/" + suggestionSet.suggestion_set_id + "/review", {{
           select: selected,
@@ -742,6 +971,12 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         const reviewed = reviewResponse.payload.ontology_suggestion_set;
         vs1State.review = reviewed.review_state;
         setText("vs1-review-state", "selected=" + reviewed.review_state.selected.length + "; rejected=" + reviewed.review_state.rejected.length + "; deferred=" + reviewed.review_state.deferred.length);
+        setVs1Step(
+          "vs1-flow-review",
+          "Review completed: " + reviewed.review_state.selected.length + " selected, " + reviewed.review_state.rejected.length + " rejected, " + reviewed.review_state.deferred.length + " deferred.",
+          "complete"
+        );
+        setVs1Step("vs1-flow-promote", "Approving selected suggestions into a local Knowledge Map.", "current");
 
         const promoteResponse = await vs1Api("/ontology/suggestion-sets/" + suggestionSet.suggestion_set_id + "/promote", {{
           candidate_ids: selected
@@ -760,6 +995,12 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
           link_refs: promotedLinks.map((link) => "ontology_link:" + link.ontology_link_id)
         }};
         setText("vs1-change-set-id", changeSet.ontology_change_set_id);
+        setVs1Step(
+          "vs1-flow-promote",
+          "Approval created Map Update " + changeSet.ontology_change_set_id + " from " + changeSet.previous_version + " to " + changeSet.next_version + ".",
+          "complete"
+        );
+        setVs1Step("vs1-flow-profile", "Opening the approved Entity Profile and checking connected context.", "current");
 
         const profileResponse = await vs1Get("/ontology/objects/" + profileObject.ontology_object_id);
         vs1State.profile = {{
@@ -774,6 +1015,10 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
           change_set_ref_count: (profileResponse.payload.ontology_object_profile.change_set_refs || []).length
         }};
         setText("vs1-object-profile-id", profileObject.ontology_object_id);
+        setText(
+          "vs1-profile-connections",
+          vs1State.profile.link_count + " relationships; " + vs1State.profile.linked_object_count + " linked entities"
+        );
 
         const ontologySearch = await vs1Api("/search", {{ query: profileObject.label }});
         const ontologyResult = (ontologySearch.payload.search_snapshot.results || []).find((result) => result.result_type === "ontology_object");
@@ -837,6 +1082,16 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
           activity_count: (finalProfile.activity_history || []).length,
           change_set_ref_count: (finalProfile.change_set_refs || []).length
         }};
+        setText(
+          "vs1-profile-connections",
+          vs1State.profile.link_count + " relationships; " + vs1State.profile.linked_object_count + " linked entities; " + vs1State.profile.related_claim_count + " claim; " + vs1State.profile.related_action_count + " action"
+        );
+        setVs1Step(
+          "vs1-flow-profile",
+          "Entity Profile connected evidence, relationships, related claim/action, version history, and audit activity.",
+          "complete"
+        );
+        setVs1Step("vs1-flow-boundary", "Verifying safety boundary: evidence required, local/mock action only, audit intact.", "current");
 
         const auditEvents = await vs1Get("/audit-events");
         const auditVerify = await vs1Api("/audit/verify", {{}});
@@ -847,6 +1102,11 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
           verification_status: auditVerify.payload.audit_integrity.status
         }};
         setText("vs1-audit-verify", auditVerify.payload.audit_integrity.status);
+        setVs1Step(
+          "vs1-flow-boundary",
+          "Safety boundary verified: unsupported truth denied, real external calls stayed at 0, audit verification is " + auditVerify.payload.audit_integrity.status + ".",
+          "complete"
+        );
         vs1State.completed = vs1Passes();
         section.dataset.vs1FlowComplete = vs1State.completed ? "true" : "false";
         status.dataset.vs1Status = vs1State.completed ? "passed" : "failed";
