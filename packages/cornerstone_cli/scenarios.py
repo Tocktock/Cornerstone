@@ -10617,10 +10617,12 @@ def _run_vs1_ontology_api_workflow(root: Path, state_path: Path) -> dict[str, An
         objects = promote_payload.get("ontology_objects", [])
         links = promote_payload.get("ontology_links", [])
         ids["ontology_change_set_id"] = change_set.get("ontology_change_set_id", "")
-        ids["ontology_object_id"] = objects[0].get("ontology_object_id", "") if objects else ""
+        linked_profile_object_id = links[0].get("source_object_id", "") if links else ""
+        ids["ontology_object_id"] = linked_profile_object_id or (objects[0].get("ontology_object_id", "") if objects else "")
         transcripts["object_profile"] = _http_json(base_url, "GET", f"/ontology/objects/{ids['ontology_object_id']}") if ids["ontology_object_id"] else {}
-        first_label = objects[0].get("label", "Northstar Labs") if objects else "Northstar Labs"
-        transcripts["ontology_search"] = _http_json(base_url, "POST", "/search", {"query": first_label})
+        profile_object = next((obj for obj in objects if obj.get("ontology_object_id") == ids["ontology_object_id"]), objects[0] if objects else {})
+        profile_label = profile_object.get("label", "Northstar Labs") if profile_object else "Northstar Labs"
+        transcripts["ontology_search"] = _http_json(base_url, "POST", "/search", {"query": profile_label})
         transcripts["artifact_show_after"] = _http_json(base_url, "GET", f"/artifacts/{ids['artifact_id']}") if ids["artifact_id"] else {}
         transcripts["bundle_create"] = _http_json(base_url, "POST", "/evidence-bundles", {"search_snapshot_id": ids["search_snapshot_id"]})
         ids["evidence_bundle_id"] = _api_payload(transcripts["bundle_create"]).get("evidence_bundle", {}).get("evidence_bundle_id", "")
@@ -10662,6 +10664,7 @@ def _run_vs1_ontology_api_workflow(root: Path, state_path: Path) -> dict[str, An
         ids["action_id"] = _api_payload(transcripts["action_create"]).get("action_card", {}).get("action_id", "")
         transcripts["action_approve"] = _http_json(base_url, "POST", f"/actions/{ids['action_id']}/approve", {"approver": "owner"}) if ids["action_id"] else {}
         transcripts["action_execute"] = _http_json(base_url, "POST", f"/actions/{ids['action_id']}/execute", {}) if ids["action_id"] else {}
+        transcripts["object_profile_after_action"] = _http_json(base_url, "GET", f"/ontology/objects/{ids['ontology_object_id']}") if ids["ontology_object_id"] else {}
 
         transcripts["conflict_artifact"] = _http_json(
             base_url,
@@ -10721,7 +10724,8 @@ def _run_vs1_ontology_api_workflow(root: Path, state_path: Path) -> dict[str, An
     objects = promote_payload.get("ontology_objects", [])
     object_refs = [f"ontology_object:{obj['ontology_object_id']}" for obj in objects]
     links = promote_payload.get("ontology_links", [])
-    object_profile = _api_payload(transcripts.get("object_profile", {})).get("ontology_object_profile", {})
+    object_profile = _api_payload(transcripts.get("object_profile_after_action", {})).get("ontology_object_profile", {})
+    object_profile_initial = _api_payload(transcripts.get("object_profile", {})).get("ontology_object_profile", {})
     ontology_search = _api_payload(transcripts.get("ontology_search", {})).get("search_snapshot", {})
     artifact_context = _api_payload(transcripts.get("artifact_show_after", {})).get("artifact", {}).get("ontology_context", {})
     claim = _api_payload(transcripts.get("claim_approve", {})).get("claim", {})
@@ -10731,6 +10735,13 @@ def _run_vs1_ontology_api_workflow(root: Path, state_path: Path) -> dict[str, An
     audit_events = _api_payload(transcripts.get("audit_events", {})).get("audit_events", [])
     audit_event_types = {event.get("event_type") for event in audit_events if isinstance(event, dict)}
     conflict_change = _api_payload(transcripts.get("conflict_promote", {})).get("ontology_change_set", {})
+    additive_semver = change_set.get("semver_bump") == "minor" and "Additive" in str(change_set.get("semver_reason"))
+    conflict_semver = (
+        conflict_change.get("semver_bump") == "major"
+        and conflict_change.get("impact", {}).get("human_review_recommended") is True
+        and any(diff.get("conflict_visible") for diff in conflict_change.get("diff", {}).get("property_updates", []))
+        and "silently overwriting" in str(conflict_change.get("semver_reason"))
+    )
     prompt_set = _api_payload(transcripts.get("prompt_injection_suggest", {})).get("ontology_suggestion_set", {})
     multi_domain_sets = [
         _api_payload(transcripts.get("personal_research_suggest", {})).get("ontology_suggestion_set", {}),
@@ -10760,11 +10771,20 @@ def _run_vs1_ontology_api_workflow(root: Path, state_path: Path) -> dict[str, An
         and any(error.get("code") == "CS_ONTOLOGY_DRAFT_TRUTH_DENIED" for error in _api_payload(transcripts.get("draft_truth_test", {})).get("errors", [])),
         "promotion_explicit": transcripts.get("ontology_promote", {}).get("status_code") == 200 and reviewed.get("status") == "reviewed",
         "change_set_versioned": bool(change_set.get("ontology_change_set_id")) and change_set.get("previous_version") and change_set.get("next_version"),
-        "semver_meaningful": change_set.get("semver_bump") == "minor" and "Additive" in str(change_set.get("semver_reason")),
+        "semver_meaningful": additive_semver and conflict_semver,
         "stable_identity": bool(objects) and all(obj.get("ontology_object_id") and obj.get("source_mapping") and obj.get("evidence_refs") for obj in objects),
         "conflict_visible": any(diff.get("conflict_visible") for diff in conflict_change.get("diff", {}).get("property_updates", []))
         or "ontology.conflict.detected" in audit_event_types,
-        "object_profile": bool(object_profile.get("ontology_object", {}).get("ontology_object_id")) and {"identity", "properties", "links", "source_mapping", "evidence", "audit"}.issubset(set(object_profile.get("profile_sections", []))),
+        "object_profile": bool(object_profile.get("ontology_object", {}).get("ontology_object_id"))
+        and {"identity", "properties", "links", "linked_objects", "source_mapping", "evidence", "related_claims", "related_actions", "activity", "version_history", "audit"}.issubset(
+            set(object_profile.get("profile_sections", []))
+        )
+        and len(object_profile.get("links", [])) >= 1
+        and len(object_profile.get("linked_objects", [])) >= 1
+        and len(object_profile.get("related_claims", [])) >= 1
+        and len(object_profile.get("related_actions", [])) >= 1
+        and len(object_profile.get("activity_history", [])) >= 1
+        and len(object_profile.get("change_set_refs", [])) >= 1,
         "search_integrated": any(result.get("result_type") == "ontology_object" for result in ontology_search.get("results", [])),
         "artifact_viewer_context": artifact_context.get("object_count", 0) > 0,
         "claim_context_requires_evidence": bool(claim.get("ontology_context", {}).get("object_refs"))
@@ -10809,10 +10829,12 @@ def _run_vs1_ontology_api_workflow(root: Path, state_path: Path) -> dict[str, An
         "suggestion_set": suggestion_set,
         "reviewed_suggestion_set": reviewed,
         "ontology_change_set": change_set,
+        "conflict_ontology_change_set": conflict_change,
         "ontology_objects": objects,
         "ontology_links": links,
         "object_refs": object_refs,
         "object_profile": object_profile,
+        "object_profile_initial": object_profile_initial,
         "claim": claim,
         "action_card": action,
         "action_result": action_result,
@@ -10851,11 +10873,15 @@ def _run_vs1_ontology_cli_workflow(root: Path, state_path: Path) -> dict[str, An
     transcripts["ontology_promote"] = _run_cli_json(root, ["ontology", "promote", ids["suggestion_set_id"], *[item for candidate_id in selected_ids for item in ["--candidate-id", candidate_id]], *state_arg, "--json"])
     promote_payload = _payload(transcripts["ontology_promote"])
     objects = promote_payload.get("ontology_objects", [])
-    object_ref = f"ontology_object:{objects[0]['ontology_object_id']}" if objects else ""
+    links = promote_payload.get("ontology_links", [])
+    linked_profile_object_id = links[0].get("source_object_id", "") if links else ""
+    profile_object_id = linked_profile_object_id or (objects[0].get("ontology_object_id", "") if objects else "")
+    profile_object = next((obj for obj in objects if obj.get("ontology_object_id") == profile_object_id), objects[0] if objects else {})
+    object_ref = f"ontology_object:{profile_object_id}" if profile_object_id else ""
     ids["ontology_change_set_id"] = promote_payload.get("ontology_change_set", {}).get("ontology_change_set_id", "")
-    ids["ontology_object_id"] = objects[0].get("ontology_object_id", "") if objects else ""
+    ids["ontology_object_id"] = profile_object_id
     transcripts["object_show"] = _run_cli_json(root, ["ontology", "object", "show", ids["ontology_object_id"], *state_arg, "--json"]) if ids["ontology_object_id"] else {}
-    transcripts["ontology_search"] = _run_cli_json(root, ["search", "query", objects[0].get("label", "Northstar Labs") if objects else "Northstar Labs", *state_arg, "--json"])
+    transcripts["ontology_search"] = _run_cli_json(root, ["search", "query", profile_object.get("label", "Northstar Labs") if profile_object else "Northstar Labs", *state_arg, "--json"])
     transcripts["bundle_create"] = _run_cli_json(root, ["evidence", "bundle", "create", "--search-snapshot-id", ids["search_snapshot_id"], *state_arg, "--json"])
     ids["evidence_bundle_id"] = _payload(transcripts["bundle_create"]).get("ids", {}).get("evidence_bundle_id", "")
     transcripts["claim_create"] = _run_cli_json(
@@ -10906,13 +10932,22 @@ def _run_vs1_ontology_cli_workflow(root: Path, state_path: Path) -> dict[str, An
     ids["action_id"] = _payload(transcripts["action_propose"]).get("ids", {}).get("action_id", "")
     transcripts["action_approve"] = _run_cli_json(root, ["action", "approve", ids["action_id"], "--approver", "owner", *state_arg, "--json"])
     transcripts["action_execute"] = _run_cli_json(root, ["action", "execute", ids["action_id"], *state_arg, "--json"])
+    transcripts["object_show_after_action"] = _run_cli_json(root, ["ontology", "object", "show", ids["ontology_object_id"], *state_arg, "--json"]) if ids["ontology_object_id"] else {}
     transcripts["invalid_graph"] = _run_cli_json(root, ["ontology", "invalid-graph-test", *state_arg, "--json"])
+    profile_after_action = _payload(transcripts.get("object_show_after_action", {})).get("ontology_object_profile", {})
     checks = {
         "cli_artifact_search_suggest": _exit_ok(transcripts["artifact_ingest"]) and _exit_ok(transcripts["search_query"]) and _exit_ok(transcripts["ontology_suggest"]),
         "cli_draft_truth_guard": transcripts["draft_truth_test"].get("exit_code") == 8
         and any(error.get("code") == "CS_ONTOLOGY_DRAFT_TRUTH_DENIED" for error in _payload(transcripts["draft_truth_test"]).get("errors", [])),
         "cli_review_promote": _exit_ok(transcripts["ontology_review"]) and _exit_ok(transcripts["ontology_promote"]),
-        "cli_profile_search": _exit_ok(transcripts["object_show"]) and any(result.get("result_type") == "ontology_object" for result in _payload(transcripts["ontology_search"]).get("search_snapshot", {}).get("results", [])),
+        "cli_profile_search": _exit_ok(transcripts["object_show"])
+        and _exit_ok(transcripts["object_show_after_action"])
+        and len(profile_after_action.get("links", [])) >= 1
+        and len(profile_after_action.get("linked_objects", [])) >= 1
+        and len(profile_after_action.get("related_claims", [])) >= 1
+        and len(profile_after_action.get("related_actions", [])) >= 1
+        and len(profile_after_action.get("change_set_refs", [])) >= 1
+        and any(result.get("result_type") == "ontology_object" for result in _payload(transcripts["ontology_search"]).get("search_snapshot", {}).get("results", [])),
         "cli_claim_action": _exit_ok(transcripts["claim_create"])
         and _exit_ok(transcripts["claim_approve"])
         and _exit_ok(transcripts["action_propose"])
@@ -10936,6 +10971,22 @@ def _write_vs1_ontology_report(root: Path, report: dict[str, Any]) -> None:
     path = root / DEFAULT_VS1_ONTOLOGY_REPORT
     summary = report.get("summary", {})
     evidence = report.get("vs1_ontology_evidence", {})
+    metadata = report.get("verification_metadata", {})
+    rows = report.get("scenario_results", [])
+    scenario_table = "\n".join(
+        f"| {row.get('id')} | {row.get('type')} | {row.get('status')} | {', '.join(row.get('evidence', []))} | {row.get('notes')} |"
+        for row in rows
+    )
+    regression_transcripts = report.get("regression_command_transcript", {})
+    regression_table = "\n".join(
+        f"| {name} | `{' '.join(item.get('command', []))}` | {item.get('exit_code')} | {item.get('timed_out')} | {item.get('elapsed_seconds')} |"
+        for name, item in regression_transcripts.items()
+    )
+    human_table = "\n".join(
+        f"| {item.get('id')} | {item.get('why_ai_cannot_verify')} | {item.get('required_human_action')} | {item.get('expected_evidence')} | {item.get('release_impact')} |"
+        for item in report.get("human_required", [])
+    )
+    negative_table = "\n".join(f"| {key} | {value} |" for key, value in report.get("negative_evidence", {}).items())
     body = f"""# VS1 Ontology Auto-Suggest Promote Verification Report - 2026-06-15
 
 ## Result
@@ -10946,6 +10997,10 @@ def _write_vs1_ontology_report(root: Path, report: dict[str, Any]) -> None:
 - HUMAN_REQUIRED rows: {summary.get("human_required")}
 - Blocking rows: {summary.get("blocking")}
 - Product claim: {summary.get("product_feature_claims")}
+- Verified base commit: {metadata.get("verified_base_commit")}
+- Verified base tree: {metadata.get("verified_base_tree_hash")}
+- Worktree dirty at verification: {metadata.get("worktree_dirty_at_verification")}
+- Report generated before commit: {metadata.get("report_generated_before_commit")}
 
 ## Evidence
 
@@ -10959,6 +11014,25 @@ def _write_vs1_ontology_report(root: Path, report: dict[str, Any]) -> None:
 - Claim: {evidence.get("claim_id")}
 - Action: {evidence.get("action_id")}
 
+## Scenario Verification
+
+| ID | Type | Status | Evidence | Notes |
+|---|---|---|---|---|
+{scenario_table}
+
+## Command Evidence
+
+| Name | Command | Exit code | Timed out | Elapsed seconds |
+|---|---|---:|---:|---:|
+| VS1 self verifier | `cornerstone scenario verify vs1-ontology-suggest-promote --json --output {DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT}` | {0 if report.get("status") == "success" else 4} | False | recorded in scenario report |
+{regression_table}
+
+## Negative Evidence
+
+| Counter | Value |
+|---|---:|
+{negative_table}
+
 ## Boundary
 
 This report claims local VS1 ontology suggestion/review/promotion readiness only.
@@ -10966,9 +11040,19 @@ It does not claim production readiness, live-provider readiness, domain semantic
 
 ## Human Required
 
-- VS1-ONT-H01: Human operator UX acceptance remains HUMAN_REQUIRED.
-- VS1-ONT-H02: Domain semantic review remains HUMAN_REQUIRED.
-- VS1-ONT-H03: Production/live connector proof remains HUMAN_REQUIRED.
+| ID | Why AI Cannot Verify | Required Human Action | Expected Evidence | Release Impact |
+|---|---|---|---|---|
+{human_table}
+
+## Failure Reverse Engineering
+
+None. No AI-owned VS1 row is `FAIL`, `NOT_VERIFIED`, or `NOT_RUN` in this generated report.
+
+## Risks
+
+- Human operator UX acceptance remains outside AI verification.
+- Domain semantic quality remains human/domain-owner reviewed.
+- Production/live-provider readiness remains unclaimed and requires separate approved evidence.
 """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(body)
@@ -10995,6 +11079,7 @@ def verify_vs1_ontology_suggest_promote(root: Path) -> dict[str, Any]:
     cli_checks = cli_workflow.get("checks", {})
     browser_ok = browser_proof.get("status") == "PASS" and all(browser_proof.get("required_markers", {}).values()) and all(browser_proof.get("operator_markers", {}).values())
     vs0_regression_ok = all(entry.get("exit_code") == 0 and not entry.get("timed_out") for entry in regression_command_transcript.values())
+    verification_metadata = git_verification_metadata(root)
     correction_result = {}
     object_id = api_workflow.get("ids", {}).get("ontology_object_id")
     if object_id:
@@ -11064,6 +11149,7 @@ def verify_vs1_ontology_suggest_promote(root: Path) -> dict[str, Any]:
         "api_workflow": api_workflow,
         "browser_proof": browser_proof,
         "regression_command_transcript": regression_command_transcript,
+        "verification_metadata": verification_metadata,
         "vs1_ontology_evidence": {
             "scenario_report": DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT,
             "browser_proof": f"{DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR}/browser-proof.json",

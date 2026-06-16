@@ -1,20 +1,20 @@
 {
   "artifacts": [
     {
-      "bytes": 538806,
+      "bytes": 538445,
       "path": "reports/scenario/vs0-evux-2026-06-13.json",
       "present": true,
       "required": true,
       "role": "acceptance_scenario_report",
-      "sha256": "64a303ad9ab6fc57bea5516d1327e0336916f0a37855bfc21b8094292b491691"
+      "sha256": "4cb547a65f70d4ca8e808f37c932ba65a2041204d83653dabbb8bc7b4bdf87de"
     },
     {
-      "bytes": 263270,
+      "bytes": 263237,
       "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "product_runtime_scenario_report",
-      "sha256": "68cbe10c5faff7b3533053430aea166f4e68c7e0ee6c6156da4b4fdfed770b5f"
+      "sha256": "3b85a5faa51d716155a9cb849b08129077413538252f0fdfc4b9b607faf3b506"
     },
     {
       "bytes": 86746,
@@ -22,7 +22,7 @@
       "present": true,
       "required": true,
       "role": "browser_proof_manifest",
-      "sha256": "798f62be16588b840424ebe0e4cac59716c35fe2f1cc20aa2715a8178c2d9142"
+      "sha256": "42c131e7fe6e6ce6a72952be21fdbc5499a6c08782d263483fdfd2184c7848da"
     },
     {
       "bytes": 108209,
@@ -33,12 +33,12 @@
       "sha256": "fad286ecdebd705ed6a0b602f415945c5dea9f6c733a2265e4e6ccd3a5cdf77e"
     },
     {
-      "bytes": 126385,
+      "bytes": 128472,
       "path": "reports/browser/vs0-evux-2026-06-13/workflow.dom.html",
       "present": true,
       "required": true,
       "role": "browser_dom_snapshot",
-      "sha256": "8bee92c087b3787ba998fd920fce8f707a497e3891e218b857bcece71a8c30cd"
+      "sha256": "109856c0c8c140b38a02970343e2abc3b6c9205217a2bf9e6845994b159728b1"
     },
     {
       "bytes": 73058,
@@ -46,7 +46,7 @@
       "present": true,
       "required": true,
       "role": "browser_workflow_trace",
-      "sha256": "21e7e1930cc2d4d3089e8a4786c8e91dddb90e7078aea451d43fc6494dca5b19"
+      "sha256": "0f27dc8e9945bb6993d3bb28ec502a2f3f2c5d7542d11117862d314dbd91cdbd"
     },
     {
       "bytes": 14572,
@@ -73,12 +73,12 @@
       "sha256": "3a30f7800308263ba5f8078e01509ef7cbba818f0e27c138bcbc2cb8243644cb"
     },
     {
-      "bytes": 126501,
+      "bytes": 126486,
       "path": "reports/quickstart/vs0-evux-quickstart.json",
       "present": true,
       "required": true,
       "role": "quickstart_report",
-      "sha256": "238abec73614497e716781ec4d3d955c9182d78d455e91611e591936e1c07512"
+      "sha256": "b8577edb4d9e22ece3266fd10de3b0fa342ca2d8e6633f5616c3a968cd6c2696"
     },
     {
       "bytes": 10562,
@@ -113,12 +113,12 @@
       "sha256": "c0c9899dc4dd68eed80b02fd82edd7f57c7f991d01c33410aaf9736eddfc1152"
     },
     {
-      "bytes": 11514,
+      "bytes": 11516,
       "path": "reports/release/vs0-evux-2026-06-13/command-transcript.json",
       "present": true,
       "required": true,
       "role": "command_transcript",
-      "sha256": "c7a0ded3cde589584ab71752a4bea4819d18ebab2e09834f47bd6760346a3772"
+      "sha256": "f4bc39ae302e0bb0a1f314ced4b61116506d630d1797c4741de309d84eb44f5b"
     },
     {
       "bytes": 700,
@@ -126,7 +126,7 @@
       "present": true,
       "required": false,
       "role": "command_evidence",
-      "sha256": "35070caa245d929036a8f45e96088780922040b3d31f2aabd057bc27e38a948e"
+      "sha256": "a40f5e5532fd0fc3028e709defbcac2e245c37339a68d901c96156861ba8a497"
     },
     {
       "bytes": 9007,
@@ -138,7 +138,7 @@
     }
   ],
   "browser_proof": "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
-  "created_at": "2026-06-15T12:17:31.887089Z",
+  "created_at": "2026-06-16T11:19:06.663684Z",
   "human_required": [
     {
       "id": "VS0-EVUX-H02",
@@ -187,7 +187,7 @@
     "unqualified_external_calls_in_release_report": 0,
     "zero_evidence_claim_approved": 0
   },
-  "package_id": "releasepkg_1295a5d361a31615",
+  "package_id": "releasepkg_be162a30fcd9591a",
   "post_commit_rollup": "reports/release/vs0-evux-2026-06-13/post_commit_rollup.json",
   "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
   "production_release_ready": false,

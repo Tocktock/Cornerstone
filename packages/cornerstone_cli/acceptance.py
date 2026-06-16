@@ -870,7 +870,16 @@ def capture_vs1_ontology_browser_proof(
         "suggestion_set_complete": suggestion.get("object_count", 0) >= 3 and suggestion.get("property_count", 0) >= 1 and suggestion.get("link_count", 0) >= 1,
         "review_controls": len(review.get("selected", [])) >= 3 and "rejected" in review and "deferred" in review,
         "promotion_changeset": bool(promotion.get("ontology_change_set_id")) and promotion.get("semver_bump") == "minor",
-        "object_profile": bool(profile.get("ontology_object_id")) and {"identity", "properties", "links", "source_mapping", "evidence", "audit"}.issubset(set(profile.get("sections") or [])),
+        "object_profile": bool(profile.get("ontology_object_id"))
+        and {"identity", "properties", "links", "linked_objects", "source_mapping", "evidence", "related_claims", "related_actions", "activity", "version_history", "audit"}.issubset(
+            set(profile.get("sections") or [])
+        )
+        and int(profile.get("link_count") or 0) >= 1
+        and int(profile.get("linked_object_count") or 0) >= 1
+        and int(profile.get("related_claim_count") or 0) >= 1
+        and int(profile.get("related_action_count") or 0) >= 1
+        and int(profile.get("activity_count") or 0) >= 1
+        and int(profile.get("change_set_ref_count") or 0) >= 1,
         "real_external_http_calls_zero": action.get("real_external_http_calls") == 0,
     }
     status = (

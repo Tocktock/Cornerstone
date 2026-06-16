@@ -1095,6 +1095,112 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs1_ontology_profile_and_semver_contract_evidence(self) -> None:
+        state_rel = "tmp/test-vs1-ontology-profile"
+        state_dir = ROOT / state_rel
+        shutil.rmtree(state_dir, ignore_errors=True)
+        state_args = ["--state-dir", state_rel]
+
+        def run_json(*args: str, expected: int = 0) -> dict:
+            result = run_cli(*args, *state_args, "--json")
+            self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+            return json.loads(result.stdout)
+
+        def candidate_ids(suggestion_set: dict, kind: str, min_confidence: float = 0.6) -> list[str]:
+            return [
+                candidate["candidate_id"]
+                for candidate in suggestion_set.get(f"{kind}_suggestions", [])
+                if float(candidate.get("confidence", 0)) >= min_confidence
+            ]
+
+        try:
+            artifact = run_json("artifact", "ingest", "fixtures/vs1/ontology/vendor_risk.txt")
+            artifact_id = artifact["ids"]["artifact_id"]
+            search = run_json("search", "query", "Northstar Labs vendor risk")
+            snapshot_id = search["ids"]["search_snapshot_id"]
+            suggest = run_json("ontology", "suggest", "--source-type", "search", "--source-id", snapshot_id)
+            suggestion_set = suggest["ontology_suggestion_set"]
+            object_ids = candidate_ids(suggestion_set, "object")
+            property_ids = candidate_ids(suggestion_set, "property")
+            link_ids = candidate_ids(suggestion_set, "link")
+            selected = [*object_ids, *property_ids[:2], *link_ids[:2]]
+
+            review_args = ["ontology", "review", suggestion_set["suggestion_set_id"]]
+            for candidate_id in selected:
+                review_args.extend(["--select", candidate_id])
+            run_json(*review_args)
+            promote_args = ["ontology", "promote", suggestion_set["suggestion_set_id"]]
+            for candidate_id in selected:
+                promote_args.extend(["--candidate-id", candidate_id])
+            promote = run_json(*promote_args)
+            self.assertEqual(promote["ontology_change_set"]["semver_bump"], "minor")
+            profile_object_id = promote["ontology_links"][0]["source_object_id"]
+            object_ref = f"ontology_object:{profile_object_id}"
+
+            bundle = run_json("evidence", "bundle", "create", "--search-snapshot-id", snapshot_id)
+            claim = run_json(
+                "claim",
+                "create",
+                "--evidence-bundle-id",
+                bundle["ids"]["evidence_bundle_id"],
+                "--statement",
+                "Northstar Labs vendor risk requires owner-reviewed follow-up.",
+                "--ontology-object-ref",
+                object_ref,
+            )
+            run_json("claim", "approve", claim["ids"]["claim_id"])
+            mission = run_json("mission", "create", "--goal", "Record local ontology impact review", "--claim-id", claim["ids"]["claim_id"])
+            run_json("mission", "activate", mission["ids"]["mission_id"], "--mode", "autopilot")
+            action = run_json(
+                "action",
+                "propose",
+                "--mission-id",
+                mission["ids"]["mission_id"],
+                "--claim-id",
+                claim["ids"]["claim_id"],
+                "--goal",
+                "Record local ontology impact review",
+                "--action-kind",
+                "external_writeback",
+                "--risk",
+                "high",
+                "--connector",
+                "mock_connector",
+                "--target",
+                "mock://vs1-ontology/test",
+                "--ontology-object-ref",
+                object_ref,
+            )
+            run_json("action", "approve", action["ids"]["action_id"], "--approver", "owner")
+            run_json("action", "execute", action["ids"]["action_id"])
+            profile = run_json("ontology", "object", "show", profile_object_id)["ontology_object_profile"]
+            self.assertGreaterEqual(len(profile["links"]), 1)
+            self.assertGreaterEqual(len(profile["linked_objects"]), 1)
+            self.assertGreaterEqual(len(profile["related_claims"]), 1)
+            self.assertGreaterEqual(len(profile["related_actions"]), 1)
+            self.assertGreaterEqual(len(profile["activity_history"]), 1)
+            self.assertGreaterEqual(len(profile["change_set_refs"]), 1)
+
+            conflict_artifact = run_json("artifact", "ingest", "fixtures/vs1/ontology/vendor_risk_conflict.txt")
+            conflict_suggest = run_json("ontology", "suggest", "--source-type", "artifact", "--source-id", conflict_artifact["ids"]["artifact_id"])
+            conflict_set = conflict_suggest["ontology_suggestion_set"]
+            conflict_selected = [*candidate_ids(conflict_set, "object"), *candidate_ids(conflict_set, "property")]
+            conflict_review_args = ["ontology", "review", conflict_set["suggestion_set_id"]]
+            for candidate_id in conflict_selected:
+                conflict_review_args.extend(["--select", candidate_id])
+            run_json(*conflict_review_args)
+            conflict_promote_args = ["ontology", "promote", conflict_set["suggestion_set_id"]]
+            for candidate_id in conflict_selected:
+                conflict_promote_args.extend(["--candidate-id", candidate_id])
+            conflict = run_json(*conflict_promote_args)
+            self.assertEqual(conflict["ontology_change_set"]["semver_bump"], "major")
+            self.assertTrue(conflict["ontology_change_set"]["impact"]["human_review_recommended"])
+            self.assertTrue(
+                any(update.get("conflict_visible") for update in conflict["ontology_change_set"]["diff"]["property_updates"])
+            )
+        finally:
+            shutil.rmtree(state_dir, ignore_errors=True)
+
     def test_full_extension_ecosystem_verify(self) -> None:
         result = run_cli("scenario", "verify", "full-extension-ecosystem", "--json")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

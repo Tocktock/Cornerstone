@@ -516,26 +516,35 @@
           candidate_ids: selected
         });
         const changeSet = promoteResponse.payload.ontology_change_set;
-        const firstObject = (promoteResponse.payload.ontology_objects || [])[0];
+        const promotedObjects = promoteResponse.payload.ontology_objects || [];
+        const promotedLinks = promoteResponse.payload.ontology_links || [];
+        const profileObjectId = promotedLinks[0] ? promotedLinks[0].source_object_id : (promotedObjects[0] && promotedObjects[0].ontology_object_id);
+        const profileObject = promotedObjects.find((object) => object.ontology_object_id === profileObjectId) || promotedObjects[0];
         vs1State.promotion = {
           ontology_change_set_id: changeSet.ontology_change_set_id,
           previous_version: changeSet.previous_version,
           next_version: changeSet.next_version,
           semver_bump: changeSet.semver_bump,
-          object_refs: (promoteResponse.payload.ontology_objects || []).map((object) => "ontology_object:" + object.ontology_object_id),
-          link_refs: (promoteResponse.payload.ontology_links || []).map((link) => "ontology_link:" + link.ontology_link_id)
+          object_refs: promotedObjects.map((object) => "ontology_object:" + object.ontology_object_id),
+          link_refs: promotedLinks.map((link) => "ontology_link:" + link.ontology_link_id)
         };
         setText("vs1-change-set-id", changeSet.ontology_change_set_id);
 
-        const profileResponse = await vs1Get("/ontology/objects/" + firstObject.ontology_object_id);
+        const profileResponse = await vs1Get("/ontology/objects/" + profileObject.ontology_object_id);
         vs1State.profile = {
-          ontology_object_id: firstObject.ontology_object_id,
+          ontology_object_id: profileObject.ontology_object_id,
           sections: profileResponse.payload.ontology_object_profile.profile_sections,
-          evidence_refs: profileResponse.payload.ontology_object_profile.evidence_refs || []
+          evidence_refs: profileResponse.payload.ontology_object_profile.evidence_refs || [],
+          link_count: (profileResponse.payload.ontology_object_profile.links || []).length,
+          linked_object_count: (profileResponse.payload.ontology_object_profile.linked_objects || []).length,
+          related_claim_count: (profileResponse.payload.ontology_object_profile.related_claims || []).length,
+          related_action_count: (profileResponse.payload.ontology_object_profile.related_actions || []).length,
+          activity_count: (profileResponse.payload.ontology_object_profile.activity_history || []).length,
+          change_set_ref_count: (profileResponse.payload.ontology_object_profile.change_set_refs || []).length
         };
-        setText("vs1-object-profile-id", firstObject.ontology_object_id);
+        setText("vs1-object-profile-id", profileObject.ontology_object_id);
 
-        const ontologySearch = await vs1Api("/search", { query: firstObject.label });
+        const ontologySearch = await vs1Api("/search", { query: profileObject.label });
         const ontologyResult = (ontologySearch.payload.search_snapshot.results || []).find((result) => result.result_type === "ontology_object");
         vs1State.search.promoted_object_result = Boolean(ontologyResult);
         setText("vs1-search-integration", vs1State.search.promoted_object_result ? "promoted object returned in search" : "not returned");
@@ -583,6 +592,20 @@
         };
         setText("vs1-action-impact", "objects=" + action.ontology_impact.object_refs.length + "; real_external_http_calls=" + vs1State.action.real_external_http_calls);
         setText("vs1-real-external-calls", "real_external_http_calls=" + vs1State.action.real_external_http_calls);
+
+        const finalProfileResponse = await vs1Get("/ontology/objects/" + profileObject.ontology_object_id);
+        const finalProfile = finalProfileResponse.payload.ontology_object_profile;
+        vs1State.profile = {
+          ontology_object_id: profileObject.ontology_object_id,
+          sections: finalProfile.profile_sections,
+          evidence_refs: finalProfile.evidence_refs || [],
+          link_count: (finalProfile.links || []).length,
+          linked_object_count: (finalProfile.linked_objects || []).length,
+          related_claim_count: (finalProfile.related_claims || []).length,
+          related_action_count: (finalProfile.related_actions || []).length,
+          activity_count: (finalProfile.activity_history || []).length,
+          change_set_ref_count: (finalProfile.change_set_refs || []).length
+        };
 
         const auditEvents = await vs1Get("/audit-events");
         const auditVerify = await vs1Api("/audit/verify", {});
@@ -633,6 +656,12 @@
         vs1State.promotion.ontology_change_set_id &&
         vs1State.promotion.semver_bump === "minor" &&
         vs1State.profile.ontology_object_id &&
+        vs1State.profile.link_count >= 1 &&
+        vs1State.profile.linked_object_count >= 1 &&
+        vs1State.profile.related_claim_count >= 1 &&
+        vs1State.profile.related_action_count >= 1 &&
+        vs1State.profile.activity_count >= 1 &&
+        vs1State.profile.change_set_ref_count >= 1 &&
         vs1State.search.promoted_object_result &&
         vs1State.claim.zero_evidence_denied &&
         vs1State.claim.approved &&

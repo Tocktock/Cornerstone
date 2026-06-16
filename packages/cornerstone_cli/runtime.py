@@ -6918,7 +6918,14 @@ class LocalRuntimeStore:
 
         promoted_object_refs = [f"ontology_object:{record['ontology_object_id']}" for record in object_records.values()]
         promoted_link_refs = [f"ontology_link:{record['ontology_link_id']}" for record in link_records]
-        previous_version, next_version = self._next_ontology_version(scope, "minor")
+        conflict_property_diffs = [diff for diff in property_diffs if diff.get("conflict_visible")]
+        semver_bump = "major" if conflict_property_diffs else "minor"
+        semver_reason = (
+            "Conflicting ontology semantics were detected and preserved for owner review without silently overwriting existing object facts."
+            if conflict_property_diffs
+            else "Additive ontology objects, properties, or links were promoted from reviewed evidence suggestions."
+        )
+        previous_version, next_version = self._next_ontology_version(scope, semver_bump)
         change_base = {
             "schema_version": "cs.ontology_change_set.v1",
             "status": "applied",
@@ -6926,8 +6933,8 @@ class LocalRuntimeStore:
             "suggestion_set_id": suggestion_set_id,
             "previous_version": previous_version,
             "next_version": next_version,
-            "semver_bump": "minor",
-            "semver_reason": "Additive ontology objects, properties, or links were promoted from reviewed evidence suggestions.",
+            "semver_bump": semver_bump,
+            "semver_reason": semver_reason,
             "diff": {
                 "added_objects": promoted_object_refs,
                 "added_links": promoted_link_refs,
@@ -6938,8 +6945,14 @@ class LocalRuntimeStore:
                 "object_profiles_updated": True,
                 "claims_may_reference_context_but_require_evidence_bundle": True,
                 "actions_may_show_ontology_impact_but_real_external_http_calls": 0,
+                "conflicting_semantics_preserved_for_review": bool(conflict_property_diffs),
+                "human_review_recommended": bool(conflict_property_diffs),
             },
-            "migration_note": "No production migration. Local JSON ontology state gained additive records; rollback by superseding with a patch change set.",
+            "migration_note": (
+                "No production migration. A conflicting local semantic update was recorded as review-required; dependent Claims and Actions must be reviewed before relying on the changed property."
+                if conflict_property_diffs
+                else "No production migration. Local JSON ontology state gained additive records; rollback by superseding with a patch change set."
+            ),
             "evidence_refs": sorted(set(suggestion_set.get("evidence_refs", []))),
             "audit_refs": [f"audit:{request_event['event_id']}", *[f"audit:{event['event_id']}" for event in [*object_events, *property_events, *link_events]]],
             "created_at": utc_now(),
@@ -6951,16 +6964,37 @@ class LocalRuntimeStore:
             "ontology.change_set.created",
             scope,
             {"type": "ontology_change_set", "id": change_set["ontology_change_set_id"]},
-            {"previous_version": previous_version, "next_version": next_version, "semver_bump": "minor"},
+            {"previous_version": previous_version, "next_version": next_version, "semver_bump": semver_bump},
         )
         version_event = self.append_audit(
             "ontology.version.changed",
             scope,
             {"type": "ontology_version", "id": next_version},
-            {"previous_version": previous_version, "next_version": next_version, "change_set_id": change_set["ontology_change_set_id"]},
+            {
+                "previous_version": previous_version,
+                "next_version": next_version,
+                "change_set_id": change_set["ontology_change_set_id"],
+                "semver_bump": semver_bump,
+                "human_review_recommended": bool(conflict_property_diffs),
+            },
         )
         change_set["audit_refs"].extend([f"audit:{change_event['event_id']}", f"audit:{version_event['event_id']}"])
         _write_json(self.ontology_change_path(change_set["ontology_change_set_id"]), change_set)
+
+        change_ref = f"ontology_change_set:{change_set['ontology_change_set_id']}"
+        for record in object_records.values():
+            stored = self.get_ontology_object(record["ontology_object_id"]) or record
+            updated = dict(stored)
+            updated["change_set_refs"] = sorted(set(updated.get("change_set_refs", []) + [change_ref]))
+            updated["last_change_set_ref"] = change_ref
+            _write_json(self.ontology_object_path(updated["ontology_object_id"]), updated)
+            object_records[updated["normalized_key"]] = updated
+        for link in link_records:
+            updated_link = dict(link)
+            updated_link["change_set_refs"] = sorted(set(updated_link.get("change_set_refs", []) + [change_ref]))
+            updated_link["last_change_set_ref"] = change_ref
+            _write_json(self.ontology_link_path(updated_link["ontology_link_id"]), updated_link)
+            link.update(updated_link)
 
         promoted = dict(suggestion_set)
         promoted["status"] = "promoted"
@@ -7060,20 +7094,135 @@ class LocalRuntimeStore:
             for link in self._ontology_link_records(scope)
             if link.get("source_object_id") == object_id or link.get("target_object_id") == object_id
         ]
+        object_ref = f"ontology_object:{object_id}"
+        linked_objects = []
+        linked_link_refs = {f"ontology_link:{link['ontology_link_id']}" for link in linked if link.get("ontology_link_id")}
+        for link in linked:
+            is_source = link.get("source_object_id") == object_id
+            other_id = str(link.get("target_object_id") if is_source else link.get("source_object_id"))
+            other = self.get_ontology_object(other_id) or {}
+            linked_objects.append(
+                {
+                    "ontology_link_id": link.get("ontology_link_id"),
+                    "link_ref": f"ontology_link:{link.get('ontology_link_id')}",
+                    "direction": "outgoing" if is_source else "incoming",
+                    "relation": link.get("relation"),
+                    "object_ref": f"ontology_object:{other_id}",
+                    "label": other.get("label"),
+                    "seed_type": other.get("seed_type"),
+                    "evidence_refs": link.get("evidence_refs", []),
+                    "audit_refs": link.get("audit_refs", []),
+                }
+            )
+        related_claims = []
+        for claim in self._claim_records(scope):
+            if object_ref in set(claim.get("ontology_context", {}).get("object_refs", [])):
+                related_claims.append(
+                    {
+                        "claim_id": claim.get("claim_id"),
+                        "trust_state": claim.get("trust_state"),
+                        "statement": claim.get("statement"),
+                        "evidence_bundle_id": claim.get("evidence_bundle", {}).get("evidence_bundle_id"),
+                        "evidence_refs": self._claim_evidence_refs(claim),
+                    }
+                )
+        related_actions = []
+        for action in self._action_records(scope):
+            if object_ref in set(action.get("ontology_impact", {}).get("object_refs", [])):
+                related_actions.append(
+                    {
+                        "action_id": action.get("action_id"),
+                        "goal": action.get("goal"),
+                        "status": action.get("execution", {}).get("status"),
+                        "policy": action.get("policy_decision", {}).get("policy"),
+                        "real_external_http_calls": action.get("ontology_impact", {}).get("real_external_http_calls"),
+                        "audit_ref": action.get("audit_ref"),
+                    }
+                )
+        change_set_refs = set(obj.get("change_set_refs", []))
+        version_history = []
+        for change in self._ontology_change_records(scope):
+            diff = change.get("diff", {})
+            property_updates = diff.get("property_updates", []) if isinstance(diff.get("property_updates"), list) else []
+            object_touched = (
+                object_ref in set(diff.get("added_objects", []))
+                or diff.get("corrected_object") == object_ref
+                or any(update.get("object_id") == object_id for update in property_updates if isinstance(update, dict))
+                or bool(linked_link_refs & set(diff.get("added_links", [])))
+            )
+            if object_touched and change.get("ontology_change_set_id"):
+                change_ref = f"ontology_change_set:{change['ontology_change_set_id']}"
+                change_set_refs.add(change_ref)
+                version_history.append(
+                    {
+                        "ontology_change_set_id": change.get("ontology_change_set_id"),
+                        "change_set_ref": change_ref,
+                        "previous_version": change.get("previous_version"),
+                        "next_version": change.get("next_version"),
+                        "semver_bump": change.get("semver_bump"),
+                        "semver_reason": change.get("semver_reason"),
+                        "migration_note": change.get("migration_note"),
+                        "evidence_refs": change.get("evidence_refs", []),
+                    }
+                )
+        activity_history = []
+        for event in self._all_audit_events():
+            subject = event.get("subject", {})
+            details = event.get("details", {})
+            detail_text = json.dumps(details, sort_keys=True)
+            if (
+                subject.get("id") == object_id
+                or object_ref in detail_text
+                or any(link_ref in detail_text for link_ref in linked_link_refs)
+            ):
+                activity_history.append(
+                    {
+                        "event_id": event.get("event_id"),
+                        "event_type": event.get("event_type"),
+                        "occurred_at": event.get("occurred_at"),
+                        "subject": subject,
+                        "details": details,
+                    }
+                )
         profile = {
             "schema_version": "cs.ontology_object_profile.v1",
             "ontology_object": obj,
             "links": linked,
+            "linked_objects": linked_objects,
+            "related_claims": related_claims,
+            "related_actions": related_actions,
+            "activity_history": activity_history,
+            "version_history": version_history,
+            "change_set_refs": sorted(change_set_refs),
             "evidence_refs": obj.get("evidence_refs", []),
             "audit_refs": obj.get("audit_refs", []),
-            "profile_sections": ["identity", "properties", "links", "source_mapping", "evidence", "audit"],
+            "profile_sections": [
+                "identity",
+                "properties",
+                "links",
+                "linked_objects",
+                "source_mapping",
+                "evidence",
+                "related_claims",
+                "related_actions",
+                "activity",
+                "version_history",
+                "audit",
+            ],
             "opened_at": utc_now(),
         }
         event = self.append_audit(
             "ontology.object.profile.read",
             scope,
             {"type": "ontology_object", "id": object_id},
-            {"link_count": len(linked), "evidence_ref_count": len(obj.get("evidence_refs", []))},
+            {
+                "link_count": len(linked),
+                "linked_object_count": len(linked_objects),
+                "related_claim_count": len(related_claims),
+                "related_action_count": len(related_actions),
+                "change_set_ref_count": len(change_set_refs),
+                "evidence_ref_count": len(obj.get("evidence_refs", [])),
+            },
         )
         profile["audit_refs"] = [*profile["audit_refs"], f"audit:{event['event_id']}"]
         return {"profile": profile, "audit_event": event}
