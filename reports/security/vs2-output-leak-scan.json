@@ -1,0 +1,16 @@
+{
+  "cross_tenant_identifier_leaks": 0,
+  "findings": [],
+  "scanned_paths": [
+    "reports/db/vs2-rls-inventory.json",
+    "reports/db/vs2-tenant-isolation.json",
+    "reports/db/vs2-migration-rollback.json",
+    "reports/policy/vs2-opa-test.json",
+    "reports/policy/vs2-opa-coverage.json",
+    "reports/policy/vs2-bundle-lifecycle.json",
+    "reports/network/vs2-egress-proof.json",
+    "reports/audit/vs2-audit-integrity.json"
+  ],
+  "secret_findings": 0,
+  "status": "passed"
+}

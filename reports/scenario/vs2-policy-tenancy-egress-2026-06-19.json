@@ -1,0 +1,2487 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs2-policy-tenancy-egress",
+  "errors": [],
+  "evidence_refs": [],
+  "h01_approval_package": {
+    "audit_refs": [
+      "audit:audit_7fadc951aed55eab"
+    ],
+    "checks": {
+      "approval_not_collected": true,
+      "approval_pending": true,
+      "architecture_scope_present": true,
+      "audit_ref_present": true,
+      "command_completed": true,
+      "dependency_decision_present": true,
+      "evidence_ref_present": true,
+      "external_http_calls_zero": true,
+      "human_decision_values_present": true,
+      "local_boundary_present": true,
+      "migration_scope_present": true,
+      "mutation_not_executed": true,
+      "rollback_owner_present": true,
+      "scenario_matches_h01": true,
+      "secret_material_not_read": true,
+      "security_owner_present": true,
+      "sensitive_implementation_not_allowed": true,
+      "status_human_review_required": true
+    },
+    "evidence_refs": [
+      "vs2_h01_approval_package:vs2h01_d997bd5205760ce7"
+    ],
+    "package_id": "vs2h01_d997bd5205760ce7",
+    "path": "reports/scenario/vs2-h01-approval-package-2026-06-19.json",
+    "present": true,
+    "status": "human_review_package_ready",
+    "valid": true
+  },
+  "h01_sensitive_change_gate": {
+    "audit_refs": [
+      "audit:audit_c7cadcb816eee60d"
+    ],
+    "checks": {
+      "approval_not_collected_by_ai": true,
+      "audit_ref_present": true,
+      "category_matches_vs2": true,
+      "command_succeeded": true,
+      "decision_requires_approval": true,
+      "evidence_ref_present": true,
+      "external_http_calls_zero": true,
+      "gate_status_approval_required": true,
+      "mutation_not_executed": true,
+      "policy_ref_present": true,
+      "secret_material_not_read": true,
+      "stop_and_ask_required": true
+    },
+    "evidence_refs": [
+      "sensitive_change_gate:sensgate_6b78f464bf92f485"
+    ],
+    "gate_id": "sensgate_6b78f464bf92f485",
+    "path": "reports/scenario/vs2-sensitive-change-gate-2026-06-19.json",
+    "policy_decision_id": "policy_54bc4330a651ebc4",
+    "present": true,
+    "status": "approval_required_observed",
+    "valid": true
+  },
+  "human_required": [
+    {
+      "expected_evidence": "Dated APPROVE/REJECT record with approved scope, exceptions, rollback owner, and dependency decision.",
+      "id": "VS2-SEC-H01",
+      "release_impact": "Blocks only the corresponding architecture, production, live-provider, migration, or UX claim until evidence exists.",
+      "required_human_action": "Human architecture/security review.",
+      "why_ai_cannot_verify": "JiYong/Tars or authorized owner approves the architecture, dependency, migration scope, rollback plan, and security ownership before code changes that cross the gate."
+    },
+    {
+      "expected_evidence": "Signed report, test scope/topology, findings, remediation, re-test evidence.",
+      "id": "VS2-SEC-H02",
+      "release_impact": "Blocks only the corresponding architecture, production, live-provider, migration, or UX claim until evidence exists.",
+      "required_human_action": "Independent penetration/security review.",
+      "why_ai_cannot_verify": "No cross-tenant data/metadata leak or policy bypass is found, or findings are remediated and re-tested."
+    },
+    {
+      "expected_evidence": "Redacted login/mapping/revocation transcript and owner/security approval.",
+      "id": "VS2-SEC-H03",
+      "release_impact": "Blocks only the corresponding architecture, production, live-provider, migration, or UX claim until evidence exists.",
+      "required_human_action": "Approved real-IdP test.",
+      "why_ai_cannot_verify": "Authorized stakeholders confirm mappings and revocation behavior; no synthetic-fixture claim is promoted to real IdP readiness."
+    },
+    {
+      "expected_evidence": "Topology diagram, firewall/proxy/network-policy evidence, packet/log transcript, approval.",
+      "id": "VS2-SEC-H04",
+      "release_impact": "Blocks only the corresponding architecture, production, live-provider, migration, or UX claim until evidence exists.",
+      "required_human_action": "Network control review and egress test.",
+      "why_ai_cannot_verify": "All undeclared paths are blocked and approved paths are traceable under the real topology."
+    },
+    {
+      "expected_evidence": "Redacted provider transcript, approval, ConnectorHub/CornerStone audit refs, result/evidence refs.",
+      "id": "VS2-SEC-H05",
+      "release_impact": "Blocks only the corresponding architecture, production, live-provider, migration, or UX claim until evidence exists.",
+      "required_human_action": "Approved live-provider rehearsal.",
+      "why_ai_cannot_verify": "Credential custody, declared capability, source policy, product approval, egress, result, evidence, and audit boundaries hold without secret exposure."
+    },
+    {
+      "expected_evidence": "ACCEPT/REJECT note, screenshots/recording, task outcomes, confusion/issues list.",
+      "id": "VS2-SEC-H06",
+      "release_impact": "Blocks only the corresponding architecture, production, live-provider, migration, or UX claim until evidence exists.",
+      "required_human_action": "Human usability/trust review.",
+      "why_ai_cannot_verify": "They accept or reject whether boundaries, causes, risks, and recovery paths are understandable and not misleading."
+    },
+    {
+      "expected_evidence": "Signed transcript, before/after counts/hashes, RLS/policy inventory, restore/rollback result.",
+      "id": "VS2-SEC-H07",
+      "release_impact": "Blocks only the corresponding architecture, production, live-provider, migration, or UX claim until evidence exists.",
+      "required_human_action": "Human-supervised non-destructive rehearsal.",
+      "why_ai_cannot_verify": "Data/evidence/audit integrity, tenant ownership, RLS policies, and service recovery meet the approved plan."
+    }
+  ],
+  "ids": {
+    "git_commit": "4683d08"
+  },
+  "local_security_proof": {
+    "egress": {
+      "egress_report": "reports/network/vs2-egress-proof.json",
+      "status": "passed"
+    },
+    "opa": {
+      "bundle_lifecycle_report": "reports/policy/vs2-bundle-lifecycle.json",
+      "opa_coverage_report": "reports/policy/vs2-opa-coverage.json",
+      "opa_test_report": "reports/policy/vs2-opa-test.json",
+      "status": "passed"
+    },
+    "path": "reports/security/vs2-local-security-proof.json",
+    "postgres": {
+      "inventory_report": "reports/db/vs2-rls-inventory.json",
+      "migration_rollback_report": "reports/db/vs2-migration-rollback.json",
+      "status": "passed",
+      "tenant_isolation_report": "reports/db/vs2-tenant-isolation.json"
+    },
+    "proof_hash": "8e76697f7e34b402fe9e4197ae1209b777b7e27f9cbbfb0c7c7223bdeb2729a1",
+    "status": "success",
+    "summary": {
+      "ai_verifiable": 86,
+      "blocking": 0,
+      "fail": 0,
+      "human_required": 7,
+      "pass": 86,
+      "product_feature_claims": "LOCAL_VS2_POLICY_TENANCY_EGRESS_READY_PRODUCTION_NOT_READY",
+      "scenario_count": 93
+    }
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "ai_rows_marked_pass_without_evidence": 0,
+    "h01_approval_package_report_missing": 0,
+    "h01_package_sensitive_implementation_allowed": 0,
+    "h01_sensitive_change_gate_report_missing": 0,
+    "human_acceptance_claimed_by_ai": 0,
+    "live_provider_ready_claimed": 0,
+    "production_security_claimed": 0,
+    "sensitive_change_approval_collected_by_ai": 0,
+    "sensitive_change_mutation_executed": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "repo_observations": {
+    "compose_files": [],
+    "contract_present": true,
+    "current_state_report_present": true,
+    "h01_approval_package_report": {
+      "audit_refs": [
+        "audit:audit_7fadc951aed55eab"
+      ],
+      "checks": {
+        "approval_not_collected": true,
+        "approval_pending": true,
+        "architecture_scope_present": true,
+        "audit_ref_present": true,
+        "command_completed": true,
+        "dependency_decision_present": true,
+        "evidence_ref_present": true,
+        "external_http_calls_zero": true,
+        "human_decision_values_present": true,
+        "local_boundary_present": true,
+        "migration_scope_present": true,
+        "mutation_not_executed": true,
+        "rollback_owner_present": true,
+        "scenario_matches_h01": true,
+        "secret_material_not_read": true,
+        "security_owner_present": true,
+        "sensitive_implementation_not_allowed": true,
+        "status_human_review_required": true
+      },
+      "evidence_refs": [
+        "vs2_h01_approval_package:vs2h01_d997bd5205760ce7"
+      ],
+      "package_id": "vs2h01_d997bd5205760ce7",
+      "path": "reports/scenario/vs2-h01-approval-package-2026-06-19.json",
+      "present": true,
+      "status": "human_review_package_ready",
+      "valid": true
+    },
+    "local_security_proof_report": "reports/security/vs2-local-security-proof.json",
+    "local_security_proof_status": "success",
+    "matrix_present": true,
+    "opa_policy_dir_present": true,
+    "postgres_profile_present": false,
+    "rego_files": [
+      "policies/vs2/policy.rego",
+      "policies/vs2/policy_test.rego"
+    ],
+    "sensitive_change_gate_report": {
+      "audit_refs": [
+        "audit:audit_c7cadcb816eee60d"
+      ],
+      "checks": {
+        "approval_not_collected_by_ai": true,
+        "audit_ref_present": true,
+        "category_matches_vs2": true,
+        "command_succeeded": true,
+        "decision_requires_approval": true,
+        "evidence_ref_present": true,
+        "external_http_calls_zero": true,
+        "gate_status_approval_required": true,
+        "mutation_not_executed": true,
+        "policy_ref_present": true,
+        "secret_material_not_read": true,
+        "stop_and_ask_required": true
+      },
+      "evidence_refs": [
+        "sensitive_change_gate:sensgate_6b78f464bf92f485"
+      ],
+      "gate_id": "sensgate_6b78f464bf92f485",
+      "path": "reports/scenario/vs2-sensitive-change-gate-2026-06-19.json",
+      "policy_decision_id": "policy_54bc4330a651ebc4",
+      "present": true,
+      "status": "approval_required_observed",
+      "valid": true
+    },
+    "sql_files": []
+  },
+  "required_before_pass": [
+    "H02-H07 evidence before claiming production security, real IdP, production network, live provider, human UX, or migration readiness."
+  ],
+  "scenario_results": [
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "The same authenticated principal, tenant, namespace, resource, and action are available through CLI, API, and UI.",
+      "id": "VS2-SEC-001",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "Shared RequestContext, policy client, CLI adapter, API middleware, UI error mapping.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Three transcripts, normalized request-context digest, matching decision outcome/revision, exit/status codes, audit references.",
+      "status": "PASS",
+      "then": "All surfaces derive the same trusted request context, receive the same policy outcome and stable error semantics, and emit linked policy/audit references.",
+      "type": "MUST_PASS",
+      "verification_method": "Automated CLI/API/browser integration test using one fixture principal and normalized input comparison.",
+      "when": "The operation is submitted through each surface."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A caller is authenticated for tenant A and supplies tenant B, owner, role, or classification values in a header, body, query, or CLI flag.",
+      "id": "VS2-SEC-002",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "Identity-to-scope resolver, input allowlist, anti-confused-deputy validation.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Denied response, zero tenant-B rows/objects, policy decision, audit event, negative-evidence counters.",
+      "status": "PASS",
+      "then": "Authoritative scope comes only from trusted identity/membership state; forged attributes are ignored or rejected, tenant B is not accessed, and the attempt is audited.",
+      "type": "MUST_PASS",
+      "verification_method": "Parameterized API/CLI tests for every client-controlled scope field and direct service invocation.",
+      "when": "The caller invokes a protected read, write, policy, tool, or action operation."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A protected request has missing, malformed, expired, conflicting, or unresolvable principal/tenant context.",
+      "id": "VS2-SEC-003",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "Request validation, principal resolver, policy fallback, worker/tool guards.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Stable error codes, zero DB/egress calls, sanitized policy/audit records.",
+      "status": "PASS",
+      "then": "The system fails closed before protected database access or egress, returns a stable helpful error, and records no secret-bearing input.",
+      "type": "MUST_PASS",
+      "verification_method": "Unit and integration matrix for null, empty, malformed, expired, and conflicting context.",
+      "when": "The request reaches the gateway, service, worker, or tool entry point."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A truth-bearing object is created or migrated: Artifact, DerivedRepresentation, SearchSnapshot, EvidenceBundle, Claim, ontology object/link, ActionCard, WorkflowRun, PolicyDecision, or AuditEvent.",
+      "id": "VS2-SEC-004",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "Domain models, database constraints, serializer validation, migration checks.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Schema inventory, constraint output, representative rows/API payloads, failed-null inserts.",
+      "status": "PASS",
+      "then": "Required tenant_id, namespace_id, owner_id, and applicable workspace/classification fields are non-null, validated, immutable where required, and visible in API/CLI evidence.",
+      "type": "MUST_PASS",
+      "verification_method": "Schema tests plus create/read tests for every active durable object type.",
+      "when": "The object is persisted."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A principal's membership, role, attribute, capability, or workspace access is revoked.",
+      "id": "VS2-SEC-005",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "Membership store, token/session versioning, policy cache invalidation, worker lease checks.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Before/after decisions, cache revision/expiry, denial audit, zero post-revocation access.",
+      "status": "PASS",
+      "then": "The new request is denied within the documented revocation window; stale authorization state cannot preserve access.",
+      "type": "MUST_PASS",
+      "verification_method": "Integration test with allow \u2192 revoke \u2192 retry across API, CLI, service, and worker paths.",
+      "when": "The principal repeats a previously allowed request, including through a cached session or long-running worker."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Any protected operation is evaluated.",
+      "id": "VS2-SEC-006",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "PolicyDecision schema, OPA result adapter, persistence, redaction.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "PolicyDecision JSON fixtures, OPA decision_id/revision, audit linkage, redaction proof.",
+      "status": "PASS",
+      "then": "A canonical PolicyDecision records allow/deny/escalate, reason codes, safe resolution guidance, policy path, bundle revision/hash, decision_id, input digest, timestamps, tenant/namespace, and evidence/audit refs.",
+      "type": "MUST_PASS",
+      "verification_method": "Schema contract tests and golden JSON tests for allow, deny, escalate, undefined, and error results.",
+      "when": "OPA and the CornerStone policy adapter return a result."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Tenant A and tenant B each have rows in every active tenant-bearing table.",
+      "id": "VS2-SEC-007",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Postgres RLS policies, transaction-local tenant context, repository adapters.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "SQL transcript, row counts, pg_policies inventory, zero tenant-B identifiers.",
+      "status": "PASS",
+      "then": "Only tenant-A rows are visible; tenant-B rows and existence metadata are absent.",
+      "type": "MUST_PASS",
+      "verification_method": "Database integration matrix across every RLS table using the real application role.",
+      "when": "The application database role executes SELECT as tenant A."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "The application role is scoped to tenant A.",
+      "id": "VS2-SEC-008",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Command-specific RLS policies, immutable tenant key constraints, transaction handling.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "SQLSTATE/neutral API error, unchanged before/after snapshots, rollback evidence, audit event.",
+      "status": "PASS",
+      "then": "INSERT/UPDATE are rejected by WITH CHECK or equivalent; cross-tenant DELETE affects zero rows or is denied; no partial mutation occurs.",
+      "type": "MUST_PASS",
+      "verification_method": "Database tests for INSERT/UPDATE/DELETE, including bulk statements and RETURNING.",
+      "when": "It attempts INSERT with tenant B, UPDATE a row into tenant B, or DELETE tenant-B data."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Tenant A queries tables containing tenant-B data through joins, subqueries, aggregates, counts, groupings, existence checks, and pagination.",
+      "id": "VS2-SEC-009",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "RLS-safe queries, tenant-scoped pagination/cursors, neutral errors.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Result snapshots, count/cursor assertions, no foreign IDs, sanitized errors.",
+      "status": "PASS",
+      "then": "Results, counts, cursors, totals, and timing/error text do not reveal tenant-B data or existence.",
+      "type": "MUST_PASS",
+      "verification_method": "Parameterized SQL/API integration tests including empty-result and boundary-page cases.",
+      "when": "The query is executed through supported repository and API paths."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "FTS, vector/semantic search, ontology search, autocomplete, and saved search snapshots contain content from two tenants.",
+      "id": "VS2-SEC-010",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Tenant-bearing search tables/indexes, RLS-safe search queries, tenant-scoped embeddings/cache.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Search/API transcripts, query plans or SQL trace, zero canary leakage, snapshot scope.",
+      "status": "PASS",
+      "then": "No tenant-B result, snippet, score, suggestion, facet count, object, or snapshot reference is returned.",
+      "type": "MUST_PASS",
+      "verification_method": "End-to-end search tests with unique canary terms in each tenant.",
+      "when": "Tenant A searches using terms unique to tenant B."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Tenant B owns an original blob, derived representation, EvidenceBundle item, or storage URI referenced by an identifier guessed by tenant A.",
+      "id": "VS2-SEC-011",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Artifact service policy, tenant-scoped storage keys/signing, evidence traversal checks.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Denied responses, zero bytes returned, storage access log, policy/audit refs.",
+      "status": "PASS",
+      "then": "Access is denied without revealing content or sensitive metadata; storage access is bound to the authorized tenant and object.",
+      "type": "MUST_PASS",
+      "verification_method": "API/object-store adapter tests using guessed IDs and cross-tenant evidence links.",
+      "when": "Tenant A requests the object, download, signed URL, or evidence traversal."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Audit events, policy decisions, operator metrics, exports, and status records exist for multiple tenants.",
+      "id": "VS2-SEC-012",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "RLS/policy for audit and policy tables, tenant-aware metrics/export layer.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Scoped exports, role matrix, denial logs, no cross-tenant event IDs.",
+      "status": "PASS",
+      "then": "Only authorized tenant records and aggregated non-sensitive metrics are visible; system-wide access requires explicit privileged policy.",
+      "type": "MUST_PASS",
+      "verification_method": "API/DB tests for tenant user, tenant admin, and system operator fixtures.",
+      "when": "A tenant-scoped user queries or exports them."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "The application connects to Postgres using its normal runtime role.",
+      "id": "VS2-SEC-013",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Dedicated migration owner and application roles, FORCE ROW LEVEL SECURITY, grants.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Role inventory showing rolsuper=false and rolbypassrls=false; relrowsecurity/relforcerowsecurity report.",
+      "status": "PASS",
+      "then": "The role is not superuser, table owner, or BYPASSRLS; protected tables have RLS enabled and forced where the design requires owner protection.",
+      "type": "MUST_PASS",
+      "verification_method": "Database metadata assertions over pg_roles, pg_class, pg_policies, and ownership.",
+      "when": "Role and table security attributes are inspected and protected queries run."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An operator needs cross-tenant maintenance, recovery, or investigation.",
+      "id": "VS2-SEC-014",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Separate maintenance role/workflow, approval record, scoped admin commands.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Approval record, role assumption/revocation timestamps, accessed row counts, audit trail.",
+      "status": "PASS",
+      "then": "Normal app credentials cannot perform it; the privileged path requires explicit authorization, purpose, time bound, audit, and safe output handling.",
+      "type": "MUST_PASS",
+      "verification_method": "Integration rehearsal with denied app role and approved synthetic break-glass role.",
+      "when": "A break-glass or maintenance path is requested."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A pooled database connection previously served tenant A.",
+      "id": "VS2-SEC-015",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Connection checkout/checkin hooks, SET LOCAL context, transaction discipline.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Connection IDs with tenant sequence, zero canary leakage, reset assertions.",
+      "status": "PASS",
+      "then": "Tenant context is transaction-local and reset; tenant B never sees tenant A state or rows.",
+      "type": "MUST_PASS",
+      "verification_method": "Pool stress test that alternates tenants and injects failures/cancellations.",
+      "when": "The same physical connection is reused for tenant B, on success, error, timeout, cancellation, and rollback paths."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Concurrent tenant-A and tenant-B requests use the same service and pool.",
+      "id": "VS2-SEC-016",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Async context propagation, pool discipline, tenant-scoped caches.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Load transcript, per-request trace IDs, zero foreign canaries, no mixed audit refs.",
+      "status": "PASS",
+      "then": "Each request remains isolated; no cross-request context, cache, result, or audit correlation is mixed.",
+      "type": "MUST_PASS",
+      "verification_method": "Concurrent integration test with unique canaries and randomized scheduling.",
+      "when": "Reads and writes interleave under load."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A background job, retry, scheduled task, extraction worker, or workflow continuation processes tenant-owned work.",
+      "id": "VS2-SEC-017",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Signed/validated job envelope, worker RequestContext, quarantine and retry policy.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Job envelope digest, worker decision, quarantine/retry record, scoped DB/audit trace.",
+      "status": "PASS",
+      "then": "Valid jobs run only in their tenant; missing/tampered jobs fail closed or quarantine; retries preserve scope and idempotency.",
+      "type": "MUST_PASS",
+      "verification_method": "Worker integration tests for valid, missing, changed, replayed, and cross-tenant envelopes.",
+      "when": "The job executes with valid, missing, stale, or tampered scope metadata."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Protected data is accessed through SQL views, functions, stored procedures, ORM raw SQL, or security-definer code.",
+      "id": "VS2-SEC-018",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Database function/view security review, restricted EXECUTE grants, repository lint.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Object inventory, grants, cross-tenant tests, lint report.",
+      "status": "PASS",
+      "then": "No path bypasses tenant isolation; unsafe security-definer or owner-context access is rejected by CI or explicitly governed.",
+      "type": "MUST_PASS",
+      "verification_method": "Database integration tests plus static inventory of views/functions/security-definer objects.",
+      "when": "The application role invokes each supported path."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Tenant A attempts writes that collide with tenant-B unique keys or reference tenant-B foreign keys.",
+      "id": "VS2-SEC-019",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Composite tenant keys, tenant-aware foreign keys, neutral error translation.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Schema definitions, neutral errors, unchanged data, no foreign identifiers.",
+      "status": "PASS",
+      "then": "Errors do not reveal tenant-B values/existence; keys are tenant-scoped where required, and unsafe cross-tenant references are impossible.",
+      "type": "MUST_PASS",
+      "verification_method": "DB/API tests for duplicate and foreign-key boundary cases.",
+      "when": "The database validates constraints."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Existing local/scaffold records or imported archive rows are migrated to the VS2 schema.",
+      "id": "VS2-SEC-020",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Backfill mapping, quarantine table/report, NOT NULL/foreign-key constraints.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Migration report with counts/checksums, quarantine reasons, rollback transcript.",
+      "status": "PASS",
+      "then": "Known rows migrate deterministically; unknown/ambiguous rows are quarantined or block migration; no ownerless global truth is created.",
+      "type": "MUST_PASS",
+      "verification_method": "Migration tests on clean, mixed, malformed, duplicate, and rollback fixtures.",
+      "when": "A row has known, missing, ambiguous, or invalid tenant/namespace ownership."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A migration adds or changes a tenant-bearing table, partition, materialized view, or policy.",
+      "id": "VS2-SEC-021",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Schema linter/inventory script, migration checklist, CI gate.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Schema inventory report, expected failing gate, passing migration evidence.",
+      "status": "PASS",
+      "then": "The gate fails unless tenant columns, RLS enable/force state, command policies, grants, and test coverage are declared.",
+      "type": "MUST_PASS",
+      "verification_method": "Failing fixture migration, passing corrected migration, machine-readable inventory.",
+      "when": "CI runs the schema security inventory."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Two namespaces/workspaces exist inside the same tenant, such as Personal and Organization.",
+      "id": "VS2-SEC-022",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Namespace policy input, service authorization, scoped queries.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Allow/deny decisions, zero implicit context use, provenance on allowed promotion.",
+      "status": "PASS",
+      "then": "RLS tenant access alone is insufficient; service/OPA policy enforces namespace, owner, membership, classification, and explicit promotion rules.",
+      "type": "MUST_PASS",
+      "verification_method": "Integration matrix for same-tenant personal/org/team/project access.",
+      "when": "A principal accesses, searches, or uses context across them."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A user attempts copy, reference, share, or promotion from tenant A to tenant B.",
+      "id": "VS2-SEC-023",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Cross-tenant invariant in domain service, OPA policy, RLS constraints.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Denied policy decision, zero target records, audit event, negative-evidence counters.",
+      "status": "PASS",
+      "then": "The operation is denied at product, policy, and storage layers; no target row, link, blob, or metadata is created.",
+      "type": "MUST_PASS",
+      "verification_method": "API/CLI/DB test for every transfer mode.",
+      "when": "The transfer request is evaluated."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Caches, idempotency keys, deduplication indexes, locks, rate limits, and saved cursors are used by multiple tenants.",
+      "id": "VS2-SEC-024",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Tenant-prefixed cache/idempotency keys, composite indexes, scoped locks.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Key snapshots/digests, independent results, zero cross-tenant cache hits.",
+      "status": "PASS",
+      "then": "Keys are tenant-scoped unless intentionally global and non-sensitive; one tenant cannot read, suppress, replay, or infer another tenant's operation.",
+      "type": "MUST_PASS",
+      "verification_method": "Collision and replay tests across two tenants.",
+      "when": "Two tenants submit identical IDs/content/keys or concurrent operations."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Tenant-scoped export and privileged full backup/restore paths exist.",
+      "id": "VS2-SEC-025",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Export service, backup role/procedure, restore verification, policy migration.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Backup manifest, restored counts/hashes, RLS inventory before/after, tenant export diff.",
+      "status": "PASS",
+      "then": "Tenant export contains only authorized rows; privileged backup is complete, restore preserves RLS/policies/audit, and filtered backups cannot silently omit protected rows.",
+      "type": "MUST_PASS",
+      "verification_method": "Automated local backup/restore and per-tenant export tests with row/hash counts.",
+      "when": "Exports and a local backup\u2192restore rehearsal run."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A protected data, tool, action, connector, model, policy-admin, or memory operation is requested.",
+      "id": "VS2-SEC-026",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "Versioned PolicyInput schema, builders per enforcement point, schema validation.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Schema file, valid/invalid fixtures, input digest and source-of-attribute map.",
+      "status": "PASS",
+      "then": "Input follows one versioned schema containing trusted subject, tenant/namespace/workspace, resource, action, classification, mission authority, risk, data scope, connector/tool capability, and environment fields.",
+      "type": "MUST_PASS",
+      "verification_method": "Contract tests and golden inputs for every operation family.",
+      "when": "The product constructs an OPA input document."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A principal has the required role and membership for a low-risk operation.",
+      "id": "VS2-SEC-027",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Rego RBAC rules and role data.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "opa test JSON, allow decision with bundle revision, downstream success/audit.",
+      "status": "PASS",
+      "then": "The request is allowed only for the declared resource/action/scope and the allow decision is auditable.",
+      "type": "MUST_PASS",
+      "verification_method": "OPA unit tests plus product integration allow cases.",
+      "when": "OPA evaluates the operation."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A principal lacks a required role or approval authority.",
+      "id": "VS2-SEC-028",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Rego deny rules, reason mapping, enforcement adapter.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Denied decisions, zero side effects, stable error and audit references.",
+      "status": "PASS",
+      "then": "OPA denies with a non-leaking reason and safe resolution path; downstream mutation/egress does not occur.",
+      "type": "MUST_PASS",
+      "verification_method": "Role/action access-control matrix tests.",
+      "when": "The principal reads, writes, approves, executes, or configures a protected resource."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Role alone would allow an operation, but attributes such as namespace, classification, mission authority, workspace mode, environment, or risk disallow it.",
+      "id": "VS2-SEC-029",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Rego ABAC rules, classification/risk taxonomy, mission/workspace inputs.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Allow/deny/escalate matrix, reason codes, policy coverage report.",
+      "status": "PASS",
+      "then": "ABAC conditions deny or escalate it; a matching allowed attribute set succeeds.",
+      "type": "MUST_PASS",
+      "verification_method": "Data-driven OPA tests at each attribute boundary.",
+      "when": "OPA evaluates the request."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A resource type, action, tool, connector capability, model, or policy path is unknown or returns undefined.",
+      "id": "VS2-SEC-030",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Default-deny Rego rules and undefined-result adapter.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Denied outputs, no downstream calls, audit decision.",
+      "status": "PASS",
+      "then": "The normalized result is deny, never implicit allow, with an unknown-policy reason and resolution.",
+      "type": "MUST_PASS",
+      "verification_method": "OPA/product tests for typos, new enum values, missing rule paths, and undefined output.",
+      "when": "The enforcement adapter evaluates it."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "OPA input is partial, malformed, over-specified, wrong-versioned, or contains unexpected authoritative attributes.",
+      "id": "VS2-SEC-031",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Strict input schema, version negotiation, unknown-field policy, redaction.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "400/deny transcripts, zero evaluation/side effects as appropriate, sanitized logs.",
+      "status": "PASS",
+      "then": "Schema validation fails closed; errors identify safe corrective action without echoing secrets or protected values.",
+      "type": "MUST_PASS",
+      "verification_method": "Fuzz/property tests and boundary fixtures.",
+      "when": "The policy endpoint receives it."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "The OPA service is running in the local/on-prem profile.",
+      "id": "VS2-SEC-032",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "OPA hardened configuration, network binding, client authentication/authorization.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "OPA config, listening sockets, successful authorized call, denied unauthorized call.",
+      "status": "PASS",
+      "then": "OPA is bound to the intended interface, protected by the chosen authentication/transport controls, and management/data APIs are not anonymously exposed.",
+      "type": "MUST_PASS",
+      "verification_method": "Container/network tests from allowed and disallowed peers.",
+      "when": "A local authorized client and an unauthorized/remote client access its APIs."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A request reaches the API gateway.",
+      "id": "VS2-SEC-033",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Gateway middleware/enforcement point and trace propagation.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Gateway decision, zero downstream counters, trace/audit record.",
+      "status": "PASS",
+      "then": "The request does not reach the service handler, database, tool runtime, model router, or connector.",
+      "type": "MUST_PASS",
+      "verification_method": "Integration test with handler/DB/tool call counters.",
+      "when": "Gateway policy denies it."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A caller bypasses or originates behind the gateway and invokes a protected service method.",
+      "id": "VS2-SEC-034",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Service authorization decorator/interceptor and repository guards.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Service decision, zero repository/tool/connector calls, audit event.",
+      "status": "PASS",
+      "then": "No protected read, mutation, tool, model, or connector operation occurs.",
+      "type": "MUST_PASS",
+      "verification_method": "Direct service/API-internal integration tests.",
+      "when": "Service-layer policy denies it."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A tool or Agent Pack receives a request that gateway/service policy allowed but runtime capability policy denies.",
+      "id": "VS2-SEC-035",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Capability sandbox, tool policy adapter, runtime audit.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Runtime denial, zero operations/bytes/calls, policy and audit refs.",
+      "status": "PASS",
+      "then": "The runtime blocks the undeclared capability and records negative evidence; upstream allow cannot bypass runtime enforcement.",
+      "type": "MUST_PASS",
+      "verification_method": "Real sandbox integration test for each capability class.",
+      "when": "The tool attempts filesystem, environment, host, shell, or network access."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Service policy mistakenly allows or is bypassed for a cross-tenant database query.",
+      "id": "VS2-SEC-036",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "RLS independent of service decision, anomaly logging.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Service allow + DB zero rows/denial, anomaly audit/metric.",
+      "status": "PASS",
+      "then": "Postgres RLS still prevents access, proving defense in depth; the anomaly is observable.",
+      "type": "MUST_PASS",
+      "verification_method": "Fault-injection integration test that stubs an allow at service layer.",
+      "when": "The application role executes the query."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An ActionCard or WorkflowRun requests internal mutation, risky action, or external side effect.",
+      "id": "VS2-SEC-037",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Action policy entrypoints, risk rules, workflow gate.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Dry-run, policy decisions, approval state, execution/denial, audit timeline.",
+      "status": "PASS",
+      "then": "Allowed low-risk behavior follows mission/workspace authority; high-risk behavior escalates/requires approval; execution rechecks policy and cannot bypass Workflow/Action.",
+      "type": "MUST_PASS",
+      "verification_method": "Action lifecycle integration matrix.",
+      "when": "Policy evaluates dry-run, approval, and execution phases."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A workspace policy allows or disallows model providers based on classification or on-prem requirements.",
+      "id": "VS2-SEC-038",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Policy-aware model router, provider capability metadata.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Routing decision, zero disallowed provider calls, explanation and audit refs.",
+      "status": "PASS",
+      "then": "Disallowed providers are blocked or safely rerouted with explanation; no request/data is sent to them.",
+      "type": "MUST_PASS",
+      "verification_method": "Router integration test with local_test and denied external provider fixtures.",
+      "when": "The model router selects a provider."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A workflow, agent, or extension requests provider data, credentials, raw access, or an external action.",
+      "id": "VS2-SEC-039",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "ConnectorHub handoff envelope, capability policy, credential references only.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Setup/preflight result, policy decision, zero raw secrets, connector and CornerStone audit refs.",
+      "status": "PASS",
+      "then": "Only declared ConnectorHub-mediated capabilities proceed; raw credentials/provider clients/direct API handles remain inaccessible; CornerStone retains product approval ownership.",
+      "type": "MUST_PASS",
+      "verification_method": "Contract tests with declared/undeclared capability and raw-secret probes.",
+      "when": "Policy and ConnectorHub capability checks run."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "The Rego policy bundle contains all VS2 entrypoints.",
+      "id": "VS2-SEC-040",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Rego unit/data-driven tests, entrypoint manifest, CI commands.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "OPA test JSON, coverage JSON, entrypoint coverage map, exit code 0.",
+      "status": "PASS",
+      "then": "All positive, negative, malformed, boundary, and regression cases pass; no-test execution fails; a machine-readable coverage report is produced and reviewed against declared entrypoints.",
+      "type": "MUST_PASS",
+      "verification_method": "Run `opa test ... --fail-on-empty --coverage --format=json` plus bundle build/check.",
+      "when": "CI runs policy tests."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A valid new policy bundle is published.",
+      "id": "VS2-SEC-041",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Versioned bundle build/service, revision metadata, status monitoring.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "OPA status before/after, revision transition, decision sample set, zero mixed/undefined results.",
+      "status": "PASS",
+      "then": "Activation is atomic; decisions identify the active revision; no request observes a partial mix; the previous revision remains traceable.",
+      "type": "MUST_PASS",
+      "verification_method": "Concurrent evaluation during bundle update.",
+      "when": "OPA downloads and activates it while requests continue."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A bundle is malformed, fails Rego tests/compile, has incompatible schema, or cannot activate.",
+      "id": "VS2-SEC-042",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Pre-activation validation, persisted last-known-good, readiness/status integration.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "OPA status/error, unchanged active revision, decisions under failure, operator alert.",
+      "status": "PASS",
+      "then": "Activation fails, the last known good bundle remains active (or protected operations fail closed if none exists), and status/error is visible without exposing secrets.",
+      "type": "MUST_PASS",
+      "verification_method": "Bundle failure injection tests including first-start failure.",
+      "when": "The update is attempted."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "OPA is unavailable, slow, returns invalid output, or times out.",
+      "id": "VS2-SEC-043",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Policy client timeout/circuit breaker, fail-closed adapter, readiness.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Stable denial/error, zero side effects, readiness/metric/audit evidence.",
+      "status": "PASS",
+      "then": "The operation fails closed or follows an explicitly documented safe read-only fallback; readiness degrades, and no risky side effect/egress occurs.",
+      "type": "MUST_PASS",
+      "verification_method": "Fault-injection tests for connection refused, timeout, 5xx, malformed JSON.",
+      "when": "A protected read, write, tool, action, connector, or model request is made."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An allow decision is cached and policy/membership is then revoked or bundle revision changes.",
+      "id": "VS2-SEC-044",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Revision-aware decision cache and invalidation.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Cache keys/digests, new decision revision, denial, zero stale allows.",
+      "status": "PASS",
+      "then": "The stale allow is not reused beyond the documented bound; cache keys include tenant, principal, resource, action, and revision.",
+      "type": "MUST_PASS",
+      "verification_method": "Allow\u2192revoke/update\u2192retry tests across tenants.",
+      "when": "The same operation is retried."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Policy decisions contain potentially sensitive input fields.",
+      "id": "VS2-SEC-045",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "OPA decision logging/masking policy, audit adapter, redaction.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Decision log with masked fields, CornerStone audit ref, zero secret scanner findings.",
+      "status": "PASS",
+      "then": "Each event has decision_id, policy path/revision, tenant-safe correlation, and masked/redacted sensitive fields; logs are linkable but not a secret store.",
+      "type": "MUST_PASS",
+      "verification_method": "Secret-bearing fixture through allow and deny decisions.",
+      "when": "Decision logging and CornerStone audit mirroring run."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A user proposes a policy, role, tenant-isolation, egress, retention, or audit configuration change.",
+      "id": "VS2-SEC-046",
+      "impact_group": "opa_rego_control_plane",
+      "implementation_area": "Policy-admin ActionCard/Workflow, bundle pipeline, rollback metadata.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Action/workflow records, bundle revisions, approvals, before/after decisions, rollback transcript.",
+      "status": "PASS",
+      "then": "It is represented as a sensitive governed change with diff, impact, tests, policy decision, authorized approval, version, rollback, and audit; direct mutation is blocked.",
+      "type": "MUST_PASS",
+      "verification_method": "Integration test for draft\u2192dry-run\u2192approve\u2192activate\u2192rollback and direct bypass denial.",
+      "when": "The change is reviewed/applied."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A user is denied data, action, model, connector, tool, egress, or policy-admin access.",
+      "id": "VS2-SEC-047",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "Reason-code catalog, error translation, UI denial component.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Response snapshots/screenshots, stable codes, matching decision/audit refs, leak scan.",
+      "status": "PASS",
+      "then": "The response states safe cause, impact, retry/request-access/change-scope/approver resolution where applicable, and what remains preserved, without exposing protected data.",
+      "type": "MUST_PASS",
+      "verification_method": "Golden API/CLI/browser tests for major denial classes.",
+      "when": "The error is shown through API, CLI, and UI."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Policy input/output is at, below, and above configured size/depth/list limits, or contains unknown enum values.",
+      "id": "VS2-SEC-048",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "Documented policy limits, parser/schema guards, time/memory limits.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Limit configuration, test corpus, resource metrics, stable failures.",
+      "status": "PASS",
+      "then": "At/below-limit requests behave deterministically; over-limit/unsupported requests fail safely with helpful errors, bounded resource use, and no partial side effect.",
+      "type": "MUST_PASS",
+      "verification_method": "Boundary-value and property/fuzz tests using configuration-derived N-1/N/N+1 cases.",
+      "when": "The request is evaluated."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Multiple policy rules apply, including an allow and a restrictive deny/escalation.",
+      "id": "VS2-SEC-049",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "Decision aggregation policy, explicit deny/escalate precedence.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Conflict matrix, final reason list, bundle revision, no accidental allow.",
+      "status": "PASS",
+      "then": "The documented conservative precedence is deterministic; restrictive tenant/security/risk rules cannot be accidentally overridden by a permissive rule.",
+      "type": "MUST_PASS",
+      "verification_method": "OPA data-driven conflict tests.",
+      "when": "The aggregate decision is computed."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "The same policy input is evaluated at gateway, service, tool runtime, and native CLI.",
+      "id": "VS2-SEC-050",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "Shared schema/client, revision pinning/correlation, mismatch guard.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Decision comparison report, mismatch denial, anomaly audit/metric.",
+      "status": "PASS",
+      "then": "Materially equivalent decisions are produced; any mismatch fails closed, emits an anomaly, and cannot lead to a side effect.",
+      "type": "MUST_PASS",
+      "verification_method": "Cross-enforcement conformance test and deliberate mismatch injection.",
+      "when": "All enforcement points evaluate it against the same active revision."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A real tool/runtime process has no egress grant and a local egress-sink endpoint is reachable at the network layer.",
+      "id": "VS2-SEC-051",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Sandbox/network policy or enforced egress proxy, denial adapter.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Denied tool result, sink access log with zero requests, network counter, policy/audit refs.",
+      "status": "PASS",
+      "then": "The connection is blocked by the runtime/network boundary, not merely skipped by application logic; the sink records zero requests/bytes.",
+      "type": "MUST_PASS",
+      "verification_method": "Container/process integration test with local egress sink and packet/request counters.",
+      "when": "The process attempts an outbound connection using supported HTTP and socket paths."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A tool/workflow has a declared ConnectorHub capability, tenant/workspace authorization, allowed mock destination, and required approval.",
+      "id": "VS2-SEC-052",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "ConnectorHub-mediated egress adapter, allow policy, mock provider.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "One sink request, sanitized request metadata, Action/Workflow/Connector result, decision/audit refs.",
+      "status": "PASS",
+      "then": "Exactly the declared call succeeds; evidence, policy, approval, connector result, and audit are linked; no undeclared call occurs.",
+      "type": "MUST_PASS",
+      "verification_method": "End-to-end local integration test.",
+      "when": "It calls the local mock provider through the governed egress path."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Tenant A has an egress allow rule and tenant B does not.",
+      "id": "VS2-SEC-053",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Tenant-scoped egress policy data and cache keys.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "A success/B denial, separate decisions, sink count exactly one.",
+      "status": "PASS",
+      "then": "Tenant A follows its governed path; tenant B is denied; allowlist/cache/config does not bleed across tenants.",
+      "type": "MUST_PASS",
+      "verification_method": "Two-tenant egress integration test.",
+      "when": "Both tenants request the same destination/capability."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An egress policy declares allowed scheme, hostname, port, method, path/capability, and data scope.",
+      "id": "VS2-SEC-054",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Canonical URL/destination parser, structured allow rules.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Per-case decisions, sink logs, normalization output, zero unexpected calls.",
+      "status": "PASS",
+      "then": "Only exact normalized permitted combinations pass; case, trailing-dot, encoded path, alternate port, wildcard, or method variations cannot broaden access.",
+      "type": "MUST_PASS",
+      "verification_method": "Table-driven boundary tests.",
+      "when": "Calls vary each field and use URL normalization variants."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A caller targets IP literals, loopback, private, link-local, multicast, Unix sockets, cloud metadata ranges, or a public name resolving to them.",
+      "id": "VS2-SEC-055",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Resolved-address validation, reserved-range policy, internal-capability model.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Denied decisions, zero sink/metadata requests, sanitized destination class.",
+      "status": "PASS",
+      "then": "The runtime denies the destination before sending data and records a safe reason.",
+      "type": "MUST_PASS",
+      "verification_method": "IPv4/IPv6 destination matrix against local fixtures.",
+      "when": "The tool attempts connection without a purpose-specific internal capability."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An allowed hostname resolves first to an allowed address and then to a denied/private address, or resolves to mixed addresses.",
+      "id": "VS2-SEC-056",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Resolver integration, address pinning/revalidation, connection guard.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "DNS transcript, selected/blocked addresses, zero denied-address connections.",
+      "status": "PASS",
+      "then": "Resolved addresses are validated at connection time; denied addresses are never contacted; policy cannot be bypassed by DNS rebinding.",
+      "type": "MUST_PASS",
+      "verification_method": "Deterministic fake-DNS rebinding test.",
+      "when": "Connection is attempted across resolution/retry."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An allowed endpoint redirects to a denied host, scheme, port, or path.",
+      "id": "VS2-SEC-057",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Redirect-aware governed HTTP client.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Hop-by-hop decisions, sink logs, header redaction, bounded redirect count.",
+      "status": "PASS",
+      "then": "Every hop is re-authorized; the denied hop is blocked, redirect limits apply, and no sensitive header is forwarded across unauthorized boundaries.",
+      "type": "MUST_PASS",
+      "verification_method": "Mock redirect-chain tests including loops and cross-host redirects.",
+      "when": "The HTTP client follows redirects."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A tool attempts to bypass governed HTTP using proxy environment variables, direct sockets, alternate DNS, WebSocket/FTP/SMTP, subprocess, or a bundled client.",
+      "id": "VS2-SEC-058",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Network namespace/proxy enforcement, environment sanitization, syscall/capability restrictions.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Zero unauthorized connections/processes, denied capability records, runtime audit.",
+      "status": "PASS",
+      "then": "Undeclared protocols and paths remain blocked at the network/capability boundary; no arbitrary shell/host privilege is gained.",
+      "type": "MUST_PASS",
+      "verification_method": "Adversarial sandbox integration suite.",
+      "when": "The process runs in the VS2 sandbox."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An Artifact, web page, connector payload, tool output, or prompt contains instructions to call a URL, exfiltrate data, change policy, or approve an action.",
+      "id": "VS2-SEC-059",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Untrusted-content labeling, agent/tool boundary, policy gate.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Zero tool/action/egress calls, blocked-attempt audit, untrusted label/evidence refs.",
+      "status": "PASS",
+      "then": "It remains untrusted evidence; it cannot create authority, egress grants, policy changes, approvals, or tool/action execution.",
+      "type": "MUST_PASS",
+      "verification_method": "Prompt-injection red-team fixtures across artifact and connector paths.",
+      "when": "The content is processed by an agent/workflow."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An allowed external call needs provider authentication or contains sensitive payload fields.",
+      "id": "VS2-SEC-060",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "ConnectorHub credential custody, request projection/redaction, log masking.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Sink metadata without raw secret, zero secret scanner findings, credential reference only.",
+      "status": "PASS",
+      "then": "Agents/product outputs never receive raw credentials; least data is sent; denied calls send nothing; logs/decisions/audit mask secrets and sensitive payload.",
+      "type": "MUST_PASS",
+      "verification_method": "Secret-canary integration tests for allowed and denied calls.",
+      "when": "The governed ConnectorHub path prepares and executes it."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An Action dry-run predicts external calls and is then approved or delayed.",
+      "id": "VS2-SEC-061",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Dry-run fingerprint, policy revision binding, execution recheck.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Dry-run and execution decision revisions, stale-state denial, zero sink calls.",
+      "status": "PASS",
+      "then": "Execution detects stale dry-run state, re-evaluates current policy and impact, and blocks or requires renewed approval; it never relies solely on the old allow.",
+      "type": "MUST_PASS",
+      "verification_method": "Allow-at-dry-run \u2192 revoke/change \u2192 execute test.",
+      "when": "Policy, allowlist, data, approval, or destination changes before execution."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An allowed external operation times out, returns retryable failure, or receives duplicate execution requests.",
+      "id": "VS2-SEC-062",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Workflow retry/timeout/idempotency, ConnectorHub action keys.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Attempt timeline, one side effect maximum, idempotency key scope, compensation/audit record.",
+      "status": "PASS",
+      "then": "Timeout/retry limits are bounded, idempotency is tenant-scoped, and duplicate real/mock side effects are prevented or explicitly compensated.",
+      "type": "MUST_PASS",
+      "verification_method": "Mock provider fault and duplicate-request tests.",
+      "when": "Workflow retry logic runs."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Allowed and denied egress attempts occur.",
+      "id": "VS2-SEC-063",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Egress audit schema, metrics, trace correlation, redaction.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Correlated records, counter assertions, decision IDs, secret-scan report.",
+      "status": "PASS",
+      "then": "Records correlate tenant-safe trace, decision, action/workflow, connector capability, normalized destination class, outcome, and byte/call counts without storing secrets or raw payloads.",
+      "type": "MUST_PASS",
+      "verification_method": "Integration plus log/metric contract tests.",
+      "when": "Operators inspect policy, connector, runtime, and CornerStone audit/metrics."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/network/vs2-egress-proof.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "The egress controller/proxy/sandbox policy component is unavailable or misconfigured.",
+      "id": "VS2-SEC-064",
+      "impact_group": "egress_runtime_capabilities",
+      "implementation_area": "Fail-closed sandbox wiring, readiness dependencies, no direct-client fallback.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Degraded readiness, denied operations, zero sink/host counters, operator guidance.",
+      "status": "PASS",
+      "then": "Protected capabilities fail closed; readiness reports the degraded component; no fallback direct connection or host access occurs.",
+      "type": "MUST_PASS",
+      "verification_method": "Stop/disable controller and repeat capability tests.",
+      "when": "A tool attempts network, shell, filesystem, environment, or host access."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A major VS2 allow, deny, missing-context, policy-unavailable, RLS, and egress failure is exercised.",
+      "id": "VS2-SEC-065",
+      "impact_group": "shared_security_contracts",
+      "implementation_area": "CLI/API/UI response contracts and error catalog.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "CLI/API payloads, screenshots/DOM snapshot, schema validation, matching references.",
+      "status": "PASS",
+      "then": "Machine-readable schemas, exit/status codes, user messages, evidence_refs, policy_decision_refs, and audit_refs remain semantically consistent.",
+      "type": "MUST_PASS",
+      "verification_method": "Golden contract tests and browser proof.",
+      "when": "The behavior is observed through CLI JSON/text, HTTP API, and UI."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/audit/vs2-audit-integrity.json",
+        "reports/security/vs2-local-security-proof.json",
+        "reports/security/vs2-output-leak-scan.json"
+      ],
+      "given": "VS2 generates access, denial, policy update, RLS anomaly, egress, approval, connector, and rollback events.",
+      "id": "VS2-SEC-066",
+      "impact_group": "workflow_connector_audit_ux_verification",
+      "implementation_area": "Audit event contract, hash-chain/checkpoint integration, verifier.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Event inventory, verification success, tamper detection failure evidence.",
+      "status": "PASS",
+      "then": "Required events are append-only/tamper-evident, queryable by tenant/action/decision, and modification/removal is detected.",
+      "type": "MUST_PASS",
+      "verification_method": "Audit contract tests and tamper fixture.",
+      "when": "Audit verification and deliberate tampering run."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/audit/vs2-audit-integrity.json",
+        "reports/security/vs2-local-security-proof.json",
+        "reports/security/vs2-output-leak-scan.json"
+      ],
+      "given": "An operator monitors Postgres, OPA, egress control, policy denials, RLS anomalies, retries, and audit integrity.",
+      "id": "VS2-SEC-067",
+      "impact_group": "workflow_connector_audit_ux_verification",
+      "implementation_area": "Health/readiness, metrics, trace IDs, operator status surface.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Status JSON/dashboard snapshot, metrics samples, alert events, leak scan.",
+      "status": "PASS",
+      "then": "Health/readiness distinguishes component states, metrics are actionable and tenant-safe, and alerts can identify failure without exposing protected data.",
+      "type": "MUST_PASS",
+      "verification_method": "Component fault-injection and observability contract tests.",
+      "when": "Status, metrics, logs, and traces are queried."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "VS2 database/policy/runtime changes are deployed over the existing local scaffold and VS1 data.",
+      "id": "VS2-SEC-068",
+      "impact_group": "postgres_rls_substrate",
+      "implementation_area": "Postgres store adapter, migration versions, compatibility layer, rollback scripts.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Before/after object counts/hashes, regression reports, rollback transcript, no data loss.",
+      "status": "PASS",
+      "then": "The smallest compatible adapter path preserves existing artifacts/evidence/claims/ontology/audit; rollback is deterministic; no destructive migration runs without approval.",
+      "type": "MUST_PASS",
+      "verification_method": "Fresh and upgrade-path integration tests with checksums and existing VS0/VS1 fixtures.",
+      "when": "Forward migration, compatibility run, failed migration, and rollback are exercised."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/audit/vs2-audit-integrity.json",
+        "reports/security/vs2-local-security-proof.json",
+        "reports/security/vs2-output-leak-scan.json"
+      ],
+      "given": "A new evaluator uses the documented local/on-prem VS2 quickstart without live provider credentials.",
+      "id": "VS2-SEC-069",
+      "impact_group": "workflow_connector_audit_ux_verification",
+      "implementation_area": "Compose/local profile, migrations, seed policy, health/readiness, quickstart verifier.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Command transcript with exit codes, component versions, policy revision, RLS inventory, generated IDs, elapsed time.",
+      "status": "PASS",
+      "then": "Readiness succeeds only when required components and active policy/RLS inventory are valid; a tenant-isolation and egress-deny smoke flow completes.",
+      "type": "MUST_PASS",
+      "verification_method": "Executable clean-environment quickstart.",
+      "when": "They start CornerStone, Postgres, OPA, and the local egress test harness."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/audit/vs2-audit-integrity.json",
+        "reports/security/vs2-local-security-proof.json",
+        "reports/security/vs2-output-leak-scan.json"
+      ],
+      "given": "A feature/milestone report claims VS2 completion.",
+      "id": "VS2-SEC-070",
+      "impact_group": "workflow_connector_audit_ux_verification",
+      "implementation_area": "Native `cornerstone scenario verify vs2-policy-tenancy-egress`, gate, Make target, release evidence package.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Machine-readable report, command transcript, evidence manifest/hashes, base/final revision metadata, verdict.",
+      "status": "PASS",
+      "then": "All applicable MUST_PASS and REGRESSION rows have concrete evidence; human rows are explicit; report metadata binds to verified revision/tree; no production/live overclaim is present.",
+      "type": "MUST_PASS",
+      "verification_method": "Scenario report schema validation, gate command, report review.",
+      "when": "The native scenario verifier and gate run against the exact code/tree state."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "VS2 changes are applied.",
+      "id": "VS2-SEC-R01",
+      "impact_group": "verification_gate",
+      "implementation_area": "Compatibility adapters and regression suite.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Existing scenario reports with exit code 0 and no weakened assertions.",
+      "status": "PASS",
+      "then": "The VS0 local product loop remains green and evidence/action safety is unchanged.",
+      "type": "REGRESSION",
+      "verification_method": "Run existing VS0 EVUX/runtime/operator gates.",
+      "when": "The existing VS0 Artifact\u2192Search\u2192Evidence\u2192Claim\u2192Action\u2192Audit gates run."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "VS2 changes are applied over the accepted local VS1 ontology slice.",
+      "id": "VS2-SEC-R02",
+      "impact_group": "verification_gate",
+      "implementation_area": "VS1 data adapter and policy-aware ontology services.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "VS1 report, zero auto-promotions/cross-tenant promotions, policy refs.",
+      "status": "PASS",
+      "then": "Ontology suggestions remain draft until explicit promotion; search/profile/claim/action/audit integration remains green under tenant policy.",
+      "type": "REGRESSION",
+      "verification_method": "Run `make verify-vs1-ontology` plus cross-tenant ontology tests.",
+      "when": "The VS1 suggest/review/promote suite runs."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Personal context exists in a user's personal namespace.",
+      "id": "VS2-SEC-R03",
+      "impact_group": "verification_gate",
+      "implementation_area": "Namespace policy and retrieval guards.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Zero personal refs/canary, denial or insufficient-evidence response.",
+      "status": "PASS",
+      "then": "Personal context is not used, cited, searched, or exposed.",
+      "type": "REGRESSION",
+      "verification_method": "Known-canary personal\u2192organization leak test.",
+      "when": "An organization request is answered or acted on without explicit promotion/permission."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Organization context exists and the user opens a personal workspace.",
+      "id": "VS2-SEC-R04",
+      "impact_group": "verification_gate",
+      "implementation_area": "Reverse namespace guards.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Zero organization refs/canary, policy/audit outcome.",
+      "status": "PASS",
+      "then": "Organization context is not used or exposed.",
+      "type": "REGRESSION",
+      "verification_method": "Organization\u2192personal canary leak test.",
+      "when": "A related personal query/action runs without an allowed reference."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Product-learning or benchmark processes run.",
+      "id": "VS2-SEC-R05",
+      "impact_group": "verification_gate",
+      "implementation_area": "Product-learning namespace policy.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Denied decision, zero source rows and memory writes.",
+      "status": "PASS",
+      "then": "Access is denied and no hidden memory/truth rewrite occurs.",
+      "type": "REGRESSION",
+      "verification_method": "Policy/data-access test.",
+      "when": "They request raw personal/organization truth without opt-in/approved redaction."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A prompt/document claims the agent now has admin, tenant, connector, tool, or egress authority.",
+      "id": "VS2-SEC-R06",
+      "impact_group": "verification_gate",
+      "implementation_area": "Prompt-injection and authority guards.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Zero authority changes/tool calls/egress, blocked-attempt audit.",
+      "status": "PASS",
+      "then": "Authority remains defined by trusted role, workspace, mission, connector capability, and policy state.",
+      "type": "REGRESSION",
+      "verification_method": "Red-team fixture suite.",
+      "when": "The agent processes it."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "An Agent Pack or product handler tries to use provider credentials or direct provider networking.",
+      "id": "VS2-SEC-R07",
+      "impact_group": "verification_gate",
+      "implementation_area": "Pack validation, import/runtime restrictions, egress policy.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Validation failure/quarantine, zero credential/network exposure.",
+      "status": "PASS",
+      "then": "The pack/path is blocked or quarantined; ConnectorHub remains the provider boundary.",
+      "type": "REGRESSION",
+      "verification_method": "Static and runtime direct-provider tests.",
+      "when": "Validation/runtime executes."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A developer adds a direct repository/database/writeback path that skips Workflow/Action or service policy.",
+      "id": "VS2-SEC-R08",
+      "impact_group": "verification_gate",
+      "implementation_area": "Boundary lint, repository interfaces, RLS.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Gate failure or runtime denial, unchanged state, audit/anomaly evidence.",
+      "status": "PASS",
+      "then": "The bypass is rejected by architecture lint, service guard, RLS, or runtime enforcement and cannot mutate state.",
+      "type": "REGRESSION",
+      "verification_method": "Deliberate bypass fixture/test.",
+      "when": "CI and integration tests run."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A new tool, model, workflow, policy entrypoint, connector capability, or table is introduced.",
+      "id": "VS2-SEC-R09",
+      "impact_group": "verification_gate",
+      "implementation_area": "Audit event manifest and coverage gate.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Failing omission proof, passing corrected event inventory.",
+      "status": "PASS",
+      "then": "All required critical events and references remain present; coverage cannot silently drop.",
+      "type": "REGRESSION",
+      "verification_method": "Mutation test that omits an event.",
+      "when": "Audit contract tests run."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Configuration is missing, reset, partially upgraded, or a new workspace/tenant is created.",
+      "id": "VS2-SEC-R10",
+      "impact_group": "verification_gate",
+      "implementation_area": "Secure defaults and bootstrap validation.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Default config snapshot, denial suite, RLS/role inventory.",
+      "status": "PASS",
+      "then": "Egress is denied, policy is default-deny, app role cannot bypass RLS, high-risk actions require approval, and shell/host access remains blocked.",
+      "type": "REGRESSION",
+      "verification_method": "Fresh/reset/partial-config integration tests.",
+      "when": "Security defaults initialize."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Policy or membership is revoked after an allow was cached.",
+      "id": "VS2-SEC-R11",
+      "impact_group": "verification_gate",
+      "implementation_area": "Cache and revision guard.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Decision revision sequence, zero post-revocation successes.",
+      "status": "PASS",
+      "then": "No stale allow produces access or side effect beyond the frozen revocation bound.",
+      "type": "REGRESSION",
+      "verification_method": "High-concurrency revocation test.",
+      "when": "Requests continue during cache/bundle transition."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Cross-tenant, malformed, secret-bearing, and denied requests generate errors/logs/traces/screenshots/reports.",
+      "id": "VS2-SEC-R12",
+      "impact_group": "verification_gate",
+      "implementation_area": "Central redaction and safe error schemas.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Zero scanner findings or reviewed allowlist with justification.",
+      "status": "PASS",
+      "then": "No secret, protected payload, raw credential, or foreign-tenant identifier appears unnecessarily.",
+      "type": "REGRESSION",
+      "verification_method": "Canary/secret scanner across generated outputs.",
+      "when": "Leak scanners and snapshot tests run."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "A new durable tenant-bearing table or partition is added without RLS/policy coverage.",
+      "id": "VS2-SEC-R13",
+      "impact_group": "verification_gate",
+      "implementation_area": "Schema/RLS inventory gate.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Expected failing gate and remediation evidence.",
+      "status": "PASS",
+      "then": "The build fails before merge/release.",
+      "type": "REGRESSION",
+      "verification_method": "Negative migration fixture.",
+      "when": "Schema CI runs."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Tenant tests run in parallel or retry after failures.",
+      "id": "VS2-SEC-R14",
+      "impact_group": "verification_gate",
+      "implementation_area": "Unique test tenant IDs, cleanup, deterministic concurrency harness.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Repeatable report hashes/semantics, zero cross-fixture canaries.",
+      "status": "PASS",
+      "then": "Test state remains isolated; one test/tenant cannot contaminate another or create false PASS.",
+      "type": "REGRESSION",
+      "verification_method": "Parallel/repeat test execution.",
+      "when": "Test fixtures, pools, caches, queues, and reports share infrastructure."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Policy, tenant, and connector controls are added.",
+      "id": "VS2-SEC-R15",
+      "impact_group": "verification_gate",
+      "implementation_area": "Product navigation and progressive-disclosure UX.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "UI map/screenshots, absence of required repo-name workflow.",
+      "status": "PASS",
+      "then": "Users still experience one CornerStone product; repo/engine names are not required mental models, while admin security detail remains available.",
+      "type": "REGRESSION",
+      "verification_method": "Automated nav/DOM check plus human review in H06.",
+      "when": "A normal user navigates the product."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/security/vs2-local-security-proof.json"
+      ],
+      "given": "Reports, README, UI, or release metadata describe VS2.",
+      "id": "VS2-SEC-R16",
+      "impact_group": "verification_gate",
+      "implementation_area": "Claim vocabulary guard and release-report validator.",
+      "notes": "Verified by local VS2 proof artifacts bound to this scenario.",
+      "owner": "AI",
+      "required_evidence": "Zero overclaim findings; explicit scope/human-required table.",
+      "status": "PASS",
+      "then": "Local/integration proof is not described as production, live-provider, penetration-tested, or human-accepted without separate evidence.",
+      "type": "REGRESSION",
+      "verification_method": "Static/report lint and evidence manifest review.",
+      "when": "A reviewer compares claims with evidence."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "reports/scenario/vs2-sensitive-change-gate-2026-06-19.json",
+        "sensitive_change_gate:approval_required_no_mutation",
+        "reports/scenario/vs2-h01-approval-package-2026-06-19.json",
+        "vs2_h01_approval_package:human_review_required_no_mutation"
+      ],
+      "given": "VS2 proposes an actual OPA production dependency, Postgres/RLS tenant model, authz semantics, and migration of durable state.",
+      "id": "VS2-SEC-H01",
+      "impact_group": "human_external_gate",
+      "implementation_area": "Architecture/ADR and approval workflow.",
+      "notes": "Requires owner, security, network, IdP, live-provider, migration, or subjective UX evidence outside AI automation.",
+      "owner": "Human",
+      "required_evidence": "Dated APPROVE/REJECT record with approved scope, exceptions, rollback owner, and dependency decision.",
+      "status": "HUMAN_REQUIRED",
+      "then": "JiYong/Tars or authorized owner approves the architecture, dependency, migration scope, rollback plan, and security ownership before code changes that cross the gate.",
+      "type": "HUMAN_REQUIRED",
+      "verification_method": "Human architecture/security review.",
+      "when": "Implementation is ready to start."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md"
+      ],
+      "given": "A production-like deployment contains multiple real or representative tenants.",
+      "id": "VS2-SEC-H02",
+      "impact_group": "human_external_gate",
+      "implementation_area": "Production-like environment and security test plan.",
+      "notes": "Requires owner, security, network, IdP, live-provider, migration, or subjective UX evidence outside AI automation.",
+      "owner": "Human",
+      "required_evidence": "Signed report, test scope/topology, findings, remediation, re-test evidence.",
+      "status": "HUMAN_REQUIRED",
+      "then": "No cross-tenant data/metadata leak or policy bypass is found, or findings are remediated and re-tested.",
+      "type": "HUMAN_REQUIRED",
+      "verification_method": "Independent penetration/security review.",
+      "when": "An independent security reviewer performs tenant-isolation and policy-bypass testing."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md"
+      ],
+      "given": "A real OIDC/SSO or enterprise identity provider is selected.",
+      "id": "VS2-SEC-H03",
+      "impact_group": "human_external_gate",
+      "implementation_area": "Identity provider integration and mapping policy.",
+      "notes": "Requires owner, security, network, IdP, live-provider, migration, or subjective UX evidence outside AI automation.",
+      "owner": "Human",
+      "required_evidence": "Redacted login/mapping/revocation transcript and owner/security approval.",
+      "status": "HUMAN_REQUIRED",
+      "then": "Authorized stakeholders confirm mappings and revocation behavior; no synthetic-fixture claim is promoted to real IdP readiness.",
+      "type": "HUMAN_REQUIRED",
+      "verification_method": "Approved real-IdP test.",
+      "when": "Groups, roles, attributes, revocation, and tenant memberships are mapped."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md"
+      ],
+      "given": "The target production/on-prem network topology, DNS, proxy, firewall, service mesh, and sandbox are available.",
+      "id": "VS2-SEC-H04",
+      "impact_group": "human_external_gate",
+      "implementation_area": "Production network controls.",
+      "notes": "Requires owner, security, network, IdP, live-provider, migration, or subjective UX evidence outside AI automation.",
+      "owner": "Human",
+      "required_evidence": "Topology diagram, firewall/proxy/network-policy evidence, packet/log transcript, approval.",
+      "status": "HUMAN_REQUIRED",
+      "then": "All undeclared paths are blocked and approved paths are traceable under the real topology.",
+      "type": "HUMAN_REQUIRED",
+      "verification_method": "Network control review and egress test.",
+      "when": "A network/security operator verifies deny-by-default and approved exceptions outside the local harness."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md"
+      ],
+      "given": "Authorized live ConnectorHub credentials and provider permissions are available.",
+      "id": "VS2-SEC-H05",
+      "impact_group": "human_external_gate",
+      "implementation_area": "Live ConnectorHub integration.",
+      "notes": "Requires owner, security, network, IdP, live-provider, migration, or subjective UX evidence outside AI automation.",
+      "owner": "Human",
+      "required_evidence": "Redacted provider transcript, approval, ConnectorHub/CornerStone audit refs, result/evidence refs.",
+      "status": "HUMAN_REQUIRED",
+      "then": "Credential custody, declared capability, source policy, product approval, egress, result, evidence, and audit boundaries hold without secret exposure.",
+      "type": "HUMAN_REQUIRED",
+      "verification_method": "Approved live-provider rehearsal.",
+      "when": "A low-risk read-only or explicitly approved test action is executed."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md"
+      ],
+      "given": "A human operator uses tenant/workspace switching, denial guidance, policy admin, egress dry-run, approval, and audit surfaces.",
+      "id": "VS2-SEC-H06",
+      "impact_group": "human_external_gate",
+      "implementation_area": "Admin/operator UX.",
+      "notes": "Requires owner, security, network, IdP, live-provider, migration, or subjective UX evidence outside AI automation.",
+      "owner": "Human",
+      "required_evidence": "ACCEPT/REJECT note, screenshots/recording, task outcomes, confusion/issues list.",
+      "status": "HUMAN_REQUIRED",
+      "then": "They accept or reject whether boundaries, causes, risks, and recovery paths are understandable and not misleading.",
+      "type": "HUMAN_REQUIRED",
+      "verification_method": "Human usability/trust review.",
+      "when": "The operator completes representative tasks."
+    },
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md"
+      ],
+      "given": "Real production-like data, backup tooling, retention rules, and rollback authority are available.",
+      "id": "VS2-SEC-H07",
+      "impact_group": "human_external_gate",
+      "implementation_area": "Production migration/backup/restore process.",
+      "notes": "Requires owner, security, network, IdP, live-provider, migration, or subjective UX evidence outside AI automation.",
+      "owner": "Human",
+      "required_evidence": "Signed transcript, before/after counts/hashes, RLS/policy inventory, restore/rollback result.",
+      "status": "HUMAN_REQUIRED",
+      "then": "Data/evidence/audit integrity, tenant ownership, RLS policies, and service recovery meet the approved plan.",
+      "type": "HUMAN_REQUIRED",
+      "verification_method": "Human-supervised non-destructive rehearsal.",
+      "when": "The approved VS2 migration and rollback/restore drill runs."
+    }
+  ],
+  "scenario_set": "vs2-policy-tenancy-egress",
+  "schema_version": "cs.cli.v0",
+  "self_command_transcript": {
+    "command": [
+      "cornerstone",
+      "scenario",
+      "verify",
+      "vs2-policy-tenancy-egress",
+      "--json",
+      "--output",
+      "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+    ],
+    "elapsed_seconds": 9.452,
+    "exit_code": 0,
+    "name": "scenario_verify_vs2-policy-tenancy-egress",
+    "required": true,
+    "schema_version": "cs.command_transcript.v0",
+    "source": "observed",
+    "stderr_tail": [],
+    "stdout_tail": [
+      "{\"scenario_set\": \"vs2-policy-tenancy-egress\", \"status\": \"success\", \"summary\": {\"blocking\": 0, \"fail\": 0, \"human_required\": 7, \"not_verified\": 0, \"pass\": 86, \"product_feature_claims\": \"LOCAL_VS2_POLICY_TENANCY_EGRESS_READY_PRODUCTION_NOT_READY\", \"scenario_count\": 93}}"
+    ],
+    "timed_out": false
+  },
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "fail": 0,
+    "human_required": 7,
+    "not_verified": 0,
+    "pass": 86,
+    "product_feature_claims": "LOCAL_VS2_POLICY_TENANCY_EGRESS_READY_PRODUCTION_NOT_READY",
+    "scenario_count": 93
+  },
+  "tenant_id": "local-dev",
+  "verification_metadata": {
+    "dirty_paths": [
+      "AGENTS.md",
+      "Makefile",
+      "README.md",
+      "docs/sot/README.md",
+      "docs/sot/sot_manifest.yaml",
+      "packages/cornerstone_cli/main.py",
+      "packages/cornerstone_cli/runtime.py",
+      "packages/cornerstone_cli/scenarios.py",
+      "tests/scenario/test_scaffold_cli.py",
+      "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+      "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+      "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+      "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_IMPLEMENTATION_REPORT_2026-06-19.md",
+      "packages/cornerstone_cli/vs2_security.py",
+      "policies/",
+      "reports/audit/",
+      "reports/db/",
+      "reports/network/",
+      "reports/policy/",
+      "reports/scenario/vs2-h01-approval-package-2026-06-19.json",
+      "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+      "reports/scenario/vs2-sensitive-change-gate-2026-06-19.json",
+      "reports/security/"
+    ],
+    "final_commit": null,
+    "final_commit_pending_reason": "worktree_dirty_at_verification",
+    "generated_dirty_paths": [
+      "reports/scenario/vs2-h01-approval-package-2026-06-19.json",
+      "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+      "reports/scenario/vs2-sensitive-change-gate-2026-06-19.json"
+    ],
+    "report_generated_before_commit": true,
+    "verified_base_commit": "4683d08",
+    "verified_base_commit_full": "4683d08420e6165c85c3b60ef7f9db13618a4727",
+    "verified_base_tree_hash": "2d9af23bde92bfb72e9c052f6197f3cbf265147e",
+    "verified_source_snapshot_paths": [
+      {
+        "bytes": 9724,
+        "path": "AGENTS.md",
+        "sha256": "1a08e11e1c2d0914e4d9730c377a26a6007fe2fc5dc7cc5a2f07683b22b237f3",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 2975,
+        "path": "Makefile",
+        "sha256": "59cb815180f243f9d3028a8f442dca76d6e7ec5bf3dcb8537a12a23af89a131e",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 27454,
+        "path": "README.md",
+        "sha256": "6ae817663482e518ad759f762ee3eb5f0ed720f0679ad487fe1937ef47dec195",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 86932,
+        "path": "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md",
+        "sha256": "d0b789b435ae2bb07d7e41f260054a82cb55689c4b241f574d75b0536203b751",
+        "state": "present",
+        "status": "??"
+      },
+      {
+        "bytes": 49902,
+        "path": "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv",
+        "sha256": "2103b1f8f878da5feb12f61d9f4dc14b4b32322cc8e5bedbb52577e513a9edbb",
+        "state": "present",
+        "status": "??"
+      },
+      {
+        "bytes": 18527,
+        "path": "docs/sot/README.md",
+        "sha256": "530a33e938bc2fa03d9c7ac5398b492d34e28a7af36caa57d117803bb28d8aa4",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 16269,
+        "path": "docs/sot/sot_manifest.yaml",
+        "sha256": "ab7aa2090d48f171209ff4795138add5ee813ceef211e654f1f4832aec1ee7c2",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 165321,
+        "path": "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+        "sha256": "f0cc41c2476369aa97b0db217119e78ef1178cd9fd1a70f0ca7aec35fb6710da",
+        "state": "present",
+        "status": "??"
+      },
+      {
+        "bytes": 5078,
+        "path": "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_IMPLEMENTATION_REPORT_2026-06-19.md",
+        "sha256": "1f26e1dfa55558ffbe0b02c0193bb5bce38cd4bad5c07dbf308a4910274a90d1",
+        "state": "present",
+        "status": "??"
+      },
+      {
+        "bytes": 306736,
+        "path": "packages/cornerstone_cli/main.py",
+        "sha256": "ef4cdb57efc1731a5f063cf6da439acc9f361f06dbb6958807ec44c2b4c5a285",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 493166,
+        "path": "packages/cornerstone_cli/runtime.py",
+        "sha256": "ce5057e321ca1ca2b6dbf3086292faf374787d728e4f55fc4985d1e40e2ae141",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 655276,
+        "path": "packages/cornerstone_cli/scenarios.py",
+        "sha256": "f40f82d7a4929b10a2dcab04c64370079e52e01ff3618bb0ebab1905b14ecf14",
+        "state": "present",
+        "status": "M"
+      },
+      {
+        "bytes": 33141,
+        "path": "packages/cornerstone_cli/vs2_security.py",
+        "sha256": "548722c430198ead5495ef8ea5854f315157d49fc6201ff7ef1ec65c244f05aa",
+        "state": "present",
+        "status": "??"
+      },
+      {
+        "bytes": 0,
+        "path": "policies/",
+        "sha256": null,
+        "state": "non_file",
+        "status": "??"
+      },
+      {
+        "bytes": 0,
+        "path": "reports/audit/",
+        "sha256": null,
+        "state": "non_file",
+        "status": "??"
+      },
+      {
+        "bytes": 0,
+        "path": "reports/db/",
+        "sha256": null,
+        "state": "non_file",
+        "status": "??"
+      },
+      {
+        "bytes": 0,
+        "path": "reports/network/",
+        "sha256": null,
+        "state": "non_file",
+        "status": "??"
+      },
+      {
+        "bytes": 0,
+        "path": "reports/policy/",
+        "sha256": null,
+        "state": "non_file",
+        "status": "??"
+      },
+      {
+        "bytes": 0,
+        "path": "reports/security/",
+        "sha256": null,
+        "state": "non_file",
+        "status": "??"
+      },
+      {
+        "bytes": 90388,
+        "path": "tests/scenario/test_scaffold_cli.py",
+        "sha256": "6cc8f1e88476d62d52d356a36065514e44d8a3f0149c812ce4eb113698efdda0",
+        "state": "present",
+        "status": "M"
+      }
+    ],
+    "verified_source_worktree_hash": "058531ecc6fcbb2fac370e767765d117cf7e9466edb481f74e25077de8a5d121",
+    "worktree_dirty_at_verification": true
+  },
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

@@ -221,6 +221,23 @@ vs1_ontology_auto_suggest_promote:
   production_release_rule: "production_release_ready remains false until separate production release and live-provider evidence exists"
   llm_rule: "LLM output alone never proves PASS; suggestions remain draft until evidence-backed user promotion"
 
+vs2_policy_tenancy_egress:
+  contract: "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md"
+  matrix: "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv"
+  current_state_report: "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md"
+  implementation_report: "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_IMPLEMENTATION_REPORT_2026-06-19.md"
+  expected_scenario_report: "reports/scenario/vs2-policy-tenancy-egress-YYYY-MM-DD.json"
+  authority: "task-scoped scenario contract for VS2 policy, tenant isolation, and default egress deny"
+  scenario_count: 93
+  must_pass_count: 70
+  regression_count: 16
+  human_required_count: 7
+  status: "local deterministic verifier passes 86 AI-verifiable rows; 7 human/external rows remain HUMAN_REQUIRED"
+  verifier: "cornerstone scenario verify vs2-policy-tenancy-egress --json --output reports/scenario/vs2-policy-tenancy-egress-YYYY-MM-DD.json"
+  gate: "cornerstone scenario gate reports/scenario/vs2-policy-tenancy-egress-YYYY-MM-DD.json --json"
+  approval_gate: "VS2-SEC-H01 approved for local/new-application implementation by JiYong/Tars on 2026-06-19 KST; H02-H07 remain external/human gates"
+  production_release_rule: "production security readiness remains false until applicable H01-H07 evidence and release decision exist"
+
 agent_guidance:
   scenario_first_instruction: "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md"
   project_constitution: "docs/agent/PROJECT_OPERATING_CONSTITUTION.md"

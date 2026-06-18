@@ -55,6 +55,9 @@ Users should experience one CornerStone product. Internally, the product keeps c
 32. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
 33. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
 34. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`
+35. `docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md`
+36. `docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv`
+37. `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md`
 
 ## Active Authority
 
@@ -93,6 +96,10 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md` | Current local deterministic implementation evidence for the VS0 operator UI gate |
 | `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md` | Human acceptance evidence for `VS0-UI-H01` |
 | `docs/verification-reports/VS0_IMPLEMENTATION_FINAL_REPORT_2026-06-15.md` | Final VS0 implementation closure report for VS1 transition |
+| `docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md` | Frozen VS2 policy, tenant isolation, and default egress-deny scenario contract |
+| `docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv` | Machine-readable VS2 scenario matrix: 70 MUST_PASS, 16 REGRESSION, 7 HUMAN_REQUIRED rows |
+| `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md` | Baseline inventory, impact map, implementation notes, and local deterministic VS2 proof links |
+| `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_IMPLEMENTATION_REPORT_2026-06-19.md` | Final local deterministic VS2 implementation report |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
 | `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md` | Verification-centered agent workflow |
@@ -107,6 +114,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 - VS0 evidence cleanup and interactive UI loop overlay: 14 task-scoped scenarios; reports show 12 AI-verifiable PASS, 2 HUMAN_REQUIRED, production release still false.
 - VS0 EVUX clean sign-off governance overlay: 16 task-scoped scenarios; verifier path `cornerstone scenario verify vs0-evux-governance`, 14 AI-verifiable rows, 2 HUMAN_REQUIRED, production release still false.
 - VS0 operator acceptance UI gate overlay: 13 task-scoped scenarios; local verifier path `cornerstone scenario verify vs0-operator-acceptance-ui`, 12 AI-verifiable PASS, 1 human-only row accepted by JiYong/Tars, full VS-1 main implementation unblocked.
+- VS2 policy/tenancy/egress overlay: 93 task-scoped scenarios; verifier path `cornerstone scenario verify vs2-policy-tenancy-egress`, 70 MUST_PASS and 16 REGRESSION rows pass in the local deterministic proof; 7 rows remain HUMAN_REQUIRED.
 - Release rule: no PASS without concrete scenario evidence.
 - CLI-native-first rule: no feature scenario can be marked PASS unless its native `cornerstone ...` CLI path is verified or the item is explicitly classified as a non-feature implementation internal.
 
@@ -200,6 +208,8 @@ The current local evidence-cleanup and interactive UI loop criteria are in `docs
 The clean sign-off governance criteria are in `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md`. They add `VS0-GOV-*` rows for matrix/report consistency, dirty-worktree metadata semantics, command transcript evidence, release manifest hashing, post-commit rollup behavior, and overclaim/dependency regression guards. Current PASS/HUMAN_REQUIRED status is recorded by `cornerstone scenario verify vs0-evux-governance`, `docs/scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_MATRIX.csv`, and `docs/verification-reports/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_REPORT_2026-06-14.md`; production release, live-provider readiness, and human usability acceptance remain unclaimed.
 
 The VS0 operator acceptance UI gate is in `docs/scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md`. It freezes the narrow UI acceptance slice required before full VS-1: the local VS0 UI must expose Artifact, Search, Evidence, Claim, Action Card, dry-run, approval, mock execution, and Audit as understandable operator steps. Current local implementation evidence is recorded in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md`, `reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json`, and `reports/browser/vs0-operator-acceptance-ui-2026-06-14/`: 12 AI-verifiable rows pass. Human operator UX acceptance is recorded in `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md`, final closure is recorded in `docs/verification-reports/VS0_IMPLEMENTATION_FINAL_REPORT_2026-06-15.md`, and full VS-1 main implementation is unblocked. Production release and live-provider readiness remain unclaimed.
+
+The VS2 policy, tenant isolation, and default egress-deny contract is in `docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md` with a machine-readable matrix at `docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv`. Baseline inventory and implementation notes are in `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md`; final local implementation evidence is in `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_IMPLEMENTATION_REPORT_2026-06-19.md`, `reports/security/vs2-local-security-proof.json`, and `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json`. The native verifier is `cornerstone scenario verify vs2-policy-tenancy-egress --json`. H02-H07 still block production security, real IdP, production network, live provider, human UX, and production-like migration/restore claims.
 
 ## VS0 Runtime Acceptance Quickstart
 

@@ -1,0 +1,117 @@
+{
+  "audit_refs": [
+    "audit:audit_c7cadcb816eee60d"
+  ],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone security sensitive-change-test",
+  "errors": [],
+  "evidence_refs": [
+    "sensitive_change_gate:sensgate_6b78f464bf92f485"
+  ],
+  "ids": {
+    "gate_id": "sensgate_6b78f464bf92f485",
+    "git_commit": "4683d08"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "owner_id": "local-user",
+  "policy_decision_refs": [
+    "policy:policy_54bc4330a651ebc4"
+  ],
+  "policy_decisions": [
+    {
+      "category": "vs2_policy_tenancy_egress",
+      "decided_at": "2026-06-18T17:17:45.122495Z",
+      "decision": "requires_approval",
+      "executed": false,
+      "id": "policy_54bc4330a651ebc4",
+      "impact": [
+        "Could mutate durable product state, security posture, tenant boundaries, audit/retention guarantees, release status, or external systems."
+      ],
+      "policy": "sensitive_change_stop_and_ask",
+      "reason": "Sensitive, destructive, production, auth, tenant, retention, audit, broad-network, release, or secret-handling changes require explicit owner approval.",
+      "requires_explicit_approval": true,
+      "resolution_path": [
+        "Show risk, impact, and rollback or irreversibility before proceeding.",
+        "Collect explicit approval from the owner or authorized admin.",
+        "Record approval, execution result, and audit before claiming completion."
+      ],
+      "risk": "high",
+      "rollback": {
+        "available": true,
+        "irreversible_warning": false
+      },
+      "schema_version": "cs.policy_decision.v0",
+      "scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      }
+    }
+  ],
+  "product": "CornerStone",
+  "schema_version": "cs.cli.v0",
+  "sensitive_change_gate": {
+    "category": "vs2_policy_tenancy_egress",
+    "created_at": "2026-06-18T17:17:45.122822Z",
+    "external_http_calls": 0,
+    "gate_id": "sensgate_6b78f464bf92f485",
+    "mutation_executed": false,
+    "policy_decision": {
+      "category": "vs2_policy_tenancy_egress",
+      "decided_at": "2026-06-18T17:17:45.122495Z",
+      "decision": "requires_approval",
+      "executed": false,
+      "id": "policy_54bc4330a651ebc4",
+      "impact": [
+        "Could mutate durable product state, security posture, tenant boundaries, audit/retention guarantees, release status, or external systems."
+      ],
+      "policy": "sensitive_change_stop_and_ask",
+      "reason": "Sensitive, destructive, production, auth, tenant, retention, audit, broad-network, release, or secret-handling changes require explicit owner approval.",
+      "requires_explicit_approval": true,
+      "resolution_path": [
+        "Show risk, impact, and rollback or irreversibility before proceeding.",
+        "Collect explicit approval from the owner or authorized admin.",
+        "Record approval, execution result, and audit before claiming completion."
+      ],
+      "risk": "high",
+      "rollback": {
+        "available": true,
+        "irreversible_warning": false
+      },
+      "schema_version": "cs.policy_decision.v0",
+      "scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      }
+    },
+    "schema_version": "cs.sensitive_change_gate_test.v0",
+    "scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    },
+    "secret_material_read": false,
+    "status": "approval_required",
+    "stop_and_ask_card": {
+      "approval_collected": false,
+      "impact": [
+        "Could mutate durable product state, security posture, tenant boundaries, audit/retention guarantees, release status, or external systems."
+      ],
+      "required": true,
+      "risk": "high",
+      "rollback": {
+        "available": true,
+        "irreversible_warning": false
+      }
+    }
+  },
+  "status": "success",
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

@@ -35,6 +35,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_evux_governance,
     verify_vs0_operator_acceptance_ui,
     verify_vs1_ontology_suggest_promote,
+    verify_vs2_policy_tenancy_egress,
     verify_vs0_runtime_acceptance,
     verify_vs0_product_runtime,
     verify_full_agent_orchestration,
@@ -70,6 +71,7 @@ from cornerstone_cli.scenarios import (
 )
 from cornerstone_cli.product_runtime import build_readiness_report, run_server
 from cornerstone_cli.runtime import LocalRuntimeStore
+from cornerstone_cli.vs2_security import run_vs2_local_security_proof
 
 
 SCHEMA_VERSION = "cs.cli.v0"
@@ -3986,6 +3988,51 @@ def command_security_sensitive_change_test(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_security_vs2_h01_approval_package(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.create_vs2_h01_approval_package(
+        requested_scope,
+        architecture_scope=args.architecture_scope,
+        dependency_decision=args.dependency_decision,
+        migration_scope=args.migration_scope,
+        rollback_owner=args.rollback_owner,
+        security_owner=args.security_owner,
+        local_boundary=args.local_boundary,
+        exceptions=args.exception,
+    )
+    package = result["approval_package"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone security vs2-h01-approval-package", "human_review_required", root)
+    payload.update(requested_scope)
+    payload["vs2_h01_approval_package"] = package
+    payload["ids"].update({"package_id": package["package_id"]})
+    payload["evidence_refs"].append(f"vs2_h01_approval_package:{package['package_id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_security_vs2_local_proof(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report = run_vs2_local_security_proof(root)
+    payload = base_response("cornerstone security vs2-local-proof", report["status"], root)
+    payload.update(report)
+    payload["evidence_refs"].extend(
+        [
+            "report:reports/security/vs2-local-security-proof.json",
+            "report:reports/db/vs2-rls-inventory.json",
+            "report:reports/db/vs2-tenant-isolation.json",
+            "report:reports/policy/vs2-opa-test.json",
+            "report:reports/network/vs2-egress-proof.json",
+            "report:reports/security/vs2-output-leak-scan.json",
+        ]
+    )
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
+
+
 def command_security_backup_restore_test(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -4469,6 +4516,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_operator_acceptance_ui(root)
     elif args.contract == "vs1-ontology-suggest-promote":
         report = verify_vs1_ontology_suggest_promote(root)
+    elif args.contract == "vs2-policy-tenancy-egress":
+        report = verify_vs2_policy_tenancy_egress(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-agent-orchestration":
@@ -4554,6 +4603,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-evux-governance",
                     "vs0-operator-acceptance-ui",
                     "vs1-ontology-suggest-promote",
+                    "vs2-policy-tenancy-egress",
                     "full-claim-collaboration",
                     "full-agent-orchestration",
                     "full-brain-routing",
@@ -4609,6 +4659,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         output_arg = DEFAULT_OPERATOR_UI_SCENARIO_REPORT
     if args.contract == "vs1-ontology-suggest-promote" and not output_arg:
         output_arg = DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT
+    if args.contract == "vs2-policy-tenancy-egress" and not output_arg:
+        output_arg = "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
     exit_code = EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
     transcript_command = ["cornerstone", "scenario", "verify", args.contract]
     for scenario_id in args.scenario or []:
@@ -6009,6 +6061,41 @@ def build_parser() -> argparse.ArgumentParser:
     sensitive_change.add_argument("--json", action="store_true", help="Emit JSON output")
     sensitive_change.set_defaults(func=command_security_sensitive_change_test)
 
+    vs2_h01_package = security_sub.add_parser(
+        "vs2-h01-approval-package",
+        help="Create a non-mutating VS2 H01 approval review package",
+    )
+    vs2_h01_package.add_argument(
+        "--architecture-scope",
+        default="Local VS2 security slice: Postgres RLS tenant isolation, OPA/Rego policy control plane, and default egress deny under the frozen scenario contract.",
+    )
+    vs2_h01_package.add_argument(
+        "--dependency-decision",
+        default="pending owner decision for local PostgreSQL, OPA/Rego, and controlled local egress harness dependencies",
+    )
+    vs2_h01_package.add_argument(
+        "--migration-scope",
+        default="non-production local compatibility path only; no production or destructive migration is approved by this package",
+    )
+    vs2_h01_package.add_argument("--rollback-owner", default="JiYong/Tars or explicitly delegated owner")
+    vs2_h01_package.add_argument("--security-owner", default="JiYong/Tars or explicitly delegated security owner")
+    vs2_h01_package.add_argument(
+        "--local-boundary",
+        default="local/on-prem deterministic proof only; no production, live-provider, penetration-test, or human-accepted claim",
+    )
+    vs2_h01_package.add_argument("--exception", action="append", default=[], help="Requested exception to include in the human review package")
+    add_state_argument(vs2_h01_package)
+    add_scope_arguments(vs2_h01_package)
+    vs2_h01_package.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_h01_package.set_defaults(func=command_security_vs2_h01_approval_package)
+
+    vs2_local_proof = security_sub.add_parser(
+        "vs2-local-proof",
+        help="Run local deterministic VS2 policy, tenant-isolation, and egress proof",
+    )
+    vs2_local_proof.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_local_proof.set_defaults(func=command_security_vs2_local_proof)
+
     backup_restore = security_sub.add_parser("backup-restore-test", help="Run a deterministic backup/restore rehearsal over local records")
     backup_restore.add_argument("--subject-ref", action="append", default=[], help="Evidence or product refs expected in the backup")
     add_state_argument(backup_restore)
@@ -6101,7 +6188,7 @@ def build_parser() -> argparse.ArgumentParser:
     scenario_sub = scenario.add_subparsers(dest="scenario_command")
 
     scenario_list = scenario_sub.add_parser("list", help="List frozen scenarios")
-    scenario_list.add_argument("--set", choices=["full", "vs0"], default="full")
+    scenario_list.add_argument("--set", choices=["full", "vs0", "vs2", "vs2-policy-tenancy-egress"], default="full")
     scenario_list.add_argument("--json", action="store_true", help="Emit JSON output")
     scenario_list.set_defaults(func=command_scenario_list)
 

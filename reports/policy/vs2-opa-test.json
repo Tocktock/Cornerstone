@@ -1,0 +1,292 @@
+{
+  "exit_code": 0,
+  "opa_image": "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+  "result": {
+    "coverage": 95.65217391304348,
+    "covered_lines": 110,
+    "files": {
+      "policies/vs2/policy.rego": {
+        "coverage": 92.85714285714286,
+        "covered": [
+          {
+            "end": {
+              "row": 3
+            },
+            "start": {
+              "row": 3
+            }
+          },
+          {
+            "end": {
+              "row": 17
+            },
+            "start": {
+              "row": 5
+            }
+          },
+          {
+            "end": {
+              "row": 22
+            },
+            "start": {
+              "row": 20
+            }
+          },
+          {
+            "end": {
+              "row": 26
+            },
+            "start": {
+              "row": 25
+            }
+          },
+          {
+            "end": {
+              "row": 39
+            },
+            "start": {
+              "row": 38
+            }
+          },
+          {
+            "end": {
+              "row": 43
+            },
+            "start": {
+              "row": 42
+            }
+          },
+          {
+            "end": {
+              "row": 47
+            },
+            "start": {
+              "row": 46
+            }
+          },
+          {
+            "end": {
+              "row": 52
+            },
+            "start": {
+              "row": 50
+            }
+          },
+          {
+            "end": {
+              "row": 63
+            },
+            "start": {
+              "row": 55
+            }
+          },
+          {
+            "end": {
+              "row": 67
+            },
+            "start": {
+              "row": 66
+            }
+          },
+          {
+            "end": {
+              "row": 72
+            },
+            "start": {
+              "row": 70
+            }
+          },
+          {
+            "end": {
+              "row": 77
+            },
+            "start": {
+              "row": 75
+            }
+          },
+          {
+            "end": {
+              "row": 82
+            },
+            "start": {
+              "row": 80
+            }
+          },
+          {
+            "end": {
+              "row": 87
+            },
+            "start": {
+              "row": 85
+            }
+          },
+          {
+            "end": {
+              "row": 92
+            },
+            "start": {
+              "row": 90
+            }
+          },
+          {
+            "end": {
+              "row": 97
+            },
+            "start": {
+              "row": 95
+            }
+          },
+          {
+            "end": {
+              "row": 102
+            },
+            "start": {
+              "row": 100
+            }
+          },
+          {
+            "end": {
+              "row": 105
+            },
+            "start": {
+              "row": 105
+            }
+          },
+          {
+            "end": {
+              "row": 111
+            },
+            "start": {
+              "row": 111
+            }
+          },
+          {
+            "end": {
+              "row": 114
+            },
+            "start": {
+              "row": 114
+            }
+          },
+          {
+            "end": {
+              "row": 121
+            },
+            "start": {
+              "row": 120
+            }
+          }
+        ],
+        "covered_lines": 65,
+        "not_covered": [
+          {
+            "end": {
+              "row": 30
+            },
+            "start": {
+              "row": 29
+            }
+          },
+          {
+            "end": {
+              "row": 35
+            },
+            "start": {
+              "row": 33
+            }
+          }
+        ],
+        "not_covered_lines": 5
+      },
+      "policies/vs2/policy_test.rego": {
+        "coverage": 100,
+        "covered": [
+          {
+            "end": {
+              "row": 3
+            },
+            "start": {
+              "row": 3
+            }
+          },
+          {
+            "end": {
+              "row": 31
+            },
+            "start": {
+              "row": 28
+            }
+          },
+          {
+            "end": {
+              "row": 38
+            },
+            "start": {
+              "row": 34
+            }
+          },
+          {
+            "end": {
+              "row": 45
+            },
+            "start": {
+              "row": 41
+            }
+          },
+          {
+            "end": {
+              "row": 52
+            },
+            "start": {
+              "row": 48
+            }
+          },
+          {
+            "end": {
+              "row": 59
+            },
+            "start": {
+              "row": 55
+            }
+          },
+          {
+            "end": {
+              "row": 66
+            },
+            "start": {
+              "row": 62
+            }
+          },
+          {
+            "end": {
+              "row": 73
+            },
+            "start": {
+              "row": 69
+            }
+          },
+          {
+            "end": {
+              "row": 80
+            },
+            "start": {
+              "row": 76
+            }
+          },
+          {
+            "end": {
+              "row": 87
+            },
+            "start": {
+              "row": 83
+            }
+          }
+        ],
+        "covered_lines": 45
+      }
+    },
+    "not_covered_lines": 5
+  },
+  "status": "passed",
+  "stderr_tail": []
+}

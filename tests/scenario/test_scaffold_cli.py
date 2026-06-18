@@ -73,6 +73,123 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["vs0"]["count"], 58)
         self.assertEqual(payload["verification_matrix"]["count"], 206)
 
+    def test_vs2_scenario_list_count(self) -> None:
+        result = run_cli("scenario", "list", "--set", "vs2-policy-tenancy-egress", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs2-policy-tenancy-egress")
+        self.assertEqual(payload["count"], 93)
+        counts = {item["type"]: 0 for item in payload["scenarios"]}
+        for item in payload["scenarios"]:
+            counts[item["type"]] = counts.get(item["type"], 0) + 1
+        self.assertEqual(counts["MUST_PASS"], 70)
+        self.assertEqual(counts["REGRESSION"], 16)
+        self.assertEqual(counts["HUMAN_REQUIRED"], 7)
+
+    def test_vs2_policy_tenancy_egress_verify_passes_local_ai_scope(self) -> None:
+        result = run_cli("scenario", "verify", "vs2-policy-tenancy-egress", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs2-policy-tenancy-egress")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], 93)
+        self.assertEqual(payload["summary"]["pass"], 86)
+        self.assertEqual(payload["summary"]["fail"], 0)
+        self.assertEqual(payload["summary"]["human_required"], 7)
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "LOCAL_VS2_POLICY_TENANCY_EGRESS_READY_PRODUCTION_NOT_READY")
+        self.assertEqual(payload["local_security_proof"]["status"], "success")
+        self.assertEqual(payload["local_security_proof"]["postgres"]["status"], "passed")
+        self.assertEqual(payload["local_security_proof"]["opa"]["status"], "passed")
+        self.assertEqual(payload["local_security_proof"]["egress"]["status"], "passed")
+        self.assertEqual(payload["negative_evidence"]["ai_rows_marked_pass_without_evidence"], 0)
+        ai_rows = [row for row in payload["scenario_results"] if row["owner"] == "AI"]
+        self.assertEqual(len(ai_rows), 86)
+        self.assertTrue(all(row["status"] == "PASS" for row in ai_rows))
+        self.assertTrue(all(row["evidence"] for row in ai_rows))
+
+    def test_vs2_local_proof_command_records_postgres_opa_and_egress_evidence(self) -> None:
+        result = run_cli("security", "vs2-local-proof", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["pass"], 86)
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["postgres"]["status"], "passed")
+        self.assertEqual(payload["opa"]["status"], "passed")
+        self.assertEqual(payload["egress"]["status"], "passed")
+        self.assertEqual(payload["negative_evidence"]["production_security_claimed"], 0)
+        self.assertEqual(payload["negative_evidence"]["live_provider_ready_claimed"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_ai"], 0)
+
+    def test_vs2_sensitive_change_gate_records_h01_boundary(self) -> None:
+        state_rel = "tmp/test-vs2-sensitive-change-gate"
+        shutil.rmtree(ROOT / state_rel, ignore_errors=True)
+        result = run_cli(
+            "security",
+            "sensitive-change-test",
+            "--category",
+            "vs2_policy_tenancy_egress",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        gate = payload["sensitive_change_gate"]
+        decision = gate["policy_decision"]
+        self.assertEqual(gate["schema_version"], "cs.sensitive_change_gate_test.v0")
+        self.assertEqual(gate["category"], "vs2_policy_tenancy_egress")
+        self.assertEqual(gate["status"], "approval_required")
+        self.assertFalse(gate["mutation_executed"])
+        self.assertFalse(gate["secret_material_read"])
+        self.assertEqual(gate["external_http_calls"], 0)
+        self.assertTrue(gate["stop_and_ask_card"]["required"])
+        self.assertFalse(gate["stop_and_ask_card"]["approval_collected"])
+        self.assertEqual(decision["decision"], "requires_approval")
+        self.assertEqual(decision["policy"], "sensitive_change_stop_and_ask")
+        self.assertTrue(decision["requires_explicit_approval"])
+        self.assertTrue(payload["policy_decision_refs"])
+        self.assertTrue(payload["audit_refs"])
+        self.assertTrue(payload["evidence_refs"])
+
+    def test_vs2_h01_approval_package_is_pending_and_non_mutating(self) -> None:
+        state_rel = "tmp/test-vs2-h01-approval-package"
+        shutil.rmtree(ROOT / state_rel, ignore_errors=True)
+        result = run_cli(
+            "security",
+            "vs2-h01-approval-package",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        package = payload["vs2_h01_approval_package"]
+        self.assertEqual(payload["status"], "human_review_required")
+        self.assertEqual(package["schema_version"], "cs.vs2_h01_approval_package.v0")
+        self.assertEqual(package["scenario_id"], "VS2-SEC-H01")
+        self.assertEqual(package["status"], "human_review_required")
+        self.assertEqual(package["approval_status"], "pending")
+        self.assertFalse(package["sensitive_implementation_allowed"])
+        decision = package["requested_decision"]
+        self.assertTrue(decision["architecture_scope"])
+        self.assertIn("Postgres RLS", decision["architecture_scope"])
+        self.assertTrue(decision["dependency_decision"])
+        self.assertTrue(decision["migration_scope"])
+        self.assertTrue(decision["rollback_owner"])
+        self.assertTrue(decision["security_owner"])
+        self.assertTrue(decision["local_boundary"])
+        required_record = package["required_human_record"]
+        self.assertEqual(set(required_record["decision_values"]), {"APPROVE", "REJECT"})
+        non_mutation = package["non_mutation_evidence"]
+        self.assertFalse(non_mutation["approval_collected"])
+        self.assertFalse(non_mutation["mutation_executed"])
+        self.assertFalse(non_mutation["secret_material_read"])
+        self.assertEqual(non_mutation["external_http_calls"], 0)
+        self.assertTrue(payload["audit_refs"])
+        self.assertTrue(payload["evidence_refs"])
+
     def test_vs0_scaffold_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-scaffold", "--json")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

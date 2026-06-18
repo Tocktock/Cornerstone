@@ -418,6 +418,7 @@ class LocalRuntimeStore:
         self.judge_calibration_dir = state_dir / "judge" / "calibration"
         self.credential_boundary_dir = state_dir / "security" / "credential_boundaries"
         self.sensitive_change_dir = state_dir / "security" / "sensitive_changes"
+        self.approval_package_dir = state_dir / "security" / "approval_packages"
         self.backup_restore_dir = state_dir / "security" / "backup_restore"
         self.helpful_failure_dir = state_dir / "security" / "helpful_failures"
         self.idempotency_dir = state_dir / "security" / "idempotency"
@@ -762,6 +763,9 @@ class LocalRuntimeStore:
 
     def sensitive_change_path(self, gate_id: str) -> Path:
         return self.sensitive_change_dir / f"{gate_id}.json"
+
+    def approval_package_path(self, package_id: str) -> Path:
+        return self.approval_package_dir / f"{package_id}.json"
 
     def backup_restore_path(self, restore_id: str) -> Path:
         return self.backup_restore_dir / f"{restore_id}.json"
@@ -9775,6 +9779,71 @@ class LocalRuntimeStore:
             {"category": category, "mutation_executed": False, "approval_collected": False},
         )
         return {"sensitive_change_gate": gate, "policy_decision": policy, "audit_event": event}
+
+    def create_vs2_h01_approval_package(
+        self,
+        scope: dict[str, str],
+        *,
+        architecture_scope: str,
+        dependency_decision: str,
+        migration_scope: str,
+        rollback_owner: str,
+        security_owner: str,
+        local_boundary: str,
+        exceptions: list[str] | None = None,
+    ) -> dict[str, Any]:
+        package_base = {
+            "schema_version": "cs.vs2_h01_approval_package.v0",
+            "scenario_id": "VS2-SEC-H01",
+            "status": "human_review_required",
+            "approval_status": "pending",
+            "sensitive_implementation_allowed": False,
+            "scope": scope,
+            "requested_decision": {
+                "architecture_scope": architecture_scope,
+                "dependency_decision": dependency_decision,
+                "migration_scope": migration_scope,
+                "rollback_owner": rollback_owner,
+                "security_owner": security_owner,
+                "local_boundary": local_boundary,
+                "exceptions": exceptions or [],
+            },
+            "required_human_record": {
+                "decision_values": ["APPROVE", "REJECT"],
+                "required_fields": [
+                    "approved_scope",
+                    "exceptions",
+                    "rollback_owner",
+                    "dependency_decision",
+                    "security_owner",
+                    "decision_timestamp",
+                    "approver",
+                ],
+                "required_evidence": "Dated APPROVE/REJECT record with approved scope, exceptions, rollback owner, dependency decision, and security ownership.",
+            },
+            "non_mutation_evidence": {
+                "approval_collected": False,
+                "mutation_executed": False,
+                "secret_material_read": False,
+                "external_http_calls": 0,
+            },
+            "created_at": utc_now(),
+        }
+        package_id = f"vs2h01_{_json_hash(package_base)[:16]}"
+        package = dict(package_base)
+        package["package_id"] = package_id
+        _write_json(self.approval_package_path(package_id), package)
+        event = self.append_audit(
+            "policy.vs2_h01_approval_package.created",
+            scope,
+            {"type": "vs2_h01_approval_package", "id": package_id},
+            {
+                "scenario_id": "VS2-SEC-H01",
+                "approval_status": package["approval_status"],
+                "sensitive_implementation_allowed": False,
+            },
+        )
+        return {"approval_package": package, "audit_event": event}
 
     def rehearse_backup_restore(self, scope: dict[str, str], subject_refs: list[str] | None = None) -> dict[str, Any]:
         counts = {

@@ -1,0 +1,29 @@
+{
+  "checks": {
+    "cross_tenant_delete_zero": true,
+    "forged_insert_denied": true,
+    "policy_table_isolated": true,
+    "safe_view_is_rls_bound": true,
+    "security_definer_execute_denied": true,
+    "tenant_a_search_isolated": true,
+    "tenant_a_sees_one_artifact": true,
+    "tenant_b_absent_from_tenant_a": true
+  },
+  "cross_tenant_delete": {
+    "cross_tenant_delete_returned": 0
+  },
+  "forged_insert_denied": true,
+  "forged_insert_error_neutral": true,
+  "security_definer_execute_denied": true,
+  "status": "passed",
+  "tenant_a_visible": {
+    "artifact_count": 1,
+    "foreign_artifact_count": 0,
+    "policy_count": 1,
+    "safe_count_view_rows": 1,
+    "search_count": 1,
+    "visible_ids": [
+      "artifact_a"
+    ]
+  }
+}

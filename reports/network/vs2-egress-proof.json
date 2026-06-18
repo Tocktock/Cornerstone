@@ -1,0 +1,213 @@
+{
+  "audit_schema": {
+    "connector_capability": "mock_provider.read",
+    "decision_id": "egress_5f4a3ae24acbc0a1",
+    "destination_class": "reserved_loopback",
+    "raw_payload_stored": false,
+    "trace_id": "trace_vs2_egress_local"
+  },
+  "checks": {
+    "audit_has_no_raw_payload": true,
+    "credentials_not_exposed": true,
+    "declared_call_allowed": true,
+    "default_denied_before_sink_call": true,
+    "dns_rebinding_guarded": true,
+    "fail_closed_without_fallback": true,
+    "idempotency_tenant_scoped": true,
+    "normalization_does_not_broaden": true,
+    "redirects_reguarded": true,
+    "reserved_destination_denied": true,
+    "sandbox_blocks_host_escape": true,
+    "stale_dry_run_blocked": true,
+    "tenant_policy_isolated": true
+  },
+  "credential_guard": {
+    "denied_calls_send_payload": false,
+    "logs_mask_secrets": true,
+    "raw_credentials_exposed": false
+  },
+  "declared_allowed": {
+    "bytes_sent": 64,
+    "decision": "allow",
+    "decision_id": "egress_d8de9d404854cea9",
+    "destination": {
+      "host": "api.mock-provider.test",
+      "method": "GET",
+      "path": "/v1/read/status",
+      "port": 443,
+      "scheme": "https"
+    },
+    "external_http_calls": 1,
+    "matched_rule": "rule_mock_provider",
+    "reason": "declared_connectorhub_capability",
+    "resolution_path": [
+      "Declare ConnectorHub capability",
+      "Bind approval and policy revision",
+      "Retry through governed client"
+    ],
+    "tenant_id": "tenant_a"
+  },
+  "default_denied": {
+    "bytes_sent": 0,
+    "decision": "deny",
+    "decision_id": "egress_5f4a3ae24acbc0a1",
+    "destination": {
+      "host": "127.0.0.1",
+      "method": "GET",
+      "path": "/blocked",
+      "port": 51328,
+      "scheme": "http"
+    },
+    "external_http_calls": 0,
+    "matched_rule": null,
+    "reason": "reserved_destination_denied",
+    "resolution_path": [
+      "Declare ConnectorHub capability",
+      "Bind approval and policy revision",
+      "Retry through governed client"
+    ],
+    "tenant_id": "tenant_a"
+  },
+  "dns_rebinding_guard": {
+    "reserved_address_contacted": false,
+    "resolved_address_checked_at_connect": true
+  },
+  "dry_run_recheck": {
+    "execution_rechecks_current_policy": true,
+    "fingerprint": "cb6ebbcf6c0d04d4a7d04f9cbd5bcd7d138b62b3ba26d92ce0fe2be1f92ea8e2",
+    "stale_allow_reused": false
+  },
+  "normalization_variations": [
+    {
+      "bytes_sent": 64,
+      "decision": "allow",
+      "decision_id": "egress_cc9bf054f781a3a1",
+      "destination": {
+        "host": "api.mock-provider.test",
+        "method": "GET",
+        "path": "/v1/read/status",
+        "port": 443,
+        "scheme": "https"
+      },
+      "external_http_calls": 1,
+      "matched_rule": "rule_mock_provider",
+      "reason": "declared_connectorhub_capability",
+      "resolution_path": [
+        "Declare ConnectorHub capability",
+        "Bind approval and policy revision",
+        "Retry through governed client"
+      ],
+      "tenant_id": "tenant_a"
+    },
+    {
+      "bytes_sent": 0,
+      "decision": "deny",
+      "decision_id": "egress_424fbb722a998bc2",
+      "destination": {
+        "host": "api.mock-provider.test",
+        "method": "GET",
+        "path": "/v1/read/status",
+        "port": 444,
+        "scheme": "https"
+      },
+      "external_http_calls": 0,
+      "matched_rule": null,
+      "reason": "default_egress_deny",
+      "resolution_path": [
+        "Declare ConnectorHub capability",
+        "Bind approval and policy revision",
+        "Retry through governed client"
+      ],
+      "tenant_id": "tenant_a"
+    },
+    {
+      "bytes_sent": 0,
+      "decision": "deny",
+      "decision_id": "egress_b41663ef26e31927",
+      "destination": {
+        "host": "api.mock-provider.test",
+        "method": "GET",
+        "path": "/v1/read/status",
+        "port": 80,
+        "scheme": "http"
+      },
+      "external_http_calls": 0,
+      "matched_rule": null,
+      "reason": "default_egress_deny",
+      "resolution_path": [
+        "Declare ConnectorHub capability",
+        "Bind approval and policy revision",
+        "Retry through governed client"
+      ],
+      "tenant_id": "tenant_a"
+    },
+    {
+      "bytes_sent": 0,
+      "decision": "deny",
+      "decision_id": "egress_b994e8e3f3dc029e",
+      "destination": {
+        "host": "api.mock-provider.test",
+        "method": "GET",
+        "path": "/v1/write/status",
+        "port": 443,
+        "scheme": "https"
+      },
+      "external_http_calls": 0,
+      "matched_rule": null,
+      "reason": "default_egress_deny",
+      "resolution_path": [
+        "Declare ConnectorHub capability",
+        "Bind approval and policy revision",
+        "Retry through governed client"
+      ],
+      "tenant_id": "tenant_a"
+    }
+  ],
+  "readiness": {
+    "direct_client_fallback": false,
+    "protected_capabilities_fail_closed": true
+  },
+  "redirect_guard": {
+    "denied_hop_sensitive_headers_forwarded": false,
+    "each_hop_reauthorized": true,
+    "redirect_limit": 5
+  },
+  "retry_idempotency": {
+    "duplicate_side_effects": 0,
+    "tenant_scoped_idempotency_key": true,
+    "timeout_limit_seconds": 3
+  },
+  "sandbox_guard": {
+    "arbitrary_protocols_blocked": true,
+    "proxy_env_sanitized": true,
+    "shell_access_blocked": true
+  },
+  "sink": {
+    "bytes": 0,
+    "host": "127.0.0.1",
+    "port": 51328,
+    "requests": 0
+  },
+  "status": "passed",
+  "tenant_b_denied": {
+    "bytes_sent": 0,
+    "decision": "deny",
+    "decision_id": "egress_117014a02fcf205d",
+    "destination": {
+      "host": "api.mock-provider.test",
+      "method": "GET",
+      "path": "/v1/read/status",
+      "port": 443,
+      "scheme": "https"
+    },
+    "external_http_calls": 0,
+    "matched_rule": null,
+    "reason": "default_egress_deny",
+    "resolution_path": [
+      "Declare ConnectorHub capability",
+      "Bind approval and policy revision",
+      "Retry through governed client"
+    ],
+    "tenant_id": "tenant_b"
+  }
+}

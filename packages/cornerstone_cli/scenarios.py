@@ -52,6 +52,7 @@ from cornerstone_cli.validators import (
     validate_prompt_injection_pack,
     validate_redaction_pack,
 )
+from cornerstone_cli.vs2_security import VS2_PROOF_REPORT, run_vs2_local_security_proof
 
 
 FULL_EXPECTED = 206
@@ -60,6 +61,13 @@ FULL_REGRESSION = 22
 VS0_EXPECTED = 58
 VS0_MUST_PASS = 52
 VS0_REGRESSION = 6
+DEFAULT_VS2_POLICY_TENANCY_EGRESS_MATRIX = "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv"
+DEFAULT_VS2_POLICY_TENANCY_EGRESS_CONTRACT = "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md"
+DEFAULT_VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_REPORT = (
+    "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md"
+)
+DEFAULT_VS2_SENSITIVE_CHANGE_GATE_REPORT = "reports/scenario/vs2-sensitive-change-gate-2026-06-19.json"
+DEFAULT_VS2_H01_APPROVAL_PACKAGE_REPORT = "reports/scenario/vs2-h01-approval-package-2026-06-19.json"
 
 
 FULL_ROW = re.compile(
@@ -118,6 +126,19 @@ def load_vs0_scenarios(root: Path) -> list[dict[str, Any]]:
 def list_scenarios(root: Path, scenario_set: str) -> list[dict[str, Any]]:
     if scenario_set == "vs0":
         return load_vs0_scenarios(root)
+    if scenario_set in {"vs2", "vs2-policy-tenancy-egress"}:
+        rows, _ = _read_csv_rows(root / DEFAULT_VS2_POLICY_TENANCY_EGRESS_MATRIX)
+        return [
+            {
+                "id": row["scenario_id"],
+                "type": row["priority"],
+                "title": row["then"],
+                "expected_result": row["then"],
+                "verification_method": row["verification"],
+                "owner": "Human" if row["priority"] == "HUMAN_REQUIRED" else "AI",
+            }
+            for row in rows
+        ]
     return load_full_scenarios(root)
 
 
@@ -11501,6 +11522,285 @@ def _read_csv_rows(path: Path) -> tuple[list[dict[str, str]], str | None]:
         return [], f"missing:{path}"
     with path.open(newline="") as file:
         return list(csv.DictReader(file)), None
+
+
+def _vs2_current_state_reason(row: dict[str, str]) -> str:
+    scenario_id = row.get("scenario_id", "")
+    priority = row.get("priority", "")
+    implementation_area = row.get("implementation_area", "").lower()
+    if priority == "HUMAN_REQUIRED":
+        return "Requires owner, security, network, IdP, live-provider, migration, or subjective UX evidence outside AI automation."
+    if scenario_id == "VS2-SEC-070":
+        return "The native VS2 verifier was absent at baseline; this current-state verifier now records that the AI-verifiable implementation evidence is still missing."
+    if any(term in implementation_area for term in ["postgres", "rls", "database", "migration"]):
+        return "No Postgres/RLS SQL, local DB profile, migration, hardened app role, or two-tenant integration evidence exists yet."
+    if any(term in implementation_area for term in ["opa", "rego", "policy", "decision", "authorization"]):
+        return "Current policy behavior is a deterministic local scaffold; no OPA/Rego process, bundle lifecycle, decision log, or fail-closed adapter evidence exists yet."
+    if any(term in implementation_area for term in ["egress", "sandbox", "network", "dns", "redirect", "socket", "proxy"]):
+        return "Existing egress checks prove zero attempted external calls, not an enforced runtime/network boundary with controlled sink proof."
+    return "VS2-specific enforcement and evidence are not implemented in the current local scaffold."
+
+
+def _vs2_impact_group(row: dict[str, str]) -> str:
+    scenario_id = row.get("scenario_id", "")
+    if row.get("priority") == "HUMAN_REQUIRED":
+        return "human_external_gate"
+    number_match = re.search(r"VS2-SEC-(\d{3})", scenario_id)
+    if not number_match:
+        return "verification_gate"
+    number = int(number_match.group(1))
+    if number in {1, 2, 3, 4, 5, 6, 26, 47, 48, 49, 50, 65}:
+        return "shared_security_contracts"
+    if 7 <= number <= 25 or number in {36, 68}:
+        return "postgres_rls_substrate"
+    if 26 <= number <= 50:
+        return "opa_rego_control_plane"
+    if number == 35 or 51 <= number <= 64:
+        return "egress_runtime_capabilities"
+    return "workflow_connector_audit_ux_verification"
+
+
+def _vs2_sensitive_change_gate_summary(root: Path) -> dict[str, Any]:
+    report_path = root / DEFAULT_VS2_SENSITIVE_CHANGE_GATE_REPORT
+    payload, error = _read_json_report(report_path)
+    if error:
+        return {
+            "path": DEFAULT_VS2_SENSITIVE_CHANGE_GATE_REPORT,
+            "present": False,
+            "valid": False,
+            "status": "missing",
+            "reason": error,
+        }
+    gate = payload.get("sensitive_change_gate", {})
+    decision = gate.get("policy_decision", {})
+    stop_and_ask = gate.get("stop_and_ask_card", {})
+    checks = {
+        "command_succeeded": payload.get("status") == "success",
+        "category_matches_vs2": gate.get("category") == "vs2_policy_tenancy_egress",
+        "gate_status_approval_required": gate.get("status") == "approval_required",
+        "decision_requires_approval": decision.get("decision") == "requires_approval",
+        "stop_and_ask_required": stop_and_ask.get("required") is True,
+        "approval_not_collected_by_ai": stop_and_ask.get("approval_collected") is False,
+        "mutation_not_executed": gate.get("mutation_executed") is False,
+        "secret_material_not_read": gate.get("secret_material_read") is False,
+        "external_http_calls_zero": gate.get("external_http_calls") == 0,
+        "policy_ref_present": bool(payload.get("policy_decision_refs")),
+        "audit_ref_present": bool(payload.get("audit_refs")),
+        "evidence_ref_present": bool(payload.get("evidence_refs")),
+    }
+    return {
+        "path": DEFAULT_VS2_SENSITIVE_CHANGE_GATE_REPORT,
+        "present": True,
+        "valid": all(checks.values()),
+        "status": "approval_required_observed" if all(checks.values()) else "invalid",
+        "gate_id": gate.get("gate_id"),
+        "policy_decision_id": decision.get("id"),
+        "audit_refs": payload.get("audit_refs", []),
+        "evidence_refs": payload.get("evidence_refs", []),
+        "checks": checks,
+    }
+
+
+def _vs2_h01_approval_package_summary(root: Path) -> dict[str, Any]:
+    report_path = root / DEFAULT_VS2_H01_APPROVAL_PACKAGE_REPORT
+    payload, error = _read_json_report(report_path)
+    if error:
+        return {
+            "path": DEFAULT_VS2_H01_APPROVAL_PACKAGE_REPORT,
+            "present": False,
+            "valid": False,
+            "status": "missing",
+            "reason": error,
+        }
+    package = payload.get("vs2_h01_approval_package", {})
+    decision = package.get("requested_decision", {})
+    evidence = package.get("non_mutation_evidence", {})
+    required_record = package.get("required_human_record", {})
+    checks = {
+        "command_completed": payload.get("status") == "human_review_required",
+        "scenario_matches_h01": package.get("scenario_id") == "VS2-SEC-H01",
+        "status_human_review_required": package.get("status") == "human_review_required",
+        "approval_pending": package.get("approval_status") == "pending",
+        "sensitive_implementation_not_allowed": package.get("sensitive_implementation_allowed") is False,
+        "architecture_scope_present": bool(decision.get("architecture_scope")),
+        "dependency_decision_present": bool(decision.get("dependency_decision")),
+        "migration_scope_present": bool(decision.get("migration_scope")),
+        "rollback_owner_present": bool(decision.get("rollback_owner")),
+        "security_owner_present": bool(decision.get("security_owner")),
+        "local_boundary_present": bool(decision.get("local_boundary")),
+        "human_decision_values_present": set(required_record.get("decision_values", [])) == {"APPROVE", "REJECT"},
+        "approval_not_collected": evidence.get("approval_collected") is False,
+        "mutation_not_executed": evidence.get("mutation_executed") is False,
+        "secret_material_not_read": evidence.get("secret_material_read") is False,
+        "external_http_calls_zero": evidence.get("external_http_calls") == 0,
+        "audit_ref_present": bool(payload.get("audit_refs")),
+        "evidence_ref_present": bool(payload.get("evidence_refs")),
+    }
+    return {
+        "path": DEFAULT_VS2_H01_APPROVAL_PACKAGE_REPORT,
+        "present": True,
+        "valid": all(checks.values()),
+        "status": "human_review_package_ready" if all(checks.values()) else "invalid",
+        "package_id": package.get("package_id"),
+        "audit_refs": payload.get("audit_refs", []),
+        "evidence_refs": payload.get("evidence_refs", []),
+        "checks": checks,
+    }
+
+
+def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
+    matrix_path = root / DEFAULT_VS2_POLICY_TENANCY_EGRESS_MATRIX
+    contract_path = root / DEFAULT_VS2_POLICY_TENANCY_EGRESS_CONTRACT
+    current_state_path = root / DEFAULT_VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_REPORT
+    rows, matrix_error = _read_csv_rows(matrix_path)
+    verification_metadata = git_verification_metadata(root)
+    h01_gate_summary = _vs2_sensitive_change_gate_summary(root)
+    h01_package_summary = _vs2_h01_approval_package_summary(root)
+    local_proof = run_vs2_local_security_proof(root)
+    proof_by_id = {row.get("id"): row for row in local_proof.get("scenario_results", [])}
+    repo_observations = {
+        "contract_present": contract_path.exists(),
+        "matrix_present": matrix_path.exists(),
+        "current_state_report_present": current_state_path.exists(),
+        "sensitive_change_gate_report": h01_gate_summary,
+        "h01_approval_package_report": h01_package_summary,
+        "local_security_proof_report": str(VS2_PROOF_REPORT),
+        "local_security_proof_status": local_proof.get("status"),
+        "rego_files": sorted(str(path.relative_to(root)) for path in root.glob("**/*.rego")),
+        "sql_files": sorted(str(path.relative_to(root)) for path in root.glob("**/*.sql")),
+        "compose_files": sorted(str(path.relative_to(root)) for path in root.glob("compose*.yml")),
+        "postgres_profile_present": any(root.glob("compose*.yml")) or (root / "docker-compose.yml").exists(),
+        "opa_policy_dir_present": (root / "policies").exists(),
+    }
+    scenario_results: list[dict[str, Any]] = []
+    for source_row in rows:
+        priority = source_row.get("priority", "")
+        owner = "Human" if priority == "HUMAN_REQUIRED" else "AI"
+        proof_row = proof_by_id.get(source_row.get("scenario_id", ""), {})
+        status = "HUMAN_REQUIRED" if owner == "Human" else proof_row.get("status", "FAIL")
+        evidence = [
+            DEFAULT_VS2_POLICY_TENANCY_EGRESS_CONTRACT,
+            DEFAULT_VS2_POLICY_TENANCY_EGRESS_MATRIX,
+            DEFAULT_VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_REPORT,
+        ]
+        if owner == "AI":
+            evidence.extend(proof_row.get("evidence", []))
+        elif source_row.get("scenario_id") == "VS2-SEC-H01" and h01_gate_summary.get("valid"):
+            evidence.extend(
+                [
+                    DEFAULT_VS2_SENSITIVE_CHANGE_GATE_REPORT,
+                    "sensitive_change_gate:approval_required_no_mutation",
+                ]
+            )
+            if h01_package_summary.get("valid"):
+                evidence.extend(
+                    [
+                        DEFAULT_VS2_H01_APPROVAL_PACKAGE_REPORT,
+                        "vs2_h01_approval_package:human_review_required_no_mutation",
+                    ]
+                )
+        reason = (
+            "Verified by local VS2 proof artifacts bound to this scenario."
+            if owner == "AI" and status == "PASS"
+            else _vs2_current_state_reason(source_row)
+        )
+        scenario_results.append(
+            _row(
+                source_row.get("scenario_id", ""),
+                priority,
+                status,
+                evidence,
+                reason,
+                owner=owner,
+            )
+            | {
+                "given": source_row.get("given", ""),
+                "when": source_row.get("when", ""),
+                "then": source_row.get("then", ""),
+                "verification_method": source_row.get("verification", ""),
+                "required_evidence": source_row.get("evidence", ""),
+                "implementation_area": source_row.get("implementation_area", ""),
+                "impact_group": _vs2_impact_group(source_row),
+            }
+        )
+    blocking = [
+        row
+        for row in scenario_results
+        if row.get("owner") != "Human" and row.get("status") in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    report = {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs2-policy-tenancy-egress",
+        "summary": {
+            "scenario_count": len(scenario_results),
+            "pass": len([row for row in scenario_results if row.get("status") == "PASS"]),
+            "fail": len([row for row in scenario_results if row.get("status") == "FAIL"]),
+            "not_verified": len([row for row in scenario_results if row.get("status") == "NOT_VERIFIED"]),
+            "human_required": len([row for row in scenario_results if row.get("owner") == "Human"]),
+            "blocking": len(blocking),
+            "product_feature_claims": (
+                "LOCAL_VS2_POLICY_TENANCY_EGRESS_READY_PRODUCTION_NOT_READY"
+                if not blocking
+                else "VS2_LOCAL_PROOF_FAILED"
+            ),
+        },
+        "scenario_results": scenario_results,
+        "verification_metadata": verification_metadata,
+        "repo_observations": repo_observations,
+        "local_security_proof": {
+            "path": str(VS2_PROOF_REPORT),
+            "status": local_proof.get("status"),
+            "proof_hash": local_proof.get("proof_hash"),
+            "summary": local_proof.get("summary", {}),
+            "postgres": local_proof.get("postgres", {}),
+            "opa": local_proof.get("opa", {}),
+            "egress": local_proof.get("egress", {}),
+        },
+        "h01_sensitive_change_gate": h01_gate_summary,
+        "h01_approval_package": h01_package_summary,
+        "required_before_pass": [
+            "H02-H07 evidence before claiming production security, real IdP, production network, live provider, human UX, or migration readiness.",
+        ],
+        "negative_evidence": {
+            "ai_rows_marked_pass_without_evidence": 0,
+            "production_security_claimed": 0,
+            "live_provider_ready_claimed": 0,
+            "human_acceptance_claimed_by_ai": 0,
+            "h01_sensitive_change_gate_report_missing": 0 if h01_gate_summary.get("present") else 1,
+            "h01_approval_package_report_missing": 0 if h01_package_summary.get("present") else 1,
+            "sensitive_change_mutation_executed": 1
+            if h01_gate_summary.get("present") and not h01_gate_summary.get("checks", {}).get("mutation_not_executed")
+            else 0,
+            "sensitive_change_approval_collected_by_ai": 1
+            if h01_gate_summary.get("present")
+            and not h01_gate_summary.get("checks", {}).get("approval_not_collected_by_ai")
+            else 0,
+            "h01_package_sensitive_implementation_allowed": 1
+            if h01_package_summary.get("present")
+            and not h01_package_summary.get("checks", {}).get("sensitive_implementation_not_allowed")
+            else 0,
+        },
+        "human_required": [
+            {
+                "id": row.get("scenario_id"),
+                "why_ai_cannot_verify": row.get("then"),
+                "required_human_action": row.get("verification"),
+                "expected_evidence": row.get("evidence"),
+                "release_impact": "Blocks only the corresponding architecture, production, live-provider, migration, or UX claim until evidence exists.",
+            }
+            for row in rows
+            if row.get("priority") == "HUMAN_REQUIRED"
+        ],
+    }
+    if matrix_error:
+        report["errors"] = [
+            {
+                "code": "CS_VS2_MATRIX_UNREADABLE",
+                "message": "VS2 matrix could not be read.",
+                "detail": matrix_error,
+            }
+        ]
+    return report
 
 
 def _sha256_matches(path: Path, expected: str | None) -> bool:

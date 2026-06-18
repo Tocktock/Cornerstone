@@ -1,0 +1,17 @@
+{
+  "activation_atomic": true,
+  "active_revision": "vs2-rego-local-v1",
+  "bundle_hash": "a0c2e7d6f44d13347cebbe897bca2db12796887662f4d7796f331f9c0cbdf535",
+  "decision_cache_keys": [
+    "tenant_id",
+    "principal_id",
+    "resource_id",
+    "action",
+    "policy_revision"
+  ],
+  "decision_logs_masked": true,
+  "fail_closed_on_timeout": true,
+  "last_known_good_retained": true,
+  "management_api_anonymous": false,
+  "status": "passed"
+}

@@ -1,0 +1,17 @@
+{
+  "checks": {
+    "ambiguous_legacy_row_quarantined": true,
+    "no_destructive_migration": true,
+    "rollback_command_succeeded": true,
+    "rollback_preserved_counts": true
+  },
+  "quarantine_exit_code": 0,
+  "rollback_after": {
+    "artifact_count_after": 1
+  },
+  "rollback_before": {
+    "artifact_count_before": 1
+  },
+  "rollback_exit_code": 0,
+  "status": "passed"
+}

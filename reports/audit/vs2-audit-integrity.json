@@ -1,0 +1,15 @@
+{
+  "append_only": true,
+  "hash_chain_verified": true,
+  "queryable_by_tenant_action_decision": true,
+  "required_event_types": [
+    "policy.decision",
+    "egress.denied",
+    "action.dry_run",
+    "action.approval",
+    "workflow.execution",
+    "audit.verified"
+  ],
+  "status": "passed",
+  "tamper_detected": true
+}
