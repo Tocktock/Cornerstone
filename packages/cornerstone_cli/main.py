@@ -4643,6 +4643,9 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
             report.setdefault("summary", {})
             report["summary"]["scenario_count"] = len(filtered_rows)
             report["summary"]["pass"] = len([row for row in filtered_rows if row.get("status") == "PASS"])
+            report["summary"]["fail"] = len([row for row in filtered_rows if row.get("status") == "FAIL"])
+            report["summary"]["not_verified"] = len([row for row in filtered_rows if row.get("status") == "NOT_VERIFIED"])
+            report["summary"]["human_required"] = len([row for row in filtered_rows if row.get("owner") == "Human"])
             report["summary"]["blocking"] = len(blocking)
             report["status"] = "success" if not blocking else "failed"
 

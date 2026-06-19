@@ -23,6 +23,8 @@
   },
   "negative_evidence": {
     "ai_rows_marked_pass_without_evidence": 0,
+    "ai_rows_marked_pass_without_scenario_validator": 0,
+    "blanket_dependencies_ok_pass_used": 0,
     "external_http_calls_denied_path": 0,
     "human_acceptance_claimed_by_ai": 0,
     "live_provider_ready_claimed": 0,
@@ -41,1190 +43,2521 @@
     "status": "passed",
     "tenant_isolation_report": "reports/db/vs2-tenant-isolation.json"
   },
-  "proof_boundary": "local deterministic implementation proof; production/live-provider/human-acceptance claims remain false",
-  "proof_hash": "8e76697f7e34b402fe9e4197ae1209b777b7e27f9cbbfb0c7c7223bdeb2729a1",
+  "proof_boundary": "scenario-specific local remediation proof; production/live-provider/human-acceptance claims remain false",
+  "proof_hash": "32c3c301200e199c0969fdbc23eabe668816272987934943aa760b4b467ff973",
+  "scenario_check_registry": [
+    "VS2-SEC-002",
+    "VS2-SEC-003",
+    "VS2-SEC-005",
+    "VS2-SEC-007",
+    "VS2-SEC-008",
+    "VS2-SEC-013",
+    "VS2-SEC-017"
+  ],
   "scenario_results": [
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-001",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Three transcripts, normalized request-context digest, matching decision outcome/revision, exit/status codes, audit references.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-001",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Automated CLI/API/browser integration test using one fixture principal and normalized input comparison."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-001",
+        "--json"
+      ],
+      "verification_method": "Automated CLI/API/browser integration test using one fixture principal and normalized input comparison.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [
-        "reports/security/vs2-local-security-proof.json"
+        "reports/security/vs2-synthetic-world.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
       ],
+      "evidence_hashes": [
+        "6fce229bf6b93fba13fd936c4bc91d286b3340d1e3e940eeaa484014426c2781",
+        "be446ba2677ce1ff4e982e1732664a5c53e14176992f387387cfb5927f098cd3"
+      ],
+      "evidence_paths": [
+        "reports/security/vs2-synthetic-world.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
+      ],
+      "exit_code": 0,
       "id": "VS2-SEC-002",
+      "notes": "Synthetic Alice session derives tenant_alpha from membership; caller-forged tenant_beta/admin fields are rejected and audited.",
       "owner": "AI",
       "required_evidence": "Denied response, zero tenant-B rows/objects, policy decision, audit event, negative-evidence counters.",
+      "scenario_id": "VS2-SEC-002",
       "status": "PASS",
       "type": "MUST_PASS",
-      "verification_method": "Parameterized API/CLI tests for every client-controlled scope field and direct service invocation."
+      "validator": "verify_forged_scope_denied",
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-002",
+        "--json"
+      ],
+      "verification_method": "Parameterized API/CLI tests for every client-controlled scope field and direct service invocation.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [
-        "reports/security/vs2-local-security-proof.json"
+        "reports/security/vs2-synthetic-world.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
       ],
+      "evidence_hashes": [
+        "6fce229bf6b93fba13fd936c4bc91d286b3340d1e3e940eeaa484014426c2781",
+        "be446ba2677ce1ff4e982e1732664a5c53e14176992f387387cfb5927f098cd3"
+      ],
+      "evidence_paths": [
+        "reports/security/vs2-synthetic-world.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
+      ],
+      "exit_code": 0,
       "id": "VS2-SEC-003",
+      "notes": "Missing, malformed, and expired synthetic sessions fail before DB or egress calls.",
       "owner": "AI",
       "required_evidence": "Stable error codes, zero DB/egress calls, sanitized policy/audit records.",
+      "scenario_id": "VS2-SEC-003",
       "status": "PASS",
       "type": "MUST_PASS",
-      "verification_method": "Unit and integration matrix for null, empty, malformed, expired, and conflicting context."
+      "validator": "verify_missing_context_fails_closed",
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-003",
+        "--json"
+      ],
+      "verification_method": "Unit and integration matrix for null, empty, malformed, expired, and conflicting context.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-004",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Schema inventory, constraint output, representative rows/API payloads, failed-null inserts.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-004",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Schema tests plus create/read tests for every active durable object type."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-004",
+        "--json"
+      ],
+      "verification_method": "Schema tests plus create/read tests for every active durable object type.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [
-        "reports/security/vs2-local-security-proof.json"
+        "reports/security/vs2-synthetic-world.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
       ],
+      "evidence_hashes": [
+        "6fce229bf6b93fba13fd936c4bc91d286b3340d1e3e940eeaa484014426c2781",
+        "be446ba2677ce1ff4e982e1732664a5c53e14176992f387387cfb5927f098cd3"
+      ],
+      "evidence_paths": [
+        "reports/security/vs2-synthetic-world.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
+      ],
+      "exit_code": 0,
       "id": "VS2-SEC-005",
+      "notes": "Synthetic membership revoke is observed by the next request and stale worker job is quarantined.",
       "owner": "AI",
       "required_evidence": "Before/after decisions, cache revision/expiry, denial audit, zero post-revocation access.",
+      "scenario_id": "VS2-SEC-005",
       "status": "PASS",
       "type": "MUST_PASS",
-      "verification_method": "Integration test with allow \u2192 revoke \u2192 retry across API, CLI, service, and worker paths."
+      "validator": "verify_revocation_denies_next_request",
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-005",
+        "--json"
+      ],
+      "verification_method": "Integration test with allow \u2192 revoke \u2192 retry across API, CLI, service, and worker paths.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-006",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "PolicyDecision JSON fixtures, OPA decision_id/revision, audit linkage, redaction proof.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-006",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Schema contract tests and golden JSON tests for allow, deny, escalate, undefined, and error results."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-006",
+        "--json"
+      ],
+      "verification_method": "Schema contract tests and golden JSON tests for allow, deny, escalate, undefined, and error results.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
         "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
+        "reports/db/vs2-rls-inventory.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
       ],
+      "evidence_hashes": [
+        "1da87ff42e480190e84fc2712fb5a19d4fc45c765cec82fbd161221cc2a2cd48",
+        "299ba08ddda25bf0aba577707e5b448a53d2006355a43d7d4dddf31e153c40ee",
+        "be446ba2677ce1ff4e982e1732664a5c53e14176992f387387cfb5927f098cd3"
+      ],
+      "evidence_paths": [
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
+      ],
+      "exit_code": 0,
       "id": "VS2-SEC-007",
+      "notes": "Disposable PostgreSQL 16 contains synthetic tenant_alpha and tenant_beta rows in every protected table; app-role tenant_alpha SELECT sees only tenant_alpha.",
       "owner": "AI",
       "required_evidence": "SQL transcript, row counts, pg_policies inventory, zero tenant-B identifiers.",
+      "scenario_id": "VS2-SEC-007",
       "status": "PASS",
       "type": "MUST_PASS",
-      "verification_method": "Database integration matrix across every RLS table using the real application role."
+      "validator": "verify_rls_select_isolation",
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-007",
+        "--json"
+      ],
+      "verification_method": "Database integration matrix across every RLS table using the real application role.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
         "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
+        "reports/db/vs2-rls-inventory.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
       ],
+      "evidence_hashes": [
+        "1da87ff42e480190e84fc2712fb5a19d4fc45c765cec82fbd161221cc2a2cd48",
+        "299ba08ddda25bf0aba577707e5b448a53d2006355a43d7d4dddf31e153c40ee",
+        "be446ba2677ce1ff4e982e1732664a5c53e14176992f387387cfb5927f098cd3"
+      ],
+      "evidence_paths": [
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/db/vs2-rls-inventory.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
+      ],
+      "exit_code": 0,
       "id": "VS2-SEC-008",
+      "notes": "Application role cannot insert/update into tenant_beta and cross-tenant update/delete return zero rows.",
       "owner": "AI",
       "required_evidence": "SQLSTATE/neutral API error, unchanged before/after snapshots, rollback evidence, audit event.",
+      "scenario_id": "VS2-SEC-008",
       "status": "PASS",
       "type": "MUST_PASS",
-      "verification_method": "Database tests for INSERT/UPDATE/DELETE, including bulk statements and RETURNING."
+      "validator": "verify_rls_write_isolation",
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-008",
+        "--json"
+      ],
+      "verification_method": "Database tests for INSERT/UPDATE/DELETE, including bulk statements and RETURNING.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-009",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Result snapshots, count/cursor assertions, no foreign IDs, sanitized errors.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-009",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Parameterized SQL/API integration tests including empty-result and boundary-page cases."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-009",
+        "--json"
+      ],
+      "verification_method": "Parameterized SQL/API integration tests including empty-result and boundary-page cases.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-010",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Search/API transcripts, query plans or SQL trace, zero canary leakage, snapshot scope.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-010",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "End-to-end search tests with unique canary terms in each tenant."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-010",
+        "--json"
+      ],
+      "verification_method": "End-to-end search tests with unique canary terms in each tenant.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-011",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Denied responses, zero bytes returned, storage access log, policy/audit refs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-011",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "API/object-store adapter tests using guessed IDs and cross-tenant evidence links."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-011",
+        "--json"
+      ],
+      "verification_method": "API/object-store adapter tests using guessed IDs and cross-tenant evidence links.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-012",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Scoped exports, role matrix, denial logs, no cross-tenant event IDs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-012",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "API/DB tests for tenant user, tenant admin, and system operator fixtures."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-012",
+        "--json"
+      ],
+      "verification_method": "API/DB tests for tenant user, tenant admin, and system operator fixtures.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [
-        "reports/db/vs2-migration-rollback.json",
         "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
+        "reports/security/vs2-scenario-specific-evidence.json"
       ],
+      "evidence_hashes": [
+        "299ba08ddda25bf0aba577707e5b448a53d2006355a43d7d4dddf31e153c40ee",
+        "be446ba2677ce1ff4e982e1732664a5c53e14176992f387387cfb5927f098cd3"
+      ],
+      "evidence_paths": [
+        "reports/db/vs2-rls-inventory.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
+      ],
+      "exit_code": 0,
       "id": "VS2-SEC-013",
+      "notes": "PostgreSQL role inventory proves application/migration/maintenance roles are not superuser/BYPASSRLS and protected tables force RLS.",
       "owner": "AI",
       "required_evidence": "Role inventory showing rolsuper=false and rolbypassrls=false; relrowsecurity/relforcerowsecurity report.",
+      "scenario_id": "VS2-SEC-013",
       "status": "PASS",
       "type": "MUST_PASS",
-      "verification_method": "Database metadata assertions over pg_roles, pg_class, pg_policies, and ownership."
+      "validator": "verify_app_role_hardened",
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-013",
+        "--json"
+      ],
+      "verification_method": "Database metadata assertions over pg_roles, pg_class, pg_policies, and ownership.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-014",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Approval record, role assumption/revocation timestamps, accessed row counts, audit trail.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-014",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Integration rehearsal with denied app role and approved synthetic break-glass role."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-014",
+        "--json"
+      ],
+      "verification_method": "Integration rehearsal with denied app role and approved synthetic break-glass role.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-015",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Connection IDs with tenant sequence, zero canary leakage, reset assertions.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-015",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Pool stress test that alternates tenants and injects failures/cancellations."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-015",
+        "--json"
+      ],
+      "verification_method": "Pool stress test that alternates tenants and injects failures/cancellations.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-016",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Load transcript, per-request trace IDs, zero foreign canaries, no mixed audit refs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-016",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Concurrent integration test with unique canaries and randomized scheduling."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-016",
+        "--json"
+      ],
+      "verification_method": "Concurrent integration test with unique canaries and randomized scheduling.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
+        "reports/security/vs2-synthetic-world.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
       ],
+      "evidence_hashes": [
+        "6fce229bf6b93fba13fd936c4bc91d286b3340d1e3e940eeaa484014426c2781",
+        "be446ba2677ce1ff4e982e1732664a5c53e14176992f387387cfb5927f098cd3"
+      ],
+      "evidence_paths": [
+        "reports/security/vs2-synthetic-world.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
+      ],
+      "exit_code": 0,
       "id": "VS2-SEC-017",
+      "notes": "Synthetic worker envelopes run only with trusted scope; missing, tampered, and stale jobs are quarantined before DB access.",
       "owner": "AI",
       "required_evidence": "Job envelope digest, worker decision, quarantine/retry record, scoped DB/audit trace.",
+      "scenario_id": "VS2-SEC-017",
       "status": "PASS",
       "type": "MUST_PASS",
-      "verification_method": "Worker integration tests for valid, missing, changed, replayed, and cross-tenant envelopes."
+      "validator": "verify_worker_scope_revalidation",
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-017",
+        "--json"
+      ],
+      "verification_method": "Worker integration tests for valid, missing, changed, replayed, and cross-tenant envelopes.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-018",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Object inventory, grants, cross-tenant tests, lint report.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-018",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Database integration tests plus static inventory of views/functions/security-definer objects."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-018",
+        "--json"
+      ],
+      "verification_method": "Database integration tests plus static inventory of views/functions/security-definer objects.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-019",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Schema definitions, neutral errors, unchanged data, no foreign identifiers.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-019",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "DB/API tests for duplicate and foreign-key boundary cases."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-019",
+        "--json"
+      ],
+      "verification_method": "DB/API tests for duplicate and foreign-key boundary cases.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-020",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Migration report with counts/checksums, quarantine reasons, rollback transcript.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-020",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Migration tests on clean, mixed, malformed, duplicate, and rollback fixtures."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-020",
+        "--json"
+      ],
+      "verification_method": "Migration tests on clean, mixed, malformed, duplicate, and rollback fixtures.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-021",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Schema inventory report, expected failing gate, passing migration evidence.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-021",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Failing fixture migration, passing corrected migration, machine-readable inventory."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-021",
+        "--json"
+      ],
+      "verification_method": "Failing fixture migration, passing corrected migration, machine-readable inventory.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-022",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Allow/deny decisions, zero implicit context use, provenance on allowed promotion.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-022",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Integration matrix for same-tenant personal/org/team/project access."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-022",
+        "--json"
+      ],
+      "verification_method": "Integration matrix for same-tenant personal/org/team/project access.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-023",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Denied policy decision, zero target records, audit event, negative-evidence counters.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-023",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "API/CLI/DB test for every transfer mode."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-023",
+        "--json"
+      ],
+      "verification_method": "API/CLI/DB test for every transfer mode.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-024",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Key snapshots/digests, independent results, zero cross-tenant cache hits.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-024",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Collision and replay tests across two tenants."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-024",
+        "--json"
+      ],
+      "verification_method": "Collision and replay tests across two tenants.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-025",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Backup manifest, restored counts/hashes, RLS inventory before/after, tenant export diff.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-025",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Automated local backup/restore and per-tenant export tests with row/hash counts."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-025",
+        "--json"
+      ],
+      "verification_method": "Automated local backup/restore and per-tenant export tests with row/hash counts.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-026",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Schema file, valid/invalid fixtures, input digest and source-of-attribute map.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-026",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Contract tests and golden inputs for every operation family."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-026",
+        "--json"
+      ],
+      "verification_method": "Contract tests and golden inputs for every operation family.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-027",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "opa test JSON, allow decision with bundle revision, downstream success/audit.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-027",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "OPA unit tests plus product integration allow cases."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-027",
+        "--json"
+      ],
+      "verification_method": "OPA unit tests plus product integration allow cases.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-028",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Denied decisions, zero side effects, stable error and audit references.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-028",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Role/action access-control matrix tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-028",
+        "--json"
+      ],
+      "verification_method": "Role/action access-control matrix tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-029",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Allow/deny/escalate matrix, reason codes, policy coverage report.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-029",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Data-driven OPA tests at each attribute boundary."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-029",
+        "--json"
+      ],
+      "verification_method": "Data-driven OPA tests at each attribute boundary.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-030",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Denied outputs, no downstream calls, audit decision.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-030",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "OPA/product tests for typos, new enum values, missing rule paths, and undefined output."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-030",
+        "--json"
+      ],
+      "verification_method": "OPA/product tests for typos, new enum values, missing rule paths, and undefined output.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-031",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "400/deny transcripts, zero evaluation/side effects as appropriate, sanitized logs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-031",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Fuzz/property tests and boundary fixtures."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-031",
+        "--json"
+      ],
+      "verification_method": "Fuzz/property tests and boundary fixtures.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-032",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "OPA config, listening sockets, successful authorized call, denied unauthorized call.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-032",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Container/network tests from allowed and disallowed peers."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-032",
+        "--json"
+      ],
+      "verification_method": "Container/network tests from allowed and disallowed peers.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-033",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Gateway decision, zero downstream counters, trace/audit record.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-033",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Integration test with handler/DB/tool call counters."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-033",
+        "--json"
+      ],
+      "verification_method": "Integration test with handler/DB/tool call counters.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-034",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Service decision, zero repository/tool/connector calls, audit event.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-034",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Direct service/API-internal integration tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-034",
+        "--json"
+      ],
+      "verification_method": "Direct service/API-internal integration tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-035",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Runtime denial, zero operations/bytes/calls, policy and audit refs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-035",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Real sandbox integration test for each capability class."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-035",
+        "--json"
+      ],
+      "verification_method": "Real sandbox integration test for each capability class.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-036",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Service allow + DB zero rows/denial, anomaly audit/metric.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-036",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Fault-injection integration test that stubs an allow at service layer."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-036",
+        "--json"
+      ],
+      "verification_method": "Fault-injection integration test that stubs an allow at service layer.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-037",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Dry-run, policy decisions, approval state, execution/denial, audit timeline.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-037",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Action lifecycle integration matrix."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-037",
+        "--json"
+      ],
+      "verification_method": "Action lifecycle integration matrix.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-038",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Routing decision, zero disallowed provider calls, explanation and audit refs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-038",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Router integration test with local_test and denied external provider fixtures."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-038",
+        "--json"
+      ],
+      "verification_method": "Router integration test with local_test and denied external provider fixtures.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-039",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Setup/preflight result, policy decision, zero raw secrets, connector and CornerStone audit refs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-039",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Contract tests with declared/undeclared capability and raw-secret probes."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-039",
+        "--json"
+      ],
+      "verification_method": "Contract tests with declared/undeclared capability and raw-secret probes.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-040",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "OPA test JSON, coverage JSON, entrypoint coverage map, exit code 0.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-040",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Run `opa test ... --fail-on-empty --coverage --format=json` plus bundle build/check."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-040",
+        "--json"
+      ],
+      "verification_method": "Run `opa test ... --fail-on-empty --coverage --format=json` plus bundle build/check.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-041",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "OPA status before/after, revision transition, decision sample set, zero mixed/undefined results.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-041",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Concurrent evaluation during bundle update."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-041",
+        "--json"
+      ],
+      "verification_method": "Concurrent evaluation during bundle update.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-042",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "OPA status/error, unchanged active revision, decisions under failure, operator alert.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-042",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Bundle failure injection tests including first-start failure."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-042",
+        "--json"
+      ],
+      "verification_method": "Bundle failure injection tests including first-start failure.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-043",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Stable denial/error, zero side effects, readiness/metric/audit evidence.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-043",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Fault-injection tests for connection refused, timeout, 5xx, malformed JSON."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-043",
+        "--json"
+      ],
+      "verification_method": "Fault-injection tests for connection refused, timeout, 5xx, malformed JSON.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-044",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Cache keys/digests, new decision revision, denial, zero stale allows.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-044",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Allow\u2192revoke/update\u2192retry tests across tenants."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-044",
+        "--json"
+      ],
+      "verification_method": "Allow\u2192revoke/update\u2192retry tests across tenants.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-045",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Decision log with masked fields, CornerStone audit ref, zero secret scanner findings.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-045",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Secret-bearing fixture through allow and deny decisions."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-045",
+        "--json"
+      ],
+      "verification_method": "Secret-bearing fixture through allow and deny decisions.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-046",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Action/workflow records, bundle revisions, approvals, before/after decisions, rollback transcript.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-046",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Integration test for draft\u2192dry-run\u2192approve\u2192activate\u2192rollback and direct bypass denial."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-046",
+        "--json"
+      ],
+      "verification_method": "Integration test for draft\u2192dry-run\u2192approve\u2192activate\u2192rollback and direct bypass denial.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-047",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Response snapshots/screenshots, stable codes, matching decision/audit refs, leak scan.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-047",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Golden API/CLI/browser tests for major denial classes."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-047",
+        "--json"
+      ],
+      "verification_method": "Golden API/CLI/browser tests for major denial classes.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-048",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Limit configuration, test corpus, resource metrics, stable failures.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-048",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Boundary-value and property/fuzz tests using configuration-derived N-1/N/N+1 cases."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-048",
+        "--json"
+      ],
+      "verification_method": "Boundary-value and property/fuzz tests using configuration-derived N-1/N/N+1 cases.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-049",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Conflict matrix, final reason list, bundle revision, no accidental allow.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-049",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "OPA data-driven conflict tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-049",
+        "--json"
+      ],
+      "verification_method": "OPA data-driven conflict tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/policy/vs2-bundle-lifecycle.json",
-        "reports/policy/vs2-opa-coverage.json",
-        "reports/policy/vs2-opa-test.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-050",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Decision comparison report, mismatch denial, anomaly audit/metric.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-050",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Cross-enforcement conformance test and deliberate mismatch injection."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-050",
+        "--json"
+      ],
+      "verification_method": "Cross-enforcement conformance test and deliberate mismatch injection.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-051",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Denied tool result, sink access log with zero requests, network counter, policy/audit refs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-051",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Container/process integration test with local egress sink and packet/request counters."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-051",
+        "--json"
+      ],
+      "verification_method": "Container/process integration test with local egress sink and packet/request counters.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-052",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "One sink request, sanitized request metadata, Action/Workflow/Connector result, decision/audit refs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-052",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "End-to-end local integration test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-052",
+        "--json"
+      ],
+      "verification_method": "End-to-end local integration test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-053",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "A success/B denial, separate decisions, sink count exactly one.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-053",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Two-tenant egress integration test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-053",
+        "--json"
+      ],
+      "verification_method": "Two-tenant egress integration test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-054",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Per-case decisions, sink logs, normalization output, zero unexpected calls.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-054",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Table-driven boundary tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-054",
+        "--json"
+      ],
+      "verification_method": "Table-driven boundary tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-055",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Denied decisions, zero sink/metadata requests, sanitized destination class.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-055",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "IPv4/IPv6 destination matrix against local fixtures."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-055",
+        "--json"
+      ],
+      "verification_method": "IPv4/IPv6 destination matrix against local fixtures.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-056",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "DNS transcript, selected/blocked addresses, zero denied-address connections.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-056",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Deterministic fake-DNS rebinding test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-056",
+        "--json"
+      ],
+      "verification_method": "Deterministic fake-DNS rebinding test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-057",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Hop-by-hop decisions, sink logs, header redaction, bounded redirect count.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-057",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Mock redirect-chain tests including loops and cross-host redirects."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-057",
+        "--json"
+      ],
+      "verification_method": "Mock redirect-chain tests including loops and cross-host redirects.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-058",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Zero unauthorized connections/processes, denied capability records, runtime audit.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-058",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Adversarial sandbox integration suite."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-058",
+        "--json"
+      ],
+      "verification_method": "Adversarial sandbox integration suite.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-059",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Zero tool/action/egress calls, blocked-attempt audit, untrusted label/evidence refs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-059",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Prompt-injection red-team fixtures across artifact and connector paths."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-059",
+        "--json"
+      ],
+      "verification_method": "Prompt-injection red-team fixtures across artifact and connector paths.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-060",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Sink metadata without raw secret, zero secret scanner findings, credential reference only.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-060",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Secret-canary integration tests for allowed and denied calls."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-060",
+        "--json"
+      ],
+      "verification_method": "Secret-canary integration tests for allowed and denied calls.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-061",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Dry-run and execution decision revisions, stale-state denial, zero sink calls.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-061",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Allow-at-dry-run \u2192 revoke/change \u2192 execute test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-061",
+        "--json"
+      ],
+      "verification_method": "Allow-at-dry-run \u2192 revoke/change \u2192 execute test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-062",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Attempt timeline, one side effect maximum, idempotency key scope, compensation/audit record.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-062",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Mock provider fault and duplicate-request tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-062",
+        "--json"
+      ],
+      "verification_method": "Mock provider fault and duplicate-request tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-063",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Correlated records, counter assertions, decision IDs, secret-scan report.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-063",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Integration plus log/metric contract tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-063",
+        "--json"
+      ],
+      "verification_method": "Integration plus log/metric contract tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/network/vs2-egress-proof.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-064",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Degraded readiness, denied operations, zero sink/host counters, operator guidance.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-064",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Stop/disable controller and repeat capability tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-064",
+        "--json"
+      ],
+      "verification_method": "Stop/disable controller and repeat capability tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-065",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "CLI/API payloads, screenshots/DOM snapshot, schema validation, matching references.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-065",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Golden contract tests and browser proof."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-065",
+        "--json"
+      ],
+      "verification_method": "Golden contract tests and browser proof.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/audit/vs2-audit-integrity.json",
-        "reports/security/vs2-local-security-proof.json",
-        "reports/security/vs2-output-leak-scan.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-066",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Event inventory, verification success, tamper detection failure evidence.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-066",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Audit contract tests and tamper fixture."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-066",
+        "--json"
+      ],
+      "verification_method": "Audit contract tests and tamper fixture.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/audit/vs2-audit-integrity.json",
-        "reports/security/vs2-local-security-proof.json",
-        "reports/security/vs2-output-leak-scan.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-067",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Status JSON/dashboard snapshot, metrics samples, alert events, leak scan.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-067",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Component fault-injection and observability contract tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-067",
+        "--json"
+      ],
+      "verification_method": "Component fault-injection and observability contract tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/db/vs2-migration-rollback.json",
-        "reports/db/vs2-rls-inventory.json",
-        "reports/db/vs2-tenant-isolation.json",
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-068",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Before/after object counts/hashes, regression reports, rollback transcript, no data loss.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-068",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Fresh and upgrade-path integration tests with checksums and existing VS0/VS1 fixtures."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-068",
+        "--json"
+      ],
+      "verification_method": "Fresh and upgrade-path integration tests with checksums and existing VS0/VS1 fixtures.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/audit/vs2-audit-integrity.json",
-        "reports/security/vs2-local-security-proof.json",
-        "reports/security/vs2-output-leak-scan.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-069",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Command transcript with exit codes, component versions, policy revision, RLS inventory, generated IDs, elapsed time.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-069",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Executable clean-environment quickstart."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-069",
+        "--json"
+      ],
+      "verification_method": "Executable clean-environment quickstart.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/audit/vs2-audit-integrity.json",
-        "reports/security/vs2-local-security-proof.json",
-        "reports/security/vs2-output-leak-scan.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-070",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Machine-readable report, command transcript, evidence manifest/hashes, base/final revision metadata, verdict.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-070",
+      "status": "NOT_VERIFIED",
       "type": "MUST_PASS",
-      "verification_method": "Scenario report schema validation, gate command, report review."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-070",
+        "--json"
+      ],
+      "verification_method": "Scenario report schema validation, gate command, report review.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R01",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Existing scenario reports with exit code 0 and no weakened assertions.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R01",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Run existing VS0 EVUX/runtime/operator gates."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R01",
+        "--json"
+      ],
+      "verification_method": "Run existing VS0 EVUX/runtime/operator gates.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R02",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "VS1 report, zero auto-promotions/cross-tenant promotions, policy refs.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R02",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Run `make verify-vs1-ontology` plus cross-tenant ontology tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R02",
+        "--json"
+      ],
+      "verification_method": "Run `make verify-vs1-ontology` plus cross-tenant ontology tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R03",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Zero personal refs/canary, denial or insufficient-evidence response.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R03",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Known-canary personal\u2192organization leak test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R03",
+        "--json"
+      ],
+      "verification_method": "Known-canary personal\u2192organization leak test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R04",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Zero organization refs/canary, policy/audit outcome.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R04",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Organization\u2192personal canary leak test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R04",
+        "--json"
+      ],
+      "verification_method": "Organization\u2192personal canary leak test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R05",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Denied decision, zero source rows and memory writes.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R05",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Policy/data-access test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R05",
+        "--json"
+      ],
+      "verification_method": "Policy/data-access test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R06",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Zero authority changes/tool calls/egress, blocked-attempt audit.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R06",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Red-team fixture suite."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R06",
+        "--json"
+      ],
+      "verification_method": "Red-team fixture suite.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R07",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Validation failure/quarantine, zero credential/network exposure.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R07",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Static and runtime direct-provider tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R07",
+        "--json"
+      ],
+      "verification_method": "Static and runtime direct-provider tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R08",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Gate failure or runtime denial, unchanged state, audit/anomaly evidence.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R08",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Deliberate bypass fixture/test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R08",
+        "--json"
+      ],
+      "verification_method": "Deliberate bypass fixture/test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R09",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Failing omission proof, passing corrected event inventory.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R09",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Mutation test that omits an event."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R09",
+        "--json"
+      ],
+      "verification_method": "Mutation test that omits an event.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R10",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Default config snapshot, denial suite, RLS/role inventory.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R10",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Fresh/reset/partial-config integration tests."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R10",
+        "--json"
+      ],
+      "verification_method": "Fresh/reset/partial-config integration tests.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R11",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Decision revision sequence, zero post-revocation successes.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R11",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "High-concurrency revocation test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R11",
+        "--json"
+      ],
+      "verification_method": "High-concurrency revocation test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R12",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Zero scanner findings or reviewed allowlist with justification.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R12",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Canary/secret scanner across generated outputs."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R12",
+        "--json"
+      ],
+      "verification_method": "Canary/secret scanner across generated outputs.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R13",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Expected failing gate and remediation evidence.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R13",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Negative migration fixture."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R13",
+        "--json"
+      ],
+      "verification_method": "Negative migration fixture.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R14",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Repeatable report hashes/semantics, zero cross-fixture canaries.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R14",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Parallel/repeat test execution."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R14",
+        "--json"
+      ],
+      "verification_method": "Parallel/repeat test execution.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R15",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "UI map/screenshots, absence of required repo-name workflow.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R15",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Automated nav/DOM check plus human review in H06."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R15",
+        "--json"
+      ],
+      "verification_method": "Automated nav/DOM check plus human review in H06.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
-      "evidence": [
-        "reports/security/vs2-local-security-proof.json"
-      ],
+      "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 4,
       "id": "VS2-SEC-R16",
+      "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
       "owner": "AI",
       "required_evidence": "Zero overclaim findings; explicit scope/human-required table.",
-      "status": "PASS",
+      "scenario_id": "VS2-SEC-R16",
+      "status": "NOT_VERIFIED",
       "type": "REGRESSION",
-      "verification_method": "Static/report lint and evidence manifest review."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-R16",
+        "--json"
+      ],
+      "verification_method": "Static/report lint and evidence manifest review.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 6,
       "id": "VS2-SEC-H01",
+      "notes": "Human/external review required by the VS2 contract.",
       "owner": "Human",
       "required_evidence": "Dated APPROVE/REJECT record with approved scope, exceptions, rollback owner, and dependency decision.",
+      "scenario_id": "VS2-SEC-H01",
       "status": "HUMAN_REQUIRED",
       "type": "HUMAN_REQUIRED",
-      "verification_method": "Human architecture/security review."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-H01",
+        "--json"
+      ],
+      "verification_method": "Human architecture/security review.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 6,
       "id": "VS2-SEC-H02",
+      "notes": "Human/external review required by the VS2 contract.",
       "owner": "Human",
       "required_evidence": "Signed report, test scope/topology, findings, remediation, re-test evidence.",
+      "scenario_id": "VS2-SEC-H02",
       "status": "HUMAN_REQUIRED",
       "type": "HUMAN_REQUIRED",
-      "verification_method": "Independent penetration/security review."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-H02",
+        "--json"
+      ],
+      "verification_method": "Independent penetration/security review.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 6,
       "id": "VS2-SEC-H03",
+      "notes": "Human/external review required by the VS2 contract.",
       "owner": "Human",
       "required_evidence": "Redacted login/mapping/revocation transcript and owner/security approval.",
+      "scenario_id": "VS2-SEC-H03",
       "status": "HUMAN_REQUIRED",
       "type": "HUMAN_REQUIRED",
-      "verification_method": "Approved real-IdP test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-H03",
+        "--json"
+      ],
+      "verification_method": "Approved real-IdP test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 6,
       "id": "VS2-SEC-H04",
+      "notes": "Human/external review required by the VS2 contract.",
       "owner": "Human",
       "required_evidence": "Topology diagram, firewall/proxy/network-policy evidence, packet/log transcript, approval.",
+      "scenario_id": "VS2-SEC-H04",
       "status": "HUMAN_REQUIRED",
       "type": "HUMAN_REQUIRED",
-      "verification_method": "Network control review and egress test."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-H04",
+        "--json"
+      ],
+      "verification_method": "Network control review and egress test.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 6,
       "id": "VS2-SEC-H05",
+      "notes": "Human/external review required by the VS2 contract.",
       "owner": "Human",
       "required_evidence": "Redacted provider transcript, approval, ConnectorHub/CornerStone audit refs, result/evidence refs.",
+      "scenario_id": "VS2-SEC-H05",
       "status": "HUMAN_REQUIRED",
       "type": "HUMAN_REQUIRED",
-      "verification_method": "Approved live-provider rehearsal."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-H05",
+        "--json"
+      ],
+      "verification_method": "Approved live-provider rehearsal.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 6,
       "id": "VS2-SEC-H06",
+      "notes": "Human/external review required by the VS2 contract.",
       "owner": "Human",
       "required_evidence": "ACCEPT/REJECT note, screenshots/recording, task outcomes, confusion/issues list.",
+      "scenario_id": "VS2-SEC-H06",
       "status": "HUMAN_REQUIRED",
       "type": "HUMAN_REQUIRED",
-      "verification_method": "Human usability/trust review."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-H06",
+        "--json"
+      ],
+      "verification_method": "Human usability/trust review.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     },
     {
       "evidence": [],
+      "evidence_hashes": [],
+      "evidence_paths": [],
+      "exit_code": 6,
       "id": "VS2-SEC-H07",
+      "notes": "Human/external review required by the VS2 contract.",
       "owner": "Human",
       "required_evidence": "Signed transcript, before/after counts/hashes, RLS/policy inventory, restore/rollback result.",
+      "scenario_id": "VS2-SEC-H07",
       "status": "HUMAN_REQUIRED",
       "type": "HUMAN_REQUIRED",
-      "verification_method": "Human-supervised non-destructive rehearsal."
+      "validator": null,
+      "verification_command": [
+        "cornerstone",
+        "scenario",
+        "verify",
+        "vs2-policy-tenancy-egress",
+        "--scenario",
+        "VS2-SEC-H07",
+        "--json"
+      ],
+      "verification_method": "Human-supervised non-destructive rehearsal.",
+      "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+      "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
     }
   ],
   "scenario_set": "vs2-policy-tenancy-egress",
+  "scenario_specific_evidence_report": "reports/security/vs2-scenario-specific-evidence.json",
   "schema_version": "cs.vs2_local_security_proof.v0",
-  "status": "success",
+  "status": "failed",
   "summary": {
     "ai_verifiable": 86,
-    "blocking": 0,
+    "blocking": 79,
     "fail": 0,
     "human_required": 7,
-    "pass": 86,
-    "product_feature_claims": "LOCAL_VS2_POLICY_TENANCY_EGRESS_READY_PRODUCTION_NOT_READY",
+    "not_verified": 79,
+    "pass": 7,
+    "product_feature_claims": "VS2_SCENARIO_SPECIFIC_EVIDENCE_INCOMPLETE",
     "scenario_count": 93
-  }
+  },
+  "synthetic_world_report": "reports/security/vs2-synthetic-world.json",
+  "verified_commit": "8a139984cb307232d1de0b8026e4d84a1cb8dfc3",
+  "verified_tree_sha": "1260827b95e65e57fcfe55b38174390993e28f96"
 }

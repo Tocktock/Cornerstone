@@ -1,7 +1,7 @@
 {
   "audit_schema": {
     "connector_capability": "mock_provider.read",
-    "decision_id": "egress_5f4a3ae24acbc0a1",
+    "decision_id": "egress_468dacc53f61b395",
     "destination_class": "reserved_loopback",
     "raw_payload_stored": false,
     "trace_id": "trace_vs2_egress_local"
@@ -50,12 +50,12 @@
   "default_denied": {
     "bytes_sent": 0,
     "decision": "deny",
-    "decision_id": "egress_5f4a3ae24acbc0a1",
+    "decision_id": "egress_468dacc53f61b395",
     "destination": {
       "host": "127.0.0.1",
       "method": "GET",
       "path": "/blocked",
-      "port": 51328,
+      "port": 59475,
       "scheme": "http"
     },
     "external_http_calls": 0,
@@ -185,7 +185,7 @@
   "sink": {
     "bytes": 0,
     "host": "127.0.0.1",
-    "port": 51328,
+    "port": 59475,
     "requests": 0
   },
   "status": "passed",

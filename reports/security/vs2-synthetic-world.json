@@ -1,0 +1,108 @@
+{
+  "fixture_note": "Synthetic local-only users, tenants, memberships, and signed sessions; no real customer data or credentials.",
+  "forged_inputs": {
+    "classification": "restricted",
+    "namespace_id": "personal",
+    "owner_id": "principal_bob",
+    "role": "admin",
+    "tenant_id": "tenant_beta",
+    "workspace_id": "beta-home"
+  },
+  "memberships": [
+    {
+      "membership_id": "m_alpha_alice_personal",
+      "membership_revision": "memrev-alpha-001",
+      "namespace_id": "personal",
+      "owner_id": "principal_alice",
+      "principal_id": "principal_alice",
+      "revoked": false,
+      "roles": [
+        "owner"
+      ],
+      "session_version": 1,
+      "tenant_id": "tenant_alpha",
+      "workspace_id": "alpha-home"
+    },
+    {
+      "membership_id": "m_alpha_alice_org",
+      "membership_revision": "memrev-alpha-org-001",
+      "namespace_id": "organization",
+      "owner_id": "principal_alice",
+      "principal_id": "principal_alice",
+      "revoked": false,
+      "roles": [
+        "operator"
+      ],
+      "session_version": 1,
+      "tenant_id": "tenant_alpha",
+      "workspace_id": "alpha-ops"
+    },
+    {
+      "membership_id": "m_beta_bob_personal",
+      "membership_revision": "memrev-beta-001",
+      "namespace_id": "personal",
+      "owner_id": "principal_bob",
+      "principal_id": "principal_bob",
+      "revoked": false,
+      "roles": [
+        "viewer"
+      ],
+      "session_version": 1,
+      "tenant_id": "tenant_beta",
+      "workspace_id": "beta-home"
+    }
+  ],
+  "namespaces": [
+    {
+      "namespace_id": "personal",
+      "owner_id": "principal_alice",
+      "tenant_id": "tenant_alpha",
+      "workspace_id": "alpha-home"
+    },
+    {
+      "namespace_id": "organization",
+      "owner_id": "principal_alice",
+      "tenant_id": "tenant_alpha",
+      "workspace_id": "alpha-ops"
+    },
+    {
+      "namespace_id": "personal",
+      "owner_id": "principal_bob",
+      "tenant_id": "tenant_beta",
+      "workspace_id": "beta-home"
+    }
+  ],
+  "principals": [
+    {
+      "display_name": "Alice Alpha",
+      "principal_id": "principal_alice"
+    },
+    {
+      "display_name": "Bob Beta",
+      "principal_id": "principal_bob"
+    },
+    {
+      "display_name": "Mallory Forged",
+      "principal_id": "principal_mallory"
+    }
+  ],
+  "schema_version": "cs.vs2.synthetic_world.v1",
+  "session_digests": {
+    "alice_org": "3af034f90632403195571b7c43c0f84760f7d94fdea8ec5f92f10f534ee98a74",
+    "alice_personal": "4717649c01fd5e7f6817b7160fb13f9b12355c5a50f33f5dc00b2236e85f1168",
+    "bob_personal": "98ccfaa2a5ca2c28ca36aa7a1fda621d24ade8eec7de4f48d32b38818c90016a",
+    "expired_alice": "2ede5c1ab49c3755c032dab00a50ffd11726e268d17b854e40f55425ded295f8"
+  },
+  "tenants": [
+    {
+      "canary": "ALPHA_ONLY_VS2_CANARY",
+      "name": "Alpha Clinic",
+      "tenant_id": "tenant_alpha"
+    },
+    {
+      "canary": "BETA_ONLY_VS2_CANARY",
+      "name": "Beta Works",
+      "tenant_id": "tenant_beta"
+    }
+  ]
+}

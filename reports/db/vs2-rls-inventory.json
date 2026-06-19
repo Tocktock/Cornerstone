@@ -7,7 +7,7 @@
     "policy_inventory_present": true,
     "unsafe_function_not_public": true
   },
-  "container": "cornerstone-vs2-pg-abd31cc7d8",
+  "container": "cornerstone-vs2-pg-d47f8f968a",
   "function_execute_public": false,
   "policy_count": 60,
   "postgres_image": "postgres:16-alpine",
@@ -115,28 +115,28 @@
         "-d",
         "--rm",
         "--name",
-        "cornerstone-vs2-pg-abd31cc7d8",
+        "cornerstone-vs2-pg-d47f8f968a",
         "-e",
         "POSTGRES_PASSWORD=cornerstone",
         "postgres:16-alpine"
       ],
-      "elapsed_seconds": 0.132,
+      "elapsed_seconds": 0.116,
       "exit_code": 0,
       "stderr_tail": [],
       "stdout_tail": [
-        "1cb5585ee59045d06b6a857e83ebc8fb8940bb6d6d780e2ce5cad9b20cdcf677"
+        "73efafae2f239224a4bbe2acc8aed1de655340837dd7ef459645ed492029f7e1"
       ]
     },
     {
       "command": [
         "docker",
         "exec",
-        "cornerstone-vs2-pg-abd31cc7d8",
+        "cornerstone-vs2-pg-d47f8f968a",
         "pg_isready",
         "-U",
         "postgres"
       ],
-      "elapsed_seconds": 0.058,
+      "elapsed_seconds": 0.034,
       "exit_code": 2,
       "stderr_tail": [],
       "stdout_tail": [
@@ -147,28 +147,12 @@
       "command": [
         "docker",
         "exec",
-        "cornerstone-vs2-pg-abd31cc7d8",
+        "cornerstone-vs2-pg-d47f8f968a",
         "pg_isready",
         "-U",
         "postgres"
       ],
-      "elapsed_seconds": 0.058,
-      "exit_code": 2,
-      "stderr_tail": [],
-      "stdout_tail": [
-        "/var/run/postgresql:5432 - no response"
-      ]
-    },
-    {
-      "command": [
-        "docker",
-        "exec",
-        "cornerstone-vs2-pg-abd31cc7d8",
-        "pg_isready",
-        "-U",
-        "postgres"
-      ],
-      "elapsed_seconds": 0.063,
+      "elapsed_seconds": 0.069,
       "exit_code": 0,
       "stderr_tail": [],
       "stdout_tail": [
@@ -180,7 +164,7 @@
         "docker",
         "exec",
         "-i",
-        "cornerstone-vs2-pg-abd31cc7d8",
+        "cornerstone-vs2-pg-d47f8f968a",
         "psql",
         "-U",
         "postgres",
@@ -193,7 +177,7 @@
         "-t",
         "-A"
       ],
-      "elapsed_seconds": 0.14,
+      "elapsed_seconds": 0.134,
       "exit_code": 0,
       "stderr_tail": [],
       "stdout_tail": []
@@ -203,30 +187,7 @@
         "docker",
         "exec",
         "-i",
-        "cornerstone-vs2-pg-abd31cc7d8",
-        "psql",
-        "-U",
-        "postgres",
-        "-d",
-        "cornerstone",
-        "-v",
-        "ON_ERROR_STOP=1",
-        "-X",
-        "-q",
-        "-t",
-        "-A"
-      ],
-      "elapsed_seconds": 0.064,
-      "exit_code": 0,
-      "stderr_tail": [],
-      "stdout_tail": []
-    },
-    {
-      "command": [
-        "docker",
-        "exec",
-        "-i",
-        "cornerstone-vs2-pg-abd31cc7d8",
+        "cornerstone-vs2-pg-d47f8f968a",
         "psql",
         "-U",
         "postgres",
@@ -239,7 +200,7 @@
         "-t",
         "-A"
       ],
-      "elapsed_seconds": 0.064,
+      "elapsed_seconds": 0.061,
       "exit_code": 0,
       "stderr_tail": [],
       "stdout_tail": []
@@ -249,7 +210,30 @@
         "docker",
         "exec",
         "-i",
-        "cornerstone-vs2-pg-abd31cc7d8",
+        "cornerstone-vs2-pg-d47f8f968a",
+        "psql",
+        "-U",
+        "postgres",
+        "-d",
+        "cornerstone",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-X",
+        "-q",
+        "-t",
+        "-A"
+      ],
+      "elapsed_seconds": 0.049,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": []
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "-i",
+        "cornerstone-vs2-pg-d47f8f968a",
         "psql",
         "-U",
         "postgres",
@@ -274,7 +258,7 @@
         "docker",
         "exec",
         "-i",
-        "cornerstone-vs2-pg-abd31cc7d8",
+        "cornerstone-vs2-pg-d47f8f968a",
         "psql",
         "-U",
         "postgres",
@@ -287,7 +271,32 @@
         "-t",
         "-A"
       ],
-      "elapsed_seconds": 0.051,
+      "elapsed_seconds": 0.056,
+      "exit_code": 3,
+      "stderr_tail": [
+        "ERROR:  new row violates row-level security policy for table \"artifacts\""
+      ],
+      "stdout_tail": []
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "-i",
+        "cornerstone-vs2-pg-d47f8f968a",
+        "psql",
+        "-U",
+        "postgres",
+        "-d",
+        "cornerstone",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-X",
+        "-q",
+        "-t",
+        "-A"
+      ],
+      "elapsed_seconds": 0.052,
       "exit_code": 3,
       "stderr_tail": [
         "ERROR:  permission denied for function unsafe_all_artifacts"
@@ -299,7 +308,30 @@
         "docker",
         "exec",
         "-i",
-        "cornerstone-vs2-pg-abd31cc7d8",
+        "cornerstone-vs2-pg-d47f8f968a",
+        "psql",
+        "-U",
+        "postgres",
+        "-d",
+        "cornerstone",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-X",
+        "-q",
+        "-t",
+        "-A"
+      ],
+      "elapsed_seconds": 0.058,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": []
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "-i",
+        "cornerstone-vs2-pg-d47f8f968a",
         "psql",
         "-U",
         "postgres",
@@ -313,29 +345,6 @@
         "-A"
       ],
       "elapsed_seconds": 0.053,
-      "exit_code": 0,
-      "stderr_tail": [],
-      "stdout_tail": []
-    },
-    {
-      "command": [
-        "docker",
-        "exec",
-        "-i",
-        "cornerstone-vs2-pg-abd31cc7d8",
-        "psql",
-        "-U",
-        "postgres",
-        "-d",
-        "cornerstone",
-        "-v",
-        "ON_ERROR_STOP=1",
-        "-X",
-        "-q",
-        "-t",
-        "-A"
-      ],
-      "elapsed_seconds": 0.054,
       "exit_code": 0,
       "stderr_tail": [],
       "stdout_tail": []

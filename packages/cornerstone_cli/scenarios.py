@@ -11714,6 +11714,14 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
                 owner=owner,
             )
             | {
+                "scenario_id": source_row.get("scenario_id", ""),
+                "validator": proof_row.get("validator"),
+                "verification_command": proof_row.get("verification_command"),
+                "exit_code": proof_row.get("exit_code"),
+                "evidence_paths": proof_row.get("evidence_paths", evidence),
+                "evidence_hashes": proof_row.get("evidence_hashes", []),
+                "verified_commit": proof_row.get("verified_commit"),
+                "verified_tree_sha": proof_row.get("verified_tree_sha"),
                 "given": source_row.get("given", ""),
                 "when": source_row.get("when", ""),
                 "then": source_row.get("then", ""),
@@ -11741,7 +11749,7 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
             "product_feature_claims": (
                 "LOCAL_VS2_POLICY_TENANCY_EGRESS_READY_PRODUCTION_NOT_READY"
                 if not blocking
-                else "VS2_LOCAL_PROOF_FAILED"
+                else local_proof.get("summary", {}).get("product_feature_claims", "VS2_SCENARIO_SPECIFIC_EVIDENCE_INCOMPLETE")
             ),
         },
         "scenario_results": scenario_results,
@@ -11751,6 +11759,9 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
             "path": str(VS2_PROOF_REPORT),
             "status": local_proof.get("status"),
             "proof_hash": local_proof.get("proof_hash"),
+            "scenario_check_registry": local_proof.get("scenario_check_registry", []),
+            "scenario_specific_evidence_report": local_proof.get("scenario_specific_evidence_report"),
+            "synthetic_world_report": local_proof.get("synthetic_world_report"),
             "summary": local_proof.get("summary", {}),
             "postgres": local_proof.get("postgres", {}),
             "opa": local_proof.get("opa", {}),
@@ -11762,7 +11773,9 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
             "H02-H07 evidence before claiming production security, real IdP, production network, live provider, human UX, or migration readiness.",
         ],
         "negative_evidence": {
-            "ai_rows_marked_pass_without_evidence": 0,
+            "ai_rows_marked_pass_without_evidence": local_proof.get("negative_evidence", {}).get("ai_rows_marked_pass_without_evidence", 0),
+            "ai_rows_marked_pass_without_scenario_validator": local_proof.get("negative_evidence", {}).get("ai_rows_marked_pass_without_scenario_validator", 0),
+            "blanket_dependencies_ok_pass_used": local_proof.get("negative_evidence", {}).get("blanket_dependencies_ok_pass_used", 0),
             "production_security_claimed": 0,
             "live_provider_ready_claimed": 0,
             "human_acceptance_claimed_by_ai": 0,

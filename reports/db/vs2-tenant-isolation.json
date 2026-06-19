@@ -1,29 +1,159 @@
 {
   "checks": {
+    "all_protected_tables_seeded_for_tenant_a": true,
     "cross_tenant_delete_zero": true,
+    "cross_tenant_update_zero": true,
     "forged_insert_denied": true,
+    "forged_update_denied": true,
     "policy_table_isolated": true,
     "safe_view_is_rls_bound": true,
     "security_definer_execute_denied": true,
     "tenant_a_search_isolated": true,
     "tenant_a_sees_one_artifact": true,
+    "tenant_b_absent_from_all_tenant_a_relations": true,
     "tenant_b_absent_from_tenant_a": true
   },
   "cross_tenant_delete": {
     "cross_tenant_delete_returned": 0
   },
+  "cross_tenant_update": {
+    "cross_tenant_update_returned": 0
+  },
   "forged_insert_denied": true,
   "forged_insert_error_neutral": true,
+  "forged_update_denied": true,
   "security_definer_execute_denied": true,
   "status": "passed",
   "tenant_a_visible": {
     "artifact_count": 1,
     "foreign_artifact_count": 0,
     "policy_count": 1,
+    "relation_counts": [
+      {
+        "foreign_visible_count": 0,
+        "relation": "action_cards",
+        "visible_count": 1,
+        "visible_ids": [
+          "action_cards_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "artifacts",
+        "visible_count": 1,
+        "visible_ids": [
+          "artifacts_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "audit_events",
+        "visible_count": 1,
+        "visible_ids": [
+          "audit_events_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "claims",
+        "visible_count": 1,
+        "visible_ids": [
+          "claims_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "derived_representations",
+        "visible_count": 1,
+        "visible_ids": [
+          "derived_representations_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "egress_policies",
+        "visible_count": 1,
+        "visible_ids": [
+          "egress_policies_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "evidence_bundles",
+        "visible_count": 1,
+        "visible_ids": [
+          "evidence_bundles_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "idempotency_keys",
+        "visible_count": 1,
+        "visible_ids": [
+          "idempotency_keys_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "jobs",
+        "visible_count": 1,
+        "visible_ids": [
+          "jobs_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "migration_quarantine",
+        "visible_count": 1,
+        "visible_ids": [
+          "migration_quarantine_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "ontology_links",
+        "visible_count": 1,
+        "visible_ids": [
+          "ontology_links_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "ontology_objects",
+        "visible_count": 1,
+        "visible_ids": [
+          "ontology_objects_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "policy_decisions",
+        "visible_count": 1,
+        "visible_ids": [
+          "policy_decisions_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "search_snapshots",
+        "visible_count": 1,
+        "visible_ids": [
+          "search_snapshots_a"
+        ]
+      },
+      {
+        "foreign_visible_count": 0,
+        "relation": "workflow_runs",
+        "visible_count": 1,
+        "visible_ids": [
+          "workflow_runs_a"
+        ]
+      }
+    ],
     "safe_count_view_rows": 1,
     "search_count": 1,
     "visible_ids": [
-      "artifact_a"
+      "artifacts_a"
     ]
   }
 }

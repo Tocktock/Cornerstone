@@ -1,30 +1,30 @@
 {
   "audit_refs": [
-    "audit:audit_c7cadcb816eee60d"
+    "audit:audit_4e035a9bacb2b275"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone security sensitive-change-test",
   "errors": [],
   "evidence_refs": [
-    "sensitive_change_gate:sensgate_6b78f464bf92f485"
+    "sensitive_change_gate:sensgate_759611addb786a23"
   ],
   "ids": {
-    "gate_id": "sensgate_6b78f464bf92f485",
-    "git_commit": "4683d08"
+    "gate_id": "sensgate_759611addb786a23",
+    "git_commit": "8a13998"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
   "owner_id": "local-user",
   "policy_decision_refs": [
-    "policy:policy_54bc4330a651ebc4"
+    "policy:policy_d0d9914f17af70c6"
   ],
   "policy_decisions": [
     {
       "category": "vs2_policy_tenancy_egress",
-      "decided_at": "2026-06-18T17:17:45.122495Z",
+      "decided_at": "2026-06-19T05:36:21.568325Z",
       "decision": "requires_approval",
       "executed": false,
-      "id": "policy_54bc4330a651ebc4",
+      "id": "policy_d0d9914f17af70c6",
       "impact": [
         "Could mutate durable product state, security posture, tenant boundaries, audit/retention guarantees, release status, or external systems."
       ],
@@ -54,16 +54,16 @@
   "schema_version": "cs.cli.v0",
   "sensitive_change_gate": {
     "category": "vs2_policy_tenancy_egress",
-    "created_at": "2026-06-18T17:17:45.122822Z",
+    "created_at": "2026-06-19T05:36:21.570764Z",
     "external_http_calls": 0,
-    "gate_id": "sensgate_6b78f464bf92f485",
+    "gate_id": "sensgate_759611addb786a23",
     "mutation_executed": false,
     "policy_decision": {
       "category": "vs2_policy_tenancy_egress",
-      "decided_at": "2026-06-18T17:17:45.122495Z",
+      "decided_at": "2026-06-19T05:36:21.568325Z",
       "decision": "requires_approval",
       "executed": false,
-      "id": "policy_54bc4330a651ebc4",
+      "id": "policy_d0d9914f17af70c6",
       "impact": [
         "Could mutate durable product state, security posture, tenant boundaries, audit/retention guarantees, release status, or external systems."
       ],

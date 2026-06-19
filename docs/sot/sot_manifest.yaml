@@ -226,13 +226,14 @@ vs2_policy_tenancy_egress:
   matrix: "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv"
   current_state_report: "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md"
   implementation_report: "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_IMPLEMENTATION_REPORT_2026-06-19.md"
+  remediation_report: "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_SCENARIO_SPECIFIC_REMEDIATION_REPORT_2026-06-19.md"
   expected_scenario_report: "reports/scenario/vs2-policy-tenancy-egress-YYYY-MM-DD.json"
   authority: "task-scoped scenario contract for VS2 policy, tenant isolation, and default egress deny"
   scenario_count: 93
   must_pass_count: 70
   regression_count: 16
   human_required_count: 7
-  status: "local deterministic verifier passes 86 AI-verifiable rows; 7 human/external rows remain HUMAN_REQUIRED"
+  status: "scenario-specific remediation in progress: 7 PASS, 79 NOT_VERIFIED, 7 HUMAN_REQUIRED; no blanket proof PASS allowed"
   verifier: "cornerstone scenario verify vs2-policy-tenancy-egress --json --output reports/scenario/vs2-policy-tenancy-egress-YYYY-MM-DD.json"
   gate: "cornerstone scenario gate reports/scenario/vs2-policy-tenancy-egress-YYYY-MM-DD.json --json"
   approval_gate: "VS2-SEC-H01 approved for local/new-application implementation by JiYong/Tars on 2026-06-19 KST; H02-H07 remain external/human gates"

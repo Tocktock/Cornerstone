@@ -1,5 +1,8 @@
 # VS2 Policy, Tenant Isolation, and Default Egress Deny Implementation Report - 2026-06-19
 
+> Superseded for current verification status by `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_SCENARIO_SPECIFIC_REMEDIATION_REPORT_2026-06-19.md`.
+> This report records the earlier local deterministic proof. The current verifier no longer allows a blanket proof to mark all AI-verifiable VS2 scenarios as PASS.
+
 ## Verdict
 
 Local deterministic VS2 implementation is complete for the AI-verifiable scope.
