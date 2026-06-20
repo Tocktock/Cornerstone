@@ -1,10 +1,10 @@
 {
   "artifact_count": 86,
-  "evidence_commit": null,
+  "evidence_commit": "94b343b281980b90141880855cc5a22f05be314b",
   "foundational_artifacts": [
     {
       "path": "reports/db/vs2-rls-inventory.json",
-      "sha256": "7d663bc8c74465af8f518e0ad5cbe4a9ec17a92c7ee437235959951957c6b85f"
+      "sha256": "428f65d48b7c727081408f0b09ac14b47619be4c466c4bb05a0a2af263543718"
     },
     {
       "path": "reports/db/vs2-tenant-isolation.json",
@@ -16,7 +16,7 @@
     },
     {
       "path": "reports/policy/vs2-opa-test.json",
-      "sha256": "3d8bdcdb0e52f41bf2d89ef28c2c166cb2ca56433e5b9591e5602b11e6041e4e"
+      "sha256": "6c2e39dbd99a18da3e539454e2966f9cae18824e56457ca4ee6267bbf2157de0"
     },
     {
       "path": "reports/policy/vs2-opa-coverage.json",
@@ -28,27 +28,27 @@
     },
     {
       "path": "reports/policy/vs2-policy-runtime.json",
-      "sha256": "76e712e25f9a4e8e525c2b6004bb3cc85e80d495437e4f904248b822f9a1c3d0"
+      "sha256": "8d0b0372693fa782c4321ba53fe36de61f9892f92f55401ab7ca129a001e337f"
     },
     {
       "path": "reports/network/vs2-egress-proof.json",
-      "sha256": "140814176ec2b03e05bed28117a8e0b0c3d753cd2102d642ee3a77e07221b4b2"
+      "sha256": "9151dadc7b5c485428457d51269daaf43cf1d68bd9af9ddd905a6b7cc9ccd129"
     },
     {
       "path": "reports/audit/vs2-audit-integrity.json",
-      "sha256": "5148004fdd239190acce41ec31f82717ae6f16d2a0251ccd2b24bffb7cf6debd"
+      "sha256": "0ee433c52b89cb30fa3bd3ab31e34df88ccbfc1cc8d01e0bb688b4845e627425"
     },
     {
       "path": "reports/security/vs2-surface-parity.json",
-      "sha256": "e157ca07190a9e94064e9918b2349514576ef600a6bf65f8758d44942df9a6ef"
+      "sha256": "f14a59e0956ba07284ffd2dc7dd7ceed4ccd8fdc5cda0307a85ddddadde1706a"
     },
     {
       "path": "reports/security/vs2-worker-proof.json",
-      "sha256": "566fffb3a0e20ebe48580b29a99fede1c132bb12cd473081aa76eee7cbc744fa"
+      "sha256": "d8847087e9257d15a90599d91e4673b37b62637361f8b47a62c3d0b1e5f458bd"
     },
     {
       "path": "reports/security/vs2-operator-status.json",
-      "sha256": "1ae97cf8b1233733a6e55891136215ac5ddc3ca1dd33991a380e1904ad687b0b"
+      "sha256": "37b9f3a2edc1bd84c9401906b9e2fe32b4add79f334ee99e49434ad310d6cc1e"
     },
     {
       "path": "reports/security/vs2-regression-proof.json",
@@ -60,615 +60,702 @@
     },
     {
       "path": "reports/security/vs2-synthetic-world.json",
-      "sha256": "46af01b7c617447c70cc54f07c2485e14061b1f3e3a9c45845dc132810762593"
+      "sha256": "986b8129cc6158e01499d0e577853a031f652a0923b22308389c80d31527cf5e"
     }
   ],
   "raw_scenario_artifacts": [
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-001.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-001",
-      "sha256": "2246bd25169ec2ab9fb0dc6bf084cf0f264b57565f775159c5144825f2f6cd2e",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_001"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-002.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-002",
-      "sha256": "083141e9037cb953889209f2eb1ad21c98da125fe75b5a573dc4f3731b99b668",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_002"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-003.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-003",
-      "sha256": "bce3c45f31ac0cab613e059504f2ff61092a990e2fefca5f8c0d0a3825b99366",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_003"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-004.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-004",
-      "sha256": "02394f7ebbee62e40b230c7e5bc66842458451eba1b791187bae784464706250",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_004"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-005.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-005",
-      "sha256": "e7106cca70d3c8547ed754be956a08cefc04365c092e754486ccea8a26d3999c",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_005"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-006.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-006",
-      "sha256": "c34c567606eb5bf5187cf490c8562cafb33a7fff5df56ea1cf8e519bfe14c77d",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_006"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-007.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-007",
-      "sha256": "44d40b7a6b32b195cfe65b6a654a24b350eaa819554e8a4b17ece54de6d606dc",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_007"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-008.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-008",
-      "sha256": "86884cf838796d42027a7c44133faa950bbf74f805da89893628709539b55891",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_008"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-009.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-009",
-      "sha256": "8512697de5559d28db7265d9681c5d001fb0824e719448d26fc20b40cedaff74",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_009"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-010.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-010",
-      "sha256": "210d6efdb9b66d81d66b00aa0f7aabe8c2da4ae501c98e10ed94a811e0306cb8",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_010"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-011.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-011",
-      "sha256": "612c3aa722050b5b9d578134203b026af637b4f26160104727115851e84a2398",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_011"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-012.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-012",
-      "sha256": "855e6b4eaf2e00e9f16e69e3903595dd15107fe2e5b1a32acbc04ec540614df5",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_012"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-013.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-013",
-      "sha256": "5640c74e139d56c6622fe2810bcf403d9128a2fe4706b8973988fb5930d9d1a3",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_013"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-014.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-014",
-      "sha256": "79decd14422725c52c02f4c1534f5136b89e343583aace06c81752aef9cf8c23",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_014"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-015.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-015",
-      "sha256": "95f478e9d388f27ece33cf4576fab6868c45bce7c5036eafdd5a535acd5bf76e",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_015"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-016.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-016",
-      "sha256": "7f0056ff79ba2245bbda8c55ab81cec3bd37d81e7fbd5fbd4b33d7bbb83177f4",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_016"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-017.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-017",
-      "sha256": "e0e9fd1267d6b78d3c09bf6cb821f9bbd3e8677ccebf9ac765cf0175b928cd3f",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_017"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-018.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-018",
-      "sha256": "1fb604b942ccac4ba1e51709203004fb910a3d247b0ac24a7d217a352c0a28f3",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_018"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-019.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-019",
-      "sha256": "b2c12328be15cb57167310932a0a85619097d50beacfe553f15fc07783632c29",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_019"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-020.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-020",
-      "sha256": "5fb5e2cff74213bcf342f681f807a986974d8c78e215468ebad72ab304296cd3",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_020"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-021.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-021",
-      "sha256": "c518823a2736933b6402923fce660f4a7f15e4da1fa67b5531ccf4b85a63c37b",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_021"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-022.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-022",
-      "sha256": "6308abc8e8858a289b39127000f3f1ed7bcf338656bbb6a0a6a6000e2075cbf7",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_022"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-023.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-023",
-      "sha256": "24fface4257b48f739fdf93b21d3fa50bdccbeb25ace8f66529bce9ae7b0b065",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_023"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-024.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-024",
-      "sha256": "f9c369680460addc5afd3da82acf3c432f1194f9f130d48ebc494f69c484c21e",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_024"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-025.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-025",
-      "sha256": "9989eb11006914f0debe4a988facbfd466bceb0899d4b572165b8b8c100d67b0",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_025"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-026.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-026",
-      "sha256": "e0247251745e2b6d7df05f676a03264b73363189701c9a9d6d1ca5c80473b7e6",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_026"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-027.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-027",
-      "sha256": "53ac54b064d752c1f264a0afd1d62f3a72dd1a016f88398cff38f6c1659902db",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_027"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-028.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-028",
-      "sha256": "8a1029ddb33569a3be144cbb4d31eca133c4d23c38e03acad00f3e8b15ba37fa",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_028"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-029.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-029",
-      "sha256": "e1891ca7eb7feda403e7d9b4fd94e556feebbfdbe7a7f7087d143ac489a37dba",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_029"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-030.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-030",
-      "sha256": "7297de5eb5352b984ef449edddd11de3c5fbaccac4a0cf1dea29f92a1e8dab0e",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_030"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-031.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-031",
-      "sha256": "428d9636b013a073795da459d0195eb7c4ab24ca7ff6b8b0c3bc9452c519b352",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_031"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-032.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-032",
-      "sha256": "464814d1f75912fb241d2dcc6f56ad85de578faf2f84636055dcdfa15a27200f",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_032"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-033.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-033",
-      "sha256": "745cee51d75ba4d9b3d49e3922c0f7b7c9c506250ef4c69474981cb3efab3ed9",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_033"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-034.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-034",
-      "sha256": "364960a1a770c7e43d8db1419b3cf28b25dd333218c5a9fa4aec95477ba7b8a1",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_034"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-035.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-035",
-      "sha256": "7860cbe79559d83c74cce7f48e678a149c28ab1547cd421d9c60455e66934eef",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_035"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-036.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-036",
-      "sha256": "3196650ba9d11702f5f9ceb9cbaab131fbb3a4837d59a865f6bb3efe430ac22d",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_036"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-037.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-037",
-      "sha256": "9eb77d82517a9fa7da575eb280709e1140370fd3a6c9a7d17bdf419378c778d6",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_037"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-038.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-038",
-      "sha256": "292afa0bab36d62c4e6a306fc3d6283bfdbfa5adf2f80a075d3cd5894f530f72",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_038"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-039.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-039",
-      "sha256": "042490eb4f5ef19cc11ce5242c61ce9f1f7d16e35923c8ad8e47b6e4353cbb2f",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_039"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-040.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-040",
-      "sha256": "513ebe90ff466adcdbc9191998f90971d07ea758a7dacfab1ac0e30851ca19b1",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_040"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-041.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-041",
-      "sha256": "00ffcd2959188b40be0c2d9070aad4c78cec6e0d802e1670410844e8898271d1",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_041"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-042.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-042",
-      "sha256": "f5e71d5e3cb3949b51f57d04ac34593c87258cebd19157489561aef9e461cbb8",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_042"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-043.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-043",
-      "sha256": "98996ae19935a06aebeac3db354f12bf30fc9c0dd5f7e383b4ad1035d6e8f66d",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_043"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-044.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-044",
-      "sha256": "fffd642887ac02e138a68bea0e77928a1db0a72aa0a861b68bb2d57f6628f3de",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_044"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-045.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-045",
-      "sha256": "14879347916e6295444ce90f1596d0c1accecca174c9a178ad60816a5ea91182",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_045"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-046.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-046",
-      "sha256": "8625165700ac996846bb96b91ce68dc7d67ea47baa11374552449503987ff837",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_046"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-047.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-047",
-      "sha256": "2a8ab0cfbdb9b15c4eae4829081e9016ac42e311ba96b0317e68bf6106c04b32",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_047"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-048.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-048",
-      "sha256": "57e5c8f9bb53ad6714b608906844cc9c1276a0dca8223d399668f2713d7b6c57",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_048"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-049.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-049",
-      "sha256": "bba955cd2181c6744b1ea87214d5982bb09ffb3f2aa924101e00188c11511e5f",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_049"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-050.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-050",
-      "sha256": "7165039472ab86b5b1979070d0b3ff6c4bafdcfa48ac34e14265692e92e230c7",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_050"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-051.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-051",
-      "sha256": "cd3cbf24144e794545d00deb63638964791ccf0e811be9602b31ffd5bbc60f7d",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_051"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-052.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-052",
-      "sha256": "4151b8c925e9976e92f55d6e038278706a924ea80908bb4dfee22eca032c89d4",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_052"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-053.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-053",
-      "sha256": "71b585f01baac567f0f75f631878687c4652e3155e067e82726432cec1ef9da5",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_053"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-054.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-054",
-      "sha256": "4504e15ea8f8d73578e55bbe251f2ca6d7418cc6ed17c5fc8573d65438c96aa4",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_054"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-055.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-055",
-      "sha256": "fbea064e162b06d51ab995ba2c57b26f2eed155446eff25d7c22bde80b6fbe6c",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_055"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-056.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-056",
-      "sha256": "73561f3a5a9a85bfc27c42be5e380d03515d492b46f72d2e9966ec70b2609b47",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_056"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-057.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-057",
-      "sha256": "f1a4adcc0c114a10ffde2f3fadf0b75ea1506dd2e226b35227f40bdcdade137c",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_057"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-058.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-058",
-      "sha256": "3dd2db4c72fc278b26b55a4ca9c15dcfc6e6217ce9214a8349b1871f60b54546",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_058"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-059.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-059",
-      "sha256": "15b0d758796ed17073c20955a69078956ce2627ac1bd8631002223397e4fe90b",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_059"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-060.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-060",
-      "sha256": "4a048dec2fc612887d85f9fed2181f79b5748e950e6430d7e74b6837a945ec22",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_060"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-061.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-061",
-      "sha256": "bafb5c77a50c4e36420e21d218a0a9bf50e63692ed72f2982464e5d590ae87e3",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_061"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-062.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-062",
-      "sha256": "86dd95dd2581795ea48e18fa672c216866e92b2daed3f22732d103ce16058218",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_062"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-063.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-063",
-      "sha256": "65ca1ba19e59fc5d5210528544008f3de91599064fbf346bf02f24b0dfe8835d",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_063"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-064.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-064",
-      "sha256": "2d67890a5e757958e297bbc4541a9596c2cbfe9a0f63bba0af2e8aa2ee1c36a3",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_064"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-065.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-065",
-      "sha256": "1cfbe91d1324ace3a23037470d7d59ae53212845b570ab4dfdd520e6549b57dd",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_065"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-066.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-066",
-      "sha256": "0a406d023ed809b93adec73215fc8404f359ea3e6bbfd361a104db6bcd767346",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_066"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-067.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-067",
-      "sha256": "c8a77dce0446763b21950038d0cf18f1565b0f04156a3751f4e7afd4462a6640",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_067"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-068.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-068",
-      "sha256": "e7f450f509f32740659746eaafa0582bd45da6c96e1292d59935fccfc0ca6f71",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_068"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-069.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-069",
-      "sha256": "7911d2839ac017596e85ae17ca0afe564a162c36c5cbe61f2f8850782b019a6f",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_069"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-070.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-070",
-      "sha256": "569a67a847a00bb29fe88d3270955e13e17c82cc0798de171199e8c2cf6da7e9",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_070"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R01.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R01",
-      "sha256": "6b41163f28c220cdf72e3b6a165ef90e00e3812ab36c9e061e8318221193a281",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r01"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R02.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R02",
-      "sha256": "e91a283ba748bd2bec40010b938dcbe34ffd5843f5a1ae2362cf81f5188a17a4",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r02"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R03.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R03",
-      "sha256": "b0bc33ecf8f6fb2684413387c52472f386991160ca76acc9ad92da76b9a3464a",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r03"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R04.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R04",
-      "sha256": "cc9502aab4d2f72a04f1bbb145a0f0405388720d62a901cfc136cfe1ba6dd05d",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r04"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R05.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R05",
-      "sha256": "ca8b4cdee6f90754963b045596e3a1fbfc6f1f3a191ce64ca1def7a7bd345631",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r05"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R06.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R06",
-      "sha256": "806305d68af70f6264fd042b9cd3edbb22c1304f4959feee9e26de545afa8b5e",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r06"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R07.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R07",
-      "sha256": "69aef43995edb94e5376cd8ee2c109c102ed41fa263cdc996b47b7ec24e2e933",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r07"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R08.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R08",
-      "sha256": "ef44607170238eff6ee6efa32ad163f92fe91cd5aef9a8e67aabdd3f9a6b3aac",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r08"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R09.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R09",
-      "sha256": "0248011f6612839284b0eba1336235406e2c3d0f01aad80fbdb97ffc9e1ba1cd",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r09"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R10.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R10",
-      "sha256": "0fb42af18a716bd4d2d7bdb479ad75201e030a507a9d035cb14b35a05ba4d063",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r10"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R11.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R11",
-      "sha256": "c9108b8e33b46276370292c8d8c9f754e254a304efec4aa10d3893641de34619",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r11"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R12.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R12",
-      "sha256": "8c82e5ea98d3059e29bae75d9ec40695943eed708448fc2a4724326a74e7525c",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r12"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R13.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R13",
-      "sha256": "ce549c8d47104a3b19bf5d6afc2cc0b4b54ae136e87cb2a430dacc27d1c03a58",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r13"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R14.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R14",
-      "sha256": "d0cd5022db68811c0646150e80188b9afad2f9d6489bb8eb7a67f48aa83863b6",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r14"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R15.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R15",
-      "sha256": "5e076f7a7db43be4e658fa2ac669f9ee64a64cf963850c7f25c6e6458323d72c",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r15"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     },
     {
-      "path": "reports/security/vs2/evidence/VS2-SEC-R16.json",
+      "path": null,
+      "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
       "scenario_id": "VS2-SEC-R16",
-      "sha256": "80ab0a6e6f5884b2f35a3a4c7895fb2574a01f77a1dba1e0b437f42dbb4fd597",
-      "status": "PASS",
-      "validator": "verify_vs2_sec_r16"
+      "sha256": null,
+      "status": "NOT_VERIFIED",
+      "validator": null
     }
   ],
+  "review_decision": "LOCAL_VS2_READY_PRODUCTION_HUMAN_GATES_PENDING rejected on 2026-06-21",
   "schema_version": "cs.vs2.evidence_manifest.v1",
   "self_hash_included": false,
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8"
+  "source_commit": "94b343b281980b90141880855cc5a22f05be314b",
+  "source_tree": "fd88514340017008cfe4e1722a6db9b8f0b84d8c"
 }

@@ -1,7 +1,7 @@
 {
   "audit_schema": {
     "connector_capability": "mock_provider.read",
-    "decision_id": "egress_0a99569e5e3fb84e",
+    "decision_id": "egress_56a8b35aa3519704",
     "destination_class": "reserved_loopback",
     "raw_payload_stored": false,
     "trace_id": "trace_vs2_egress_local"
@@ -35,12 +35,12 @@
   "declared_allowed": {
     "bytes_sent": 64,
     "decision": "allow",
-    "decision_id": "egress_247688380219a6f3",
+    "decision_id": "egress_02bd9919eeb0c916",
     "destination": {
       "host": "127.0.0.1",
       "method": "GET",
       "path": "/v1/read/status",
-      "port": 59132,
+      "port": 61008,
       "scheme": "http"
     },
     "external_http_calls": 1,
@@ -55,7 +55,7 @@
   },
   "declared_allowed_execution": {
     "bytes_received": 12,
-    "decision_id": "egress_247688380219a6f3",
+    "decision_id": "egress_02bd9919eeb0c916",
     "headers_sent": {
       "x-cs-credential-ref": "credential_ref_mock_provider_read",
       "x-cs-trace-id": "trace_vs2_governed_egress"
@@ -66,12 +66,12 @@
   "default_denied": {
     "bytes_sent": 0,
     "decision": "deny",
-    "decision_id": "egress_0a99569e5e3fb84e",
+    "decision_id": "egress_56a8b35aa3519704",
     "destination": {
       "host": "127.0.0.1",
       "method": "GET",
       "path": "/blocked",
-      "port": 59132,
+      "port": 61008,
       "scheme": "http"
     },
     "external_http_calls": 0,
@@ -86,7 +86,7 @@
   },
   "default_denied_execution": {
     "bytes_sent": 0,
-    "decision_id": "egress_0a99569e5e3fb84e",
+    "decision_id": "egress_56a8b35aa3519704",
     "headers_sent": {},
     "http_status": null,
     "status": "denied_before_network"
@@ -102,19 +102,19 @@
   },
   "dry_run_recheck": {
     "execution_rechecks_current_policy": true,
-    "fingerprint": "d33d14189c835cda6f01d30b8105c1155d0ee06c016469c6559c7bf3f8ca3758",
+    "fingerprint": "09c7456becdd3580d0b72faa3a585a33bcb76fd1253f49ae4f0d1e044067731c",
     "stale_allow_reused": false
   },
   "normalization_variations": [
     {
       "bytes_sent": 0,
       "decision": "deny",
-      "decision_id": "egress_959348880840560d",
+      "decision_id": "egress_4525e65840141dfd",
       "destination": {
         "host": "localhost",
         "method": "GET",
         "path": "/v1/read/status",
-        "port": 59132,
+        "port": 61008,
         "scheme": "http"
       },
       "external_http_calls": 0,
@@ -130,12 +130,12 @@
     {
       "bytes_sent": 0,
       "decision": "deny",
-      "decision_id": "egress_09e7026c0f7d6d65",
+      "decision_id": "egress_a222082be5202440",
       "destination": {
         "host": "127.0.0.1",
         "method": "GET",
         "path": "/v1/read/status",
-        "port": 59133,
+        "port": 61009,
         "scheme": "http"
       },
       "external_http_calls": 0,
@@ -151,12 +151,12 @@
     {
       "bytes_sent": 0,
       "decision": "deny",
-      "decision_id": "egress_b39e6f5cf49d126c",
+      "decision_id": "egress_c8ee115914a1fbbf",
       "destination": {
         "host": "127.0.0.1",
         "method": "GET",
         "path": "/v1/read/status",
-        "port": 59132,
+        "port": 61008,
         "scheme": "https"
       },
       "external_http_calls": 0,
@@ -172,12 +172,12 @@
     {
       "bytes_sent": 0,
       "decision": "deny",
-      "decision_id": "egress_16ecc47ef26636bb",
+      "decision_id": "egress_2f36b5b484f34ce3",
       "destination": {
         "host": "127.0.0.1",
         "method": "GET",
         "path": "/v1/write/status",
-        "port": 59132,
+        "port": 61008,
         "scheme": "http"
       },
       "external_http_calls": 0,
@@ -216,7 +216,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:59132",
+          "Host": "127.0.0.1:61008",
           "User-Agent": "cornerstone-vs2-governed-egress/1",
           "X-Cs-Credential-Ref": "credential_ref_mock_provider_read",
           "X-Cs-Trace-Id": "trace_vs2_governed_egress"
@@ -227,7 +227,7 @@
       }
     ],
     "host": "127.0.0.1",
-    "port": 59132,
+    "port": 61008,
     "request_bytes": 0,
     "requests": 1
   },
@@ -235,12 +235,12 @@
   "tenant_b_denied": {
     "bytes_sent": 0,
     "decision": "deny",
-    "decision_id": "egress_4b883e306d2a027c",
+    "decision_id": "egress_fd928f89ab398fa3",
     "destination": {
       "host": "127.0.0.1",
       "method": "GET",
       "path": "/v1/read/status",
-      "port": 59132,
+      "port": 61008,
       "scheme": "http"
     },
     "external_http_calls": 0,
@@ -255,7 +255,7 @@
   },
   "tenant_b_execution": {
     "bytes_sent": 0,
-    "decision_id": "egress_4b883e306d2a027c",
+    "decision_id": "egress_fd928f89ab398fa3",
     "headers_sent": {},
     "http_status": null,
     "status": "denied_before_network"

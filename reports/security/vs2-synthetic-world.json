@@ -20,7 +20,7 @@
     }
   ],
   "clock": {
-    "now_epoch": 1781968482,
+    "now_epoch": 1781971026,
     "valid_session_ttl_seconds": 3600
   },
   "fixture_note": "Synthetic local-only users, tenants, memberships, and signed sessions; no real customer data or credentials.",
@@ -115,10 +115,10 @@
   ],
   "schema_version": "cs.vs2.synthetic_world.v1",
   "session_digests": {
-    "alice_org": "925535982e609bca154129f8da64f1d9c4e6d67bfce95cb100b31e36ff27729e",
-    "alice_personal": "47f639c6a6d5a784b2bd8206849ebf83e3051e610a7850b914d0057911562b0b",
-    "bob_personal": "072495ef88d522b5b19699407b11248543277cdf81eb6f87e4f59caf826c4cb6",
-    "expired_alice": "6945817535dd5bc3f52769a4afa61d9d509cb3ce5ecb3102529b98ef650cc70c"
+    "alice_org": "51acc56eba87734c63d9d89457d04fb0c767e5c34cffa0bc5be828cc977bad0a",
+    "alice_personal": "0cb55cce620f9d533a30c2c2924e6598b0de19775a0671857e9f85957ebb32b9",
+    "bob_personal": "288b6138bd788d11aed1f75c38dd08e120282ad65a6b06f959424d4f17850d89",
+    "expired_alice": "551c0e1f7c1c25bc61a0b3c2bcf4da80cc345bb16929ed7745cafa0b18d53525"
   },
   "tenants": [
     {

@@ -1,9 +1,9 @@
 {
-  "evidence_commit": null,
+  "evidence_commit": "94b343b281980b90141880855cc5a22f05be314b",
   "evidence_manifest": "reports/security/vs2/evidence-manifest.json",
-  "evidence_manifest_sha256": "369d0e028b33c176455f1d19e4c41509c9d214dc1b96d4ee7803911d65ad9e3e",
+  "evidence_manifest_sha256": "72c505a4454b799bc6f6c8a2e298bb9fde0bf97105ba8cac105479219785a1b3",
+  "h01_decision": "APPROVE WITH CONDITIONS recorded in docs/verification-reports/VS2_SEC_H01_OWNER_APPROVAL_2026-06-20.md",
   "human_gates_remaining": [
-    "VS2-SEC-H01",
     "VS2-SEC-H02",
     "VS2-SEC-H03",
     "VS2-SEC-H04",
@@ -11,9 +11,9 @@
     "VS2-SEC-H06",
     "VS2-SEC-H07"
   ],
-  "local_claim": "LOCAL_VS2_READY_PRODUCTION_HUMAN_GATES_PENDING",
-  "notes": "Evidence commit is null until these generated reports are committed; source_commit/source_tree identify the code under test.",
+  "local_claim": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
+  "notes": "Post-review rollup records that evidence commit 94b343b is not accepted as local VS2 readiness evidence.",
   "schema_version": "cs.vs2.post_commit_rollup.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8"
+  "source_commit": "94b343b281980b90141880855cc5a22f05be314b",
+  "source_tree": "fd88514340017008cfe4e1722a6db9b8f0b84d8c"
 }

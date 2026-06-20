@@ -5,6 +5,7 @@ import copy
 import csv
 import hashlib
 import hmac
+import http.client
 import json
 import shutil
 import socket
@@ -647,7 +648,7 @@ def _verify_opa_http_service(root: Path) -> dict[str, Any]:
                     ready = response.status == 200
                     if ready:
                         break
-            except (urllib.error.URLError, TimeoutError) as error:
+            except (urllib.error.URLError, TimeoutError, http.client.RemoteDisconnected) as error:
                 transcript.append({"command": ["GET", "/health"], "exit_code": 1, "error": str(error)})
                 time.sleep(0.25)
         if not ready:
@@ -2482,9 +2483,12 @@ def _make_scenario_check(scenario_id: str) -> Callable[[dict[str, Any]], dict[st
 
 
 AI_SCENARIO_IDS = [f"VS2-SEC-{number:03d}" for number in range(1, 71)] + [f"VS2-SEC-R{number:02d}" for number in range(1, 17)]
-SCENARIO_CHECKS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
-    scenario_id: _make_scenario_check(scenario_id) for scenario_id in AI_SCENARIO_IDS
-}
+
+# The review on 2026-06-21 rejected the generated-wrapper registry as
+# scenario-specific naming without scenario-specific execution. Keep the
+# reusable foundation probes, but do not register a VS2 row as PASS until its
+# exact Given/When/Then behavior is executed by a dedicated validator.
+SCENARIO_CHECKS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {}
 
 
 def _scenario_artifacts(scenario_id: str) -> list[str]:
@@ -2603,17 +2607,22 @@ def run_vs2_local_security_proof(root: Path) -> dict[str, Any]:
         else:
             validator = SCENARIO_CHECKS.get(scenario_id)
             if validator is None:
+                partial_paths = [Path(path) for path in _scenario_artifacts(scenario_id) if path != str(VS2_PROOF_REPORT)]
                 result = {
                     "scenario_id": scenario_id,
                     "status": "NOT_VERIFIED",
                     "validator": None,
                     "verification_command": _scenario_command(scenario_id),
                     "exit_code": 4,
-                    "evidence_paths": [],
-                    "evidence_hashes": [],
+                    "evidence_paths": [str(path) for path in partial_paths],
+                    "evidence_hashes": [
+                        hash_value
+                        for hash_value in (_file_hash(root, path) for path in partial_paths)
+                        if hash_value
+                    ],
                     "verified_commit": verified_commit,
                     "verified_tree_sha": verified_tree_sha,
-                    "notes": "No scenario-specific validator exists yet; blanket proof is not allowed.",
+                    "notes": "Downgraded after review: reusable partial evidence exists, but no exact scenario-specific validator executes this row's Given/When/Then behavior.",
                 }
             else:
                 result = validator(scenario_context)
@@ -2650,22 +2659,22 @@ def run_vs2_local_security_proof(root: Path) -> dict[str, Any]:
     for result in scenario_results:
         if result["owner"] != "AI":
             continue
-        raw_path = _raw_evidence_path(result["scenario_id"])
-        raw_hash = _file_hash(root, raw_path)
         raw_artifacts.append(
             {
                 "scenario_id": result["scenario_id"],
                 "status": result["status"],
                 "validator": result.get("validator"),
-                "path": str(raw_path),
-                "sha256": raw_hash,
+                "path": None,
+                "sha256": None,
+                "review_note": "No raw scenario artifact is accepted for PASS after the 2026-06-21 review; exact validator is missing.",
             }
         )
     manifest_payload = {
         "schema_version": "cs.vs2.evidence_manifest.v1",
         "source_commit": verified_commit,
         "source_tree": verified_tree_sha,
-        "evidence_commit": None,
+        "evidence_commit": "94b343b281980b90141880855cc5a22f05be314b",
+        "review_decision": "LOCAL_VS2_READY_PRODUCTION_HUMAN_GATES_PENDING rejected on 2026-06-21",
         "artifact_count": len(raw_artifacts),
         "raw_scenario_artifacts": raw_artifacts,
         "foundational_artifacts": [
@@ -2696,12 +2705,13 @@ def run_vs2_local_security_proof(root: Path) -> dict[str, Any]:
         "schema_version": "cs.vs2.post_commit_rollup.v1",
         "source_commit": verified_commit,
         "source_tree": verified_tree_sha,
-        "evidence_commit": None,
+        "evidence_commit": "94b343b281980b90141880855cc5a22f05be314b",
         "evidence_manifest": str(VS2_EVIDENCE_MANIFEST),
         "evidence_manifest_sha256": manifest_hash,
-        "local_claim": "LOCAL_VS2_READY_PRODUCTION_HUMAN_GATES_PENDING",
-        "human_gates_remaining": ["VS2-SEC-H01", "VS2-SEC-H02", "VS2-SEC-H03", "VS2-SEC-H04", "VS2-SEC-H05", "VS2-SEC-H06", "VS2-SEC-H07"],
-        "notes": "Evidence commit is null until these generated reports are committed; source_commit/source_tree identify the code under test.",
+        "local_claim": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
+        "human_gates_remaining": ["VS2-SEC-H02", "VS2-SEC-H03", "VS2-SEC-H04", "VS2-SEC-H05", "VS2-SEC-H06", "VS2-SEC-H07"],
+        "h01_decision": "APPROVE WITH CONDITIONS recorded in docs/verification-reports/VS2_SEC_H01_OWNER_APPROVAL_2026-06-20.md",
+        "notes": "Post-review rollup records that evidence commit 94b343b is not accepted as local VS2 readiness evidence.",
     }
     _write_json(root, VS2_POST_COMMIT_ROLLUP, post_commit_rollup)
     _write_json(
@@ -2762,9 +2772,7 @@ def run_vs2_local_security_proof(root: Path) -> dict[str, Any]:
             "not_run": len([row for row in scenario_results if row["status"] == "NOT_RUN"]),
             "human_required": len([row for row in scenario_results if row["owner"] == "Human"]),
             "blocking": len(blocking),
-            "product_feature_claims": "LOCAL_VS2_READY_PRODUCTION_HUMAN_GATES_PENDING"
-            if not blocking
-            else "VS2_SCENARIO_SPECIFIC_EVIDENCE_INCOMPLETE",
+            "product_feature_claims": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
         },
         "negative_evidence": negative_evidence,
         "scenario_results": scenario_results,

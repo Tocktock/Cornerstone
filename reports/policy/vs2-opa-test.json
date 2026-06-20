@@ -7,7 +7,7 @@
       "http_invalid_schema_denied": true,
       "outage_fails_closed": true
     },
-    "container": "cornerstone-vs2-opa-bd8e6a4c7a",
+    "container": "cornerstone-vs2-opa-6db2b97156",
     "decision_transcript": [
       {
         "case": "allow",
@@ -52,9 +52,9 @@
           "-d",
           "--rm",
           "--name",
-          "cornerstone-vs2-opa-bd8e6a4c7a",
+          "cornerstone-vs2-opa-6db2b97156",
           "-p",
-          "127.0.0.1:59123:8181",
+          "127.0.0.1:60999:8181",
           "-v",
           "/Users/jiyong/playground/Cornerstone/policies/vs2:/policies:ro",
           "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
@@ -63,11 +63,11 @@
           "--addr=0.0.0.0:8181",
           "/policies"
         ],
-        "elapsed_seconds": 0.139,
+        "elapsed_seconds": 0.12,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [
-          "4208974e10a3512a4502d9b09502066ebe5d4c61f7e7dab6a6481227bf1d359c"
+          "22adff10aed7cde531f51358bbd405f090ac28361bbd95781009411188d53eb4"
         ]
       },
       {
@@ -75,13 +75,13 @@
           "docker",
           "rm",
           "-f",
-          "cornerstone-vs2-opa-bd8e6a4c7a"
+          "cornerstone-vs2-opa-6db2b97156"
         ],
-        "elapsed_seconds": 0.216,
+        "elapsed_seconds": 0.185,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [
-          "cornerstone-vs2-opa-bd8e6a4c7a"
+          "cornerstone-vs2-opa-6db2b97156"
         ]
       }
     ],
@@ -90,7 +90,7 @@
       "error_class": "URLError",
       "reason": "opa_unavailable_fail_closed"
     },
-    "port": 59123,
+    "port": 60999,
     "status": "passed"
   },
   "opa_image": "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",

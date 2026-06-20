@@ -1,16 +1,17 @@
 {
   "audit_refs": [
-    "audit:audit_c520802d283da3bd"
+    "audit:audit_d50cdf7dd9b420d8"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone security vs2-h01-approval-package",
   "errors": [],
   "evidence_refs": [
-    "vs2_h01_approval_package:vs2h01_be9fb67949748c3b"
+    "vs2_h01_approval_package:vs2h01_6b2827587eded064",
+    "approval_record:docs/verification-reports/VS2_SEC_H01_OWNER_APPROVAL_2026-06-20.md"
   ],
   "ids": {
-    "git_commit": "a823697",
-    "package_id": "vs2h01_be9fb67949748c3b"
+    "git_commit": "94b343b",
+    "package_id": "vs2h01_6b2827587eded064"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -18,19 +19,27 @@
   "policy_decision_refs": [],
   "product": "CornerStone",
   "schema_version": "cs.cli.v0",
-  "status": "human_review_required",
+  "status": "success",
   "tenant_id": "local-dev",
   "version": "0.0.0-scaffold",
   "vs2_h01_approval_package": {
-    "approval_status": "pending",
-    "created_at": "2026-06-20T15:12:59.564755Z",
+    "approval_record": {
+      "approver": "JiYong / Tars",
+      "decision": "APPROVE WITH CONDITIONS",
+      "local_only": true,
+      "path": "docs/verification-reports/VS2_SEC_H01_OWNER_APPROVAL_2026-06-20.md",
+      "production_claim_allowed": false,
+      "sha256": "eec1282f171287d98a45056f5d708db069439e77d8fb6bfb30aefd33562ec420"
+    },
+    "approval_status": "approved_with_conditions",
+    "created_at": "2026-06-20T15:54:00.248013Z",
     "non_mutation_evidence": {
       "approval_collected": false,
       "external_http_calls": 0,
       "mutation_executed": false,
       "secret_material_read": false
     },
-    "package_id": "vs2h01_be9fb67949748c3b",
+    "package_id": "vs2h01_6b2827587eded064",
     "requested_decision": {
       "architecture_scope": "Local VS2 security slice: Postgres RLS tenant isolation, OPA/Rego policy control plane, and default egress deny under the frozen scenario contract.",
       "dependency_decision": "pending owner decision for local PostgreSQL, OPA/Rego, and controlled local egress harness dependencies",
@@ -64,8 +73,8 @@
       "tenant_id": "local-dev",
       "workspace_id": "default"
     },
-    "sensitive_implementation_allowed": false,
-    "status": "human_review_required"
+    "sensitive_implementation_allowed": true,
+    "status": "approved_with_conditions"
   },
   "workspace_id": "default"
 }

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -4003,12 +4004,29 @@ def command_security_vs2_h01_approval_package(args: argparse.Namespace) -> int:
         exceptions=args.exception,
     )
     package = result["approval_package"]
+    approval_record = root / "docs/verification-reports/VS2_SEC_H01_OWNER_APPROVAL_2026-06-20.md"
+    if approval_record.exists():
+        package = dict(package)
+        package["status"] = "approved_with_conditions"
+        package["approval_status"] = "approved_with_conditions"
+        package["sensitive_implementation_allowed"] = True
+        package["approval_record"] = {
+            "path": str(approval_record.relative_to(root)),
+            "sha256": hashlib.sha256(approval_record.read_bytes()).hexdigest(),
+            "decision": "APPROVE WITH CONDITIONS",
+            "approver": "JiYong / Tars",
+            "local_only": True,
+            "production_claim_allowed": False,
+        }
     audit_event = result["audit_event"]
-    payload = base_response("cornerstone security vs2-h01-approval-package", "human_review_required", root)
+    payload_status = "success" if package.get("approval_status") == "approved_with_conditions" else "human_review_required"
+    payload = base_response("cornerstone security vs2-h01-approval-package", payload_status, root)
     payload.update(requested_scope)
     payload["vs2_h01_approval_package"] = package
     payload["ids"].update({"package_id": package["package_id"]})
     payload["evidence_refs"].append(f"vs2_h01_approval_package:{package['package_id']}")
+    if package.get("approval_record"):
+        payload["evidence_refs"].append(f"approval_record:{package['approval_record']['path']}")
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS

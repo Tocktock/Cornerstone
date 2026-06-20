@@ -11616,12 +11616,15 @@ def _vs2_h01_approval_package_summary(root: Path) -> dict[str, Any]:
     decision = package.get("requested_decision", {})
     evidence = package.get("non_mutation_evidence", {})
     required_record = package.get("required_human_record", {})
+    approval_record = package.get("approval_record", {})
     checks = {
-        "command_completed": payload.get("status") == "human_review_required",
+        "command_completed": payload.get("status") in {"success", "human_review_required"},
         "scenario_matches_h01": package.get("scenario_id") == "VS2-SEC-H01",
-        "status_human_review_required": package.get("status") == "human_review_required",
-        "approval_pending": package.get("approval_status") == "pending",
-        "sensitive_implementation_not_allowed": package.get("sensitive_implementation_allowed") is False,
+        "status_approved_with_conditions": package.get("status") == "approved_with_conditions",
+        "approval_approved_with_conditions": package.get("approval_status") == "approved_with_conditions",
+        "sensitive_local_implementation_allowed": package.get("sensitive_implementation_allowed") is True,
+        "approval_record_present": bool(approval_record.get("path")) and bool(approval_record.get("sha256")),
+        "production_claim_not_allowed": approval_record.get("production_claim_allowed") is False,
         "architecture_scope_present": bool(decision.get("architecture_scope")),
         "dependency_decision_present": bool(decision.get("dependency_decision")),
         "migration_scope_present": bool(decision.get("migration_scope")),
@@ -11640,8 +11643,9 @@ def _vs2_h01_approval_package_summary(root: Path) -> dict[str, Any]:
         "path": DEFAULT_VS2_H01_APPROVAL_PACKAGE_REPORT,
         "present": True,
         "valid": all(checks.values()),
-        "status": "human_review_package_ready" if all(checks.values()) else "invalid",
+        "status": "approved_with_conditions_recorded" if all(checks.values()) else "invalid",
         "package_id": package.get("package_id"),
+        "approval_record": approval_record,
         "audit_refs": payload.get("audit_refs", []),
         "evidence_refs": payload.get("evidence_refs", []),
         "checks": checks,
@@ -11696,7 +11700,7 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
                 evidence.extend(
                     [
                         DEFAULT_VS2_H01_APPROVAL_PACKAGE_REPORT,
-                        "vs2_h01_approval_package:human_review_required_no_mutation",
+                        "vs2_h01_approval_package:approved_with_conditions_no_production_claim",
                     ]
                 )
         reason = (
@@ -11748,9 +11752,9 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
             "human_required": len([row for row in scenario_results if row.get("owner") == "Human"]),
             "blocking": len(blocking),
             "product_feature_claims": (
-                "LOCAL_VS2_READY_PRODUCTION_HUMAN_GATES_PENDING"
+                "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING"
                 if not blocking
-                else local_proof.get("summary", {}).get("product_feature_claims", "VS2_SCENARIO_SPECIFIC_EVIDENCE_INCOMPLETE")
+                else local_proof.get("summary", {}).get("product_feature_claims", "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED")
             ),
         },
         "scenario_results": scenario_results,
@@ -11789,9 +11793,11 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
             if h01_gate_summary.get("present")
             and not h01_gate_summary.get("checks", {}).get("approval_not_collected_by_ai")
             else 0,
-            "h01_package_sensitive_implementation_allowed": 1
-            if h01_package_summary.get("present")
-            and not h01_package_summary.get("checks", {}).get("sensitive_implementation_not_allowed")
+            "h01_local_approval_missing": 0
+            if h01_package_summary.get("checks", {}).get("approval_approved_with_conditions")
+            else 1,
+            "h01_package_production_claim_allowed": 1
+            if h01_package_summary.get("approval_record", {}).get("production_claim_allowed") is True
             else 0,
         },
         "human_required": [
