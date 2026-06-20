@@ -11744,10 +11744,11 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
             "pass": len([row for row in scenario_results if row.get("status") == "PASS"]),
             "fail": len([row for row in scenario_results if row.get("status") == "FAIL"]),
             "not_verified": len([row for row in scenario_results if row.get("status") == "NOT_VERIFIED"]),
+            "not_run": len([row for row in scenario_results if row.get("status") == "NOT_RUN"]),
             "human_required": len([row for row in scenario_results if row.get("owner") == "Human"]),
             "blocking": len(blocking),
             "product_feature_claims": (
-                "LOCAL_VS2_POLICY_TENANCY_EGRESS_READY_PRODUCTION_NOT_READY"
+                "LOCAL_VS2_READY_PRODUCTION_HUMAN_GATES_PENDING"
                 if not blocking
                 else local_proof.get("summary", {}).get("product_feature_claims", "VS2_SCENARIO_SPECIFIC_EVIDENCE_INCOMPLETE")
             ),

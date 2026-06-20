@@ -1,0 +1,5 @@
+services: {}
+bundles: {}
+decision_logs:
+  console: false
+default_decision: /cornerstone/vs2/decision

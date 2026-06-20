@@ -1,27 +1,35 @@
 package cornerstone.vs2
 
 base_input := {
-	"schema_version": "cs.policy_input.vs2.v0",
-	"tenant_id": "tenant_a",
-	"namespace_id": "personal",
-	"workspace_id": "default",
-	"action": "read",
-	"classification": "internal",
+	"schema_version": "cs.policy_input.vs2.v1",
+	"trace_id": "trace_policy_test",
+	"scope": {
+		"tenant_id": "tenant_a",
+		"namespace_id": "personal",
+		"workspace_id": "default",
+	},
+	"action": "artifact.read",
 	"risk": "low",
 	"policy_path": "artifact.read",
 	"subject": {
 		"principal_id": "user_a",
-		"role": "owner",
+		"roles": ["owner"],
+		"membership_revision": "memrev-001",
 		"revoked": false,
 	},
 	"resource": {
 		"resource_id": "artifact_a",
 		"tenant_id": "tenant_a",
 		"namespace_id": "personal",
+		"classification": "internal",
 	},
 	"capability": {
 		"declared": true,
 		"connectorhub_mediated": true,
+	},
+	"approval": {
+		"required": false,
+		"status": "not_required",
 	},
 }
 
@@ -32,7 +40,7 @@ test_owner_read_allowed if {
 }
 
 test_member_write_denied if {
-	i := object.union(base_input, {"action": "write", "subject": object.union(base_input.subject, {"role": "member"})})
+	i := object.union(base_input, {"action": "artifact.write", "subject": object.union(base_input.subject, {"roles": ["member"]})})
 	d := decision with input as i
 	d.decision == "deny"
 	"role_not_allowed" in d.reason_codes
@@ -60,10 +68,16 @@ test_high_risk_requires_approval if {
 }
 
 test_secret_classification_denied if {
-	i := object.union(base_input, {"classification": "secret"})
+	i := object.union(base_input, {"resource": object.union(base_input.resource, {"classification": "secret"})})
 	d := decision with input as i
 	d.decision == "deny"
 	"secret_classification_denied" in d.reason_codes
+}
+
+test_high_risk_approved_allowed if {
+	i := object.union(base_input, {"risk": "high", "approval": {"required": true, "status": "approved"}})
+	d := decision with input as i
+	d.decision == "allow"
 }
 
 test_connectorhub_capability_required if {

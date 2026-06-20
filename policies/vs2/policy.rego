@@ -3,36 +3,42 @@ package cornerstone.vs2
 default allow := false
 
 valid_schema if {
-	input.schema_version == "cs.policy_input.vs2.v0"
+	input.schema_version == "cs.policy_input.vs2.v1"
+	is_string(input.trace_id)
 	is_string(input.subject.principal_id)
-	is_string(input.subject.role)
-	is_string(input.tenant_id)
-	is_string(input.namespace_id)
-	is_string(input.workspace_id)
+	is_array(input.subject.roles)
+	is_string(input.subject.membership_revision)
+	is_boolean(input.subject.revoked)
+	is_string(input.scope.tenant_id)
+	is_string(input.scope.namespace_id)
+	is_string(input.scope.workspace_id)
 	is_string(input.resource.resource_id)
 	is_string(input.resource.tenant_id)
 	is_string(input.resource.namespace_id)
+	is_string(input.resource.classification)
 	is_string(input.action)
-	is_string(input.classification)
 	is_string(input.risk)
+	is_boolean(input.capability.declared)
+	is_boolean(input.capability.connectorhub_mediated)
+	is_string(input.approval.status)
 }
 
 same_scope if {
-	input.tenant_id == input.resource.tenant_id
-	input.namespace_id == input.resource.namespace_id
+	input.scope.tenant_id == input.resource.tenant_id
+	input.scope.namespace_id == input.resource.namespace_id
 }
 
 role_allowed if {
-	input.subject.role == "owner"
+	input.subject.roles[_] == "owner"
 }
 
 role_allowed if {
-	input.subject.role == "admin"
+	input.subject.roles[_] == "admin"
 }
 
 role_allowed if {
-	input.subject.role == "member"
-	input.action == "read"
+	input.subject.roles[_] == "member"
+	input.action == "artifact.read"
 }
 
 revoked if {
@@ -43,8 +49,13 @@ risk_allowed if {
 	input.risk != "high"
 }
 
+risk_allowed if {
+	input.risk == "high"
+	input.approval.status == "approved"
+}
+
 classification_allowed if {
-	input.classification != "secret"
+	input.resource.classification != "secret"
 }
 
 capability_allowed if {
@@ -85,11 +96,12 @@ deny contains "revoked_principal" if {
 deny contains "high_risk_requires_approval" if {
 	valid_schema
 	input.risk == "high"
+	input.approval.status != "approved"
 }
 
 deny contains "secret_classification_denied" if {
 	valid_schema
-	input.classification == "secret"
+	input.resource.classification == "secret"
 }
 
 deny contains "connectorhub_capability_required" if {

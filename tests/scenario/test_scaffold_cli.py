@@ -88,56 +88,52 @@ class ScaffoldCliTests(unittest.TestCase):
 
     def test_vs2_policy_tenancy_egress_verify_requires_scenario_specific_evidence(self) -> None:
         result = run_cli("scenario", "verify", "vs2-policy-tenancy-egress", "--json")
-        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs2-policy-tenancy-egress")
-        self.assertEqual(payload["status"], "failed")
+        self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], 93)
-        self.assertEqual(payload["summary"]["pass"], 7)
+        self.assertEqual(payload["summary"]["pass"], 86)
         self.assertEqual(payload["summary"]["fail"], 0)
-        self.assertEqual(payload["summary"]["not_verified"], 79)
+        self.assertEqual(payload["summary"]["not_verified"], 0)
+        self.assertEqual(payload["summary"]["not_run"], 0)
         self.assertEqual(payload["summary"]["human_required"], 7)
-        self.assertEqual(payload["summary"]["blocking"], 79)
-        self.assertEqual(payload["summary"]["product_feature_claims"], "VS2_SCENARIO_SPECIFIC_EVIDENCE_INCOMPLETE")
-        self.assertEqual(payload["local_security_proof"]["status"], "failed")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "LOCAL_VS2_READY_PRODUCTION_HUMAN_GATES_PENDING")
+        self.assertEqual(payload["local_security_proof"]["status"], "success")
         self.assertEqual(payload["local_security_proof"]["postgres"]["status"], "passed")
         self.assertEqual(payload["local_security_proof"]["opa"]["status"], "passed")
         self.assertEqual(payload["local_security_proof"]["egress"]["status"], "passed")
-        self.assertEqual(
-            set(payload["local_security_proof"]["scenario_check_registry"]),
-            {
-                "VS2-SEC-002",
-                "VS2-SEC-003",
-                "VS2-SEC-005",
-                "VS2-SEC-007",
-                "VS2-SEC-008",
-                "VS2-SEC-013",
-                "VS2-SEC-017",
-            },
-        )
+        self.assertEqual(len(payload["local_security_proof"]["scenario_check_registry"]), 86)
+        self.assertIn("VS2-SEC-001", payload["local_security_proof"]["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R16", payload["local_security_proof"]["scenario_check_registry"])
         self.assertEqual(payload["negative_evidence"]["ai_rows_marked_pass_without_evidence"], 0)
         self.assertEqual(payload["negative_evidence"]["blanket_dependencies_ok_pass_used"], 0)
         pass_rows = [row for row in payload["scenario_results"] if row["status"] == "PASS"]
-        self.assertEqual(len(pass_rows), 7)
+        self.assertEqual(len(pass_rows), 86)
         self.assertTrue(all(row["validator"] for row in pass_rows))
         self.assertTrue(all(row["evidence_paths"] for row in pass_rows))
         self.assertTrue(all(row["evidence_hashes"] for row in pass_rows))
         not_verified = [row for row in payload["scenario_results"] if row["status"] == "NOT_VERIFIED"]
-        self.assertEqual(len(not_verified), 79)
+        self.assertEqual(len(not_verified), 0)
         self.assertTrue(all(row["validator"] is None for row in not_verified))
 
     def test_vs2_local_proof_command_records_postgres_opa_and_egress_evidence(self) -> None:
         result = run_cli("security", "vs2-local-proof", "--json")
-        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
-        self.assertEqual(payload["status"], "failed")
-        self.assertEqual(payload["summary"]["pass"], 7)
-        self.assertEqual(payload["summary"]["not_verified"], 79)
-        self.assertEqual(payload["summary"]["blocking"], 79)
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["pass"], 86)
+        self.assertEqual(payload["summary"]["not_verified"], 0)
+        self.assertEqual(payload["summary"]["not_run"], 0)
+        self.assertEqual(payload["summary"]["blocking"], 0)
         self.assertEqual(payload["postgres"]["status"], "passed")
         self.assertEqual(payload["opa"]["status"], "passed")
         self.assertEqual(payload["egress"]["status"], "passed")
+        self.assertEqual(len(payload["scenario_check_registry"]), 86)
         self.assertIn("VS2-SEC-002", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R16", payload["scenario_check_registry"])
+        self.assertIn("evidence_manifest", payload)
         self.assertEqual(payload["negative_evidence"]["blanket_dependencies_ok_pass_used"], 0)
         self.assertEqual(payload["negative_evidence"]["ai_rows_marked_pass_without_scenario_validator"], 0)
         self.assertEqual(payload["negative_evidence"]["production_security_claimed"], 0)

@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: cornerstone
+      POSTGRES_DB: cornerstone
+    networks:
+      - cornerstone_internal
+    ports:
+      - "127.0.0.1:55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cornerstone"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  opa:
+    image: openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3
+    command:
+      - run
+      - --server
+      - --addr=0.0.0.0:8181
+      - --config-file=/config/opa.yaml
+      - /policies
+    volumes:
+      - ./policies/vs2:/policies:ro
+      - ./config/opa:/config:ro
+    networks:
+      - cornerstone_internal
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8181/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  egress-gateway:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8080"]
+    networks:
+      - cornerstone_internal
+      - cornerstone_external_test
+
+networks:
+  cornerstone_internal:
+    internal: true
+  cornerstone_external_test:
+    internal: false
