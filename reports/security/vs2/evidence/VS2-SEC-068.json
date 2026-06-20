@@ -1,0 +1,69 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "ambiguous_legacy_row_quarantined": true,
+        "backup_manifest_has_hashes": true,
+        "invalid_cross_tenant_rows_quarantined": true,
+        "no_destructive_migration": true,
+        "ownerless_global_truth_forbidden": true,
+        "restore_counts_match": true,
+        "rollback_command_succeeded": true,
+        "rollback_preserved_counts": true
+      },
+      "name": "migration_quarantines_bad_ownership",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "ambiguous_legacy_row_quarantined": true,
+        "backup_manifest_has_hashes": true,
+        "invalid_cross_tenant_rows_quarantined": true,
+        "no_destructive_migration": true,
+        "ownerless_global_truth_forbidden": true,
+        "restore_counts_match": true,
+        "rollback_command_succeeded": true,
+        "rollback_preserved_counts": true
+      },
+      "name": "backup_restore_and_rollback_preserve_counts",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "The smallest compatible adapter path preserves existing artifacts/evidence/claims/ontology/audit; rollback is deterministic; no destructive migration runs without approval.",
+  "given": "VS2 database/policy/runtime changes are deployed over the existing local scaffold and VS1 data.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Before/after object counts/hashes, regression reports, rollback transcript, no data loss.",
+  "scenario_id": "VS2-SEC-068",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "The smallest compatible adapter path preserves existing artifacts/evidence/claims/ontology/audit; rollback is deterministic; no destructive migration runs without approval.",
+  "validator": "verify_vs2_sec_068",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-068",
+    "--json"
+  ],
+  "verification_method": "Fresh and upgrade-path integration tests with checksums and existing VS0/VS1 fixtures.",
+  "when": "Forward migration, compatibility run, failed migration, and rollback are exercised."
+}

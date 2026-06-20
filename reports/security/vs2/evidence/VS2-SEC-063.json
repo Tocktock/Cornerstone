@@ -1,0 +1,128 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "audit_has_no_raw_payload": true,
+        "credentials_not_exposed": true,
+        "declared_call_allowed": true,
+        "default_denied_before_sink_call": true,
+        "direct_socket_blocked": true,
+        "dns_rebinding_guarded": true,
+        "fail_closed_without_fallback": true,
+        "idempotency_tenant_scoped": true,
+        "normalization_does_not_broaden": true,
+        "redirects_reguarded": true,
+        "reserved_destination_denied": true,
+        "sandbox_blocks_host_escape": true,
+        "stale_dry_run_blocked": true,
+        "tenant_policy_isolated": true
+      },
+      "name": "default_deny_sends_zero_sink_calls",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "sink": {
+          "authorization_headers_seen": 0,
+          "calls": [
+            {
+              "authorization_header_seen": false,
+              "headers": {
+                "Host": "127.0.0.1:59132",
+                "User-Agent": "cornerstone-vs2-governed-egress/1",
+                "X-Cs-Credential-Ref": "credential_ref_mock_provider_read",
+                "X-Cs-Trace-Id": "trace_vs2_governed_egress"
+              },
+              "method": "GET",
+              "path": "/v1/read/status",
+              "request_bytes": 0
+            }
+          ],
+          "host": "127.0.0.1",
+          "port": 59132,
+          "request_bytes": 0,
+          "requests": 1
+        }
+      },
+      "name": "declared_connectorhub_call_hits_sink_once",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "audit_has_no_raw_payload": true,
+        "credentials_not_exposed": true,
+        "declared_call_allowed": true,
+        "default_denied_before_sink_call": true,
+        "direct_socket_blocked": true,
+        "dns_rebinding_guarded": true,
+        "fail_closed_without_fallback": true,
+        "idempotency_tenant_scoped": true,
+        "normalization_does_not_broaden": true,
+        "redirects_reguarded": true,
+        "reserved_destination_denied": true,
+        "sandbox_blocks_host_escape": true,
+        "stale_dry_run_blocked": true,
+        "tenant_policy_isolated": true
+      },
+      "name": "tenant_b_and_adversarial_paths_blocked",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "audit_has_no_raw_payload": true,
+        "credentials_not_exposed": true,
+        "declared_call_allowed": true,
+        "default_denied_before_sink_call": true,
+        "direct_socket_blocked": true,
+        "dns_rebinding_guarded": true,
+        "fail_closed_without_fallback": true,
+        "idempotency_tenant_scoped": true,
+        "normalization_does_not_broaden": true,
+        "redirects_reguarded": true,
+        "reserved_destination_denied": true,
+        "sandbox_blocks_host_escape": true,
+        "stale_dry_run_blocked": true,
+        "tenant_policy_isolated": true
+      },
+      "name": "credentials_and_payload_not_exposed",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "Records correlate tenant-safe trace, decision, action/workflow, connector capability, normalized destination class, outcome, and byte/call counts without storing secrets or raw payloads.",
+  "given": "Allowed and denied egress attempts occur.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Correlated records, counter assertions, decision IDs, secret-scan report.",
+  "scenario_id": "VS2-SEC-063",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "Records correlate tenant-safe trace, decision, action/workflow, connector capability, normalized destination class, outcome, and byte/call counts without storing secrets or raw payloads.",
+  "validator": "verify_vs2_sec_063",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-063",
+    "--json"
+  ],
+  "verification_method": "Integration plus log/metric contract tests.",
+  "when": "Operators inspect policy, connector, runtime, and CornerStone audit/metrics."
+}

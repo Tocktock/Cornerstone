@@ -1,0 +1,80 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "audit_refs_present": true,
+        "forged_scope_denied": true,
+        "missing_context_fails_before_db_egress": true,
+        "same_context_digest": true,
+        "same_policy_outcome": true,
+        "same_status_code": true,
+        "tenant_b_canary_not_serialized": true
+      },
+      "name": "cli_api_ui_context_digest_matches",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "audit_refs_present": true,
+        "forged_scope_denied": true,
+        "missing_context_fails_before_db_egress": true,
+        "same_context_digest": true,
+        "same_policy_outcome": true,
+        "same_status_code": true,
+        "tenant_b_canary_not_serialized": true
+      },
+      "name": "cli_api_ui_policy_outcome_matches",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "audit_refs_present": true,
+        "forged_scope_denied": true,
+        "missing_context_fails_before_db_egress": true,
+        "same_context_digest": true,
+        "same_policy_outcome": true,
+        "same_status_code": true,
+        "tenant_b_canary_not_serialized": true
+      },
+      "name": "linked_audit_refs_exist",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "All surfaces derive the same trusted request context, receive the same policy outcome and stable error semantics, and emit linked policy/audit references.",
+  "given": "The same authenticated principal, tenant, namespace, resource, and action are available through CLI, API, and UI.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Three transcripts, normalized request-context digest, matching decision outcome/revision, exit/status codes, audit references.",
+  "scenario_id": "VS2-SEC-001",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "All surfaces derive the same trusted request context, receive the same policy outcome and stable error semantics, and emit linked policy/audit references.",
+  "validator": "verify_vs2_sec_001",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-001",
+    "--json"
+  ],
+  "verification_method": "Automated CLI/API/browser integration test using one fixture principal and normalized input comparison.",
+  "when": "The operation is submitted through each surface."
+}

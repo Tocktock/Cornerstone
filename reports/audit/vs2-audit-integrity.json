@@ -1,15 +1,86 @@
 {
   "append_only": true,
+  "checks": {
+    "clean_ledger_verifies": true,
+    "deletion_detected": true,
+    "insertion_detected": true,
+    "mutation_detected": true,
+    "previous_hash_tamper_detected": true,
+    "reordering_detected": true,
+    "required_events_present": true,
+    "tenant_query_scoped": true
+  },
+  "clean_verification": {
+    "event_count": 35,
+    "root_hash": "d8d321788f53011986fecca876eccad1a416284ebcd9051418bf01577d5ac656",
+    "valid": true
+  },
+  "event_count": 35,
   "hash_chain_verified": true,
+  "present_event_types": [
+    "action.approved",
+    "action.dry_run.created",
+    "artifact.read",
+    "audit.verified",
+    "connector.requested",
+    "egress.allowed",
+    "egress.denied",
+    "identity.context.denied",
+    "identity.context.resolved",
+    "migration.quarantined",
+    "migration.started",
+    "policy.decision.created",
+    "policy.enforcement_mismatch.denied",
+    "rls.anomaly.detected",
+    "scope_forgery.denied",
+    "security.change.reviewed",
+    "worker.job.executed",
+    "workflow.executed"
+  ],
   "queryable_by_tenant_action_decision": true,
   "required_event_types": [
-    "policy.decision",
+    "identity.context.resolved",
+    "identity.context.denied",
+    "policy.decision.created",
+    "rls.anomaly.detected",
+    "artifact.read",
+    "action.dry_run.created",
+    "action.approved",
+    "workflow.executed",
     "egress.denied",
-    "action.dry_run",
-    "action.approval",
-    "workflow.execution",
+    "egress.allowed",
+    "connector.requested",
+    "migration.started",
+    "migration.quarantined",
+    "security.change.reviewed",
     "audit.verified"
   ],
   "status": "passed",
-  "tamper_detected": true
+  "tamper_cases": {
+    "event_deletion": {
+      "failed_at": 1,
+      "reason": "previous_hash_mismatch",
+      "valid": false
+    },
+    "event_insertion": {
+      "failed_at": 1,
+      "reason": "previous_hash_mismatch",
+      "valid": false
+    },
+    "event_reordering": {
+      "failed_at": 1,
+      "reason": "previous_hash_mismatch",
+      "valid": false
+    },
+    "one_byte_mutation": {
+      "failed_at": 1,
+      "reason": "event_hash_mismatch",
+      "valid": false
+    },
+    "previous_hash_change": {
+      "failed_at": 1,
+      "reason": "previous_hash_mismatch",
+      "valid": false
+    }
+  }
 }

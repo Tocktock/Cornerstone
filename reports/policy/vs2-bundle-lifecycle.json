@@ -1,7 +1,7 @@
 {
   "activation_atomic": true,
   "active_revision": "vs2-rego-local-v1",
-  "bundle_hash": "a0c2e7d6f44d13347cebbe897bca2db12796887662f4d7796f331f9c0cbdf535",
+  "bundle_hash": "a23617c575c760b9d10c16a4abfaa915c972f4492ea5c20214371f445ac6a529",
   "decision_cache_keys": [
     "tenant_id",
     "principal_id",
@@ -11,7 +11,48 @@
   ],
   "decision_logs_masked": true,
   "fail_closed_on_timeout": true,
+  "http_decision_transcript": [
+    {
+      "case": "allow",
+      "decision": {
+        "bundle_revision": "vs2-rego-local-v1",
+        "decision": "allow",
+        "policy_path": "cornerstone.vs2/allow",
+        "reason_codes": []
+      },
+      "status": 200
+    },
+    {
+      "case": "cross_tenant_deny",
+      "decision": {
+        "bundle_revision": "vs2-rego-local-v1",
+        "decision": "deny",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "cross_tenant_scope"
+        ]
+      },
+      "status": 200
+    },
+    {
+      "case": "invalid_schema",
+      "decision": {
+        "bundle_revision": "vs2-rego-local-v1",
+        "decision": "deny",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "invalid_schema"
+        ]
+      },
+      "status": 200
+    }
+  ],
   "last_known_good_retained": true,
   "management_api_anonymous": false,
+  "outage_probe": {
+    "decision": "deny",
+    "error_class": "URLError",
+    "reason": "opa_unavailable_fail_closed"
+  },
   "status": "passed"
 }

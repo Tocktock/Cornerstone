@@ -1,0 +1,85 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "after": {
+          "audit_event": "identity.revoked_denied",
+          "db_calls": 0,
+          "egress_calls": 0,
+          "reason": "membership_revoked",
+          "status": "denied"
+        },
+        "before": {
+          "audit_event": "identity.resolved",
+          "context": {
+            "membership_revision": "memrev-alpha-001",
+            "namespace_id": "personal",
+            "owner_id": "principal_alice",
+            "principal_id": "principal_alice",
+            "revoked": false,
+            "roles": [
+              "owner"
+            ],
+            "session_version": 1,
+            "tenant_id": "tenant_alpha",
+            "workspace_id": "alpha-home"
+          },
+          "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+          "db_calls": 0,
+          "egress_calls": 0,
+          "ignored_or_rejected_caller_fields": {},
+          "reason": "trusted_context_resolved",
+          "status": "allowed"
+        },
+        "stale_worker": {
+          "db_calls": 0,
+          "decision": "quarantine",
+          "egress_calls": 0,
+          "job_id": "job_alpha_stale_001",
+          "membership_revision": "memrev-alpha-001",
+          "reason": "stale_or_revoked_membership",
+          "tenant_id": "tenant_alpha"
+        }
+      },
+      "name": "revoked_membership_denies_next_request_and_worker",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "The new request is denied within the documented revocation window; stale authorization state cannot preserve access.",
+  "given": "A principal's membership, role, attribute, capability, or workspace access is revoked.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Before/after decisions, cache revision/expiry, denial audit, zero post-revocation access.",
+  "scenario_id": "VS2-SEC-005",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "The new request is denied within the documented revocation window; stale authorization state cannot preserve access.",
+  "validator": "verify_vs2_sec_005",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-005",
+    "--json"
+  ],
+  "verification_method": "Integration test with allow \u2192 revoke \u2192 retry across API, CLI, service, and worker paths.",
+  "when": "The principal repeats a previously allowed request, including through a cached session or long-running worker."
+}

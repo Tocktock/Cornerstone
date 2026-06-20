@@ -1,0 +1,69 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "clean_ledger_verifies": true,
+        "deletion_detected": true,
+        "insertion_detected": true,
+        "mutation_detected": true,
+        "previous_hash_tamper_detected": true,
+        "reordering_detected": true,
+        "required_events_present": true,
+        "tenant_query_scoped": true
+      },
+      "name": "clean_audit_ledger_verifies",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "clean_ledger_verifies": true,
+        "deletion_detected": true,
+        "insertion_detected": true,
+        "mutation_detected": true,
+        "previous_hash_tamper_detected": true,
+        "reordering_detected": true,
+        "required_events_present": true,
+        "tenant_query_scoped": true
+      },
+      "name": "audit_tamper_mutation_delete_insert_reorder_detected",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "Required events are append-only/tamper-evident, queryable by tenant/action/decision, and modification/removal is detected.",
+  "given": "VS2 generates access, denial, policy update, RLS anomaly, egress, approval, connector, and rollback events.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Event inventory, verification success, tamper detection failure evidence.",
+  "scenario_id": "VS2-SEC-066",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "Required events are append-only/tamper-evident, queryable by tenant/action/decision, and modification/removal is detected.",
+  "validator": "verify_vs2_sec_066",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-066",
+    "--json"
+  ],
+  "verification_method": "Audit contract tests and tamper fixture.",
+  "when": "Audit verification and deliberate tampering run."
+}

@@ -1,0 +1,69 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "abac_denied": true,
+        "allow_decision_observed": true,
+        "capability_default_deny": true,
+        "deny_precedence_on_mismatch": true,
+        "high_risk_allowed_after_approval": true,
+        "high_risk_requires_approval": true,
+        "invalid_schema_denied": true,
+        "opa_unavailable_denied": true,
+        "role_denied": true,
+        "undefined_default_deny": true
+      },
+      "name": "namespace_cross_scope_policy_denies",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "cross_tenant_payload_quarantined": true,
+        "missing_signature_quarantined": true,
+        "replay_quarantined": true,
+        "stale_revision_quarantined": true,
+        "tampered_tenant_quarantined": true,
+        "valid_job_runs": true
+      },
+      "name": "tenant_scoped_cache_or_idempotency",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "Keys are tenant-scoped unless intentionally global and non-sensitive; one tenant cannot read, suppress, replay, or infer another tenant's operation.",
+  "given": "Caches, idempotency keys, deduplication indexes, locks, rate limits, and saved cursors are used by multiple tenants.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Key snapshots/digests, independent results, zero cross-tenant cache hits.",
+  "scenario_id": "VS2-SEC-024",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "Keys are tenant-scoped unless intentionally global and non-sensitive; one tenant cannot read, suppress, replay, or infer another tenant's operation.",
+  "validator": "verify_vs2_sec_024",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-024",
+    "--json"
+  ],
+  "verification_method": "Collision and replay tests across two tenants.",
+  "when": "Two tenants submit identical IDs/content/keys or concurrent operations."
+}

@@ -1,0 +1,84 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "all_protected_tables_seeded_for_tenant_a": true,
+        "cross_tenant_delete_zero": true,
+        "cross_tenant_update_zero": true,
+        "forged_insert_denied": true,
+        "forged_update_denied": true,
+        "policy_table_isolated": true,
+        "safe_view_is_rls_bound": true,
+        "security_definer_execute_denied": true,
+        "tenant_a_search_isolated": true,
+        "tenant_a_sees_one_artifact": true,
+        "tenant_b_absent_from_all_tenant_a_relations": true,
+        "tenant_b_absent_from_tenant_a": true
+      },
+      "name": "cross_tenant_reads_counts_and_views_isolated",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "all_protected_tables_seeded_for_tenant_a": true,
+        "cross_tenant_delete_zero": true,
+        "cross_tenant_update_zero": true,
+        "forged_insert_denied": true,
+        "forged_update_denied": true,
+        "policy_table_isolated": true,
+        "safe_view_is_rls_bound": true,
+        "security_definer_execute_denied": true,
+        "tenant_a_search_isolated": true,
+        "tenant_a_sees_one_artifact": true,
+        "tenant_b_absent_from_all_tenant_a_relations": true,
+        "tenant_b_absent_from_tenant_a": true
+      },
+      "name": "write_or_unsafe_path_cannot_bypass",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "forged_insert_error_neutral": true
+      },
+      "name": "neutral_errors_and_no_foreign_canary",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "No path bypasses tenant isolation; unsafe security-definer or owner-context access is rejected by CI or explicitly governed.",
+  "given": "Protected data is accessed through SQL views, functions, stored procedures, ORM raw SQL, or security-definer code.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Object inventory, grants, cross-tenant tests, lint report.",
+  "scenario_id": "VS2-SEC-018",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "No path bypasses tenant isolation; unsafe security-definer or owner-context access is rejected by CI or explicitly governed.",
+  "validator": "verify_vs2_sec_018",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-018",
+    "--json"
+  ],
+  "verification_method": "Database integration tests plus static inventory of views/functions/security-definer objects.",
+  "when": "The application role invokes each supported path."
+}

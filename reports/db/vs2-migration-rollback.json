@@ -1,11 +1,38 @@
 {
+  "backup_manifest": {
+    "manifest_id": "vs2_backup_local_fixture_001",
+    "post_restore_hash": "3b58aaa3442b53337e91d847372dab21b86de99b0407d474f3e00bf5bf57e678",
+    "pre_migration_hash": "3b58aaa3442b53337e91d847372dab21b86de99b0407d474f3e00bf5bf57e678",
+    "scope": "local_synthetic_fixture"
+  },
   "checks": {
     "ambiguous_legacy_row_quarantined": true,
+    "backup_manifest_has_hashes": true,
+    "invalid_cross_tenant_rows_quarantined": true,
     "no_destructive_migration": true,
+    "ownerless_global_truth_forbidden": true,
+    "restore_counts_match": true,
     "rollback_command_succeeded": true,
     "rollback_preserved_counts": true
   },
+  "fixture_database": {
+    "ambiguous_namespace_rows": 1,
+    "cross_tenant_reference_rows": 1,
+    "known_tenant_rows": 30,
+    "missing_ownership_rows": 1,
+    "ownerless_global_truth_rows": 0
+  },
   "quarantine_exit_code": 0,
+  "quarantine_reasons": [
+    "ambiguous_owner",
+    "missing_tenant",
+    "cross_tenant_reference"
+  ],
+  "restore_verification": {
+    "audit_rechecked_after_restore": true,
+    "counts_match": true,
+    "rls_rechecked_after_restore": true
+  },
   "rollback_after": {
     "artifact_count_after": 1
   },

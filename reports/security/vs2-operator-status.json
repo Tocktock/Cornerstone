@@ -1,0 +1,47 @@
+{
+  "active_namespace": "personal",
+  "active_tenant": "tenant_alpha",
+  "approval_required": true,
+  "audit_refs": [
+    "audit_0017"
+  ],
+  "authenticated_principal": "principal_alice",
+  "boundary": "local-only; production-not-ready; H02-H07 remain human-required",
+  "egress_destination": "reports/network/vs2-egress-proof.json",
+  "execution_result": "blocked_until_valid_approval",
+  "policy_decision": {
+    "audit_refs": [
+      "audit_0017"
+    ],
+    "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+    "bundle_revision": "vs2-rego-local-v1",
+    "decided_at_epoch": 1781968482,
+    "decision": "deny",
+    "decision_id": "policy_e1e3fb8acf46e75a",
+    "evidence_refs": [],
+    "input_digest": "2f30ffd53b89a5e361315434cc2943e299fe3ae7b89b966c2e882207346759dd",
+    "namespace_id": "personal",
+    "policy_path": "cornerstone.vs2/deny",
+    "reason_codes": [
+      "high_risk_requires_approval"
+    ],
+    "resolution_path": [
+      "Use trusted membership scope",
+      "Request approval or required role",
+      "Retry through governed path"
+    ],
+    "schema_version": "cs.policy_decision.vs2.v1",
+    "tenant_id": "tenant_alpha",
+    "trace_id": "trace_vs2_policy_local"
+  },
+  "risk": "high",
+  "status": "passed",
+  "ui_map": [
+    "Home",
+    "Search",
+    "Artifacts",
+    "Claims",
+    "Actions",
+    "Admin/Security"
+  ]
+}

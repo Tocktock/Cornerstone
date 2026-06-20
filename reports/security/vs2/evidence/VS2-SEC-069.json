@@ -1,0 +1,51 @@
+{
+  "assertions": [
+    {
+      "evidence": {},
+      "name": "compose_profile_and_migrations_present",
+      "passed": true
+    },
+    {
+      "evidence": {},
+      "name": "postgres_opa_egress_smoke_passed",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "Readiness succeeds only when required components and active policy/RLS inventory are valid; a tenant-isolation and egress-deny smoke flow completes.",
+  "given": "A new evaluator uses the documented local/on-prem VS2 quickstart without live provider credentials.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Command transcript with exit codes, component versions, policy revision, RLS inventory, generated IDs, elapsed time.",
+  "scenario_id": "VS2-SEC-069",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "Readiness succeeds only when required components and active policy/RLS inventory are valid; a tenant-isolation and egress-deny smoke flow completes.",
+  "validator": "verify_vs2_sec_069",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-069",
+    "--json"
+  ],
+  "verification_method": "Executable clean-environment quickstart.",
+  "when": "They start CornerStone, Postgres, OPA, and the local egress test harness."
+}

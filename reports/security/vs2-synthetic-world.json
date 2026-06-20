@@ -1,10 +1,37 @@
 {
+  "artifacts": [
+    {
+      "artifact_id": "artifact_alpha_001",
+      "canary": "ALPHA_ONLY_VS2_CANARY",
+      "classification": "internal",
+      "namespace_id": "personal",
+      "owner_id": "principal_alice",
+      "tenant_id": "tenant_alpha",
+      "workspace_id": "alpha-home"
+    },
+    {
+      "artifact_id": "artifact_beta_001",
+      "canary": "BETA_ONLY_VS2_CANARY",
+      "classification": "internal",
+      "namespace_id": "personal",
+      "owner_id": "principal_bob",
+      "tenant_id": "tenant_beta",
+      "workspace_id": "beta-home"
+    }
+  ],
+  "clock": {
+    "now_epoch": 1781968482,
+    "valid_session_ttl_seconds": 3600
+  },
   "fixture_note": "Synthetic local-only users, tenants, memberships, and signed sessions; no real customer data or credentials.",
   "forged_inputs": {
     "classification": "restricted",
     "namespace_id": "personal",
     "owner_id": "principal_bob",
     "role": "admin",
+    "roles": [
+      "admin"
+    ],
     "tenant_id": "tenant_beta",
     "workspace_id": "beta-home"
   },
@@ -88,10 +115,10 @@
   ],
   "schema_version": "cs.vs2.synthetic_world.v1",
   "session_digests": {
-    "alice_org": "3af034f90632403195571b7c43c0f84760f7d94fdea8ec5f92f10f534ee98a74",
-    "alice_personal": "4717649c01fd5e7f6817b7160fb13f9b12355c5a50f33f5dc00b2236e85f1168",
-    "bob_personal": "98ccfaa2a5ca2c28ca36aa7a1fda621d24ade8eec7de4f48d32b38818c90016a",
-    "expired_alice": "2ede5c1ab49c3755c032dab00a50ffd11726e268d17b854e40f55425ded295f8"
+    "alice_org": "925535982e609bca154129f8da64f1d9c4e6d67bfce95cb100b31e36ff27729e",
+    "alice_personal": "47f639c6a6d5a784b2bd8206849ebf83e3051e610a7850b914d0057911562b0b",
+    "bob_personal": "072495ef88d522b5b19699407b11248543277cdf81eb6f87e4f59caf826c4cb6",
+    "expired_alice": "6945817535dd5bc3f52769a4afa61d9d509cb3ce5ecb3102529b98ef650cc70c"
   },
   "tenants": [
     {

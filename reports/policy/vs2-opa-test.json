@@ -1,12 +1,105 @@
 {
   "exit_code": 0,
+  "http_service": {
+    "checks": {
+      "http_allow_observed": true,
+      "http_cross_tenant_denied": true,
+      "http_invalid_schema_denied": true,
+      "outage_fails_closed": true
+    },
+    "container": "cornerstone-vs2-opa-bd8e6a4c7a",
+    "decision_transcript": [
+      {
+        "case": "allow",
+        "decision": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "policy_path": "cornerstone.vs2/allow",
+          "reason_codes": []
+        },
+        "status": 200
+      },
+      {
+        "case": "cross_tenant_deny",
+        "decision": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "cross_tenant_scope"
+          ]
+        },
+        "status": 200
+      },
+      {
+        "case": "invalid_schema",
+        "decision": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "invalid_schema"
+          ]
+        },
+        "status": 200
+      }
+    ],
+    "docker_transcript": [
+      {
+        "command": [
+          "docker",
+          "run",
+          "-d",
+          "--rm",
+          "--name",
+          "cornerstone-vs2-opa-bd8e6a4c7a",
+          "-p",
+          "127.0.0.1:59123:8181",
+          "-v",
+          "/Users/jiyong/playground/Cornerstone/policies/vs2:/policies:ro",
+          "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+          "run",
+          "--server",
+          "--addr=0.0.0.0:8181",
+          "/policies"
+        ],
+        "elapsed_seconds": 0.139,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [
+          "4208974e10a3512a4502d9b09502066ebe5d4c61f7e7dab6a6481227bf1d359c"
+        ]
+      },
+      {
+        "command": [
+          "docker",
+          "rm",
+          "-f",
+          "cornerstone-vs2-opa-bd8e6a4c7a"
+        ],
+        "elapsed_seconds": 0.216,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [
+          "cornerstone-vs2-opa-bd8e6a4c7a"
+        ]
+      }
+    ],
+    "outage_probe": {
+      "decision": "deny",
+      "error_class": "URLError",
+      "reason": "opa_unavailable_fail_closed"
+    },
+    "port": 59123,
+    "status": "passed"
+  },
   "opa_image": "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
   "result": {
-    "coverage": 95.65217391304348,
-    "covered_lines": 110,
+    "coverage": 96.12403100775194,
+    "covered_lines": 124,
     "files": {
       "policies/vs2/policy.rego": {
-        "coverage": 92.85714285714286,
+        "coverage": 93.75,
         "covered": [
           {
             "end": {
@@ -18,7 +111,7 @@
           },
           {
             "end": {
-              "row": 17
+              "row": 23
             },
             "start": {
               "row": 5
@@ -26,50 +119,50 @@
           },
           {
             "end": {
-              "row": 22
+              "row": 28
             },
             "start": {
-              "row": 20
-            }
-          },
-          {
-            "end": {
               "row": 26
-            },
-            "start": {
-              "row": 25
             }
           },
           {
             "end": {
-              "row": 39
+              "row": 32
             },
             "start": {
-              "row": 38
+              "row": 31
             }
           },
           {
             "end": {
-              "row": 43
+              "row": 45
             },
             "start": {
-              "row": 42
+              "row": 44
             }
           },
           {
             "end": {
-              "row": 47
+              "row": 49
             },
             "start": {
-              "row": 46
+              "row": 48
             }
           },
           {
             "end": {
+              "row": 54
+            },
+            "start": {
               "row": 52
+            }
+          },
+          {
+            "end": {
+              "row": 58
             },
             "start": {
-              "row": 50
+              "row": 57
             }
           },
           {
@@ -77,12 +170,12 @@
               "row": 63
             },
             "start": {
-              "row": 55
+              "row": 61
             }
           },
           {
             "end": {
-              "row": 67
+              "row": 74
             },
             "start": {
               "row": 66
@@ -90,74 +183,58 @@
           },
           {
             "end": {
-              "row": 72
+              "row": 78
             },
             "start": {
-              "row": 70
-            }
-          },
-          {
-            "end": {
               "row": 77
-            },
-            "start": {
-              "row": 75
             }
           },
           {
             "end": {
-              "row": 82
+              "row": 83
             },
             "start": {
-              "row": 80
+              "row": 81
             }
           },
           {
             "end": {
-              "row": 87
+              "row": 88
             },
             "start": {
-              "row": 85
+              "row": 86
             }
           },
           {
             "end": {
-              "row": 92
+              "row": 93
             },
             "start": {
-              "row": 90
+              "row": 91
             }
           },
           {
             "end": {
-              "row": 97
+              "row": 99
             },
             "start": {
-              "row": 95
+              "row": 96
             }
           },
           {
             "end": {
+              "row": 104
+            },
+            "start": {
               "row": 102
-            },
-            "start": {
-              "row": 100
             }
           },
           {
             "end": {
-              "row": 105
+              "row": 109
             },
             "start": {
-              "row": 105
-            }
-          },
-          {
-            "end": {
-              "row": 111
-            },
-            "start": {
-              "row": 111
+              "row": 107
             }
           },
           {
@@ -165,34 +242,58 @@
               "row": 114
             },
             "start": {
-              "row": 114
+              "row": 112
             }
           },
           {
             "end": {
-              "row": 121
+              "row": 117
             },
             "start": {
-              "row": 120
+              "row": 117
+            }
+          },
+          {
+            "end": {
+              "row": 123
+            },
+            "start": {
+              "row": 123
+            }
+          },
+          {
+            "end": {
+              "row": 126
+            },
+            "start": {
+              "row": 126
+            }
+          },
+          {
+            "end": {
+              "row": 133
+            },
+            "start": {
+              "row": 132
             }
           }
         ],
-        "covered_lines": 65,
+        "covered_lines": 75,
         "not_covered": [
           {
             "end": {
-              "row": 30
+              "row": 36
             },
             "start": {
-              "row": 29
+              "row": 35
             }
           },
           {
             "end": {
-              "row": 35
+              "row": 41
             },
             "start": {
-              "row": 33
+              "row": 39
             }
           }
         ],
@@ -211,58 +312,50 @@
           },
           {
             "end": {
-              "row": 31
+              "row": 39
             },
             "start": {
-              "row": 28
+              "row": 36
             }
           },
           {
             "end": {
-              "row": 38
+              "row": 46
             },
             "start": {
-              "row": 34
+              "row": 42
             }
           },
           {
             "end": {
-              "row": 45
+              "row": 53
             },
             "start": {
-              "row": 41
+              "row": 49
             }
           },
           {
             "end": {
-              "row": 52
+              "row": 60
             },
             "start": {
-              "row": 48
+              "row": 56
             }
           },
           {
             "end": {
-              "row": 59
+              "row": 67
             },
             "start": {
-              "row": 55
+              "row": 63
             }
           },
           {
             "end": {
-              "row": 66
+              "row": 74
             },
             "start": {
-              "row": 62
-            }
-          },
-          {
-            "end": {
-              "row": 73
-            },
-            "start": {
-              "row": 69
+              "row": 70
             }
           },
           {
@@ -270,7 +363,7 @@
               "row": 80
             },
             "start": {
-              "row": 76
+              "row": 77
             }
           },
           {
@@ -280,9 +373,25 @@
             "start": {
               "row": 83
             }
+          },
+          {
+            "end": {
+              "row": 94
+            },
+            "start": {
+              "row": 90
+            }
+          },
+          {
+            "end": {
+              "row": 101
+            },
+            "start": {
+              "row": 97
+            }
           }
         ],
-        "covered_lines": 45
+        "covered_lines": 49
       }
     },
     "not_covered_lines": 5

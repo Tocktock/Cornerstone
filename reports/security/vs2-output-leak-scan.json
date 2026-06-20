@@ -8,8 +8,14 @@
     "reports/policy/vs2-opa-test.json",
     "reports/policy/vs2-opa-coverage.json",
     "reports/policy/vs2-bundle-lifecycle.json",
+    "reports/policy/vs2-policy-runtime.json",
     "reports/network/vs2-egress-proof.json",
-    "reports/audit/vs2-audit-integrity.json"
+    "reports/audit/vs2-audit-integrity.json",
+    "reports/security/vs2-surface-parity.json",
+    "reports/security/vs2-worker-proof.json",
+    "reports/security/vs2-operator-status.json",
+    "reports/security/vs2-regression-proof.json",
+    "reports/security/vs2-synthetic-world.json"
   ],
   "secret_findings": 0,
   "status": "passed"

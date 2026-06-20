@@ -1,0 +1,62 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "abac_denied": true,
+        "allow_decision_observed": true,
+        "capability_default_deny": true,
+        "deny_precedence_on_mismatch": true,
+        "high_risk_allowed_after_approval": true,
+        "high_risk_requires_approval": true,
+        "invalid_schema_denied": true,
+        "opa_unavailable_denied": true,
+        "role_denied": true,
+        "undefined_default_deny": true
+      },
+      "name": "policy_decision_schema_allow_deny_observed",
+      "passed": true
+    },
+    {
+      "evidence": {},
+      "name": "policy_decision_contains_revision_and_digest",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "A canonical PolicyDecision records allow/deny/escalate, reason codes, safe resolution guidance, policy path, bundle revision/hash, decision_id, input digest, timestamps, tenant/namespace, and evidence/audit refs.",
+  "given": "Any protected operation is evaluated.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "PolicyDecision JSON fixtures, OPA decision_id/revision, audit linkage, redaction proof.",
+  "scenario_id": "VS2-SEC-006",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "A canonical PolicyDecision records allow/deny/escalate, reason codes, safe resolution guidance, policy path, bundle revision/hash, decision_id, input digest, timestamps, tenant/namespace, and evidence/audit refs.",
+  "validator": "verify_vs2_sec_006",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-006",
+    "--json"
+  ],
+  "verification_method": "Schema contract tests and golden JSON tests for allow, deny, escalate, undefined, and error results.",
+  "when": "OPA and the CornerStone policy adapter return a result."
+}

@@ -1,0 +1,19 @@
+{
+  "evidence_commit": null,
+  "evidence_manifest": "reports/security/vs2/evidence-manifest.json",
+  "evidence_manifest_sha256": "369d0e028b33c176455f1d19e4c41509c9d214dc1b96d4ee7803911d65ad9e3e",
+  "human_gates_remaining": [
+    "VS2-SEC-H01",
+    "VS2-SEC-H02",
+    "VS2-SEC-H03",
+    "VS2-SEC-H04",
+    "VS2-SEC-H05",
+    "VS2-SEC-H06",
+    "VS2-SEC-H07"
+  ],
+  "local_claim": "LOCAL_VS2_READY_PRODUCTION_HUMAN_GATES_PENDING",
+  "notes": "Evidence commit is null until these generated reports are committed; source_commit/source_tree identify the code under test.",
+  "schema_version": "cs.vs2.post_commit_rollup.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8"
+}

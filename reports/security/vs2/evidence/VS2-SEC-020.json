@@ -1,0 +1,69 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "ambiguous_legacy_row_quarantined": true,
+        "backup_manifest_has_hashes": true,
+        "invalid_cross_tenant_rows_quarantined": true,
+        "no_destructive_migration": true,
+        "ownerless_global_truth_forbidden": true,
+        "restore_counts_match": true,
+        "rollback_command_succeeded": true,
+        "rollback_preserved_counts": true
+      },
+      "name": "migration_quarantines_bad_ownership",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "ambiguous_legacy_row_quarantined": true,
+        "backup_manifest_has_hashes": true,
+        "invalid_cross_tenant_rows_quarantined": true,
+        "no_destructive_migration": true,
+        "ownerless_global_truth_forbidden": true,
+        "restore_counts_match": true,
+        "rollback_command_succeeded": true,
+        "rollback_preserved_counts": true
+      },
+      "name": "backup_restore_and_rollback_preserve_counts",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "Known rows migrate deterministically; unknown/ambiguous rows are quarantined or block migration; no ownerless global truth is created.",
+  "given": "Existing local/scaffold records or imported archive rows are migrated to the VS2 schema.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Migration report with counts/checksums, quarantine reasons, rollback transcript.",
+  "scenario_id": "VS2-SEC-020",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "Known rows migrate deterministically; unknown/ambiguous rows are quarantined or block migration; no ownerless global truth is created.",
+  "validator": "verify_vs2_sec_020",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-020",
+    "--json"
+  ],
+  "verification_method": "Migration tests on clean, mixed, malformed, duplicate, and rollback fixtures.",
+  "when": "A row has known, missing, ambiguous, or invalid tenant/namespace ownership."
+}

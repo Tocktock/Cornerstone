@@ -1,0 +1,77 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "all_tables_force_rls": true,
+        "all_tables_have_rls": true,
+        "app_role_not_bypassrls": true,
+        "app_role_not_superuser": true,
+        "app_role_not_table_owner": true,
+        "policy_inventory_present": true,
+        "unsafe_function_not_public": true
+      },
+      "name": "normal_app_role_cannot_break_glass",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "roles": [
+          {
+            "rolbypassrls": false,
+            "rolname": "cornerstone_app",
+            "rolsuper": false
+          },
+          {
+            "rolbypassrls": false,
+            "rolname": "cornerstone_maintenance",
+            "rolsuper": false
+          },
+          {
+            "rolbypassrls": false,
+            "rolname": "cornerstone_migrator",
+            "rolsuper": false
+          }
+        ]
+      },
+      "name": "maintenance_role_is_separate",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "Normal app credentials cannot perform it; the privileged path requires explicit authorization, purpose, time bound, audit, and safe output handling.",
+  "given": "An operator needs cross-tenant maintenance, recovery, or investigation.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Approval record, role assumption/revocation timestamps, accessed row counts, audit trail.",
+  "scenario_id": "VS2-SEC-014",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "Normal app credentials cannot perform it; the privileged path requires explicit authorization, purpose, time bound, audit, and safe output handling.",
+  "validator": "verify_vs2_sec_014",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-014",
+    "--json"
+  ],
+  "verification_method": "Integration rehearsal with denied app role and approved synthetic break-glass role.",
+  "when": "A break-glass or maintenance path is requested."
+}

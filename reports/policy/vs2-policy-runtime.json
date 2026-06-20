@@ -1,0 +1,589 @@
+{
+  "checks": {
+    "abac_denied": true,
+    "allow_decision_observed": true,
+    "capability_default_deny": true,
+    "deny_precedence_on_mismatch": true,
+    "high_risk_allowed_after_approval": true,
+    "high_risk_requires_approval": true,
+    "invalid_schema_denied": true,
+    "opa_unavailable_denied": true,
+    "role_denied": true,
+    "undefined_default_deny": true
+  },
+  "policy_cases": {
+    "abac_deny": {
+      "decision": {
+        "audit_refs": [
+          "audit_0016"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_fb210fdad14de66f",
+        "evidence_refs": [],
+        "input_digest": "a6edec338c18838e801b55a26f7c2c4c842d7b25b43af51e44bf9e578fc30a41",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "secret_classification_denied"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "input": {
+        "action": "artifact.read",
+        "approval": {
+          "required": false,
+          "status": "not_required"
+        },
+        "attribute_sources": {
+          "approval.status": "action_approval_store",
+          "resource.tenant_id": "database_record",
+          "scope.tenant_id": "membership_store",
+          "subject.principal_id": "verified_session"
+        },
+        "capability": {
+          "connectorhub_mediated": true,
+          "declared": true
+        },
+        "environment": {
+          "deployment": "local",
+          "workspace_mode": "assist"
+        },
+        "policy_path": "artifact.read",
+        "resource": {
+          "classification": "secret",
+          "namespace_id": "personal",
+          "resource_id": "artifact_alpha_001",
+          "tenant_id": "tenant_alpha"
+        },
+        "risk": "low",
+        "schema_version": "cs.policy_input.vs2.v1",
+        "scope": {
+          "namespace_id": "personal",
+          "tenant_id": "tenant_alpha",
+          "workspace_id": "alpha-home"
+        },
+        "subject": {
+          "membership_revision": "memrev-alpha-001",
+          "principal_id": "principal_alice",
+          "revoked": false,
+          "roles": [
+            "owner"
+          ]
+        },
+        "trace_id": "trace_vs2_policy_local"
+      }
+    },
+    "allow": {
+      "decision": {
+        "audit_refs": [
+          "audit_0014"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "allow",
+        "decision_id": "policy_7058ca7806201d96",
+        "evidence_refs": [],
+        "input_digest": "73bac6477ef5df420959c48aeb262ff7158dd2a2f8884219880458edb586598e",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/allow",
+        "reason_codes": [],
+        "resolution_path": [],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "input": {
+        "action": "artifact.read",
+        "approval": {
+          "required": false,
+          "status": "not_required"
+        },
+        "attribute_sources": {
+          "approval.status": "action_approval_store",
+          "resource.tenant_id": "database_record",
+          "scope.tenant_id": "membership_store",
+          "subject.principal_id": "verified_session"
+        },
+        "capability": {
+          "connectorhub_mediated": true,
+          "declared": true
+        },
+        "environment": {
+          "deployment": "local",
+          "workspace_mode": "assist"
+        },
+        "policy_path": "artifact.read",
+        "resource": {
+          "classification": "internal",
+          "namespace_id": "personal",
+          "resource_id": "artifact_alpha_001",
+          "tenant_id": "tenant_alpha"
+        },
+        "risk": "low",
+        "schema_version": "cs.policy_input.vs2.v1",
+        "scope": {
+          "namespace_id": "personal",
+          "tenant_id": "tenant_alpha",
+          "workspace_id": "alpha-home"
+        },
+        "subject": {
+          "membership_revision": "memrev-alpha-001",
+          "principal_id": "principal_alice",
+          "revoked": false,
+          "roles": [
+            "owner"
+          ]
+        },
+        "trace_id": "trace_vs2_policy_local"
+      }
+    },
+    "capability_deny": {
+      "decision": {
+        "audit_refs": [
+          "audit_0020"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_3babf066a511506a",
+        "evidence_refs": [],
+        "input_digest": "a59cdbc1a3a676a9a4ab952471f6442582cc5995bd0c1d5ea9e40f8af69dea2a",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "connectorhub_capability_required"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "input": {
+        "action": "artifact.read",
+        "approval": {
+          "required": false,
+          "status": "not_required"
+        },
+        "attribute_sources": {
+          "approval.status": "action_approval_store",
+          "resource.tenant_id": "database_record",
+          "scope.tenant_id": "membership_store",
+          "subject.principal_id": "verified_session"
+        },
+        "capability": {
+          "connectorhub_mediated": false,
+          "declared": false
+        },
+        "environment": {
+          "deployment": "local",
+          "workspace_mode": "assist"
+        },
+        "policy_path": "artifact.read",
+        "resource": {
+          "classification": "internal",
+          "namespace_id": "personal",
+          "resource_id": "artifact_alpha_001",
+          "tenant_id": "tenant_alpha"
+        },
+        "risk": "low",
+        "schema_version": "cs.policy_input.vs2.v1",
+        "scope": {
+          "namespace_id": "personal",
+          "tenant_id": "tenant_alpha",
+          "workspace_id": "alpha-home"
+        },
+        "subject": {
+          "membership_revision": "memrev-alpha-001",
+          "principal_id": "principal_alice",
+          "revoked": false,
+          "roles": [
+            "owner"
+          ]
+        },
+        "trace_id": "trace_vs2_policy_local"
+      }
+    },
+    "gateway_service_mismatch": {
+      "audit_event": "audit_0022",
+      "final": "deny",
+      "gateway": "allow",
+      "service": "deny",
+      "side_effects": 0
+    },
+    "high_risk_approval_required": {
+      "decision": {
+        "audit_refs": [
+          "audit_0017"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_e1e3fb8acf46e75a",
+        "evidence_refs": [],
+        "input_digest": "2f30ffd53b89a5e361315434cc2943e299fe3ae7b89b966c2e882207346759dd",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "high_risk_requires_approval"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "input": {
+        "action": "artifact.read",
+        "approval": {
+          "required": true,
+          "status": "missing"
+        },
+        "attribute_sources": {
+          "approval.status": "action_approval_store",
+          "resource.tenant_id": "database_record",
+          "scope.tenant_id": "membership_store",
+          "subject.principal_id": "verified_session"
+        },
+        "capability": {
+          "connectorhub_mediated": true,
+          "declared": true
+        },
+        "environment": {
+          "deployment": "local",
+          "workspace_mode": "assist"
+        },
+        "policy_path": "artifact.read",
+        "resource": {
+          "classification": "internal",
+          "namespace_id": "personal",
+          "resource_id": "artifact_alpha_001",
+          "tenant_id": "tenant_alpha"
+        },
+        "risk": "high",
+        "schema_version": "cs.policy_input.vs2.v1",
+        "scope": {
+          "namespace_id": "personal",
+          "tenant_id": "tenant_alpha",
+          "workspace_id": "alpha-home"
+        },
+        "subject": {
+          "membership_revision": "memrev-alpha-001",
+          "principal_id": "principal_alice",
+          "revoked": false,
+          "roles": [
+            "owner"
+          ]
+        },
+        "trace_id": "trace_vs2_policy_local"
+      }
+    },
+    "high_risk_approved": {
+      "decision": {
+        "audit_refs": [
+          "audit_0018"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "allow",
+        "decision_id": "policy_dff2d3f0a0759411",
+        "evidence_refs": [],
+        "input_digest": "fc93186ad6757e8e95f7b0687b80f6c7a03ec8cd29ae2820c139bbfa41f241e6",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/allow",
+        "reason_codes": [],
+        "resolution_path": [],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "input": {
+        "action": "artifact.read",
+        "approval": {
+          "required": true,
+          "status": "approved"
+        },
+        "attribute_sources": {
+          "approval.status": "action_approval_store",
+          "resource.tenant_id": "database_record",
+          "scope.tenant_id": "membership_store",
+          "subject.principal_id": "verified_session"
+        },
+        "capability": {
+          "connectorhub_mediated": true,
+          "declared": true
+        },
+        "environment": {
+          "deployment": "local",
+          "workspace_mode": "assist"
+        },
+        "policy_path": "artifact.read",
+        "resource": {
+          "classification": "internal",
+          "namespace_id": "personal",
+          "resource_id": "artifact_alpha_001",
+          "tenant_id": "tenant_alpha"
+        },
+        "risk": "high",
+        "schema_version": "cs.policy_input.vs2.v1",
+        "scope": {
+          "namespace_id": "personal",
+          "tenant_id": "tenant_alpha",
+          "workspace_id": "alpha-home"
+        },
+        "subject": {
+          "membership_revision": "memrev-alpha-001",
+          "principal_id": "principal_alice",
+          "revoked": false,
+          "roles": [
+            "owner"
+          ]
+        },
+        "trace_id": "trace_vs2_policy_local"
+      }
+    },
+    "invalid_schema": {
+      "decision": {
+        "audit_refs": [
+          "audit_0021"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_3108b2f519f14efd",
+        "evidence_refs": [],
+        "input_digest": "a4541ef5cd71687a0c12f78616209cc0f52975374a8cafbe5f300f69807c99ba",
+        "namespace_id": null,
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "invalid_schema",
+          "role_not_allowed",
+          "connectorhub_capability_required"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": null,
+        "trace_id": null
+      },
+      "input": {
+        "schema_version": "invalid"
+      }
+    },
+    "opa_unavailable": {
+      "decision": {
+        "bundle_revision": null,
+        "decision": "deny",
+        "decision_id": "policy_opa_unavailable_local",
+        "reason_codes": [
+          "opa_unavailable_fail_closed"
+        ]
+      },
+      "input": {
+        "action": "artifact.read",
+        "approval": {
+          "required": false,
+          "status": "not_required"
+        },
+        "capability": {
+          "connectorhub_mediated": true,
+          "declared": true
+        },
+        "environment": {
+          "deployment": "local",
+          "workspace_mode": "assist"
+        },
+        "policy_path": "artifact.read",
+        "resource": {
+          "classification": "internal",
+          "namespace_id": "personal",
+          "resource_id": "artifact_a",
+          "tenant_id": "tenant_a"
+        },
+        "risk": "low",
+        "schema_version": "cs.policy_input.vs2.v1",
+        "scope": {
+          "namespace_id": "personal",
+          "tenant_id": "tenant_a",
+          "workspace_id": "default"
+        },
+        "subject": {
+          "membership_revision": "memrev-alpha-001",
+          "principal_id": "principal_alice",
+          "revoked": false,
+          "roles": [
+            "owner"
+          ]
+        },
+        "trace_id": "trace_vs2_policy_http"
+      }
+    },
+    "role_deny": {
+      "decision": {
+        "audit_refs": [
+          "audit_0015"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_996dd872c7bfc69a",
+        "evidence_refs": [],
+        "input_digest": "ac701f2f812e14f8e81e2d3c9448cb9b14f41de65ef4380524116d0de8c2bbdf",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "role_not_allowed"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "input": {
+        "action": "artifact.read",
+        "approval": {
+          "required": false,
+          "status": "not_required"
+        },
+        "attribute_sources": {
+          "approval.status": "action_approval_store",
+          "resource.tenant_id": "database_record",
+          "scope.tenant_id": "membership_store",
+          "subject.principal_id": "verified_session"
+        },
+        "capability": {
+          "connectorhub_mediated": true,
+          "declared": true
+        },
+        "environment": {
+          "deployment": "local",
+          "workspace_mode": "assist"
+        },
+        "policy_path": "artifact.read",
+        "resource": {
+          "classification": "internal",
+          "namespace_id": "personal",
+          "resource_id": "artifact_alpha_001",
+          "tenant_id": "tenant_alpha"
+        },
+        "risk": "low",
+        "schema_version": "cs.policy_input.vs2.v1",
+        "scope": {
+          "namespace_id": "personal",
+          "tenant_id": "tenant_alpha",
+          "workspace_id": "alpha-home"
+        },
+        "subject": {
+          "membership_revision": "memrev-alpha-001",
+          "principal_id": "principal_alice",
+          "revoked": false,
+          "roles": [
+            "viewer"
+          ]
+        },
+        "trace_id": "trace_vs2_policy_local"
+      }
+    },
+    "undefined_policy": {
+      "decision": {
+        "audit_refs": [
+          "audit_0019"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_b408cee323b1c872",
+        "evidence_refs": [],
+        "input_digest": "beec618240d7b992a90cb9bfb67eb6fdf87fec7ab8efd661968943d70826f55c",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "unknown_policy_default_deny"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "input": {
+        "action": "artifact.read",
+        "approval": {
+          "required": false,
+          "status": "not_required"
+        },
+        "attribute_sources": {
+          "approval.status": "action_approval_store",
+          "resource.tenant_id": "database_record",
+          "scope.tenant_id": "membership_store",
+          "subject.principal_id": "verified_session"
+        },
+        "capability": {
+          "connectorhub_mediated": true,
+          "declared": true
+        },
+        "environment": {
+          "deployment": "local",
+          "workspace_mode": "assist"
+        },
+        "policy_path": "unknown",
+        "resource": {
+          "classification": "internal",
+          "namespace_id": "personal",
+          "resource_id": "artifact_alpha_001",
+          "tenant_id": "tenant_alpha"
+        },
+        "risk": "low",
+        "schema_version": "cs.policy_input.vs2.v1",
+        "scope": {
+          "namespace_id": "personal",
+          "tenant_id": "tenant_alpha",
+          "workspace_id": "alpha-home"
+        },
+        "subject": {
+          "membership_revision": "memrev-alpha-001",
+          "principal_id": "principal_alice",
+          "revoked": false,
+          "roles": [
+            "owner"
+          ]
+        },
+        "trace_id": "trace_vs2_policy_local"
+      }
+    }
+  },
+  "status": "passed"
+}

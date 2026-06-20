@@ -1,0 +1,67 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "audit_refs_present": true,
+        "forged_scope_denied": true,
+        "missing_context_fails_before_db_egress": true,
+        "same_context_digest": true,
+        "same_policy_outcome": true,
+        "same_status_code": true,
+        "tenant_b_canary_not_serialized": true
+      },
+      "name": "forged_scope_denied_by_entrypoints",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "audit_refs_present": true,
+        "forged_scope_denied": true,
+        "missing_context_fails_before_db_egress": true,
+        "same_context_digest": true,
+        "same_policy_outcome": true,
+        "same_status_code": true,
+        "tenant_b_canary_not_serialized": true
+      },
+      "name": "tenant_b_canary_absent",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "Authoritative scope comes only from trusted identity/membership state; forged attributes are ignored or rejected, tenant B is not accessed, and the attempt is audited.",
+  "given": "A caller is authenticated for tenant A and supplies tenant B, owner, role, or classification values in a header, body, query, or CLI flag.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Denied response, zero tenant-B rows/objects, policy decision, audit event, negative-evidence counters.",
+  "scenario_id": "VS2-SEC-002",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "Authoritative scope comes only from trusted identity/membership state; forged attributes are ignored or rejected, tenant B is not accessed, and the attempt is audited.",
+  "validator": "verify_vs2_sec_002",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-002",
+    "--json"
+  ],
+  "verification_method": "Parameterized API/CLI tests for every client-controlled scope field and direct service invocation.",
+  "when": "The caller invokes a protected read, write, policy, tool, or action operation."
+}

@@ -1,0 +1,77 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "all_protected_tables_seeded_for_tenant_a": true,
+        "cross_tenant_delete_zero": true,
+        "cross_tenant_update_zero": true,
+        "forged_insert_denied": true,
+        "forged_update_denied": true,
+        "policy_table_isolated": true,
+        "safe_view_is_rls_bound": true,
+        "security_definer_execute_denied": true,
+        "tenant_a_search_isolated": true,
+        "tenant_a_sees_one_artifact": true,
+        "tenant_b_absent_from_all_tenant_a_relations": true,
+        "tenant_b_absent_from_tenant_a": true
+      },
+      "name": "cross_tenant_delete_zero",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "all_protected_tables_seeded_for_tenant_a": true,
+        "cross_tenant_delete_zero": true,
+        "cross_tenant_update_zero": true,
+        "forged_insert_denied": true,
+        "forged_update_denied": true,
+        "policy_table_isolated": true,
+        "safe_view_is_rls_bound": true,
+        "security_definer_execute_denied": true,
+        "tenant_a_search_isolated": true,
+        "tenant_a_sees_one_artifact": true,
+        "tenant_b_absent_from_all_tenant_a_relations": true,
+        "tenant_b_absent_from_tenant_a": true
+      },
+      "name": "forged_insert_update_denied",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "INSERT/UPDATE are rejected by WITH CHECK or equivalent; cross-tenant DELETE affects zero rows or is denied; no partial mutation occurs.",
+  "given": "The application role is scoped to tenant A.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "SQLSTATE/neutral API error, unchanged before/after snapshots, rollback evidence, audit event.",
+  "scenario_id": "VS2-SEC-008",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "INSERT/UPDATE are rejected by WITH CHECK or equivalent; cross-tenant DELETE affects zero rows or is denied; no partial mutation occurs.",
+  "validator": "verify_vs2_sec_008",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-008",
+    "--json"
+  ],
+  "verification_method": "Database tests for INSERT/UPDATE/DELETE, including bulk statements and RETURNING.",
+  "when": "It attempts INSERT with tenant B, UPDATE a row into tenant B, or DELETE tenant-B data."
+}

@@ -1,0 +1,90 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "http_allow_observed": true,
+        "http_cross_tenant_denied": true,
+        "http_invalid_schema_denied": true,
+        "outage_fails_closed": true
+      },
+      "name": "opa_unit_and_http_decision_pass",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "abac_denied": true,
+        "allow_decision_observed": true,
+        "capability_default_deny": true,
+        "deny_precedence_on_mismatch": true,
+        "high_risk_allowed_after_approval": true,
+        "high_risk_requires_approval": true,
+        "invalid_schema_denied": true,
+        "opa_unavailable_denied": true,
+        "role_denied": true,
+        "undefined_default_deny": true
+      },
+      "name": "policy_fail_closed_cases_observed",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "bundle_hash": "a23617c575c760b9d10c16a4abfaa915c972f4492ea5c20214371f445ac6a529"
+      },
+      "name": "bundle_revision_and_lkg_recorded",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "abac_denied": true,
+        "allow_decision_observed": true,
+        "capability_default_deny": true,
+        "deny_precedence_on_mismatch": true,
+        "high_risk_allowed_after_approval": true,
+        "high_risk_requires_approval": true,
+        "invalid_schema_denied": true,
+        "opa_unavailable_denied": true,
+        "role_denied": true,
+        "undefined_default_deny": true
+      },
+      "name": "approval_or_deny_precedence_observed",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "The documented conservative precedence is deterministic; restrictive tenant/security/risk rules cannot be accidentally overridden by a permissive rule.",
+  "given": "Multiple policy rules apply, including an allow and a restrictive deny/escalation.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Conflict matrix, final reason list, bundle revision, no accidental allow.",
+  "scenario_id": "VS2-SEC-049",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "The documented conservative precedence is deterministic; restrictive tenant/security/risk rules cannot be accidentally overridden by a permissive rule.",
+  "validator": "verify_vs2_sec_049",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-049",
+    "--json"
+  ],
+  "verification_method": "OPA data-driven conflict tests.",
+  "when": "The aggregate decision is computed."
+}

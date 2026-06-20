@@ -1,0 +1,54 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "audit_refs_present": true,
+        "forged_scope_denied": true,
+        "missing_context_fails_before_db_egress": true,
+        "same_context_digest": true,
+        "same_policy_outcome": true,
+        "same_status_code": true,
+        "tenant_b_canary_not_serialized": true
+      },
+      "name": "missing_malformed_expired_context_fails_before_db_egress",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "The system fails closed before protected database access or egress, returns a stable helpful error, and records no secret-bearing input.",
+  "given": "A protected request has missing, malformed, expired, conflicting, or unresolvable principal/tenant context.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Stable error codes, zero DB/egress calls, sanitized policy/audit records.",
+  "scenario_id": "VS2-SEC-003",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "The system fails closed before protected database access or egress, returns a stable helpful error, and records no secret-bearing input.",
+  "validator": "verify_vs2_sec_003",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-003",
+    "--json"
+  ],
+  "verification_method": "Unit and integration matrix for null, empty, malformed, expired, and conflicting context.",
+  "when": "The request reaches the gateway, service, worker, or tool entry point."
+}

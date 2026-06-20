@@ -1,0 +1,81 @@
+{
+  "checks": {
+    "cross_tenant_payload_quarantined": true,
+    "missing_signature_quarantined": true,
+    "replay_quarantined": true,
+    "stale_revision_quarantined": true,
+    "tampered_tenant_quarantined": true,
+    "valid_job_runs": true
+  },
+  "cross_payload_job": {
+    "db_calls": 0,
+    "decision": "quarantine",
+    "egress_calls": 0,
+    "job_id": "job_cross_tenant_payload",
+    "reason": "cross_tenant_payload_reference"
+  },
+  "missing_signature_job": {
+    "db_calls": 0,
+    "decision": "quarantine",
+    "egress_calls": 0,
+    "job_id": "job_missing_signature",
+    "reason": "missing_signed_scope"
+  },
+  "quarantine": [
+    {
+      "job_id": "job_missing_signature",
+      "reason": "missing_signed_scope"
+    },
+    {
+      "job_id": "job_tampered_tenant",
+      "reason": "signature_mismatch"
+    },
+    {
+      "job_id": "job_stale_revision",
+      "reason": "duplicate_replay"
+    },
+    {
+      "job_id": "job_cross_tenant_payload",
+      "reason": "cross_tenant_payload_reference"
+    },
+    {
+      "job_id": "job_alpha_valid_001",
+      "reason": "duplicate_replay"
+    }
+  ],
+  "replay_job": {
+    "db_calls": 0,
+    "decision": "quarantine",
+    "egress_calls": 0,
+    "job_id": "job_alpha_valid_001",
+    "reason": "duplicate_replay"
+  },
+  "signed_envelope_digest": "bfe42721fa842b9e28911c4585d407258f0f7ae66400a99d80d22773d43668ef",
+  "stale_job": {
+    "db_calls": 0,
+    "decision": "quarantine",
+    "egress_calls": 0,
+    "job_id": "job_stale_revision",
+    "reason": "duplicate_replay"
+  },
+  "status": "passed",
+  "tampered_job": {
+    "db_calls": 0,
+    "decision": "quarantine",
+    "egress_calls": 0,
+    "job_id": "job_tampered_tenant",
+    "reason": "signature_mismatch"
+  },
+  "valid_job": {
+    "audit_refs": [
+      "audit_0023"
+    ],
+    "db_calls": 1,
+    "decision": "run",
+    "egress_calls": 0,
+    "idempotency_key": "tenant_alpha:job_alpha_valid_001",
+    "job_id": "job_alpha_valid_001",
+    "membership_revision": "memrev-alpha-001",
+    "tenant_id": "tenant_alpha"
+  }
+}

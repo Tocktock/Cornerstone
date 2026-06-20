@@ -1,0 +1,54 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "compileall_green": true,
+        "scenario_matrix_green": true,
+        "vs0_acceptance_green": true,
+        "vs0_evux_green": true,
+        "vs0_operator_ui_green": true,
+        "vs0_runtime_green": true,
+        "vs1_ontology_green": true
+      },
+      "name": "vs0_regression_reports_green",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "The VS0 local product loop remains green and evidence/action safety is unchanged.",
+  "given": "VS2 changes are applied.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "REGRESSION",
+  "required_evidence": "Existing scenario reports with exit code 0 and no weakened assertions.",
+  "scenario_id": "VS2-SEC-R01",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "The VS0 local product loop remains green and evidence/action safety is unchanged.",
+  "validator": "verify_vs2_sec_r01",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-R01",
+    "--json"
+  ],
+  "verification_method": "Run existing VS0 EVUX/runtime/operator gates.",
+  "when": "The existing VS0 Artifact\u2192Search\u2192Evidence\u2192Claim\u2192Action\u2192Audit gates run."
+}

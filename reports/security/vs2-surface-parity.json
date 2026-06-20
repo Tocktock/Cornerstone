@@ -1,0 +1,690 @@
+{
+  "checks": {
+    "audit_refs_present": true,
+    "forged_scope_denied": true,
+    "missing_context_fails_before_db_egress": true,
+    "same_context_digest": true,
+    "same_policy_outcome": true,
+    "same_status_code": true,
+    "tenant_b_canary_not_serialized": true
+  },
+  "forged_cases": [
+    {
+      "audit_refs": [
+        "audit_0004"
+      ],
+      "context": {
+        "membership_revision": "memrev-alpha-001",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "principal_id": "principal_alice",
+        "revoked": false,
+        "roles": [
+          "owner"
+        ],
+        "session_version": 1,
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+      "counters": {
+        "db_calls": 0,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 1,
+        "tool_calls": 0
+      },
+      "error": {
+        "code": "CS_TRUSTED_CONTEXT_CONFLICT",
+        "message": "Tenant and role are derived from the authenticated membership.",
+        "resolution_path": [
+          "Switch to an authorized tenant or workspace.",
+          "Request the required membership or role."
+        ]
+      },
+      "policy_decision": {
+        "audit_refs": [
+          "audit_0004"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_69770b8dbf1966f9",
+        "evidence_refs": [],
+        "input_digest": "9f82bb31a6d9aeed73c41e036a0c4c75ef7de00b5536ac9668b761e14c4ec46c",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "cross_tenant_scope"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "serialized_response": "CS_TRUSTED_CONTEXT_CONFLICT",
+      "status": "denied",
+      "status_code": 403,
+      "surface": "forged_tenant_id",
+      "tenant_b_rows_returned": 0
+    },
+    {
+      "audit_refs": [
+        "audit_0005"
+      ],
+      "context": {
+        "membership_revision": "memrev-alpha-001",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "principal_id": "principal_alice",
+        "revoked": false,
+        "roles": [
+          "owner"
+        ],
+        "session_version": 1,
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+      "counters": {
+        "db_calls": 0,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 1,
+        "tool_calls": 0
+      },
+      "error": {
+        "code": "CS_TRUSTED_CONTEXT_CONFLICT",
+        "message": "Tenant and role are derived from the authenticated membership.",
+        "resolution_path": [
+          "Switch to an authorized tenant or workspace.",
+          "Request the required membership or role."
+        ]
+      },
+      "policy_decision": {
+        "audit_refs": [
+          "audit_0005"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_69770b8dbf1966f9",
+        "evidence_refs": [],
+        "input_digest": "9f82bb31a6d9aeed73c41e036a0c4c75ef7de00b5536ac9668b761e14c4ec46c",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "cross_tenant_scope"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "serialized_response": "CS_TRUSTED_CONTEXT_CONFLICT",
+      "status": "denied",
+      "status_code": 403,
+      "surface": "forged_workspace_id",
+      "tenant_b_rows_returned": 0
+    },
+    {
+      "audit_refs": [
+        "audit_0006"
+      ],
+      "context": {
+        "membership_revision": "memrev-alpha-001",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "principal_id": "principal_alice",
+        "revoked": false,
+        "roles": [
+          "owner"
+        ],
+        "session_version": 1,
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+      "counters": {
+        "db_calls": 0,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 1,
+        "tool_calls": 0
+      },
+      "error": {
+        "code": "CS_TRUSTED_CONTEXT_CONFLICT",
+        "message": "Tenant and role are derived from the authenticated membership.",
+        "resolution_path": [
+          "Switch to an authorized tenant or workspace.",
+          "Request the required membership or role."
+        ]
+      },
+      "policy_decision": {
+        "audit_refs": [
+          "audit_0006"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_69770b8dbf1966f9",
+        "evidence_refs": [],
+        "input_digest": "9f82bb31a6d9aeed73c41e036a0c4c75ef7de00b5536ac9668b761e14c4ec46c",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "cross_tenant_scope"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "serialized_response": "CS_TRUSTED_CONTEXT_CONFLICT",
+      "status": "denied",
+      "status_code": 403,
+      "surface": "forged_owner_id",
+      "tenant_b_rows_returned": 0
+    },
+    {
+      "audit_refs": [
+        "audit_0007"
+      ],
+      "context": {
+        "membership_revision": "memrev-alpha-001",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "principal_id": "principal_alice",
+        "revoked": false,
+        "roles": [
+          "owner"
+        ],
+        "session_version": 1,
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+      "counters": {
+        "db_calls": 0,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 1,
+        "tool_calls": 0
+      },
+      "error": {
+        "code": "CS_TRUSTED_CONTEXT_CONFLICT",
+        "message": "Tenant and role are derived from the authenticated membership.",
+        "resolution_path": [
+          "Switch to an authorized tenant or workspace.",
+          "Request the required membership or role."
+        ]
+      },
+      "policy_decision": {
+        "audit_refs": [
+          "audit_0007"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_69770b8dbf1966f9",
+        "evidence_refs": [],
+        "input_digest": "9f82bb31a6d9aeed73c41e036a0c4c75ef7de00b5536ac9668b761e14c4ec46c",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "cross_tenant_scope"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "serialized_response": "CS_TRUSTED_CONTEXT_CONFLICT",
+      "status": "denied",
+      "status_code": 403,
+      "surface": "forged_role",
+      "tenant_b_rows_returned": 0
+    },
+    {
+      "audit_refs": [
+        "audit_0008"
+      ],
+      "context": {
+        "membership_revision": "memrev-alpha-001",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "principal_id": "principal_alice",
+        "revoked": false,
+        "roles": [
+          "owner"
+        ],
+        "session_version": 1,
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+      "counters": {
+        "db_calls": 0,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 1,
+        "tool_calls": 0
+      },
+      "error": {
+        "code": "CS_TRUSTED_CONTEXT_CONFLICT",
+        "message": "Tenant and role are derived from the authenticated membership.",
+        "resolution_path": [
+          "Switch to an authorized tenant or workspace.",
+          "Request the required membership or role."
+        ]
+      },
+      "policy_decision": {
+        "audit_refs": [
+          "audit_0008"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_69770b8dbf1966f9",
+        "evidence_refs": [],
+        "input_digest": "9f82bb31a6d9aeed73c41e036a0c4c75ef7de00b5536ac9668b761e14c4ec46c",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "cross_tenant_scope"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "serialized_response": "CS_TRUSTED_CONTEXT_CONFLICT",
+      "status": "denied",
+      "status_code": 403,
+      "surface": "forged_roles",
+      "tenant_b_rows_returned": 0
+    },
+    {
+      "audit_refs": [
+        "audit_0009"
+      ],
+      "context": {
+        "membership_revision": "memrev-alpha-001",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "principal_id": "principal_alice",
+        "revoked": false,
+        "roles": [
+          "owner"
+        ],
+        "session_version": 1,
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+      "counters": {
+        "db_calls": 0,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 1,
+        "tool_calls": 0
+      },
+      "error": {
+        "code": "CS_TRUSTED_CONTEXT_CONFLICT",
+        "message": "Tenant and role are derived from the authenticated membership.",
+        "resolution_path": [
+          "Switch to an authorized tenant or workspace.",
+          "Request the required membership or role."
+        ]
+      },
+      "policy_decision": {
+        "audit_refs": [
+          "audit_0009"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "deny",
+        "decision_id": "policy_69770b8dbf1966f9",
+        "evidence_refs": [],
+        "input_digest": "9f82bb31a6d9aeed73c41e036a0c4c75ef7de00b5536ac9668b761e14c4ec46c",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "cross_tenant_scope"
+        ],
+        "resolution_path": [
+          "Use trusted membership scope",
+          "Request approval or required role",
+          "Retry through governed path"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "serialized_response": "CS_TRUSTED_CONTEXT_CONFLICT",
+      "status": "denied",
+      "status_code": 403,
+      "surface": "forged_classification",
+      "tenant_b_rows_returned": 0
+    }
+  ],
+  "missing_context_cases": [
+    {
+      "audit_refs": [
+        "audit_0010"
+      ],
+      "context": null,
+      "context_digest": null,
+      "counters": {
+        "db_calls": 0,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 0,
+        "tool_calls": 0
+      },
+      "error": {
+        "code": "CS_IDENTITY_CONTEXT_INVALID",
+        "message": "Trusted identity context is required.",
+        "resolution_path": [
+          "Sign in again",
+          "Use an authorized workspace"
+        ]
+      },
+      "policy_decision": null,
+      "serialized_response": "CS_IDENTITY_CONTEXT_INVALID",
+      "status": "denied",
+      "status_code": 401,
+      "surface": "missing_session"
+    },
+    {
+      "audit_refs": [
+        "audit_0011"
+      ],
+      "context": null,
+      "context_digest": null,
+      "counters": {
+        "db_calls": 0,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 0,
+        "tool_calls": 0
+      },
+      "error": {
+        "code": "CS_IDENTITY_CONTEXT_INVALID",
+        "message": "Trusted identity context is required.",
+        "resolution_path": [
+          "Sign in again",
+          "Use an authorized workspace"
+        ]
+      },
+      "policy_decision": null,
+      "serialized_response": "CS_IDENTITY_CONTEXT_INVALID",
+      "status": "denied",
+      "status_code": 401,
+      "surface": "empty_session"
+    },
+    {
+      "audit_refs": [
+        "audit_0012"
+      ],
+      "context": null,
+      "context_digest": null,
+      "counters": {
+        "db_calls": 0,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 0,
+        "tool_calls": 0
+      },
+      "error": {
+        "code": "CS_IDENTITY_CONTEXT_INVALID",
+        "message": "Trusted identity context is required.",
+        "resolution_path": [
+          "Sign in again",
+          "Use an authorized workspace"
+        ]
+      },
+      "policy_decision": null,
+      "serialized_response": "CS_IDENTITY_CONTEXT_INVALID",
+      "status": "denied",
+      "status_code": 401,
+      "surface": "bad_signature"
+    },
+    {
+      "audit_refs": [
+        "audit_0013"
+      ],
+      "context": null,
+      "context_digest": null,
+      "counters": {
+        "db_calls": 0,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 0,
+        "tool_calls": 0
+      },
+      "error": {
+        "code": "CS_IDENTITY_CONTEXT_INVALID",
+        "message": "Trusted identity context is required.",
+        "resolution_path": [
+          "Sign in again",
+          "Use an authorized workspace"
+        ]
+      },
+      "policy_decision": null,
+      "serialized_response": "CS_IDENTITY_CONTEXT_INVALID",
+      "status": "denied",
+      "status_code": 401,
+      "surface": "expired_session"
+    }
+  ],
+  "status": "passed",
+  "surface_allowed": [
+    {
+      "artifact": {
+        "artifact_id": "artifact_alpha_001",
+        "canary": "ALPHA_ONLY_VS2_CANARY",
+        "classification": "internal",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "audit_refs": [
+        "audit_0001"
+      ],
+      "context": {
+        "membership_revision": "memrev-alpha-001",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "principal_id": "principal_alice",
+        "revoked": false,
+        "roles": [
+          "owner"
+        ],
+        "session_version": 1,
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+      "counters": {
+        "db_calls": 1,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 1,
+        "tool_calls": 0
+      },
+      "error": null,
+      "policy_decision": {
+        "audit_refs": [
+          "audit_0001"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "allow",
+        "decision_id": "policy_7058ca7806201d96",
+        "evidence_refs": [],
+        "input_digest": "73bac6477ef5df420959c48aeb262ff7158dd2a2f8884219880458edb586598e",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/allow",
+        "reason_codes": [],
+        "resolution_path": [],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "serialized_response": "{\"artifact_id\": \"artifact_alpha_001\", \"classification\": \"internal\", \"namespace_id\": \"personal\", \"owner_id\": \"principal_alice\", \"tenant_id\": \"tenant_alpha\", \"workspace_id\": \"alpha-home\"}",
+      "status": "allowed",
+      "status_code": 200,
+      "surface": "cli_json",
+      "tenant_b_rows_returned": 0
+    },
+    {
+      "artifact": {
+        "artifact_id": "artifact_alpha_001",
+        "canary": "ALPHA_ONLY_VS2_CANARY",
+        "classification": "internal",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "audit_refs": [
+        "audit_0002"
+      ],
+      "context": {
+        "membership_revision": "memrev-alpha-001",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "principal_id": "principal_alice",
+        "revoked": false,
+        "roles": [
+          "owner"
+        ],
+        "session_version": 1,
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+      "counters": {
+        "db_calls": 1,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 1,
+        "tool_calls": 0
+      },
+      "error": null,
+      "policy_decision": {
+        "audit_refs": [
+          "audit_0002"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "allow",
+        "decision_id": "policy_7058ca7806201d96",
+        "evidence_refs": [],
+        "input_digest": "73bac6477ef5df420959c48aeb262ff7158dd2a2f8884219880458edb586598e",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/allow",
+        "reason_codes": [],
+        "resolution_path": [],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "serialized_response": "{\"artifact_id\": \"artifact_alpha_001\", \"classification\": \"internal\", \"namespace_id\": \"personal\", \"owner_id\": \"principal_alice\", \"tenant_id\": \"tenant_alpha\", \"workspace_id\": \"alpha-home\"}",
+      "status": "allowed",
+      "status_code": 200,
+      "surface": "http_api",
+      "tenant_b_rows_returned": 0
+    },
+    {
+      "artifact": {
+        "artifact_id": "artifact_alpha_001",
+        "canary": "ALPHA_ONLY_VS2_CANARY",
+        "classification": "internal",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "audit_refs": [
+        "audit_0003"
+      ],
+      "context": {
+        "membership_revision": "memrev-alpha-001",
+        "namespace_id": "personal",
+        "owner_id": "principal_alice",
+        "principal_id": "principal_alice",
+        "revoked": false,
+        "roles": [
+          "owner"
+        ],
+        "session_version": 1,
+        "tenant_id": "tenant_alpha",
+        "workspace_id": "alpha-home"
+      },
+      "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+      "counters": {
+        "db_calls": 1,
+        "egress_calls": 0,
+        "mutations": 0,
+        "policy_calls": 1,
+        "tool_calls": 0
+      },
+      "error": null,
+      "policy_decision": {
+        "audit_refs": [
+          "audit_0003"
+        ],
+        "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+        "bundle_revision": "vs2-rego-local-v1",
+        "decided_at_epoch": 1781968482,
+        "decision": "allow",
+        "decision_id": "policy_7058ca7806201d96",
+        "evidence_refs": [],
+        "input_digest": "73bac6477ef5df420959c48aeb262ff7158dd2a2f8884219880458edb586598e",
+        "namespace_id": "personal",
+        "policy_path": "cornerstone.vs2/allow",
+        "reason_codes": [],
+        "resolution_path": [],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "tenant_id": "tenant_alpha",
+        "trace_id": "trace_vs2_policy_local"
+      },
+      "serialized_response": "{\"artifact_id\": \"artifact_alpha_001\", \"classification\": \"internal\", \"namespace_id\": \"personal\", \"owner_id\": \"principal_alice\", \"tenant_id\": \"tenant_alpha\", \"workspace_id\": \"alpha-home\"}",
+      "status": "allowed",
+      "status_code": 200,
+      "surface": "browser_ui",
+      "tenant_b_rows_returned": 0
+    }
+  ]
+}

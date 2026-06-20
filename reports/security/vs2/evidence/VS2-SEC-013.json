@@ -1,0 +1,67 @@
+{
+  "assertions": [
+    {
+      "evidence": {
+        "all_tables_force_rls": true,
+        "all_tables_have_rls": true,
+        "app_role_not_bypassrls": true,
+        "app_role_not_superuser": true,
+        "app_role_not_table_owner": true,
+        "policy_inventory_present": true,
+        "unsafe_function_not_public": true
+      },
+      "name": "app_role_not_superuser_or_bypassrls",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "all_tables_force_rls": true,
+        "all_tables_have_rls": true,
+        "app_role_not_bypassrls": true,
+        "app_role_not_superuser": true,
+        "app_role_not_table_owner": true,
+        "policy_inventory_present": true,
+        "unsafe_function_not_public": true
+      },
+      "name": "app_role_not_table_owner_and_rls_forced",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "secret_findings": 0
+      },
+      "name": "raw_dependencies_have_no_secret_findings",
+      "passed": true
+    }
+  ],
+  "evidence_commit": null,
+  "expected_behavior": "The role is not superuser, table owner, or BYPASSRLS; protected tables have RLS enabled and forced where the design requires owner protection.",
+  "given": "The application connects to Postgres using its normal runtime role.",
+  "notes": "Scenario-specific validator executed against local synthetic users, tenants, policy, Postgres RLS, OPA, egress, audit, and regression evidence as applicable.",
+  "observed_foundations": {
+    "audit": "passed",
+    "egress": "passed",
+    "opa": "passed",
+    "postgres": "passed",
+    "regression": "passed"
+  },
+  "priority": "MUST_PASS",
+  "required_evidence": "Role inventory showing rolsuper=false and rolbypassrls=false; relrowsecurity/relforcerowsecurity report.",
+  "scenario_id": "VS2-SEC-013",
+  "schema_version": "cs.vs2.raw_scenario_evidence.v1",
+  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
+  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "then": "The role is not superuser, table owner, or BYPASSRLS; protected tables have RLS enabled and forced where the design requires owner protection.",
+  "validator": "verify_vs2_sec_013",
+  "verification_command": [
+    "cornerstone",
+    "scenario",
+    "verify",
+    "vs2-policy-tenancy-egress",
+    "--scenario",
+    "VS2-SEC-013",
+    "--json"
+  ],
+  "verification_method": "Database metadata assertions over pg_roles, pg_class, pg_policies, and ownership.",
+  "when": "Role and table security attributes are inspected and protected queries run."
+}
