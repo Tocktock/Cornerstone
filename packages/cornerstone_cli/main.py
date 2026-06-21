@@ -4049,7 +4049,10 @@ def command_security_vs2_h01_approval_package(args: argparse.Namespace) -> int:
 
 def command_security_vs2_local_proof(args: argparse.Namespace) -> int:
     root = repo_root()
-    report = run_vs2_local_security_proof(root)
+    report = run_vs2_local_security_proof(
+        root,
+        local_range_report=Path(args.reuse_local_range_report) if args.reuse_local_range_report else None,
+    )
     payload = base_response("cornerstone security vs2-local-proof", report["status"], root)
     payload.update(report)
     payload["evidence_refs"].extend(
@@ -4725,7 +4728,10 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
     elif args.contract == "vs1-ontology-suggest-promote":
         report = verify_vs1_ontology_suggest_promote(root)
     elif args.contract == "vs2-policy-tenancy-egress":
-        report = verify_vs2_policy_tenancy_egress(root)
+        report = verify_vs2_policy_tenancy_egress(
+            root,
+            local_proof_report=Path(args.reuse_vs2_local_proof_report) if args.reuse_vs2_local_proof_report else None,
+        )
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-agent-orchestration":
@@ -4882,6 +4888,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         transcript_command.extend(["--model-provider", args.model_provider])
     if args.json:
         transcript_command.append("--json")
+    if args.reuse_vs2_local_proof_report and args.contract == "vs2-policy-tenancy-egress":
+        transcript_command.extend(["--reuse-vs2-local-proof-report", args.reuse_vs2_local_proof_report])
     if output_arg:
         transcript_command.extend(["--output", output_arg])
     payload["self_command_transcript"] = command_transcript_entry(
@@ -6304,6 +6312,10 @@ def build_parser() -> argparse.ArgumentParser:
         "vs2-local-proof",
         help="Run local deterministic VS2 policy, tenant-isolation, and egress proof",
     )
+    vs2_local_proof.add_argument(
+        "--reuse-local-range-report",
+        help="Reuse a current-source vs2-local-range report instead of rerunning the local range.",
+    )
     vs2_local_proof.add_argument("--json", action="store_true", help="Emit JSON output")
     vs2_local_proof.set_defaults(func=command_security_vs2_local_proof)
 
@@ -6531,6 +6543,10 @@ def build_parser() -> argparse.ArgumentParser:
     verify.add_argument("--scenario", action="append", help="Optional product scenario ID to require in the fixture corpus")
     verify.add_argument("--corpus", default="fixtures/vs0", help="Fixture corpus path for fixture verification")
     verify.add_argument("--model-provider", default="local_test", help="Deterministic local model provider")
+    verify.add_argument(
+        "--reuse-vs2-local-proof-report",
+        help="Reuse a current-source VS2 local proof report for vs2-policy-tenancy-egress instead of rerunning it.",
+    )
     verify.add_argument("--json", action="store_true", help="Emit JSON output")
     verify.add_argument("--output", help="Optional path to write the JSON report")
     verify.set_defaults(func=command_scenario_verify)

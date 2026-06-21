@@ -53,6 +53,7 @@ from cornerstone_cli.validators import (
     validate_redaction_pack,
 )
 from cornerstone_cli.vs2_security import VS2_PROOF_REPORT, run_vs2_local_security_proof
+from cornerstone_cli.vs2_verification_metadata import build_source_fingerprint, validate_reusable_report
 
 
 FULL_EXPECTED = 206
@@ -11652,7 +11653,7 @@ def _vs2_h01_approval_package_summary(root: Path) -> dict[str, Any]:
     }
 
 
-def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
+def verify_vs2_policy_tenancy_egress(root: Path, *, local_proof_report: Path | None = None) -> dict[str, Any]:
     matrix_path = root / DEFAULT_VS2_POLICY_TENANCY_EGRESS_MATRIX
     contract_path = root / DEFAULT_VS2_POLICY_TENANCY_EGRESS_CONTRACT
     current_state_path = root / DEFAULT_VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_REPORT
@@ -11660,7 +11661,43 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
     verification_metadata = git_verification_metadata(root)
     h01_gate_summary = _vs2_sensitive_change_gate_summary(root)
     h01_package_summary = _vs2_h01_approval_package_summary(root)
-    local_proof = run_vs2_local_security_proof(root)
+    proof_reuse: dict[str, Any] = {"requested": local_proof_report is not None, "status": "not_requested"}
+    if local_proof_report is not None:
+        proof_path = local_proof_report if local_proof_report.is_absolute() else root / local_proof_report
+        candidate, read_error = _read_json_report(proof_path)
+        reusable, errors, current_fingerprint = validate_reusable_report(
+            candidate,
+            root=root,
+            family="vs2_local_proof",
+            expected_schema="cs.vs2_local_security_proof.v0",
+            require_status=None,
+        )
+        if read_error:
+            errors = [read_error, *errors]
+            reusable = False
+        proof_reuse = {
+            "requested": True,
+            "status": "reused" if reusable else "rejected",
+            "path": str(local_proof_report),
+            "errors": errors,
+            "current_source_fingerprint": current_fingerprint,
+        }
+        if reusable:
+            local_proof = candidate
+        else:
+            local_proof = {
+                "status": "failed",
+                "summary": {"product_feature_claims": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED"},
+                "scenario_results": [],
+                "negative_evidence": {
+                    "stale_or_invalid_local_proof_reuse_blocked": 1,
+                    "ai_rows_marked_pass_without_evidence": 0,
+                    "ai_rows_marked_pass_without_scenario_validator": 0,
+                    "blanket_dependencies_ok_pass_used": 0,
+                },
+            }
+    else:
+        local_proof = run_vs2_local_security_proof(root)
     proof_by_id = {row.get("id"): row for row in local_proof.get("scenario_results", [])}
     repo_observations = {
         "contract_present": contract_path.exists(),
@@ -11764,6 +11801,8 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
             "path": str(VS2_PROOF_REPORT),
             "status": local_proof.get("status"),
             "proof_hash": local_proof.get("proof_hash"),
+            "reuse": proof_reuse,
+            "source_fingerprint": local_proof.get("source_fingerprint", build_source_fingerprint(root, family="vs2_local_proof")),
             "scenario_check_registry": local_proof.get("scenario_check_registry", []),
             "scenario_specific_evidence_report": local_proof.get("scenario_specific_evidence_report"),
             "synthetic_world_report": local_proof.get("synthetic_world_report"),

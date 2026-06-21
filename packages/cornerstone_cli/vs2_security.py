@@ -24,6 +24,7 @@ from typing import Any, Callable
 from urllib.parse import unquote, urljoin, urlparse
 
 from cornerstone_cli.vs2_local_range import POLICY_INPUT_SCHEMA_PATH, POLICY_LIMITS_PATH, REASON_CODE_CATALOG_PATH, VS2_LOCAL_RANGE_REPORT, run_vs2_local_range
+from cornerstone_cli.vs2_verification_metadata import build_source_fingerprint, proof_hash, validate_reusable_report
 
 
 POSTGRES_IMAGE = "postgres:16-alpine"
@@ -405,6 +406,11 @@ def _verify_postgres_rls(root: Path) -> dict[str, Any]:
             if check["exit_code"] == 0:
                 ready = True
                 break
+            if _container_disappeared(check):
+                inspect = _run(["docker", "container", "inspect", container], cwd=root, timeout=10)
+                transcript.append(inspect)
+                if inspect["exit_code"] != 0:
+                    break
             time.sleep(0.5)
         if not ready:
             payload = {"status": "failed", "container": container, "reason": "postgres_not_ready", "transcript": transcript}
@@ -3039,6 +3045,11 @@ def _file_hash(root: Path, relative_path: Path) -> str | None:
     if not path.exists() or not path.is_file():
         return None
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _container_disappeared(result: dict[str, Any]) -> bool:
+    combined = f"{result.get('stdout', '')}\n{result.get('stderr', '')}"
+    return "No such container" in combined or "broken pipe" in combined
 
 
 def _sign_payload(payload: dict[str, Any], key: bytes) -> str:
@@ -6222,12 +6233,61 @@ def _scenario_artifacts(scenario_id: str) -> list[str]:
     return sorted(set(evidence))
 
 
-def run_vs2_local_security_proof(root: Path) -> dict[str, Any]:
+def run_vs2_local_security_proof(root: Path, *, local_range_report: Path | None = None) -> dict[str, Any]:
     root = root.resolve()
     for directory in ["reports/db", "reports/policy", "reports/network", "reports/security", "reports/security/vs2/evidence", "reports/audit", "reports/scenario"]:
         (root / directory).mkdir(parents=True, exist_ok=True)
 
-    local_range = run_vs2_local_range(root)
+    reuse_diagnostics: dict[str, Any] = {"requested": local_range_report is not None, "status": "not_requested"}
+    if local_range_report is not None:
+        candidate = _read_report(root, local_range_report)
+        reusable, errors, current_fingerprint = validate_reusable_report(
+            candidate,
+            root=root,
+            family="vs2_local_range",
+            expected_schema="cs.vs2_local_range.v1",
+            require_status="passed",
+        )
+        reuse_diagnostics = {
+            "requested": True,
+            "status": "reused" if reusable else "rejected",
+            "path": str(local_range_report),
+            "errors": errors,
+            "current_source_fingerprint": current_fingerprint,
+        }
+        if not reusable:
+            report = {
+                "schema_version": "cs.vs2_local_security_proof.v0",
+                "status": "failed",
+                "scenario_set": "vs2-policy-tenancy-egress",
+                "proof_boundary": "scenario-specific local remediation proof; production/live-provider/human-acceptance claims remain false",
+                "source_fingerprint": build_source_fingerprint(root, family="vs2_local_proof"),
+                "local_range_reuse": reuse_diagnostics,
+                "summary": {
+                    "scenario_count": 0,
+                    "ai_verifiable": 0,
+                    "pass": 0,
+                    "fail": 1,
+                    "not_verified": 0,
+                    "not_run": 0,
+                    "human_required": 0,
+                    "blocking": 1,
+                    "product_feature_claims": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
+                },
+                "negative_evidence": {
+                    "stale_or_invalid_local_range_reuse_blocked": 1,
+                    "production_security_claimed": 0,
+                    "live_provider_ready_claimed": 0,
+                    "human_acceptance_claimed_by_ai": 0,
+                },
+                "scenario_results": [],
+            }
+            report["proof_hash"] = proof_hash(report)
+            _write_json(root, VS2_PROOF_REPORT, report)
+            return report
+        local_range = candidate
+    else:
+        local_range = run_vs2_local_range(root)
     postgres = _verify_postgres_rls(root)
     opa = _verify_opa(root)
     egress = _verify_egress(root)
@@ -6501,6 +6561,8 @@ def run_vs2_local_security_proof(root: Path) -> dict[str, Any]:
         "scenario_set": "vs2-policy-tenancy-egress",
         "proof_boundary": "scenario-specific local remediation proof; production/live-provider/human-acceptance claims remain false",
         "compatibility_policy": "new_application_no_legacy_compatibility_constraint",
+        "source_fingerprint": build_source_fingerprint(root, family="vs2_local_proof"),
+        "local_range_reuse": reuse_diagnostics,
         "postgres": postgres,
         "opa": opa,
         "egress": egress,
@@ -6530,6 +6592,6 @@ def run_vs2_local_security_proof(root: Path) -> dict[str, Any]:
         "negative_evidence": negative_evidence,
         "scenario_results": scenario_results,
     }
-    report["proof_hash"] = _sha256_json({key: value for key, value in report.items() if key != "proof_hash"})
+    report["proof_hash"] = proof_hash(report)
     _write_json(root, VS2_PROOF_REPORT, report)
     return report

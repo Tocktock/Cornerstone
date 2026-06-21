@@ -18,6 +18,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
+from cornerstone_cli.vs2_verification_metadata import build_source_fingerprint
+
 
 POSTGRES_IMAGE = "postgres:16-alpine"
 OPA_IMAGE = "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3"
@@ -66,6 +68,11 @@ def _write_json(root: Path, relative_path: Path, payload: dict[str, Any]) -> Pat
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     return path
+
+
+def _container_disappeared(result: dict[str, Any]) -> bool:
+    combined = f"{result.get('stdout', '')}\n{result.get('stderr', '')}"
+    return "No such container" in combined or "broken pipe" in combined
 
 
 def _sql_literal(value: Any) -> str:
@@ -340,6 +347,11 @@ class _PostgresRange:
             if ready["exit_code"] == 0:
                 ready = True
                 break
+            if _container_disappeared(ready):
+                inspect = _run(["docker", "container", "inspect", self.container], cwd=self.root, timeout=10)
+                self.transcript.append(inspect)
+                if inspect["exit_code"] != 0:
+                    return False
             time.sleep(0.5)
         if not ready:
             return False
@@ -10470,9 +10482,21 @@ def _tenant_read_neutral_guessed_results(rows: list[dict[str, Any]]) -> bool:
 
 def run_vs2_local_range(root: Path) -> dict[str, Any]:
     root = root.resolve()
+    started = time.perf_counter()
+    source_fingerprint = build_source_fingerprint(root, family="vs2_local_range")
     (root / VS2_LOCAL_RANGE_REPORT).parent.mkdir(parents=True, exist_ok=True)
     if shutil.which("docker") is None:
-        payload = {"status": "not_verified", "reason": "docker executable missing"}
+        payload = {
+            "schema_version": "cs.vs2_local_range.v1",
+            "status": "not_verified",
+            "reason": "docker executable missing",
+            "source_fingerprint": source_fingerprint,
+            "profile": {
+                "schema_version": "cs.vs2_local_range_profile.v1",
+                "wall_seconds": round(time.perf_counter() - started, 3),
+                "child_command_elapsed_seconds": 0.0,
+            },
+        }
         _write_json(root, VS2_LOCAL_RANGE_REPORT, payload)
         return payload
 
@@ -10543,6 +10567,7 @@ def run_vs2_local_range(root: Path) -> dict[str, Any]:
             payload = {
                 "schema_version": "cs.vs2_local_range.v1",
                 "status": "failed",
+                "source_fingerprint": source_fingerprint,
                 "postgres_ready": postgres_ready,
                 "migrations_ok": migrations_ok,
                 "seed_ok": seed_ok,
@@ -10552,6 +10577,15 @@ def run_vs2_local_range(root: Path) -> dict[str, Any]:
                 "postgres_transcript": _safe_transcript(postgres.transcript),
                 "opa_transcript": _safe_transcript(opa.transcript),
                 "opa_revision_v2_transcript": _safe_transcript(opa_revision_v2.transcript),
+                "profile": {
+                    "schema_version": "cs.vs2_local_range_profile.v1",
+                    "wall_seconds": round(time.perf_counter() - started, 3),
+                    "child_command_elapsed_seconds": round(
+                        sum(float(entry.get("elapsed_seconds") or 0.0) for entry in postgres.transcript + opa.transcript + opa_revision_v2.transcript),
+                        3,
+                    ),
+                    "failure_layer": "bootstrap",
+                },
             }
             _write_json(root, VS2_LOCAL_RANGE_REPORT, payload)
             return payload
@@ -11427,6 +11461,7 @@ COMMIT;
         payload = {
             "schema_version": "cs.vs2_local_range.v1",
             "status": "passed" if all(checks.values()) else "failed",
+            "source_fingerprint": source_fingerprint,
             "claim_boundary": "first production-flow local slice only; not full VS2, production, live-provider, penetration-test, or human UX evidence",
             "topology": {
                 "host_side_test_runner": True,
@@ -11549,6 +11584,18 @@ COMMIT;
                 "opa": _safe_transcript(opa.transcript),
                 "opa_revision_v2": _safe_transcript(opa_revision_v2.transcript),
             },
+        }
+        command_elapsed = 0.0
+        for entry in payload["command_transcripts"].values():
+            if isinstance(entry, list):
+                command_elapsed += sum(float(item.get("elapsed_seconds") or 0.0) for item in entry)
+            elif isinstance(entry, dict):
+                command_elapsed += float(entry.get("elapsed_seconds") or 0.0)
+        payload["profile"] = {
+            "schema_version": "cs.vs2_local_range_profile.v1",
+            "wall_seconds": round(time.perf_counter() - started, 3),
+            "child_command_elapsed_seconds": round(command_elapsed, 3),
+            "profile_boundary": "top-level local-range wall time plus child command elapsed totals; HTTP and in-process probe timings remain inside wall time",
         }
         _write_json(root, VS2_LOCAL_RANGE_REPORT, payload)
         return payload

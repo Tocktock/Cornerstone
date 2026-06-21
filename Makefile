@@ -39,8 +39,8 @@ verify-vs2-security:
 	PATH="$(PWD):$$PATH" cornerstone security sensitive-change-test --category vs2_policy_tenancy_egress --json > reports/scenario/vs2-sensitive-change-gate-2026-06-19.json
 	PATH="$(PWD):$$PATH" cornerstone security vs2-h01-approval-package --json > reports/scenario/vs2-h01-approval-package-2026-06-19.json
 	PATH="$(PWD):$$PATH" cornerstone security vs2-local-range --json > reports/security/vs2-local-range-command.json
-	PATH="$(PWD):$$PATH" cornerstone security vs2-local-proof --json > reports/security/vs2-local-security-proof-command.json || true
-	PATH="$(PWD):$$PATH" cornerstone scenario verify vs2-policy-tenancy-egress --json --output reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json || true
+	PATH="$(PWD):$$PATH" cornerstone security vs2-local-proof --reuse-local-range-report reports/security/vs2-local-range.json --json > reports/security/vs2-local-security-proof-command.json || true
+	PATH="$(PWD):$$PATH" cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json --output reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json || true
 	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json --json
 
 verify-vs2-local-range:
