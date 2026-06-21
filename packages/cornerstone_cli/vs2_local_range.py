@@ -18,7 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
-from cornerstone_cli.vs2_verification_metadata import build_source_fingerprint
+from cornerstone_cli.vs2_verification_metadata import build_source_fingerprint, proof_hash
 
 
 POSTGRES_IMAGE = "postgres:16-alpine"
@@ -68,6 +68,44 @@ def _write_json(root: Path, relative_path: Path, payload: dict[str, Any]) -> Pat
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     return path
+
+
+def _finalize_report_payload(
+    root: Path,
+    relative_path: Path,
+    payload: dict[str, Any],
+    *,
+    started: float,
+    cleanup_seconds: float = 0.0,
+    cleanup_errors: list[str] | None = None,
+) -> None:
+    profile = payload.setdefault("profile", {"schema_version": "cs.vs2_local_range_profile.v1"})
+    measured_wall = float(profile.get("wall_seconds") or 0.0)
+    bootstrap_seconds = measured_wall if profile.get("failure_layer") == "bootstrap" else 0.0
+    execution_seconds = 0.0 if profile.get("failure_layer") == "bootstrap" else measured_wall
+    profile["phase_seconds"] = {
+        "bootstrap": round(bootstrap_seconds, 3),
+        "execution": round(execution_seconds, 3),
+        "evidence_serialization": 0.0,
+        "cleanup": round(cleanup_seconds, 3),
+    }
+    if cleanup_errors:
+        profile["cleanup_errors"] = cleanup_errors
+    profile["total_command_wall_seconds"] = round(time.perf_counter() - started, 3)
+    profile["wall_seconds"] = profile["total_command_wall_seconds"]
+    serialization_started = time.perf_counter()
+    payload["proof_hash"] = proof_hash(payload)
+    _write_json(root, relative_path, payload)
+    serialization_seconds = time.perf_counter() - serialization_started
+    profile["phase_seconds"]["evidence_serialization"] = round(serialization_seconds, 3)
+    profile["total_command_wall_seconds"] = round(time.perf_counter() - started, 3)
+    profile["wall_seconds"] = profile["total_command_wall_seconds"]
+    profile["profile_boundary"] = (
+        "total_command_wall_seconds includes cleanup and the first profiled report serialization; "
+        "phase bootstrap/execution boundaries are conservative for the legacy monolithic runner"
+    )
+    payload["proof_hash"] = proof_hash(payload)
+    _write_json(root, relative_path, payload)
 
 
 def _container_disappeared(result: dict[str, Any]) -> bool:
@@ -10497,7 +10535,7 @@ def run_vs2_local_range(root: Path) -> dict[str, Any]:
                 "child_command_elapsed_seconds": 0.0,
             },
         }
-        _write_json(root, VS2_LOCAL_RANGE_REPORT, payload)
+        _finalize_report_payload(root, VS2_LOCAL_RANGE_REPORT, payload, started=started)
         return payload
 
     postgres = _PostgresRange(root)
@@ -10553,6 +10591,7 @@ def run_vs2_local_range(root: Path) -> dict[str, Any]:
         "exp": int(time.time()) + 600,
     }
     carla_token_v1 = _sign_token(carla_token_v1_payload, token_key)
+    payload: dict[str, Any] | None = None
 
     try:
         postgres_ready = postgres.start()
@@ -10587,7 +10626,6 @@ def run_vs2_local_range(root: Path) -> dict[str, Any]:
                     "failure_layer": "bootstrap",
                 },
             }
-            _write_json(root, VS2_LOCAL_RANGE_REPORT, payload)
             return payload
 
         gateway = _RangeGateway(root, postgres, opa.url, token_key, egress_proxy.url)
@@ -11597,16 +11635,34 @@ COMMIT;
             "child_command_elapsed_seconds": round(command_elapsed, 3),
             "profile_boundary": "top-level local-range wall time plus child command elapsed totals; HTTP and in-process probe timings remain inside wall time",
         }
-        _write_json(root, VS2_LOCAL_RANGE_REPORT, payload)
         return payload
     finally:
-        if gateway is not None:
-            gateway.stop()
-        opa_revision_v2.stop()
-        egress_proxy.stop()
-        provider.stop()
-        opa.stop()
-        postgres.stop()
+        cleanup_started = time.perf_counter()
+        cleanup_errors: list[str] = []
+        for label, cleanup in [
+            ("gateway", gateway.stop if gateway is not None else None),
+            ("opa_revision_v2", opa_revision_v2.stop),
+            ("egress_proxy", egress_proxy.stop),
+            ("provider", provider.stop),
+            ("opa", opa.stop),
+            ("postgres", postgres.stop),
+        ]:
+            if cleanup is None:
+                continue
+            try:
+                cleanup()
+            except Exception as error:  # pragma: no cover - cleanup failure must preserve partial evidence
+                cleanup_errors.append(f"{label}:{type(error).__name__}:{error}")
+        cleanup_seconds = time.perf_counter() - cleanup_started
+        if payload is not None:
+            _finalize_report_payload(
+                root,
+                VS2_LOCAL_RANGE_REPORT,
+                payload,
+                started=started,
+                cleanup_seconds=cleanup_seconds,
+                cleanup_errors=cleanup_errors,
+            )
 
 
 def _extract_html_attr(html: str, name: str) -> str:

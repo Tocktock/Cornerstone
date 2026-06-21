@@ -11665,12 +11665,15 @@ def verify_vs2_policy_tenancy_egress(root: Path, *, local_proof_report: Path | N
     if local_proof_report is not None:
         proof_path = local_proof_report if local_proof_report.is_absolute() else root / local_proof_report
         candidate, read_error = _read_json_report(proof_path)
+        expected_scenario_ids = {row.get("scenario_id", "") for row in rows if row.get("scenario_id")}
         reusable, errors, current_fingerprint = validate_reusable_report(
             candidate,
             root=root,
             family="vs2_local_proof",
             expected_schema="cs.vs2_local_security_proof.v0",
             require_status=None,
+            expected_scenario_ids=expected_scenario_ids,
+            validate_evidence=True,
         )
         if read_error:
             errors = [read_error, *errors]
