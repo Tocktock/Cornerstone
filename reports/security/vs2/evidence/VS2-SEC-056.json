@@ -2,49 +2,100 @@
   "assertions": [
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
-      },
-      "name": "default_deny_sends_zero_sink_calls",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "sink": {
-          "authorization_headers_seen": 0,
-          "calls": [
-            {
-              "authorization_header_seen": false,
-              "headers": {
-                "Host": "127.0.0.1:59132",
-                "User-Agent": "cornerstone-vs2-governed-egress/1",
-                "X-Cs-Credential-Ref": "credential_ref_mock_provider_read",
-                "X-Cs-Trace-Id": "trace_vs2_governed_egress"
+        "cases": [
+          {
+            "answers": [
+              {
+                "address": "93.184.216.34",
+                "destination_class": "public_ip",
+                "ttl_step": 1
               },
-              "method": "GET",
-              "path": "/v1/read/status",
-              "request_bytes": 0
-            }
-          ],
-          "host": "127.0.0.1",
-          "port": 59132,
-          "request_bytes": 0,
-          "requests": 1
+              {
+                "address": "127.0.0.1",
+                "destination_class": "reserved_loopback",
+                "ttl_step": 2
+              }
+            ],
+            "decision": "deny",
+            "denied_addresses": [
+              {
+                "address": "127.0.0.1",
+                "destination_class": "reserved_loopback",
+                "ttl_step": 2
+              }
+            ],
+            "host": "provider.example.test",
+            "name": "allowed_then_loopback",
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "reason": "resolved_reserved_address_denied",
+            "selected_address": null
+          },
+          {
+            "answers": [
+              {
+                "address": "93.184.216.34",
+                "destination_class": "public_ip",
+                "ttl_step": 1
+              },
+              {
+                "address": "169.254.169.254",
+                "destination_class": "reserved_link_local",
+                "ttl_step": 1
+              }
+            ],
+            "decision": "deny",
+            "denied_addresses": [
+              {
+                "address": "169.254.169.254",
+                "destination_class": "reserved_link_local",
+                "ttl_step": 1
+              }
+            ],
+            "host": "metadata-rebind.example.test",
+            "name": "mixed_public_metadata",
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "reason": "resolved_reserved_address_denied",
+            "selected_address": null
+          },
+          {
+            "answers": [
+              {
+                "address": "2606:2800:220:1:248:1893:25c8:1946",
+                "destination_class": "public_ip",
+                "ttl_step": 1
+              },
+              {
+                "address": "::1",
+                "destination_class": "reserved_loopback",
+                "ttl_step": 2
+              }
+            ],
+            "decision": "deny",
+            "denied_addresses": [
+              {
+                "address": "::1",
+                "destination_class": "reserved_loopback",
+                "ttl_step": 2
+              }
+            ],
+            "host": "ipv6-rebind.example.test",
+            "name": "mixed_public_ipv6_loopback",
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "reason": "resolved_reserved_address_denied",
+            "selected_address": null
+          }
+        ],
+        "resolver": "deterministic_fake_dns_rebinding_fixture",
+        "summary": {
+          "denied_address_connections": 0,
+          "denied_reserved_resolution_count": 3,
+          "operation_count": 3
         }
       },
-      "name": "declared_connectorhub_call_hits_sink_once",
+      "name": "dns_rebinding_cases_attempted",
       "passed": true
     },
     {
@@ -55,36 +106,30 @@
         "default_denied_before_sink_call": true,
         "direct_socket_blocked": true,
         "dns_rebinding_guarded": true,
+        "egress_audit_records_correlate_attempts": true,
+        "egress_audit_records_have_byte_and_call_counts": true,
         "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
         "normalization_does_not_broaden": true,
+        "redirect_denied_hop_sensitive_headers_forwarded": true,
+        "redirect_loop_bounded": true,
         "redirects_reguarded": true,
         "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "reserved_destination_matrix_denied_before_network": true,
+        "retry_timeout_idempotency_proved": true,
+        "sandbox_bypass_guard_proved": true,
+        "tenant_policy_isolated": true,
+        "untrusted_content_guard_proved": true
       },
-      "name": "tenant_b_and_adversarial_paths_blocked",
+      "name": "dns_rebinding_reserved_addresses_denied",
       "passed": true
     },
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "denied_address_connections": 0,
+        "denied_reserved_resolution_count": 3,
+        "operation_count": 3
       },
-      "name": "credentials_and_payload_not_exposed",
+      "name": "dns_rebinding_denied_addresses_never_contacted",
       "passed": true
     },
     {
@@ -110,8 +155,8 @@
   "required_evidence": "DNS transcript, selected/blocked addresses, zero denied-address connections.",
   "scenario_id": "VS2-SEC-056",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Resolved addresses are validated at connection time; denied addresses are never contacted; policy cannot be bypassed by DNS rebinding.",
   "validator": "verify_vs2_sec_056",
   "verification_command": [

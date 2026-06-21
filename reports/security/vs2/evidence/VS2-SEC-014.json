@@ -59,8 +59,8 @@
   "required_evidence": "Approval record, role assumption/revocation timestamps, accessed row counts, audit trail.",
   "scenario_id": "VS2-SEC-014",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Normal app credentials cannot perform it; the privileged path requires explicit authorization, purpose, time bound, audit, and safe output handling.",
   "validator": "verify_vs2_sec_014",
   "verification_command": [

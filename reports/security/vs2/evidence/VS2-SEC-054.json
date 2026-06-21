@@ -1,50 +1,345 @@
 {
   "assertions": [
     {
-      "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
-      },
-      "name": "default_deny_sends_zero_sink_calls",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "sink": {
-          "authorization_headers_seen": 0,
-          "calls": [
-            {
-              "authorization_header_seen": false,
-              "headers": {
-                "Host": "127.0.0.1:59132",
-                "User-Agent": "cornerstone-vs2-governed-egress/1",
-                "X-Cs-Credential-Ref": "credential_ref_mock_provider_read",
-                "X-Cs-Trace-Id": "trace_vs2_governed_egress"
-              },
+      "evidence": [
+        {
+          "decision": {
+            "bytes_sent": 0,
+            "decision": "deny",
+            "decision_id": "egress_19ca4b32a320977b",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "localhost",
               "method": "GET",
               "path": "/v1/read/status",
-              "request_bytes": 0
-            }
-          ],
-          "host": "127.0.0.1",
-          "port": 59132,
-          "request_bytes": 0,
-          "requests": 1
+              "port": 53048,
+              "raw_path": "/v1/read/status",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 0,
+            "matched_rule": null,
+            "reason": "reserved_destination_denied",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_sent": 0,
+            "decision_id": "egress_19ca4b32a320977b",
+            "headers_sent": {},
+            "hops": [
+              {
+                "decision": "deny",
+                "decision_id": "egress_19ca4b32a320977b",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "localhost",
+                  "method": "GET",
+                  "path": "/v1/read/status",
+                  "port": 53048,
+                  "raw_path": "/v1/read/status",
+                  "scheme": "http"
+                },
+                "reason": "reserved_destination_denied",
+                "request_sent": false,
+                "url": "http://localhost:53048/v1/read/status"
+              }
+            ],
+            "http_status": null,
+            "status": "denied_before_network"
+          },
+          "method": "GET",
+          "name": "alternate_host",
+          "sink_calls_after": 1,
+          "sink_calls_before": 1,
+          "url": "http://localhost:53048/v1/read/status"
+        },
+        {
+          "decision": {
+            "bytes_sent": 0,
+            "decision": "deny",
+            "decision_id": "egress_4736daa997137f94",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
+              "method": "GET",
+              "path": "/v1/read/status",
+              "port": 53049,
+              "raw_path": "/v1/read/status",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 0,
+            "matched_rule": null,
+            "reason": "reserved_destination_denied",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_sent": 0,
+            "decision_id": "egress_4736daa997137f94",
+            "headers_sent": {},
+            "hops": [
+              {
+                "decision": "deny",
+                "decision_id": "egress_4736daa997137f94",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/read/status",
+                  "port": 53049,
+                  "raw_path": "/v1/read/status",
+                  "scheme": "http"
+                },
+                "reason": "reserved_destination_denied",
+                "request_sent": false,
+                "url": "http://127.0.0.1:53049/v1/read/status"
+              }
+            ],
+            "http_status": null,
+            "status": "denied_before_network"
+          },
+          "method": "GET",
+          "name": "alternate_port",
+          "sink_calls_after": 1,
+          "sink_calls_before": 1,
+          "url": "http://127.0.0.1:53049/v1/read/status"
+        },
+        {
+          "decision": {
+            "bytes_sent": 0,
+            "decision": "deny",
+            "decision_id": "egress_9e8a1ce46efac1ed",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
+              "method": "GET",
+              "path": "/v1/read/status",
+              "port": 53048,
+              "raw_path": "/v1/read/status",
+              "scheme": "https"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 0,
+            "matched_rule": null,
+            "reason": "reserved_destination_denied",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_sent": 0,
+            "decision_id": "egress_9e8a1ce46efac1ed",
+            "headers_sent": {},
+            "hops": [
+              {
+                "decision": "deny",
+                "decision_id": "egress_9e8a1ce46efac1ed",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/read/status",
+                  "port": 53048,
+                  "raw_path": "/v1/read/status",
+                  "scheme": "https"
+                },
+                "reason": "reserved_destination_denied",
+                "request_sent": false,
+                "url": "https://127.0.0.1:53048/v1/read/status"
+              }
+            ],
+            "http_status": null,
+            "status": "denied_before_network"
+          },
+          "method": "GET",
+          "name": "alternate_scheme",
+          "sink_calls_after": 1,
+          "sink_calls_before": 1,
+          "url": "https://127.0.0.1:53048/v1/read/status"
+        },
+        {
+          "decision": {
+            "bytes_sent": 0,
+            "decision": "deny",
+            "decision_id": "egress_d6ef4e53d4345cdd",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
+              "method": "GET",
+              "path": "/v1/readwrite/status",
+              "port": 53048,
+              "raw_path": "/v1/readwrite/status",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 0,
+            "matched_rule": null,
+            "reason": "reserved_destination_denied",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_sent": 0,
+            "decision_id": "egress_d6ef4e53d4345cdd",
+            "headers_sent": {},
+            "hops": [
+              {
+                "decision": "deny",
+                "decision_id": "egress_d6ef4e53d4345cdd",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/readwrite/status",
+                  "port": 53048,
+                  "raw_path": "/v1/readwrite/status",
+                  "scheme": "http"
+                },
+                "reason": "reserved_destination_denied",
+                "request_sent": false,
+                "url": "http://127.0.0.1:53048/v1/readwrite/status"
+              }
+            ],
+            "http_status": null,
+            "status": "denied_before_network"
+          },
+          "method": "GET",
+          "name": "path_prefix_shadow",
+          "sink_calls_after": 1,
+          "sink_calls_before": 1,
+          "url": "http://127.0.0.1:53048/v1/readwrite/status"
+        },
+        {
+          "decision": {
+            "bytes_sent": 0,
+            "decision": "deny",
+            "decision_id": "egress_ca584b4bbd91e98a",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
+              "method": "GET",
+              "path": "/v1/write/status",
+              "port": 53048,
+              "raw_path": "/v1/read/%2e%2e/write/status",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 0,
+            "matched_rule": null,
+            "reason": "reserved_destination_denied",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_sent": 0,
+            "decision_id": "egress_ca584b4bbd91e98a",
+            "headers_sent": {},
+            "hops": [
+              {
+                "decision": "deny",
+                "decision_id": "egress_ca584b4bbd91e98a",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/write/status",
+                  "port": 53048,
+                  "raw_path": "/v1/read/%2e%2e/write/status",
+                  "scheme": "http"
+                },
+                "reason": "reserved_destination_denied",
+                "request_sent": false,
+                "url": "http://127.0.0.1:53048/v1/read/%2e%2e/write/status"
+              }
+            ],
+            "http_status": null,
+            "status": "denied_before_network"
+          },
+          "method": "GET",
+          "name": "encoded_traversal",
+          "sink_calls_after": 1,
+          "sink_calls_before": 1,
+          "url": "http://127.0.0.1:53048/v1/read/%2e%2e/write/status"
+        },
+        {
+          "decision": {
+            "bytes_sent": 0,
+            "decision": "deny",
+            "decision_id": "egress_678fd88b188c24d5",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
+              "method": "POST",
+              "path": "/v1/read/status",
+              "port": 53048,
+              "raw_path": "/v1/read/status",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 0,
+            "matched_rule": null,
+            "reason": "reserved_destination_denied",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_sent": 0,
+            "decision_id": "egress_678fd88b188c24d5",
+            "headers_sent": {},
+            "hops": [
+              {
+                "decision": "deny",
+                "decision_id": "egress_678fd88b188c24d5",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "POST",
+                  "path": "/v1/read/status",
+                  "port": 53048,
+                  "raw_path": "/v1/read/status",
+                  "scheme": "http"
+                },
+                "reason": "reserved_destination_denied",
+                "request_sent": false,
+                "url": "http://127.0.0.1:53048/v1/read/status"
+              }
+            ],
+            "http_status": null,
+            "status": "denied_before_network"
+          },
+          "method": "POST",
+          "name": "alternate_method",
+          "sink_calls_after": 1,
+          "sink_calls_before": 1,
+          "url": "http://127.0.0.1:53048/v1/read/status"
         }
-      },
-      "name": "declared_connectorhub_call_hits_sink_once",
+      ],
+      "name": "exact_destination_variations_attempted",
       "passed": true
     },
     {
@@ -55,36 +350,46 @@
         "default_denied_before_sink_call": true,
         "direct_socket_blocked": true,
         "dns_rebinding_guarded": true,
+        "egress_audit_records_correlate_attempts": true,
+        "egress_audit_records_have_byte_and_call_counts": true,
         "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
         "normalization_does_not_broaden": true,
+        "redirect_denied_hop_sensitive_headers_forwarded": true,
+        "redirect_loop_bounded": true,
         "redirects_reguarded": true,
         "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "reserved_destination_matrix_denied_before_network": true,
+        "retry_timeout_idempotency_proved": true,
+        "sandbox_bypass_guard_proved": true,
+        "tenant_policy_isolated": true,
+        "untrusted_content_guard_proved": true
       },
-      "name": "tenant_b_and_adversarial_paths_blocked",
+      "name": "normalization_variations_denied_before_network",
       "passed": true
     },
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "authorization_headers_seen": 0,
+        "calls": [
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53048",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "method": "GET",
+            "path": "/v1/read/status",
+            "request_bytes": 0
+          }
+        ],
+        "host": "127.0.0.1",
+        "port": 53048,
+        "request_bytes": 0,
+        "requests": 1
       },
-      "name": "credentials_and_payload_not_exposed",
+      "name": "only_declared_normalized_call_hits_sink_once",
       "passed": true
     },
     {
@@ -110,8 +415,8 @@
   "required_evidence": "Per-case decisions, sink logs, normalization output, zero unexpected calls.",
   "scenario_id": "VS2-SEC-054",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Only exact normalized permitted combinations pass; case, trailing-dot, encoded path, alternate port, wildcard, or method variations cannot broaden access.",
   "validator": "verify_vs2_sec_054",
   "verification_command": [

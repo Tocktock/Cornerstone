@@ -36,3 +36,10 @@ CREATE POLICY audit_events_tenant_scope ON cs.audit_events
   );
 
 GRANT SELECT, INSERT ON cs.audit_events TO cornerstone_app;
+
+CREATE POLICY audit_events_auditor_read ON cs.audit_events
+  FOR SELECT TO cornerstone_auditor
+  USING (true);
+
+GRANT USAGE ON SCHEMA cs TO cornerstone_auditor;
+GRANT SELECT ON cs.audit_events TO cornerstone_auditor;

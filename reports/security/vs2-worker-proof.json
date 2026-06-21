@@ -50,7 +50,7 @@
     "job_id": "job_alpha_valid_001",
     "reason": "duplicate_replay"
   },
-  "signed_envelope_digest": "cee0aff0962df6cd567f7c3a99a677dd91d4403165a2a300e981b30595f89c8f",
+  "signed_envelope_digest": "2950ee55dda60377aaad0027f74a7c96146ae90b2a74bbd978a7bcad617c0758",
   "stale_job": {
     "db_calls": 0,
     "decision": "quarantine",

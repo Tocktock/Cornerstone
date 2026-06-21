@@ -1,0 +1,194 @@
+{
+  "$id": "https://cornerstone.local/schemas/cs.policy_input.vs2.v1.json",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "type": "string"
+    },
+    "approval": {
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "required",
+        "status"
+      ],
+      "type": "object"
+    },
+    "capability": {
+      "additionalProperties": false,
+      "properties": {
+        "connectorhub_mediated": {
+          "type": "boolean"
+        },
+        "declared": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "declared",
+        "connectorhub_mediated"
+      ],
+      "type": "object"
+    },
+    "data_scope": {
+      "additionalProperties": false,
+      "properties": {
+        "purpose": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope",
+        "purpose"
+      ],
+      "type": "object"
+    },
+    "environment": {
+      "additionalProperties": false,
+      "properties": {
+        "deployment": {
+          "type": "string"
+        },
+        "workspace_mode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "deployment",
+        "workspace_mode"
+      ],
+      "type": "object"
+    },
+    "mission_authority": {
+      "additionalProperties": false,
+      "properties": {
+        "authority_ref": {
+          "type": "string"
+        },
+        "authorized": {
+          "type": "boolean"
+        },
+        "mission_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mission_id",
+        "authorized",
+        "authority_ref"
+      ],
+      "type": "object"
+    },
+    "policy_path": {
+      "type": "string"
+    },
+    "resource": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "type": "string"
+        },
+        "namespace_id": {
+          "type": "string"
+        },
+        "resource_id": {
+          "type": "string"
+        },
+        "tenant_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "resource_id",
+        "tenant_id",
+        "namespace_id",
+        "classification"
+      ],
+      "type": "object"
+    },
+    "risk": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "cs.policy_input.vs2.v1",
+      "type": "string"
+    },
+    "scope": {
+      "additionalProperties": false,
+      "properties": {
+        "namespace_id": {
+          "type": "string"
+        },
+        "tenant_id": {
+          "type": "string"
+        },
+        "workspace_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "namespace_id",
+        "workspace_id"
+      ],
+      "type": "object"
+    },
+    "subject": {
+      "additionalProperties": false,
+      "properties": {
+        "membership_revision": {
+          "type": "string"
+        },
+        "principal_id": {
+          "type": "string"
+        },
+        "revoked": {
+          "type": "boolean"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "principal_id",
+        "roles",
+        "membership_revision",
+        "revoked"
+      ],
+      "type": "object"
+    },
+    "trace_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "trace_id",
+    "subject",
+    "scope",
+    "resource",
+    "action",
+    "risk",
+    "policy_path",
+    "mission_authority",
+    "data_scope",
+    "approval",
+    "capability",
+    "environment"
+  ],
+  "title": "CornerStone VS2 PolicyInput",
+  "type": "object"
+}

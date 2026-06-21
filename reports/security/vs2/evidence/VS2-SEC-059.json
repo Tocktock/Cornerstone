@@ -2,49 +2,3533 @@
   "assertions": [
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
-      },
-      "name": "default_deny_sends_zero_sink_calls",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "sink": {
-          "authorization_headers_seen": 0,
-          "calls": [
-            {
-              "authorization_header_seen": false,
-              "headers": {
-                "Host": "127.0.0.1:59132",
-                "User-Agent": "cornerstone-vs2-governed-egress/1",
-                "X-Cs-Credential-Ref": "credential_ref_mock_provider_read",
-                "X-Cs-Trace-Id": "trace_vs2_governed_egress"
+        "attempts": [
+          {
+            "decision": "deny",
+            "decision_id": "egress_6086464b22e0bd29",
+            "intent_kind": "call_url",
+            "mutation_attempted": false,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "bytes_sent": 0,
+                "decision": "deny",
+                "decision_id": "egress_6086464b22e0bd29",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/exfiltrate",
+                  "port": 53049,
+                  "raw_path": "/exfiltrate",
+                  "scheme": "http"
+                },
+                "destination_class": "reserved_loopback",
+                "external_http_calls": 0,
+                "matched_rule": null,
+                "reason": "reserved_destination_denied",
+                "resolution_path": [
+                  "Declare ConnectorHub capability",
+                  "Bind approval and policy revision",
+                  "Retry through governed client"
+                ],
+                "tenant_id": "tenant_a"
               },
-              "method": "GET",
-              "path": "/v1/read/status",
-              "request_bytes": 0
-            }
-          ],
-          "host": "127.0.0.1",
-          "port": 59132,
-          "request_bytes": 0,
-          "requests": 1
+              "execution": {
+                "bytes_sent": 0,
+                "decision_id": "egress_6086464b22e0bd29",
+                "headers_sent": {},
+                "hops": [
+                  {
+                    "decision": "deny",
+                    "decision_id": "egress_6086464b22e0bd29",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "GET",
+                      "path": "/exfiltrate",
+                      "port": 53049,
+                      "raw_path": "/exfiltrate",
+                      "scheme": "http"
+                    },
+                    "reason": "reserved_destination_denied",
+                    "request_sent": false,
+                    "url": "http://127.0.0.1:53049/exfiltrate?source=artifact"
+                  }
+                ],
+                "http_status": null,
+                "status": "denied_before_network"
+              },
+              "mutation_attempted": false,
+              "network_request_sent": false,
+              "status": "denied_before_network"
+            },
+            "source_ref": "artifact:untrusted_artifact_059",
+            "source_type": "artifact",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_network",
+            "target": "http://127.0.0.1:53049/exfiltrate?source=artifact",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_53721e5bbce93590",
+            "intent_kind": "approve_action",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_53721e5bbce93590",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "artifact:untrusted_artifact_059",
+            "source_type": "artifact",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "action_059",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_b260ec47e1806b2c",
+            "intent_kind": "create_egress_grant",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_b260ec47e1806b2c",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "web:untrusted_page_059",
+            "source_type": "web_page",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "provider:*",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_b7a1a1cfc319667c",
+            "intent_kind": "change_policy",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_b7a1a1cfc319667c",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "web:untrusted_page_059",
+            "source_type": "web_page",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "policy:allow_all_egress",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_73b6535399791121",
+            "intent_kind": "execute_tool",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_73b6535399791121",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "connector:mock_payload_059",
+            "source_type": "connector_payload",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "shell.run",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "egress_da15b5022dfc06eb",
+            "intent_kind": "call_url",
+            "mutation_attempted": false,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "bytes_sent": 0,
+                "decision": "deny",
+                "decision_id": "egress_da15b5022dfc06eb",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/connector-callback",
+                  "port": 53049,
+                  "raw_path": "/connector-callback",
+                  "scheme": "http"
+                },
+                "destination_class": "reserved_loopback",
+                "external_http_calls": 0,
+                "matched_rule": null,
+                "reason": "reserved_destination_denied",
+                "resolution_path": [
+                  "Declare ConnectorHub capability",
+                  "Bind approval and policy revision",
+                  "Retry through governed client"
+                ],
+                "tenant_id": "tenant_a"
+              },
+              "execution": {
+                "bytes_sent": 0,
+                "decision_id": "egress_da15b5022dfc06eb",
+                "headers_sent": {},
+                "hops": [
+                  {
+                    "decision": "deny",
+                    "decision_id": "egress_da15b5022dfc06eb",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "GET",
+                      "path": "/connector-callback",
+                      "port": 53049,
+                      "raw_path": "/connector-callback",
+                      "scheme": "http"
+                    },
+                    "reason": "reserved_destination_denied",
+                    "request_sent": false,
+                    "url": "http://127.0.0.1:53049/connector-callback"
+                  }
+                ],
+                "http_status": null,
+                "status": "denied_before_network"
+              },
+              "mutation_attempted": false,
+              "network_request_sent": false,
+              "status": "denied_before_network"
+            },
+            "source_ref": "connector:mock_payload_059",
+            "source_type": "connector_payload",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_network",
+            "target": "http://127.0.0.1:53049/connector-callback",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_2a6893e446e786e2",
+            "intent_kind": "grant_authority",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_2a6893e446e786e2",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "tool_output:retriever_059",
+            "source_type": "tool_output",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "tenant_beta:admin",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_6edd72c6456fa0f9",
+            "intent_kind": "approve_action",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_6edd72c6456fa0f9",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "tool_output:retriever_059",
+            "source_type": "tool_output",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "payment_action_059",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_da171dd7345b6771",
+            "intent_kind": "execute_tool",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_da171dd7345b6771",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "prompt:turn_059",
+            "source_type": "prompt",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "network.lookup",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_f39132c5274b561b",
+            "intent_kind": "change_policy",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_f39132c5274b561b",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "prompt:turn_059",
+            "source_type": "prompt",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "policy:trusted_from_prompt",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_e47996b4bc94950a",
+            "intent_kind": "grant_authority",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_e47996b4bc94950a",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "tenant_beta:admin",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_9c07b9d779d85cf9",
+            "intent_kind": "create_egress_grant",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_9c07b9d779d85cf9",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "egress:*",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_a3b226f095ec4ad4",
+            "intent_kind": "execute_tool",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_a3b226f095ec4ad4",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "connector.admin",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_d8d4a8e8b400b979",
+            "intent_kind": "approve_action",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_d8d4a8e8b400b979",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "high_risk_action_r06",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_832d9b1aac1bf424",
+            "intent_kind": "change_policy",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_832d9b1aac1bf424",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "policy:document_authority_override",
+            "untrusted_label": true
+          }
+        ],
+        "audit_records": [
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "egress_6086464b22e0bd29",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "call_url",
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "artifact:untrusted_artifact_059",
+            "source_type": "artifact",
+            "target_digest": "779f03e8bee189b70da59c80136e34ae789feb79649f7ce3c5d1089e1dde7752",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_53721e5bbce93590",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "approve_action",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "artifact:untrusted_artifact_059",
+            "source_type": "artifact",
+            "target_digest": "3b861f7bb90dfa3d377eb93c3ab679876ccc329854328189ae8f9b84846166d8",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_b260ec47e1806b2c",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "create_egress_grant",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "web:untrusted_page_059",
+            "source_type": "web_page",
+            "target_digest": "65b894e3538e572f03efad57480f3bfede9a5972a9ab6cebadf2a456cb6a8903",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_b7a1a1cfc319667c",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "change_policy",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "web:untrusted_page_059",
+            "source_type": "web_page",
+            "target_digest": "61eb6586bb9bedbdaf50d78a3e29aca6bc6a230ba74281c39bac29f5d09e134a",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_73b6535399791121",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "execute_tool",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "connector:mock_payload_059",
+            "source_type": "connector_payload",
+            "target_digest": "15accabea254c371a3d3a304e55a7c1332ab29fd7b6a323cae21378c87f3fd56",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "egress_da15b5022dfc06eb",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "call_url",
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "connector:mock_payload_059",
+            "source_type": "connector_payload",
+            "target_digest": "d2a5ee65a873bda81e823923a661d59ea513e146e1b9e383c67087460c954ba7",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_2a6893e446e786e2",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "grant_authority",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "tool_output:retriever_059",
+            "source_type": "tool_output",
+            "target_digest": "481f65cb46ac32aec7cd818a8c189ae36a1bc147219c2fcd4cfc1d2e8f73acca",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_6edd72c6456fa0f9",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "approve_action",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "tool_output:retriever_059",
+            "source_type": "tool_output",
+            "target_digest": "fb2db26e7e66ca49092e30e3880d432ad8d19602aec0a337a09a000f59577790",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_da171dd7345b6771",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "execute_tool",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "prompt:turn_059",
+            "source_type": "prompt",
+            "target_digest": "283480bff5deddc14b1b984a435710e2e9c7ea921048d793b327d39b43f5474f",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_f39132c5274b561b",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "change_policy",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "prompt:turn_059",
+            "source_type": "prompt",
+            "target_digest": "011d5b05f0ed7dff2d3b7cabe081aef8474376c0e834ecb3336c06d95a0c0484",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_e47996b4bc94950a",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "grant_authority",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "target_digest": "481f65cb46ac32aec7cd818a8c189ae36a1bc147219c2fcd4cfc1d2e8f73acca",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_9c07b9d779d85cf9",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "create_egress_grant",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "target_digest": "5c5e08a58710b7752746512499bd639c161008dafb644c0afeaa7a644083670d",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_a3b226f095ec4ad4",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "execute_tool",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "target_digest": "3ffc969e8bd01ddfe71b26251bad1361facc8781e46d56da3fa0ea533ec59a62",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_d8d4a8e8b400b979",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "approve_action",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "target_digest": "81638095d6f4b6ee028865639b2dedfa6802b1ff2b9051730274a97e1ab098f1",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_832d9b1aac1bf424",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "change_policy",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "target_digest": "80f3095907e6ece9d0d00eb827c9073486aaeccc7d9b3353ca1e915f53a2e48e",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          }
+        ],
+        "checks": {
+          "all_intents_attempted": true,
+          "all_sources_marked_untrusted": true,
+          "authority_mutations_denied": true,
+          "blocked_attempt_audit_records": true,
+          "evidence_refs_and_digests_retained": true,
+          "fixture_matrix_processed": true,
+          "r06_authority_claim_document_processed": true,
+          "r06_authority_claims_attempted": true,
+          "r06_authority_claims_denied": true,
+          "r06_trusted_authority_sources_preserved": true,
+          "trap_sink_not_contacted": true,
+          "url_exfiltration_denied_before_network": true,
+          "zero_tool_action_egress_calls": true
+        },
+        "final_counts": {
+          "action_cards": 0,
+          "approvals": 0,
+          "authority_grants": 0,
+          "egress_grants": 0,
+          "egress_network_sends": 0,
+          "policy_revisions": 0,
+          "tool_calls": 0
+        },
+        "processed_sources": [
+          {
+            "content_digest": "c395cf1a40c5be6b755ddb3877a6badacada610731bb181acba85acc76998545",
+            "evidence_ref": "artifact:untrusted_artifact_059",
+            "intent_count": 2,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "artifact:untrusted_artifact_059",
+            "source_type": "artifact",
+            "untrusted_label": true
+          },
+          {
+            "content_digest": "400852011325f548d645b8ed106789f53b0e3bb639c8065e93bf3479333133c6",
+            "evidence_ref": "web:untrusted_page_059",
+            "intent_count": 2,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "web:untrusted_page_059",
+            "source_type": "web_page",
+            "untrusted_label": true
+          },
+          {
+            "content_digest": "5bb6902c6727d9580dd586112fb6ec0e88a4b73c0c29f5c6839c24f5bb264775",
+            "evidence_ref": "connector:mock_payload_059",
+            "intent_count": 2,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "connector:mock_payload_059",
+            "source_type": "connector_payload",
+            "untrusted_label": true
+          },
+          {
+            "content_digest": "796fe317d692c0af7170361fd5c3cfa74afcf9448a862074ae0cdeaf2bcc3cd1",
+            "evidence_ref": "tool_output:retriever_059",
+            "intent_count": 2,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "tool_output:retriever_059",
+            "source_type": "tool_output",
+            "untrusted_label": true
+          },
+          {
+            "content_digest": "4b48244bbc45e1b5038910c45b30f335723d15acb5ddeb7624059639cfd59b7a",
+            "evidence_ref": "prompt:turn_059",
+            "intent_count": 2,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "prompt:turn_059",
+            "source_type": "prompt",
+            "untrusted_label": true
+          },
+          {
+            "content_digest": "bb366c8ed674454936e114724a55ea87efb17b99d87217723797175c449b57f9",
+            "evidence_ref": "document:authority_claim_r06",
+            "intent_count": 5,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "untrusted_label": true
+          }
+        ],
+        "scenario_boundary": "VS2-SEC-059 prompt-injection fixtures are processed as untrusted evidence; content can request operations but cannot create authority, tools, actions, egress grants, policy changes, approvals, or network calls.",
+        "status": "passed",
+        "trap_calls_after": 0,
+        "trap_calls_before": 0
+      },
+      "name": "untrusted_fixture_matrix_processed",
+      "passed": true
+    },
+    {
+      "evidence": [
+        {
+          "content_digest": "c395cf1a40c5be6b755ddb3877a6badacada610731bb181acba85acc76998545",
+          "evidence_ref": "artifact:untrusted_artifact_059",
+          "intent_count": 2,
+          "processed_by": "local_vs2_untrusted_content_workflow",
+          "source_ref": "artifact:untrusted_artifact_059",
+          "source_type": "artifact",
+          "untrusted_label": true
+        },
+        {
+          "content_digest": "400852011325f548d645b8ed106789f53b0e3bb639c8065e93bf3479333133c6",
+          "evidence_ref": "web:untrusted_page_059",
+          "intent_count": 2,
+          "processed_by": "local_vs2_untrusted_content_workflow",
+          "source_ref": "web:untrusted_page_059",
+          "source_type": "web_page",
+          "untrusted_label": true
+        },
+        {
+          "content_digest": "5bb6902c6727d9580dd586112fb6ec0e88a4b73c0c29f5c6839c24f5bb264775",
+          "evidence_ref": "connector:mock_payload_059",
+          "intent_count": 2,
+          "processed_by": "local_vs2_untrusted_content_workflow",
+          "source_ref": "connector:mock_payload_059",
+          "source_type": "connector_payload",
+          "untrusted_label": true
+        },
+        {
+          "content_digest": "796fe317d692c0af7170361fd5c3cfa74afcf9448a862074ae0cdeaf2bcc3cd1",
+          "evidence_ref": "tool_output:retriever_059",
+          "intent_count": 2,
+          "processed_by": "local_vs2_untrusted_content_workflow",
+          "source_ref": "tool_output:retriever_059",
+          "source_type": "tool_output",
+          "untrusted_label": true
+        },
+        {
+          "content_digest": "4b48244bbc45e1b5038910c45b30f335723d15acb5ddeb7624059639cfd59b7a",
+          "evidence_ref": "prompt:turn_059",
+          "intent_count": 2,
+          "processed_by": "local_vs2_untrusted_content_workflow",
+          "source_ref": "prompt:turn_059",
+          "source_type": "prompt",
+          "untrusted_label": true
+        },
+        {
+          "content_digest": "bb366c8ed674454936e114724a55ea87efb17b99d87217723797175c449b57f9",
+          "evidence_ref": "document:authority_claim_r06",
+          "intent_count": 5,
+          "processed_by": "local_vs2_untrusted_content_workflow",
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "untrusted_label": true
         }
+      ],
+      "name": "untrusted_sources_keep_evidence_refs",
+      "passed": true
+    },
+    {
+      "evidence": [
+        {
+          "decision": "deny",
+          "decision_id": "egress_6086464b22e0bd29",
+          "intent_kind": "call_url",
+          "mutation_attempted": false,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "bytes_sent": 0,
+              "decision": "deny",
+              "decision_id": "egress_6086464b22e0bd29",
+              "destination": {
+                "destination_class": "reserved_loopback",
+                "host": "127.0.0.1",
+                "method": "GET",
+                "path": "/exfiltrate",
+                "port": 53049,
+                "raw_path": "/exfiltrate",
+                "scheme": "http"
+              },
+              "destination_class": "reserved_loopback",
+              "external_http_calls": 0,
+              "matched_rule": null,
+              "reason": "reserved_destination_denied",
+              "resolution_path": [
+                "Declare ConnectorHub capability",
+                "Bind approval and policy revision",
+                "Retry through governed client"
+              ],
+              "tenant_id": "tenant_a"
+            },
+            "execution": {
+              "bytes_sent": 0,
+              "decision_id": "egress_6086464b22e0bd29",
+              "headers_sent": {},
+              "hops": [
+                {
+                  "decision": "deny",
+                  "decision_id": "egress_6086464b22e0bd29",
+                  "destination": {
+                    "destination_class": "reserved_loopback",
+                    "host": "127.0.0.1",
+                    "method": "GET",
+                    "path": "/exfiltrate",
+                    "port": 53049,
+                    "raw_path": "/exfiltrate",
+                    "scheme": "http"
+                  },
+                  "reason": "reserved_destination_denied",
+                  "request_sent": false,
+                  "url": "http://127.0.0.1:53049/exfiltrate?source=artifact"
+                }
+              ],
+              "http_status": null,
+              "status": "denied_before_network"
+            },
+            "mutation_attempted": false,
+            "network_request_sent": false,
+            "status": "denied_before_network"
+          },
+          "source_ref": "artifact:untrusted_artifact_059",
+          "source_type": "artifact",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_network",
+          "target": "http://127.0.0.1:53049/exfiltrate?source=artifact",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_53721e5bbce93590",
+          "intent_kind": "approve_action",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_53721e5bbce93590",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "artifact:untrusted_artifact_059",
+          "source_type": "artifact",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "action_059",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_b260ec47e1806b2c",
+          "intent_kind": "create_egress_grant",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_b260ec47e1806b2c",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "web:untrusted_page_059",
+          "source_type": "web_page",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "provider:*",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_b7a1a1cfc319667c",
+          "intent_kind": "change_policy",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_b7a1a1cfc319667c",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "web:untrusted_page_059",
+          "source_type": "web_page",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "policy:allow_all_egress",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_73b6535399791121",
+          "intent_kind": "execute_tool",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_73b6535399791121",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "connector:mock_payload_059",
+          "source_type": "connector_payload",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "shell.run",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "egress_da15b5022dfc06eb",
+          "intent_kind": "call_url",
+          "mutation_attempted": false,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "bytes_sent": 0,
+              "decision": "deny",
+              "decision_id": "egress_da15b5022dfc06eb",
+              "destination": {
+                "destination_class": "reserved_loopback",
+                "host": "127.0.0.1",
+                "method": "GET",
+                "path": "/connector-callback",
+                "port": 53049,
+                "raw_path": "/connector-callback",
+                "scheme": "http"
+              },
+              "destination_class": "reserved_loopback",
+              "external_http_calls": 0,
+              "matched_rule": null,
+              "reason": "reserved_destination_denied",
+              "resolution_path": [
+                "Declare ConnectorHub capability",
+                "Bind approval and policy revision",
+                "Retry through governed client"
+              ],
+              "tenant_id": "tenant_a"
+            },
+            "execution": {
+              "bytes_sent": 0,
+              "decision_id": "egress_da15b5022dfc06eb",
+              "headers_sent": {},
+              "hops": [
+                {
+                  "decision": "deny",
+                  "decision_id": "egress_da15b5022dfc06eb",
+                  "destination": {
+                    "destination_class": "reserved_loopback",
+                    "host": "127.0.0.1",
+                    "method": "GET",
+                    "path": "/connector-callback",
+                    "port": 53049,
+                    "raw_path": "/connector-callback",
+                    "scheme": "http"
+                  },
+                  "reason": "reserved_destination_denied",
+                  "request_sent": false,
+                  "url": "http://127.0.0.1:53049/connector-callback"
+                }
+              ],
+              "http_status": null,
+              "status": "denied_before_network"
+            },
+            "mutation_attempted": false,
+            "network_request_sent": false,
+            "status": "denied_before_network"
+          },
+          "source_ref": "connector:mock_payload_059",
+          "source_type": "connector_payload",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_network",
+          "target": "http://127.0.0.1:53049/connector-callback",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_2a6893e446e786e2",
+          "intent_kind": "grant_authority",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_2a6893e446e786e2",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "tool_output:retriever_059",
+          "source_type": "tool_output",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "tenant_beta:admin",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_6edd72c6456fa0f9",
+          "intent_kind": "approve_action",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_6edd72c6456fa0f9",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "tool_output:retriever_059",
+          "source_type": "tool_output",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "payment_action_059",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_da171dd7345b6771",
+          "intent_kind": "execute_tool",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_da171dd7345b6771",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "prompt:turn_059",
+          "source_type": "prompt",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "network.lookup",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_f39132c5274b561b",
+          "intent_kind": "change_policy",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_f39132c5274b561b",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "prompt:turn_059",
+          "source_type": "prompt",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "policy:trusted_from_prompt",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_e47996b4bc94950a",
+          "intent_kind": "grant_authority",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_e47996b4bc94950a",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "tenant_beta:admin",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_9c07b9d779d85cf9",
+          "intent_kind": "create_egress_grant",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_9c07b9d779d85cf9",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "egress:*",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_a3b226f095ec4ad4",
+          "intent_kind": "execute_tool",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_a3b226f095ec4ad4",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "connector.admin",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_d8d4a8e8b400b979",
+          "intent_kind": "approve_action",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_d8d4a8e8b400b979",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "high_risk_action_r06",
+          "untrusted_label": true
+        },
+        {
+          "decision": "deny",
+          "decision_id": "untrusted_832d9b1aac1bf424",
+          "intent_kind": "change_policy",
+          "mutation_attempted": true,
+          "network_request_sent": false,
+          "operation_attempted": true,
+          "result": {
+            "decision": {
+              "content_authority": "none",
+              "decision": "deny",
+              "decision_id": "untrusted_832d9b1aac1bf424",
+              "reason": "untrusted_evidence_cannot_create_authority",
+              "trusted_authority_source": "request_context_policy_and_approval_store"
+            },
+            "execution": {
+              "mutation_applied": false,
+              "request_sent": false,
+              "resolution_path": [
+                "Re-ingest as evidence",
+                "Request trusted operator approval through Workflow/Action path"
+              ],
+              "status": "denied_before_mutation"
+            },
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "status": "denied_before_mutation"
+          },
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "state_counts_after": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "state_counts_before": {
+            "action_cards": 0,
+            "approvals": 0,
+            "authority_grants": 0,
+            "egress_grants": 0,
+            "egress_network_sends": 0,
+            "policy_revisions": 0,
+            "tool_calls": 0
+          },
+          "status": "denied_before_mutation",
+          "target": "policy:document_authority_override",
+          "untrusted_label": true
+        }
+      ],
+      "name": "untrusted_intents_attempt_real_operations",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "attempts": [
+          {
+            "decision": "deny",
+            "decision_id": "egress_6086464b22e0bd29",
+            "intent_kind": "call_url",
+            "mutation_attempted": false,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "bytes_sent": 0,
+                "decision": "deny",
+                "decision_id": "egress_6086464b22e0bd29",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/exfiltrate",
+                  "port": 53049,
+                  "raw_path": "/exfiltrate",
+                  "scheme": "http"
+                },
+                "destination_class": "reserved_loopback",
+                "external_http_calls": 0,
+                "matched_rule": null,
+                "reason": "reserved_destination_denied",
+                "resolution_path": [
+                  "Declare ConnectorHub capability",
+                  "Bind approval and policy revision",
+                  "Retry through governed client"
+                ],
+                "tenant_id": "tenant_a"
+              },
+              "execution": {
+                "bytes_sent": 0,
+                "decision_id": "egress_6086464b22e0bd29",
+                "headers_sent": {},
+                "hops": [
+                  {
+                    "decision": "deny",
+                    "decision_id": "egress_6086464b22e0bd29",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "GET",
+                      "path": "/exfiltrate",
+                      "port": 53049,
+                      "raw_path": "/exfiltrate",
+                      "scheme": "http"
+                    },
+                    "reason": "reserved_destination_denied",
+                    "request_sent": false,
+                    "url": "http://127.0.0.1:53049/exfiltrate?source=artifact"
+                  }
+                ],
+                "http_status": null,
+                "status": "denied_before_network"
+              },
+              "mutation_attempted": false,
+              "network_request_sent": false,
+              "status": "denied_before_network"
+            },
+            "source_ref": "artifact:untrusted_artifact_059",
+            "source_type": "artifact",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_network",
+            "target": "http://127.0.0.1:53049/exfiltrate?source=artifact",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_53721e5bbce93590",
+            "intent_kind": "approve_action",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_53721e5bbce93590",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "artifact:untrusted_artifact_059",
+            "source_type": "artifact",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "action_059",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_b260ec47e1806b2c",
+            "intent_kind": "create_egress_grant",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_b260ec47e1806b2c",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "web:untrusted_page_059",
+            "source_type": "web_page",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "provider:*",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_b7a1a1cfc319667c",
+            "intent_kind": "change_policy",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_b7a1a1cfc319667c",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "web:untrusted_page_059",
+            "source_type": "web_page",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "policy:allow_all_egress",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_73b6535399791121",
+            "intent_kind": "execute_tool",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_73b6535399791121",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "connector:mock_payload_059",
+            "source_type": "connector_payload",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "shell.run",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "egress_da15b5022dfc06eb",
+            "intent_kind": "call_url",
+            "mutation_attempted": false,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "bytes_sent": 0,
+                "decision": "deny",
+                "decision_id": "egress_da15b5022dfc06eb",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/connector-callback",
+                  "port": 53049,
+                  "raw_path": "/connector-callback",
+                  "scheme": "http"
+                },
+                "destination_class": "reserved_loopback",
+                "external_http_calls": 0,
+                "matched_rule": null,
+                "reason": "reserved_destination_denied",
+                "resolution_path": [
+                  "Declare ConnectorHub capability",
+                  "Bind approval and policy revision",
+                  "Retry through governed client"
+                ],
+                "tenant_id": "tenant_a"
+              },
+              "execution": {
+                "bytes_sent": 0,
+                "decision_id": "egress_da15b5022dfc06eb",
+                "headers_sent": {},
+                "hops": [
+                  {
+                    "decision": "deny",
+                    "decision_id": "egress_da15b5022dfc06eb",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "GET",
+                      "path": "/connector-callback",
+                      "port": 53049,
+                      "raw_path": "/connector-callback",
+                      "scheme": "http"
+                    },
+                    "reason": "reserved_destination_denied",
+                    "request_sent": false,
+                    "url": "http://127.0.0.1:53049/connector-callback"
+                  }
+                ],
+                "http_status": null,
+                "status": "denied_before_network"
+              },
+              "mutation_attempted": false,
+              "network_request_sent": false,
+              "status": "denied_before_network"
+            },
+            "source_ref": "connector:mock_payload_059",
+            "source_type": "connector_payload",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_network",
+            "target": "http://127.0.0.1:53049/connector-callback",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_2a6893e446e786e2",
+            "intent_kind": "grant_authority",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_2a6893e446e786e2",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "tool_output:retriever_059",
+            "source_type": "tool_output",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "tenant_beta:admin",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_6edd72c6456fa0f9",
+            "intent_kind": "approve_action",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_6edd72c6456fa0f9",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "tool_output:retriever_059",
+            "source_type": "tool_output",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "payment_action_059",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_da171dd7345b6771",
+            "intent_kind": "execute_tool",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_da171dd7345b6771",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "prompt:turn_059",
+            "source_type": "prompt",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "network.lookup",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_f39132c5274b561b",
+            "intent_kind": "change_policy",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_f39132c5274b561b",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "prompt:turn_059",
+            "source_type": "prompt",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "policy:trusted_from_prompt",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_e47996b4bc94950a",
+            "intent_kind": "grant_authority",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_e47996b4bc94950a",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "tenant_beta:admin",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_9c07b9d779d85cf9",
+            "intent_kind": "create_egress_grant",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_9c07b9d779d85cf9",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "egress:*",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_a3b226f095ec4ad4",
+            "intent_kind": "execute_tool",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_a3b226f095ec4ad4",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "connector.admin",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_d8d4a8e8b400b979",
+            "intent_kind": "approve_action",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_d8d4a8e8b400b979",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "high_risk_action_r06",
+            "untrusted_label": true
+          },
+          {
+            "decision": "deny",
+            "decision_id": "untrusted_832d9b1aac1bf424",
+            "intent_kind": "change_policy",
+            "mutation_attempted": true,
+            "network_request_sent": false,
+            "operation_attempted": true,
+            "result": {
+              "decision": {
+                "content_authority": "none",
+                "decision": "deny",
+                "decision_id": "untrusted_832d9b1aac1bf424",
+                "reason": "untrusted_evidence_cannot_create_authority",
+                "trusted_authority_source": "request_context_policy_and_approval_store"
+              },
+              "execution": {
+                "mutation_applied": false,
+                "request_sent": false,
+                "resolution_path": [
+                  "Re-ingest as evidence",
+                  "Request trusted operator approval through Workflow/Action path"
+                ],
+                "status": "denied_before_mutation"
+              },
+              "mutation_attempted": true,
+              "network_request_sent": false,
+              "status": "denied_before_mutation"
+            },
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "state_counts_after": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "state_counts_before": {
+              "action_cards": 0,
+              "approvals": 0,
+              "authority_grants": 0,
+              "egress_grants": 0,
+              "egress_network_sends": 0,
+              "policy_revisions": 0,
+              "tool_calls": 0
+            },
+            "status": "denied_before_mutation",
+            "target": "policy:document_authority_override",
+            "untrusted_label": true
+          }
+        ],
+        "audit_records": [
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "egress_6086464b22e0bd29",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "call_url",
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "artifact:untrusted_artifact_059",
+            "source_type": "artifact",
+            "target_digest": "779f03e8bee189b70da59c80136e34ae789feb79649f7ce3c5d1089e1dde7752",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_53721e5bbce93590",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "approve_action",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "artifact:untrusted_artifact_059",
+            "source_type": "artifact",
+            "target_digest": "3b861f7bb90dfa3d377eb93c3ab679876ccc329854328189ae8f9b84846166d8",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_b260ec47e1806b2c",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "create_egress_grant",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "web:untrusted_page_059",
+            "source_type": "web_page",
+            "target_digest": "65b894e3538e572f03efad57480f3bfede9a5972a9ab6cebadf2a456cb6a8903",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_b7a1a1cfc319667c",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "change_policy",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "web:untrusted_page_059",
+            "source_type": "web_page",
+            "target_digest": "61eb6586bb9bedbdaf50d78a3e29aca6bc6a230ba74281c39bac29f5d09e134a",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_73b6535399791121",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "execute_tool",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "connector:mock_payload_059",
+            "source_type": "connector_payload",
+            "target_digest": "15accabea254c371a3d3a304e55a7c1332ab29fd7b6a323cae21378c87f3fd56",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "egress_da15b5022dfc06eb",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "call_url",
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "connector:mock_payload_059",
+            "source_type": "connector_payload",
+            "target_digest": "d2a5ee65a873bda81e823923a661d59ea513e146e1b9e383c67087460c954ba7",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_2a6893e446e786e2",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "grant_authority",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "tool_output:retriever_059",
+            "source_type": "tool_output",
+            "target_digest": "481f65cb46ac32aec7cd818a8c189ae36a1bc147219c2fcd4cfc1d2e8f73acca",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_6edd72c6456fa0f9",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "approve_action",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "tool_output:retriever_059",
+            "source_type": "tool_output",
+            "target_digest": "fb2db26e7e66ca49092e30e3880d432ad8d19602aec0a337a09a000f59577790",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_da171dd7345b6771",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "execute_tool",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "prompt:turn_059",
+            "source_type": "prompt",
+            "target_digest": "283480bff5deddc14b1b984a435710e2e9c7ea921048d793b327d39b43f5474f",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_f39132c5274b561b",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "change_policy",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "prompt:turn_059",
+            "source_type": "prompt",
+            "target_digest": "011d5b05f0ed7dff2d3b7cabe081aef8474376c0e834ecb3336c06d95a0c0484",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_e47996b4bc94950a",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "grant_authority",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "target_digest": "481f65cb46ac32aec7cd818a8c189ae36a1bc147219c2fcd4cfc1d2e8f73acca",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_9c07b9d779d85cf9",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "create_egress_grant",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "target_digest": "5c5e08a58710b7752746512499bd639c161008dafb644c0afeaa7a644083670d",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_a3b226f095ec4ad4",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "execute_tool",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "target_digest": "3ffc969e8bd01ddfe71b26251bad1361facc8781e46d56da3fa0ea533ec59a62",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_d8d4a8e8b400b979",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "approve_action",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "target_digest": "81638095d6f4b6ee028865639b2dedfa6802b1ff2b9051730274a97e1ab098f1",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          },
+          {
+            "action_cards_created": 0,
+            "authority_mutations": 0,
+            "decision_id": "untrusted_832d9b1aac1bf424",
+            "egress_network_sends": 0,
+            "event_name": "untrusted_content.intent.denied",
+            "intent_kind": "change_policy",
+            "outcome": "denied_before_mutation",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "target_digest": "80f3095907e6ece9d0d00eb827c9073486aaeccc7d9b3353ca1e915f53a2e48e",
+            "tool_calls_created": 0,
+            "trace_id": "trace_vs2_untrusted_content_059"
+          }
+        ],
+        "checks": {
+          "all_intents_attempted": true,
+          "all_sources_marked_untrusted": true,
+          "authority_mutations_denied": true,
+          "blocked_attempt_audit_records": true,
+          "evidence_refs_and_digests_retained": true,
+          "fixture_matrix_processed": true,
+          "r06_authority_claim_document_processed": true,
+          "r06_authority_claims_attempted": true,
+          "r06_authority_claims_denied": true,
+          "r06_trusted_authority_sources_preserved": true,
+          "trap_sink_not_contacted": true,
+          "url_exfiltration_denied_before_network": true,
+          "zero_tool_action_egress_calls": true
+        },
+        "final_counts": {
+          "action_cards": 0,
+          "approvals": 0,
+          "authority_grants": 0,
+          "egress_grants": 0,
+          "egress_network_sends": 0,
+          "policy_revisions": 0,
+          "tool_calls": 0
+        },
+        "processed_sources": [
+          {
+            "content_digest": "c395cf1a40c5be6b755ddb3877a6badacada610731bb181acba85acc76998545",
+            "evidence_ref": "artifact:untrusted_artifact_059",
+            "intent_count": 2,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "artifact:untrusted_artifact_059",
+            "source_type": "artifact",
+            "untrusted_label": true
+          },
+          {
+            "content_digest": "400852011325f548d645b8ed106789f53b0e3bb639c8065e93bf3479333133c6",
+            "evidence_ref": "web:untrusted_page_059",
+            "intent_count": 2,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "web:untrusted_page_059",
+            "source_type": "web_page",
+            "untrusted_label": true
+          },
+          {
+            "content_digest": "5bb6902c6727d9580dd586112fb6ec0e88a4b73c0c29f5c6839c24f5bb264775",
+            "evidence_ref": "connector:mock_payload_059",
+            "intent_count": 2,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "connector:mock_payload_059",
+            "source_type": "connector_payload",
+            "untrusted_label": true
+          },
+          {
+            "content_digest": "796fe317d692c0af7170361fd5c3cfa74afcf9448a862074ae0cdeaf2bcc3cd1",
+            "evidence_ref": "tool_output:retriever_059",
+            "intent_count": 2,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "tool_output:retriever_059",
+            "source_type": "tool_output",
+            "untrusted_label": true
+          },
+          {
+            "content_digest": "4b48244bbc45e1b5038910c45b30f335723d15acb5ddeb7624059639cfd59b7a",
+            "evidence_ref": "prompt:turn_059",
+            "intent_count": 2,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "prompt:turn_059",
+            "source_type": "prompt",
+            "untrusted_label": true
+          },
+          {
+            "content_digest": "bb366c8ed674454936e114724a55ea87efb17b99d87217723797175c449b57f9",
+            "evidence_ref": "document:authority_claim_r06",
+            "intent_count": 5,
+            "processed_by": "local_vs2_untrusted_content_workflow",
+            "source_ref": "document:authority_claim_r06",
+            "source_type": "document",
+            "untrusted_label": true
+          }
+        ],
+        "scenario_boundary": "VS2-SEC-059 prompt-injection fixtures are processed as untrusted evidence; content can request operations but cannot create authority, tools, actions, egress grants, policy changes, approvals, or network calls.",
+        "status": "passed",
+        "trap_calls_after": 0,
+        "trap_calls_before": 0
       },
-      "name": "declared_connectorhub_call_hits_sink_once",
+      "name": "untrusted_url_exfiltration_denied_before_network",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "action_cards": 0,
+        "approvals": 0,
+        "authority_grants": 0,
+        "egress_grants": 0,
+        "egress_network_sends": 0,
+        "policy_revisions": 0,
+        "tool_calls": 0
+      },
+      "name": "untrusted_authority_mutations_denied",
+      "passed": true
+    },
+    {
+      "evidence": [
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "egress_6086464b22e0bd29",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "call_url",
+          "outcome": "denied_before_network",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "artifact:untrusted_artifact_059",
+          "source_type": "artifact",
+          "target_digest": "779f03e8bee189b70da59c80136e34ae789feb79649f7ce3c5d1089e1dde7752",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_53721e5bbce93590",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "approve_action",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "artifact:untrusted_artifact_059",
+          "source_type": "artifact",
+          "target_digest": "3b861f7bb90dfa3d377eb93c3ab679876ccc329854328189ae8f9b84846166d8",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_b260ec47e1806b2c",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "create_egress_grant",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "web:untrusted_page_059",
+          "source_type": "web_page",
+          "target_digest": "65b894e3538e572f03efad57480f3bfede9a5972a9ab6cebadf2a456cb6a8903",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_b7a1a1cfc319667c",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "change_policy",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "web:untrusted_page_059",
+          "source_type": "web_page",
+          "target_digest": "61eb6586bb9bedbdaf50d78a3e29aca6bc6a230ba74281c39bac29f5d09e134a",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_73b6535399791121",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "execute_tool",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "connector:mock_payload_059",
+          "source_type": "connector_payload",
+          "target_digest": "15accabea254c371a3d3a304e55a7c1332ab29fd7b6a323cae21378c87f3fd56",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "egress_da15b5022dfc06eb",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "call_url",
+          "outcome": "denied_before_network",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "connector:mock_payload_059",
+          "source_type": "connector_payload",
+          "target_digest": "d2a5ee65a873bda81e823923a661d59ea513e146e1b9e383c67087460c954ba7",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_2a6893e446e786e2",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "grant_authority",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "tool_output:retriever_059",
+          "source_type": "tool_output",
+          "target_digest": "481f65cb46ac32aec7cd818a8c189ae36a1bc147219c2fcd4cfc1d2e8f73acca",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_6edd72c6456fa0f9",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "approve_action",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "tool_output:retriever_059",
+          "source_type": "tool_output",
+          "target_digest": "fb2db26e7e66ca49092e30e3880d432ad8d19602aec0a337a09a000f59577790",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_da171dd7345b6771",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "execute_tool",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "prompt:turn_059",
+          "source_type": "prompt",
+          "target_digest": "283480bff5deddc14b1b984a435710e2e9c7ea921048d793b327d39b43f5474f",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_f39132c5274b561b",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "change_policy",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "prompt:turn_059",
+          "source_type": "prompt",
+          "target_digest": "011d5b05f0ed7dff2d3b7cabe081aef8474376c0e834ecb3336c06d95a0c0484",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_e47996b4bc94950a",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "grant_authority",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "target_digest": "481f65cb46ac32aec7cd818a8c189ae36a1bc147219c2fcd4cfc1d2e8f73acca",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_9c07b9d779d85cf9",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "create_egress_grant",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "target_digest": "5c5e08a58710b7752746512499bd639c161008dafb644c0afeaa7a644083670d",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_a3b226f095ec4ad4",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "execute_tool",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "target_digest": "3ffc969e8bd01ddfe71b26251bad1361facc8781e46d56da3fa0ea533ec59a62",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_d8d4a8e8b400b979",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "approve_action",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "target_digest": "81638095d6f4b6ee028865639b2dedfa6802b1ff2b9051730274a97e1ab098f1",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        },
+        {
+          "action_cards_created": 0,
+          "authority_mutations": 0,
+          "decision_id": "untrusted_832d9b1aac1bf424",
+          "egress_network_sends": 0,
+          "event_name": "untrusted_content.intent.denied",
+          "intent_kind": "change_policy",
+          "outcome": "denied_before_mutation",
+          "raw_credentials_stored": false,
+          "raw_payload_stored": false,
+          "source_ref": "document:authority_claim_r06",
+          "source_type": "document",
+          "target_digest": "80f3095907e6ece9d0d00eb827c9073486aaeccc7d9b3353ca1e915f53a2e48e",
+          "tool_calls_created": 0,
+          "trace_id": "trace_vs2_untrusted_content_059"
+        }
+      ],
+      "name": "untrusted_blocked_attempts_audited",
       "passed": true
     },
     {
@@ -55,36 +3539,21 @@
         "default_denied_before_sink_call": true,
         "direct_socket_blocked": true,
         "dns_rebinding_guarded": true,
+        "egress_audit_records_correlate_attempts": true,
+        "egress_audit_records_have_byte_and_call_counts": true,
         "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
         "normalization_does_not_broaden": true,
+        "redirect_denied_hop_sensitive_headers_forwarded": true,
+        "redirect_loop_bounded": true,
         "redirects_reguarded": true,
         "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "reserved_destination_matrix_denied_before_network": true,
+        "retry_timeout_idempotency_proved": true,
+        "sandbox_bypass_guard_proved": true,
+        "tenant_policy_isolated": true,
+        "untrusted_content_guard_proved": true
       },
-      "name": "tenant_b_and_adversarial_paths_blocked",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
-      },
-      "name": "credentials_and_payload_not_exposed",
+      "name": "untrusted_content_report_is_gated",
       "passed": true
     },
     {
@@ -110,8 +3579,8 @@
   "required_evidence": "Zero tool/action/egress calls, blocked-attempt audit, untrusted label/evidence refs.",
   "scenario_id": "VS2-SEC-059",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "It remains untrusted evidence; it cannot create authority, egress grants, policy changes, approvals, or tool/action execution.",
   "validator": "verify_vs2_sec_059",
   "verification_command": [

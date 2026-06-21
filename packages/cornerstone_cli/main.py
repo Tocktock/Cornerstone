@@ -73,6 +73,21 @@ from cornerstone_cli.scenarios import (
 from cornerstone_cli.product_runtime import build_readiness_report, run_server
 from cornerstone_cli.runtime import LocalRuntimeStore
 from cornerstone_cli.vs2_security import run_vs2_local_security_proof
+from cornerstone_cli.vs2_local_range import (
+    run_vs2_local_range,
+    run_vs2_range_action_client,
+    run_vs2_range_audit_integrity_client,
+    run_vs2_range_client,
+    run_vs2_range_constraint_collision_client,
+    run_vs2_range_db_path_client,
+    run_vs2_range_migration_client,
+    run_vs2_range_object_access_client,
+    run_vs2_range_object_contract_client,
+    run_vs2_range_observability_client,
+    run_vs2_range_search_client,
+    run_vs2_range_tenant_read_client,
+    run_vs2_range_upgrade_path_client,
+)
 
 
 SCHEMA_VERSION = "cs.cli.v0"
@@ -4040,6 +4055,7 @@ def command_security_vs2_local_proof(args: argparse.Namespace) -> int:
     payload["evidence_refs"].extend(
         [
             "report:reports/security/vs2-local-security-proof.json",
+            "report:reports/security/vs2-local-range.json",
             "report:reports/db/vs2-rls-inventory.json",
             "report:reports/db/vs2-tenant-isolation.json",
             "report:reports/policy/vs2-opa-test.json",
@@ -4049,6 +4065,180 @@ def command_security_vs2_local_proof(args: argparse.Namespace) -> int:
     )
     print_payload(payload, args.json)
     return EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_security_vs2_local_range(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report = run_vs2_local_range(root)
+    payload = base_response("cornerstone security vs2-local-range", report["status"], root)
+    payload.update(report)
+    payload["evidence_refs"].append("report:reports/security/vs2-local-range.json")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report["status"] == "passed" else EXIT_EVIDENCE_MISSING
+
+
+def command_security_vs2_range_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    caller_fields = {}
+    if args.forged_tenant_id:
+        caller_fields["tenant_id"] = args.forged_tenant_id
+    if args.forged_role:
+        caller_fields["role"] = args.forged_role
+    result = run_vs2_range_client(root, args.api_url, args.token, args.artifact_id, caller_fields)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-client", status, root)
+    payload["range_client"] = result
+    response_payload = result.get("payload", {})
+    payload["evidence_refs"].extend(response_payload.get("evidence_refs", []))
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    policy_decision = response_payload.get("policy_decision")
+    if policy_decision and policy_decision.get("decision_id"):
+        payload["policy_decision_refs"].append(f"policy:{policy_decision['decision_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_action_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_action_client(root, args.api_url, args.token, args.provider_url)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-action-client", status, root)
+    payload["range_action_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    for decision_key in ["dry_run_decision", "execution_decision"]:
+        decision = response_payload.get(decision_key, {})
+        if decision.get("decision_id"):
+            payload["policy_decision_refs"].append(f"policy:{decision['decision_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_object_contract_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_object_contract_client(root, args.api_url, args.token)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-object-contract-client", status, root)
+    payload["range_object_contract_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_object_access_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_object_access_client(root, args.api_url, args.token)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-object-access-client", status, root)
+    payload["range_object_access_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_observability_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_observability_client(root, args.api_url, args.token)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-observability-client", status, root)
+    payload["range_observability_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_tenant_read_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_tenant_read_client(root, args.api_url, args.token)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-tenant-read-client", status, root)
+    payload["range_tenant_read_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_search_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_search_client(root, args.api_url, args.token)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-search-client", status, root)
+    payload["range_search_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_db_path_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_db_path_client(root, args.api_url, args.token)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-db-path-client", status, root)
+    payload["range_db_path_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_constraint_collision_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_constraint_collision_client(root, args.api_url, args.token)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-constraint-collision-client", status, root)
+    payload["range_constraint_collision_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_migration_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_migration_client(root, args.api_url, args.token)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-migration-client", status, root)
+    payload["range_migration_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_upgrade_path_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_upgrade_path_client(root, args.api_url, args.token)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-upgrade-path-client", status, root)
+    payload["range_upgrade_path_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    for decision_key in ["policy_decision", "destructive_migration_decision"]:
+        decision = response_payload.get(decision_key, {})
+        if decision.get("decision_id"):
+            payload["policy_decision_refs"].append(f"policy:{decision['decision_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
+
+
+def command_security_vs2_range_audit_integrity_client(args: argparse.Namespace) -> int:
+    root = repo_root()
+    result = run_vs2_range_audit_integrity_client(root, args.api_url, args.token)
+    status = "success" if result.get("http_status") == 200 else "denied"
+    payload = base_response("cornerstone security vs2-range-audit-integrity-client", status, root)
+    payload["range_audit_integrity_client"] = result
+    response_payload = result.get("payload", {})
+    payload["audit_refs"].extend(response_payload.get("audit_refs", []))
+    decision = response_payload.get("policy_decision", {})
+    if decision.get("decision_id"):
+        payload["policy_decision_refs"].append(f"policy:{decision['decision_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if result.get("http_status") == 200 else EXIT_POLICY_DENIED
 
 
 def command_security_backup_restore_test(args: argparse.Namespace) -> int:
@@ -6116,6 +6306,125 @@ def build_parser() -> argparse.ArgumentParser:
     )
     vs2_local_proof.add_argument("--json", action="store_true", help="Emit JSON output")
     vs2_local_proof.set_defaults(func=command_security_vs2_local_proof)
+
+    vs2_local_range = security_sub.add_parser(
+        "vs2-local-range",
+        help="Run the first production-flow VS2 local range through real Postgres, OPA, API, browser, CLI, and audit evidence",
+    )
+    vs2_local_range.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_local_range.set_defaults(func=command_security_vs2_local_range)
+
+    vs2_range_client = security_sub.add_parser(
+        "vs2-range-client",
+        help="Call a running VS2 local range gateway as the native CLI surface",
+    )
+    vs2_range_client.add_argument("--api-url", required=True)
+    vs2_range_client.add_argument("--token", required=True)
+    vs2_range_client.add_argument("--artifact-id", required=True)
+    vs2_range_client.add_argument("--forged-tenant-id")
+    vs2_range_client.add_argument("--forged-role")
+    vs2_range_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_client.set_defaults(func=command_security_vs2_range_client)
+
+    vs2_range_action_client = security_sub.add_parser(
+        "vs2-range-action-client",
+        help="Call a running VS2 local range gateway as the native CLI external-action surface",
+    )
+    vs2_range_action_client.add_argument("--api-url", required=True)
+    vs2_range_action_client.add_argument("--token", required=True)
+    vs2_range_action_client.add_argument("--provider-url", required=True)
+    vs2_range_action_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_action_client.set_defaults(func=command_security_vs2_range_action_client)
+
+    vs2_range_object_contract_client = security_sub.add_parser(
+        "vs2-range-object-contract-client",
+        help="Call a running VS2 local range gateway for durable object contract evidence",
+    )
+    vs2_range_object_contract_client.add_argument("--api-url", required=True)
+    vs2_range_object_contract_client.add_argument("--token", required=True)
+    vs2_range_object_contract_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_object_contract_client.set_defaults(func=command_security_vs2_range_object_contract_client)
+
+    vs2_range_object_access_client = security_sub.add_parser(
+        "vs2-range-object-access-client",
+        help="Call a running VS2 local range gateway for guessed object/download/evidence traversal denial evidence",
+    )
+    vs2_range_object_access_client.add_argument("--api-url", required=True)
+    vs2_range_object_access_client.add_argument("--token", required=True)
+    vs2_range_object_access_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_object_access_client.set_defaults(func=command_security_vs2_range_object_access_client)
+
+    vs2_range_observability_client = security_sub.add_parser(
+        "vs2-range-observability-client",
+        help="Call a running VS2 local range gateway for tenant-scoped observability/export evidence",
+    )
+    vs2_range_observability_client.add_argument("--api-url", required=True)
+    vs2_range_observability_client.add_argument("--token", required=True)
+    vs2_range_observability_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_observability_client.set_defaults(func=command_security_vs2_range_observability_client)
+
+    vs2_range_tenant_read_client = security_sub.add_parser(
+        "vs2-range-tenant-read-client",
+        help="Call a running VS2 local range gateway for tenant read-matrix evidence",
+    )
+    vs2_range_tenant_read_client.add_argument("--api-url", required=True)
+    vs2_range_tenant_read_client.add_argument("--token", required=True)
+    vs2_range_tenant_read_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_tenant_read_client.set_defaults(func=command_security_vs2_range_tenant_read_client)
+
+    vs2_range_search_client = security_sub.add_parser(
+        "vs2-range-search-client",
+        help="Call a running VS2 local range gateway for tenant search/snapshot isolation evidence",
+    )
+    vs2_range_search_client.add_argument("--api-url", required=True)
+    vs2_range_search_client.add_argument("--token", required=True)
+    vs2_range_search_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_search_client.set_defaults(func=command_security_vs2_range_search_client)
+
+    vs2_range_db_path_client = security_sub.add_parser(
+        "vs2-range-db-path-client",
+        help="Call a running VS2 local range gateway for DB view/function/raw-SQL path evidence",
+    )
+    vs2_range_db_path_client.add_argument("--api-url", required=True)
+    vs2_range_db_path_client.add_argument("--token", required=True)
+    vs2_range_db_path_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_db_path_client.set_defaults(func=command_security_vs2_range_db_path_client)
+
+    vs2_range_constraint_collision_client = security_sub.add_parser(
+        "vs2-range-constraint-collision-client",
+        help="Call a running VS2 local range gateway for tenant-scoped unique/FK collision evidence",
+    )
+    vs2_range_constraint_collision_client.add_argument("--api-url", required=True)
+    vs2_range_constraint_collision_client.add_argument("--token", required=True)
+    vs2_range_constraint_collision_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_constraint_collision_client.set_defaults(func=command_security_vs2_range_constraint_collision_client)
+
+    vs2_range_migration_client = security_sub.add_parser(
+        "vs2-range-migration-client",
+        help="Call a running VS2 local range gateway for migration/quarantine evidence",
+    )
+    vs2_range_migration_client.add_argument("--api-url", required=True)
+    vs2_range_migration_client.add_argument("--token", required=True)
+    vs2_range_migration_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_migration_client.set_defaults(func=command_security_vs2_range_migration_client)
+
+    vs2_range_upgrade_path_client = security_sub.add_parser(
+        "vs2-range-upgrade-path-client",
+        help="Call a running VS2 local range gateway for upgrade-path migration/rollback evidence",
+    )
+    vs2_range_upgrade_path_client.add_argument("--api-url", required=True)
+    vs2_range_upgrade_path_client.add_argument("--token", required=True)
+    vs2_range_upgrade_path_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_upgrade_path_client.set_defaults(func=command_security_vs2_range_upgrade_path_client)
+
+    vs2_range_audit_integrity_client = security_sub.add_parser(
+        "vs2-range-audit-integrity-client",
+        help="Call a running VS2 local range gateway for audit hash-chain and tamper evidence",
+    )
+    vs2_range_audit_integrity_client.add_argument("--api-url", required=True)
+    vs2_range_audit_integrity_client.add_argument("--token", required=True)
+    vs2_range_audit_integrity_client.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs2_range_audit_integrity_client.set_defaults(func=command_security_vs2_range_audit_integrity_client)
 
     backup_restore = security_sub.add_parser("backup-restore-test", help="Run a deterministic backup/restore rehearsal over local records")
     backup_restore.add_argument("--subject-ref", action="append", default=[], help="Evidence or product refs expected in the backup")

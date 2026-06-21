@@ -2,35 +2,572 @@
   "assertions": [
     {
       "evidence": {
-        "http_allow_observed": true,
-        "http_cross_tenant_denied": true,
-        "http_invalid_schema_denied": true,
-        "outage_fails_closed": true
+        "docker_command": [
+          "docker",
+          "run",
+          "-d",
+          "--rm",
+          "--name",
+          "cornerstone-vs2-opa-69aebe8f04",
+          "-p",
+          "127.0.0.1:52697:8181",
+          "-v",
+          "/Users/jiyong/playground/Cornerstone/policies/vs2:/policies:ro",
+          "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+          "run",
+          "--server",
+          "--addr=0.0.0.0:8181",
+          "/policies"
+        ]
       },
-      "name": "opa_unit_and_http_decision_pass",
+      "name": "opa_service_published_to_loopback_only",
       "passed": true
     },
     {
       "evidence": {
-        "abac_denied": true,
-        "allow_decision_observed": true,
-        "capability_default_deny": true,
-        "deny_precedence_on_mismatch": true,
-        "high_risk_allowed_after_approval": true,
-        "high_risk_requires_approval": true,
-        "invalid_schema_denied": true,
-        "opa_unavailable_denied": true,
-        "role_denied": true,
-        "undefined_default_deny": true
+        "checks": {
+          "http_allow_observed": true,
+          "http_cross_tenant_denied": true,
+          "http_invalid_schema_denied": true,
+          "outage_fails_closed": true
+        },
+        "container": "cornerstone-vs2-opa-69aebe8f04",
+        "decision_transcript": [
+          {
+            "case": "allow",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": []
+            },
+            "status": 200
+          },
+          {
+            "case": "cross_tenant_deny",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "cross_tenant_scope"
+              ]
+            },
+            "status": 200
+          },
+          {
+            "case": "invalid_schema",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "invalid_schema"
+              ]
+            },
+            "status": 200
+          }
+        ],
+        "docker_transcript": [
+          {
+            "command": [
+              "docker",
+              "run",
+              "-d",
+              "--rm",
+              "--name",
+              "cornerstone-vs2-opa-69aebe8f04",
+              "-p",
+              "127.0.0.1:52697:8181",
+              "-v",
+              "/Users/jiyong/playground/Cornerstone/policies/vs2:/policies:ro",
+              "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+              "run",
+              "--server",
+              "--addr=0.0.0.0:8181",
+              "/policies"
+            ],
+            "elapsed_seconds": 0.4,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "390a97cc25933f8539f4723f0c73d4fa502be5549c6a54586996e14ea56dba3f"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "rm",
+              "-f",
+              "cornerstone-vs2-opa-69aebe8f04"
+            ],
+            "elapsed_seconds": 0.566,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "cornerstone-vs2-opa-69aebe8f04"
+            ]
+          }
+        ],
+        "outage_probe": {
+          "decision": "deny",
+          "error_class": "URLError",
+          "reason": "opa_unavailable_fail_closed"
+        },
+        "port": 52697,
+        "status": "passed"
       },
-      "name": "policy_fail_closed_cases_observed",
+      "name": "authorized_local_opa_data_call_succeeds",
       "passed": true
     },
     {
       "evidence": {
-        "bundle_hash": "a23617c575c760b9d10c16a4abfaa915c972f4492ea5c20214371f445ac6a529"
+        "checks": {
+          "direct_http_and_socket_blocked": true,
+          "provider_network_membership_isolated": true,
+          "provider_reachable_from_governed_proxy": true,
+          "provider_zero_requests_after_direct_attempts": true,
+          "service_network_membership_expected": true
+        },
+        "direct_attempts": {
+          "api": {
+            "actor": "api",
+            "http": {
+              "blocked": true,
+              "error": "<urlopen error [Errno -3] Temporary failure in name resolution>",
+              "error_type": "URLError"
+            },
+            "socket": {
+              "blocked": true,
+              "error": "[Errno -3] Temporary failure in name resolution",
+              "error_type": "gaierror"
+            },
+            "target": "provider:8080"
+          },
+          "tool_runtime": {
+            "actor": "tool_runtime",
+            "http": {
+              "blocked": true,
+              "error": "<urlopen error [Errno -3] Temporary failure in name resolution>",
+              "error_type": "URLError"
+            },
+            "socket": {
+              "blocked": true,
+              "error": "[Errno -3] Temporary failure in name resolution",
+              "error_type": "gaierror"
+            },
+            "target": "provider:8080"
+          },
+          "worker": {
+            "actor": "worker",
+            "http": {
+              "blocked": true,
+              "error": "<urlopen error [Errno -3] Temporary failure in name resolution>",
+              "error_type": "URLError"
+            },
+            "socket": {
+              "blocked": true,
+              "error": "[Errno -3] Temporary failure in name resolution",
+              "error_type": "gaierror"
+            },
+            "target": "provider:8080"
+          }
+        },
+        "governed_proxy_attempt": {
+          "actor": "egress_proxy",
+          "body": {
+            "request_number": 1,
+            "status": "provider_ok"
+          },
+          "http_status": 200
+        },
+        "provider_counts": {
+          "after_allowed": {
+            "events": [
+              {
+                "client": "172.30.0.3",
+                "path": "/status",
+                "query": {
+                  "actor": [
+                    "egress_proxy"
+                  ],
+                  "path": [
+                    "governed_proxy"
+                  ]
+                },
+                "ts": 1782045120.122
+              }
+            ],
+            "requests": 1
+          },
+          "after_direct": {
+            "events": [],
+            "requests": 0
+          },
+          "before_direct": {
+            "events": [],
+            "requests": 0
+          }
+        },
+        "status": "passed",
+        "topology": {
+          "containers": {
+            "api": "cornerstone-vs2-api-30c78e96d5",
+            "egress_proxy": "cornerstone-vs2-egress-proxy-30c78e96d5",
+            "provider": "cornerstone-vs2-provider-30c78e96d5",
+            "tool_runtime": "cornerstone-vs2-tool-30c78e96d5",
+            "worker": "cornerstone-vs2-worker-30c78e96d5"
+          },
+          "host_network": false,
+          "privileged": false,
+          "provider_members": [
+            "cornerstone-vs2-egress-proxy-30c78e96d5",
+            "cornerstone-vs2-provider-30c78e96d5"
+          ],
+          "provider_net": "cornerstone-vs2-range-provider-30c78e96d5",
+          "published_ports": false,
+          "service_members": [
+            "cornerstone-vs2-api-30c78e96d5",
+            "cornerstone-vs2-egress-proxy-30c78e96d5",
+            "cornerstone-vs2-tool-30c78e96d5",
+            "cornerstone-vs2-worker-30c78e96d5"
+          ],
+          "service_net": "cornerstone-vs2-range-service-30c78e96d5"
+        },
+        "transcript": [
+          {
+            "command": [
+              "docker",
+              "network",
+              "create",
+              "--internal",
+              "cornerstone-vs2-range-service-30c78e96d5"
+            ],
+            "elapsed_seconds": 0.038,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "94068373c9f2446cb3febd40d70e28b74755eacb7b21294276d0b9890acc2cce"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "network",
+              "create",
+              "--internal",
+              "cornerstone-vs2-range-provider-30c78e96d5"
+            ],
+            "elapsed_seconds": 0.062,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "312cddb08396d1eef02acbdcbeb1b5896fe587824a7f07c057ac7d11323a1a5f"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "run",
+              "-d",
+              "--rm",
+              "--name",
+              "cornerstone-vs2-provider-30c78e96d5",
+              "--network",
+              "cornerstone-vs2-range-provider-30c78e96d5",
+              "--network-alias",
+              "provider",
+              "python:3.12-bookworm",
+              "python",
+              "-u",
+              "-c",
+              "\nimport json\nimport pathlib\nimport time\nimport urllib.parse\nfrom http.server import BaseHTTPRequestHandler, ThreadingHTTPServer\n\nlog_path = pathlib.Path(\"/tmp/provider_calls.jsonl\")\n\ndef read_events():\n    if not log_path.exists():\n        return []\n    return [json.loads(line) for line in log_path.read_text().splitlines() if line.strip()]\n\nclass Handler(BaseHTTPRequestHandler):\n    def do_GET(self):\n        if self.path.startswith(\"/count\"):\n            events = read_events()\n            body = {\"requests\": len(events), \"events\": events}\n            self.send_response(200)\n            self.send_header(\"content-type\", \"application/json\")\n            self.end_headers()\n            self.wfile.write(json.dumps(body, sort_keys=True).encode())\n            return\n        parsed = urllib.parse.urlparse(self.path)\n        event = {\n            \"path\": parsed.path,\n            \"query\": urllib.parse.parse_qs(parsed.query),\n            \"client\": self.client_address[0],\n            \"ts\": round(time.time(), 3),\n        }\n        with log_path.open(\"a\") as file:\n            file.write(json.dumps(event, sort_keys=True) + \"\\n\")\n        body = {\"status\": \"provider_ok\", \"request_number\": len(read_events())}\n        self.send_response(200)\n        self.send_header(\"content-type\", \"application/json\")\n        self.end_headers()\n        self.wfile.write(json.dumps(body, sort_keys=True).encode())\n\n    def log_message(self, format, *args):\n        return\n\nThreadingHTTPServer((\"0.0.0.0\", 8080), Handler).serve_forever()\n"
+            ],
+            "elapsed_seconds": 0.335,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "addec5428b28d3dd2fd0daf9df7bd3ca3155266d25d7b716d8f3c0bc0cb4b5e9"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "run",
+              "-d",
+              "--rm",
+              "--name",
+              "cornerstone-vs2-egress-proxy-30c78e96d5",
+              "--network",
+              "cornerstone-vs2-range-service-30c78e96d5",
+              "python:3.12-bookworm",
+              "sleep",
+              "600"
+            ],
+            "elapsed_seconds": 0.439,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "efbdef2c760509cc22a1c8dc6ae0ebbef3dd8ea658cd1d9be09af2e97ec732de"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "network",
+              "connect",
+              "cornerstone-vs2-range-provider-30c78e96d5",
+              "cornerstone-vs2-egress-proxy-30c78e96d5"
+            ],
+            "elapsed_seconds": 0.048,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": []
+          },
+          {
+            "command": [
+              "docker",
+              "run",
+              "-d",
+              "--rm",
+              "--name",
+              "cornerstone-vs2-api-30c78e96d5",
+              "--network",
+              "cornerstone-vs2-range-service-30c78e96d5",
+              "python:3.12-bookworm",
+              "sleep",
+              "600"
+            ],
+            "elapsed_seconds": 0.413,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "77965fde98c312d65ed81b5f7d3a5a2b6255960b0f70d70f45e134e1ff0b03fe"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "run",
+              "-d",
+              "--rm",
+              "--name",
+              "cornerstone-vs2-worker-30c78e96d5",
+              "--network",
+              "cornerstone-vs2-range-service-30c78e96d5",
+              "python:3.12-bookworm",
+              "sleep",
+              "600"
+            ],
+            "elapsed_seconds": 0.371,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "be6277855126cbee3a6ee7765e817bc42e158861447a489ffcf4d80923a346a0"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "run",
+              "-d",
+              "--rm",
+              "--name",
+              "cornerstone-vs2-tool-30c78e96d5",
+              "--network",
+              "cornerstone-vs2-range-service-30c78e96d5",
+              "python:3.12-bookworm",
+              "sleep",
+              "600"
+            ],
+            "elapsed_seconds": 0.388,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "2b0d041797a8f1adad2ccefde73834c198b6e4c060ca5392c0b98b07c8d66f03"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "exec",
+              "cornerstone-vs2-egress-proxy-30c78e96d5",
+              "python",
+              "-c",
+              "\nimport urllib.request\n\nurllib.request.urlopen(\"http://provider:8080/count\", timeout=2).read()\nprint(\"ready\")\n"
+            ],
+            "elapsed_seconds": 0.559,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "ready"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "exec",
+              "cornerstone-vs2-provider-30c78e96d5",
+              "python",
+              "-c",
+              "\nimport json\nimport pathlib\n\npath = pathlib.Path(\"/tmp/provider_calls.jsonl\")\nevents = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []\nprint(json.dumps({\"requests\": len(events), \"events\": events}, sort_keys=True))\n"
+            ],
+            "elapsed_seconds": 0.145,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "{\"events\": [], \"requests\": 0}"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "exec",
+              "cornerstone-vs2-api-30c78e96d5",
+              "python",
+              "-c",
+              "\nimport json\nimport socket\nimport sys\nimport urllib.error\nimport urllib.request\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nactor = sys.argv[3]\nresult = {\"actor\": actor, \"target\": f\"{host}:{port}\"}\ntry:\n    urllib.request.urlopen(f\"http://{host}:{port}/status?actor={actor}&path=http\", timeout=2).read()\n    result[\"http\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"http\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\ntry:\n    sock = socket.create_connection((host, port), timeout=2)\n    sock.close()\n    result[\"socket\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"socket\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\nprint(json.dumps(result, sort_keys=True))\n",
+              "provider",
+              "8080",
+              "api"
+            ],
+            "elapsed_seconds": 0.531,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "{\"actor\": \"api\", \"http\": {\"blocked\": true, \"error\": \"<urlopen error [Errno -3] Temporary failure in name resolution>\", \"error_type\": \"URLError\"}, \"socket\": {\"blocked\": true, \"error\": \"[Errno -3] Temporary failure in name resolution\", \"error_type\": \"gaierror\"}, \"target\": \"provider:8080\"}"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "exec",
+              "cornerstone-vs2-worker-30c78e96d5",
+              "python",
+              "-c",
+              "\nimport json\nimport socket\nimport sys\nimport urllib.error\nimport urllib.request\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nactor = sys.argv[3]\nresult = {\"actor\": actor, \"target\": f\"{host}:{port}\"}\ntry:\n    urllib.request.urlopen(f\"http://{host}:{port}/status?actor={actor}&path=http\", timeout=2).read()\n    result[\"http\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"http\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\ntry:\n    sock = socket.create_connection((host, port), timeout=2)\n    sock.close()\n    result[\"socket\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"socket\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\nprint(json.dumps(result, sort_keys=True))\n",
+              "provider",
+              "8080",
+              "worker"
+            ],
+            "elapsed_seconds": 0.456,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "{\"actor\": \"worker\", \"http\": {\"blocked\": true, \"error\": \"<urlopen error [Errno -3] Temporary failure in name resolution>\", \"error_type\": \"URLError\"}, \"socket\": {\"blocked\": true, \"error\": \"[Errno -3] Temporary failure in name resolution\", \"error_type\": \"gaierror\"}, \"target\": \"provider:8080\"}"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "exec",
+              "cornerstone-vs2-tool-30c78e96d5",
+              "python",
+              "-c",
+              "\nimport json\nimport socket\nimport sys\nimport urllib.error\nimport urllib.request\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nactor = sys.argv[3]\nresult = {\"actor\": actor, \"target\": f\"{host}:{port}\"}\ntry:\n    urllib.request.urlopen(f\"http://{host}:{port}/status?actor={actor}&path=http\", timeout=2).read()\n    result[\"http\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"http\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\ntry:\n    sock = socket.create_connection((host, port), timeout=2)\n    sock.close()\n    result[\"socket\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"socket\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\nprint(json.dumps(result, sort_keys=True))\n",
+              "provider",
+              "8080",
+              "tool_runtime"
+            ],
+            "elapsed_seconds": 0.618,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "{\"actor\": \"tool_runtime\", \"http\": {\"blocked\": true, \"error\": \"<urlopen error [Errno -3] Temporary failure in name resolution>\", \"error_type\": \"URLError\"}, \"socket\": {\"blocked\": true, \"error\": \"[Errno -3] Temporary failure in name resolution\", \"error_type\": \"gaierror\"}, \"target\": \"provider:8080\"}"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "exec",
+              "cornerstone-vs2-provider-30c78e96d5",
+              "python",
+              "-c",
+              "\nimport json\nimport pathlib\n\npath = pathlib.Path(\"/tmp/provider_calls.jsonl\")\nevents = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []\nprint(json.dumps({\"requests\": len(events), \"events\": events}, sort_keys=True))\n"
+            ],
+            "elapsed_seconds": 0.172,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "{\"events\": [], \"requests\": 0}"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "exec",
+              "cornerstone-vs2-egress-proxy-30c78e96d5",
+              "python",
+              "-c",
+              "\nimport json\nimport sys\nimport urllib.request\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nactor = sys.argv[3]\nwith urllib.request.urlopen(f\"http://{host}:{port}/status?actor={actor}&path=governed_proxy\", timeout=3) as response:\n    body = json.loads(response.read().decode())\nprint(json.dumps({\"actor\": actor, \"http_status\": response.status, \"body\": body}, sort_keys=True))\n",
+              "provider",
+              "8080",
+              "egress_proxy"
+            ],
+            "elapsed_seconds": 0.311,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "{\"actor\": \"egress_proxy\", \"body\": {\"request_number\": 1, \"status\": \"provider_ok\"}, \"http_status\": 200}"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "exec",
+              "cornerstone-vs2-provider-30c78e96d5",
+              "python",
+              "-c",
+              "\nimport json\nimport pathlib\n\npath = pathlib.Path(\"/tmp/provider_calls.jsonl\")\nevents = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []\nprint(json.dumps({\"requests\": len(events), \"events\": events}, sort_keys=True))\n"
+            ],
+            "elapsed_seconds": 0.133,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "{\"events\": [{\"client\": \"172.30.0.3\", \"path\": \"/status\", \"query\": {\"actor\": [\"egress_proxy\"], \"path\": [\"governed_proxy\"]}, \"ts\": 1782045120.122}], \"requests\": 1}"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "network",
+              "inspect",
+              "cornerstone-vs2-range-service-30c78e96d5"
+            ],
+            "elapsed_seconds": 0.019,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "                    }",
+              "                }",
+              "            }",
+              "        }",
+              "    }",
+              "]"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "network",
+              "inspect",
+              "cornerstone-vs2-range-provider-30c78e96d5"
+            ],
+            "elapsed_seconds": 0.018,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "                    }",
+              "                }",
+              "            }",
+              "        }",
+              "    }",
+              "]"
+            ]
+          }
+        ]
       },
-      "name": "bundle_revision_and_lkg_recorded",
+      "name": "disallowed_peer_networks_do_not_reach_protected_services",
       "passed": true
     },
     {
@@ -56,8 +593,8 @@
   "required_evidence": "OPA config, listening sockets, successful authorized call, denied unauthorized call.",
   "scenario_id": "VS2-SEC-032",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "OPA is bound to the intended interface, protected by the chosen authentication/transport controls, and management/data APIs are not anonymously exposed.",
   "validator": "verify_vs2_sec_032",
   "verification_command": [

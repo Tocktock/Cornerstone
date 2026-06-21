@@ -9,6 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
+SKIP_VS2_REGRESSION_TESTS = os.environ.get("CORNERSTONE_SKIP_VS2_REGRESSION_TESTS") == "1"
 
 
 def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
@@ -86,47 +87,435 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(counts["REGRESSION"], 16)
         self.assertEqual(counts["HUMAN_REQUIRED"], 7)
 
+    @unittest.skipIf(SKIP_VS2_REGRESSION_TESTS, "VS0 regression target excludes VS2-only proof to avoid recursive regression verification")
     def test_vs2_policy_tenancy_egress_verify_requires_scenario_specific_evidence(self) -> None:
         result = run_cli("scenario", "verify", "vs2-policy-tenancy-egress", "--json")
-        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs2-policy-tenancy-egress")
-        self.assertEqual(payload["status"], "failed")
+        self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], 93)
-        self.assertEqual(payload["summary"]["pass"], 0)
+        self.assertEqual(payload["summary"]["pass"], 86)
         self.assertEqual(payload["summary"]["fail"], 0)
-        self.assertEqual(payload["summary"]["not_verified"], 86)
+        self.assertEqual(payload["summary"]["not_verified"], 0)
         self.assertEqual(payload["summary"]["not_run"], 0)
         self.assertEqual(payload["summary"]["human_required"], 7)
-        self.assertEqual(payload["summary"]["blocking"], 86)
-        self.assertEqual(payload["summary"]["product_feature_claims"], "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED")
-        self.assertEqual(payload["local_security_proof"]["status"], "failed")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING")
+        self.assertEqual(payload["local_security_proof"]["status"], "success")
+        self.assertEqual(payload["local_security_proof"]["local_range"]["status"], "passed")
         self.assertEqual(payload["local_security_proof"]["postgres"]["status"], "passed")
         self.assertEqual(payload["local_security_proof"]["opa"]["status"], "passed")
         self.assertEqual(payload["local_security_proof"]["egress"]["status"], "passed")
-        self.assertEqual(payload["local_security_proof"]["scenario_check_registry"], [])
+        self.assertEqual(
+            payload["local_security_proof"]["scenario_check_registry"],
+            [
+                "VS2-SEC-001",
+                "VS2-SEC-002",
+                "VS2-SEC-003",
+                "VS2-SEC-004",
+                "VS2-SEC-005",
+                "VS2-SEC-006",
+                "VS2-SEC-007",
+                "VS2-SEC-008",
+                "VS2-SEC-009",
+                "VS2-SEC-010",
+                "VS2-SEC-011",
+                "VS2-SEC-012",
+                "VS2-SEC-013",
+                "VS2-SEC-014",
+                "VS2-SEC-015",
+                "VS2-SEC-016",
+                "VS2-SEC-017",
+                "VS2-SEC-018",
+                "VS2-SEC-019",
+                "VS2-SEC-020",
+                "VS2-SEC-021",
+                "VS2-SEC-022",
+                "VS2-SEC-023",
+                "VS2-SEC-024",
+                "VS2-SEC-025",
+                "VS2-SEC-026",
+                "VS2-SEC-027",
+                "VS2-SEC-028",
+                "VS2-SEC-029",
+                "VS2-SEC-030",
+                "VS2-SEC-031",
+                "VS2-SEC-032",
+                "VS2-SEC-033",
+                "VS2-SEC-034",
+                "VS2-SEC-035",
+                "VS2-SEC-036",
+                "VS2-SEC-037",
+                "VS2-SEC-038",
+                "VS2-SEC-039",
+                "VS2-SEC-040",
+                "VS2-SEC-041",
+                "VS2-SEC-042",
+                "VS2-SEC-043",
+                "VS2-SEC-044",
+                "VS2-SEC-045",
+                "VS2-SEC-046",
+                "VS2-SEC-047",
+                "VS2-SEC-048",
+                "VS2-SEC-049",
+                "VS2-SEC-050",
+                "VS2-SEC-051",
+                "VS2-SEC-052",
+                "VS2-SEC-053",
+                "VS2-SEC-054",
+                "VS2-SEC-055",
+                "VS2-SEC-056",
+                "VS2-SEC-057",
+                "VS2-SEC-058",
+                "VS2-SEC-059",
+                "VS2-SEC-060",
+                "VS2-SEC-061",
+                "VS2-SEC-062",
+                "VS2-SEC-063",
+                "VS2-SEC-064",
+                "VS2-SEC-065",
+                "VS2-SEC-066",
+                "VS2-SEC-067",
+                "VS2-SEC-068",
+                "VS2-SEC-069",
+                "VS2-SEC-070",
+                "VS2-SEC-R01",
+                "VS2-SEC-R02",
+                "VS2-SEC-R03",
+                "VS2-SEC-R04",
+                "VS2-SEC-R05",
+                "VS2-SEC-R06",
+                "VS2-SEC-R07",
+                "VS2-SEC-R08",
+                "VS2-SEC-R09",
+                "VS2-SEC-R10",
+                "VS2-SEC-R11",
+                "VS2-SEC-R12",
+                "VS2-SEC-R13",
+                "VS2-SEC-R14",
+                "VS2-SEC-R15",
+                "VS2-SEC-R16",
+            ],
+        )
         self.assertEqual(payload["negative_evidence"]["blanket_dependencies_ok_pass_used"], 0)
         pass_rows = [row for row in payload["scenario_results"] if row["status"] == "PASS"]
-        self.assertEqual(len(pass_rows), 0)
+        self.assertEqual(len(pass_rows), 86)
+        egress_adversarial_ids = {"VS2-SEC-054", "VS2-SEC-055", "VS2-SEC-056", "VS2-SEC-057", "VS2-SEC-058", "VS2-SEC-059", "VS2-SEC-062", "VS2-SEC-063", "VS2-SEC-064"}
+        opa_ci_ids = {"VS2-SEC-040"}
+        opa_bundle_ids = {"VS2-SEC-041", "VS2-SEC-042"}
+        local_range_rows = [row for row in pass_rows if row["scenario_id"] not in egress_adversarial_ids | opa_ci_ids | opa_bundle_ids and not row["scenario_id"].startswith("VS2-SEC-R")]
+        opa_ci_rows = [row for row in pass_rows if row["scenario_id"] in opa_ci_ids]
+        opa_bundle_rows = [row for row in pass_rows if row["scenario_id"] in opa_bundle_ids]
+        egress_rows = [row for row in pass_rows if row["scenario_id"] in egress_adversarial_ids]
+        regression_rows = [row for row in pass_rows if row["scenario_id"] in {"VS2-SEC-R01", "VS2-SEC-R02", "VS2-SEC-R06", "VS2-SEC-R11"}]
+        namespace_regression_rows = [row for row in pass_rows if row["scenario_id"] in {"VS2-SEC-R03", "VS2-SEC-R04"}]
+        boundary_regression_rows = [row for row in pass_rows if row["scenario_id"] in {"VS2-SEC-R07", "VS2-SEC-R08", "VS2-SEC-R10"}]
+        leak_output_rows = [row for row in pass_rows if row["scenario_id"] in {"VS2-SEC-R12"}]
+        schema_guard_rows = [row for row in pass_rows if row["scenario_id"] in {"VS2-SEC-R13"}]
+        overclaim_rows = [row for row in pass_rows if row["scenario_id"] in {"VS2-SEC-R16"}]
+        completion_regression_rows = [row for row in pass_rows if row["scenario_id"] in {"VS2-SEC-R05", "VS2-SEC-R09", "VS2-SEC-R14", "VS2-SEC-R15"}]
+        self.assertEqual(len(local_range_rows), 58)
+        self.assertEqual(len(opa_ci_rows), 1)
+        self.assertEqual(len(opa_bundle_rows), 2)
+        self.assertEqual(len(egress_rows), 9)
+        self.assertEqual(len(regression_rows), 4)
+        self.assertEqual(len(namespace_regression_rows), 2)
+        self.assertEqual(len(boundary_regression_rows), 3)
+        self.assertEqual(len(leak_output_rows), 1)
+        self.assertEqual(len(schema_guard_rows), 1)
+        self.assertEqual(len(overclaim_rows), 1)
+        self.assertEqual(len(completion_regression_rows), 4)
+        self.assertTrue(all("reports/security/vs2-local-range.json" in row["evidence_paths"] for row in local_range_rows))
+        self.assertTrue(all("reports/policy/vs2-opa-test.json" in row["evidence_paths"] for row in opa_ci_rows))
+        self.assertTrue(all("reports/policy/vs2-opa-coverage.json" in row["evidence_paths"] for row in opa_ci_rows))
+        self.assertTrue(all("reports/policy/vs2-bundle-lifecycle.json" in row["evidence_paths"] for row in opa_bundle_rows))
+        self.assertTrue(all("reports/network/vs2-egress-proof.json" in row["evidence_paths"] for row in egress_rows))
+        self.assertTrue(all("reports/security/vs2-regression-proof.json" in row["evidence_paths"] for row in regression_rows))
+        self.assertTrue(all("reports/security/vs2-local-range.json" in row["evidence_paths"] for row in namespace_regression_rows))
+        self.assertTrue(all("reports/security/vs2-local-range.json" in row["evidence_paths"] for row in boundary_regression_rows))
+        self.assertTrue(all("reports/network/vs2-egress-proof.json" in row["evidence_paths"] for row in boundary_regression_rows if row["scenario_id"] != "VS2-SEC-R08"))
+        self.assertTrue(all("reports/security/vs2-output-leak-scan.json" in row["evidence_paths"] for row in leak_output_rows))
+        self.assertTrue(all("reports/security/vs2-local-range.json" in row["evidence_paths"] for row in leak_output_rows))
+        self.assertTrue(all("reports/security/vs2-local-range.json" in row["evidence_paths"] for row in schema_guard_rows))
+        self.assertTrue(all("reports/security/vs2-overclaim-scan.json" in row["evidence_paths"] for row in overclaim_rows))
+        self.assertTrue(all("reports/security/vs2-local-range.json" in row["evidence_paths"] for row in completion_regression_rows))
         not_verified = [row for row in payload["scenario_results"] if row["status"] == "NOT_VERIFIED"]
-        self.assertEqual(len(not_verified), 86)
-        self.assertTrue(all(row["validator"] is None for row in not_verified))
-        self.assertTrue(any(row["evidence_paths"] for row in not_verified))
+        self.assertEqual(len(not_verified), 0)
 
+    @unittest.skipIf(SKIP_VS2_REGRESSION_TESTS, "VS0 regression target excludes VS2-only proof to avoid recursive regression verification")
+    def test_vs2_local_range_command_runs_real_first_slice(self) -> None:
+        result = run_cli("security", "vs2-local-range", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "passed")
+        checks = payload["checks"]
+        self.assertTrue(checks["components_healthy"])
+        self.assertTrue(checks["migrations_and_seed_applied"])
+        self.assertTrue(checks["cli_api_browser_same_context_digest"])
+        self.assertTrue(checks["cli_api_browser_same_policy_decision"])
+        self.assertTrue(checks["forged_scope_denied"])
+        self.assertTrue(checks["missing_context_zero_db_egress"])
+        self.assertTrue(checks["bad_signature_zero_db_egress"])
+        self.assertTrue(checks["object_contract_api_cli_visible"])
+        self.assertTrue(checks["object_contract_required_columns_not_null"])
+        self.assertTrue(checks["object_contract_representative_rows_created"])
+        self.assertTrue(checks["object_contract_failed_null_inserts_denied"])
+        self.assertTrue(checks["object_contract_scope_mutation_denied"])
+        self.assertTrue(checks["object_access_matrix_api_cli_visible"])
+        self.assertTrue(checks["object_access_authorized_alpha_storage_bound"])
+        self.assertTrue(checks["object_access_foreign_object_download_signed_url_denied"])
+        self.assertTrue(checks["object_access_evidence_traversal_isolated"])
+        self.assertTrue(checks["object_access_storage_log_zero_foreign_reads"])
+        self.assertTrue(checks["object_access_zero_beta_canary_or_ids"])
+        self.assertTrue(checks["observability_matrix_api_cli_visible"])
+        self.assertTrue(checks["observability_records_isolated"])
+        self.assertTrue(checks["observability_tenant_export_scoped"])
+        self.assertTrue(checks["observability_aggregate_metrics_non_sensitive"])
+        self.assertTrue(checks["observability_system_wide_denied_without_privilege"])
+        self.assertTrue(checks["observability_role_matrix_user_admin_scoped"])
+        self.assertTrue(checks["observability_zero_beta_canary_or_ids"])
+        self.assertTrue(checks["tenant_read_matrix_api_cli_visible"])
+        self.assertTrue(checks["tenant_read_matrix_counts_hide_foreign_rows"])
+        self.assertTrue(checks["tenant_read_matrix_join_subquery_aggregate_pagination_isolated"])
+        self.assertTrue(checks["tenant_read_matrix_zero_beta_canary_or_ids"])
+        self.assertTrue(checks["tenant_read_matrix_neutral_guessed_id_results"])
+        self.assertTrue(checks["search_matrix_api_cli_visible"])
+        self.assertTrue(checks["search_matrix_foreign_term_no_results"])
+        self.assertTrue(checks["search_matrix_autocomplete_facets_snapshots_objects_isolated"])
+        self.assertTrue(checks["search_matrix_inventory_indexes_and_rls_ok"])
+        self.assertTrue(checks["search_matrix_zero_beta_canary_or_ids"])
+        self.assertTrue(checks["db_path_matrix_api_cli_visible"])
+        self.assertTrue(checks["db_path_raw_sql_repository_isolated"])
+        self.assertTrue(checks["db_path_view_and_function_isolated"])
+        self.assertTrue(checks["db_path_unsafe_security_definer_denied"])
+        self.assertTrue(checks["db_path_inventory_grants_and_security_modes_ok"])
+        self.assertTrue(checks["db_path_zero_beta_canary_or_ids"])
+        self.assertTrue(checks["constraint_collision_matrix_api_cli_visible"])
+        self.assertTrue(checks["constraint_collision_tenant_scoped_unique_keys"])
+        self.assertTrue(checks["constraint_collision_tenant_aware_foreign_keys"])
+        self.assertTrue(checks["constraint_collision_neutral_errors"])
+        self.assertTrue(checks["constraint_collision_zero_foreign_canary_or_ids"])
+        self.assertTrue(checks["migration_matrix_api_cli_visible"])
+        self.assertTrue(checks["migration_known_rows_migrated"])
+        self.assertTrue(checks["migration_bad_rows_quarantined"])
+        self.assertTrue(checks["migration_no_ownerless_global_truth"])
+        self.assertTrue(checks["migration_checksums_and_rollback_evidence"])
+        self.assertTrue(checks["migration_zero_foreign_canary_or_ids"])
+        self.assertTrue(checks["upgrade_path_matrix_api_cli_visible"])
+        self.assertTrue(checks["upgrade_path_forward_preserves_vs0_vs1_objects"])
+        self.assertTrue(checks["upgrade_path_compatibility_regression_reads"])
+        self.assertTrue(checks["upgrade_path_failed_migration_and_rollback"])
+        self.assertTrue(checks["upgrade_path_destructive_without_approval_denied"])
+        self.assertTrue(checks["audit_integrity_matrix_api_cli_visible"])
+        self.assertTrue(checks["audit_integrity_required_events_present"])
+        self.assertTrue(checks["audit_integrity_clean_chain_verifies"])
+        self.assertTrue(checks["audit_integrity_tamper_cases_detected"])
+        self.assertTrue(checks["audit_integrity_append_only_and_auditor_role"])
+        self.assertTrue(checks["schema_gate_bad_fixture_fails"])
+        self.assertTrue(checks["schema_gate_corrected_fixture_passes"])
+        self.assertTrue(checks["schema_gate_inventory_machine_readable"])
+        self.assertTrue(checks["schema_gate_detects_required_surfaces"])
+        self.assertTrue(checks["schema_gate_rollback_leaves_no_fixture_tables"])
+        self.assertTrue(checks["revocation_allow_before_revoke"])
+        self.assertTrue(checks["stale_session_version_denied"])
+        self.assertTrue(checks["policy_cache_initial_allow_from_real_opa"])
+        self.assertTrue(checks["policy_cache_same_revision_hit_exercised"])
+        self.assertTrue(checks["policy_cache_key_contains_required_dimensions"])
+        self.assertTrue(checks["policy_cache_revision_update_changes_key"])
+        self.assertTrue(checks["policy_cache_legacy_key_without_revision_would_collide"])
+        self.assertTrue(checks["policy_cache_stale_allow_not_reused_after_revision_update"])
+        self.assertTrue(checks["policy_cache_new_revision_decision_recorded"])
+        self.assertTrue(checks["policy_cache_zero_stale_allows"])
+        self.assertTrue(checks["policy_cache_cross_tenant_key_distinct"])
+        self.assertTrue(checks["policy_cache_source_map_bound_to_trusted_context"])
+        self.assertTrue(checks["policy_cache_audit_refs_recorded"])
+        self.assertTrue(checks["r11_cached_allow_existed_before_revocation"])
+        self.assertTrue(checks["r11_revision_update_sequence_recorded"])
+        self.assertTrue(checks["r11_membership_revoked_after_cached_allow"])
+        self.assertTrue(checks["r11_concurrent_retries_completed"])
+        self.assertTrue(checks["r11_zero_post_revocation_successes"])
+        self.assertTrue(checks["r11_cached_allow_not_reused_after_revocation"])
+        self.assertTrue(checks["r11_denial_audits_recorded"])
+        self.assertTrue(checks["r11_zero_provider_or_egress_side_effects"])
+        self.assertTrue(checks["revoked_membership_denied_api_cli_browser_service_worker"])
+        self.assertTrue(checks["revocation_denial_audit_recorded"])
+        self.assertTrue(checks["revocation_zero_post_revoke_access_or_egress"])
+        self.assertTrue(checks["real_opa_allow_observed"])
+        self.assertTrue(checks["rls_select_isolated"])
+        self.assertTrue(checks["rls_write_denied"])
+        self.assertTrue(checks["connection_reuse_same_backend_pid"])
+        self.assertTrue(checks["connection_reuse_tenant_sequence_isolated"])
+        self.assertTrue(checks["connection_reuse_resets_after_success_error_timeout_rollback"])
+        self.assertTrue(checks["connection_reuse_expected_error_timeout_observed"])
+        self.assertTrue(checks["connection_reuse_zero_cross_tenant_canary_or_ids"])
+        self.assertTrue(checks["concurrent_tenant_api_load_completed"])
+        self.assertTrue(checks["concurrent_tenant_contexts_isolated"])
+        self.assertTrue(checks["concurrent_tenant_zero_foreign_canary_or_ids"])
+        self.assertTrue(checks["concurrent_tenant_audit_refs_not_mixed"])
+        self.assertTrue(checks["concurrent_tenant_policy_trace_refs_present"])
+        self.assertTrue(checks["concurrent_tenant_pool_reset_evidence_present"])
+        self.assertTrue(checks["worker_scope_valid_job_completed"])
+        self.assertTrue(checks["worker_scope_quarantines_bad_envelopes"])
+        self.assertTrue(checks["worker_scope_persists_audit_and_job_records"])
+        self.assertTrue(checks["worker_scope_zero_payload_leak_or_egress"])
+        self.assertTrue(checks["worker_scope_replay_idempotency_guard"])
+        self.assertTrue(checks["operation_key_records_exist"])
+        self.assertTrue(checks["operation_key_tenant_scoped_independent"])
+        self.assertTrue(checks["operation_key_collision_replay_scoped"])
+        self.assertTrue(checks["operation_key_zero_cross_tenant_suppression"])
+        self.assertTrue(checks["operation_key_no_foreign_canary_in_tenant_outputs"])
+        self.assertTrue(checks["app_role_hardened"])
+        self.assertTrue(checks["audit_persisted_in_postgres"])
+        self.assertTrue(checks["negative_control_rls_disabled_detects_leak"])
+        self.assertTrue(checks["external_action_flow_executed"])
+        self.assertTrue(checks["external_action_dry_run_approval_execution_linked"])
+        self.assertTrue(checks["tenant_b_egress_denied"])
+        self.assertTrue(checks["connectorhub_credential_ref_only"])
+        self.assertTrue(checks["stale_dry_run_blocks_execution"])
+        self.assertTrue(checks["docker_network_direct_egress_denied"])
+        self.assertTrue(checks["docker_network_provider_zero_requests_after_direct_attempts"])
+        self.assertTrue(checks["docker_network_provider_reachable_from_governed_proxy"])
+        self.assertTrue(checks["docker_network_membership_isolated"])
+        self.assertTrue(checks["backup_restore_pg_dump_succeeded"])
+        self.assertTrue(checks["backup_restore_pg_restore_succeeded"])
+        self.assertTrue(checks["backup_restore_counts_match"])
+        self.assertTrue(checks["backup_restore_rls_rechecked"])
+        self.assertTrue(checks["backup_restore_audit_rechecked"])
+        self.assertTrue(checks["backup_restore_tenant_export_scoped"])
+        self.assertTrue(checks["same_tenant_namespace_policy_denies_implicit_cross_namespace"])
+        self.assertTrue(checks["same_tenant_namespace_rls_hides_foreign_workspace"])
+        self.assertTrue(checks["same_tenant_namespace_explicit_promotion_has_provenance"])
+        self.assertTrue(checks["cross_tenant_transfer_policy_denies"])
+        self.assertTrue(checks["cross_tenant_transfer_copy_reference_share_promotion_denied"])
+        self.assertTrue(checks["cross_tenant_transfer_zero_target_records"])
+        self.assertTrue(checks["cross_tenant_transfer_audited"])
+        self.assertTrue(checks["service_allow_bypass_rls_zero_rows"])
+        self.assertTrue(checks["service_allow_bypass_anomaly_audited_and_metric_recorded"])
+        self.assertTrue(checks["opa_policy_input_schema_file_present"])
+        self.assertTrue(checks["opa_policy_input_schema_version_const_is_v1"])
+        self.assertTrue(checks["opa_policy_input_builders_cover_operation_families"])
+        self.assertTrue(checks["opa_policy_input_valid_cases_pass_schema_and_opa"])
+        self.assertTrue(checks["opa_policy_input_invalid_cases_rejected_before_opa"])
+        self.assertTrue(checks["opa_policy_input_source_map_covers_required_attributes"])
+        self.assertTrue(checks["opa_policy_input_digests_present"])
+        self.assertTrue(checks["opa_policy_input_audit_refs_recorded"])
+        self.assertTrue(checks["opa_low_risk_allow_reaches_downstream_and_audit"])
+        self.assertTrue(checks["opa_role_denied_without_downstream_side_effect"])
+        self.assertTrue(checks["opa_unknown_policy_default_denied_without_downstream_side_effect"])
+        self.assertTrue(checks["opa_abac_attribute_boundaries_enforced"])
+        self.assertTrue(checks["opa_abac_matching_allowed_set_succeeds"])
+        self.assertTrue(checks["opa_malformed_and_wrong_version_inputs_fail_closed"])
+        self.assertTrue(checks["opa_unexpected_authoritative_attrs_fail_closed"])
+        self.assertTrue(checks["opa_deny_precedence_conflict_matrix_enforced"])
+        self.assertTrue(checks["opa_failure_modes_fail_closed_without_side_effects"])
+        self.assertTrue(checks["opa_failure_modes_cover_protected_operation_families"])
+        self.assertTrue(checks["opa_failure_readiness_degraded"])
+        self.assertTrue(checks["opa_failure_denials_have_stable_safe_responses"])
+        self.assertTrue(checks["opa_decision_log_mask_policy_loaded_from_opa"])
+        self.assertTrue(checks["opa_decision_log_canary_reached_opa_request"])
+        self.assertTrue(checks["opa_decision_log_collector_received_masked_fields"])
+        self.assertTrue(checks["opa_decision_log_collector_entry_has_no_canary"])
+        self.assertTrue(checks["opa_decision_log_linked_to_policy_and_audit"])
+        self.assertTrue(checks["opa_decision_log_source_map_retained_without_raw_values"])
+        self.assertTrue(checks["reason_code_catalog_file_present"])
+        self.assertTrue(checks["reason_code_catalog_covers_observed_reasons"])
+        self.assertTrue(checks["reason_code_denial_responses_have_stable_codes"])
+        self.assertTrue(checks["reason_code_denial_responses_match_decision_and_audit_refs"])
+        self.assertTrue(checks["reason_code_ui_snapshots_render_denial_component"])
+        self.assertTrue(checks["reason_code_surfaces_cover_policy_denial_families"])
+        self.assertTrue(checks["reason_code_audit_refs_recorded"])
+        self.assertTrue(checks["break_glass_normal_app_denied"])
+        self.assertTrue(checks["break_glass_requires_approval"])
+        self.assertTrue(checks["break_glass_approved_path_audited_and_time_bound"])
+        self.assertTrue(checks["break_glass_safe_output_counts_only"])
+        self.assertTrue(checks["product_learning_raw_truth_denied"])
+        self.assertTrue(checks["product_learning_zero_memory_or_truth_writes"])
+        self.assertTrue(checks["product_learning_denials_audited"])
+        self.assertTrue(checks["policy_limits_config_present"])
+        self.assertTrue(checks["policy_limits_at_and_below_allow"])
+        self.assertTrue(checks["policy_limits_over_limit_fail_before_opa"])
+        self.assertTrue(checks["policy_limits_unknown_enum_fail_before_opa"])
+        self.assertTrue(checks["policy_limits_bounded_no_partial_side_effect"])
+        self.assertTrue(checks["policy_conformance_same_input_all_points"])
+        self.assertTrue(checks["policy_conformance_gateway_service_tool_cli_equivalent"])
+        self.assertTrue(checks["policy_conformance_mismatch_fail_closed"])
+        self.assertTrue(checks["policy_conformance_mismatch_audited_no_side_effect"])
+        self.assertTrue(checks["opa_decisions_have_revision_digest_and_id"])
+        self.assertTrue(checks["opa_fail_closed_decisions_have_digest_and_id"])
+        self.assertTrue(checks["opa_denials_have_stable_safe_responses"])
+        self.assertFalse(payload["topology"]["postgres"]["published_to_host"])
+
+    @unittest.skipIf(SKIP_VS2_REGRESSION_TESTS, "VS0 regression target excludes VS2-only proof to avoid recursive regression verification")
     def test_vs2_local_proof_command_records_postgres_opa_and_egress_evidence(self) -> None:
         result = run_cli("security", "vs2-local-proof", "--json")
-        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
-        self.assertEqual(payload["status"], "failed")
-        self.assertEqual(payload["summary"]["pass"], 0)
-        self.assertEqual(payload["summary"]["not_verified"], 86)
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["pass"], 86)
+        self.assertEqual(payload["summary"]["not_verified"], 0)
         self.assertEqual(payload["summary"]["not_run"], 0)
-        self.assertEqual(payload["summary"]["blocking"], 86)
-        self.assertEqual(payload["summary"]["product_feature_claims"], "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED")
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["product_feature_claims"], "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING")
+        self.assertEqual(payload["local_range"]["status"], "passed")
         self.assertEqual(payload["postgres"]["status"], "passed")
         self.assertEqual(payload["opa"]["status"], "passed")
         self.assertEqual(payload["egress"]["status"], "passed")
-        self.assertEqual(payload["scenario_check_registry"], [])
+        self.assertEqual(payload["regression_report"]["status"], "passed")
+        self.assertTrue(payload["regression_report"]["checks"]["reports_written_under_vs2_regression_dir"])
+        self.assertTrue(payload["regression_report"]["checks"]["vs0_runtime_green"])
+        self.assertTrue(payload["regression_report"]["checks"]["vs0_acceptance_green"])
+        self.assertTrue(payload["regression_report"]["checks"]["vs0_evux_green"])
+        self.assertTrue(payload["regression_report"]["checks"]["vs0_operator_ui_green"])
+        self.assertTrue(payload["regression_report"]["checks"]["vs1_ontology_green"])
+        self.assertIn("VS2-SEC-001", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-014", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-022", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-023", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-026", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-027", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-028", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-029", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-030", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-031", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-032", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-033", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-034", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-035", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-036", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-038", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-040", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-041", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-042", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-043", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-045", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-046", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-047", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-048", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-049", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-050", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-054", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-062", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-064", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-067", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-069", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-070", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R01", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R02", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R03", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R04", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R05", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R07", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R08", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R09", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R10", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R11", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R12", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R13", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R14", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R15", payload["scenario_check_registry"])
+        self.assertIn("VS2-SEC-R16", payload["scenario_check_registry"])
+        self.assertIn("report:reports/security/vs2-local-range.json", payload["evidence_refs"])
         self.assertIn("evidence_manifest", payload)
         self.assertEqual(payload["negative_evidence"]["blanket_dependencies_ok_pass_used"], 0)
         self.assertEqual(payload["negative_evidence"]["ai_rows_marked_pass_without_scenario_validator"], 0)
@@ -134,6 +523,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["negative_evidence"]["live_provider_ready_claimed"], 0)
         self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_ai"], 0)
 
+    @unittest.skipIf(SKIP_VS2_REGRESSION_TESTS, "VS0 regression target excludes VS2-only proof to avoid recursive regression verification")
     def test_vs2_sensitive_change_gate_records_h01_boundary(self) -> None:
         state_rel = "tmp/test-vs2-sensitive-change-gate"
         shutil.rmtree(ROOT / state_rel, ignore_errors=True)
@@ -165,6 +555,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(payload["audit_refs"])
         self.assertTrue(payload["evidence_refs"])
 
+    @unittest.skipIf(SKIP_VS2_REGRESSION_TESTS, "VS0 regression target excludes VS2-only proof to avoid recursive regression verification")
     def test_vs2_h01_approval_package_is_pending_and_non_mutating(self) -> None:
         state_rel = "tmp/test-vs2-h01-approval-package"
         shutil.rmtree(ROOT / state_rel, ignore_errors=True)

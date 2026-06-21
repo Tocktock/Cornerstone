@@ -2,20 +2,2103 @@
   "assertions": [
     {
       "evidence": {
-        "compileall_green": true,
-        "scenario_matrix_green": true,
-        "vs0_acceptance_green": true,
-        "vs0_evux_green": true,
-        "vs0_operator_ui_green": true,
-        "vs0_runtime_green": true,
-        "vs1_ontology_green": true
+        "audit_refs": [
+          "audit_07480738aec69e16",
+          "audit_1849f74ec57dea18",
+          "audit_19d10e594183fbd1",
+          "audit_5317c742b0502466",
+          "audit_622fa63512148cee",
+          "audit_751404de621818d6",
+          "audit_84ab9c0b39e72b89",
+          "audit_9685ce957616757e",
+          "audit_9fcd43a6f9ff1d0a",
+          "audit_a0f9f65b36d8c711",
+          "audit_a8f4b3d9d15c2c7e",
+          "audit_b5ddeec9577ce221",
+          "audit_c9613d4be0d5877e",
+          "audit_cd2cce070ddc1890",
+          "audit_ec72ab46e9cf980f",
+          "audit_fb73ac1b9ae0c398"
+        ],
+        "completion_order": [
+          "beta",
+          "alpha",
+          "alpha",
+          "beta",
+          "alpha",
+          "beta",
+          "beta",
+          "beta",
+          "beta",
+          "alpha",
+          "beta",
+          "alpha",
+          "alpha",
+          "beta",
+          "alpha",
+          "alpha"
+        ],
+        "context_digests": {
+          "alpha": [
+            "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a"
+          ],
+          "beta": [
+            "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681"
+          ]
+        },
+        "gateway_url": "http://127.0.0.1:52505",
+        "observations": [
+          {
+            "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_beta_001",
+            "artifact_owner_id": "principal_bob",
+            "artifact_tenant_id": "tenant_beta",
+            "artifact_workspace_id": "beta-home",
+            "audit_refs": [
+              "audit_5317c742b0502466"
+            ],
+            "case_id": "concurrent_11_beta",
+            "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+            "context_owner_id": "principal_bob",
+            "context_tenant_id": "tenant_beta",
+            "context_workspace_id": "beta-home",
+            "ended_monotonic": 1116877.387553,
+            "expected_artifact_id": "artifact_beta_001",
+            "expected_tenant_id": "tenant_beta",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "7abbbcf13b87c89772f4257956560b9f425736d497426004e7c17ad2184f4e62",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_443d918048ede645",
+            "policy_trace_id": "trace_vs2_concurrent_beta_11",
+            "response_trace_id": "trace_vs2_concurrent_beta_11",
+            "started_monotonic": 1116876.306,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "beta",
+            "trace_id": "trace_vs2_concurrent_beta_11"
+          },
+          {
+            "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_alpha_001",
+            "artifact_owner_id": "principal_alice",
+            "artifact_tenant_id": "tenant_alpha",
+            "artifact_workspace_id": "alpha-home",
+            "audit_refs": [
+              "audit_c9613d4be0d5877e"
+            ],
+            "case_id": "concurrent_10_alpha",
+            "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+            "context_owner_id": "principal_alice",
+            "context_tenant_id": "tenant_alpha",
+            "context_workspace_id": "alpha-home",
+            "ended_monotonic": 1116877.426202,
+            "expected_artifact_id": "artifact_alpha_001",
+            "expected_tenant_id": "tenant_alpha",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "7bfeeabcd56efdc38038cb69e136a487ca783b5f04648dfdbfb88d996bc48659",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_50969ef6a550347b",
+            "policy_trace_id": "trace_vs2_concurrent_alpha_10",
+            "response_trace_id": "trace_vs2_concurrent_alpha_10",
+            "started_monotonic": 1116876.305892,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_10"
+          },
+          {
+            "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_alpha_001",
+            "artifact_owner_id": "principal_alice",
+            "artifact_tenant_id": "tenant_alpha",
+            "artifact_workspace_id": "alpha-home",
+            "audit_refs": [
+              "audit_a8f4b3d9d15c2c7e"
+            ],
+            "case_id": "concurrent_14_alpha",
+            "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+            "context_owner_id": "principal_alice",
+            "context_tenant_id": "tenant_alpha",
+            "context_workspace_id": "alpha-home",
+            "ended_monotonic": 1116877.457531,
+            "expected_artifact_id": "artifact_alpha_001",
+            "expected_tenant_id": "tenant_alpha",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "af348fff2d197207c8d31a1ec4a73e33c14908621d6b74beb4ddaedb3a9db7de",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_7667f9df14000fe4",
+            "policy_trace_id": "trace_vs2_concurrent_alpha_14",
+            "response_trace_id": "trace_vs2_concurrent_alpha_14",
+            "started_monotonic": 1116876.305969,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_14"
+          },
+          {
+            "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_beta_001",
+            "artifact_owner_id": "principal_bob",
+            "artifact_tenant_id": "tenant_beta",
+            "artifact_workspace_id": "beta-home",
+            "audit_refs": [
+              "audit_84ab9c0b39e72b89"
+            ],
+            "case_id": "concurrent_15_beta",
+            "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+            "context_owner_id": "principal_bob",
+            "context_tenant_id": "tenant_beta",
+            "context_workspace_id": "beta-home",
+            "ended_monotonic": 1116877.469974,
+            "expected_artifact_id": "artifact_beta_001",
+            "expected_tenant_id": "tenant_beta",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "1aaefb88dc7d3e76d0259cfe41cee7f1ffbedb3090ef18c6bbb2cf2570fd0ad1",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_311e884ea2160a06",
+            "policy_trace_id": "trace_vs2_concurrent_beta_15",
+            "response_trace_id": "trace_vs2_concurrent_beta_15",
+            "started_monotonic": 1116876.306077,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "beta",
+            "trace_id": "trace_vs2_concurrent_beta_15"
+          },
+          {
+            "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_alpha_001",
+            "artifact_owner_id": "principal_alice",
+            "artifact_tenant_id": "tenant_alpha",
+            "artifact_workspace_id": "alpha-home",
+            "audit_refs": [
+              "audit_fb73ac1b9ae0c398"
+            ],
+            "case_id": "concurrent_02_alpha",
+            "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+            "context_owner_id": "principal_alice",
+            "context_tenant_id": "tenant_alpha",
+            "context_workspace_id": "alpha-home",
+            "ended_monotonic": 1116877.475331,
+            "expected_artifact_id": "artifact_alpha_001",
+            "expected_tenant_id": "tenant_alpha",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "7d4671d0e02b68af4015c35cc06a3d0fac60c4f3f0a2bf8a28fe8e4402106f3a",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_da8af043cf5e35e9",
+            "policy_trace_id": "trace_vs2_concurrent_alpha_02",
+            "response_trace_id": "trace_vs2_concurrent_alpha_02",
+            "started_monotonic": 1116876.305721,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_02"
+          },
+          {
+            "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_beta_001",
+            "artifact_owner_id": "principal_bob",
+            "artifact_tenant_id": "tenant_beta",
+            "artifact_workspace_id": "beta-home",
+            "audit_refs": [
+              "audit_cd2cce070ddc1890"
+            ],
+            "case_id": "concurrent_07_beta",
+            "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+            "context_owner_id": "principal_bob",
+            "context_tenant_id": "tenant_beta",
+            "context_workspace_id": "beta-home",
+            "ended_monotonic": 1116877.487558,
+            "expected_artifact_id": "artifact_beta_001",
+            "expected_tenant_id": "tenant_beta",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "556826c460adee9abf1fe4e65fed0b227a7a380528acdd2879041168fb6533d9",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_86bd4d2cee8bb92a",
+            "policy_trace_id": "trace_vs2_concurrent_beta_07",
+            "response_trace_id": "trace_vs2_concurrent_beta_07",
+            "started_monotonic": 1116876.306053,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "beta",
+            "trace_id": "trace_vs2_concurrent_beta_07"
+          },
+          {
+            "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_beta_001",
+            "artifact_owner_id": "principal_bob",
+            "artifact_tenant_id": "tenant_beta",
+            "artifact_workspace_id": "beta-home",
+            "audit_refs": [
+              "audit_a0f9f65b36d8c711"
+            ],
+            "case_id": "concurrent_13_beta",
+            "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+            "context_owner_id": "principal_bob",
+            "context_tenant_id": "tenant_beta",
+            "context_workspace_id": "beta-home",
+            "ended_monotonic": 1116877.492272,
+            "expected_artifact_id": "artifact_beta_001",
+            "expected_tenant_id": "tenant_beta",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "fea9011a8fbb02c92d28ec764e87d2cf6de91a39263f070862c8dc78e5eb834e",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_aba5b5acd5d62e18",
+            "policy_trace_id": "trace_vs2_concurrent_beta_13",
+            "response_trace_id": "trace_vs2_concurrent_beta_13",
+            "started_monotonic": 1116876.305872,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "beta",
+            "trace_id": "trace_vs2_concurrent_beta_13"
+          },
+          {
+            "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_beta_001",
+            "artifact_owner_id": "principal_bob",
+            "artifact_tenant_id": "tenant_beta",
+            "artifact_workspace_id": "beta-home",
+            "audit_refs": [
+              "audit_ec72ab46e9cf980f"
+            ],
+            "case_id": "concurrent_09_beta",
+            "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+            "context_owner_id": "principal_bob",
+            "context_tenant_id": "tenant_beta",
+            "context_workspace_id": "beta-home",
+            "ended_monotonic": 1116877.500074,
+            "expected_artifact_id": "artifact_beta_001",
+            "expected_tenant_id": "tenant_beta",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "61bf2b919e9657ce0256b5294599b6d09f33d7c2b7baa633608ffe45eb080f50",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_4b327f6c39639bb7",
+            "policy_trace_id": "trace_vs2_concurrent_beta_09",
+            "response_trace_id": "trace_vs2_concurrent_beta_09",
+            "started_monotonic": 1116876.30561,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "beta",
+            "trace_id": "trace_vs2_concurrent_beta_09"
+          },
+          {
+            "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_beta_001",
+            "artifact_owner_id": "principal_bob",
+            "artifact_tenant_id": "tenant_beta",
+            "artifact_workspace_id": "beta-home",
+            "audit_refs": [
+              "audit_1849f74ec57dea18"
+            ],
+            "case_id": "concurrent_03_beta",
+            "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+            "context_owner_id": "principal_bob",
+            "context_tenant_id": "tenant_beta",
+            "context_workspace_id": "beta-home",
+            "ended_monotonic": 1116877.533414,
+            "expected_artifact_id": "artifact_beta_001",
+            "expected_tenant_id": "tenant_beta",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "f557e3b5fdddea5eb10c64c653618b6aacddcd39ee34143ddb494d4e075d6689",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_6e5433a517e8f053",
+            "policy_trace_id": "trace_vs2_concurrent_beta_03",
+            "response_trace_id": "trace_vs2_concurrent_beta_03",
+            "started_monotonic": 1116876.306032,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "beta",
+            "trace_id": "trace_vs2_concurrent_beta_03"
+          },
+          {
+            "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_alpha_001",
+            "artifact_owner_id": "principal_alice",
+            "artifact_tenant_id": "tenant_alpha",
+            "artifact_workspace_id": "alpha-home",
+            "audit_refs": [
+              "audit_751404de621818d6"
+            ],
+            "case_id": "concurrent_08_alpha",
+            "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+            "context_owner_id": "principal_alice",
+            "context_tenant_id": "tenant_alpha",
+            "context_workspace_id": "alpha-home",
+            "ended_monotonic": 1116877.568423,
+            "expected_artifact_id": "artifact_alpha_001",
+            "expected_tenant_id": "tenant_alpha",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "a4979c60cf22a8b0b8fadbd92836f42777960a816471a12d6072aeb76687cdbf",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_0b67479cd1d20fde",
+            "policy_trace_id": "trace_vs2_concurrent_alpha_08",
+            "response_trace_id": "trace_vs2_concurrent_alpha_08",
+            "started_monotonic": 1116876.30569,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_08"
+          },
+          {
+            "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_beta_001",
+            "artifact_owner_id": "principal_bob",
+            "artifact_tenant_id": "tenant_beta",
+            "artifact_workspace_id": "beta-home",
+            "audit_refs": [
+              "audit_b5ddeec9577ce221"
+            ],
+            "case_id": "concurrent_05_beta",
+            "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+            "context_owner_id": "principal_bob",
+            "context_tenant_id": "tenant_beta",
+            "context_workspace_id": "beta-home",
+            "ended_monotonic": 1116877.568496,
+            "expected_artifact_id": "artifact_beta_001",
+            "expected_tenant_id": "tenant_beta",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "aaffc3bba65ab1fc93c5d9a94b12cf830c6acb9065cd9e528d3ae2f4be88a911",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_c90e21fff9e9963b",
+            "policy_trace_id": "trace_vs2_concurrent_beta_05",
+            "response_trace_id": "trace_vs2_concurrent_beta_05",
+            "started_monotonic": 1116876.305794,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "beta",
+            "trace_id": "trace_vs2_concurrent_beta_05"
+          },
+          {
+            "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_alpha_001",
+            "artifact_owner_id": "principal_alice",
+            "artifact_tenant_id": "tenant_alpha",
+            "artifact_workspace_id": "alpha-home",
+            "audit_refs": [
+              "audit_9685ce957616757e"
+            ],
+            "case_id": "concurrent_06_alpha",
+            "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+            "context_owner_id": "principal_alice",
+            "context_tenant_id": "tenant_alpha",
+            "context_workspace_id": "alpha-home",
+            "ended_monotonic": 1116877.575262,
+            "expected_artifact_id": "artifact_alpha_001",
+            "expected_tenant_id": "tenant_alpha",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "30098723738edb1885d44b6419671024d533456a7657484e0b814f5cf5a91701",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_fe8dd61afe1b7275",
+            "policy_trace_id": "trace_vs2_concurrent_alpha_06",
+            "response_trace_id": "trace_vs2_concurrent_alpha_06",
+            "started_monotonic": 1116876.30585,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_06"
+          },
+          {
+            "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_alpha_001",
+            "artifact_owner_id": "principal_alice",
+            "artifact_tenant_id": "tenant_alpha",
+            "artifact_workspace_id": "alpha-home",
+            "audit_refs": [
+              "audit_07480738aec69e16"
+            ],
+            "case_id": "concurrent_04_alpha",
+            "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+            "context_owner_id": "principal_alice",
+            "context_tenant_id": "tenant_alpha",
+            "context_workspace_id": "alpha-home",
+            "ended_monotonic": 1116877.575456,
+            "expected_artifact_id": "artifact_alpha_001",
+            "expected_tenant_id": "tenant_alpha",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "3a54d87bd28028a2ea78a89e8a28db8f53008e69bf8eefcafa5d1a55963c3e90",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_4e247ccfbee66c70",
+            "policy_trace_id": "trace_vs2_concurrent_alpha_04",
+            "response_trace_id": "trace_vs2_concurrent_alpha_04",
+            "started_monotonic": 1116876.305818,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_04"
+          },
+          {
+            "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_beta_001",
+            "artifact_owner_id": "principal_bob",
+            "artifact_tenant_id": "tenant_beta",
+            "artifact_workspace_id": "beta-home",
+            "audit_refs": [
+              "audit_19d10e594183fbd1"
+            ],
+            "case_id": "concurrent_01_beta",
+            "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+            "context_owner_id": "principal_bob",
+            "context_tenant_id": "tenant_beta",
+            "context_workspace_id": "beta-home",
+            "ended_monotonic": 1116877.578715,
+            "expected_artifact_id": "artifact_beta_001",
+            "expected_tenant_id": "tenant_beta",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "0577450055fe751768b7fc94953b6a4a34ed2350c5b3cbbd09d2f53bedfa6ae5",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_cde7b734b19c8987",
+            "policy_trace_id": "trace_vs2_concurrent_beta_01",
+            "response_trace_id": "trace_vs2_concurrent_beta_01",
+            "started_monotonic": 1116876.305741,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "beta",
+            "trace_id": "trace_vs2_concurrent_beta_01"
+          },
+          {
+            "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_alpha_001",
+            "artifact_owner_id": "principal_alice",
+            "artifact_tenant_id": "tenant_alpha",
+            "artifact_workspace_id": "alpha-home",
+            "audit_refs": [
+              "audit_622fa63512148cee"
+            ],
+            "case_id": "concurrent_00_alpha",
+            "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+            "context_owner_id": "principal_alice",
+            "context_tenant_id": "tenant_alpha",
+            "context_workspace_id": "alpha-home",
+            "ended_monotonic": 1116877.578832,
+            "expected_artifact_id": "artifact_alpha_001",
+            "expected_tenant_id": "tenant_alpha",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "55807b3cc5920b12b1ea0bbc7d7d4e576b979ae8822ba887fdb415382d4ffc8c",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_502078c7d1966ed8",
+            "policy_trace_id": "trace_vs2_concurrent_alpha_00",
+            "response_trace_id": "trace_vs2_concurrent_alpha_00",
+            "started_monotonic": 1116876.305907,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_00"
+          },
+          {
+            "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+            "artifact_id": "artifact_alpha_001",
+            "artifact_owner_id": "principal_alice",
+            "artifact_tenant_id": "tenant_alpha",
+            "artifact_workspace_id": "alpha-home",
+            "audit_refs": [
+              "audit_9fcd43a6f9ff1d0a"
+            ],
+            "case_id": "concurrent_12_alpha",
+            "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+            "context_owner_id": "principal_alice",
+            "context_tenant_id": "tenant_alpha",
+            "context_workspace_id": "alpha-home",
+            "ended_monotonic": 1116877.579874,
+            "expected_artifact_id": "artifact_alpha_001",
+            "expected_tenant_id": "tenant_alpha",
+            "foreign_canary_seen": false,
+            "foreign_identifier_seen": false,
+            "http_status": 200,
+            "payload_sha256": "487c1dce3c33eeba2a0ad07d24937b3484f97998616a6483f4fc481483420ce8",
+            "policy_decision": "allow",
+            "policy_decision_id": "policy_8703a118a69be5ae",
+            "policy_trace_id": "trace_vs2_concurrent_alpha_12",
+            "response_trace_id": "trace_vs2_concurrent_alpha_12",
+            "started_monotonic": 1116876.305944,
+            "status": "allowed",
+            "surface": "http_api",
+            "tenant_label": "alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_12"
+          }
+        ],
+        "persisted_audit_rows": [
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_4e247ccfbee66c70",
+            "event_id": "audit_07480738aec69e16",
+            "event_type": "artifact.read",
+            "owner_id": "principal_alice",
+            "subject": {
+              "artifact_id": "artifact_alpha_001"
+            },
+            "tenant_id": "tenant_alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_04",
+            "workspace_id": "alpha-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_6e5433a517e8f053",
+            "event_id": "audit_1849f74ec57dea18",
+            "event_type": "artifact.read",
+            "owner_id": "principal_bob",
+            "subject": {
+              "artifact_id": "artifact_beta_001"
+            },
+            "tenant_id": "tenant_beta",
+            "trace_id": "trace_vs2_concurrent_beta_03",
+            "workspace_id": "beta-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_cde7b734b19c8987",
+            "event_id": "audit_19d10e594183fbd1",
+            "event_type": "artifact.read",
+            "owner_id": "principal_bob",
+            "subject": {
+              "artifact_id": "artifact_beta_001"
+            },
+            "tenant_id": "tenant_beta",
+            "trace_id": "trace_vs2_concurrent_beta_01",
+            "workspace_id": "beta-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_443d918048ede645",
+            "event_id": "audit_5317c742b0502466",
+            "event_type": "artifact.read",
+            "owner_id": "principal_bob",
+            "subject": {
+              "artifact_id": "artifact_beta_001"
+            },
+            "tenant_id": "tenant_beta",
+            "trace_id": "trace_vs2_concurrent_beta_11",
+            "workspace_id": "beta-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_502078c7d1966ed8",
+            "event_id": "audit_622fa63512148cee",
+            "event_type": "artifact.read",
+            "owner_id": "principal_alice",
+            "subject": {
+              "artifact_id": "artifact_alpha_001"
+            },
+            "tenant_id": "tenant_alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_00",
+            "workspace_id": "alpha-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_0b67479cd1d20fde",
+            "event_id": "audit_751404de621818d6",
+            "event_type": "artifact.read",
+            "owner_id": "principal_alice",
+            "subject": {
+              "artifact_id": "artifact_alpha_001"
+            },
+            "tenant_id": "tenant_alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_08",
+            "workspace_id": "alpha-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_311e884ea2160a06",
+            "event_id": "audit_84ab9c0b39e72b89",
+            "event_type": "artifact.read",
+            "owner_id": "principal_bob",
+            "subject": {
+              "artifact_id": "artifact_beta_001"
+            },
+            "tenant_id": "tenant_beta",
+            "trace_id": "trace_vs2_concurrent_beta_15",
+            "workspace_id": "beta-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_fe8dd61afe1b7275",
+            "event_id": "audit_9685ce957616757e",
+            "event_type": "artifact.read",
+            "owner_id": "principal_alice",
+            "subject": {
+              "artifact_id": "artifact_alpha_001"
+            },
+            "tenant_id": "tenant_alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_06",
+            "workspace_id": "alpha-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_8703a118a69be5ae",
+            "event_id": "audit_9fcd43a6f9ff1d0a",
+            "event_type": "artifact.read",
+            "owner_id": "principal_alice",
+            "subject": {
+              "artifact_id": "artifact_alpha_001"
+            },
+            "tenant_id": "tenant_alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_12",
+            "workspace_id": "alpha-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_aba5b5acd5d62e18",
+            "event_id": "audit_a0f9f65b36d8c711",
+            "event_type": "artifact.read",
+            "owner_id": "principal_bob",
+            "subject": {
+              "artifact_id": "artifact_beta_001"
+            },
+            "tenant_id": "tenant_beta",
+            "trace_id": "trace_vs2_concurrent_beta_13",
+            "workspace_id": "beta-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_7667f9df14000fe4",
+            "event_id": "audit_a8f4b3d9d15c2c7e",
+            "event_type": "artifact.read",
+            "owner_id": "principal_alice",
+            "subject": {
+              "artifact_id": "artifact_alpha_001"
+            },
+            "tenant_id": "tenant_alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_14",
+            "workspace_id": "alpha-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_c90e21fff9e9963b",
+            "event_id": "audit_b5ddeec9577ce221",
+            "event_type": "artifact.read",
+            "owner_id": "principal_bob",
+            "subject": {
+              "artifact_id": "artifact_beta_001"
+            },
+            "tenant_id": "tenant_beta",
+            "trace_id": "trace_vs2_concurrent_beta_05",
+            "workspace_id": "beta-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_50969ef6a550347b",
+            "event_id": "audit_c9613d4be0d5877e",
+            "event_type": "artifact.read",
+            "owner_id": "principal_alice",
+            "subject": {
+              "artifact_id": "artifact_alpha_001"
+            },
+            "tenant_id": "tenant_alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_10",
+            "workspace_id": "alpha-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_86bd4d2cee8bb92a",
+            "event_id": "audit_cd2cce070ddc1890",
+            "event_type": "artifact.read",
+            "owner_id": "principal_bob",
+            "subject": {
+              "artifact_id": "artifact_beta_001"
+            },
+            "tenant_id": "tenant_beta",
+            "trace_id": "trace_vs2_concurrent_beta_07",
+            "workspace_id": "beta-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_4b327f6c39639bb7",
+            "event_id": "audit_ec72ab46e9cf980f",
+            "event_type": "artifact.read",
+            "owner_id": "principal_bob",
+            "subject": {
+              "artifact_id": "artifact_beta_001"
+            },
+            "tenant_id": "tenant_beta",
+            "trace_id": "trace_vs2_concurrent_beta_09",
+            "workspace_id": "beta-home"
+          },
+          {
+            "action": "artifact.show",
+            "decision_id": "policy_da8af043cf5e35e9",
+            "event_id": "audit_fb73ac1b9ae0c398",
+            "event_type": "artifact.read",
+            "owner_id": "principal_alice",
+            "subject": {
+              "artifact_id": "artifact_alpha_001"
+            },
+            "tenant_id": "tenant_alpha",
+            "trace_id": "trace_vs2_concurrent_alpha_02",
+            "workspace_id": "alpha-home"
+          }
+        ],
+        "pool_reset_evidence": "database.connection_reuse",
+        "request_path": "/api/vs2/artifacts/{artifact_id}",
+        "same_service": true,
+        "scheduler_seed": 16016,
+        "status": "completed",
+        "tenant_switches": 9,
+        "thread_count": 16
       },
-      "name": "targeted_regression_guard_observed",
+      "name": "r14_parallel_tenant_load_completed_with_isolated_contexts",
       "passed": true
     },
     {
-      "evidence": {},
-      "name": "security_foundation_still_default_deny",
+      "evidence": {
+        "concurrent_tenant_api": {
+          "audit_refs": [
+            "audit_07480738aec69e16",
+            "audit_1849f74ec57dea18",
+            "audit_19d10e594183fbd1",
+            "audit_5317c742b0502466",
+            "audit_622fa63512148cee",
+            "audit_751404de621818d6",
+            "audit_84ab9c0b39e72b89",
+            "audit_9685ce957616757e",
+            "audit_9fcd43a6f9ff1d0a",
+            "audit_a0f9f65b36d8c711",
+            "audit_a8f4b3d9d15c2c7e",
+            "audit_b5ddeec9577ce221",
+            "audit_c9613d4be0d5877e",
+            "audit_cd2cce070ddc1890",
+            "audit_ec72ab46e9cf980f",
+            "audit_fb73ac1b9ae0c398"
+          ],
+          "completion_order": [
+            "beta",
+            "alpha",
+            "alpha",
+            "beta",
+            "alpha",
+            "beta",
+            "beta",
+            "beta",
+            "beta",
+            "alpha",
+            "beta",
+            "alpha",
+            "alpha",
+            "beta",
+            "alpha",
+            "alpha"
+          ],
+          "context_digests": {
+            "alpha": [
+              "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a"
+            ],
+            "beta": [
+              "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681"
+            ]
+          },
+          "gateway_url": "http://127.0.0.1:52505",
+          "observations": [
+            {
+              "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_beta_001",
+              "artifact_owner_id": "principal_bob",
+              "artifact_tenant_id": "tenant_beta",
+              "artifact_workspace_id": "beta-home",
+              "audit_refs": [
+                "audit_5317c742b0502466"
+              ],
+              "case_id": "concurrent_11_beta",
+              "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+              "context_owner_id": "principal_bob",
+              "context_tenant_id": "tenant_beta",
+              "context_workspace_id": "beta-home",
+              "ended_monotonic": 1116877.387553,
+              "expected_artifact_id": "artifact_beta_001",
+              "expected_tenant_id": "tenant_beta",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "7abbbcf13b87c89772f4257956560b9f425736d497426004e7c17ad2184f4e62",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_443d918048ede645",
+              "policy_trace_id": "trace_vs2_concurrent_beta_11",
+              "response_trace_id": "trace_vs2_concurrent_beta_11",
+              "started_monotonic": 1116876.306,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "beta",
+              "trace_id": "trace_vs2_concurrent_beta_11"
+            },
+            {
+              "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_alpha_001",
+              "artifact_owner_id": "principal_alice",
+              "artifact_tenant_id": "tenant_alpha",
+              "artifact_workspace_id": "alpha-home",
+              "audit_refs": [
+                "audit_c9613d4be0d5877e"
+              ],
+              "case_id": "concurrent_10_alpha",
+              "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+              "context_owner_id": "principal_alice",
+              "context_tenant_id": "tenant_alpha",
+              "context_workspace_id": "alpha-home",
+              "ended_monotonic": 1116877.426202,
+              "expected_artifact_id": "artifact_alpha_001",
+              "expected_tenant_id": "tenant_alpha",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "7bfeeabcd56efdc38038cb69e136a487ca783b5f04648dfdbfb88d996bc48659",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_50969ef6a550347b",
+              "policy_trace_id": "trace_vs2_concurrent_alpha_10",
+              "response_trace_id": "trace_vs2_concurrent_alpha_10",
+              "started_monotonic": 1116876.305892,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_10"
+            },
+            {
+              "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_alpha_001",
+              "artifact_owner_id": "principal_alice",
+              "artifact_tenant_id": "tenant_alpha",
+              "artifact_workspace_id": "alpha-home",
+              "audit_refs": [
+                "audit_a8f4b3d9d15c2c7e"
+              ],
+              "case_id": "concurrent_14_alpha",
+              "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+              "context_owner_id": "principal_alice",
+              "context_tenant_id": "tenant_alpha",
+              "context_workspace_id": "alpha-home",
+              "ended_monotonic": 1116877.457531,
+              "expected_artifact_id": "artifact_alpha_001",
+              "expected_tenant_id": "tenant_alpha",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "af348fff2d197207c8d31a1ec4a73e33c14908621d6b74beb4ddaedb3a9db7de",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_7667f9df14000fe4",
+              "policy_trace_id": "trace_vs2_concurrent_alpha_14",
+              "response_trace_id": "trace_vs2_concurrent_alpha_14",
+              "started_monotonic": 1116876.305969,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_14"
+            },
+            {
+              "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_beta_001",
+              "artifact_owner_id": "principal_bob",
+              "artifact_tenant_id": "tenant_beta",
+              "artifact_workspace_id": "beta-home",
+              "audit_refs": [
+                "audit_84ab9c0b39e72b89"
+              ],
+              "case_id": "concurrent_15_beta",
+              "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+              "context_owner_id": "principal_bob",
+              "context_tenant_id": "tenant_beta",
+              "context_workspace_id": "beta-home",
+              "ended_monotonic": 1116877.469974,
+              "expected_artifact_id": "artifact_beta_001",
+              "expected_tenant_id": "tenant_beta",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "1aaefb88dc7d3e76d0259cfe41cee7f1ffbedb3090ef18c6bbb2cf2570fd0ad1",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_311e884ea2160a06",
+              "policy_trace_id": "trace_vs2_concurrent_beta_15",
+              "response_trace_id": "trace_vs2_concurrent_beta_15",
+              "started_monotonic": 1116876.306077,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "beta",
+              "trace_id": "trace_vs2_concurrent_beta_15"
+            },
+            {
+              "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_alpha_001",
+              "artifact_owner_id": "principal_alice",
+              "artifact_tenant_id": "tenant_alpha",
+              "artifact_workspace_id": "alpha-home",
+              "audit_refs": [
+                "audit_fb73ac1b9ae0c398"
+              ],
+              "case_id": "concurrent_02_alpha",
+              "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+              "context_owner_id": "principal_alice",
+              "context_tenant_id": "tenant_alpha",
+              "context_workspace_id": "alpha-home",
+              "ended_monotonic": 1116877.475331,
+              "expected_artifact_id": "artifact_alpha_001",
+              "expected_tenant_id": "tenant_alpha",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "7d4671d0e02b68af4015c35cc06a3d0fac60c4f3f0a2bf8a28fe8e4402106f3a",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_da8af043cf5e35e9",
+              "policy_trace_id": "trace_vs2_concurrent_alpha_02",
+              "response_trace_id": "trace_vs2_concurrent_alpha_02",
+              "started_monotonic": 1116876.305721,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_02"
+            },
+            {
+              "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_beta_001",
+              "artifact_owner_id": "principal_bob",
+              "artifact_tenant_id": "tenant_beta",
+              "artifact_workspace_id": "beta-home",
+              "audit_refs": [
+                "audit_cd2cce070ddc1890"
+              ],
+              "case_id": "concurrent_07_beta",
+              "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+              "context_owner_id": "principal_bob",
+              "context_tenant_id": "tenant_beta",
+              "context_workspace_id": "beta-home",
+              "ended_monotonic": 1116877.487558,
+              "expected_artifact_id": "artifact_beta_001",
+              "expected_tenant_id": "tenant_beta",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "556826c460adee9abf1fe4e65fed0b227a7a380528acdd2879041168fb6533d9",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_86bd4d2cee8bb92a",
+              "policy_trace_id": "trace_vs2_concurrent_beta_07",
+              "response_trace_id": "trace_vs2_concurrent_beta_07",
+              "started_monotonic": 1116876.306053,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "beta",
+              "trace_id": "trace_vs2_concurrent_beta_07"
+            },
+            {
+              "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_beta_001",
+              "artifact_owner_id": "principal_bob",
+              "artifact_tenant_id": "tenant_beta",
+              "artifact_workspace_id": "beta-home",
+              "audit_refs": [
+                "audit_a0f9f65b36d8c711"
+              ],
+              "case_id": "concurrent_13_beta",
+              "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+              "context_owner_id": "principal_bob",
+              "context_tenant_id": "tenant_beta",
+              "context_workspace_id": "beta-home",
+              "ended_monotonic": 1116877.492272,
+              "expected_artifact_id": "artifact_beta_001",
+              "expected_tenant_id": "tenant_beta",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "fea9011a8fbb02c92d28ec764e87d2cf6de91a39263f070862c8dc78e5eb834e",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_aba5b5acd5d62e18",
+              "policy_trace_id": "trace_vs2_concurrent_beta_13",
+              "response_trace_id": "trace_vs2_concurrent_beta_13",
+              "started_monotonic": 1116876.305872,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "beta",
+              "trace_id": "trace_vs2_concurrent_beta_13"
+            },
+            {
+              "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_beta_001",
+              "artifact_owner_id": "principal_bob",
+              "artifact_tenant_id": "tenant_beta",
+              "artifact_workspace_id": "beta-home",
+              "audit_refs": [
+                "audit_ec72ab46e9cf980f"
+              ],
+              "case_id": "concurrent_09_beta",
+              "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+              "context_owner_id": "principal_bob",
+              "context_tenant_id": "tenant_beta",
+              "context_workspace_id": "beta-home",
+              "ended_monotonic": 1116877.500074,
+              "expected_artifact_id": "artifact_beta_001",
+              "expected_tenant_id": "tenant_beta",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "61bf2b919e9657ce0256b5294599b6d09f33d7c2b7baa633608ffe45eb080f50",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_4b327f6c39639bb7",
+              "policy_trace_id": "trace_vs2_concurrent_beta_09",
+              "response_trace_id": "trace_vs2_concurrent_beta_09",
+              "started_monotonic": 1116876.30561,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "beta",
+              "trace_id": "trace_vs2_concurrent_beta_09"
+            },
+            {
+              "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_beta_001",
+              "artifact_owner_id": "principal_bob",
+              "artifact_tenant_id": "tenant_beta",
+              "artifact_workspace_id": "beta-home",
+              "audit_refs": [
+                "audit_1849f74ec57dea18"
+              ],
+              "case_id": "concurrent_03_beta",
+              "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+              "context_owner_id": "principal_bob",
+              "context_tenant_id": "tenant_beta",
+              "context_workspace_id": "beta-home",
+              "ended_monotonic": 1116877.533414,
+              "expected_artifact_id": "artifact_beta_001",
+              "expected_tenant_id": "tenant_beta",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "f557e3b5fdddea5eb10c64c653618b6aacddcd39ee34143ddb494d4e075d6689",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_6e5433a517e8f053",
+              "policy_trace_id": "trace_vs2_concurrent_beta_03",
+              "response_trace_id": "trace_vs2_concurrent_beta_03",
+              "started_monotonic": 1116876.306032,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "beta",
+              "trace_id": "trace_vs2_concurrent_beta_03"
+            },
+            {
+              "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_alpha_001",
+              "artifact_owner_id": "principal_alice",
+              "artifact_tenant_id": "tenant_alpha",
+              "artifact_workspace_id": "alpha-home",
+              "audit_refs": [
+                "audit_751404de621818d6"
+              ],
+              "case_id": "concurrent_08_alpha",
+              "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+              "context_owner_id": "principal_alice",
+              "context_tenant_id": "tenant_alpha",
+              "context_workspace_id": "alpha-home",
+              "ended_monotonic": 1116877.568423,
+              "expected_artifact_id": "artifact_alpha_001",
+              "expected_tenant_id": "tenant_alpha",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "a4979c60cf22a8b0b8fadbd92836f42777960a816471a12d6072aeb76687cdbf",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_0b67479cd1d20fde",
+              "policy_trace_id": "trace_vs2_concurrent_alpha_08",
+              "response_trace_id": "trace_vs2_concurrent_alpha_08",
+              "started_monotonic": 1116876.30569,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_08"
+            },
+            {
+              "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_beta_001",
+              "artifact_owner_id": "principal_bob",
+              "artifact_tenant_id": "tenant_beta",
+              "artifact_workspace_id": "beta-home",
+              "audit_refs": [
+                "audit_b5ddeec9577ce221"
+              ],
+              "case_id": "concurrent_05_beta",
+              "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+              "context_owner_id": "principal_bob",
+              "context_tenant_id": "tenant_beta",
+              "context_workspace_id": "beta-home",
+              "ended_monotonic": 1116877.568496,
+              "expected_artifact_id": "artifact_beta_001",
+              "expected_tenant_id": "tenant_beta",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "aaffc3bba65ab1fc93c5d9a94b12cf830c6acb9065cd9e528d3ae2f4be88a911",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_c90e21fff9e9963b",
+              "policy_trace_id": "trace_vs2_concurrent_beta_05",
+              "response_trace_id": "trace_vs2_concurrent_beta_05",
+              "started_monotonic": 1116876.305794,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "beta",
+              "trace_id": "trace_vs2_concurrent_beta_05"
+            },
+            {
+              "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_alpha_001",
+              "artifact_owner_id": "principal_alice",
+              "artifact_tenant_id": "tenant_alpha",
+              "artifact_workspace_id": "alpha-home",
+              "audit_refs": [
+                "audit_9685ce957616757e"
+              ],
+              "case_id": "concurrent_06_alpha",
+              "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+              "context_owner_id": "principal_alice",
+              "context_tenant_id": "tenant_alpha",
+              "context_workspace_id": "alpha-home",
+              "ended_monotonic": 1116877.575262,
+              "expected_artifact_id": "artifact_alpha_001",
+              "expected_tenant_id": "tenant_alpha",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "30098723738edb1885d44b6419671024d533456a7657484e0b814f5cf5a91701",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_fe8dd61afe1b7275",
+              "policy_trace_id": "trace_vs2_concurrent_alpha_06",
+              "response_trace_id": "trace_vs2_concurrent_alpha_06",
+              "started_monotonic": 1116876.30585,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_06"
+            },
+            {
+              "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_alpha_001",
+              "artifact_owner_id": "principal_alice",
+              "artifact_tenant_id": "tenant_alpha",
+              "artifact_workspace_id": "alpha-home",
+              "audit_refs": [
+                "audit_07480738aec69e16"
+              ],
+              "case_id": "concurrent_04_alpha",
+              "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+              "context_owner_id": "principal_alice",
+              "context_tenant_id": "tenant_alpha",
+              "context_workspace_id": "alpha-home",
+              "ended_monotonic": 1116877.575456,
+              "expected_artifact_id": "artifact_alpha_001",
+              "expected_tenant_id": "tenant_alpha",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "3a54d87bd28028a2ea78a89e8a28db8f53008e69bf8eefcafa5d1a55963c3e90",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_4e247ccfbee66c70",
+              "policy_trace_id": "trace_vs2_concurrent_alpha_04",
+              "response_trace_id": "trace_vs2_concurrent_alpha_04",
+              "started_monotonic": 1116876.305818,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_04"
+            },
+            {
+              "artifact_canary": "BETA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_beta_001",
+              "artifact_owner_id": "principal_bob",
+              "artifact_tenant_id": "tenant_beta",
+              "artifact_workspace_id": "beta-home",
+              "audit_refs": [
+                "audit_19d10e594183fbd1"
+              ],
+              "case_id": "concurrent_01_beta",
+              "context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+              "context_owner_id": "principal_bob",
+              "context_tenant_id": "tenant_beta",
+              "context_workspace_id": "beta-home",
+              "ended_monotonic": 1116877.578715,
+              "expected_artifact_id": "artifact_beta_001",
+              "expected_tenant_id": "tenant_beta",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "0577450055fe751768b7fc94953b6a4a34ed2350c5b3cbbd09d2f53bedfa6ae5",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_cde7b734b19c8987",
+              "policy_trace_id": "trace_vs2_concurrent_beta_01",
+              "response_trace_id": "trace_vs2_concurrent_beta_01",
+              "started_monotonic": 1116876.305741,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "beta",
+              "trace_id": "trace_vs2_concurrent_beta_01"
+            },
+            {
+              "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_alpha_001",
+              "artifact_owner_id": "principal_alice",
+              "artifact_tenant_id": "tenant_alpha",
+              "artifact_workspace_id": "alpha-home",
+              "audit_refs": [
+                "audit_622fa63512148cee"
+              ],
+              "case_id": "concurrent_00_alpha",
+              "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+              "context_owner_id": "principal_alice",
+              "context_tenant_id": "tenant_alpha",
+              "context_workspace_id": "alpha-home",
+              "ended_monotonic": 1116877.578832,
+              "expected_artifact_id": "artifact_alpha_001",
+              "expected_tenant_id": "tenant_alpha",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "55807b3cc5920b12b1ea0bbc7d7d4e576b979ae8822ba887fdb415382d4ffc8c",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_502078c7d1966ed8",
+              "policy_trace_id": "trace_vs2_concurrent_alpha_00",
+              "response_trace_id": "trace_vs2_concurrent_alpha_00",
+              "started_monotonic": 1116876.305907,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_00"
+            },
+            {
+              "artifact_canary": "ALPHA_ONLY_RANGE_CANARY",
+              "artifact_id": "artifact_alpha_001",
+              "artifact_owner_id": "principal_alice",
+              "artifact_tenant_id": "tenant_alpha",
+              "artifact_workspace_id": "alpha-home",
+              "audit_refs": [
+                "audit_9fcd43a6f9ff1d0a"
+              ],
+              "case_id": "concurrent_12_alpha",
+              "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+              "context_owner_id": "principal_alice",
+              "context_tenant_id": "tenant_alpha",
+              "context_workspace_id": "alpha-home",
+              "ended_monotonic": 1116877.579874,
+              "expected_artifact_id": "artifact_alpha_001",
+              "expected_tenant_id": "tenant_alpha",
+              "foreign_canary_seen": false,
+              "foreign_identifier_seen": false,
+              "http_status": 200,
+              "payload_sha256": "487c1dce3c33eeba2a0ad07d24937b3484f97998616a6483f4fc481483420ce8",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_8703a118a69be5ae",
+              "policy_trace_id": "trace_vs2_concurrent_alpha_12",
+              "response_trace_id": "trace_vs2_concurrent_alpha_12",
+              "started_monotonic": 1116876.305944,
+              "status": "allowed",
+              "surface": "http_api",
+              "tenant_label": "alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_12"
+            }
+          ],
+          "persisted_audit_rows": [
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_4e247ccfbee66c70",
+              "event_id": "audit_07480738aec69e16",
+              "event_type": "artifact.read",
+              "owner_id": "principal_alice",
+              "subject": {
+                "artifact_id": "artifact_alpha_001"
+              },
+              "tenant_id": "tenant_alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_04",
+              "workspace_id": "alpha-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_6e5433a517e8f053",
+              "event_id": "audit_1849f74ec57dea18",
+              "event_type": "artifact.read",
+              "owner_id": "principal_bob",
+              "subject": {
+                "artifact_id": "artifact_beta_001"
+              },
+              "tenant_id": "tenant_beta",
+              "trace_id": "trace_vs2_concurrent_beta_03",
+              "workspace_id": "beta-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_cde7b734b19c8987",
+              "event_id": "audit_19d10e594183fbd1",
+              "event_type": "artifact.read",
+              "owner_id": "principal_bob",
+              "subject": {
+                "artifact_id": "artifact_beta_001"
+              },
+              "tenant_id": "tenant_beta",
+              "trace_id": "trace_vs2_concurrent_beta_01",
+              "workspace_id": "beta-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_443d918048ede645",
+              "event_id": "audit_5317c742b0502466",
+              "event_type": "artifact.read",
+              "owner_id": "principal_bob",
+              "subject": {
+                "artifact_id": "artifact_beta_001"
+              },
+              "tenant_id": "tenant_beta",
+              "trace_id": "trace_vs2_concurrent_beta_11",
+              "workspace_id": "beta-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_502078c7d1966ed8",
+              "event_id": "audit_622fa63512148cee",
+              "event_type": "artifact.read",
+              "owner_id": "principal_alice",
+              "subject": {
+                "artifact_id": "artifact_alpha_001"
+              },
+              "tenant_id": "tenant_alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_00",
+              "workspace_id": "alpha-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_0b67479cd1d20fde",
+              "event_id": "audit_751404de621818d6",
+              "event_type": "artifact.read",
+              "owner_id": "principal_alice",
+              "subject": {
+                "artifact_id": "artifact_alpha_001"
+              },
+              "tenant_id": "tenant_alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_08",
+              "workspace_id": "alpha-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_311e884ea2160a06",
+              "event_id": "audit_84ab9c0b39e72b89",
+              "event_type": "artifact.read",
+              "owner_id": "principal_bob",
+              "subject": {
+                "artifact_id": "artifact_beta_001"
+              },
+              "tenant_id": "tenant_beta",
+              "trace_id": "trace_vs2_concurrent_beta_15",
+              "workspace_id": "beta-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_fe8dd61afe1b7275",
+              "event_id": "audit_9685ce957616757e",
+              "event_type": "artifact.read",
+              "owner_id": "principal_alice",
+              "subject": {
+                "artifact_id": "artifact_alpha_001"
+              },
+              "tenant_id": "tenant_alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_06",
+              "workspace_id": "alpha-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_8703a118a69be5ae",
+              "event_id": "audit_9fcd43a6f9ff1d0a",
+              "event_type": "artifact.read",
+              "owner_id": "principal_alice",
+              "subject": {
+                "artifact_id": "artifact_alpha_001"
+              },
+              "tenant_id": "tenant_alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_12",
+              "workspace_id": "alpha-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_aba5b5acd5d62e18",
+              "event_id": "audit_a0f9f65b36d8c711",
+              "event_type": "artifact.read",
+              "owner_id": "principal_bob",
+              "subject": {
+                "artifact_id": "artifact_beta_001"
+              },
+              "tenant_id": "tenant_beta",
+              "trace_id": "trace_vs2_concurrent_beta_13",
+              "workspace_id": "beta-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_7667f9df14000fe4",
+              "event_id": "audit_a8f4b3d9d15c2c7e",
+              "event_type": "artifact.read",
+              "owner_id": "principal_alice",
+              "subject": {
+                "artifact_id": "artifact_alpha_001"
+              },
+              "tenant_id": "tenant_alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_14",
+              "workspace_id": "alpha-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_c90e21fff9e9963b",
+              "event_id": "audit_b5ddeec9577ce221",
+              "event_type": "artifact.read",
+              "owner_id": "principal_bob",
+              "subject": {
+                "artifact_id": "artifact_beta_001"
+              },
+              "tenant_id": "tenant_beta",
+              "trace_id": "trace_vs2_concurrent_beta_05",
+              "workspace_id": "beta-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_50969ef6a550347b",
+              "event_id": "audit_c9613d4be0d5877e",
+              "event_type": "artifact.read",
+              "owner_id": "principal_alice",
+              "subject": {
+                "artifact_id": "artifact_alpha_001"
+              },
+              "tenant_id": "tenant_alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_10",
+              "workspace_id": "alpha-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_86bd4d2cee8bb92a",
+              "event_id": "audit_cd2cce070ddc1890",
+              "event_type": "artifact.read",
+              "owner_id": "principal_bob",
+              "subject": {
+                "artifact_id": "artifact_beta_001"
+              },
+              "tenant_id": "tenant_beta",
+              "trace_id": "trace_vs2_concurrent_beta_07",
+              "workspace_id": "beta-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_4b327f6c39639bb7",
+              "event_id": "audit_ec72ab46e9cf980f",
+              "event_type": "artifact.read",
+              "owner_id": "principal_bob",
+              "subject": {
+                "artifact_id": "artifact_beta_001"
+              },
+              "tenant_id": "tenant_beta",
+              "trace_id": "trace_vs2_concurrent_beta_09",
+              "workspace_id": "beta-home"
+            },
+            {
+              "action": "artifact.show",
+              "decision_id": "policy_da8af043cf5e35e9",
+              "event_id": "audit_fb73ac1b9ae0c398",
+              "event_type": "artifact.read",
+              "owner_id": "principal_alice",
+              "subject": {
+                "artifact_id": "artifact_alpha_001"
+              },
+              "tenant_id": "tenant_alpha",
+              "trace_id": "trace_vs2_concurrent_alpha_02",
+              "workspace_id": "alpha-home"
+            }
+          ],
+          "pool_reset_evidence": "database.connection_reuse",
+          "request_path": "/api/vs2/artifacts/{artifact_id}",
+          "same_service": true,
+          "scheduler_seed": 16016,
+          "status": "completed",
+          "tenant_switches": 9,
+          "thread_count": 16
+        },
+        "operation_key_scope": {
+          "alpha_read": {
+            "explicit_foreign_count": 0,
+            "operation_keys": [
+              "shared-cache-024",
+              "shared-cursor-024",
+              "shared-dedupe-024",
+              "shared-idempotency-024",
+              "shared-lock-024",
+              "shared-rate_limit-024"
+            ],
+            "tenant_id": "tenant_alpha",
+            "visible_canaries": [
+              "ALPHA_OPKEY_CACHE_CANARY",
+              "ALPHA_OPKEY_CURSOR_CANARY",
+              "ALPHA_OPKEY_DEDUPE_CANARY",
+              "ALPHA_OPKEY_IDEMPOTENCY_CANARY",
+              "ALPHA_OPKEY_LOCK_CANARY",
+              "ALPHA_OPKEY_RATE_LIMIT_CANARY"
+            ],
+            "visible_count": 6,
+            "visible_ids": [
+              "opkey_cache_shared_024",
+              "opkey_cursor_shared_024",
+              "opkey_dedupe_shared_024",
+              "opkey_idempotency_shared_024",
+              "opkey_lock_shared_024",
+              "opkey_rate_limit_shared_024"
+            ],
+            "visible_kinds": [
+              "cache",
+              "cursor",
+              "dedupe",
+              "idempotency",
+              "lock",
+              "rate_limit"
+            ],
+            "visible_tenants": [
+              "tenant_alpha"
+            ]
+          },
+          "beta_after_cross_tenant_mutation": {
+            "explicit_foreign_count": 0,
+            "operation_keys": [
+              "shared-cache-024",
+              "shared-cursor-024",
+              "shared-dedupe-024",
+              "shared-idempotency-024",
+              "shared-lock-024",
+              "shared-rate_limit-024"
+            ],
+            "tenant_id": "tenant_beta",
+            "visible_canaries": [
+              "BETA_OPKEY_CACHE_CANARY",
+              "BETA_OPKEY_CURSOR_CANARY",
+              "BETA_OPKEY_DEDUPE_CANARY",
+              "BETA_OPKEY_IDEMPOTENCY_CANARY",
+              "BETA_OPKEY_LOCK_CANARY",
+              "BETA_OPKEY_RATE_LIMIT_CANARY"
+            ],
+            "visible_count": 6,
+            "visible_ids": [
+              "opkey_cache_shared_024",
+              "opkey_cursor_shared_024",
+              "opkey_dedupe_shared_024",
+              "opkey_idempotency_shared_024",
+              "opkey_lock_shared_024",
+              "opkey_rate_limit_shared_024"
+            ],
+            "visible_kinds": [
+              "cache",
+              "cursor",
+              "dedupe",
+              "idempotency",
+              "lock",
+              "rate_limit"
+            ],
+            "visible_tenants": [
+              "tenant_beta"
+            ]
+          },
+          "beta_read": {
+            "explicit_foreign_count": 0,
+            "operation_keys": [
+              "shared-cache-024",
+              "shared-cursor-024",
+              "shared-dedupe-024",
+              "shared-idempotency-024",
+              "shared-lock-024",
+              "shared-rate_limit-024"
+            ],
+            "tenant_id": "tenant_beta",
+            "visible_canaries": [
+              "BETA_OPKEY_CACHE_CANARY",
+              "BETA_OPKEY_CURSOR_CANARY",
+              "BETA_OPKEY_DEDUPE_CANARY",
+              "BETA_OPKEY_IDEMPOTENCY_CANARY",
+              "BETA_OPKEY_LOCK_CANARY",
+              "BETA_OPKEY_RATE_LIMIT_CANARY"
+            ],
+            "visible_count": 6,
+            "visible_ids": [
+              "opkey_cache_shared_024",
+              "opkey_cursor_shared_024",
+              "opkey_dedupe_shared_024",
+              "opkey_idempotency_shared_024",
+              "opkey_lock_shared_024",
+              "opkey_rate_limit_shared_024"
+            ],
+            "visible_kinds": [
+              "cache",
+              "cursor",
+              "dedupe",
+              "idempotency",
+              "lock",
+              "rate_limit"
+            ],
+            "visible_tenants": [
+              "tenant_beta"
+            ]
+          },
+          "cross_tenant_mutation": {
+            "deleted_count": 0,
+            "deleted_ids": [],
+            "updated_count": 0,
+            "updated_ids": []
+          },
+          "duplicate_alpha": {
+            "duplicate_key_observed": true,
+            "exit_code": 3,
+            "foreign_identifier_echoed": false,
+            "stderr_tail": [
+              "ERROR:  duplicate key value violates unique constraint \"idempotency_keys_pkey\""
+            ]
+          },
+          "key_kinds": [
+            "cache",
+            "idempotency",
+            "dedupe",
+            "lock",
+            "rate_limit",
+            "cursor"
+          ],
+          "seed_exit_code": 0,
+          "status": "completed"
+        }
+      },
+      "name": "r14_shared_fixture_infrastructure_has_scoped_keys_and_audits",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "policy_conformance": {
+          "checks": {
+            "gateway_service_tool_cli_decisions_equivalent": true,
+            "mismatch_anomaly_audit_and_metric_recorded": true,
+            "mismatch_no_protected_side_effect": true,
+            "native_cli_observed_same_active_revision": true,
+            "revision_mismatch_fails_closed": true,
+            "same_policy_input_digest_across_enforcement_points": true
+          },
+          "decisions": {
+            "gateway": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_e5d4cf07c72fd677",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_conformance_050"
+            },
+            "native_cli": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_e5d4cf07c72fd677",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_conformance_050"
+            },
+            "service": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_e5d4cf07c72fd677",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_conformance_050"
+            },
+            "tool_runtime": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_e5d4cf07c72fd677",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_conformance_050"
+            }
+          },
+          "metric_insert": {
+            "command": [
+              "docker",
+              "exec",
+              "-i",
+              "cornerstone-vs2-range-pg-a973465896",
+              "psql",
+              "-U",
+              "postgres",
+              "-d",
+              "cornerstone",
+              "-v",
+              "ON_ERROR_STOP=1",
+              "-X",
+              "-q",
+              "-t",
+              "-A"
+            ],
+            "elapsed_seconds": 0.232,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_bytes": 0,
+            "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "mismatch_audit_ref": "audit_ceaf7819173789c6",
+          "mismatch_decision": {
+            "bundle_revision": null,
+            "decision": "deny",
+            "decision_id": "policy_1f0c30ec82f8a9ed",
+            "fail_closed": true,
+            "failure_reason": "policy_revision_mismatch",
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/fail_closed",
+            "reason_codes": [
+              "policy_revision_mismatch"
+            ],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          },
+          "native_cli_decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_802ad12a4c864263",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "ebbbc0e7e1f9e7d97049ead9fd551db40494fc965ef1877ce91d0e104b0fa581",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_local_range"
+          },
+          "policy_input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+          "side_effect_counts_after": {
+            "policy_probe_action_cards": 0,
+            "policy_probe_egress_grants": 0,
+            "policy_probe_jobs": 0,
+            "policy_probe_workflow_runs": 0
+          },
+          "side_effect_counts_before": {
+            "policy_probe_action_cards": 0,
+            "policy_probe_egress_grants": 0,
+            "policy_probe_jobs": 0,
+            "policy_probe_workflow_runs": 0
+          },
+          "source_map": {
+            "action": "gateway.declared_action",
+            "approval.required": "gateway.risk_classifier",
+            "approval.status": "gateway.approval_state",
+            "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+            "capability.declared": "gateway.capability_manifest",
+            "data_scope.purpose": "gateway.data_purpose",
+            "data_scope.scope": "gateway.data_scope",
+            "environment.deployment": "local_range.environment",
+            "environment.workspace_mode": "trusted_request_context.workspace_mode",
+            "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+            "mission_authority.authorized": "trusted_request_context.mission_authority",
+            "mission_authority.mission_id": "trusted_request_context.mission_authority",
+            "policy_path": "gateway.policy_entrypoint",
+            "resource.classification": "gateway.resource_record",
+            "resource.namespace_id": "gateway.resource_record",
+            "resource.resource_id": "gateway.resource_record",
+            "resource.tenant_id": "gateway.resource_record",
+            "risk": "gateway.risk_classifier",
+            "schema_version": "policy_client.constant",
+            "scope.namespace_id": "trusted_request_context.namespace_scope",
+            "scope.tenant_id": "trusted_request_context.tenant_scope",
+            "scope.workspace_id": "trusted_request_context.workspace_scope",
+            "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+            "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+            "subject.revoked": "trusted_request_context.postgres.revocation_state",
+            "subject.roles": "trusted_request_context.postgres.membership_roles",
+            "trace_id": "gateway.trace_context"
+          },
+          "status": "passed"
+        },
+        "worker_scope": {
+          "audit_refs": [
+            "audit_003bca1a20686e18",
+            "audit_5f2b53d3947e1313",
+            "audit_64488dc434e201d2",
+            "audit_a8d4c6da263ddd47",
+            "audit_ab921fdb7c41d3d3",
+            "audit_ead4e969ea772b5e"
+          ],
+          "case_count": 7,
+          "expected_reasons": {
+            "cross_tenant_payload": "payload_not_found_or_denied",
+            "invalid_signature": "invalid_job_signature",
+            "missing_scope": "missing_scope_metadata",
+            "replay": "replay_detected",
+            "stale_revision": "stale_membership_revision",
+            "tampered_scope": "tampered_scope_metadata"
+          },
+          "persisted_audit_rows": [
+            {
+              "action": "worker.artifact_read",
+              "decision_id": "worker_tampered_scope_metadata",
+              "event_id": "audit_003bca1a20686e18",
+              "event_type": "worker.job.quarantined",
+              "trace_id": "trace_vs2_worker_scope_tampered_scope_017"
+            },
+            {
+              "action": "worker.artifact_read",
+              "decision_id": "worker_payload_not_found_or_denied",
+              "event_id": "audit_5f2b53d3947e1313",
+              "event_type": "worker.job.quarantined",
+              "trace_id": "trace_vs2_worker_scope_cross_payload_017"
+            },
+            {
+              "action": "worker.artifact_read",
+              "decision_id": "policy_802ad12a4c864263",
+              "event_id": "audit_64488dc434e201d2",
+              "event_type": "worker.job.completed",
+              "trace_id": "trace_vs2_worker_scope_valid_017"
+            },
+            {
+              "action": "worker.artifact_read",
+              "decision_id": "worker_stale_membership_revision",
+              "event_id": "audit_a8d4c6da263ddd47",
+              "event_type": "worker.job.quarantined",
+              "trace_id": "trace_vs2_worker_scope_stale_revision_017"
+            },
+            {
+              "action": "worker.artifact_read",
+              "decision_id": "worker_missing_scope_metadata",
+              "event_id": "audit_ab921fdb7c41d3d3",
+              "event_type": "worker.job.quarantined",
+              "trace_id": "trace_vs2_worker_scope_missing_scope_017"
+            },
+            {
+              "action": "worker.artifact_read",
+              "decision_id": "worker_replay_detected",
+              "event_id": "audit_ead4e969ea772b5e",
+              "event_type": "worker.job.quarantined",
+              "trace_id": "trace_vs2_worker_scope_valid_017"
+            }
+          ],
+          "persisted_jobs": [
+            {
+              "audit_ref": "trace_vs2_external_action",
+              "has_artifact_ref": true,
+              "job_id": "job_worker_scope_cross_payload_017",
+              "reason": "payload_not_found_or_denied",
+              "record_id": "job_worker_scope_cross_payload_017",
+              "state": "quarantined"
+            },
+            {
+              "audit_ref": "trace_vs2_external_action",
+              "has_artifact_ref": true,
+              "job_id": "job_worker_scope_missing_scope_017",
+              "reason": "missing_scope_metadata",
+              "record_id": "job_worker_scope_missing_scope_017",
+              "state": "quarantined"
+            },
+            {
+              "audit_ref": "trace_vs2_external_action",
+              "has_artifact_ref": true,
+              "job_id": "job_worker_scope_stale_revision_017",
+              "reason": "stale_membership_revision",
+              "record_id": "job_worker_scope_stale_revision_017",
+              "state": "quarantined"
+            },
+            {
+              "audit_ref": "trace_vs2_external_action",
+              "has_artifact_ref": true,
+              "job_id": "job_worker_scope_tampered_scope_017",
+              "reason": "tampered_scope_metadata",
+              "record_id": "job_worker_scope_tampered_scope_017",
+              "state": "quarantined"
+            },
+            {
+              "audit_ref": "trace_vs2_external_action",
+              "has_artifact_ref": true,
+              "job_id": "job_worker_scope_valid_017",
+              "reason": null,
+              "record_id": "job_worker_scope_valid_017",
+              "state": "completed"
+            },
+            {
+              "audit_ref": "trace_vs2_external_action",
+              "has_artifact_ref": true,
+              "job_id": "job_worker_scope_valid_017",
+              "reason": "replay_detected",
+              "record_id": "quarantine_job_worker_scope_valid_017_aab1224daa55",
+              "state": "quarantined"
+            }
+          ],
+          "results": {
+            "cross_tenant_payload": {
+              "artifact_id": null,
+              "artifact_payload_digest": null,
+              "artifact_tenant_id": null,
+              "audit_ref_count": 1,
+              "audit_refs": [
+                "audit_5f2b53d3947e1313"
+              ],
+              "counters": {
+                "audit_inserts": 1,
+                "db_calls": 4,
+                "egress_calls": 0,
+                "policy_calls": 0
+              },
+              "job_id": "job_worker_scope_cross_payload_017",
+              "policy_decision": null,
+              "policy_decision_id": null,
+              "reason": "payload_not_found_or_denied",
+              "status": "quarantined",
+              "trace_id": "trace_vs2_worker_scope_cross_payload_017"
+            },
+            "invalid_signature": {
+              "artifact_id": null,
+              "artifact_payload_digest": null,
+              "artifact_tenant_id": null,
+              "audit_ref_count": 0,
+              "audit_refs": [],
+              "counters": {
+                "audit_inserts": 0,
+                "db_calls": 0,
+                "egress_calls": 0,
+                "policy_calls": 0
+              },
+              "job_id": "job_worker_scope_invalid_signature_017",
+              "policy_decision": null,
+              "policy_decision_id": null,
+              "reason": "invalid_job_signature",
+              "status": "quarantined",
+              "trace_id": "trace_vs2_worker_scope_invalid_signature_017"
+            },
+            "missing_scope": {
+              "artifact_id": null,
+              "artifact_payload_digest": null,
+              "artifact_tenant_id": null,
+              "audit_ref_count": 1,
+              "audit_refs": [
+                "audit_ab921fdb7c41d3d3"
+              ],
+              "counters": {
+                "audit_inserts": 1,
+                "db_calls": 1,
+                "egress_calls": 0,
+                "policy_calls": 0
+              },
+              "job_id": "job_worker_scope_missing_scope_017",
+              "policy_decision": null,
+              "policy_decision_id": null,
+              "reason": "missing_scope_metadata",
+              "status": "quarantined",
+              "trace_id": "trace_vs2_worker_scope_missing_scope_017"
+            },
+            "replay": {
+              "artifact_id": null,
+              "artifact_payload_digest": null,
+              "artifact_tenant_id": null,
+              "audit_ref_count": 1,
+              "audit_refs": [
+                "audit_ead4e969ea772b5e"
+              ],
+              "counters": {
+                "audit_inserts": 1,
+                "db_calls": 2,
+                "egress_calls": 0,
+                "policy_calls": 0
+              },
+              "job_id": "job_worker_scope_valid_017",
+              "policy_decision": null,
+              "policy_decision_id": null,
+              "reason": "replay_detected",
+              "status": "quarantined",
+              "trace_id": "trace_vs2_worker_scope_valid_017"
+            },
+            "stale_revision": {
+              "artifact_id": null,
+              "artifact_payload_digest": null,
+              "artifact_tenant_id": null,
+              "audit_ref_count": 1,
+              "audit_refs": [
+                "audit_a8d4c6da263ddd47"
+              ],
+              "counters": {
+                "audit_inserts": 1,
+                "db_calls": 1,
+                "egress_calls": 0,
+                "policy_calls": 0
+              },
+              "job_id": "job_worker_scope_stale_revision_017",
+              "policy_decision": null,
+              "policy_decision_id": null,
+              "reason": "stale_membership_revision",
+              "status": "quarantined",
+              "trace_id": "trace_vs2_worker_scope_stale_revision_017"
+            },
+            "tampered_scope": {
+              "artifact_id": null,
+              "artifact_payload_digest": null,
+              "artifact_tenant_id": null,
+              "audit_ref_count": 1,
+              "audit_refs": [
+                "audit_003bca1a20686e18"
+              ],
+              "counters": {
+                "audit_inserts": 1,
+                "db_calls": 1,
+                "egress_calls": 0,
+                "policy_calls": 0
+              },
+              "job_id": "job_worker_scope_tampered_scope_017",
+              "policy_decision": null,
+              "policy_decision_id": null,
+              "reason": "tampered_scope_metadata",
+              "status": "quarantined",
+              "trace_id": "trace_vs2_worker_scope_tampered_scope_017"
+            },
+            "valid": {
+              "artifact_id": "artifact_alpha_001",
+              "artifact_payload_digest": "44428d841a65201ca600c8511ed4a61f32f8e815a4846d777a61ed93523604d2",
+              "artifact_tenant_id": "tenant_alpha",
+              "audit_ref_count": 1,
+              "audit_refs": [
+                "audit_64488dc434e201d2"
+              ],
+              "counters": {
+                "audit_inserts": 1,
+                "db_calls": 4,
+                "egress_calls": 0,
+                "policy_calls": 1
+              },
+              "job_id": "job_worker_scope_valid_017",
+              "policy_decision": "allow",
+              "policy_decision_id": "policy_802ad12a4c864263",
+              "reason": null,
+              "status": "completed",
+              "trace_id": "trace_vs2_worker_scope_valid_017"
+            }
+          },
+          "status": "completed"
+        }
+      },
+      "name": "r14_retries_do_not_create_false_pass",
       "passed": true
     },
     {
@@ -41,8 +2124,8 @@
   "required_evidence": "Repeatable report hashes/semantics, zero cross-fixture canaries.",
   "scenario_id": "VS2-SEC-R14",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Test state remains isolated; one test/tenant cannot contaminate another or create false PASS.",
   "validator": "verify_vs2_sec_r14",
   "verification_command": [

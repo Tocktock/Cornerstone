@@ -2,20 +2,213 @@
   "assertions": [
     {
       "evidence": {
-        "compileall_green": true,
-        "scenario_matrix_green": true,
-        "vs0_acceptance_green": true,
-        "vs0_evux_green": true,
-        "vs0_operator_ui_green": true,
-        "vs0_runtime_green": true,
-        "vs1_ontology_green": true
+        "failure_reasons": [
+          "missing_tenant_scope_columns",
+          "rls_not_enabled",
+          "rls_not_forced",
+          "missing_command_policy",
+          "missing_app_grants",
+          "missing_test_coverage_declaration"
+        ],
+        "gate_status": "failed",
+        "inventory": {
+          "app_grants": {
+            "delete": false,
+            "insert": false,
+            "select": false,
+            "update": false
+          },
+          "checks": {
+            "app_grants_present": false,
+            "command_policy_present": false,
+            "rls_enabled": false,
+            "rls_forced": false,
+            "tenant_scope_columns_present": false,
+            "test_coverage_declared": false
+          },
+          "coverage_count": 0,
+          "policy_count": 0,
+          "required_columns": [
+            {
+              "column_name": "namespace_id",
+              "present_not_null": false
+            },
+            {
+              "column_name": "owner_id",
+              "present_not_null": false
+            },
+            {
+              "column_name": "tenant_id",
+              "present_not_null": false
+            },
+            {
+              "column_name": "workspace_id",
+              "present_not_null": false
+            }
+          ],
+          "rls_enabled": false,
+          "rls_forced": false,
+          "table_name": "schema_gate_bad_021"
+        }
       },
-      "name": "targeted_regression_guard_observed",
+      "name": "r13_bad_tenant_table_fixture_fails_gate",
       "passed": true
     },
     {
-      "evidence": {},
-      "name": "security_foundation_still_default_deny",
+      "evidence": {
+        "failure_reasons": [],
+        "gate_status": "passed",
+        "inventory": {
+          "app_grants": {
+            "delete": true,
+            "insert": true,
+            "select": true,
+            "update": true
+          },
+          "checks": {
+            "app_grants_present": true,
+            "command_policy_present": true,
+            "rls_enabled": true,
+            "rls_forced": true,
+            "tenant_scope_columns_present": true,
+            "test_coverage_declared": true
+          },
+          "coverage_count": 2,
+          "policy_count": 1,
+          "required_columns": [
+            {
+              "column_name": "namespace_id",
+              "present_not_null": true
+            },
+            {
+              "column_name": "owner_id",
+              "present_not_null": true
+            },
+            {
+              "column_name": "tenant_id",
+              "present_not_null": true
+            },
+            {
+              "column_name": "workspace_id",
+              "present_not_null": true
+            }
+          ],
+          "rls_enabled": true,
+          "rls_forced": true,
+          "table_name": "schema_gate_good_021"
+        }
+      },
+      "name": "r13_corrected_fixture_passes_gate",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "bad_fixture": {
+          "failure_reasons": [
+            "missing_tenant_scope_columns",
+            "rls_not_enabled",
+            "rls_not_forced",
+            "missing_command_policy",
+            "missing_app_grants",
+            "missing_test_coverage_declaration"
+          ],
+          "gate_status": "failed",
+          "inventory": {
+            "app_grants": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            },
+            "checks": {
+              "app_grants_present": false,
+              "command_policy_present": false,
+              "rls_enabled": false,
+              "rls_forced": false,
+              "tenant_scope_columns_present": false,
+              "test_coverage_declared": false
+            },
+            "coverage_count": 0,
+            "policy_count": 0,
+            "required_columns": [
+              {
+                "column_name": "namespace_id",
+                "present_not_null": false
+              },
+              {
+                "column_name": "owner_id",
+                "present_not_null": false
+              },
+              {
+                "column_name": "tenant_id",
+                "present_not_null": false
+              },
+              {
+                "column_name": "workspace_id",
+                "present_not_null": false
+              }
+            ],
+            "rls_enabled": false,
+            "rls_forced": false,
+            "table_name": "schema_gate_bad_021"
+          }
+        },
+        "corrected_fixture": {
+          "failure_reasons": [],
+          "gate_status": "passed",
+          "inventory": {
+            "app_grants": {
+              "delete": true,
+              "insert": true,
+              "select": true,
+              "update": true
+            },
+            "checks": {
+              "app_grants_present": true,
+              "command_policy_present": true,
+              "rls_enabled": true,
+              "rls_forced": true,
+              "tenant_scope_columns_present": true,
+              "test_coverage_declared": true
+            },
+            "coverage_count": 2,
+            "policy_count": 1,
+            "required_columns": [
+              {
+                "column_name": "namespace_id",
+                "present_not_null": true
+              },
+              {
+                "column_name": "owner_id",
+                "present_not_null": true
+              },
+              {
+                "column_name": "tenant_id",
+                "present_not_null": true
+              },
+              {
+                "column_name": "workspace_id",
+                "present_not_null": true
+              }
+            ],
+            "rls_enabled": true,
+            "rls_forced": true,
+            "table_name": "schema_gate_good_021"
+          }
+        },
+        "rollback_state": {
+          "persisted_fixture_table_count": 0
+        },
+        "status": "completed"
+      },
+      "name": "r13_inventory_declares_required_surfaces",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "persisted_fixture_table_count": 0
+      },
+      "name": "r13_negative_fixture_rolled_back",
       "passed": true
     },
     {
@@ -41,8 +234,8 @@
   "required_evidence": "Expected failing gate and remediation evidence.",
   "scenario_id": "VS2-SEC-R13",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "The build fails before merge/release.",
   "validator": "verify_vs2_sec_r13",
   "verification_command": [

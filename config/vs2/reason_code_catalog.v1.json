@@ -1,0 +1,55 @@
+{
+  "catalog_version": "cs.reason_code_catalog.vs2.v1",
+  "default": {
+    "http_status": 403,
+    "message": "Request denied by policy.",
+    "resolution": "Review the request scope, authority, and policy requirements."
+  },
+  "reason_codes": {
+    "connectorhub_capability_required": {
+      "http_status": 403,
+      "message": "The requested connector or tool capability is not declared.",
+      "resolution": "Use a declared ConnectorHub-mediated capability."
+    },
+    "cross_tenant_scope": {
+      "http_status": 403,
+      "message": "The requested resource is outside the authorized tenant scope.",
+      "resolution": "Switch to an authorized tenant scope or request explicit approval."
+    },
+    "data_scope_denied": {
+      "http_status": 403,
+      "message": "The requested data scope is not authorized.",
+      "resolution": "Reduce the data scope or request policy approval."
+    },
+    "high_risk_requires_approval": {
+      "http_status": 403,
+      "message": "This high-risk operation requires approval.",
+      "resolution": "Complete the required approval workflow before retrying."
+    },
+    "invalid_schema": {
+      "http_status": 403,
+      "message": "The policy input schema is invalid.",
+      "resolution": "Retry with the current versioned PolicyInput schema."
+    },
+    "role_not_allowed": {
+      "http_status": 403,
+      "message": "The current role cannot perform this operation.",
+      "resolution": "Request an appropriate role or change the operation scope."
+    },
+    "secret_classification_denied": {
+      "http_status": 403,
+      "message": "The requested classification is not allowed.",
+      "resolution": "Use an allowed classification or request policy approval."
+    },
+    "unknown_policy_default_deny": {
+      "http_status": 403,
+      "message": "The requested policy path is not declared.",
+      "resolution": "Use a declared resource, action, and policy path."
+    },
+    "workspace_mode_denied": {
+      "http_status": 403,
+      "message": "The workspace mode does not allow this operation.",
+      "resolution": "Use an allowed workspace mode for this operation."
+    }
+  }
+}

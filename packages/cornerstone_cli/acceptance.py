@@ -1822,10 +1822,16 @@ def _git_output(root: Path, args: list[str]) -> str | None:
 
 
 GENERATED_EVIDENCE_PREFIXES = (
+    "reports/audit/",
     "reports/browser/",
+    "reports/db/",
+    "reports/network/",
+    "reports/policy/",
     "reports/quickstart/",
     "reports/release/",
     "reports/scenario/",
+    "reports/security/",
+    "reports/vs2/",
     "tmp/",
     "data/local/",
 )

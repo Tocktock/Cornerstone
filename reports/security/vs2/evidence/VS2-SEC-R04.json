@@ -2,20 +2,33 @@
   "assertions": [
     {
       "evidence": {
-        "compileall_green": true,
-        "scenario_matrix_green": true,
-        "vs0_acceptance_green": true,
-        "vs0_evux_green": true,
-        "vs0_operator_ui_green": true,
-        "vs0_runtime_green": true,
-        "vs1_ontology_green": true
+        "org_rows_visible": 1,
+        "payloads": [
+          {
+            "canary": "ALPHA_ORG_RANGE_CANARY",
+            "title": "Alpha organization artifact"
+          }
+        ]
       },
-      "name": "targeted_regression_guard_observed",
+      "name": "r04_org_context_fixture_exists",
       "passed": true
     },
     {
-      "evidence": {},
-      "name": "security_foundation_still_default_deny",
+      "evidence": {
+        "explicit_org_namespace_rows_visible": 0,
+        "namespace_ids_returned": [],
+        "org_rows_visible": 0,
+        "tenant_ids_returned": []
+      },
+      "name": "r04_personal_workspace_hides_org_context",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "org_context_digest": "41c286831de548f1abd56f5a6338dcf3da2a35b6a6d3be05770240d9282497a2",
+        "personal_context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a"
+      },
+      "name": "r04_personal_and_org_contexts_are_distinct",
       "passed": true
     },
     {
@@ -41,8 +54,8 @@
   "required_evidence": "Zero organization refs/canary, policy/audit outcome.",
   "scenario_id": "VS2-SEC-R04",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Organization context is not used or exposed.",
   "validator": "verify_vs2_sec_r04",
   "verification_command": [

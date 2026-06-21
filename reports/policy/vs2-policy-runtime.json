@@ -19,11 +19,11 @@
         ],
         "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
         "bundle_revision": "vs2-rego-local-v1",
-        "decided_at_epoch": 1781971026,
+        "decided_at_epoch": 1782045155,
         "decision": "deny",
-        "decision_id": "policy_5795aac3836a7ede",
+        "decision_id": "policy_532d68b018d1a1f6",
         "evidence_refs": [],
-        "input_digest": "a6edec338c18838e801b55a26f7c2c4c842d7b25b43af51e44bf9e578fc30a41",
+        "input_digest": "8fddd871c0dc092f9a42996b60be5f5b0d99a6beed60d6e72967766ed1f3cc63",
         "namespace_id": "personal",
         "policy_path": "cornerstone.vs2/deny",
         "reason_codes": [
@@ -46,6 +46,8 @@
         },
         "attribute_sources": {
           "approval.status": "action_approval_store",
+          "data_scope.scope": "request_policy_mapping",
+          "mission_authority.authorized": "mission_authority_store",
           "resource.tenant_id": "database_record",
           "scope.tenant_id": "membership_store",
           "subject.principal_id": "verified_session"
@@ -54,9 +56,18 @@
           "connectorhub_mediated": true,
           "declared": true
         },
+        "data_scope": {
+          "purpose": "artifact_read",
+          "scope": "tenant"
+        },
         "environment": {
           "deployment": "local",
           "workspace_mode": "assist"
+        },
+        "mission_authority": {
+          "authority_ref": "authority_alpha_context",
+          "authorized": true,
+          "mission_id": "mission_alpha"
         },
         "policy_path": "artifact.read",
         "resource": {
@@ -90,11 +101,11 @@
         ],
         "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
         "bundle_revision": "vs2-rego-local-v1",
-        "decided_at_epoch": 1781971026,
+        "decided_at_epoch": 1782045155,
         "decision": "allow",
-        "decision_id": "policy_b31fc18fc0ac4fa3",
+        "decision_id": "policy_404a0a294b64eb53",
         "evidence_refs": [],
-        "input_digest": "73bac6477ef5df420959c48aeb262ff7158dd2a2f8884219880458edb586598e",
+        "input_digest": "4499cbf6e01285b62577886bf22fbca47d879aff12bc6c86aca799aa23fcffb8",
         "namespace_id": "personal",
         "policy_path": "cornerstone.vs2/allow",
         "reason_codes": [],
@@ -111,6 +122,8 @@
         },
         "attribute_sources": {
           "approval.status": "action_approval_store",
+          "data_scope.scope": "request_policy_mapping",
+          "mission_authority.authorized": "mission_authority_store",
           "resource.tenant_id": "database_record",
           "scope.tenant_id": "membership_store",
           "subject.principal_id": "verified_session"
@@ -119,9 +132,18 @@
           "connectorhub_mediated": true,
           "declared": true
         },
+        "data_scope": {
+          "purpose": "artifact_read",
+          "scope": "tenant"
+        },
         "environment": {
           "deployment": "local",
           "workspace_mode": "assist"
+        },
+        "mission_authority": {
+          "authority_ref": "authority_alpha_context",
+          "authorized": true,
+          "mission_id": "mission_alpha"
         },
         "policy_path": "artifact.read",
         "resource": {
@@ -155,11 +177,11 @@
         ],
         "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
         "bundle_revision": "vs2-rego-local-v1",
-        "decided_at_epoch": 1781971026,
+        "decided_at_epoch": 1782045155,
         "decision": "deny",
-        "decision_id": "policy_84b1ab75ecb297c5",
+        "decision_id": "policy_57101ff55570382e",
         "evidence_refs": [],
-        "input_digest": "a59cdbc1a3a676a9a4ab952471f6442582cc5995bd0c1d5ea9e40f8af69dea2a",
+        "input_digest": "fbc4f16de90621c9bd1d7bd4ba5e3c01f076874b74f267da7fb881d50f05af8c",
         "namespace_id": "personal",
         "policy_path": "cornerstone.vs2/deny",
         "reason_codes": [
@@ -182,6 +204,8 @@
         },
         "attribute_sources": {
           "approval.status": "action_approval_store",
+          "data_scope.scope": "request_policy_mapping",
+          "mission_authority.authorized": "mission_authority_store",
           "resource.tenant_id": "database_record",
           "scope.tenant_id": "membership_store",
           "subject.principal_id": "verified_session"
@@ -190,9 +214,18 @@
           "connectorhub_mediated": false,
           "declared": false
         },
+        "data_scope": {
+          "purpose": "artifact_read",
+          "scope": "tenant"
+        },
         "environment": {
           "deployment": "local",
           "workspace_mode": "assist"
+        },
+        "mission_authority": {
+          "authority_ref": "authority_alpha_context",
+          "authorized": true,
+          "mission_id": "mission_alpha"
         },
         "policy_path": "artifact.read",
         "resource": {
@@ -233,11 +266,11 @@
         ],
         "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
         "bundle_revision": "vs2-rego-local-v1",
-        "decided_at_epoch": 1781971026,
+        "decided_at_epoch": 1782045155,
         "decision": "deny",
-        "decision_id": "policy_c1ae923177f47adc",
+        "decision_id": "policy_2a2e1d9b876b16e1",
         "evidence_refs": [],
-        "input_digest": "2f30ffd53b89a5e361315434cc2943e299fe3ae7b89b966c2e882207346759dd",
+        "input_digest": "2cbb1cb1dcf2b5f5c4a4a8fc3540dd7db4cbe8db24e51f87fad3dc7d36b9374b",
         "namespace_id": "personal",
         "policy_path": "cornerstone.vs2/deny",
         "reason_codes": [
@@ -260,6 +293,8 @@
         },
         "attribute_sources": {
           "approval.status": "action_approval_store",
+          "data_scope.scope": "request_policy_mapping",
+          "mission_authority.authorized": "mission_authority_store",
           "resource.tenant_id": "database_record",
           "scope.tenant_id": "membership_store",
           "subject.principal_id": "verified_session"
@@ -268,9 +303,18 @@
           "connectorhub_mediated": true,
           "declared": true
         },
+        "data_scope": {
+          "purpose": "artifact_read",
+          "scope": "tenant"
+        },
         "environment": {
           "deployment": "local",
           "workspace_mode": "assist"
+        },
+        "mission_authority": {
+          "authority_ref": "authority_alpha_context",
+          "authorized": true,
+          "mission_id": "mission_alpha"
         },
         "policy_path": "artifact.read",
         "resource": {
@@ -304,11 +348,11 @@
         ],
         "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
         "bundle_revision": "vs2-rego-local-v1",
-        "decided_at_epoch": 1781971026,
+        "decided_at_epoch": 1782045155,
         "decision": "allow",
-        "decision_id": "policy_cc9b7f6ab579c8dc",
+        "decision_id": "policy_deeed70f38cf68a8",
         "evidence_refs": [],
-        "input_digest": "fc93186ad6757e8e95f7b0687b80f6c7a03ec8cd29ae2820c139bbfa41f241e6",
+        "input_digest": "48afcd028c2dbb373cf8db8adec24adfa9541d84294fe8d5febe3732681a78d7",
         "namespace_id": "personal",
         "policy_path": "cornerstone.vs2/allow",
         "reason_codes": [],
@@ -325,6 +369,8 @@
         },
         "attribute_sources": {
           "approval.status": "action_approval_store",
+          "data_scope.scope": "request_policy_mapping",
+          "mission_authority.authorized": "mission_authority_store",
           "resource.tenant_id": "database_record",
           "scope.tenant_id": "membership_store",
           "subject.principal_id": "verified_session"
@@ -333,9 +379,18 @@
           "connectorhub_mediated": true,
           "declared": true
         },
+        "data_scope": {
+          "purpose": "artifact_read",
+          "scope": "tenant"
+        },
         "environment": {
           "deployment": "local",
           "workspace_mode": "assist"
+        },
+        "mission_authority": {
+          "authority_ref": "authority_alpha_context",
+          "authorized": true,
+          "mission_id": "mission_alpha"
         },
         "policy_path": "artifact.read",
         "resource": {
@@ -369,17 +424,15 @@
         ],
         "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
         "bundle_revision": "vs2-rego-local-v1",
-        "decided_at_epoch": 1781971026,
+        "decided_at_epoch": 1782045155,
         "decision": "deny",
-        "decision_id": "policy_1b4102fd3008847d",
+        "decision_id": "policy_82ca02b8ac3f8683",
         "evidence_refs": [],
         "input_digest": "a4541ef5cd71687a0c12f78616209cc0f52975374a8cafbe5f300f69807c99ba",
         "namespace_id": null,
         "policy_path": "cornerstone.vs2/deny",
         "reason_codes": [
-          "invalid_schema",
-          "role_not_allowed",
-          "connectorhub_capability_required"
+          "invalid_schema"
         ],
         "resolution_path": [
           "Use trusted membership scope",
@@ -413,9 +466,18 @@
           "connectorhub_mediated": true,
           "declared": true
         },
+        "data_scope": {
+          "purpose": "artifact_read",
+          "scope": "tenant"
+        },
         "environment": {
           "deployment": "local",
           "workspace_mode": "assist"
+        },
+        "mission_authority": {
+          "authority_ref": "authority_alpha_owner",
+          "authorized": true,
+          "mission_id": "mission_alpha"
         },
         "policy_path": "artifact.read",
         "resource": {
@@ -449,11 +511,11 @@
         ],
         "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
         "bundle_revision": "vs2-rego-local-v1",
-        "decided_at_epoch": 1781971026,
+        "decided_at_epoch": 1782045155,
         "decision": "deny",
-        "decision_id": "policy_33778ba1f3e8cc6a",
+        "decision_id": "policy_1861ef1d638d0552",
         "evidence_refs": [],
-        "input_digest": "ac701f2f812e14f8e81e2d3c9448cb9b14f41de65ef4380524116d0de8c2bbdf",
+        "input_digest": "725d15aedbe8bbd3ba600083cdeb7f2155437353c92e6bfed6493e8e33ea9b46",
         "namespace_id": "personal",
         "policy_path": "cornerstone.vs2/deny",
         "reason_codes": [
@@ -476,6 +538,8 @@
         },
         "attribute_sources": {
           "approval.status": "action_approval_store",
+          "data_scope.scope": "request_policy_mapping",
+          "mission_authority.authorized": "mission_authority_store",
           "resource.tenant_id": "database_record",
           "scope.tenant_id": "membership_store",
           "subject.principal_id": "verified_session"
@@ -484,9 +548,18 @@
           "connectorhub_mediated": true,
           "declared": true
         },
+        "data_scope": {
+          "purpose": "artifact_read",
+          "scope": "tenant"
+        },
         "environment": {
           "deployment": "local",
           "workspace_mode": "assist"
+        },
+        "mission_authority": {
+          "authority_ref": "authority_alpha_context",
+          "authorized": true,
+          "mission_id": "mission_alpha"
         },
         "policy_path": "artifact.read",
         "resource": {
@@ -520,11 +593,11 @@
         ],
         "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
         "bundle_revision": "vs2-rego-local-v1",
-        "decided_at_epoch": 1781971026,
+        "decided_at_epoch": 1782045155,
         "decision": "deny",
-        "decision_id": "policy_bf30625e2d452601",
+        "decision_id": "policy_61651fe70a4924db",
         "evidence_refs": [],
-        "input_digest": "beec618240d7b992a90cb9bfb67eb6fdf87fec7ab8efd661968943d70826f55c",
+        "input_digest": "a6f582cf0d156345214b942c69316906a8e7bbfc16fa2c30c6ca4c1ae521d725",
         "namespace_id": "personal",
         "policy_path": "cornerstone.vs2/deny",
         "reason_codes": [
@@ -547,6 +620,8 @@
         },
         "attribute_sources": {
           "approval.status": "action_approval_store",
+          "data_scope.scope": "request_policy_mapping",
+          "mission_authority.authorized": "mission_authority_store",
           "resource.tenant_id": "database_record",
           "scope.tenant_id": "membership_store",
           "subject.principal_id": "verified_session"
@@ -555,9 +630,18 @@
           "connectorhub_mediated": true,
           "declared": true
         },
+        "data_scope": {
+          "purpose": "artifact_read",
+          "scope": "tenant"
+        },
         "environment": {
           "deployment": "local",
           "workspace_mode": "assist"
+        },
+        "mission_authority": {
+          "authority_ref": "authority_alpha_context",
+          "authorized": true,
+          "mission_id": "mission_alpha"
         },
         "policy_path": "unknown",
         "resource": {

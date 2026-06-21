@@ -18,9 +18,16 @@ valid_schema if {
 	is_string(input.resource.classification)
 	is_string(input.action)
 	is_string(input.risk)
+	is_string(input.mission_authority.mission_id)
+	is_boolean(input.mission_authority.authorized)
+	is_string(input.mission_authority.authority_ref)
+	is_string(input.data_scope.scope)
+	is_string(input.data_scope.purpose)
 	is_boolean(input.capability.declared)
 	is_boolean(input.capability.connectorhub_mediated)
 	is_string(input.approval.status)
+	is_string(input.environment.deployment)
+	is_string(input.environment.workspace_mode)
 }
 
 same_scope if {
@@ -58,9 +65,25 @@ classification_allowed if {
 	input.resource.classification != "secret"
 }
 
+mission_allowed if {
+	input.mission_authority.authorized == true
+}
+
+data_scope_allowed if {
+	input.data_scope.scope != "cross_tenant"
+}
+
+workspace_mode_allowed if {
+	input.environment.workspace_mode != "external"
+}
+
 capability_allowed if {
 	input.capability.declared == true
 	input.capability.connectorhub_mediated == true
+}
+
+unexpected_authoritative_attrs if {
+	object.get(input.subject, "tenant_id", null) != null
 }
 
 allow if {
@@ -69,8 +92,12 @@ allow if {
 	role_allowed
 	risk_allowed
 	classification_allowed
+	mission_allowed
+	data_scope_allowed
+	workspace_mode_allowed
 	capability_allowed
 	not revoked
+	not unexpected_authoritative_attrs
 	input.policy_path != "unknown"
 }
 
@@ -104,9 +131,29 @@ deny contains "secret_classification_denied" if {
 	input.resource.classification == "secret"
 }
 
+deny contains "mission_authority_required" if {
+	valid_schema
+	not mission_allowed
+}
+
+deny contains "data_scope_denied" if {
+	valid_schema
+	not data_scope_allowed
+}
+
+deny contains "workspace_mode_denied" if {
+	valid_schema
+	not workspace_mode_allowed
+}
+
 deny contains "connectorhub_capability_required" if {
 	valid_schema
 	not capability_allowed
+}
+
+deny contains "unexpected_authoritative_attribute" if {
+	valid_schema
+	unexpected_authoritative_attrs
 }
 
 deny contains "unknown_policy_default_deny" if {

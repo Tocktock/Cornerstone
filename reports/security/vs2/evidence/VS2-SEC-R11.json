@@ -2,20 +2,4289 @@
   "assertions": [
     {
       "evidence": {
-        "compileall_green": true,
-        "scenario_matrix_green": true,
-        "vs0_acceptance_green": true,
-        "vs0_evux_green": true,
-        "vs0_operator_ui_green": true,
-        "vs0_runtime_green": true,
-        "vs1_ontology_green": true
+        "audit_refs": [
+          "audit_1568b54bc7034377",
+          "audit_1e884f18f9574727",
+          "audit_25f4730659b244a8",
+          "audit_37039f7b6c982300",
+          "audit_60c42f21bb29a2ab",
+          "audit_64881ddaa39fb399",
+          "audit_75abc299156bdcff",
+          "audit_7b9ffd44ce7cc890",
+          "audit_91ff14bd0cbc22e6",
+          "audit_997b9ea5d3f5cfda",
+          "audit_a838a671070cf1d6",
+          "audit_aba9e7b734acd90c",
+          "audit_c6d33b7077689026",
+          "audit_c7f42488abc353da",
+          "audit_d0e1396f3577dd29",
+          "audit_f57f64d64eaaebc6",
+          "audit_fcc1a351e67a1b8d"
+        ],
+        "cache_size_after": 3,
+        "cache_size_before": 3,
+        "cached_allow_before_revocation": {
+          "cache_key_digest": "c3aada8b6113741de2516d599579bf2adfdcd9fa6be974ef7d5bb711b7775ed4",
+          "decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "37dd4c45ae34b5017cb854517f946d810f7ce348e678abc2b8935708a0608c19",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_cache_allow_044"
+          }
+        },
+        "checks": {
+          "r11_cached_allow_existed_before_revocation": true,
+          "r11_cached_allow_not_reused_after_revocation": true,
+          "r11_concurrent_retries_completed": true,
+          "r11_denial_audits_recorded": true,
+          "r11_membership_revoked_after_cached_allow": true,
+          "r11_revision_update_sequence_recorded": true,
+          "r11_zero_post_revocation_successes": true,
+          "r11_zero_provider_or_egress_side_effects": true
+        },
+        "decision_revision_sequence": [
+          {
+            "decision": "allow",
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "revision": "vs2-rego-local-v1",
+            "step": "cached_allow"
+          },
+          {
+            "cache_hit": true,
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "revision": "vs2-rego-local-v1",
+            "step": "same_revision_cache_hit"
+          },
+          {
+            "decision": "deny",
+            "decision_id": "policy_5b4c3e9652eba07c",
+            "revision": "vs2-rego-local-v2",
+            "step": "revision_update_deny"
+          },
+          {
+            "membership_revision": "memrev-gamma-003",
+            "revoked": true,
+            "step": "membership_revoked"
+          }
+        ],
+        "denied_observation_count": 24,
+        "egress_proxy_calls_after": 1,
+        "egress_proxy_calls_before": 1,
+        "membership_update": {
+          "memberships": [
+            {
+              "membership_id": "m_gamma_carla_personal",
+              "membership_revision": "memrev-gamma-003",
+              "revoked": true,
+              "session_version": 2
+            }
+          ],
+          "rows": 1
+        },
+        "observations": [
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_91ff14bd0cbc22e6"
+            ],
+            "case_id": "r11_post_revoke_20_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116853.156614,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.9104,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_20_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_c7f42488abc353da"
+            ],
+            "case_id": "r11_post_revoke_05_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116853.376215,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910505,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_05_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_aba9e7b734acd90c"
+            ],
+            "case_id": "r11_post_revoke_08_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116853.685269,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.9103,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_08_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_1e884f18f9574727"
+            ],
+            "case_id": "r11_post_revoke_17_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116856.026553,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910348,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_17_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_f57f64d64eaaebc6"
+            ],
+            "case_id": "r11_post_revoke_02_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116856.307447,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910191,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_02_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_25f4730659b244a8"
+            ],
+            "case_id": "r11_post_revoke_14_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116856.652453,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910167,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_14_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_64881ddaa39fb399"
+            ],
+            "case_id": "r11_post_revoke_23_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116857.242495,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91055,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_23_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_d0e1396f3577dd29"
+            ],
+            "case_id": "r11_post_revoke_11_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116858.370679,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91062,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_11_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_60c42f21bb29a2ab"
+            ],
+            "case_id": "r11_post_revoke_01_service",
+            "ended_monotonic": 1116859.236039,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910252,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_01_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_75abc299156bdcff"
+            ],
+            "case_id": "r11_post_revoke_16_service",
+            "ended_monotonic": 1116859.454857,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910465,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_16_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_c6d33b7077689026"
+            ],
+            "case_id": "r11_post_revoke_12_api",
+            "ended_monotonic": 1116859.518715,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91023,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_12_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_37039f7b6c982300"
+            ],
+            "case_id": "r11_post_revoke_07_service",
+            "ended_monotonic": 1116860.539709,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910281,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_07_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_00_api",
+            "ended_monotonic": 1116860.566654,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910415,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_00_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_7b9ffd44ce7cc890"
+            ],
+            "case_id": "r11_post_revoke_13_service",
+            "ended_monotonic": 1116860.57407,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910588,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_13_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_18_api",
+            "ended_monotonic": 1116860.580727,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910568,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_18_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_fcc1a351e67a1b8d"
+            ],
+            "case_id": "r11_post_revoke_04_service",
+            "ended_monotonic": 1116860.639096,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910432,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_04_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_21_api",
+            "ended_monotonic": 1116860.780654,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910486,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_21_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_1568b54bc7034377"
+            ],
+            "case_id": "r11_post_revoke_22_service",
+            "ended_monotonic": 1116860.786079,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91013,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_22_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_09_api",
+            "ended_monotonic": 1116860.831736,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910375,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_09_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_06_api",
+            "ended_monotonic": 1116861.053386,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910526,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_06_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_a838a671070cf1d6"
+            ],
+            "case_id": "r11_post_revoke_10_service",
+            "ended_monotonic": 1116861.053442,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910599,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_10_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_997b9ea5d3f5cfda"
+            ],
+            "case_id": "r11_post_revoke_19_service",
+            "ended_monotonic": 1116861.053471,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910448,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_19_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_03_api",
+            "ended_monotonic": 1116861.053593,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910091,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_03_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_15_api",
+            "ended_monotonic": 1116861.05377,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910636,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_15_api"
+          }
+        ],
+        "persisted_audit_rows": [
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_1568b54bc7034377",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_22_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_1e884f18f9574727",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_17_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_17_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_25f4730659b244a8",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_14_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_14_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_37039f7b6c982300",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_07_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_60c42f21bb29a2ab",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_01_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_64881ddaa39fb399",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_23_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_23_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_75abc299156bdcff",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_16_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_7b9ffd44ce7cc890",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_13_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_91ff14bd0cbc22e6",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_20_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_20_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_997b9ea5d3f5cfda",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_19_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_a838a671070cf1d6",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_10_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_aba9e7b734acd90c",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_08_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_08_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_c6d33b7077689026",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "http_api"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_c7f42488abc353da",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_05_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_05_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_d0e1396f3577dd29",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_11_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_11_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_f57f64d64eaaebc6",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_02_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_02_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_fcc1a351e67a1b8d",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_04_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          }
+        ],
+        "provider_calls_after": 1,
+        "provider_calls_before": 1,
+        "request_path": "/api/vs2/artifacts/artifact_gamma_001",
+        "revision_update_decision": {
+          "bundle_revision": "vs2-rego-local-v2",
+          "decision": "deny",
+          "decision_id": "policy_5b4c3e9652eba07c",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "3a50fa5deb97e55f7fd5f36f4fb3aeaebf9b0a989f52d1370e6acea3857b0da3",
+          "policy_path": "cornerstone.vs2/revision_update",
+          "reason_codes": [
+            "policy_revision_updated_denied"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_cache_revision_update_044"
+        },
+        "same_revision_cache_hit": {
+          "cache_hit": true,
+          "cache_key_digest": "c3aada8b6113741de2516d599579bf2adfdcd9fa6be974ef7d5bb711b7775ed4",
+          "decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "37dd4c45ae34b5017cb854517f946d810f7ce348e678abc2b8935708a0608c19",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_cache_allow_044"
+          }
+        },
+        "scheduler_seed": 11111,
+        "status": "passed",
+        "successful_observations": [],
+        "thread_count": 24,
+        "unfinished_cases": []
       },
-      "name": "targeted_regression_guard_observed",
+      "name": "range_r11_cached_allow_existed_before_revocation",
       "passed": true
     },
     {
-      "evidence": {},
-      "name": "security_foundation_still_default_deny",
+      "evidence": [
+        {
+          "decision": "allow",
+          "decision_id": "policy_bdb3e6a6573dd913",
+          "revision": "vs2-rego-local-v1",
+          "step": "cached_allow"
+        },
+        {
+          "cache_hit": true,
+          "decision_id": "policy_bdb3e6a6573dd913",
+          "revision": "vs2-rego-local-v1",
+          "step": "same_revision_cache_hit"
+        },
+        {
+          "decision": "deny",
+          "decision_id": "policy_5b4c3e9652eba07c",
+          "revision": "vs2-rego-local-v2",
+          "step": "revision_update_deny"
+        },
+        {
+          "membership_revision": "memrev-gamma-003",
+          "revoked": true,
+          "step": "membership_revoked"
+        }
+      ],
+      "name": "range_r11_revision_update_sequence_recorded",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "memberships": [
+          {
+            "membership_id": "m_gamma_carla_personal",
+            "membership_revision": "memrev-gamma-003",
+            "revoked": true,
+            "session_version": 2
+          }
+        ],
+        "rows": 1
+      },
+      "name": "range_r11_membership_revoked_after_cached_allow",
+      "passed": true
+    },
+    {
+      "evidence": [
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_91ff14bd0cbc22e6"
+          ],
+          "case_id": "r11_post_revoke_20_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116853.156614,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.9104,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_20_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_c7f42488abc353da"
+          ],
+          "case_id": "r11_post_revoke_05_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116853.376215,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910505,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_05_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_aba9e7b734acd90c"
+          ],
+          "case_id": "r11_post_revoke_08_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116853.685269,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.9103,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_08_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_1e884f18f9574727"
+          ],
+          "case_id": "r11_post_revoke_17_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116856.026553,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910348,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_17_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_f57f64d64eaaebc6"
+          ],
+          "case_id": "r11_post_revoke_02_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116856.307447,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910191,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_02_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_25f4730659b244a8"
+          ],
+          "case_id": "r11_post_revoke_14_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116856.652453,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910167,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_14_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_64881ddaa39fb399"
+          ],
+          "case_id": "r11_post_revoke_23_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116857.242495,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.91055,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_23_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_d0e1396f3577dd29"
+          ],
+          "case_id": "r11_post_revoke_11_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116858.370679,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.91062,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_11_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_60c42f21bb29a2ab"
+          ],
+          "case_id": "r11_post_revoke_01_service",
+          "ended_monotonic": 1116859.236039,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910252,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_01_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_75abc299156bdcff"
+          ],
+          "case_id": "r11_post_revoke_16_service",
+          "ended_monotonic": 1116859.454857,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910465,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_16_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_c6d33b7077689026"
+          ],
+          "case_id": "r11_post_revoke_12_api",
+          "ended_monotonic": 1116859.518715,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.91023,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_12_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_37039f7b6c982300"
+          ],
+          "case_id": "r11_post_revoke_07_service",
+          "ended_monotonic": 1116860.539709,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910281,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_07_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_00_api",
+          "ended_monotonic": 1116860.566654,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910415,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_00_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_7b9ffd44ce7cc890"
+          ],
+          "case_id": "r11_post_revoke_13_service",
+          "ended_monotonic": 1116860.57407,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910588,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_13_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_18_api",
+          "ended_monotonic": 1116860.580727,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910568,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_18_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_fcc1a351e67a1b8d"
+          ],
+          "case_id": "r11_post_revoke_04_service",
+          "ended_monotonic": 1116860.639096,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910432,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_04_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_21_api",
+          "ended_monotonic": 1116860.780654,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910486,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_21_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_1568b54bc7034377"
+          ],
+          "case_id": "r11_post_revoke_22_service",
+          "ended_monotonic": 1116860.786079,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.91013,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_22_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_09_api",
+          "ended_monotonic": 1116860.831736,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910375,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_09_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_06_api",
+          "ended_monotonic": 1116861.053386,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910526,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_06_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_a838a671070cf1d6"
+          ],
+          "case_id": "r11_post_revoke_10_service",
+          "ended_monotonic": 1116861.053442,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910599,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_10_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_997b9ea5d3f5cfda"
+          ],
+          "case_id": "r11_post_revoke_19_service",
+          "ended_monotonic": 1116861.053471,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910448,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_19_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_03_api",
+          "ended_monotonic": 1116861.053593,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910091,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_03_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_15_api",
+          "ended_monotonic": 1116861.05377,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910636,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_15_api"
+        }
+      ],
+      "name": "range_r11_concurrent_retries_completed",
+      "passed": true
+    },
+    {
+      "evidence": [
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_91ff14bd0cbc22e6"
+          ],
+          "case_id": "r11_post_revoke_20_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116853.156614,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.9104,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_20_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_c7f42488abc353da"
+          ],
+          "case_id": "r11_post_revoke_05_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116853.376215,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910505,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_05_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_aba9e7b734acd90c"
+          ],
+          "case_id": "r11_post_revoke_08_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116853.685269,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.9103,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_08_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_1e884f18f9574727"
+          ],
+          "case_id": "r11_post_revoke_17_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116856.026553,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910348,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_17_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_f57f64d64eaaebc6"
+          ],
+          "case_id": "r11_post_revoke_02_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116856.307447,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910191,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_02_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_25f4730659b244a8"
+          ],
+          "case_id": "r11_post_revoke_14_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116856.652453,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910167,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_14_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_64881ddaa39fb399"
+          ],
+          "case_id": "r11_post_revoke_23_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116857.242495,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.91055,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_23_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_d0e1396f3577dd29"
+          ],
+          "case_id": "r11_post_revoke_11_worker",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 1,
+            "egress_calls": 0,
+            "policy_calls": 0
+          },
+          "ended_monotonic": 1116858.370679,
+          "http_status": null,
+          "identity_decision": null,
+          "policy_decision": null,
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.91062,
+          "status": "quarantined",
+          "surface": "worker",
+          "trace_id": "trace_vs2_r11_post_revoke_11_worker"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_60c42f21bb29a2ab"
+          ],
+          "case_id": "r11_post_revoke_01_service",
+          "ended_monotonic": 1116859.236039,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910252,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_01_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_75abc299156bdcff"
+          ],
+          "case_id": "r11_post_revoke_16_service",
+          "ended_monotonic": 1116859.454857,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910465,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_16_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_c6d33b7077689026"
+          ],
+          "case_id": "r11_post_revoke_12_api",
+          "ended_monotonic": 1116859.518715,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.91023,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_12_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_37039f7b6c982300"
+          ],
+          "case_id": "r11_post_revoke_07_service",
+          "ended_monotonic": 1116860.539709,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910281,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_07_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_00_api",
+          "ended_monotonic": 1116860.566654,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910415,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_00_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_7b9ffd44ce7cc890"
+          ],
+          "case_id": "r11_post_revoke_13_service",
+          "ended_monotonic": 1116860.57407,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910588,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_13_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_18_api",
+          "ended_monotonic": 1116860.580727,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910568,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_18_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_fcc1a351e67a1b8d"
+          ],
+          "case_id": "r11_post_revoke_04_service",
+          "ended_monotonic": 1116860.639096,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910432,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_04_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_21_api",
+          "ended_monotonic": 1116860.780654,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910486,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_21_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_1568b54bc7034377"
+          ],
+          "case_id": "r11_post_revoke_22_service",
+          "ended_monotonic": 1116860.786079,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.91013,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_22_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_09_api",
+          "ended_monotonic": 1116860.831736,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910375,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_09_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_06_api",
+          "ended_monotonic": 1116861.053386,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910526,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_06_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_a838a671070cf1d6"
+          ],
+          "case_id": "r11_post_revoke_10_service",
+          "ended_monotonic": 1116861.053442,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910599,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_10_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 1,
+          "audit_refs": [
+            "audit_997b9ea5d3f5cfda"
+          ],
+          "case_id": "r11_post_revoke_19_service",
+          "ended_monotonic": 1116861.053471,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910448,
+          "status": "denied",
+          "surface": "service",
+          "trace_id": "trace_vs2_r11_post_revoke_19_service"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_03_api",
+          "ended_monotonic": 1116861.053593,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910091,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_03_api"
+        },
+        {
+          "artifact_present": false,
+          "audit_ref_count": 0,
+          "audit_refs": [],
+          "case_id": "r11_post_revoke_15_api",
+          "ended_monotonic": 1116861.05377,
+          "http_status": 401,
+          "identity_decision": {
+            "decision": "deny",
+            "decision_id": "identity_membership_revoked",
+            "reason_codes": [
+              "membership_revoked"
+            ]
+          },
+          "policy_decision": null,
+          "raw_status": "denied",
+          "reason": "membership_revoked",
+          "started_monotonic": 1116844.910636,
+          "status": "denied",
+          "surface": "api",
+          "trace_id": "trace_vs2_r11_post_revoke_15_api"
+        }
+      ],
+      "name": "range_r11_zero_post_revocation_successes",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "audit_refs": [
+          "audit_1568b54bc7034377",
+          "audit_1e884f18f9574727",
+          "audit_25f4730659b244a8",
+          "audit_37039f7b6c982300",
+          "audit_60c42f21bb29a2ab",
+          "audit_64881ddaa39fb399",
+          "audit_75abc299156bdcff",
+          "audit_7b9ffd44ce7cc890",
+          "audit_91ff14bd0cbc22e6",
+          "audit_997b9ea5d3f5cfda",
+          "audit_a838a671070cf1d6",
+          "audit_aba9e7b734acd90c",
+          "audit_c6d33b7077689026",
+          "audit_c7f42488abc353da",
+          "audit_d0e1396f3577dd29",
+          "audit_f57f64d64eaaebc6",
+          "audit_fcc1a351e67a1b8d"
+        ],
+        "cache_size_after": 3,
+        "cache_size_before": 3,
+        "cached_allow_before_revocation": {
+          "cache_key_digest": "c3aada8b6113741de2516d599579bf2adfdcd9fa6be974ef7d5bb711b7775ed4",
+          "decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "37dd4c45ae34b5017cb854517f946d810f7ce348e678abc2b8935708a0608c19",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_cache_allow_044"
+          }
+        },
+        "checks": {
+          "r11_cached_allow_existed_before_revocation": true,
+          "r11_cached_allow_not_reused_after_revocation": true,
+          "r11_concurrent_retries_completed": true,
+          "r11_denial_audits_recorded": true,
+          "r11_membership_revoked_after_cached_allow": true,
+          "r11_revision_update_sequence_recorded": true,
+          "r11_zero_post_revocation_successes": true,
+          "r11_zero_provider_or_egress_side_effects": true
+        },
+        "decision_revision_sequence": [
+          {
+            "decision": "allow",
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "revision": "vs2-rego-local-v1",
+            "step": "cached_allow"
+          },
+          {
+            "cache_hit": true,
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "revision": "vs2-rego-local-v1",
+            "step": "same_revision_cache_hit"
+          },
+          {
+            "decision": "deny",
+            "decision_id": "policy_5b4c3e9652eba07c",
+            "revision": "vs2-rego-local-v2",
+            "step": "revision_update_deny"
+          },
+          {
+            "membership_revision": "memrev-gamma-003",
+            "revoked": true,
+            "step": "membership_revoked"
+          }
+        ],
+        "denied_observation_count": 24,
+        "egress_proxy_calls_after": 1,
+        "egress_proxy_calls_before": 1,
+        "membership_update": {
+          "memberships": [
+            {
+              "membership_id": "m_gamma_carla_personal",
+              "membership_revision": "memrev-gamma-003",
+              "revoked": true,
+              "session_version": 2
+            }
+          ],
+          "rows": 1
+        },
+        "observations": [
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_91ff14bd0cbc22e6"
+            ],
+            "case_id": "r11_post_revoke_20_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116853.156614,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.9104,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_20_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_c7f42488abc353da"
+            ],
+            "case_id": "r11_post_revoke_05_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116853.376215,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910505,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_05_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_aba9e7b734acd90c"
+            ],
+            "case_id": "r11_post_revoke_08_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116853.685269,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.9103,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_08_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_1e884f18f9574727"
+            ],
+            "case_id": "r11_post_revoke_17_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116856.026553,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910348,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_17_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_f57f64d64eaaebc6"
+            ],
+            "case_id": "r11_post_revoke_02_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116856.307447,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910191,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_02_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_25f4730659b244a8"
+            ],
+            "case_id": "r11_post_revoke_14_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116856.652453,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910167,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_14_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_64881ddaa39fb399"
+            ],
+            "case_id": "r11_post_revoke_23_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116857.242495,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91055,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_23_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_d0e1396f3577dd29"
+            ],
+            "case_id": "r11_post_revoke_11_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116858.370679,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91062,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_11_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_60c42f21bb29a2ab"
+            ],
+            "case_id": "r11_post_revoke_01_service",
+            "ended_monotonic": 1116859.236039,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910252,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_01_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_75abc299156bdcff"
+            ],
+            "case_id": "r11_post_revoke_16_service",
+            "ended_monotonic": 1116859.454857,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910465,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_16_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_c6d33b7077689026"
+            ],
+            "case_id": "r11_post_revoke_12_api",
+            "ended_monotonic": 1116859.518715,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91023,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_12_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_37039f7b6c982300"
+            ],
+            "case_id": "r11_post_revoke_07_service",
+            "ended_monotonic": 1116860.539709,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910281,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_07_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_00_api",
+            "ended_monotonic": 1116860.566654,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910415,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_00_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_7b9ffd44ce7cc890"
+            ],
+            "case_id": "r11_post_revoke_13_service",
+            "ended_monotonic": 1116860.57407,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910588,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_13_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_18_api",
+            "ended_monotonic": 1116860.580727,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910568,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_18_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_fcc1a351e67a1b8d"
+            ],
+            "case_id": "r11_post_revoke_04_service",
+            "ended_monotonic": 1116860.639096,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910432,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_04_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_21_api",
+            "ended_monotonic": 1116860.780654,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910486,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_21_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_1568b54bc7034377"
+            ],
+            "case_id": "r11_post_revoke_22_service",
+            "ended_monotonic": 1116860.786079,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91013,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_22_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_09_api",
+            "ended_monotonic": 1116860.831736,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910375,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_09_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_06_api",
+            "ended_monotonic": 1116861.053386,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910526,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_06_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_a838a671070cf1d6"
+            ],
+            "case_id": "r11_post_revoke_10_service",
+            "ended_monotonic": 1116861.053442,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910599,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_10_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_997b9ea5d3f5cfda"
+            ],
+            "case_id": "r11_post_revoke_19_service",
+            "ended_monotonic": 1116861.053471,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910448,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_19_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_03_api",
+            "ended_monotonic": 1116861.053593,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910091,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_03_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_15_api",
+            "ended_monotonic": 1116861.05377,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910636,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_15_api"
+          }
+        ],
+        "persisted_audit_rows": [
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_1568b54bc7034377",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_22_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_1e884f18f9574727",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_17_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_17_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_25f4730659b244a8",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_14_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_14_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_37039f7b6c982300",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_07_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_60c42f21bb29a2ab",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_01_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_64881ddaa39fb399",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_23_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_23_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_75abc299156bdcff",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_16_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_7b9ffd44ce7cc890",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_13_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_91ff14bd0cbc22e6",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_20_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_20_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_997b9ea5d3f5cfda",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_19_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_a838a671070cf1d6",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_10_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_aba9e7b734acd90c",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_08_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_08_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_c6d33b7077689026",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "http_api"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_c7f42488abc353da",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_05_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_05_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_d0e1396f3577dd29",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_11_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_11_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_f57f64d64eaaebc6",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_02_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_02_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_fcc1a351e67a1b8d",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_04_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          }
+        ],
+        "provider_calls_after": 1,
+        "provider_calls_before": 1,
+        "request_path": "/api/vs2/artifacts/artifact_gamma_001",
+        "revision_update_decision": {
+          "bundle_revision": "vs2-rego-local-v2",
+          "decision": "deny",
+          "decision_id": "policy_5b4c3e9652eba07c",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "3a50fa5deb97e55f7fd5f36f4fb3aeaebf9b0a989f52d1370e6acea3857b0da3",
+          "policy_path": "cornerstone.vs2/revision_update",
+          "reason_codes": [
+            "policy_revision_updated_denied"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_cache_revision_update_044"
+        },
+        "same_revision_cache_hit": {
+          "cache_hit": true,
+          "cache_key_digest": "c3aada8b6113741de2516d599579bf2adfdcd9fa6be974ef7d5bb711b7775ed4",
+          "decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "37dd4c45ae34b5017cb854517f946d810f7ce348e678abc2b8935708a0608c19",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_cache_allow_044"
+          }
+        },
+        "scheduler_seed": 11111,
+        "status": "passed",
+        "successful_observations": [],
+        "thread_count": 24,
+        "unfinished_cases": []
+      },
+      "name": "range_r11_cached_allow_not_reused_after_revocation",
+      "passed": true
+    },
+    {
+      "evidence": [
+        {
+          "action": "identity.resolve",
+          "decision_id": "identity_membership_revoked",
+          "event_id": "audit_1568b54bc7034377",
+          "event_type": "identity.denied",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "membership_id": "m_gamma_carla_personal",
+            "reason": "membership_revoked",
+            "surface": "service_direct_r11_r11_post_revoke_22_service"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_local_range_revocation",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "worker.artifact_read",
+          "decision_id": "worker_membership_revoked",
+          "event_id": "audit_1e884f18f9574727",
+          "event_type": "worker.job.quarantined",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_17_worker",
+            "reason": "membership_revoked"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_r11_post_revoke_17_worker",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "worker.artifact_read",
+          "decision_id": "worker_membership_revoked",
+          "event_id": "audit_25f4730659b244a8",
+          "event_type": "worker.job.quarantined",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_14_worker",
+            "reason": "membership_revoked"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_r11_post_revoke_14_worker",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "identity.resolve",
+          "decision_id": "identity_membership_revoked",
+          "event_id": "audit_37039f7b6c982300",
+          "event_type": "identity.denied",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "membership_id": "m_gamma_carla_personal",
+            "reason": "membership_revoked",
+            "surface": "service_direct_r11_r11_post_revoke_07_service"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_local_range_revocation",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "identity.resolve",
+          "decision_id": "identity_membership_revoked",
+          "event_id": "audit_60c42f21bb29a2ab",
+          "event_type": "identity.denied",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "membership_id": "m_gamma_carla_personal",
+            "reason": "membership_revoked",
+            "surface": "service_direct_r11_r11_post_revoke_01_service"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_local_range_revocation",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "worker.artifact_read",
+          "decision_id": "worker_membership_revoked",
+          "event_id": "audit_64881ddaa39fb399",
+          "event_type": "worker.job.quarantined",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_23_worker",
+            "reason": "membership_revoked"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_r11_post_revoke_23_worker",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "identity.resolve",
+          "decision_id": "identity_membership_revoked",
+          "event_id": "audit_75abc299156bdcff",
+          "event_type": "identity.denied",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "membership_id": "m_gamma_carla_personal",
+            "reason": "membership_revoked",
+            "surface": "service_direct_r11_r11_post_revoke_16_service"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_local_range_revocation",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "identity.resolve",
+          "decision_id": "identity_membership_revoked",
+          "event_id": "audit_7b9ffd44ce7cc890",
+          "event_type": "identity.denied",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "membership_id": "m_gamma_carla_personal",
+            "reason": "membership_revoked",
+            "surface": "service_direct_r11_r11_post_revoke_13_service"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_local_range_revocation",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "worker.artifact_read",
+          "decision_id": "worker_membership_revoked",
+          "event_id": "audit_91ff14bd0cbc22e6",
+          "event_type": "worker.job.quarantined",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_20_worker",
+            "reason": "membership_revoked"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_r11_post_revoke_20_worker",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "identity.resolve",
+          "decision_id": "identity_membership_revoked",
+          "event_id": "audit_997b9ea5d3f5cfda",
+          "event_type": "identity.denied",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "membership_id": "m_gamma_carla_personal",
+            "reason": "membership_revoked",
+            "surface": "service_direct_r11_r11_post_revoke_19_service"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_local_range_revocation",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "identity.resolve",
+          "decision_id": "identity_membership_revoked",
+          "event_id": "audit_a838a671070cf1d6",
+          "event_type": "identity.denied",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "membership_id": "m_gamma_carla_personal",
+            "reason": "membership_revoked",
+            "surface": "service_direct_r11_r11_post_revoke_10_service"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_local_range_revocation",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "worker.artifact_read",
+          "decision_id": "worker_membership_revoked",
+          "event_id": "audit_aba9e7b734acd90c",
+          "event_type": "worker.job.quarantined",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_08_worker",
+            "reason": "membership_revoked"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_r11_post_revoke_08_worker",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "identity.resolve",
+          "decision_id": "identity_membership_revoked",
+          "event_id": "audit_c6d33b7077689026",
+          "event_type": "identity.denied",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "membership_id": "m_gamma_carla_personal",
+            "reason": "membership_revoked",
+            "surface": "http_api"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_local_range_revocation",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "worker.artifact_read",
+          "decision_id": "worker_membership_revoked",
+          "event_id": "audit_c7f42488abc353da",
+          "event_type": "worker.job.quarantined",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_05_worker",
+            "reason": "membership_revoked"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_r11_post_revoke_05_worker",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "worker.artifact_read",
+          "decision_id": "worker_membership_revoked",
+          "event_id": "audit_d0e1396f3577dd29",
+          "event_type": "worker.job.quarantined",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_11_worker",
+            "reason": "membership_revoked"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_r11_post_revoke_11_worker",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "worker.artifact_read",
+          "decision_id": "worker_membership_revoked",
+          "event_id": "audit_f57f64d64eaaebc6",
+          "event_type": "worker.job.quarantined",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_02_worker",
+            "reason": "membership_revoked"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_r11_post_revoke_02_worker",
+          "workspace_id": "gamma-home"
+        },
+        {
+          "action": "identity.resolve",
+          "decision_id": "identity_membership_revoked",
+          "event_id": "audit_fcc1a351e67a1b8d",
+          "event_type": "identity.denied",
+          "owner_id": "principal_carla",
+          "subject": {
+            "artifact_id": "artifact_gamma_001",
+            "membership_id": "m_gamma_carla_personal",
+            "reason": "membership_revoked",
+            "surface": "service_direct_r11_r11_post_revoke_04_service"
+          },
+          "tenant_id": "tenant_gamma",
+          "trace_id": "trace_vs2_local_range_revocation",
+          "workspace_id": "gamma-home"
+        }
+      ],
+      "name": "range_r11_denial_audits_recorded",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "audit_refs": [
+          "audit_1568b54bc7034377",
+          "audit_1e884f18f9574727",
+          "audit_25f4730659b244a8",
+          "audit_37039f7b6c982300",
+          "audit_60c42f21bb29a2ab",
+          "audit_64881ddaa39fb399",
+          "audit_75abc299156bdcff",
+          "audit_7b9ffd44ce7cc890",
+          "audit_91ff14bd0cbc22e6",
+          "audit_997b9ea5d3f5cfda",
+          "audit_a838a671070cf1d6",
+          "audit_aba9e7b734acd90c",
+          "audit_c6d33b7077689026",
+          "audit_c7f42488abc353da",
+          "audit_d0e1396f3577dd29",
+          "audit_f57f64d64eaaebc6",
+          "audit_fcc1a351e67a1b8d"
+        ],
+        "cache_size_after": 3,
+        "cache_size_before": 3,
+        "cached_allow_before_revocation": {
+          "cache_key_digest": "c3aada8b6113741de2516d599579bf2adfdcd9fa6be974ef7d5bb711b7775ed4",
+          "decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "37dd4c45ae34b5017cb854517f946d810f7ce348e678abc2b8935708a0608c19",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_cache_allow_044"
+          }
+        },
+        "checks": {
+          "r11_cached_allow_existed_before_revocation": true,
+          "r11_cached_allow_not_reused_after_revocation": true,
+          "r11_concurrent_retries_completed": true,
+          "r11_denial_audits_recorded": true,
+          "r11_membership_revoked_after_cached_allow": true,
+          "r11_revision_update_sequence_recorded": true,
+          "r11_zero_post_revocation_successes": true,
+          "r11_zero_provider_or_egress_side_effects": true
+        },
+        "decision_revision_sequence": [
+          {
+            "decision": "allow",
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "revision": "vs2-rego-local-v1",
+            "step": "cached_allow"
+          },
+          {
+            "cache_hit": true,
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "revision": "vs2-rego-local-v1",
+            "step": "same_revision_cache_hit"
+          },
+          {
+            "decision": "deny",
+            "decision_id": "policy_5b4c3e9652eba07c",
+            "revision": "vs2-rego-local-v2",
+            "step": "revision_update_deny"
+          },
+          {
+            "membership_revision": "memrev-gamma-003",
+            "revoked": true,
+            "step": "membership_revoked"
+          }
+        ],
+        "denied_observation_count": 24,
+        "egress_proxy_calls_after": 1,
+        "egress_proxy_calls_before": 1,
+        "membership_update": {
+          "memberships": [
+            {
+              "membership_id": "m_gamma_carla_personal",
+              "membership_revision": "memrev-gamma-003",
+              "revoked": true,
+              "session_version": 2
+            }
+          ],
+          "rows": 1
+        },
+        "observations": [
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_91ff14bd0cbc22e6"
+            ],
+            "case_id": "r11_post_revoke_20_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116853.156614,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.9104,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_20_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_c7f42488abc353da"
+            ],
+            "case_id": "r11_post_revoke_05_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116853.376215,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910505,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_05_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_aba9e7b734acd90c"
+            ],
+            "case_id": "r11_post_revoke_08_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116853.685269,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.9103,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_08_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_1e884f18f9574727"
+            ],
+            "case_id": "r11_post_revoke_17_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116856.026553,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910348,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_17_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_f57f64d64eaaebc6"
+            ],
+            "case_id": "r11_post_revoke_02_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116856.307447,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910191,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_02_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_25f4730659b244a8"
+            ],
+            "case_id": "r11_post_revoke_14_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116856.652453,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910167,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_14_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_64881ddaa39fb399"
+            ],
+            "case_id": "r11_post_revoke_23_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116857.242495,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91055,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_23_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_d0e1396f3577dd29"
+            ],
+            "case_id": "r11_post_revoke_11_worker",
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 1,
+              "egress_calls": 0,
+              "policy_calls": 0
+            },
+            "ended_monotonic": 1116858.370679,
+            "http_status": null,
+            "identity_decision": null,
+            "policy_decision": null,
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91062,
+            "status": "quarantined",
+            "surface": "worker",
+            "trace_id": "trace_vs2_r11_post_revoke_11_worker"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_60c42f21bb29a2ab"
+            ],
+            "case_id": "r11_post_revoke_01_service",
+            "ended_monotonic": 1116859.236039,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910252,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_01_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_75abc299156bdcff"
+            ],
+            "case_id": "r11_post_revoke_16_service",
+            "ended_monotonic": 1116859.454857,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910465,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_16_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_c6d33b7077689026"
+            ],
+            "case_id": "r11_post_revoke_12_api",
+            "ended_monotonic": 1116859.518715,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91023,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_12_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_37039f7b6c982300"
+            ],
+            "case_id": "r11_post_revoke_07_service",
+            "ended_monotonic": 1116860.539709,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910281,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_07_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_00_api",
+            "ended_monotonic": 1116860.566654,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910415,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_00_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_7b9ffd44ce7cc890"
+            ],
+            "case_id": "r11_post_revoke_13_service",
+            "ended_monotonic": 1116860.57407,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910588,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_13_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_18_api",
+            "ended_monotonic": 1116860.580727,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910568,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_18_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_fcc1a351e67a1b8d"
+            ],
+            "case_id": "r11_post_revoke_04_service",
+            "ended_monotonic": 1116860.639096,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910432,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_04_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_21_api",
+            "ended_monotonic": 1116860.780654,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910486,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_21_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_1568b54bc7034377"
+            ],
+            "case_id": "r11_post_revoke_22_service",
+            "ended_monotonic": 1116860.786079,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.91013,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_22_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_09_api",
+            "ended_monotonic": 1116860.831736,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910375,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_09_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_06_api",
+            "ended_monotonic": 1116861.053386,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910526,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_06_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_a838a671070cf1d6"
+            ],
+            "case_id": "r11_post_revoke_10_service",
+            "ended_monotonic": 1116861.053442,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910599,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_10_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 1,
+            "audit_refs": [
+              "audit_997b9ea5d3f5cfda"
+            ],
+            "case_id": "r11_post_revoke_19_service",
+            "ended_monotonic": 1116861.053471,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910448,
+            "status": "denied",
+            "surface": "service",
+            "trace_id": "trace_vs2_r11_post_revoke_19_service"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_03_api",
+            "ended_monotonic": 1116861.053593,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910091,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_03_api"
+          },
+          {
+            "artifact_present": false,
+            "audit_ref_count": 0,
+            "audit_refs": [],
+            "case_id": "r11_post_revoke_15_api",
+            "ended_monotonic": 1116861.05377,
+            "http_status": 401,
+            "identity_decision": {
+              "decision": "deny",
+              "decision_id": "identity_membership_revoked",
+              "reason_codes": [
+                "membership_revoked"
+              ]
+            },
+            "policy_decision": null,
+            "raw_status": "denied",
+            "reason": "membership_revoked",
+            "started_monotonic": 1116844.910636,
+            "status": "denied",
+            "surface": "api",
+            "trace_id": "trace_vs2_r11_post_revoke_15_api"
+          }
+        ],
+        "persisted_audit_rows": [
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_1568b54bc7034377",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_22_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_1e884f18f9574727",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_17_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_17_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_25f4730659b244a8",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_14_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_14_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_37039f7b6c982300",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_07_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_60c42f21bb29a2ab",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_01_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_64881ddaa39fb399",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_23_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_23_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_75abc299156bdcff",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_16_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_7b9ffd44ce7cc890",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_13_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_91ff14bd0cbc22e6",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_20_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_20_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_997b9ea5d3f5cfda",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_19_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_a838a671070cf1d6",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_10_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_aba9e7b734acd90c",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_08_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_08_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_c6d33b7077689026",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "http_api"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_c7f42488abc353da",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_05_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_05_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_d0e1396f3577dd29",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_11_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_11_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "worker.artifact_read",
+            "decision_id": "worker_membership_revoked",
+            "event_id": "audit_f57f64d64eaaebc6",
+            "event_type": "worker.job.quarantined",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "job_id": "job_gamma_r11_post_revoke_r11_post_revoke_02_worker",
+              "reason": "membership_revoked"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_r11_post_revoke_02_worker",
+            "workspace_id": "gamma-home"
+          },
+          {
+            "action": "identity.resolve",
+            "decision_id": "identity_membership_revoked",
+            "event_id": "audit_fcc1a351e67a1b8d",
+            "event_type": "identity.denied",
+            "owner_id": "principal_carla",
+            "subject": {
+              "artifact_id": "artifact_gamma_001",
+              "membership_id": "m_gamma_carla_personal",
+              "reason": "membership_revoked",
+              "surface": "service_direct_r11_r11_post_revoke_04_service"
+            },
+            "tenant_id": "tenant_gamma",
+            "trace_id": "trace_vs2_local_range_revocation",
+            "workspace_id": "gamma-home"
+          }
+        ],
+        "provider_calls_after": 1,
+        "provider_calls_before": 1,
+        "request_path": "/api/vs2/artifacts/artifact_gamma_001",
+        "revision_update_decision": {
+          "bundle_revision": "vs2-rego-local-v2",
+          "decision": "deny",
+          "decision_id": "policy_5b4c3e9652eba07c",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "3a50fa5deb97e55f7fd5f36f4fb3aeaebf9b0a989f52d1370e6acea3857b0da3",
+          "policy_path": "cornerstone.vs2/revision_update",
+          "reason_codes": [
+            "policy_revision_updated_denied"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_cache_revision_update_044"
+        },
+        "same_revision_cache_hit": {
+          "cache_hit": true,
+          "cache_key_digest": "c3aada8b6113741de2516d599579bf2adfdcd9fa6be974ef7d5bb711b7775ed4",
+          "decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_bdb3e6a6573dd913",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "37dd4c45ae34b5017cb854517f946d810f7ce348e678abc2b8935708a0608c19",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_cache_allow_044"
+          }
+        },
+        "scheduler_seed": 11111,
+        "status": "passed",
+        "successful_observations": [],
+        "thread_count": 24,
+        "unfinished_cases": []
+      },
+      "name": "range_r11_zero_provider_or_egress_side_effects",
       "passed": true
     },
     {
@@ -41,8 +4310,8 @@
   "required_evidence": "Decision revision sequence, zero post-revocation successes.",
   "scenario_id": "VS2-SEC-R11",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "No stale allow produces access or side effect beyond the frozen revocation bound.",
   "validator": "verify_vs2_sec_r11",
   "verification_command": [

@@ -2,35 +2,1682 @@
   "assertions": [
     {
       "evidence": {
-        "http_allow_observed": true,
-        "http_cross_tenant_denied": true,
-        "http_invalid_schema_denied": true,
-        "outage_fails_closed": true
+        "audit_refs": [
+          "audit_ebd9dfa37f078e61",
+          "audit_c3516450050fc1ec",
+          "audit_bb8b35f5d58a7803",
+          "audit_8631852f957481b9",
+          "audit_dc1df16e4336a7fe",
+          "audit_79eab1d36d800b8a",
+          "audit_861595813f850fd2",
+          "audit_2d21beee99f4a023"
+        ],
+        "checks": {
+          "audit_refs_recorded": true,
+          "input_digests_present": true,
+          "invalid_cases_rejected_before_opa": true,
+          "schema_file_present": true,
+          "schema_required_paths_present": true,
+          "schema_version_const_is_v1": true,
+          "source_map_covers_required_attributes": true,
+          "valid_cases_cover_operation_families": true,
+          "valid_cases_pass_schema_and_opa": true
+        },
+        "invalid_cases": [
+          {
+            "case": "missing_subject_principal",
+            "input_digest": "75b397597e5d7c85eff35c172672b3a9e0bc0c47fa3eacdbf02ca622254b48c6",
+            "mutation": {
+              "kind": "remove",
+              "path": "subject.principal_id"
+            },
+            "opa_call_attempted": false,
+            "schema_errors": [
+              {
+                "code": "missing_required",
+                "path": "$.subject.principal_id"
+              }
+            ],
+            "source_map": {
+              "action": "gateway.declared_action",
+              "approval.required": "gateway.risk_classifier",
+              "approval.status": "gateway.approval_state",
+              "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+              "capability.declared": "gateway.capability_manifest",
+              "data_scope.purpose": "gateway.data_purpose",
+              "data_scope.scope": "gateway.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "gateway.policy_entrypoint",
+              "resource.classification": "gateway.resource_record",
+              "resource.namespace_id": "gateway.resource_record",
+              "resource.resource_id": "gateway.resource_record",
+              "resource.tenant_id": "gateway.resource_record",
+              "risk": "gateway.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "gateway.trace_context"
+            }
+          },
+          {
+            "case": "roles_wrong_type",
+            "input_digest": "2f5294c9f4bcd10072e62a157c5d04b38ceea880358d3e4384edd6b844953d54",
+            "mutation": {
+              "kind": "set",
+              "path": "subject.roles"
+            },
+            "opa_call_attempted": false,
+            "schema_errors": [
+              {
+                "actual": "str",
+                "code": "type_mismatch",
+                "expected": "array",
+                "path": "$.subject.roles"
+              }
+            ],
+            "source_map": {
+              "action": "gateway.declared_action",
+              "approval.required": "gateway.risk_classifier",
+              "approval.status": "gateway.approval_state",
+              "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+              "capability.declared": "gateway.capability_manifest",
+              "data_scope.purpose": "gateway.data_purpose",
+              "data_scope.scope": "gateway.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "gateway.policy_entrypoint",
+              "resource.classification": "gateway.resource_record",
+              "resource.namespace_id": "gateway.resource_record",
+              "resource.resource_id": "gateway.resource_record",
+              "resource.tenant_id": "gateway.resource_record",
+              "risk": "gateway.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "gateway.trace_context"
+            }
+          },
+          {
+            "case": "wrong_schema_version",
+            "input_digest": "8d1ed455c15a30e5e352ca7d5b0334aa2e0b32af8a66bc5f6c4f5c27cba542a2",
+            "mutation": {
+              "kind": "set",
+              "path": "schema_version"
+            },
+            "opa_call_attempted": false,
+            "schema_errors": [
+              {
+                "actual": "cs.policy_input.vs2.invalid",
+                "code": "const_mismatch",
+                "expected": "cs.policy_input.vs2.v1",
+                "path": "$.schema_version"
+              }
+            ],
+            "source_map": {
+              "action": "gateway.declared_action",
+              "approval.required": "gateway.risk_classifier",
+              "approval.status": "gateway.approval_state",
+              "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+              "capability.declared": "gateway.capability_manifest",
+              "data_scope.purpose": "gateway.data_purpose",
+              "data_scope.scope": "gateway.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "gateway.policy_entrypoint",
+              "resource.classification": "gateway.resource_record",
+              "resource.namespace_id": "gateway.resource_record",
+              "resource.resource_id": "gateway.resource_record",
+              "resource.tenant_id": "gateway.resource_record",
+              "risk": "gateway.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "gateway.trace_context"
+            }
+          },
+          {
+            "case": "unexpected_top_level_tenant",
+            "input_digest": "246b10f2a00b6fde83ecb16ed755f449e4a27b28b8581265a71561e425ba2a5c",
+            "mutation": {
+              "kind": "set",
+              "path": "tenant_id"
+            },
+            "opa_call_attempted": false,
+            "schema_errors": [
+              {
+                "code": "additional_property",
+                "path": "$.tenant_id"
+              }
+            ],
+            "source_map": {
+              "action": "gateway.declared_action",
+              "approval.required": "gateway.risk_classifier",
+              "approval.status": "gateway.approval_state",
+              "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+              "capability.declared": "gateway.capability_manifest",
+              "data_scope.purpose": "gateway.data_purpose",
+              "data_scope.scope": "gateway.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "gateway.policy_entrypoint",
+              "resource.classification": "gateway.resource_record",
+              "resource.namespace_id": "gateway.resource_record",
+              "resource.resource_id": "gateway.resource_record",
+              "resource.tenant_id": "gateway.resource_record",
+              "risk": "gateway.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "gateway.trace_context"
+            }
+          },
+          {
+            "case": "missing_mission_authorized",
+            "input_digest": "9755b6fa429a87e44391529144ef09fdb0a0d0bfafa7ec2654ebe67f96fab727",
+            "mutation": {
+              "kind": "remove",
+              "path": "mission_authority.authorized"
+            },
+            "opa_call_attempted": false,
+            "schema_errors": [
+              {
+                "code": "missing_required",
+                "path": "$.mission_authority.authorized"
+              }
+            ],
+            "source_map": {
+              "action": "gateway.declared_action",
+              "approval.required": "gateway.risk_classifier",
+              "approval.status": "gateway.approval_state",
+              "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+              "capability.declared": "gateway.capability_manifest",
+              "data_scope.purpose": "gateway.data_purpose",
+              "data_scope.scope": "gateway.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "gateway.policy_entrypoint",
+              "resource.classification": "gateway.resource_record",
+              "resource.namespace_id": "gateway.resource_record",
+              "resource.resource_id": "gateway.resource_record",
+              "resource.tenant_id": "gateway.resource_record",
+              "risk": "gateway.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "gateway.trace_context"
+            }
+          },
+          {
+            "case": "unexpected_authoritative_subject_tenant",
+            "input_digest": "c6024236c59a87179ff8e3772fdc4049292b3d5259a5b7aae4c6c6ab6022f241",
+            "mutation": {
+              "kind": "set",
+              "path": "subject.tenant_id"
+            },
+            "opa_call_attempted": false,
+            "schema_errors": [
+              {
+                "code": "additional_property",
+                "path": "$.subject.tenant_id"
+              }
+            ],
+            "source_map": {
+              "action": "gateway.declared_action",
+              "approval.required": "gateway.risk_classifier",
+              "approval.status": "gateway.approval_state",
+              "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+              "capability.declared": "gateway.capability_manifest",
+              "data_scope.purpose": "gateway.data_purpose",
+              "data_scope.scope": "gateway.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "gateway.policy_entrypoint",
+              "resource.classification": "gateway.resource_record",
+              "resource.namespace_id": "gateway.resource_record",
+              "resource.resource_id": "gateway.resource_record",
+              "resource.tenant_id": "gateway.resource_record",
+              "risk": "gateway.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "gateway.trace_context"
+            }
+          }
+        ],
+        "required_source_paths": [
+          "subject.principal_id",
+          "subject.roles",
+          "subject.membership_revision",
+          "subject.revoked",
+          "scope.tenant_id",
+          "scope.namespace_id",
+          "scope.workspace_id",
+          "resource.resource_id",
+          "resource.tenant_id",
+          "resource.namespace_id",
+          "resource.classification",
+          "action",
+          "risk",
+          "policy_path",
+          "mission_authority.mission_id",
+          "mission_authority.authorized",
+          "mission_authority.authority_ref",
+          "data_scope.scope",
+          "data_scope.purpose",
+          "approval.required",
+          "approval.status",
+          "capability.declared",
+          "capability.connectorhub_mediated",
+          "environment.deployment",
+          "environment.workspace_mode"
+        ],
+        "schema_path": "config/vs2/policy_input_schema.v1.json",
+        "schema_sha256": "77d102109bcf9124b8030200e6fe4776c4e3b662892a3609189eb7f1b2f0eeea",
+        "schema_title": "CornerStone VS2 PolicyInput",
+        "status": "passed",
+        "valid_cases": [
+          {
+            "action": "artifact.read",
+            "audit_ref": "audit_ebd9dfa37f078e61",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_3cee5faa39c2cd39",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "a1acf13b71e17371f5b5bfb6fec45b5b32e64532c2b07ce50a08ef1ccc06a900",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_input_026_1"
+            },
+            "input_digest": "a1acf13b71e17371f5b5bfb6fec45b5b32e64532c2b07ce50a08ef1ccc06a900",
+            "opa_call_attempted": true,
+            "operation_family": "gateway",
+            "policy_path": "artifact.read",
+            "schema_errors": [],
+            "source_map": {
+              "action": "gateway.declared_action",
+              "approval.required": "gateway.risk_classifier",
+              "approval.status": "gateway.approval_state",
+              "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+              "capability.declared": "gateway.capability_manifest",
+              "data_scope.purpose": "gateway.data_purpose",
+              "data_scope.scope": "gateway.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "gateway.policy_entrypoint",
+              "resource.classification": "gateway.resource_record",
+              "resource.namespace_id": "gateway.resource_record",
+              "resource.resource_id": "gateway.resource_record",
+              "resource.tenant_id": "gateway.resource_record",
+              "risk": "gateway.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "gateway.trace_context"
+            }
+          },
+          {
+            "action": "artifact.write",
+            "audit_ref": "audit_c3516450050fc1ec",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_97e124c1259a7aa5",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "1f1c6367622b60ad4502c506354381cb7e792d97d9bf61ab64cb0570b0fab90f",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_input_026_2"
+            },
+            "input_digest": "1f1c6367622b60ad4502c506354381cb7e792d97d9bf61ab64cb0570b0fab90f",
+            "opa_call_attempted": true,
+            "operation_family": "service",
+            "policy_path": "artifact.write",
+            "schema_errors": [],
+            "source_map": {
+              "action": "service.declared_action",
+              "approval.required": "service.risk_classifier",
+              "approval.status": "service.approval_state",
+              "capability.connectorhub_mediated": "service.connectorhub_boundary",
+              "capability.declared": "service.capability_manifest",
+              "data_scope.purpose": "service.data_purpose",
+              "data_scope.scope": "service.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "service.policy_entrypoint",
+              "resource.classification": "service.resource_record",
+              "resource.namespace_id": "service.resource_record",
+              "resource.resource_id": "service.resource_record",
+              "resource.tenant_id": "service.resource_record",
+              "risk": "service.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "service.trace_context"
+            }
+          },
+          {
+            "action": "tool.execute",
+            "audit_ref": "audit_bb8b35f5d58a7803",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_2897efe2786a01eb",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "315ee0c418592cbeaf6b022e650e55047ede7f6e31e7bcd8052c461ba14db1c1",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_input_026_3"
+            },
+            "input_digest": "315ee0c418592cbeaf6b022e650e55047ede7f6e31e7bcd8052c461ba14db1c1",
+            "opa_call_attempted": true,
+            "operation_family": "tool_runtime",
+            "policy_path": "tool.execute",
+            "schema_errors": [],
+            "source_map": {
+              "action": "tool_runtime.declared_action",
+              "approval.required": "tool_runtime.risk_classifier",
+              "approval.status": "tool_runtime.approval_state",
+              "capability.connectorhub_mediated": "tool_runtime.connectorhub_boundary",
+              "capability.declared": "tool_runtime.capability_manifest",
+              "data_scope.purpose": "tool_runtime.data_purpose",
+              "data_scope.scope": "tool_runtime.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "tool_runtime.policy_entrypoint",
+              "resource.classification": "tool_runtime.resource_record",
+              "resource.namespace_id": "tool_runtime.resource_record",
+              "resource.resource_id": "tool_runtime.resource_record",
+              "resource.tenant_id": "tool_runtime.resource_record",
+              "risk": "tool_runtime.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "tool_runtime.trace_context"
+            }
+          },
+          {
+            "action": "action.execute",
+            "audit_ref": "audit_8631852f957481b9",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_5471fedb52dea4e2",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "aa3b896cf79d37bb7934623a6de911210bacdeeeb423ad3345538ef082736b63",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_input_026_4"
+            },
+            "input_digest": "aa3b896cf79d37bb7934623a6de911210bacdeeeb423ad3345538ef082736b63",
+            "opa_call_attempted": true,
+            "operation_family": "action_card",
+            "policy_path": "action.execute",
+            "schema_errors": [],
+            "source_map": {
+              "action": "action_card.declared_action",
+              "approval.required": "action_card.risk_classifier",
+              "approval.status": "action_card.approval_state",
+              "capability.connectorhub_mediated": "action_card.connectorhub_boundary",
+              "capability.declared": "action_card.capability_manifest",
+              "data_scope.purpose": "action_card.data_purpose",
+              "data_scope.scope": "action_card.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "action_card.policy_entrypoint",
+              "resource.classification": "action_card.resource_record",
+              "resource.namespace_id": "action_card.resource_record",
+              "resource.resource_id": "action_card.resource_record",
+              "resource.tenant_id": "action_card.resource_record",
+              "risk": "action_card.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "action_card.trace_context"
+            }
+          },
+          {
+            "action": "connector.execute",
+            "audit_ref": "audit_dc1df16e4336a7fe",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_a4195dcb3906f745",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "52d94d2bd3c54739710afaf05a515889aa7de17e01ca775f81e89c0198cfc437",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_input_026_5"
+            },
+            "input_digest": "52d94d2bd3c54739710afaf05a515889aa7de17e01ca775f81e89c0198cfc437",
+            "opa_call_attempted": true,
+            "operation_family": "connector",
+            "policy_path": "connector.execute",
+            "schema_errors": [],
+            "source_map": {
+              "action": "connector.declared_action",
+              "approval.required": "connector.risk_classifier",
+              "approval.status": "connector.approval_state",
+              "capability.connectorhub_mediated": "connector.connectorhub_boundary",
+              "capability.declared": "connector.capability_manifest",
+              "data_scope.purpose": "connector.data_purpose",
+              "data_scope.scope": "connector.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "connector.policy_entrypoint",
+              "resource.classification": "connector.resource_record",
+              "resource.namespace_id": "connector.resource_record",
+              "resource.resource_id": "connector.resource_record",
+              "resource.tenant_id": "connector.resource_record",
+              "risk": "connector.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "connector.trace_context"
+            }
+          },
+          {
+            "action": "model.route",
+            "audit_ref": "audit_79eab1d36d800b8a",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_a3d4b43db7798299",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "08bc5842ec33cc1e8b3a639fcf39626cdd8f797fcab2bbfb152afa8ef9490645",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_input_026_6"
+            },
+            "input_digest": "08bc5842ec33cc1e8b3a639fcf39626cdd8f797fcab2bbfb152afa8ef9490645",
+            "opa_call_attempted": true,
+            "operation_family": "model_router",
+            "policy_path": "model.route",
+            "schema_errors": [],
+            "source_map": {
+              "action": "model_router.declared_action",
+              "approval.required": "model_router.risk_classifier",
+              "approval.status": "model_router.approval_state",
+              "capability.connectorhub_mediated": "model_router.connectorhub_boundary",
+              "capability.declared": "model_router.capability_manifest",
+              "data_scope.purpose": "model_router.data_purpose",
+              "data_scope.scope": "model_router.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "model_router.policy_entrypoint",
+              "resource.classification": "model_router.resource_record",
+              "resource.namespace_id": "model_router.resource_record",
+              "resource.resource_id": "model_router.resource_record",
+              "resource.tenant_id": "model_router.resource_record",
+              "risk": "model_router.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "model_router.trace_context"
+            }
+          },
+          {
+            "action": "policy.bundle.publish",
+            "audit_ref": "audit_861595813f850fd2",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_81a8ceeea1ec2530",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "490112ed2148b4210ff24a3bc040ca2df8a91b37650ecd4caa2a166c30d5923d",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_input_026_7"
+            },
+            "input_digest": "490112ed2148b4210ff24a3bc040ca2df8a91b37650ecd4caa2a166c30d5923d",
+            "opa_call_attempted": true,
+            "operation_family": "policy_admin",
+            "policy_path": "policy.bundle.publish",
+            "schema_errors": [],
+            "source_map": {
+              "action": "policy_admin.declared_action",
+              "approval.required": "policy_admin.risk_classifier",
+              "approval.status": "policy_admin.approval_state",
+              "capability.connectorhub_mediated": "policy_admin.connectorhub_boundary",
+              "capability.declared": "policy_admin.capability_manifest",
+              "data_scope.purpose": "policy_admin.data_purpose",
+              "data_scope.scope": "policy_admin.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "policy_admin.policy_entrypoint",
+              "resource.classification": "policy_admin.resource_record",
+              "resource.namespace_id": "policy_admin.resource_record",
+              "resource.resource_id": "policy_admin.resource_record",
+              "resource.tenant_id": "policy_admin.resource_record",
+              "risk": "policy_admin.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "policy_admin.trace_context"
+            }
+          },
+          {
+            "action": "memory.read",
+            "audit_ref": "audit_2d21beee99f4a023",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_dfea8eb5094ad1be",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "556be6fa7bee3e5306e4fe530f5fc319afeb266a87d288efc5ba4154676b4c78",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_input_026_8"
+            },
+            "input_digest": "556be6fa7bee3e5306e4fe530f5fc319afeb266a87d288efc5ba4154676b4c78",
+            "opa_call_attempted": true,
+            "operation_family": "memory",
+            "policy_path": "memory.read",
+            "schema_errors": [],
+            "source_map": {
+              "action": "memory.declared_action",
+              "approval.required": "memory.risk_classifier",
+              "approval.status": "memory.approval_state",
+              "capability.connectorhub_mediated": "memory.connectorhub_boundary",
+              "capability.declared": "memory.capability_manifest",
+              "data_scope.purpose": "memory.data_purpose",
+              "data_scope.scope": "memory.data_scope",
+              "environment.deployment": "local_range.environment",
+              "environment.workspace_mode": "trusted_request_context.workspace_mode",
+              "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+              "mission_authority.authorized": "trusted_request_context.mission_authority",
+              "mission_authority.mission_id": "trusted_request_context.mission_authority",
+              "policy_path": "memory.policy_entrypoint",
+              "resource.classification": "memory.resource_record",
+              "resource.namespace_id": "memory.resource_record",
+              "resource.resource_id": "memory.resource_record",
+              "resource.tenant_id": "memory.resource_record",
+              "risk": "memory.risk_classifier",
+              "schema_version": "policy_client.constant",
+              "scope.namespace_id": "trusted_request_context.namespace_scope",
+              "scope.tenant_id": "trusted_request_context.tenant_scope",
+              "scope.workspace_id": "trusted_request_context.workspace_scope",
+              "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+              "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+              "subject.revoked": "trusted_request_context.postgres.revocation_state",
+              "subject.roles": "trusted_request_context.postgres.membership_roles",
+              "trace_id": "memory.trace_context"
+            }
+          }
+        ]
       },
-      "name": "opa_unit_and_http_decision_pass",
+      "name": "model_router_policy_input_builder_exercised",
       "passed": true
     },
     {
       "evidence": {
-        "abac_denied": true,
-        "allow_decision_observed": true,
-        "capability_default_deny": true,
-        "deny_precedence_on_mismatch": true,
-        "high_risk_allowed_after_approval": true,
-        "high_risk_requires_approval": true,
-        "invalid_schema_denied": true,
-        "opa_unavailable_denied": true,
-        "role_denied": true,
-        "undefined_default_deny": true
+        "snapshots": [
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_832a6f50bd9e5334",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "66eb788aed1014e8e1bb99ea4dc557d9904549deeabc29b7c4455ca19485a7a5",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "role_not_allowed"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_data_047"
+            },
+            "expected_reason": "role_not_allowed",
+            "response": {
+              "audit_ref": "audit_a97534c70eed55d8",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_832a6f50bd9e5334",
+              "message": "The current role cannot perform this operation.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "The current role cannot perform this operation.",
+                  "reason_code": "role_not_allowed",
+                  "resolution": "Request an appropriate role or change the operation scope."
+                }
+              ],
+              "resolution": "Request an appropriate role or change the operation scope.",
+              "safe_reason_codes": [
+                "role_not_allowed"
+              ],
+              "status_code": 403
+            },
+            "surface": "data",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='data' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='role_not_allowed' data-decision-id='policy_832a6f50bd9e5334' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>The current role cannot perform this operation.</p><p>Request an appropriate role or change the operation scope.</p></section>",
+              "html_sha256": "7d78826e873e06fdd95e1e020f3ca0016ff58071f2449ca62c558775a847a373",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_42ddded76b4d581b",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "1e182a3acf97a493dc30dddbc2dcb1715faa8912d8a7ca2464df5be42170da95",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "connectorhub_capability_required"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_tool_047"
+            },
+            "expected_reason": "connectorhub_capability_required",
+            "response": {
+              "audit_ref": "audit_766f59637651b155",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_42ddded76b4d581b",
+              "message": "The requested connector or tool capability is not declared.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "The requested connector or tool capability is not declared.",
+                  "reason_code": "connectorhub_capability_required",
+                  "resolution": "Use a declared ConnectorHub-mediated capability."
+                }
+              ],
+              "resolution": "Use a declared ConnectorHub-mediated capability.",
+              "safe_reason_codes": [
+                "connectorhub_capability_required"
+              ],
+              "status_code": 403
+            },
+            "surface": "tool",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='tool' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='connectorhub_capability_required' data-decision-id='policy_42ddded76b4d581b' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>The requested connector or tool capability is not declared.</p><p>Use a declared ConnectorHub-mediated capability.</p></section>",
+              "html_sha256": "37c265bde86a9d24fc0e5d3c7f2fac0cc42084ed2c43a8cf64863dc17722dc33",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_cc80d7fce02ab579",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "257f02d393beef847a910cd09089f3f409fbad77760bd0f0bc25fceb3b42e949",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "high_risk_requires_approval"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_action_047"
+            },
+            "expected_reason": "high_risk_requires_approval",
+            "response": {
+              "audit_ref": "audit_411f43be9d332f86",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_cc80d7fce02ab579",
+              "message": "This high-risk operation requires approval.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "This high-risk operation requires approval.",
+                  "reason_code": "high_risk_requires_approval",
+                  "resolution": "Complete the required approval workflow before retrying."
+                }
+              ],
+              "resolution": "Complete the required approval workflow before retrying.",
+              "safe_reason_codes": [
+                "high_risk_requires_approval"
+              ],
+              "status_code": 403
+            },
+            "surface": "action",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='action' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='high_risk_requires_approval' data-decision-id='policy_cc80d7fce02ab579' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>This high-risk operation requires approval.</p><p>Complete the required approval workflow before retrying.</p></section>",
+              "html_sha256": "c35e727b1dc7b831dc1061308f99efe90ce97c9f0bbb82615bd8cce6d3c297df",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_63036f01ae8136c9",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "9c1a7e1e6cecbfe0169dbb8e16fd4a2feea3a040a28bb7fe27b4bc9a11d19b49",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "connectorhub_capability_required"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_connector_047"
+            },
+            "expected_reason": "connectorhub_capability_required",
+            "response": {
+              "audit_ref": "audit_8ef68cb8067e332f",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_63036f01ae8136c9",
+              "message": "The requested connector or tool capability is not declared.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "The requested connector or tool capability is not declared.",
+                  "reason_code": "connectorhub_capability_required",
+                  "resolution": "Use a declared ConnectorHub-mediated capability."
+                }
+              ],
+              "resolution": "Use a declared ConnectorHub-mediated capability.",
+              "safe_reason_codes": [
+                "connectorhub_capability_required"
+              ],
+              "status_code": 403
+            },
+            "surface": "connector",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='connector' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='connectorhub_capability_required' data-decision-id='policy_63036f01ae8136c9' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>The requested connector or tool capability is not declared.</p><p>Use a declared ConnectorHub-mediated capability.</p></section>",
+              "html_sha256": "057a5f1e193b42aef6c60faf1a0b42d6e3f1baefe500c868604f9be858ba1f28",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_e042eb097310a30b",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "dfa715164be8a476622c9a01cb42ce9f12a719a30f6ea7369b137bb61d7fa23e",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "workspace_mode_denied"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_model_047"
+            },
+            "expected_reason": "workspace_mode_denied",
+            "response": {
+              "audit_ref": "audit_f8711032b2714bc6",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_e042eb097310a30b",
+              "message": "The workspace mode does not allow this operation.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "The workspace mode does not allow this operation.",
+                  "reason_code": "workspace_mode_denied",
+                  "resolution": "Use an allowed workspace mode for this operation."
+                }
+              ],
+              "resolution": "Use an allowed workspace mode for this operation.",
+              "safe_reason_codes": [
+                "workspace_mode_denied"
+              ],
+              "status_code": 403
+            },
+            "surface": "model",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='model' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='workspace_mode_denied' data-decision-id='policy_e042eb097310a30b' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>The workspace mode does not allow this operation.</p><p>Use an allowed workspace mode for this operation.</p></section>",
+              "html_sha256": "a7fa3cf033d6995b9df8b80b00e6ed61c39bc3b09238c809d3e5d812e30cfb13",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_1f474bd0bdecb07c",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "7cacd6fc2220a2e86c5f8530b9ad95d8ea70d9032e437046131b2df0a49332ab",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "cross_tenant_scope"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_egress_047"
+            },
+            "expected_reason": "cross_tenant_scope",
+            "response": {
+              "audit_ref": "audit_3c294e489eb1a9f6",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_1f474bd0bdecb07c",
+              "message": "The requested resource is outside the authorized tenant scope.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "The requested resource is outside the authorized tenant scope.",
+                  "reason_code": "cross_tenant_scope",
+                  "resolution": "Switch to an authorized tenant scope or request explicit approval."
+                }
+              ],
+              "resolution": "Switch to an authorized tenant scope or request explicit approval.",
+              "safe_reason_codes": [
+                "cross_tenant_scope"
+              ],
+              "status_code": 403
+            },
+            "surface": "egress",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='egress' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='cross_tenant_scope' data-decision-id='policy_1f474bd0bdecb07c' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>The requested resource is outside the authorized tenant scope.</p><p>Switch to an authorized tenant scope or request explicit approval.</p></section>",
+              "html_sha256": "b113292167ebbab61260474749b9699e3eb4828326963619a11f989de91d2318",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_177884ba0c2a5628",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "fce6084185422a29b96ced5aec65c825ce57cfae0e9e39f25642411909d83fc4",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "high_risk_requires_approval"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_policy_admin_047"
+            },
+            "expected_reason": "high_risk_requires_approval",
+            "response": {
+              "audit_ref": "audit_ac8fab4a51498b30",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_177884ba0c2a5628",
+              "message": "This high-risk operation requires approval.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "This high-risk operation requires approval.",
+                  "reason_code": "high_risk_requires_approval",
+                  "resolution": "Complete the required approval workflow before retrying."
+                }
+              ],
+              "resolution": "Complete the required approval workflow before retrying.",
+              "safe_reason_codes": [
+                "high_risk_requires_approval"
+              ],
+              "status_code": 403
+            },
+            "surface": "policy_admin",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='policy_admin' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='high_risk_requires_approval' data-decision-id='policy_177884ba0c2a5628' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>This high-risk operation requires approval.</p><p>Complete the required approval workflow before retrying.</p></section>",
+              "html_sha256": "9e711e2e1fab863ef9cd73e669310b39431d79fd35696cc34424a3216d1b33d2",
+              "protected_data_echoed": false
+            }
+          }
+        ]
       },
-      "name": "policy_fail_closed_cases_observed",
+      "name": "disallowed_model_provider_or_workspace_mode_denied",
       "passed": true
     },
     {
       "evidence": {
-        "bundle_hash": "a23617c575c760b9d10c16a4abfaa915c972f4492ea5c20214371f445ac6a529"
+        "abac_allowed": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "decision_id": "policy_5f383343f6f05aee",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "8f894e78cd30d23cad1865e0d62d9c21f806cbfc790ff5cfcc7a0dd21dafc589",
+          "policy_path": "cornerstone.vs2/allow",
+          "reason_codes": [],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_abac_allow_029"
+        },
+        "abac_matrix": [
+          {
+            "audit_ref": "audit_0667f1cf78ebb558",
+            "case": "secret_classification",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_dfd04fd6bafdb174",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "6e66f205615fbca3adad034f53d039630c81288c957133db2d8e85a1f3923c3f",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "secret_classification_denied"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_abac_deny_029_1"
+            },
+            "expected_reason": "secret_classification_denied",
+            "role_alone_would_allow": true
+          },
+          {
+            "audit_ref": "audit_0cf1a574e2bc508d",
+            "case": "missing_mission_authority",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_2520d47a269f7579",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "0c4d1dccd90470e404220dbac1aa5d5f914ce3e2a357b5dd1fd198f8b5bb042b",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "mission_authority_required"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_abac_deny_029_2"
+            },
+            "expected_reason": "mission_authority_required",
+            "role_alone_would_allow": true
+          },
+          {
+            "audit_ref": "audit_a2e8869014956d7c",
+            "case": "cross_tenant_data_scope",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_7e89445729d1d05b",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "657fb0f973e0c7d50fe6324ecb482256b8745a6442379611707ebd16ce5c4310",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "data_scope_denied"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_abac_deny_029_3"
+            },
+            "expected_reason": "data_scope_denied",
+            "role_alone_would_allow": true
+          },
+          {
+            "audit_ref": "audit_ff885ea53477a563",
+            "case": "external_workspace_mode",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_4fa0ae7ead6e99ea",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "53b3d79ca7685e14d375a41626c7ade5d3b416eca35a9ff2fc7dd7134b06ff52",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "workspace_mode_denied"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_abac_deny_029_4"
+            },
+            "expected_reason": "workspace_mode_denied",
+            "role_alone_would_allow": true
+          }
+        ],
+        "allow_flow": {
+          "artifact": {
+            "artifact_id": "artifact_alpha_001",
+            "classification": "internal",
+            "namespace_id": "personal",
+            "owner_id": "principal_alice",
+            "payload": {
+              "canary": "ALPHA_ONLY_RANGE_CANARY",
+              "title": "Alpha local range artifact"
+            },
+            "tenant_id": "tenant_alpha",
+            "workspace_id": "alpha-home"
+          },
+          "audit_refs": [
+            "audit_634607b728b4bcb8"
+          ],
+          "context": {
+            "membership_revision": "memrev-alpha-001",
+            "namespace_id": "personal",
+            "owner_id": "principal_alice",
+            "principal_id": "principal_alice",
+            "revoked": false,
+            "roles": [
+              "owner"
+            ],
+            "session_version": 1,
+            "tenant_id": "tenant_alpha",
+            "workspace_id": "alpha-home"
+          },
+          "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 2,
+            "egress_calls": 0,
+            "policy_calls": 1
+          },
+          "error": null,
+          "policy_decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_afdcf6c5f1f67571",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "ba9d60a838d6d109de44fe693577192daffc021e6a74fa662ff7dc1fd9f567c1",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_allow_027"
+          },
+          "status": "allowed",
+          "status_code": 200,
+          "surface": "service_direct",
+          "tenant_b_rows_returned": 0,
+          "trace_id": "trace_vs2_policy_allow_027"
+        },
+        "audit_refs": [
+          "audit_e0e65cb478c8daa5",
+          "audit_d0e1eca2205b56fa",
+          "audit_0667f1cf78ebb558",
+          "audit_0cf1a574e2bc508d",
+          "audit_a2e8869014956d7c",
+          "audit_ff885ea53477a563",
+          "audit_99650eedb2f549dd",
+          "audit_9b27f6cef370e2d6",
+          "audit_cb6b41220c19cbbb",
+          "audit_a87bc7d3120b170e",
+          "audit_ff3bd9faf7083f15",
+          "audit_71f9f718208aac6b",
+          "audit_207219ea625bdf1c",
+          "audit_d0d2bbfbaa511ba2",
+          "audit_4a6c521db9d98c16",
+          "audit_37194e94dde9caa3",
+          "audit_67caa3d1eee6e1b7",
+          "audit_634607b728b4bcb8"
+        ],
+        "checks": {
+          "abac_attribute_boundaries_enforced": true,
+          "abac_matching_allowed_set_succeeds": true,
+          "allow_decision_reaches_downstream_and_audit": true,
+          "decisions_have_revision_digest_and_id": true,
+          "denials_have_stable_safe_responses": true,
+          "deny_precedence_conflict_matrix_enforced": true,
+          "fail_closed_decisions_have_digest_and_id": true,
+          "malformed_and_wrong_version_inputs_fail_closed": true,
+          "opa_failure_denials_have_stable_safe_responses": true,
+          "opa_failure_modes_cover_protected_operation_families": true,
+          "opa_failure_modes_fail_closed_without_side_effects": true,
+          "opa_failure_readiness_degraded": true,
+          "role_denied_without_downstream_side_effect": true,
+          "unexpected_authoritative_attrs_fail_closed": true,
+          "unknown_policy_default_denied_without_downstream_side_effect": true
+        },
+        "deny_precedence": {
+          "audit_ref": "audit_ff3bd9faf7083f15",
+          "decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "deny",
+            "decision_id": "policy_c1c7868a791da310",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "b638d2f670a8474bd900420c017a08df508a63937a03bf40bf7977f393905c41",
+            "policy_path": "cornerstone.vs2/deny",
+            "reason_codes": [
+              "data_scope_denied",
+              "high_risk_requires_approval",
+              "secret_classification_denied"
+            ],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_deny_precedence_049"
+          },
+          "restrictive_rules": [
+            "secret_classification_denied",
+            "high_risk_requires_approval",
+            "data_scope_denied"
+          ],
+          "role_alone_would_allow": true
+        },
+        "malformed_matrix": [
+          {
+            "audit_ref": "audit_99650eedb2f549dd",
+            "case": "partial_missing_mission_field",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_f0993578ed5c1c9a",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "4b67fad824f2e35ce090c2de16edcb4c680d2e7445d535726e20f8b334fa2bdf",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "invalid_schema"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_malformed_031_1"
+            },
+            "expected_reason": "invalid_schema",
+            "protected_data_echoed": false,
+            "safe_corrective_action": "retry with the cs.policy_input.vs2.v1 schema and trusted context-derived attributes"
+          },
+          {
+            "audit_ref": "audit_9b27f6cef370e2d6",
+            "case": "wrong_schema_version",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_599cd3e56f6fbbb1",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "dc1c620538851c641d3ed0c9eba47ed1455ea784e9b2283599a717dd77f438eb",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "invalid_schema"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_malformed_031_2"
+            },
+            "expected_reason": "invalid_schema",
+            "protected_data_echoed": false,
+            "safe_corrective_action": "retry with the cs.policy_input.vs2.v1 schema and trusted context-derived attributes"
+          },
+          {
+            "audit_ref": "audit_cb6b41220c19cbbb",
+            "case": "malformed_subject_roles",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_a04c95314126b221",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "18a78f9b73ad1d95d4675a7d954290b69447209a469e2da5879c07142ab32d4c",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "invalid_schema"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_malformed_031_3"
+            },
+            "expected_reason": "invalid_schema",
+            "protected_data_echoed": false,
+            "safe_corrective_action": "retry with the cs.policy_input.vs2.v1 schema and trusted context-derived attributes"
+          },
+          {
+            "audit_ref": "audit_a87bc7d3120b170e",
+            "case": "unexpected_authoritative_subject_tenant",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_996abd4d4179f0a1",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "bf4ef08d487ddf22eb33591599eef09d7155dca6076462dc074cc1f74c6222b7",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "unexpected_authoritative_attribute"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_malformed_031_4"
+            },
+            "expected_reason": "unexpected_authoritative_attribute",
+            "protected_data_echoed": false,
+            "safe_corrective_action": "retry with the cs.policy_input.vs2.v1 schema and trusted context-derived attributes"
+          }
+        ],
+        "member_context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+        "opa_failure_behavior": {
+          "audit_refs": [
+            "audit_71f9f718208aac6b",
+            "audit_207219ea625bdf1c",
+            "audit_d0d2bbfbaa511ba2",
+            "audit_4a6c521db9d98c16",
+            "audit_37194e94dde9caa3",
+            "audit_67caa3d1eee6e1b7"
+          ],
+          "fault_server_calls": {
+            "http_500": [
+              {
+                "mode": "http_500",
+                "path": "/v1/data/cornerstone/vs2/decision",
+                "request_bytes": 924,
+                "secret_canary_seen": false
+              }
+            ],
+            "malformed_result": [
+              {
+                "mode": "malformed_result",
+                "path": "/v1/data/cornerstone/vs2/decision",
+                "request_bytes": 927,
+                "secret_canary_seen": false
+              }
+            ],
+            "revision_mismatch": [
+              {
+                "mode": "revision_mismatch",
+                "path": "/v1/data/cornerstone/vs2/decision",
+                "request_bytes": 922,
+                "secret_canary_seen": false
+              }
+            ],
+            "timeout": [
+              {
+                "mode": "timeout",
+                "path": "/v1/data/cornerstone/vs2/decision",
+                "request_bytes": 931,
+                "secret_canary_seen": false
+              }
+            ],
+            "undefined_result": [
+              {
+                "mode": "undefined_result",
+                "path": "/v1/data/cornerstone/vs2/decision",
+                "request_bytes": 931,
+                "secret_canary_seen": false
+              }
+            ]
+          },
+          "matrix": [
+            {
+              "audit_ref": "audit_71f9f718208aac6b",
+              "case": "connection_refused",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_ceae2b603b1915e1",
+                "fail_closed": true,
+                "failure_reason": "policy_client_unavailable",
+                "input_digest": "a2eee2cff1951d73b59e9ec1c211c1fe9a4204f2f63efc20b895a5dc33ee45b7",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_client_unavailable"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_1"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_client_unavailable",
+              "operation_family": "protected_read",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            },
+            {
+              "audit_ref": "audit_207219ea625bdf1c",
+              "case": "timeout",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_55120dc9103c4863",
+                "fail_closed": true,
+                "failure_reason": "policy_client_timeout",
+                "input_digest": "dd755349c6c40c849b27fb50e2d305792a30fe943ec73e05903f5ea89a965a9d",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_client_timeout"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_2"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_client_timeout",
+              "operation_family": "protected_write",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            },
+            {
+              "audit_ref": "audit_d0d2bbfbaa511ba2",
+              "case": "http_500",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_0d0bb069baad9551",
+                "fail_closed": true,
+                "failure_reason": "policy_client_http_error",
+                "input_digest": "0bb1e769e5d286b9c88e7aed5a45bdf11331a634d3c59edd6237bf40643072d8",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_client_http_error"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_3"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_client_http_error",
+              "operation_family": "tool_runtime",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            },
+            {
+              "audit_ref": "audit_4a6c521db9d98c16",
+              "case": "malformed_result",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_fb159878066be472",
+                "fail_closed": true,
+                "failure_reason": "policy_client_malformed_result",
+                "input_digest": "caef087f920093573f9b595991e7890c608d1287ab2d05f22631ba7d19c4d3e1",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_client_malformed_result"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_4"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_client_malformed_result",
+              "operation_family": "action_card",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            },
+            {
+              "audit_ref": "audit_37194e94dde9caa3",
+              "case": "undefined_result",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_9cf19f45fb5a6719",
+                "fail_closed": true,
+                "failure_reason": "policy_undefined_result",
+                "input_digest": "4fb061085c23f280dad68fc8ecf08b38da55e1cf454b7bde90fba998eb1a9b83",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_undefined_result"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_5"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_undefined_result",
+              "operation_family": "connector",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            },
+            {
+              "audit_ref": "audit_67caa3d1eee6e1b7",
+              "case": "revision_mismatch",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_cee121aa90553858",
+                "fail_closed": true,
+                "failure_reason": "policy_revision_mismatch",
+                "input_digest": "b1312519fcc98a79ebfe3699b70ced386c247ab6ee4e8dc5fb7724b0505e7ba0",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_revision_mismatch"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_6"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_revision_mismatch",
+              "operation_family": "model_router",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            }
+          ],
+          "readiness": {
+            "component": "opa",
+            "failure_count": 6,
+            "serving_risky_operations": false,
+            "status": "degraded"
+          },
+          "status": "passed"
+        },
+        "owner_context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+        "role_denied": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "decision_id": "policy_adbc92575d463ed1",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "e1e7a5e4b1d441efd97bb69868707bdbfe9a4cc6230b062099e82be69df06600",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "role_not_allowed"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_role_deny_028"
+        },
+        "side_effect_counts_after": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "side_effect_counts_before": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "stable_denial_responses": {
+          "malformed_input": {
+            "code": "CS_POLICY_DENIED",
+            "protected_data_echoed": false,
+            "resolution": "retry with the versioned policy input schema and trusted attribute sources",
+            "safe_reason_codes": [
+              "invalid_schema",
+              "unexpected_authoritative_attribute"
+            ],
+            "status_code": 403
+          },
+          "policy_client_failure": {
+            "code": "CS_POLICY_UNAVAILABLE",
+            "protected_data_echoed": false,
+            "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+            "safe_reason_codes": [
+              "policy_client_http_error",
+              "policy_client_malformed_result",
+              "policy_client_timeout",
+              "policy_client_unavailable",
+              "policy_revision_mismatch",
+              "policy_undefined_result"
+            ],
+            "status_code": 503
+          },
+          "role_denied": {
+            "code": "CS_POLICY_DENIED",
+            "protected_data_echoed": false,
+            "resolution": "request a role or change scope",
+            "safe_reason_codes": [
+              "role_not_allowed"
+            ],
+            "status_code": 403
+          },
+          "unknown_policy": {
+            "code": "CS_POLICY_DENIED",
+            "protected_data_echoed": false,
+            "resolution": "use a declared resource, action, or policy path",
+            "safe_reason_codes": [
+              "unknown_policy_default_deny"
+            ],
+            "status_code": 403
+          }
+        },
+        "status": "passed",
+        "unknown_denied": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "decision_id": "policy_a4554ff401d0db45",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "090ce80e3f0c08d9eaaa3b4b6b91ae046f3e1289f0dd70da57f2a79e93a444a0",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "unknown_policy_default_deny"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_unknown_030"
+        }
       },
-      "name": "bundle_revision_and_lkg_recorded",
+      "name": "model_denial_sends_no_disallowed_provider_request",
       "passed": true
     },
     {
@@ -56,8 +1703,8 @@
   "required_evidence": "Routing decision, zero disallowed provider calls, explanation and audit refs.",
   "scenario_id": "VS2-SEC-038",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Disallowed providers are blocked or safely rerouted with explanation; no request/data is sent to them.",
   "validator": "verify_vs2_sec_038",
   "verification_command": [

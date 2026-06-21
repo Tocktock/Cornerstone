@@ -12,14 +12,50 @@
     },
     {
       "evidence": {
-        "blanket_dependencies_ok_pass_used": 0,
-        "external_http_calls_denied_path": 0,
-        "human_acceptance_claimed_by_ai": 0,
-        "live_provider_ready_claimed": 0,
-        "production_security_claimed": 0,
-        "unredacted_secret_findings": 0
+        "verified_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+        "verified_tree_sha": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de"
       },
-      "name": "no_blanket_pass_or_production_overclaim",
+      "name": "report_metadata_binds_to_verified_revision_and_tree",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "negative_evidence": {
+          "blanket_dependencies_ok_pass_used": 0,
+          "external_http_calls_denied_path": 0,
+          "human_acceptance_claimed_by_ai": 0,
+          "live_provider_ready_claimed": 0,
+          "production_security_claimed": 0,
+          "unredacted_secret_findings": 0
+        },
+        "overclaim_scan": {
+          "expected_counts": {
+            "human_required": 7,
+            "not_verified": 0,
+            "pass": 86
+          },
+          "finding_count": 0,
+          "findings": [],
+          "missing_required_boundaries": [],
+          "required_boundaries": {
+            "current_state_ai_verified_human_gates_label_present": true,
+            "current_state_counts_match_report": true,
+            "current_state_non_production_boundary_present": true,
+            "local_report_human_external_boundaries_present": true,
+            "local_report_still_not_claimed_section_present": true,
+            "readme_ai_verified_human_gates_label_present": true,
+            "readme_counts_match_report": true,
+            "readme_human_boundaries_present": true
+          },
+          "scanned_paths": [
+            "README.md",
+            "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+            "docs/verification-reports/VS2_LOCAL_RANGE_FIRST_SLICE_REPORT_2026-06-21.md"
+          ],
+          "status": "passed"
+        }
+      },
+      "name": "completion_report_has_no_production_live_or_human_overclaim",
       "passed": true
     },
     {
@@ -45,8 +81,8 @@
   "required_evidence": "Machine-readable report, command transcript, evidence manifest/hashes, base/final revision metadata, verdict.",
   "scenario_id": "VS2-SEC-070",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "All applicable MUST_PASS and REGRESSION rows have concrete evidence; human rows are explicit; report metadata binds to verified revision/tree; no production/live overclaim is present.",
   "validator": "verify_vs2_sec_070",
   "verification_command": [

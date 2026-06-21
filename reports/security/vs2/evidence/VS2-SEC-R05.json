@@ -2,20 +2,106 @@
   "assertions": [
     {
       "evidence": {
-        "compileall_green": true,
-        "scenario_matrix_green": true,
-        "vs0_acceptance_green": true,
-        "vs0_evux_green": true,
-        "vs0_operator_ui_green": true,
-        "vs0_runtime_green": true,
-        "vs1_ontology_green": true
+        "audit_refs": [
+          "audit_61a5afeec49c2b9f",
+          "audit_239eaeffc9f04037"
+        ],
+        "checks": {
+          "learning_denials_audited": true,
+          "no_hidden_memory_or_truth_writes": true,
+          "raw_org_truth_learning_denied": true,
+          "raw_personal_truth_learning_denied": true
+        },
+        "counts_after": {
+          "claims": 0,
+          "derived_representations": 0,
+          "ontology_links": 0,
+          "ontology_objects": 0,
+          "search_snapshots": 0
+        },
+        "counts_before": {
+          "claims": 0,
+          "derived_representations": 0,
+          "ontology_links": 0,
+          "ontology_objects": 0,
+          "search_snapshots": 0
+        },
+        "decisions": [
+          {
+            "audit_ref": "audit_61a5afeec49c2b9f",
+            "case": "raw_personal_truth_without_opt_in",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_2e595403a1afac12",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "3dafe7250eddca5e9d3137aab88a7f331e79c8991e683dce3a5b42e9ddfab05f",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "high_risk_requires_approval",
+                "mission_authority_required"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_product_learning_r05_raw_personal_truth_without_opt_in"
+            }
+          },
+          {
+            "audit_ref": "audit_239eaeffc9f04037",
+            "case": "raw_org_truth_without_redaction",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_cc98d79526e239bf",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "a872d549876e5e1846229f564818dd56296bd649287ff3019382da80946242d9",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "data_scope_denied",
+                "high_risk_requires_approval",
+                "mission_authority_required"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_product_learning_r05_raw_org_truth_without_redaction"
+            }
+          }
+        ],
+        "org_context_digest": "41c286831de548f1abd56f5a6338dcf3da2a35b6a6d3be05770240d9282497a2",
+        "personal_context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+        "status": "passed"
       },
-      "name": "targeted_regression_guard_observed",
+      "name": "r05_raw_personal_and_org_truth_learning_denied",
       "passed": true
     },
     {
-      "evidence": {},
-      "name": "security_foundation_still_default_deny",
+      "evidence": {
+        "counts_after": {
+          "claims": 0,
+          "derived_representations": 0,
+          "ontology_links": 0,
+          "ontology_objects": 0,
+          "search_snapshots": 0
+        },
+        "counts_before": {
+          "claims": 0,
+          "derived_representations": 0,
+          "ontology_links": 0,
+          "ontology_objects": 0,
+          "search_snapshots": 0
+        }
+      },
+      "name": "r05_no_hidden_memory_or_truth_rewrite",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "audit_refs": [
+          "audit_61a5afeec49c2b9f",
+          "audit_239eaeffc9f04037"
+        ]
+      },
+      "name": "r05_learning_denials_audited",
       "passed": true
     },
     {
@@ -41,8 +127,8 @@
   "required_evidence": "Denied decision, zero source rows and memory writes.",
   "scenario_id": "VS2-SEC-R05",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Access is denied and no hidden memory/truth rewrite occurs.",
   "validator": "verify_vs2_sec_r05",
   "verification_command": [

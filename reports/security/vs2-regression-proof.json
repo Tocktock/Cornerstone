@@ -1,14 +1,303 @@
 {
   "checks": {
     "compileall_green": true,
+    "reports_written_under_vs2_regression_dir": true,
     "scenario_matrix_green": true,
+    "vs0_acceptance_fresh_verify_green": true,
+    "vs0_acceptance_gate_green": true,
     "vs0_acceptance_green": true,
+    "vs0_evux_fresh_verify_green": true,
+    "vs0_evux_gate_green": true,
     "vs0_evux_green": true,
+    "vs0_operator_ui_fresh_verify_green": true,
+    "vs0_operator_ui_gate_green": true,
     "vs0_operator_ui_green": true,
+    "vs0_runtime_fresh_verify_green": true,
+    "vs0_runtime_gate_green": true,
     "vs0_runtime_green": true,
+    "vs1_ontology_fresh_verify_green": true,
+    "vs1_ontology_gate_green": true,
     "vs1_ontology_green": true
   },
-  "commands": {
+  "claim_boundary": "fresh local VS0/VS1 regression reports only; not production, live-provider, or human acceptance evidence",
+  "fresh_checks": [
+    "cornerstone scenario verify vs0-product-runtime",
+    "cornerstone scenario verify vs0-runtime-acceptance",
+    "cornerstone scenario verify vs0-evux",
+    "cornerstone scenario verify vs0-operator-acceptance-ui",
+    "cornerstone scenario verify vs1-ontology-suggest-promote",
+    "cornerstone scenario gate reports/vs2/regression/*.json",
+    "scripts/verify_scenario_matrix.py",
+    "python3 -m compileall packages/cornerstone_cli"
+  ],
+  "fresh_report_summaries": {
+    "vs0_acceptance": {
+      "scenario_set": "vs0-runtime-acceptance",
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "human_required": 2,
+        "pass": 7,
+        "product_feature_claims": "LOCAL_VS0_RUNTIME_ACCEPTANCE_READY_PRODUCTION_NOT_READY",
+        "scenario_count": 9
+      }
+    },
+    "vs0_evux": {
+      "scenario_set": "vs0-evux",
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "human_required": 2,
+        "pass": 12,
+        "product_feature_claims": "LOCAL_VS0_EVUX_READY_PRODUCTION_NOT_READY",
+        "scenario_count": 14
+      }
+    },
+    "vs0_operator_ui": {
+      "scenario_set": "vs0-operator-acceptance-ui",
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "human_required": 1,
+        "pass": 12,
+        "product_feature_claims": "LOCAL_VS0_OPERATOR_UI_READY_HUMAN_REQUIRED_PRODUCTION_NOT_READY",
+        "scenario_count": 13
+      }
+    },
+    "vs0_runtime": {
+      "scenario_set": "vs0-product-runtime",
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "human_required": 2,
+        "pass": 12,
+        "product_feature_claims": "LOCAL_VS0_PRODUCT_RUNTIME_READY_PRODUCTION_NOT_READY",
+        "scenario_count": 14
+      }
+    },
+    "vs1_ontology": {
+      "scenario_set": "vs1-ontology-suggest-promote",
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "human_required": 3,
+        "pass": 32,
+        "product_feature_claims": "LOCAL_VS1_ONTOLOGY_READY_PRODUCTION_NOT_READY_HUMAN_REQUIRED",
+        "scenario_count": 35
+      }
+    }
+  },
+  "fresh_verify_commands": {
+    "vs0_acceptance": [
+      "/Users/jiyong/playground/Cornerstone/cornerstone",
+      "scenario",
+      "verify",
+      "vs0-runtime-acceptance",
+      "--json",
+      "--output",
+      "reports/vs2/regression/vs0-runtime-acceptance.json"
+    ],
+    "vs0_evux": [
+      "/Users/jiyong/playground/Cornerstone/cornerstone",
+      "scenario",
+      "verify",
+      "vs0-evux",
+      "--json",
+      "--output",
+      "reports/vs2/regression/vs0-evux.json"
+    ],
+    "vs0_operator_ui": [
+      "/Users/jiyong/playground/Cornerstone/cornerstone",
+      "scenario",
+      "verify",
+      "vs0-operator-acceptance-ui",
+      "--json",
+      "--output",
+      "reports/vs2/regression/vs0-operator-ui.json"
+    ],
+    "vs0_runtime": [
+      "/Users/jiyong/playground/Cornerstone/cornerstone",
+      "scenario",
+      "verify",
+      "vs0-product-runtime",
+      "--json",
+      "--output",
+      "reports/vs2/regression/vs0-product-runtime.json"
+    ],
+    "vs1_ontology": [
+      "/Users/jiyong/playground/Cornerstone/cornerstone",
+      "scenario",
+      "verify",
+      "vs1-ontology-suggest-promote",
+      "--json",
+      "--output",
+      "reports/vs2/regression/vs1-ontology.json"
+    ]
+  },
+  "fresh_verify_exit_codes": {
+    "vs0_acceptance": 0,
+    "vs0_evux": 0,
+    "vs0_operator_ui": 0,
+    "vs0_runtime": 0,
+    "vs1_ontology": 0
+  },
+  "gate_commands": {
+    "vs0_acceptance": [
+      "/Users/jiyong/playground/Cornerstone/cornerstone",
+      "scenario",
+      "gate",
+      "reports/vs2/regression/vs0-runtime-acceptance.json",
+      "--json"
+    ],
+    "vs0_evux": [
+      "/Users/jiyong/playground/Cornerstone/cornerstone",
+      "scenario",
+      "gate",
+      "reports/vs2/regression/vs0-evux.json",
+      "--json"
+    ],
+    "vs0_operator_ui": [
+      "/Users/jiyong/playground/Cornerstone/cornerstone",
+      "scenario",
+      "gate",
+      "reports/vs2/regression/vs0-operator-ui.json",
+      "--json"
+    ],
+    "vs0_runtime": [
+      "/Users/jiyong/playground/Cornerstone/cornerstone",
+      "scenario",
+      "gate",
+      "reports/vs2/regression/vs0-product-runtime.json",
+      "--json"
+    ],
+    "vs1_ontology": [
+      "/Users/jiyong/playground/Cornerstone/cornerstone",
+      "scenario",
+      "gate",
+      "reports/vs2/regression/vs1-ontology.json",
+      "--json"
+    ]
+  },
+  "gate_exit_codes": {
+    "vs0_acceptance": 0,
+    "vs0_evux": 0,
+    "vs0_operator_ui": 0,
+    "vs0_runtime": 0,
+    "vs1_ontology": 0
+  },
+  "report_paths": {
+    "vs0_acceptance": "reports/vs2/regression/vs0-runtime-acceptance.json",
+    "vs0_evux": "reports/vs2/regression/vs0-evux.json",
+    "vs0_operator_ui": "reports/vs2/regression/vs0-operator-ui.json",
+    "vs0_runtime": "reports/vs2/regression/vs0-product-runtime.json",
+    "vs1_ontology": "reports/vs2/regression/vs1-ontology.json"
+  },
+  "status": "passed",
+  "stderr_tail": {
+    "gate": {
+      "vs0_acceptance": [],
+      "vs0_evux": [],
+      "vs0_operator_ui": [],
+      "vs0_runtime": [],
+      "vs1_ontology": []
+    },
+    "utility": {
+      "compileall": [],
+      "scenario_matrix": []
+    },
+    "verify": {
+      "vs0_acceptance": [],
+      "vs0_evux": [],
+      "vs0_operator_ui": [],
+      "vs0_runtime": [],
+      "vs1_ontology": []
+    }
+  },
+  "stdout_tail": {
+    "gate": {
+      "vs0_acceptance": [
+        "  \"status\": \"success\",",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "vs0_evux": [
+        "  \"status\": \"success\",",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "vs0_operator_ui": [
+        "  \"status\": \"success\",",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "vs0_runtime": [
+        "  \"status\": \"success\",",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "vs1_ontology": [
+        "  \"status\": \"success\",",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ]
+    },
+    "utility": {
+      "compileall": [
+        "Listing 'packages/cornerstone_cli'..."
+      ],
+      "scenario_matrix": [
+        "PASS: scenario verification matrix verified (206 scenarios; no missing rows; no unevidenced PASS claims)."
+      ]
+    },
+    "verify": {
+      "vs0_acceptance": [
+        "  },",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "vs0_evux": [
+        "    \"worktree_dirty_at_verification\": true",
+        "  },",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "vs0_operator_ui": [
+        "  },",
+        "  \"tenant_id\": \"local-dev\",",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "vs0_runtime": [
+        "    }",
+        "  },",
+        "  \"version\": \"0.0.0-scaffold\",",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ],
+      "vs1_ontology": [
+        "    \"scenario_report\": \"reports/scenario/vs1-ontology-suggest-promote-2026-06-15.json\",",
+        "    \"suggestion_set_id\": \"oset_35864e921a8f28a5\"",
+        "  },",
+        "  \"workspace_id\": \"default\"",
+        "}"
+      ]
+    }
+  },
+  "utility_commands": {
     "compileall": [
       "python3",
       "-m",
@@ -18,115 +307,10 @@
     "scenario_matrix": [
       "python3",
       "scripts/verify_scenario_matrix.py"
-    ],
-    "vs0_acceptance": [
-      "/Users/jiyong/playground/Cornerstone/cornerstone",
-      "scenario",
-      "gate",
-      "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
-      "--json"
-    ],
-    "vs0_evux": [
-      "/Users/jiyong/playground/Cornerstone/cornerstone",
-      "scenario",
-      "gate",
-      "reports/scenario/vs0-evux-2026-06-13.json",
-      "--json"
-    ],
-    "vs0_operator_ui": [
-      "/Users/jiyong/playground/Cornerstone/cornerstone",
-      "scenario",
-      "gate",
-      "reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json",
-      "--json"
-    ],
-    "vs0_runtime": [
-      "/Users/jiyong/playground/Cornerstone/cornerstone",
-      "scenario",
-      "gate",
-      "reports/scenario/vs0-product-runtime-2026-06-11.json",
-      "--json"
-    ],
-    "vs1_ontology": [
-      "/Users/jiyong/playground/Cornerstone/cornerstone",
-      "scenario",
-      "gate",
-      "reports/scenario/vs1-ontology-suggest-promote-2026-06-15.json",
-      "--json"
     ]
   },
-  "exit_codes": {
+  "utility_exit_codes": {
     "compileall": 0,
-    "scenario_matrix": 0,
-    "vs0_acceptance": 0,
-    "vs0_evux": 0,
-    "vs0_operator_ui": 0,
-    "vs0_runtime": 0,
-    "vs1_ontology": 0
-  },
-  "fresh_checks": [
-    "scripts/verify_scenario_matrix.py",
-    "python3 -m compileall packages/cornerstone_cli"
-  ],
-  "non_recursive_note": "VS0/VS1 accepted reports are gated here to avoid recursive VS2 proof generation inside the VS2 verifier.",
-  "report_paths": {
-    "vs0_acceptance": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
-    "vs0_evux": "reports/scenario/vs0-evux-2026-06-13.json",
-    "vs0_operator_ui": "reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json",
-    "vs0_runtime": "reports/scenario/vs0-product-runtime-2026-06-11.json",
-    "vs1_ontology": "reports/scenario/vs1-ontology-suggest-promote-2026-06-15.json"
-  },
-  "status": "passed",
-  "stderr_tail": {
-    "compileall": [],
-    "scenario_matrix": [],
-    "vs0_acceptance": [],
-    "vs0_evux": [],
-    "vs0_operator_ui": [],
-    "vs0_runtime": [],
-    "vs1_ontology": []
-  },
-  "stdout_tail": {
-    "compileall": [
-      "Listing 'packages/cornerstone_cli'..."
-    ],
-    "scenario_matrix": [
-      "PASS: scenario verification matrix verified (206 scenarios; no missing rows; no unevidenced PASS claims)."
-    ],
-    "vs0_acceptance": [
-      "  \"status\": \"success\",",
-      "  \"tenant_id\": \"local-dev\",",
-      "  \"version\": \"0.0.0-scaffold\",",
-      "  \"workspace_id\": \"default\"",
-      "}"
-    ],
-    "vs0_evux": [
-      "  \"status\": \"success\",",
-      "  \"tenant_id\": \"local-dev\",",
-      "  \"version\": \"0.0.0-scaffold\",",
-      "  \"workspace_id\": \"default\"",
-      "}"
-    ],
-    "vs0_operator_ui": [
-      "  \"status\": \"success\",",
-      "  \"tenant_id\": \"local-dev\",",
-      "  \"version\": \"0.0.0-scaffold\",",
-      "  \"workspace_id\": \"default\"",
-      "}"
-    ],
-    "vs0_runtime": [
-      "  \"status\": \"success\",",
-      "  \"tenant_id\": \"local-dev\",",
-      "  \"version\": \"0.0.0-scaffold\",",
-      "  \"workspace_id\": \"default\"",
-      "}"
-    ],
-    "vs1_ontology": [
-      "  \"status\": \"success\",",
-      "  \"tenant_id\": \"local-dev\",",
-      "  \"version\": \"0.0.0-scaffold\",",
-      "  \"workspace_id\": \"default\"",
-      "}"
-    ]
+    "scenario_matrix": 0
   }
 }

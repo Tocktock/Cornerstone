@@ -2,35 +2,107 @@
   "assertions": [
     {
       "evidence": {
-        "http_allow_observed": true,
-        "http_cross_tenant_denied": true,
-        "http_invalid_schema_denied": true,
-        "outage_fails_closed": true
+        "coverage_report_machine_readable": true,
+        "no_test_execution_failed": true,
+        "opa_build_passed": true,
+        "opa_check_passed": true,
+        "opa_test_details_passed": true,
+        "opa_test_passed": true,
+        "required_case_matrix_present": true
       },
-      "name": "opa_unit_and_http_decision_pass",
+      "name": "opa_ci_unit_tests_pass_with_fail_on_empty",
       "passed": true
     },
     {
       "evidence": {
-        "abac_denied": true,
-        "allow_decision_observed": true,
-        "capability_default_deny": true,
-        "deny_precedence_on_mismatch": true,
-        "high_risk_allowed_after_approval": true,
-        "high_risk_requires_approval": true,
-        "invalid_schema_denied": true,
-        "opa_unavailable_denied": true,
-        "role_denied": true,
-        "undefined_default_deny": true
+        "coverage_report_machine_readable": true,
+        "no_test_execution_failed": true,
+        "opa_build_passed": true,
+        "opa_check_passed": true,
+        "opa_test_details_passed": true,
+        "opa_test_passed": true,
+        "required_case_matrix_present": true
       },
-      "name": "policy_fail_closed_cases_observed",
+      "name": "opa_ci_check_and_bundle_build_pass",
       "passed": true
     },
     {
       "evidence": {
-        "bundle_hash": "a23617c575c760b9d10c16a4abfaa915c972f4492ea5c20214371f445ac6a529"
+        "coverage_report_machine_readable": true,
+        "no_test_execution_failed": true,
+        "opa_build_passed": true,
+        "opa_check_passed": true,
+        "opa_test_details_passed": true,
+        "opa_test_passed": true,
+        "required_case_matrix_present": true
       },
-      "name": "bundle_revision_and_lkg_recorded",
+      "name": "opa_ci_no_test_execution_fails",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "observed": [
+          "test_connectorhub_capability_required",
+          "test_cross_tenant_data_scope_denied",
+          "test_cross_tenant_scope_denied",
+          "test_external_workspace_mode_denied",
+          "test_high_risk_approved_allowed",
+          "test_high_risk_requires_approval",
+          "test_invalid_schema_fails_closed",
+          "test_member_write_denied",
+          "test_mission_authority_required",
+          "test_owner_read_allowed",
+          "test_revoked_principal_denied",
+          "test_secret_classification_denied",
+          "test_unexpected_authoritative_attribute_denied",
+          "test_unknown_policy_default_deny"
+        ],
+        "required": [
+          "test_connectorhub_capability_required",
+          "test_cross_tenant_data_scope_denied",
+          "test_cross_tenant_scope_denied",
+          "test_high_risk_approved_allowed",
+          "test_invalid_schema_fails_closed",
+          "test_member_write_denied",
+          "test_owner_read_allowed",
+          "test_revoked_principal_denied",
+          "test_unexpected_authoritative_attribute_denied",
+          "test_unknown_policy_default_deny"
+        ]
+      },
+      "name": "opa_ci_named_case_matrix_present",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "coverage_available": true,
+        "covered_percent": 93.58288770053476
+      },
+      "name": "opa_ci_machine_readable_coverage_available",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "observed": [
+          "allow",
+          "capability_allowed",
+          "decision",
+          "deny",
+          "role_allowed",
+          "same_scope",
+          "valid_schema"
+        ],
+        "required": [
+          "allow",
+          "capability_allowed",
+          "decision",
+          "deny",
+          "role_allowed",
+          "same_scope",
+          "valid_schema"
+        ]
+      },
+      "name": "opa_ci_entrypoint_manifest_reviewed",
       "passed": true
     },
     {
@@ -56,8 +128,8 @@
   "required_evidence": "OPA test JSON, coverage JSON, entrypoint coverage map, exit code 0.",
   "scenario_id": "VS2-SEC-040",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "All positive, negative, malformed, boundary, and regression cases pass; no-test execution fails; a machine-readable coverage report is produced and reviewed against declared entrypoints.",
   "validator": "verify_vs2_sec_040",
   "verification_command": [

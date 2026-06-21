@@ -15,7 +15,8 @@
     "reports/security/vs2-worker-proof.json",
     "reports/security/vs2-operator-status.json",
     "reports/security/vs2-regression-proof.json",
-    "reports/security/vs2-synthetic-world.json"
+    "reports/security/vs2-synthetic-world.json",
+    "reports/security/vs2-local-range.json"
   ],
   "secret_findings": 0,
   "status": "passed"

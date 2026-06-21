@@ -2,20 +2,1283 @@
   "assertions": [
     {
       "evidence": {
-        "compileall_green": true,
-        "scenario_matrix_green": true,
-        "vs0_acceptance_green": true,
-        "vs0_evux_green": true,
-        "vs0_operator_ui_green": true,
-        "vs0_runtime_green": true,
-        "vs1_ontology_green": true
+        "abac_allowed": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "decision_id": "policy_5f383343f6f05aee",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "8f894e78cd30d23cad1865e0d62d9c21f806cbfc790ff5cfcc7a0dd21dafc589",
+          "policy_path": "cornerstone.vs2/allow",
+          "reason_codes": [],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_abac_allow_029"
+        },
+        "abac_matrix": [
+          {
+            "audit_ref": "audit_0667f1cf78ebb558",
+            "case": "secret_classification",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_dfd04fd6bafdb174",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "6e66f205615fbca3adad034f53d039630c81288c957133db2d8e85a1f3923c3f",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "secret_classification_denied"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_abac_deny_029_1"
+            },
+            "expected_reason": "secret_classification_denied",
+            "role_alone_would_allow": true
+          },
+          {
+            "audit_ref": "audit_0cf1a574e2bc508d",
+            "case": "missing_mission_authority",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_2520d47a269f7579",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "0c4d1dccd90470e404220dbac1aa5d5f914ce3e2a357b5dd1fd198f8b5bb042b",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "mission_authority_required"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_abac_deny_029_2"
+            },
+            "expected_reason": "mission_authority_required",
+            "role_alone_would_allow": true
+          },
+          {
+            "audit_ref": "audit_a2e8869014956d7c",
+            "case": "cross_tenant_data_scope",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_7e89445729d1d05b",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "657fb0f973e0c7d50fe6324ecb482256b8745a6442379611707ebd16ce5c4310",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "data_scope_denied"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_abac_deny_029_3"
+            },
+            "expected_reason": "data_scope_denied",
+            "role_alone_would_allow": true
+          },
+          {
+            "audit_ref": "audit_ff885ea53477a563",
+            "case": "external_workspace_mode",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_4fa0ae7ead6e99ea",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "53b3d79ca7685e14d375a41626c7ade5d3b416eca35a9ff2fc7dd7134b06ff52",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "workspace_mode_denied"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_abac_deny_029_4"
+            },
+            "expected_reason": "workspace_mode_denied",
+            "role_alone_would_allow": true
+          }
+        ],
+        "allow_flow": {
+          "artifact": {
+            "artifact_id": "artifact_alpha_001",
+            "classification": "internal",
+            "namespace_id": "personal",
+            "owner_id": "principal_alice",
+            "payload": {
+              "canary": "ALPHA_ONLY_RANGE_CANARY",
+              "title": "Alpha local range artifact"
+            },
+            "tenant_id": "tenant_alpha",
+            "workspace_id": "alpha-home"
+          },
+          "audit_refs": [
+            "audit_634607b728b4bcb8"
+          ],
+          "context": {
+            "membership_revision": "memrev-alpha-001",
+            "namespace_id": "personal",
+            "owner_id": "principal_alice",
+            "principal_id": "principal_alice",
+            "revoked": false,
+            "roles": [
+              "owner"
+            ],
+            "session_version": 1,
+            "tenant_id": "tenant_alpha",
+            "workspace_id": "alpha-home"
+          },
+          "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 2,
+            "egress_calls": 0,
+            "policy_calls": 1
+          },
+          "error": null,
+          "policy_decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_afdcf6c5f1f67571",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "ba9d60a838d6d109de44fe693577192daffc021e6a74fa662ff7dc1fd9f567c1",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_allow_027"
+          },
+          "status": "allowed",
+          "status_code": 200,
+          "surface": "service_direct",
+          "tenant_b_rows_returned": 0,
+          "trace_id": "trace_vs2_policy_allow_027"
+        },
+        "audit_refs": [
+          "audit_e0e65cb478c8daa5",
+          "audit_d0e1eca2205b56fa",
+          "audit_0667f1cf78ebb558",
+          "audit_0cf1a574e2bc508d",
+          "audit_a2e8869014956d7c",
+          "audit_ff885ea53477a563",
+          "audit_99650eedb2f549dd",
+          "audit_9b27f6cef370e2d6",
+          "audit_cb6b41220c19cbbb",
+          "audit_a87bc7d3120b170e",
+          "audit_ff3bd9faf7083f15",
+          "audit_71f9f718208aac6b",
+          "audit_207219ea625bdf1c",
+          "audit_d0d2bbfbaa511ba2",
+          "audit_4a6c521db9d98c16",
+          "audit_37194e94dde9caa3",
+          "audit_67caa3d1eee6e1b7",
+          "audit_634607b728b4bcb8"
+        ],
+        "checks": {
+          "abac_attribute_boundaries_enforced": true,
+          "abac_matching_allowed_set_succeeds": true,
+          "allow_decision_reaches_downstream_and_audit": true,
+          "decisions_have_revision_digest_and_id": true,
+          "denials_have_stable_safe_responses": true,
+          "deny_precedence_conflict_matrix_enforced": true,
+          "fail_closed_decisions_have_digest_and_id": true,
+          "malformed_and_wrong_version_inputs_fail_closed": true,
+          "opa_failure_denials_have_stable_safe_responses": true,
+          "opa_failure_modes_cover_protected_operation_families": true,
+          "opa_failure_modes_fail_closed_without_side_effects": true,
+          "opa_failure_readiness_degraded": true,
+          "role_denied_without_downstream_side_effect": true,
+          "unexpected_authoritative_attrs_fail_closed": true,
+          "unknown_policy_default_denied_without_downstream_side_effect": true
+        },
+        "deny_precedence": {
+          "audit_ref": "audit_ff3bd9faf7083f15",
+          "decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "deny",
+            "decision_id": "policy_c1c7868a791da310",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "b638d2f670a8474bd900420c017a08df508a63937a03bf40bf7977f393905c41",
+            "policy_path": "cornerstone.vs2/deny",
+            "reason_codes": [
+              "data_scope_denied",
+              "high_risk_requires_approval",
+              "secret_classification_denied"
+            ],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_deny_precedence_049"
+          },
+          "restrictive_rules": [
+            "secret_classification_denied",
+            "high_risk_requires_approval",
+            "data_scope_denied"
+          ],
+          "role_alone_would_allow": true
+        },
+        "malformed_matrix": [
+          {
+            "audit_ref": "audit_99650eedb2f549dd",
+            "case": "partial_missing_mission_field",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_f0993578ed5c1c9a",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "4b67fad824f2e35ce090c2de16edcb4c680d2e7445d535726e20f8b334fa2bdf",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "invalid_schema"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_malformed_031_1"
+            },
+            "expected_reason": "invalid_schema",
+            "protected_data_echoed": false,
+            "safe_corrective_action": "retry with the cs.policy_input.vs2.v1 schema and trusted context-derived attributes"
+          },
+          {
+            "audit_ref": "audit_9b27f6cef370e2d6",
+            "case": "wrong_schema_version",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_599cd3e56f6fbbb1",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "dc1c620538851c641d3ed0c9eba47ed1455ea784e9b2283599a717dd77f438eb",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "invalid_schema"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_malformed_031_2"
+            },
+            "expected_reason": "invalid_schema",
+            "protected_data_echoed": false,
+            "safe_corrective_action": "retry with the cs.policy_input.vs2.v1 schema and trusted context-derived attributes"
+          },
+          {
+            "audit_ref": "audit_cb6b41220c19cbbb",
+            "case": "malformed_subject_roles",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_a04c95314126b221",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "18a78f9b73ad1d95d4675a7d954290b69447209a469e2da5879c07142ab32d4c",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "invalid_schema"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_malformed_031_3"
+            },
+            "expected_reason": "invalid_schema",
+            "protected_data_echoed": false,
+            "safe_corrective_action": "retry with the cs.policy_input.vs2.v1 schema and trusted context-derived attributes"
+          },
+          {
+            "audit_ref": "audit_a87bc7d3120b170e",
+            "case": "unexpected_authoritative_subject_tenant",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_996abd4d4179f0a1",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "bf4ef08d487ddf22eb33591599eef09d7155dca6076462dc074cc1f74c6222b7",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "unexpected_authoritative_attribute"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_malformed_031_4"
+            },
+            "expected_reason": "unexpected_authoritative_attribute",
+            "protected_data_echoed": false,
+            "safe_corrective_action": "retry with the cs.policy_input.vs2.v1 schema and trusted context-derived attributes"
+          }
+        ],
+        "member_context_digest": "68986b48d2c3cb67450e7eb248daf2a9fdf56403505c6dbbb24f8300224da681",
+        "opa_failure_behavior": {
+          "audit_refs": [
+            "audit_71f9f718208aac6b",
+            "audit_207219ea625bdf1c",
+            "audit_d0d2bbfbaa511ba2",
+            "audit_4a6c521db9d98c16",
+            "audit_37194e94dde9caa3",
+            "audit_67caa3d1eee6e1b7"
+          ],
+          "fault_server_calls": {
+            "http_500": [
+              {
+                "mode": "http_500",
+                "path": "/v1/data/cornerstone/vs2/decision",
+                "request_bytes": 924,
+                "secret_canary_seen": false
+              }
+            ],
+            "malformed_result": [
+              {
+                "mode": "malformed_result",
+                "path": "/v1/data/cornerstone/vs2/decision",
+                "request_bytes": 927,
+                "secret_canary_seen": false
+              }
+            ],
+            "revision_mismatch": [
+              {
+                "mode": "revision_mismatch",
+                "path": "/v1/data/cornerstone/vs2/decision",
+                "request_bytes": 922,
+                "secret_canary_seen": false
+              }
+            ],
+            "timeout": [
+              {
+                "mode": "timeout",
+                "path": "/v1/data/cornerstone/vs2/decision",
+                "request_bytes": 931,
+                "secret_canary_seen": false
+              }
+            ],
+            "undefined_result": [
+              {
+                "mode": "undefined_result",
+                "path": "/v1/data/cornerstone/vs2/decision",
+                "request_bytes": 931,
+                "secret_canary_seen": false
+              }
+            ]
+          },
+          "matrix": [
+            {
+              "audit_ref": "audit_71f9f718208aac6b",
+              "case": "connection_refused",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_ceae2b603b1915e1",
+                "fail_closed": true,
+                "failure_reason": "policy_client_unavailable",
+                "input_digest": "a2eee2cff1951d73b59e9ec1c211c1fe9a4204f2f63efc20b895a5dc33ee45b7",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_client_unavailable"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_1"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_client_unavailable",
+              "operation_family": "protected_read",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            },
+            {
+              "audit_ref": "audit_207219ea625bdf1c",
+              "case": "timeout",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_55120dc9103c4863",
+                "fail_closed": true,
+                "failure_reason": "policy_client_timeout",
+                "input_digest": "dd755349c6c40c849b27fb50e2d305792a30fe943ec73e05903f5ea89a965a9d",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_client_timeout"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_2"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_client_timeout",
+              "operation_family": "protected_write",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            },
+            {
+              "audit_ref": "audit_d0d2bbfbaa511ba2",
+              "case": "http_500",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_0d0bb069baad9551",
+                "fail_closed": true,
+                "failure_reason": "policy_client_http_error",
+                "input_digest": "0bb1e769e5d286b9c88e7aed5a45bdf11331a634d3c59edd6237bf40643072d8",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_client_http_error"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_3"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_client_http_error",
+              "operation_family": "tool_runtime",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            },
+            {
+              "audit_ref": "audit_4a6c521db9d98c16",
+              "case": "malformed_result",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_fb159878066be472",
+                "fail_closed": true,
+                "failure_reason": "policy_client_malformed_result",
+                "input_digest": "caef087f920093573f9b595991e7890c608d1287ab2d05f22631ba7d19c4d3e1",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_client_malformed_result"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_4"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_client_malformed_result",
+              "operation_family": "action_card",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            },
+            {
+              "audit_ref": "audit_37194e94dde9caa3",
+              "case": "undefined_result",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_9cf19f45fb5a6719",
+                "fail_closed": true,
+                "failure_reason": "policy_undefined_result",
+                "input_digest": "4fb061085c23f280dad68fc8ecf08b38da55e1cf454b7bde90fba998eb1a9b83",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_undefined_result"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_5"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_undefined_result",
+              "operation_family": "connector",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            },
+            {
+              "audit_ref": "audit_67caa3d1eee6e1b7",
+              "case": "revision_mismatch",
+              "decision": {
+                "bundle_revision": null,
+                "decision": "deny",
+                "decision_id": "policy_cee121aa90553858",
+                "fail_closed": true,
+                "failure_reason": "policy_revision_mismatch",
+                "input_digest": "b1312519fcc98a79ebfe3699b70ced386c247ab6ee4e8dc5fb7724b0505e7ba0",
+                "policy_path": "cornerstone.vs2/fail_closed",
+                "reason_codes": [
+                  "policy_revision_mismatch"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_policy_failure_043_6"
+              },
+              "downstream_side_effect_attempted": false,
+              "expected_reason": "policy_revision_mismatch",
+              "operation_family": "model_router",
+              "stable_response": {
+                "code": "CS_POLICY_UNAVAILABLE",
+                "protected_data_echoed": false,
+                "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+                "status_code": 503
+              }
+            }
+          ],
+          "readiness": {
+            "component": "opa",
+            "failure_count": 6,
+            "serving_risky_operations": false,
+            "status": "degraded"
+          },
+          "status": "passed"
+        },
+        "owner_context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+        "role_denied": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "decision_id": "policy_adbc92575d463ed1",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "e1e7a5e4b1d441efd97bb69868707bdbfe9a4cc6230b062099e82be69df06600",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "role_not_allowed"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_role_deny_028"
+        },
+        "side_effect_counts_after": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "side_effect_counts_before": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "stable_denial_responses": {
+          "malformed_input": {
+            "code": "CS_POLICY_DENIED",
+            "protected_data_echoed": false,
+            "resolution": "retry with the versioned policy input schema and trusted attribute sources",
+            "safe_reason_codes": [
+              "invalid_schema",
+              "unexpected_authoritative_attribute"
+            ],
+            "status_code": 403
+          },
+          "policy_client_failure": {
+            "code": "CS_POLICY_UNAVAILABLE",
+            "protected_data_echoed": false,
+            "resolution": "retry after the active OPA policy service and bundle revision are healthy",
+            "safe_reason_codes": [
+              "policy_client_http_error",
+              "policy_client_malformed_result",
+              "policy_client_timeout",
+              "policy_client_unavailable",
+              "policy_revision_mismatch",
+              "policy_undefined_result"
+            ],
+            "status_code": 503
+          },
+          "role_denied": {
+            "code": "CS_POLICY_DENIED",
+            "protected_data_echoed": false,
+            "resolution": "request a role or change scope",
+            "safe_reason_codes": [
+              "role_not_allowed"
+            ],
+            "status_code": 403
+          },
+          "unknown_policy": {
+            "code": "CS_POLICY_DENIED",
+            "protected_data_echoed": false,
+            "resolution": "use a declared resource, action, or policy path",
+            "safe_reason_codes": [
+              "unknown_policy_default_deny"
+            ],
+            "status_code": 403
+          }
+        },
+        "status": "passed",
+        "unknown_denied": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "decision_id": "policy_a4554ff401d0db45",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "090ce80e3f0c08d9eaaa3b4b6b91ae046f3e1289f0dd70da57f2a79e93a444a0",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "unknown_policy_default_deny"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_unknown_030"
+        }
       },
-      "name": "targeted_regression_guard_observed",
+      "name": "r10_default_deny_policy_and_opa_fail_closed",
       "passed": true
     },
     {
-      "evidence": {},
-      "name": "security_foundation_still_default_deny",
+      "evidence": {
+        "external_action_cli": {
+          "audit_refs": [
+            "audit_f5d3dc0d7739d8e8"
+          ],
+          "cli_schema_version": "cs.cli.v0",
+          "command": "cornerstone security vs2-range-action-client",
+          "errors": [],
+          "evidence_refs": [],
+          "ids": {
+            "git_commit": "7fea206"
+          },
+          "mode": "local_scaffold",
+          "namespace_id": "personal",
+          "owner_id": "local-user",
+          "policy_decision_refs": [
+            "policy:policy_8798d510291e83e4",
+            "policy:policy_a573f7578daffc09"
+          ],
+          "product": "CornerStone",
+          "range_action_client": {
+            "http_status": 200,
+            "payload": {
+              "action_card": {
+                "action_id": "action_59b7d10893dd",
+                "capability": "mock_provider.status.write",
+                "credential_ref": "credential_ref_mock_provider_write",
+                "dry_run_fingerprint": "d0ee405b266b514109dc5845476aaaf9864ded33064bd01afc64cf8c8237a531",
+                "expected_provider_calls": 1,
+                "provider_url": "http://127.0.0.1:52493/provider/status",
+                "raw_credential_available_to_product": false,
+                "real_external_http_calls": 0,
+                "state": "dry_run_created"
+              },
+              "approval": {
+                "approval_id": "approval_6d8c5ced35f4",
+                "approver": "principal_alice",
+                "dry_run_fingerprint": "d0ee405b266b514109dc5845476aaaf9864ded33064bd01afc64cf8c8237a531",
+                "status": "approved"
+              },
+              "audit_refs": [
+                "audit_f5d3dc0d7739d8e8"
+              ],
+              "connectorhub": {
+                "credential_ref": "credential_ref_mock_provider_write",
+                "direct_provider_access": false,
+                "egress_proxy_url": "http://127.0.0.1:52494/egress",
+                "mediated_by": "ConnectorHub",
+                "raw_credentials_exposed": false
+              },
+              "context": {
+                "membership_revision": "memrev-alpha-001",
+                "namespace_id": "personal",
+                "owner_id": "principal_alice",
+                "principal_id": "principal_alice",
+                "revoked": false,
+                "roles": [
+                  "owner"
+                ],
+                "session_version": 1,
+                "tenant_id": "tenant_alpha",
+                "workspace_id": "alpha-home"
+              },
+              "counters": {
+                "audit_inserts": 1,
+                "db_calls": 4,
+                "egress_proxy_calls": 1,
+                "policy_calls": 3,
+                "provider_calls": 1
+              },
+              "dry_run_decision": {
+                "bundle_revision": "vs2-rego-local-v1",
+                "decision": "allow",
+                "decision_id": "policy_8798d510291e83e4",
+                "fail_closed": false,
+                "failure_reason": null,
+                "input_digest": "65ab7d0d5bd2101bb59ebd34a5c5e46f830a93c5c53d78a926f5c99bb5e909b5",
+                "policy_path": "cornerstone.vs2/allow",
+                "reason_codes": [],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_external_action"
+              },
+              "execution_decision": {
+                "bundle_revision": "vs2-rego-local-v1",
+                "decision": "allow",
+                "decision_id": "policy_a573f7578daffc09",
+                "fail_closed": false,
+                "failure_reason": null,
+                "input_digest": "b61ccfe6a68207d5deb66ee8f6d407992dc2dfc6350190b4b11e57ae20701146",
+                "policy_path": "cornerstone.vs2/allow",
+                "reason_codes": [],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_external_action"
+              },
+              "result": {
+                "provider_body": {
+                  "provider_request_id": "mock_provider_001",
+                  "received_fields": [
+                    "action_id",
+                    "namespace_id",
+                    "status",
+                    "tenant_id"
+                  ],
+                  "status": "provider_ok"
+                },
+                "provider_status": 200,
+                "status": "egress_proxy_ok"
+              },
+              "stale_dry_run_probe": {
+                "changed_provider_url": "http://127.0.0.1:52493/provider/status/stale",
+                "decision": "deny",
+                "opa_reason_codes": [
+                  "high_risk_requires_approval"
+                ],
+                "provider_calls_after": 0,
+                "provider_calls_before": 0,
+                "reason": "stale_dry_run_fingerprint"
+              },
+              "status": "executed",
+              "status_code": 200,
+              "surface": "http_api"
+            },
+            "status": "success"
+          },
+          "schema_version": "cs.cli.v0",
+          "status": "success",
+          "tenant_id": "local-dev",
+          "version": "0.0.0-scaffold",
+          "workspace_id": "default"
+        },
+        "tenant_b_external_action": {
+          "http_status": 403,
+          "payload": {
+            "action_card": {
+              "action_id": "action_8642354b3680",
+              "capability": "mock_provider.status.write",
+              "credential_ref": null,
+              "dry_run_fingerprint": "454e8cc36439d0b1ad90dbc556d50bcd7489b720adf4069a723138dfe71f6060",
+              "expected_provider_calls": 0,
+              "provider_url": "http://127.0.0.1:52493/provider/status",
+              "raw_credential_available_to_product": false,
+              "real_external_http_calls": 0,
+              "state": "dry_run_created"
+            },
+            "audit_refs": [
+              "audit_c3d34ff780ec922c"
+            ],
+            "context": {
+              "membership_revision": "memrev-beta-001",
+              "namespace_id": "personal",
+              "owner_id": "principal_bob",
+              "principal_id": "principal_bob",
+              "revoked": false,
+              "roles": [
+                "member"
+              ],
+              "session_version": 1,
+              "tenant_id": "tenant_beta",
+              "workspace_id": "beta-home"
+            },
+            "counters": {
+              "audit_inserts": 1,
+              "db_calls": 3,
+              "egress_proxy_calls": 0,
+              "policy_calls": 1,
+              "provider_calls": 0
+            },
+            "dry_run_decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_4efcbf99a3aa06e0",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "5bbb96d5fb67b18ff233ed9fed381131772ddbde91d1e5fbee0f352d92c9b77a",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "connectorhub_capability_required",
+                "role_not_allowed"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_external_action"
+            },
+            "error": {
+              "code": "CS_CONNECTORHUB_CAPABILITY_REQUIRED"
+            },
+            "status": "denied",
+            "status_code": 403,
+            "surface": "http_api"
+          }
+        }
+      },
+      "name": "r10_app_role_rls_and_high_risk_defaults_hardened",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "egress_checks": {
+          "audit_has_no_raw_payload": true,
+          "credentials_not_exposed": true,
+          "declared_call_allowed": true,
+          "default_denied_before_sink_call": true,
+          "direct_socket_blocked": true,
+          "dns_rebinding_guarded": true,
+          "egress_audit_records_correlate_attempts": true,
+          "egress_audit_records_have_byte_and_call_counts": true,
+          "fail_closed_without_fallback": true,
+          "normalization_does_not_broaden": true,
+          "redirect_denied_hop_sensitive_headers_forwarded": true,
+          "redirect_loop_bounded": true,
+          "redirects_reguarded": true,
+          "reserved_destination_denied": true,
+          "reserved_destination_matrix_denied_before_network": true,
+          "retry_timeout_idempotency_proved": true,
+          "sandbox_bypass_guard_proved": true,
+          "tenant_policy_isolated": true,
+          "untrusted_content_guard_proved": true
+        },
+        "network_boundary": {
+          "checks": {
+            "direct_http_and_socket_blocked": true,
+            "provider_network_membership_isolated": true,
+            "provider_reachable_from_governed_proxy": true,
+            "provider_zero_requests_after_direct_attempts": true,
+            "service_network_membership_expected": true
+          },
+          "direct_attempts": {
+            "api": {
+              "actor": "api",
+              "http": {
+                "blocked": true,
+                "error": "<urlopen error [Errno -3] Temporary failure in name resolution>",
+                "error_type": "URLError"
+              },
+              "socket": {
+                "blocked": true,
+                "error": "[Errno -3] Temporary failure in name resolution",
+                "error_type": "gaierror"
+              },
+              "target": "provider:8080"
+            },
+            "tool_runtime": {
+              "actor": "tool_runtime",
+              "http": {
+                "blocked": true,
+                "error": "<urlopen error [Errno -3] Temporary failure in name resolution>",
+                "error_type": "URLError"
+              },
+              "socket": {
+                "blocked": true,
+                "error": "[Errno -3] Temporary failure in name resolution",
+                "error_type": "gaierror"
+              },
+              "target": "provider:8080"
+            },
+            "worker": {
+              "actor": "worker",
+              "http": {
+                "blocked": true,
+                "error": "<urlopen error [Errno -3] Temporary failure in name resolution>",
+                "error_type": "URLError"
+              },
+              "socket": {
+                "blocked": true,
+                "error": "[Errno -3] Temporary failure in name resolution",
+                "error_type": "gaierror"
+              },
+              "target": "provider:8080"
+            }
+          },
+          "governed_proxy_attempt": {
+            "actor": "egress_proxy",
+            "body": {
+              "request_number": 1,
+              "status": "provider_ok"
+            },
+            "http_status": 200
+          },
+          "provider_counts": {
+            "after_allowed": {
+              "events": [
+                {
+                  "client": "172.30.0.3",
+                  "path": "/status",
+                  "query": {
+                    "actor": [
+                      "egress_proxy"
+                    ],
+                    "path": [
+                      "governed_proxy"
+                    ]
+                  },
+                  "ts": 1782045120.122
+                }
+              ],
+              "requests": 1
+            },
+            "after_direct": {
+              "events": [],
+              "requests": 0
+            },
+            "before_direct": {
+              "events": [],
+              "requests": 0
+            }
+          },
+          "status": "passed",
+          "topology": {
+            "containers": {
+              "api": "cornerstone-vs2-api-30c78e96d5",
+              "egress_proxy": "cornerstone-vs2-egress-proxy-30c78e96d5",
+              "provider": "cornerstone-vs2-provider-30c78e96d5",
+              "tool_runtime": "cornerstone-vs2-tool-30c78e96d5",
+              "worker": "cornerstone-vs2-worker-30c78e96d5"
+            },
+            "host_network": false,
+            "privileged": false,
+            "provider_members": [
+              "cornerstone-vs2-egress-proxy-30c78e96d5",
+              "cornerstone-vs2-provider-30c78e96d5"
+            ],
+            "provider_net": "cornerstone-vs2-range-provider-30c78e96d5",
+            "published_ports": false,
+            "service_members": [
+              "cornerstone-vs2-api-30c78e96d5",
+              "cornerstone-vs2-egress-proxy-30c78e96d5",
+              "cornerstone-vs2-tool-30c78e96d5",
+              "cornerstone-vs2-worker-30c78e96d5"
+            ],
+            "service_net": "cornerstone-vs2-range-service-30c78e96d5"
+          },
+          "transcript": [
+            {
+              "command": [
+                "docker",
+                "network",
+                "create",
+                "--internal",
+                "cornerstone-vs2-range-service-30c78e96d5"
+              ],
+              "elapsed_seconds": 0.038,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "94068373c9f2446cb3febd40d70e28b74755eacb7b21294276d0b9890acc2cce"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "network",
+                "create",
+                "--internal",
+                "cornerstone-vs2-range-provider-30c78e96d5"
+              ],
+              "elapsed_seconds": 0.062,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "312cddb08396d1eef02acbdcbeb1b5896fe587824a7f07c057ac7d11323a1a5f"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "run",
+                "-d",
+                "--rm",
+                "--name",
+                "cornerstone-vs2-provider-30c78e96d5",
+                "--network",
+                "cornerstone-vs2-range-provider-30c78e96d5",
+                "--network-alias",
+                "provider",
+                "python:3.12-bookworm",
+                "python",
+                "-u",
+                "-c",
+                "\nimport json\nimport pathlib\nimport time\nimport urllib.parse\nfrom http.server import BaseHTTPRequestHandler, ThreadingHTTPServer\n\nlog_path = pathlib.Path(\"/tmp/provider_calls.jsonl\")\n\ndef read_events():\n    if not log_path.exists():\n        return []\n    return [json.loads(line) for line in log_path.read_text().splitlines() if line.strip()]\n\nclass Handler(BaseHTTPRequestHandler):\n    def do_GET(self):\n        if self.path.startswith(\"/count\"):\n            events = read_events()\n            body = {\"requests\": len(events), \"events\": events}\n            self.send_response(200)\n            self.send_header(\"content-type\", \"application/json\")\n            self.end_headers()\n            self.wfile.write(json.dumps(body, sort_keys=True).encode())\n            return\n        parsed = urllib.parse.urlparse(self.path)\n        event = {\n            \"path\": parsed.path,\n            \"query\": urllib.parse.parse_qs(parsed.query),\n            \"client\": self.client_address[0],\n            \"ts\": round(time.time(), 3),\n        }\n        with log_path.open(\"a\") as file:\n            file.write(json.dumps(event, sort_keys=True) + \"\\n\")\n        body = {\"status\": \"provider_ok\", \"request_number\": len(read_events())}\n        self.send_response(200)\n        self.send_header(\"content-type\", \"application/json\")\n        self.end_headers()\n        self.wfile.write(json.dumps(body, sort_keys=True).encode())\n\n    def log_message(self, format, *args):\n        return\n\nThreadingHTTPServer((\"0.0.0.0\", 8080), Handler).serve_forever()\n"
+              ],
+              "elapsed_seconds": 0.335,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "addec5428b28d3dd2fd0daf9df7bd3ca3155266d25d7b716d8f3c0bc0cb4b5e9"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "run",
+                "-d",
+                "--rm",
+                "--name",
+                "cornerstone-vs2-egress-proxy-30c78e96d5",
+                "--network",
+                "cornerstone-vs2-range-service-30c78e96d5",
+                "python:3.12-bookworm",
+                "sleep",
+                "600"
+              ],
+              "elapsed_seconds": 0.439,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "efbdef2c760509cc22a1c8dc6ae0ebbef3dd8ea658cd1d9be09af2e97ec732de"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "network",
+                "connect",
+                "cornerstone-vs2-range-provider-30c78e96d5",
+                "cornerstone-vs2-egress-proxy-30c78e96d5"
+              ],
+              "elapsed_seconds": 0.048,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": []
+            },
+            {
+              "command": [
+                "docker",
+                "run",
+                "-d",
+                "--rm",
+                "--name",
+                "cornerstone-vs2-api-30c78e96d5",
+                "--network",
+                "cornerstone-vs2-range-service-30c78e96d5",
+                "python:3.12-bookworm",
+                "sleep",
+                "600"
+              ],
+              "elapsed_seconds": 0.413,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "77965fde98c312d65ed81b5f7d3a5a2b6255960b0f70d70f45e134e1ff0b03fe"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "run",
+                "-d",
+                "--rm",
+                "--name",
+                "cornerstone-vs2-worker-30c78e96d5",
+                "--network",
+                "cornerstone-vs2-range-service-30c78e96d5",
+                "python:3.12-bookworm",
+                "sleep",
+                "600"
+              ],
+              "elapsed_seconds": 0.371,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "be6277855126cbee3a6ee7765e817bc42e158861447a489ffcf4d80923a346a0"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "run",
+                "-d",
+                "--rm",
+                "--name",
+                "cornerstone-vs2-tool-30c78e96d5",
+                "--network",
+                "cornerstone-vs2-range-service-30c78e96d5",
+                "python:3.12-bookworm",
+                "sleep",
+                "600"
+              ],
+              "elapsed_seconds": 0.388,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "2b0d041797a8f1adad2ccefde73834c198b6e4c060ca5392c0b98b07c8d66f03"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "exec",
+                "cornerstone-vs2-egress-proxy-30c78e96d5",
+                "python",
+                "-c",
+                "\nimport urllib.request\n\nurllib.request.urlopen(\"http://provider:8080/count\", timeout=2).read()\nprint(\"ready\")\n"
+              ],
+              "elapsed_seconds": 0.559,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "ready"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "exec",
+                "cornerstone-vs2-provider-30c78e96d5",
+                "python",
+                "-c",
+                "\nimport json\nimport pathlib\n\npath = pathlib.Path(\"/tmp/provider_calls.jsonl\")\nevents = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []\nprint(json.dumps({\"requests\": len(events), \"events\": events}, sort_keys=True))\n"
+              ],
+              "elapsed_seconds": 0.145,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "{\"events\": [], \"requests\": 0}"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "exec",
+                "cornerstone-vs2-api-30c78e96d5",
+                "python",
+                "-c",
+                "\nimport json\nimport socket\nimport sys\nimport urllib.error\nimport urllib.request\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nactor = sys.argv[3]\nresult = {\"actor\": actor, \"target\": f\"{host}:{port}\"}\ntry:\n    urllib.request.urlopen(f\"http://{host}:{port}/status?actor={actor}&path=http\", timeout=2).read()\n    result[\"http\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"http\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\ntry:\n    sock = socket.create_connection((host, port), timeout=2)\n    sock.close()\n    result[\"socket\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"socket\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\nprint(json.dumps(result, sort_keys=True))\n",
+                "provider",
+                "8080",
+                "api"
+              ],
+              "elapsed_seconds": 0.531,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "{\"actor\": \"api\", \"http\": {\"blocked\": true, \"error\": \"<urlopen error [Errno -3] Temporary failure in name resolution>\", \"error_type\": \"URLError\"}, \"socket\": {\"blocked\": true, \"error\": \"[Errno -3] Temporary failure in name resolution\", \"error_type\": \"gaierror\"}, \"target\": \"provider:8080\"}"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "exec",
+                "cornerstone-vs2-worker-30c78e96d5",
+                "python",
+                "-c",
+                "\nimport json\nimport socket\nimport sys\nimport urllib.error\nimport urllib.request\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nactor = sys.argv[3]\nresult = {\"actor\": actor, \"target\": f\"{host}:{port}\"}\ntry:\n    urllib.request.urlopen(f\"http://{host}:{port}/status?actor={actor}&path=http\", timeout=2).read()\n    result[\"http\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"http\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\ntry:\n    sock = socket.create_connection((host, port), timeout=2)\n    sock.close()\n    result[\"socket\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"socket\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\nprint(json.dumps(result, sort_keys=True))\n",
+                "provider",
+                "8080",
+                "worker"
+              ],
+              "elapsed_seconds": 0.456,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "{\"actor\": \"worker\", \"http\": {\"blocked\": true, \"error\": \"<urlopen error [Errno -3] Temporary failure in name resolution>\", \"error_type\": \"URLError\"}, \"socket\": {\"blocked\": true, \"error\": \"[Errno -3] Temporary failure in name resolution\", \"error_type\": \"gaierror\"}, \"target\": \"provider:8080\"}"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "exec",
+                "cornerstone-vs2-tool-30c78e96d5",
+                "python",
+                "-c",
+                "\nimport json\nimport socket\nimport sys\nimport urllib.error\nimport urllib.request\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nactor = sys.argv[3]\nresult = {\"actor\": actor, \"target\": f\"{host}:{port}\"}\ntry:\n    urllib.request.urlopen(f\"http://{host}:{port}/status?actor={actor}&path=http\", timeout=2).read()\n    result[\"http\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"http\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\ntry:\n    sock = socket.create_connection((host, port), timeout=2)\n    sock.close()\n    result[\"socket\"] = {\"blocked\": False, \"error_type\": None}\nexcept Exception as error:\n    result[\"socket\"] = {\"blocked\": True, \"error_type\": type(error).__name__, \"error\": str(error)[:240]}\nprint(json.dumps(result, sort_keys=True))\n",
+                "provider",
+                "8080",
+                "tool_runtime"
+              ],
+              "elapsed_seconds": 0.618,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "{\"actor\": \"tool_runtime\", \"http\": {\"blocked\": true, \"error\": \"<urlopen error [Errno -3] Temporary failure in name resolution>\", \"error_type\": \"URLError\"}, \"socket\": {\"blocked\": true, \"error\": \"[Errno -3] Temporary failure in name resolution\", \"error_type\": \"gaierror\"}, \"target\": \"provider:8080\"}"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "exec",
+                "cornerstone-vs2-provider-30c78e96d5",
+                "python",
+                "-c",
+                "\nimport json\nimport pathlib\n\npath = pathlib.Path(\"/tmp/provider_calls.jsonl\")\nevents = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []\nprint(json.dumps({\"requests\": len(events), \"events\": events}, sort_keys=True))\n"
+              ],
+              "elapsed_seconds": 0.172,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "{\"events\": [], \"requests\": 0}"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "exec",
+                "cornerstone-vs2-egress-proxy-30c78e96d5",
+                "python",
+                "-c",
+                "\nimport json\nimport sys\nimport urllib.request\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nactor = sys.argv[3]\nwith urllib.request.urlopen(f\"http://{host}:{port}/status?actor={actor}&path=governed_proxy\", timeout=3) as response:\n    body = json.loads(response.read().decode())\nprint(json.dumps({\"actor\": actor, \"http_status\": response.status, \"body\": body}, sort_keys=True))\n",
+                "provider",
+                "8080",
+                "egress_proxy"
+              ],
+              "elapsed_seconds": 0.311,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "{\"actor\": \"egress_proxy\", \"body\": {\"request_number\": 1, \"status\": \"provider_ok\"}, \"http_status\": 200}"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "exec",
+                "cornerstone-vs2-provider-30c78e96d5",
+                "python",
+                "-c",
+                "\nimport json\nimport pathlib\n\npath = pathlib.Path(\"/tmp/provider_calls.jsonl\")\nevents = [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []\nprint(json.dumps({\"requests\": len(events), \"events\": events}, sort_keys=True))\n"
+              ],
+              "elapsed_seconds": 0.133,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "{\"events\": [{\"client\": \"172.30.0.3\", \"path\": \"/status\", \"query\": {\"actor\": [\"egress_proxy\"], \"path\": [\"governed_proxy\"]}, \"ts\": 1782045120.122}], \"requests\": 1}"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "network",
+                "inspect",
+                "cornerstone-vs2-range-service-30c78e96d5"
+              ],
+              "elapsed_seconds": 0.019,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "                    }",
+                "                }",
+                "            }",
+                "        }",
+                "    }",
+                "]"
+              ]
+            },
+            {
+              "command": [
+                "docker",
+                "network",
+                "inspect",
+                "cornerstone-vs2-range-provider-30c78e96d5"
+              ],
+              "elapsed_seconds": 0.018,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_tail": [
+                "                    }",
+                "                }",
+                "            }",
+                "        }",
+                "    }",
+                "]"
+              ]
+            }
+          ]
+        }
+      },
+      "name": "r10_egress_and_host_capabilities_default_deny",
       "passed": true
     },
     {
@@ -41,8 +1304,8 @@
   "required_evidence": "Default config snapshot, denial suite, RLS/role inventory.",
   "scenario_id": "VS2-SEC-R10",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Egress is denied, policy is default-deny, app role cannot bypass RLS, high-risk actions require approval, and shell/host access remains blocked.",
   "validator": "verify_vs2_sec_r10",
   "verification_command": [

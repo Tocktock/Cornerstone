@@ -2,7 +2,7 @@
 
 ## Summary
 
-This report converts the user-provided VS2 scenario matrix into a repo-local scenario inventory, records the baseline gap analysis, maps the code impact, and now links the implemented local deterministic VS2 proof.
+This report converts the user-provided VS2 scenario matrix into a repo-local scenario inventory, records the baseline gap analysis, maps the code impact, and links the current scenario-specific local remediation proof.
 
 The attached contract is now copied to `docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md` and the machine-readable matrix is copied to `docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv`.
 
@@ -17,9 +17,10 @@ The attached contract is now copied to `docs/scenario-contracts/VS2_POLICY_TENAN
 
 ## Current Verdict
 
-- AI-verifiable VS2 implementation status: `PASS` for the local deterministic scope.
-- Implemented classification: 86 AI-verifiable rows are `PASS` in `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json`; 7 rows remain `HUMAN_REQUIRED`.
+- AI-verifiable VS2 implementation status: `LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING`.
+- Current generated report classification: 86 AI-verifiable rows are `PASS`, 0 AI-verifiable rows remain `NOT_VERIFIED`, and 7 rows remain `HUMAN_REQUIRED` in `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json`.
 - Baseline classification: before implementation, 86 AI-verifiable rows were `FAIL` because the repo had no VS2 OPA/Postgres/RLS/network-boundary implementation or VS2 gate evidence.
+- Production security, live-provider readiness, independent penetration-test completion, human UX acceptance, and production-like migration/restore readiness are not claimed by this local report.
 - Human gates: 7 rows are `HUMAN_REQUIRED`.
 - Sensitive implementation stop: `VS2-SEC-H01` was cleared for local/new-application implementation by JiYong/Tars in-chat approval on 2026-06-19 KST; H02-H07 remain separate human/external gates.
 - H01 preflight evidence can now be captured by `cornerstone security sensitive-change-test --category vs2_policy_tenancy_egress --json`; this proves the stop-and-ask gate is executable, not that approval has been granted.

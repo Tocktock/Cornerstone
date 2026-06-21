@@ -2,6 +2,101 @@
   "assertions": [
     {
       "evidence": {
+        "expected_counts": {
+          "human_required": 7,
+          "not_verified": 0,
+          "pass": 86
+        },
+        "finding_count": 0,
+        "findings": [],
+        "missing_required_boundaries": [],
+        "required_boundaries": {
+          "current_state_ai_verified_human_gates_label_present": true,
+          "current_state_counts_match_report": true,
+          "current_state_non_production_boundary_present": true,
+          "local_report_human_external_boundaries_present": true,
+          "local_report_still_not_claimed_section_present": true,
+          "readme_ai_verified_human_gates_label_present": true,
+          "readme_counts_match_report": true,
+          "readme_human_boundaries_present": true
+        },
+        "scanned_paths": [
+          "README.md",
+          "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+          "docs/verification-reports/VS2_LOCAL_RANGE_FIRST_SLICE_REPORT_2026-06-21.md"
+        ],
+        "status": "passed"
+      },
+      "name": "r16_overclaim_scan_has_zero_findings",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "current_state_ai_verified_human_gates_label_present": true,
+        "current_state_counts_match_report": true,
+        "current_state_non_production_boundary_present": true,
+        "local_report_human_external_boundaries_present": true,
+        "local_report_still_not_claimed_section_present": true,
+        "readme_ai_verified_human_gates_label_present": true,
+        "readme_counts_match_report": true,
+        "readme_human_boundaries_present": true
+      },
+      "name": "r16_required_scope_boundaries_are_explicit",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "active_namespace": "personal",
+        "active_tenant": "tenant_alpha",
+        "approval_required": true,
+        "audit_refs": [
+          "audit_0017"
+        ],
+        "authenticated_principal": "principal_alice",
+        "boundary": "local-only; production-not-ready; H02-H07 remain human-required",
+        "egress_destination": "reports/network/vs2-egress-proof.json",
+        "execution_result": "blocked_until_valid_approval",
+        "policy_decision": {
+          "audit_refs": [
+            "audit_0017"
+          ],
+          "bundle_hash": "f16b6e6d952eb5f6a62b7d5ed98a4358327c8c63970e1f790ce590982425174d",
+          "bundle_revision": "vs2-rego-local-v1",
+          "decided_at_epoch": 1782045155,
+          "decision": "deny",
+          "decision_id": "policy_2a2e1d9b876b16e1",
+          "evidence_refs": [],
+          "input_digest": "2cbb1cb1dcf2b5f5c4a4a8fc3540dd7db4cbe8db24e51f87fad3dc7d36b9374b",
+          "namespace_id": "personal",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "high_risk_requires_approval"
+          ],
+          "resolution_path": [
+            "Use trusted membership scope",
+            "Request approval or required role",
+            "Retry through governed path"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "tenant_id": "tenant_alpha",
+          "trace_id": "trace_vs2_policy_local"
+        },
+        "risk": "high",
+        "status": "passed",
+        "ui_map": [
+          "Home",
+          "Search",
+          "Artifacts",
+          "Claims",
+          "Actions",
+          "Admin/Security"
+        ]
+      },
+      "name": "r16_operator_boundary_does_not_claim_production",
+      "passed": true
+    },
+    {
+      "evidence": {
         "blanket_dependencies_ok_pass_used": 0,
         "external_http_calls_denied_path": 0,
         "human_acceptance_claimed_by_ai": 0,
@@ -9,7 +104,7 @@
         "production_security_claimed": 0,
         "unredacted_secret_findings": 0
       },
-      "name": "claim_vocabulary_does_not_overclaim",
+      "name": "r16_negative_claim_flags_remain_zero",
       "passed": true
     },
     {
@@ -35,8 +130,8 @@
   "required_evidence": "Zero overclaim findings; explicit scope/human-required table.",
   "scenario_id": "VS2-SEC-R16",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Local/integration proof is not described as production, live-provider, penetration-tested, or human-accepted without separate evidence.",
   "validator": "verify_vs2_sec_r16",
   "verification_command": [

@@ -1,6 +1,131 @@
 {
+  "ci_checks": {
+    "coverage_report_machine_readable": true,
+    "no_test_execution_failed": true,
+    "opa_build_passed": true,
+    "opa_check_passed": true,
+    "opa_test_details_passed": true,
+    "opa_test_passed": true,
+    "required_case_matrix_present": true
+  },
+  "ci_command_transcripts": [
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        "/Users/jiyong/playground/Cornerstone:/repo",
+        "-w",
+        "/repo",
+        "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "test",
+        "policies/vs2",
+        "--fail-on-empty",
+        "--coverage",
+        "--format=json"
+      ],
+      "elapsed_seconds": 0.857,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "  },",
+        "  \"covered_lines\": 175,",
+        "  \"not_covered_lines\": 12,",
+        "  \"coverage\": 93.58288770053476",
+        "}"
+      ]
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        "/Users/jiyong/playground/Cornerstone:/repo",
+        "-w",
+        "/repo",
+        "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "test",
+        "policies/vs2",
+        "--fail-on-empty",
+        "--format=json"
+      ],
+      "elapsed_seconds": 0.87,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "    \"package\": \"data.cornerstone.vs2\",",
+        "    \"name\": \"test_unexpected_authoritative_attribute_denied\",",
+        "    \"duration\": 46921459",
+        "  }",
+        "]"
+      ]
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        "/Users/jiyong/playground/Cornerstone:/repo",
+        "-w",
+        "/repo",
+        "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "check",
+        "policies/vs2"
+      ],
+      "elapsed_seconds": 0.778,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": []
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        "/Users/jiyong/playground/Cornerstone:/repo",
+        "-w",
+        "/repo",
+        "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "build",
+        "-b",
+        "policies/vs2",
+        "-o",
+        "/tmp/cornerstone-vs2-policy-bundle.tar.gz"
+      ],
+      "elapsed_seconds": 0.644,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": []
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        "/var/folders/hn/zz23wc011j119ttb26t_pnnm0000gn/T/cornerstone-vs2-empty-opa-jum9b07m:/empty:ro",
+        "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "test",
+        "/empty",
+        "--fail-on-empty",
+        "--format=json"
+      ],
+      "elapsed_seconds": 0.651,
+      "exit_code": 1,
+      "stderr_tail": [
+        "no tests were run"
+      ],
+      "stdout_tail": [
+        "[]"
+      ]
+    }
+  ],
   "coverage_available": true,
-  "covered_percent": 96.12403100775194,
+  "covered_percent": 93.58288770053476,
   "entrypoint_manifest": [
     "allow",
     "deny",
@@ -10,5 +135,33 @@
     "role_allowed",
     "capability_allowed"
   ],
-  "status": "passed"
+  "required_test_names": [
+    "test_connectorhub_capability_required",
+    "test_cross_tenant_data_scope_denied",
+    "test_cross_tenant_scope_denied",
+    "test_high_risk_approved_allowed",
+    "test_invalid_schema_fails_closed",
+    "test_member_write_denied",
+    "test_owner_read_allowed",
+    "test_revoked_principal_denied",
+    "test_unexpected_authoritative_attribute_denied",
+    "test_unknown_policy_default_deny"
+  ],
+  "status": "passed",
+  "test_names": [
+    "test_connectorhub_capability_required",
+    "test_cross_tenant_data_scope_denied",
+    "test_cross_tenant_scope_denied",
+    "test_external_workspace_mode_denied",
+    "test_high_risk_approved_allowed",
+    "test_high_risk_requires_approval",
+    "test_invalid_schema_fails_closed",
+    "test_member_write_denied",
+    "test_mission_authority_required",
+    "test_owner_read_allowed",
+    "test_revoked_principal_denied",
+    "test_secret_classification_denied",
+    "test_unexpected_authoritative_attribute_denied",
+    "test_unknown_policy_default_deny"
+  ]
 }

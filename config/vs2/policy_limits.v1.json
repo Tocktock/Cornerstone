@@ -1,0 +1,11 @@
+{
+  "allowed_workspace_modes": [
+    "admin",
+    "assist",
+    "local"
+  ],
+  "max_input_bytes": 4096,
+  "max_json_depth": 8,
+  "max_roles": 5,
+  "schema_version": "cs.policy_limits.vs2.v1"
+}

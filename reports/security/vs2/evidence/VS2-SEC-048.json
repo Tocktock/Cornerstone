@@ -2,35 +2,814 @@
   "assertions": [
     {
       "evidence": {
-        "http_allow_observed": true,
-        "http_cross_tenant_denied": true,
-        "http_invalid_schema_denied": true,
-        "outage_fails_closed": true
+        "audit_refs": [
+          "audit_83ba731ec45dedb6",
+          "audit_984e5e56050bee8e"
+        ],
+        "cases": [
+          {
+            "case": "below_limit",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_765ee8a0254883c2",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "44e88be1bce58c22d773b59ed9993a06cef6a68be63ad97a880dd6f76b5d1213",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_limits_048_base"
+            },
+            "elapsed_ms": 218.518,
+            "expected": "allow",
+            "input_bytes": 859,
+            "input_digest": "44e88be1bce58c22d773b59ed9993a06cef6a68be63ad97a880dd6f76b5d1213",
+            "json_depth": 4,
+            "limit_errors": [],
+            "opa_call_attempted": true,
+            "schema_errors": []
+          },
+          {
+            "case": "at_limit",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_f9c1f0f682639b67",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "6b8a7f51ec91810d27a009191e4179e52e7fa3fe0d452b8ab6fb97b82c40fe68",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_limits_048_base"
+            },
+            "elapsed_ms": 308.503,
+            "expected": "allow",
+            "input_bytes": 935,
+            "input_digest": "6b8a7f51ec91810d27a009191e4179e52e7fa3fe0d452b8ab6fb97b82c40fe68",
+            "json_depth": 4,
+            "limit_errors": [],
+            "opa_call_attempted": true,
+            "schema_errors": []
+          },
+          {
+            "case": "over_role_limit",
+            "decision": null,
+            "elapsed_ms": 0.081,
+            "expected": "limit_error",
+            "input_bytes": 954,
+            "input_digest": "8a7bde6c3a3f458422cd3c21836b29c64256ab066a5f418369a8f98b6cd4b8d2",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": 6,
+                "code": "policy_input_role_list_too_long",
+                "limit": 5
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          },
+          {
+            "case": "over_size_limit",
+            "decision": null,
+            "elapsed_ms": 0.053,
+            "expected": "limit_error",
+            "input_bytes": 4951,
+            "input_digest": "038840eb90185ff54dbb1cf4364348035cd679877a538b6f75cdff0a9b262c76",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": 4951,
+                "code": "policy_input_too_large",
+                "limit": 4096
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          },
+          {
+            "case": "over_depth_limit",
+            "decision": null,
+            "elapsed_ms": 0.049,
+            "expected": "limit_error",
+            "input_bytes": 947,
+            "input_digest": "2530f2b681410fe0ee530308175583d6603bb23c5f1c13237782ccab768f7d70",
+            "json_depth": 11,
+            "limit_errors": [
+              {
+                "actual": 11,
+                "code": "policy_input_too_deep",
+                "limit": 8
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": [
+              {
+                "code": "additional_property",
+                "path": "$.limit_probe"
+              }
+            ]
+          },
+          {
+            "case": "unknown_workspace_mode",
+            "decision": null,
+            "elapsed_ms": 0.034,
+            "expected": "limit_error",
+            "input_bytes": 879,
+            "input_digest": "61c5b5319d8f12e4133d00b6bcb3a86c5a2a945841a00b47b27902e94f126c2e",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": "unsupported_workspace_mode",
+                "allowed": [
+                  "admin",
+                  "assist",
+                  "local"
+                ],
+                "code": "unsupported_workspace_mode"
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          }
+        ],
+        "checks": {
+          "below_and_at_limit_requests_allow_deterministically": true,
+          "limit_failures_have_bounded_resource_use": true,
+          "limit_failures_leave_no_partial_side_effects": true,
+          "limit_source_map_retained": true,
+          "limits_config_file_present": true,
+          "over_limit_requests_rejected_before_opa": true,
+          "unknown_enum_rejected_before_opa": true
+        },
+        "limits": {
+          "allowed_workspace_modes": [
+            "admin",
+            "assist",
+            "local"
+          ],
+          "max_input_bytes": 4096,
+          "max_json_depth": 8,
+          "max_roles": 5,
+          "schema_version": "cs.policy_limits.vs2.v1"
+        },
+        "limits_path": "config/vs2/policy_limits.v1.json",
+        "limits_sha256": "941e970fdf023abbc7145962d35370bd6df19a970be5eb2e3cc2078821d84ba5",
+        "side_effect_counts_after": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "side_effect_counts_before": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "source_map": {
+          "action": "gateway.declared_action",
+          "approval.required": "gateway.risk_classifier",
+          "approval.status": "gateway.approval_state",
+          "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+          "capability.declared": "gateway.capability_manifest",
+          "data_scope.purpose": "gateway.data_purpose",
+          "data_scope.scope": "gateway.data_scope",
+          "environment.deployment": "local_range.environment",
+          "environment.workspace_mode": "trusted_request_context.workspace_mode",
+          "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+          "mission_authority.authorized": "trusted_request_context.mission_authority",
+          "mission_authority.mission_id": "trusted_request_context.mission_authority",
+          "policy_path": "gateway.policy_entrypoint",
+          "resource.classification": "gateway.resource_record",
+          "resource.namespace_id": "gateway.resource_record",
+          "resource.resource_id": "gateway.resource_record",
+          "resource.tenant_id": "gateway.resource_record",
+          "risk": "gateway.risk_classifier",
+          "schema_version": "policy_client.constant",
+          "scope.namespace_id": "trusted_request_context.namespace_scope",
+          "scope.tenant_id": "trusted_request_context.tenant_scope",
+          "scope.workspace_id": "trusted_request_context.workspace_scope",
+          "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+          "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+          "subject.revoked": "trusted_request_context.postgres.revocation_state",
+          "subject.roles": "trusted_request_context.postgres.membership_roles",
+          "trace_id": "gateway.trace_context"
+        },
+        "status": "passed"
       },
-      "name": "opa_unit_and_http_decision_pass",
+      "name": "policy_limit_config_and_boundary_corpus_present",
       "passed": true
     },
     {
       "evidence": {
-        "abac_denied": true,
-        "allow_decision_observed": true,
-        "capability_default_deny": true,
-        "deny_precedence_on_mismatch": true,
-        "high_risk_allowed_after_approval": true,
-        "high_risk_requires_approval": true,
-        "invalid_schema_denied": true,
-        "opa_unavailable_denied": true,
-        "role_denied": true,
-        "undefined_default_deny": true
+        "audit_refs": [
+          "audit_83ba731ec45dedb6",
+          "audit_984e5e56050bee8e"
+        ],
+        "cases": [
+          {
+            "case": "below_limit",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_765ee8a0254883c2",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "44e88be1bce58c22d773b59ed9993a06cef6a68be63ad97a880dd6f76b5d1213",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_limits_048_base"
+            },
+            "elapsed_ms": 218.518,
+            "expected": "allow",
+            "input_bytes": 859,
+            "input_digest": "44e88be1bce58c22d773b59ed9993a06cef6a68be63ad97a880dd6f76b5d1213",
+            "json_depth": 4,
+            "limit_errors": [],
+            "opa_call_attempted": true,
+            "schema_errors": []
+          },
+          {
+            "case": "at_limit",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_f9c1f0f682639b67",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "6b8a7f51ec91810d27a009191e4179e52e7fa3fe0d452b8ab6fb97b82c40fe68",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_limits_048_base"
+            },
+            "elapsed_ms": 308.503,
+            "expected": "allow",
+            "input_bytes": 935,
+            "input_digest": "6b8a7f51ec91810d27a009191e4179e52e7fa3fe0d452b8ab6fb97b82c40fe68",
+            "json_depth": 4,
+            "limit_errors": [],
+            "opa_call_attempted": true,
+            "schema_errors": []
+          },
+          {
+            "case": "over_role_limit",
+            "decision": null,
+            "elapsed_ms": 0.081,
+            "expected": "limit_error",
+            "input_bytes": 954,
+            "input_digest": "8a7bde6c3a3f458422cd3c21836b29c64256ab066a5f418369a8f98b6cd4b8d2",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": 6,
+                "code": "policy_input_role_list_too_long",
+                "limit": 5
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          },
+          {
+            "case": "over_size_limit",
+            "decision": null,
+            "elapsed_ms": 0.053,
+            "expected": "limit_error",
+            "input_bytes": 4951,
+            "input_digest": "038840eb90185ff54dbb1cf4364348035cd679877a538b6f75cdff0a9b262c76",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": 4951,
+                "code": "policy_input_too_large",
+                "limit": 4096
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          },
+          {
+            "case": "over_depth_limit",
+            "decision": null,
+            "elapsed_ms": 0.049,
+            "expected": "limit_error",
+            "input_bytes": 947,
+            "input_digest": "2530f2b681410fe0ee530308175583d6603bb23c5f1c13237782ccab768f7d70",
+            "json_depth": 11,
+            "limit_errors": [
+              {
+                "actual": 11,
+                "code": "policy_input_too_deep",
+                "limit": 8
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": [
+              {
+                "code": "additional_property",
+                "path": "$.limit_probe"
+              }
+            ]
+          },
+          {
+            "case": "unknown_workspace_mode",
+            "decision": null,
+            "elapsed_ms": 0.034,
+            "expected": "limit_error",
+            "input_bytes": 879,
+            "input_digest": "61c5b5319d8f12e4133d00b6bcb3a86c5a2a945841a00b47b27902e94f126c2e",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": "unsupported_workspace_mode",
+                "allowed": [
+                  "admin",
+                  "assist",
+                  "local"
+                ],
+                "code": "unsupported_workspace_mode"
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          }
+        ],
+        "checks": {
+          "below_and_at_limit_requests_allow_deterministically": true,
+          "limit_failures_have_bounded_resource_use": true,
+          "limit_failures_leave_no_partial_side_effects": true,
+          "limit_source_map_retained": true,
+          "limits_config_file_present": true,
+          "over_limit_requests_rejected_before_opa": true,
+          "unknown_enum_rejected_before_opa": true
+        },
+        "limits": {
+          "allowed_workspace_modes": [
+            "admin",
+            "assist",
+            "local"
+          ],
+          "max_input_bytes": 4096,
+          "max_json_depth": 8,
+          "max_roles": 5,
+          "schema_version": "cs.policy_limits.vs2.v1"
+        },
+        "limits_path": "config/vs2/policy_limits.v1.json",
+        "limits_sha256": "941e970fdf023abbc7145962d35370bd6df19a970be5eb2e3cc2078821d84ba5",
+        "side_effect_counts_after": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "side_effect_counts_before": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "source_map": {
+          "action": "gateway.declared_action",
+          "approval.required": "gateway.risk_classifier",
+          "approval.status": "gateway.approval_state",
+          "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+          "capability.declared": "gateway.capability_manifest",
+          "data_scope.purpose": "gateway.data_purpose",
+          "data_scope.scope": "gateway.data_scope",
+          "environment.deployment": "local_range.environment",
+          "environment.workspace_mode": "trusted_request_context.workspace_mode",
+          "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+          "mission_authority.authorized": "trusted_request_context.mission_authority",
+          "mission_authority.mission_id": "trusted_request_context.mission_authority",
+          "policy_path": "gateway.policy_entrypoint",
+          "resource.classification": "gateway.resource_record",
+          "resource.namespace_id": "gateway.resource_record",
+          "resource.resource_id": "gateway.resource_record",
+          "resource.tenant_id": "gateway.resource_record",
+          "risk": "gateway.risk_classifier",
+          "schema_version": "policy_client.constant",
+          "scope.namespace_id": "trusted_request_context.namespace_scope",
+          "scope.tenant_id": "trusted_request_context.tenant_scope",
+          "scope.workspace_id": "trusted_request_context.workspace_scope",
+          "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+          "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+          "subject.revoked": "trusted_request_context.postgres.revocation_state",
+          "subject.roles": "trusted_request_context.postgres.membership_roles",
+          "trace_id": "gateway.trace_context"
+        },
+        "status": "passed"
       },
-      "name": "policy_fail_closed_cases_observed",
+      "name": "at_and_below_limit_requests_are_deterministic",
       "passed": true
     },
     {
       "evidence": {
-        "bundle_hash": "a23617c575c760b9d10c16a4abfaa915c972f4492ea5c20214371f445ac6a529"
+        "audit_refs": [
+          "audit_83ba731ec45dedb6",
+          "audit_984e5e56050bee8e"
+        ],
+        "cases": [
+          {
+            "case": "below_limit",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_765ee8a0254883c2",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "44e88be1bce58c22d773b59ed9993a06cef6a68be63ad97a880dd6f76b5d1213",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_limits_048_base"
+            },
+            "elapsed_ms": 218.518,
+            "expected": "allow",
+            "input_bytes": 859,
+            "input_digest": "44e88be1bce58c22d773b59ed9993a06cef6a68be63ad97a880dd6f76b5d1213",
+            "json_depth": 4,
+            "limit_errors": [],
+            "opa_call_attempted": true,
+            "schema_errors": []
+          },
+          {
+            "case": "at_limit",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_f9c1f0f682639b67",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "6b8a7f51ec91810d27a009191e4179e52e7fa3fe0d452b8ab6fb97b82c40fe68",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_limits_048_base"
+            },
+            "elapsed_ms": 308.503,
+            "expected": "allow",
+            "input_bytes": 935,
+            "input_digest": "6b8a7f51ec91810d27a009191e4179e52e7fa3fe0d452b8ab6fb97b82c40fe68",
+            "json_depth": 4,
+            "limit_errors": [],
+            "opa_call_attempted": true,
+            "schema_errors": []
+          },
+          {
+            "case": "over_role_limit",
+            "decision": null,
+            "elapsed_ms": 0.081,
+            "expected": "limit_error",
+            "input_bytes": 954,
+            "input_digest": "8a7bde6c3a3f458422cd3c21836b29c64256ab066a5f418369a8f98b6cd4b8d2",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": 6,
+                "code": "policy_input_role_list_too_long",
+                "limit": 5
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          },
+          {
+            "case": "over_size_limit",
+            "decision": null,
+            "elapsed_ms": 0.053,
+            "expected": "limit_error",
+            "input_bytes": 4951,
+            "input_digest": "038840eb90185ff54dbb1cf4364348035cd679877a538b6f75cdff0a9b262c76",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": 4951,
+                "code": "policy_input_too_large",
+                "limit": 4096
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          },
+          {
+            "case": "over_depth_limit",
+            "decision": null,
+            "elapsed_ms": 0.049,
+            "expected": "limit_error",
+            "input_bytes": 947,
+            "input_digest": "2530f2b681410fe0ee530308175583d6603bb23c5f1c13237782ccab768f7d70",
+            "json_depth": 11,
+            "limit_errors": [
+              {
+                "actual": 11,
+                "code": "policy_input_too_deep",
+                "limit": 8
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": [
+              {
+                "code": "additional_property",
+                "path": "$.limit_probe"
+              }
+            ]
+          },
+          {
+            "case": "unknown_workspace_mode",
+            "decision": null,
+            "elapsed_ms": 0.034,
+            "expected": "limit_error",
+            "input_bytes": 879,
+            "input_digest": "61c5b5319d8f12e4133d00b6bcb3a86c5a2a945841a00b47b27902e94f126c2e",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": "unsupported_workspace_mode",
+                "allowed": [
+                  "admin",
+                  "assist",
+                  "local"
+                ],
+                "code": "unsupported_workspace_mode"
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          }
+        ],
+        "checks": {
+          "below_and_at_limit_requests_allow_deterministically": true,
+          "limit_failures_have_bounded_resource_use": true,
+          "limit_failures_leave_no_partial_side_effects": true,
+          "limit_source_map_retained": true,
+          "limits_config_file_present": true,
+          "over_limit_requests_rejected_before_opa": true,
+          "unknown_enum_rejected_before_opa": true
+        },
+        "limits": {
+          "allowed_workspace_modes": [
+            "admin",
+            "assist",
+            "local"
+          ],
+          "max_input_bytes": 4096,
+          "max_json_depth": 8,
+          "max_roles": 5,
+          "schema_version": "cs.policy_limits.vs2.v1"
+        },
+        "limits_path": "config/vs2/policy_limits.v1.json",
+        "limits_sha256": "941e970fdf023abbc7145962d35370bd6df19a970be5eb2e3cc2078821d84ba5",
+        "side_effect_counts_after": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "side_effect_counts_before": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "source_map": {
+          "action": "gateway.declared_action",
+          "approval.required": "gateway.risk_classifier",
+          "approval.status": "gateway.approval_state",
+          "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+          "capability.declared": "gateway.capability_manifest",
+          "data_scope.purpose": "gateway.data_purpose",
+          "data_scope.scope": "gateway.data_scope",
+          "environment.deployment": "local_range.environment",
+          "environment.workspace_mode": "trusted_request_context.workspace_mode",
+          "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+          "mission_authority.authorized": "trusted_request_context.mission_authority",
+          "mission_authority.mission_id": "trusted_request_context.mission_authority",
+          "policy_path": "gateway.policy_entrypoint",
+          "resource.classification": "gateway.resource_record",
+          "resource.namespace_id": "gateway.resource_record",
+          "resource.resource_id": "gateway.resource_record",
+          "resource.tenant_id": "gateway.resource_record",
+          "risk": "gateway.risk_classifier",
+          "schema_version": "policy_client.constant",
+          "scope.namespace_id": "trusted_request_context.namespace_scope",
+          "scope.tenant_id": "trusted_request_context.tenant_scope",
+          "scope.workspace_id": "trusted_request_context.workspace_scope",
+          "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+          "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+          "subject.revoked": "trusted_request_context.postgres.revocation_state",
+          "subject.roles": "trusted_request_context.postgres.membership_roles",
+          "trace_id": "gateway.trace_context"
+        },
+        "status": "passed"
       },
-      "name": "bundle_revision_and_lkg_recorded",
+      "name": "over_limit_and_unknown_enum_fail_safely_before_opa",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "audit_refs": [
+          "audit_83ba731ec45dedb6",
+          "audit_984e5e56050bee8e"
+        ],
+        "cases": [
+          {
+            "case": "below_limit",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_765ee8a0254883c2",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "44e88be1bce58c22d773b59ed9993a06cef6a68be63ad97a880dd6f76b5d1213",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_limits_048_base"
+            },
+            "elapsed_ms": 218.518,
+            "expected": "allow",
+            "input_bytes": 859,
+            "input_digest": "44e88be1bce58c22d773b59ed9993a06cef6a68be63ad97a880dd6f76b5d1213",
+            "json_depth": 4,
+            "limit_errors": [],
+            "opa_call_attempted": true,
+            "schema_errors": []
+          },
+          {
+            "case": "at_limit",
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "decision_id": "policy_f9c1f0f682639b67",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "6b8a7f51ec91810d27a009191e4179e52e7fa3fe0d452b8ab6fb97b82c40fe68",
+              "policy_path": "cornerstone.vs2/allow",
+              "reason_codes": [],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_policy_limits_048_base"
+            },
+            "elapsed_ms": 308.503,
+            "expected": "allow",
+            "input_bytes": 935,
+            "input_digest": "6b8a7f51ec91810d27a009191e4179e52e7fa3fe0d452b8ab6fb97b82c40fe68",
+            "json_depth": 4,
+            "limit_errors": [],
+            "opa_call_attempted": true,
+            "schema_errors": []
+          },
+          {
+            "case": "over_role_limit",
+            "decision": null,
+            "elapsed_ms": 0.081,
+            "expected": "limit_error",
+            "input_bytes": 954,
+            "input_digest": "8a7bde6c3a3f458422cd3c21836b29c64256ab066a5f418369a8f98b6cd4b8d2",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": 6,
+                "code": "policy_input_role_list_too_long",
+                "limit": 5
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          },
+          {
+            "case": "over_size_limit",
+            "decision": null,
+            "elapsed_ms": 0.053,
+            "expected": "limit_error",
+            "input_bytes": 4951,
+            "input_digest": "038840eb90185ff54dbb1cf4364348035cd679877a538b6f75cdff0a9b262c76",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": 4951,
+                "code": "policy_input_too_large",
+                "limit": 4096
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          },
+          {
+            "case": "over_depth_limit",
+            "decision": null,
+            "elapsed_ms": 0.049,
+            "expected": "limit_error",
+            "input_bytes": 947,
+            "input_digest": "2530f2b681410fe0ee530308175583d6603bb23c5f1c13237782ccab768f7d70",
+            "json_depth": 11,
+            "limit_errors": [
+              {
+                "actual": 11,
+                "code": "policy_input_too_deep",
+                "limit": 8
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": [
+              {
+                "code": "additional_property",
+                "path": "$.limit_probe"
+              }
+            ]
+          },
+          {
+            "case": "unknown_workspace_mode",
+            "decision": null,
+            "elapsed_ms": 0.034,
+            "expected": "limit_error",
+            "input_bytes": 879,
+            "input_digest": "61c5b5319d8f12e4133d00b6bcb3a86c5a2a945841a00b47b27902e94f126c2e",
+            "json_depth": 4,
+            "limit_errors": [
+              {
+                "actual": "unsupported_workspace_mode",
+                "allowed": [
+                  "admin",
+                  "assist",
+                  "local"
+                ],
+                "code": "unsupported_workspace_mode"
+              }
+            ],
+            "opa_call_attempted": false,
+            "schema_errors": []
+          }
+        ],
+        "checks": {
+          "below_and_at_limit_requests_allow_deterministically": true,
+          "limit_failures_have_bounded_resource_use": true,
+          "limit_failures_leave_no_partial_side_effects": true,
+          "limit_source_map_retained": true,
+          "limits_config_file_present": true,
+          "over_limit_requests_rejected_before_opa": true,
+          "unknown_enum_rejected_before_opa": true
+        },
+        "limits": {
+          "allowed_workspace_modes": [
+            "admin",
+            "assist",
+            "local"
+          ],
+          "max_input_bytes": 4096,
+          "max_json_depth": 8,
+          "max_roles": 5,
+          "schema_version": "cs.policy_limits.vs2.v1"
+        },
+        "limits_path": "config/vs2/policy_limits.v1.json",
+        "limits_sha256": "941e970fdf023abbc7145962d35370bd6df19a970be5eb2e3cc2078821d84ba5",
+        "side_effect_counts_after": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "side_effect_counts_before": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "source_map": {
+          "action": "gateway.declared_action",
+          "approval.required": "gateway.risk_classifier",
+          "approval.status": "gateway.approval_state",
+          "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+          "capability.declared": "gateway.capability_manifest",
+          "data_scope.purpose": "gateway.data_purpose",
+          "data_scope.scope": "gateway.data_scope",
+          "environment.deployment": "local_range.environment",
+          "environment.workspace_mode": "trusted_request_context.workspace_mode",
+          "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+          "mission_authority.authorized": "trusted_request_context.mission_authority",
+          "mission_authority.mission_id": "trusted_request_context.mission_authority",
+          "policy_path": "gateway.policy_entrypoint",
+          "resource.classification": "gateway.resource_record",
+          "resource.namespace_id": "gateway.resource_record",
+          "resource.resource_id": "gateway.resource_record",
+          "resource.tenant_id": "gateway.resource_record",
+          "risk": "gateway.risk_classifier",
+          "schema_version": "policy_client.constant",
+          "scope.namespace_id": "trusted_request_context.namespace_scope",
+          "scope.tenant_id": "trusted_request_context.tenant_scope",
+          "scope.workspace_id": "trusted_request_context.workspace_scope",
+          "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+          "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+          "subject.revoked": "trusted_request_context.postgres.revocation_state",
+          "subject.roles": "trusted_request_context.postgres.membership_roles",
+          "trace_id": "gateway.trace_context"
+        },
+        "status": "passed"
+      },
+      "name": "limit_failures_are_bounded_and_side_effect_free",
       "passed": true
     },
     {
@@ -56,8 +835,8 @@
   "required_evidence": "Limit configuration, test corpus, resource metrics, stable failures.",
   "scenario_id": "VS2-SEC-048",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "At/below-limit requests behave deterministically; over-limit/unsupported requests fail safely with helpful errors, bounded resource use, and no partial side effect.",
   "validator": "verify_vs2_sec_048",
   "verification_command": [

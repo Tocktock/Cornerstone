@@ -1,4 +1,4 @@
-.PHONY: verify-docs verify-scenario-matrix verify-scaffold-cli verify-vs0-runtime verify-vs0-acceptance verify-vs0-evux verify-vs0-operator-ui verify-vs1-ontology verify-vs2-security verify-local-fast
+.PHONY: verify-docs verify-scenario-matrix verify-scaffold-cli verify-vs0-runtime verify-vs0-acceptance verify-vs0-evux verify-vs0-operator-ui verify-vs1-ontology verify-vs2-local-range verify-vs2-security verify-local-fast
 
 verify-docs:
 	scripts/verify_sot_docs.sh
@@ -38,8 +38,13 @@ verify-vs2-security:
 	mkdir -p reports/scenario reports/security
 	PATH="$(PWD):$$PATH" cornerstone security sensitive-change-test --category vs2_policy_tenancy_egress --json > reports/scenario/vs2-sensitive-change-gate-2026-06-19.json
 	PATH="$(PWD):$$PATH" cornerstone security vs2-h01-approval-package --json > reports/scenario/vs2-h01-approval-package-2026-06-19.json
+	PATH="$(PWD):$$PATH" cornerstone security vs2-local-range --json > reports/security/vs2-local-range-command.json
 	PATH="$(PWD):$$PATH" cornerstone security vs2-local-proof --json > reports/security/vs2-local-security-proof-command.json || true
 	PATH="$(PWD):$$PATH" cornerstone scenario verify vs2-policy-tenancy-egress --json --output reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json || true
 	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json --json
+
+verify-vs2-local-range:
+	mkdir -p reports/security
+	PATH="$(PWD):$$PATH" cornerstone security vs2-local-range --json > reports/security/vs2-local-range-command.json
 
 verify-local-fast: verify-docs verify-scenario-matrix verify-scaffold-cli

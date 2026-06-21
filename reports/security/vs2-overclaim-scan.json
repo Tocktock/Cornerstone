@@ -1,0 +1,26 @@
+{
+  "expected_counts": {
+    "human_required": 7,
+    "not_verified": 0,
+    "pass": 86
+  },
+  "finding_count": 0,
+  "findings": [],
+  "missing_required_boundaries": [],
+  "required_boundaries": {
+    "current_state_ai_verified_human_gates_label_present": true,
+    "current_state_counts_match_report": true,
+    "current_state_non_production_boundary_present": true,
+    "local_report_human_external_boundaries_present": true,
+    "local_report_still_not_claimed_section_present": true,
+    "readme_ai_verified_human_gates_label_present": true,
+    "readme_counts_match_report": true,
+    "readme_human_boundaries_present": true
+  },
+  "scanned_paths": [
+    "README.md",
+    "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md",
+    "docs/verification-reports/VS2_LOCAL_RANGE_FIRST_SLICE_REPORT_2026-06-21.md"
+  ],
+  "status": "passed"
+}

@@ -2,49 +2,1822 @@
   "assertions": [
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
-      },
-      "name": "default_deny_sends_zero_sink_calls",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "sink": {
-          "authorization_headers_seen": 0,
-          "calls": [
+        "checks": {
+          "duplicate_suppressed_before_network": true,
+          "one_side_effect_per_tenant_scoped_key": true,
+          "retry_limit_bounded": true,
+          "retryable_failure_retried_until_success": true,
+          "tenant_scoped_idempotency_keys": true,
+          "timeout_attempted_and_bounded": true
+        },
+        "duplicate_operation": {
+          "attempts": [],
+          "idempotency_key": "tenant_a:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 3,
+          "provider_calls_before": 3,
+          "side_effects_after": 1,
+          "side_effects_before": 1,
+          "status": "duplicate_suppressed_before_network",
+          "tenant_id": "tenant_a"
+        },
+        "idempotency_ledger": [
+          "tenant_a:action:001",
+          "tenant_b:action:001"
+        ],
+        "provider_calls": [
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:timeout:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:timeout:001",
+            "method": "POST",
+            "path": "/v1/execute/timeout",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_b:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_b:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_b:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_b:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          }
+        ],
+        "retry_operation": {
+          "attempts": [
             {
-              "authorization_header_seen": false,
-              "headers": {
-                "Host": "127.0.0.1:59132",
-                "User-Agent": "cornerstone-vs2-governed-egress/1",
-                "X-Cs-Credential-Ref": "credential_ref_mock_provider_read",
-                "X-Cs-Trace-Id": "trace_vs2_governed_egress"
-              },
-              "method": "GET",
-              "path": "/v1/read/status",
-              "request_bytes": 0
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 75,
+                "decision_id": "egress_4f95017ec0fd8ea0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 75,
+                    "decision": "allow",
+                    "decision_id": "egress_4f95017ec0fd8ea0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 503,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 503,
+                "status": "sent"
+              }
+            },
+            {
+              "attempt": 2,
+              "execution": {
+                "bytes_received": 59,
+                "decision_id": "egress_4f95017ec0fd8ea0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 59,
+                    "decision": "allow",
+                    "decision_id": "egress_4f95017ec0fd8ea0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 200,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 200,
+                "status": "sent"
+              }
             }
           ],
-          "host": "127.0.0.1",
-          "port": 59132,
-          "request_bytes": 0,
-          "requests": 1
+          "idempotency_key": "tenant_a:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 3,
+          "provider_calls_before": 1,
+          "side_effect_delta": 1,
+          "side_effects_after": 1,
+          "side_effects_before": 0,
+          "status": "succeeded",
+          "tenant_id": "tenant_a"
+        },
+        "side_effects": [
+          {
+            "attempt": 2,
+            "effect_ref": "mock_effect_c041dbeaeb45",
+            "idempotency_key": "tenant_a:action:001"
+          },
+          {
+            "attempt": 2,
+            "effect_ref": "mock_effect_66034799d6df",
+            "idempotency_key": "tenant_b:action:001"
+          }
+        ],
+        "tenant_b_same_local_key_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 75,
+                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_b:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 75,
+                    "decision": "allow",
+                    "decision_id": "egress_2dc2d7caa6b22dd0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_b:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 503,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 503,
+                "status": "sent"
+              }
+            },
+            {
+              "attempt": 2,
+              "execution": {
+                "bytes_received": 59,
+                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_b:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 59,
+                    "decision": "allow",
+                    "decision_id": "egress_2dc2d7caa6b22dd0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_b:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 200,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 200,
+                "status": "sent"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_b:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 5,
+          "provider_calls_before": 3,
+          "side_effect_delta": 1,
+          "side_effects_after": 2,
+          "side_effects_before": 1,
+          "status": "succeeded",
+          "tenant_id": "tenant_b"
+        },
+        "timeout_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 0,
+                "decision_id": "egress_d33039995581da96",
+                "error_class": "TimeoutError",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:timeout:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "decision": "allow",
+                    "decision_id": "egress_d33039995581da96",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/timeout",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/timeout",
+                      "scheme": "http"
+                    },
+                    "error": "timed out",
+                    "error_class": "TimeoutError",
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:timeout:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "timeout": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/timeout"
+                  }
+                ],
+                "http_status": null,
+                "status": "timeout"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_a:timeout:001",
+          "max_attempts": 1,
+          "provider_calls_after": 1,
+          "provider_calls_before": 0,
+          "side_effect_delta": 0,
+          "side_effects_after": 0,
+          "side_effects_before": 0,
+          "status": "timeout",
+          "tenant_id": "tenant_a"
         }
       },
-      "name": "declared_connectorhub_call_hits_sink_once",
+      "name": "timeout_operation_attempted_and_bounded",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "checks": {
+          "duplicate_suppressed_before_network": true,
+          "one_side_effect_per_tenant_scoped_key": true,
+          "retry_limit_bounded": true,
+          "retryable_failure_retried_until_success": true,
+          "tenant_scoped_idempotency_keys": true,
+          "timeout_attempted_and_bounded": true
+        },
+        "duplicate_operation": {
+          "attempts": [],
+          "idempotency_key": "tenant_a:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 3,
+          "provider_calls_before": 3,
+          "side_effects_after": 1,
+          "side_effects_before": 1,
+          "status": "duplicate_suppressed_before_network",
+          "tenant_id": "tenant_a"
+        },
+        "idempotency_ledger": [
+          "tenant_a:action:001",
+          "tenant_b:action:001"
+        ],
+        "provider_calls": [
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:timeout:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:timeout:001",
+            "method": "POST",
+            "path": "/v1/execute/timeout",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_b:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_b:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_b:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_b:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          }
+        ],
+        "retry_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 75,
+                "decision_id": "egress_4f95017ec0fd8ea0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 75,
+                    "decision": "allow",
+                    "decision_id": "egress_4f95017ec0fd8ea0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 503,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 503,
+                "status": "sent"
+              }
+            },
+            {
+              "attempt": 2,
+              "execution": {
+                "bytes_received": 59,
+                "decision_id": "egress_4f95017ec0fd8ea0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 59,
+                    "decision": "allow",
+                    "decision_id": "egress_4f95017ec0fd8ea0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 200,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 200,
+                "status": "sent"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_a:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 3,
+          "provider_calls_before": 1,
+          "side_effect_delta": 1,
+          "side_effects_after": 1,
+          "side_effects_before": 0,
+          "status": "succeeded",
+          "tenant_id": "tenant_a"
+        },
+        "side_effects": [
+          {
+            "attempt": 2,
+            "effect_ref": "mock_effect_c041dbeaeb45",
+            "idempotency_key": "tenant_a:action:001"
+          },
+          {
+            "attempt": 2,
+            "effect_ref": "mock_effect_66034799d6df",
+            "idempotency_key": "tenant_b:action:001"
+          }
+        ],
+        "tenant_b_same_local_key_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 75,
+                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_b:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 75,
+                    "decision": "allow",
+                    "decision_id": "egress_2dc2d7caa6b22dd0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_b:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 503,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 503,
+                "status": "sent"
+              }
+            },
+            {
+              "attempt": 2,
+              "execution": {
+                "bytes_received": 59,
+                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_b:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 59,
+                    "decision": "allow",
+                    "decision_id": "egress_2dc2d7caa6b22dd0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_b:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 200,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 200,
+                "status": "sent"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_b:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 5,
+          "provider_calls_before": 3,
+          "side_effect_delta": 1,
+          "side_effects_after": 2,
+          "side_effects_before": 1,
+          "status": "succeeded",
+          "tenant_id": "tenant_b"
+        },
+        "timeout_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 0,
+                "decision_id": "egress_d33039995581da96",
+                "error_class": "TimeoutError",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:timeout:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "decision": "allow",
+                    "decision_id": "egress_d33039995581da96",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/timeout",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/timeout",
+                      "scheme": "http"
+                    },
+                    "error": "timed out",
+                    "error_class": "TimeoutError",
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:timeout:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "timeout": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/timeout"
+                  }
+                ],
+                "http_status": null,
+                "status": "timeout"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_a:timeout:001",
+          "max_attempts": 1,
+          "provider_calls_after": 1,
+          "provider_calls_before": 0,
+          "side_effect_delta": 0,
+          "side_effects_after": 0,
+          "side_effects_before": 0,
+          "status": "timeout",
+          "tenant_id": "tenant_a"
+        }
+      },
+      "name": "retryable_failure_retried_until_success",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "checks": {
+          "duplicate_suppressed_before_network": true,
+          "one_side_effect_per_tenant_scoped_key": true,
+          "retry_limit_bounded": true,
+          "retryable_failure_retried_until_success": true,
+          "tenant_scoped_idempotency_keys": true,
+          "timeout_attempted_and_bounded": true
+        },
+        "duplicate_operation": {
+          "attempts": [],
+          "idempotency_key": "tenant_a:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 3,
+          "provider_calls_before": 3,
+          "side_effects_after": 1,
+          "side_effects_before": 1,
+          "status": "duplicate_suppressed_before_network",
+          "tenant_id": "tenant_a"
+        },
+        "idempotency_ledger": [
+          "tenant_a:action:001",
+          "tenant_b:action:001"
+        ],
+        "provider_calls": [
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:timeout:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:timeout:001",
+            "method": "POST",
+            "path": "/v1/execute/timeout",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_b:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_b:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_b:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_b:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          }
+        ],
+        "retry_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 75,
+                "decision_id": "egress_4f95017ec0fd8ea0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 75,
+                    "decision": "allow",
+                    "decision_id": "egress_4f95017ec0fd8ea0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 503,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 503,
+                "status": "sent"
+              }
+            },
+            {
+              "attempt": 2,
+              "execution": {
+                "bytes_received": 59,
+                "decision_id": "egress_4f95017ec0fd8ea0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 59,
+                    "decision": "allow",
+                    "decision_id": "egress_4f95017ec0fd8ea0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 200,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 200,
+                "status": "sent"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_a:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 3,
+          "provider_calls_before": 1,
+          "side_effect_delta": 1,
+          "side_effects_after": 1,
+          "side_effects_before": 0,
+          "status": "succeeded",
+          "tenant_id": "tenant_a"
+        },
+        "side_effects": [
+          {
+            "attempt": 2,
+            "effect_ref": "mock_effect_c041dbeaeb45",
+            "idempotency_key": "tenant_a:action:001"
+          },
+          {
+            "attempt": 2,
+            "effect_ref": "mock_effect_66034799d6df",
+            "idempotency_key": "tenant_b:action:001"
+          }
+        ],
+        "tenant_b_same_local_key_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 75,
+                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_b:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 75,
+                    "decision": "allow",
+                    "decision_id": "egress_2dc2d7caa6b22dd0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_b:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 503,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 503,
+                "status": "sent"
+              }
+            },
+            {
+              "attempt": 2,
+              "execution": {
+                "bytes_received": 59,
+                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_b:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 59,
+                    "decision": "allow",
+                    "decision_id": "egress_2dc2d7caa6b22dd0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_b:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 200,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 200,
+                "status": "sent"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_b:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 5,
+          "provider_calls_before": 3,
+          "side_effect_delta": 1,
+          "side_effects_after": 2,
+          "side_effects_before": 1,
+          "status": "succeeded",
+          "tenant_id": "tenant_b"
+        },
+        "timeout_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 0,
+                "decision_id": "egress_d33039995581da96",
+                "error_class": "TimeoutError",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:timeout:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "decision": "allow",
+                    "decision_id": "egress_d33039995581da96",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/timeout",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/timeout",
+                      "scheme": "http"
+                    },
+                    "error": "timed out",
+                    "error_class": "TimeoutError",
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:timeout:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "timeout": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/timeout"
+                  }
+                ],
+                "http_status": null,
+                "status": "timeout"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_a:timeout:001",
+          "max_attempts": 1,
+          "provider_calls_after": 1,
+          "provider_calls_before": 0,
+          "side_effect_delta": 0,
+          "side_effects_after": 0,
+          "side_effects_before": 0,
+          "status": "timeout",
+          "tenant_id": "tenant_a"
+        }
+      },
+      "name": "retry_limit_is_bounded",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "checks": {
+          "duplicate_suppressed_before_network": true,
+          "one_side_effect_per_tenant_scoped_key": true,
+          "retry_limit_bounded": true,
+          "retryable_failure_retried_until_success": true,
+          "tenant_scoped_idempotency_keys": true,
+          "timeout_attempted_and_bounded": true
+        },
+        "duplicate_operation": {
+          "attempts": [],
+          "idempotency_key": "tenant_a:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 3,
+          "provider_calls_before": 3,
+          "side_effects_after": 1,
+          "side_effects_before": 1,
+          "status": "duplicate_suppressed_before_network",
+          "tenant_id": "tenant_a"
+        },
+        "idempotency_ledger": [
+          "tenant_a:action:001",
+          "tenant_b:action:001"
+        ],
+        "provider_calls": [
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:timeout:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:timeout:001",
+            "method": "POST",
+            "path": "/v1/execute/timeout",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_b:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_b:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_b:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_b:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          }
+        ],
+        "retry_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 75,
+                "decision_id": "egress_4f95017ec0fd8ea0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 75,
+                    "decision": "allow",
+                    "decision_id": "egress_4f95017ec0fd8ea0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 503,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 503,
+                "status": "sent"
+              }
+            },
+            {
+              "attempt": 2,
+              "execution": {
+                "bytes_received": 59,
+                "decision_id": "egress_4f95017ec0fd8ea0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 59,
+                    "decision": "allow",
+                    "decision_id": "egress_4f95017ec0fd8ea0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 200,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 200,
+                "status": "sent"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_a:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 3,
+          "provider_calls_before": 1,
+          "side_effect_delta": 1,
+          "side_effects_after": 1,
+          "side_effects_before": 0,
+          "status": "succeeded",
+          "tenant_id": "tenant_a"
+        },
+        "side_effects": [
+          {
+            "attempt": 2,
+            "effect_ref": "mock_effect_c041dbeaeb45",
+            "idempotency_key": "tenant_a:action:001"
+          },
+          {
+            "attempt": 2,
+            "effect_ref": "mock_effect_66034799d6df",
+            "idempotency_key": "tenant_b:action:001"
+          }
+        ],
+        "tenant_b_same_local_key_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 75,
+                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_b:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 75,
+                    "decision": "allow",
+                    "decision_id": "egress_2dc2d7caa6b22dd0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_b:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 503,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 503,
+                "status": "sent"
+              }
+            },
+            {
+              "attempt": 2,
+              "execution": {
+                "bytes_received": 59,
+                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_b:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 59,
+                    "decision": "allow",
+                    "decision_id": "egress_2dc2d7caa6b22dd0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_b:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 200,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 200,
+                "status": "sent"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_b:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 5,
+          "provider_calls_before": 3,
+          "side_effect_delta": 1,
+          "side_effects_after": 2,
+          "side_effects_before": 1,
+          "status": "succeeded",
+          "tenant_id": "tenant_b"
+        },
+        "timeout_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 0,
+                "decision_id": "egress_d33039995581da96",
+                "error_class": "TimeoutError",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:timeout:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "decision": "allow",
+                    "decision_id": "egress_d33039995581da96",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/timeout",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/timeout",
+                      "scheme": "http"
+                    },
+                    "error": "timed out",
+                    "error_class": "TimeoutError",
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:timeout:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "timeout": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/timeout"
+                  }
+                ],
+                "http_status": null,
+                "status": "timeout"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_a:timeout:001",
+          "max_attempts": 1,
+          "provider_calls_after": 1,
+          "provider_calls_before": 0,
+          "side_effect_delta": 0,
+          "side_effects_after": 0,
+          "side_effects_before": 0,
+          "status": "timeout",
+          "tenant_id": "tenant_a"
+        }
+      },
+      "name": "duplicate_execution_suppressed_before_network",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "checks": {
+          "duplicate_suppressed_before_network": true,
+          "one_side_effect_per_tenant_scoped_key": true,
+          "retry_limit_bounded": true,
+          "retryable_failure_retried_until_success": true,
+          "tenant_scoped_idempotency_keys": true,
+          "timeout_attempted_and_bounded": true
+        },
+        "duplicate_operation": {
+          "attempts": [],
+          "idempotency_key": "tenant_a:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 3,
+          "provider_calls_before": 3,
+          "side_effects_after": 1,
+          "side_effects_before": 1,
+          "status": "duplicate_suppressed_before_network",
+          "tenant_id": "tenant_a"
+        },
+        "idempotency_ledger": [
+          "tenant_a:action:001",
+          "tenant_b:action:001"
+        ],
+        "provider_calls": [
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:timeout:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:timeout:001",
+            "method": "POST",
+            "path": "/v1/execute/timeout",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_a:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_a:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_b:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_b:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          },
+          {
+            "authorization_header_seen": false,
+            "headers": {
+              "Host": "127.0.0.1:53051",
+              "Idempotency-Key": "tenant_b:action:001",
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "idempotency_key": "tenant_b:action:001",
+            "method": "POST",
+            "path": "/v1/execute/retryable",
+            "request_bytes": 46
+          }
+        ],
+        "retry_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 75,
+                "decision_id": "egress_4f95017ec0fd8ea0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 75,
+                    "decision": "allow",
+                    "decision_id": "egress_4f95017ec0fd8ea0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 503,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 503,
+                "status": "sent"
+              }
+            },
+            {
+              "attempt": 2,
+              "execution": {
+                "bytes_received": 59,
+                "decision_id": "egress_4f95017ec0fd8ea0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 59,
+                    "decision": "allow",
+                    "decision_id": "egress_4f95017ec0fd8ea0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 200,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 200,
+                "status": "sent"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_a:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 3,
+          "provider_calls_before": 1,
+          "side_effect_delta": 1,
+          "side_effects_after": 1,
+          "side_effects_before": 0,
+          "status": "succeeded",
+          "tenant_id": "tenant_a"
+        },
+        "side_effects": [
+          {
+            "attempt": 2,
+            "effect_ref": "mock_effect_c041dbeaeb45",
+            "idempotency_key": "tenant_a:action:001"
+          },
+          {
+            "attempt": 2,
+            "effect_ref": "mock_effect_66034799d6df",
+            "idempotency_key": "tenant_b:action:001"
+          }
+        ],
+        "tenant_b_same_local_key_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 75,
+                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_b:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 75,
+                    "decision": "allow",
+                    "decision_id": "egress_2dc2d7caa6b22dd0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_b:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 503,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 503,
+                "status": "sent"
+              }
+            },
+            {
+              "attempt": 2,
+              "execution": {
+                "bytes_received": 59,
+                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_b:action:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "bytes_received": 59,
+                    "decision": "allow",
+                    "decision_id": "egress_2dc2d7caa6b22dd0",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/retryable",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/retryable",
+                      "scheme": "http"
+                    },
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_b:action:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": 200,
+                    "location": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                  }
+                ],
+                "http_status": 200,
+                "status": "sent"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_b:action:001",
+          "max_attempts": 2,
+          "provider_calls_after": 5,
+          "provider_calls_before": 3,
+          "side_effect_delta": 1,
+          "side_effects_after": 2,
+          "side_effects_before": 1,
+          "status": "succeeded",
+          "tenant_id": "tenant_b"
+        },
+        "timeout_operation": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "execution": {
+                "bytes_received": 0,
+                "decision_id": "egress_d33039995581da96",
+                "error_class": "TimeoutError",
+                "headers_sent": {
+                  "Idempotency-Key": "tenant_a:timeout:001",
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "hops": [
+                  {
+                    "decision": "allow",
+                    "decision_id": "egress_d33039995581da96",
+                    "destination": {
+                      "destination_class": "reserved_loopback",
+                      "host": "127.0.0.1",
+                      "method": "POST",
+                      "path": "/v1/execute/timeout",
+                      "port": 53051,
+                      "raw_path": "/v1/execute/timeout",
+                      "scheme": "http"
+                    },
+                    "error": "timed out",
+                    "error_class": "TimeoutError",
+                    "headers_sent": {
+                      "Idempotency-Key": "tenant_a:timeout:001",
+                      "user-agent": "cornerstone-vs2-governed-egress/1",
+                      "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                      "x-cs-trace-id": "trace_vs2_governed_egress"
+                    },
+                    "http_status": null,
+                    "reason": "declared_connectorhub_capability",
+                    "request_sent": true,
+                    "timeout": true,
+                    "url": "http://127.0.0.1:53051/v1/execute/timeout"
+                  }
+                ],
+                "http_status": null,
+                "status": "timeout"
+              }
+            }
+          ],
+          "idempotency_key": "tenant_a:timeout:001",
+          "max_attempts": 1,
+          "provider_calls_after": 1,
+          "provider_calls_before": 0,
+          "side_effect_delta": 0,
+          "side_effects_after": 0,
+          "side_effects_before": 0,
+          "status": "timeout",
+          "tenant_id": "tenant_a"
+        }
+      },
+      "name": "one_side_effect_per_tenant_scoped_key",
       "passed": true
     },
     {
@@ -55,36 +1828,21 @@
         "default_denied_before_sink_call": true,
         "direct_socket_blocked": true,
         "dns_rebinding_guarded": true,
+        "egress_audit_records_correlate_attempts": true,
+        "egress_audit_records_have_byte_and_call_counts": true,
         "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
         "normalization_does_not_broaden": true,
+        "redirect_denied_hop_sensitive_headers_forwarded": true,
+        "redirect_loop_bounded": true,
         "redirects_reguarded": true,
         "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "reserved_destination_matrix_denied_before_network": true,
+        "retry_timeout_idempotency_proved": true,
+        "sandbox_bypass_guard_proved": true,
+        "tenant_policy_isolated": true,
+        "untrusted_content_guard_proved": true
       },
-      "name": "tenant_b_and_adversarial_paths_blocked",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
-      },
-      "name": "credentials_and_payload_not_exposed",
+      "name": "retry_timeout_idempotency_report_is_gated",
       "passed": true
     },
     {
@@ -110,8 +1868,8 @@
   "required_evidence": "Attempt timeline, one side effect maximum, idempotency key scope, compensation/audit record.",
   "scenario_id": "VS2-SEC-062",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Timeout/retry limits are bounded, idempotency is tenant-scoped, and duplicate real/mock side effects are prevented or explicitly compensated.",
   "validator": "verify_vs2_sec_062",
   "verification_command": [

@@ -2,89 +2,358 @@
   "assertions": [
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
-      },
-      "name": "default_deny_sends_zero_sink_calls",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "sink": {
-          "authorization_headers_seen": 0,
-          "calls": [
-            {
-              "authorization_header_seen": false,
-              "headers": {
-                "Host": "127.0.0.1:59132",
-                "User-Agent": "cornerstone-vs2-governed-egress/1",
-                "X-Cs-Credential-Ref": "credential_ref_mock_provider_read",
-                "X-Cs-Trace-Id": "trace_vs2_governed_egress"
-              },
+        "redirect_limit": 5,
+        "redirect_loop": {
+          "decision": {
+            "bytes_sent": 64,
+            "decision": "allow",
+            "decision_id": "egress_e9cc98f98033c9a5",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
               "method": "GET",
-              "path": "/v1/read/status",
-              "request_bytes": 0
-            }
-          ],
-          "host": "127.0.0.1",
-          "port": 59132,
-          "request_bytes": 0,
-          "requests": 1
+              "path": "/v1/read/redirect-loop",
+              "port": 53050,
+              "raw_path": "/v1/read/redirect-loop",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 1,
+            "matched_rule": "rule_mock_provider_redirect",
+            "reason": "declared_connectorhub_capability",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_received": 0,
+            "decision_id": "egress_e9cc98f98033c9a5",
+            "headers_sent": {
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "hops": [
+              {
+                "bytes_received": 0,
+                "decision": "allow",
+                "decision_id": "egress_e9cc98f98033c9a5",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/read/redirect-loop",
+                  "port": 53050,
+                  "raw_path": "/v1/read/redirect-loop",
+                  "scheme": "http"
+                },
+                "headers_sent": {
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "http_status": 302,
+                "location": "http://127.0.0.1:53050/v1/read/redirect-loop",
+                "reason": "declared_connectorhub_capability",
+                "request_sent": true,
+                "url": "http://127.0.0.1:53050/v1/read/redirect-loop"
+              },
+              {
+                "bytes_received": 0,
+                "decision": "allow",
+                "decision_id": "egress_e9cc98f98033c9a5",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/read/redirect-loop",
+                  "port": 53050,
+                  "raw_path": "/v1/read/redirect-loop",
+                  "scheme": "http"
+                },
+                "headers_sent": {
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "http_status": 302,
+                "location": "http://127.0.0.1:53050/v1/read/redirect-loop",
+                "reason": "declared_connectorhub_capability",
+                "request_sent": true,
+                "url": "http://127.0.0.1:53050/v1/read/redirect-loop"
+              }
+            ],
+            "http_status": 302,
+            "status": "redirect_limit_exceeded"
+          },
+          "limit": 1
+        },
+        "redirect_to_private": {
+          "decision": {
+            "bytes_sent": 64,
+            "decision": "allow",
+            "decision_id": "egress_a8ab896a06170eb3",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
+              "method": "GET",
+              "path": "/v1/read/redirect-private",
+              "port": 53050,
+              "raw_path": "/v1/read/redirect-private",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 1,
+            "matched_rule": "rule_mock_provider_redirect",
+            "reason": "declared_connectorhub_capability",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_sent": 0,
+            "decision_id": "egress_7f7846f06d7350a8",
+            "headers_sent": {},
+            "hops": [
+              {
+                "bytes_received": 0,
+                "decision": "allow",
+                "decision_id": "egress_a8ab896a06170eb3",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/read/redirect-private",
+                  "port": 53050,
+                  "raw_path": "/v1/read/redirect-private",
+                  "scheme": "http"
+                },
+                "headers_sent": {
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "http_status": 302,
+                "location": "http://127.0.0.1:53049/blocked",
+                "reason": "declared_connectorhub_capability",
+                "request_sent": true,
+                "url": "http://127.0.0.1:53050/v1/read/redirect-private"
+              },
+              {
+                "decision": "deny",
+                "decision_id": "egress_7f7846f06d7350a8",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/blocked",
+                  "port": 53049,
+                  "raw_path": "/blocked",
+                  "scheme": "http"
+                },
+                "reason": "reserved_destination_denied",
+                "request_sent": false,
+                "url": "http://127.0.0.1:53049/blocked"
+              }
+            ],
+            "http_status": null,
+            "status": "denied_before_network"
+          },
+          "trap_calls_after": 0,
+          "trap_calls_before": 0
         }
       },
-      "name": "declared_connectorhub_call_hits_sink_once",
+      "name": "redirect_hops_reauthorized",
       "passed": true
     },
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "redirect_limit": 5,
+        "redirect_loop": {
+          "decision": {
+            "bytes_sent": 64,
+            "decision": "allow",
+            "decision_id": "egress_e9cc98f98033c9a5",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
+              "method": "GET",
+              "path": "/v1/read/redirect-loop",
+              "port": 53050,
+              "raw_path": "/v1/read/redirect-loop",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 1,
+            "matched_rule": "rule_mock_provider_redirect",
+            "reason": "declared_connectorhub_capability",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_received": 0,
+            "decision_id": "egress_e9cc98f98033c9a5",
+            "headers_sent": {
+              "user-agent": "cornerstone-vs2-governed-egress/1",
+              "x-cs-credential-ref": "credential_ref_mock_provider_read",
+              "x-cs-trace-id": "trace_vs2_governed_egress"
+            },
+            "hops": [
+              {
+                "bytes_received": 0,
+                "decision": "allow",
+                "decision_id": "egress_e9cc98f98033c9a5",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/read/redirect-loop",
+                  "port": 53050,
+                  "raw_path": "/v1/read/redirect-loop",
+                  "scheme": "http"
+                },
+                "headers_sent": {
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "http_status": 302,
+                "location": "http://127.0.0.1:53050/v1/read/redirect-loop",
+                "reason": "declared_connectorhub_capability",
+                "request_sent": true,
+                "url": "http://127.0.0.1:53050/v1/read/redirect-loop"
+              },
+              {
+                "bytes_received": 0,
+                "decision": "allow",
+                "decision_id": "egress_e9cc98f98033c9a5",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/read/redirect-loop",
+                  "port": 53050,
+                  "raw_path": "/v1/read/redirect-loop",
+                  "scheme": "http"
+                },
+                "headers_sent": {
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "http_status": 302,
+                "location": "http://127.0.0.1:53050/v1/read/redirect-loop",
+                "reason": "declared_connectorhub_capability",
+                "request_sent": true,
+                "url": "http://127.0.0.1:53050/v1/read/redirect-loop"
+              }
+            ],
+            "http_status": 302,
+            "status": "redirect_limit_exceeded"
+          },
+          "limit": 1
+        },
+        "redirect_to_private": {
+          "decision": {
+            "bytes_sent": 64,
+            "decision": "allow",
+            "decision_id": "egress_a8ab896a06170eb3",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
+              "method": "GET",
+              "path": "/v1/read/redirect-private",
+              "port": 53050,
+              "raw_path": "/v1/read/redirect-private",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 1,
+            "matched_rule": "rule_mock_provider_redirect",
+            "reason": "declared_connectorhub_capability",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_sent": 0,
+            "decision_id": "egress_7f7846f06d7350a8",
+            "headers_sent": {},
+            "hops": [
+              {
+                "bytes_received": 0,
+                "decision": "allow",
+                "decision_id": "egress_a8ab896a06170eb3",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/read/redirect-private",
+                  "port": 53050,
+                  "raw_path": "/v1/read/redirect-private",
+                  "scheme": "http"
+                },
+                "headers_sent": {
+                  "user-agent": "cornerstone-vs2-governed-egress/1",
+                  "x-cs-credential-ref": "credential_ref_mock_provider_read",
+                  "x-cs-trace-id": "trace_vs2_governed_egress"
+                },
+                "http_status": 302,
+                "location": "http://127.0.0.1:53049/blocked",
+                "reason": "declared_connectorhub_capability",
+                "request_sent": true,
+                "url": "http://127.0.0.1:53050/v1/read/redirect-private"
+              },
+              {
+                "decision": "deny",
+                "decision_id": "egress_7f7846f06d7350a8",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/blocked",
+                  "port": 53049,
+                  "raw_path": "/blocked",
+                  "scheme": "http"
+                },
+                "reason": "reserved_destination_denied",
+                "request_sent": false,
+                "url": "http://127.0.0.1:53049/blocked"
+              }
+            ],
+            "http_status": null,
+            "status": "denied_before_network"
+          },
+          "trap_calls_after": 0,
+          "trap_calls_before": 0
+        }
       },
-      "name": "tenant_b_and_adversarial_paths_blocked",
+      "name": "redirect_loop_is_bounded",
       "passed": true
     },
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "authorization_headers_seen": 0,
+        "calls": [],
+        "credential_ref_headers_seen": 0,
+        "host": "127.0.0.1",
+        "port": 53049,
+        "requests": 0
       },
-      "name": "credentials_and_payload_not_exposed",
+      "name": "denied_redirect_hop_gets_no_sensitive_headers",
       "passed": true
     },
     {
@@ -110,8 +379,8 @@
   "required_evidence": "Hop-by-hop decisions, sink logs, header redaction, bounded redirect count.",
   "scenario_id": "VS2-SEC-057",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Every hop is re-authorized; the denied hop is blocked, redirect limits apply, and no sensitive header is forwarded across unauthorized boundaries.",
   "validator": "verify_vs2_sec_057",
   "verification_command": [

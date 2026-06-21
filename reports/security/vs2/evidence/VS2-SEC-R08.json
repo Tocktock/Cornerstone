@@ -2,20 +2,196 @@
   "assertions": [
     {
       "evidence": {
-        "compileall_green": true,
-        "scenario_matrix_green": true,
-        "vs0_acceptance_green": true,
-        "vs0_evux_green": true,
-        "vs0_operator_ui_green": true,
-        "vs0_runtime_green": true,
-        "vs1_ontology_green": true
+        "audit_refs": [
+          "audit_319fcdb71b9b2cc8"
+        ],
+        "checks": {
+          "anomaly_audit_recorded": true,
+          "anomaly_metric_recorded": true,
+          "fault_injected_service_allow_recorded": true,
+          "rls_still_returns_zero_foreign_rows": true
+        },
+        "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+        "fixture_presence": {
+          "beta_fixture_canary_digest": "0aa43aaa39cc1740514dc06704a49c8c",
+          "beta_fixture_rows": 1
+        },
+        "metric_insert": {
+          "command": [
+            "docker",
+            "exec",
+            "-i",
+            "cornerstone-vs2-range-pg-a973465896",
+            "psql",
+            "-U",
+            "postgres",
+            "-d",
+            "cornerstone",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-X",
+            "-q",
+            "-t",
+            "-A"
+          ],
+          "elapsed_seconds": 0.164,
+          "exit_code": 0,
+          "stderr_tail": [],
+          "stdout_bytes": 0,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "metric_read": {
+          "metric_rows_visible": 1,
+          "metric_values": [
+            1
+          ]
+        },
+        "rls_probe": {
+          "foreign_artifact_rows_visible": 0,
+          "foreign_payload_rows_visible": 0,
+          "tenant_ids_returned": []
+        },
+        "service_policy_fault": {
+          "decision": "allow",
+          "fault_injection": "service_policy_bypass_stub",
+          "scenario_id": "VS2-SEC-036",
+          "target_tenant_digest": "8512b8ca4f7326287c2f724ffbcac9d705b234e1c2e92afe25256fa0db53fb9e",
+          "trusted_policy_source": false
+        },
+        "status": "passed"
       },
-      "name": "targeted_regression_guard_observed",
+      "name": "r08_fault_injected_service_allow_still_returns_zero_foreign_rows",
       "passed": true
     },
     {
-      "evidence": {},
-      "name": "security_foundation_still_default_deny",
+      "evidence": {
+        "audit_refs": [
+          "audit_319fcdb71b9b2cc8"
+        ],
+        "checks": {
+          "anomaly_audit_recorded": true,
+          "anomaly_metric_recorded": true,
+          "fault_injected_service_allow_recorded": true,
+          "rls_still_returns_zero_foreign_rows": true
+        },
+        "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+        "fixture_presence": {
+          "beta_fixture_canary_digest": "0aa43aaa39cc1740514dc06704a49c8c",
+          "beta_fixture_rows": 1
+        },
+        "metric_insert": {
+          "command": [
+            "docker",
+            "exec",
+            "-i",
+            "cornerstone-vs2-range-pg-a973465896",
+            "psql",
+            "-U",
+            "postgres",
+            "-d",
+            "cornerstone",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-X",
+            "-q",
+            "-t",
+            "-A"
+          ],
+          "elapsed_seconds": 0.164,
+          "exit_code": 0,
+          "stderr_tail": [],
+          "stdout_bytes": 0,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "metric_read": {
+          "metric_rows_visible": 1,
+          "metric_values": [
+            1
+          ]
+        },
+        "rls_probe": {
+          "foreign_artifact_rows_visible": 0,
+          "foreign_payload_rows_visible": 0,
+          "tenant_ids_returned": []
+        },
+        "service_policy_fault": {
+          "decision": "allow",
+          "fault_injection": "service_policy_bypass_stub",
+          "scenario_id": "VS2-SEC-036",
+          "target_tenant_digest": "8512b8ca4f7326287c2f724ffbcac9d705b234e1c2e92afe25256fa0db53fb9e",
+          "trusted_policy_source": false
+        },
+        "status": "passed"
+      },
+      "name": "r08_bypass_attempt_records_audit_and_metric",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "attempt_results": {
+          "copy": {
+            "exit_code": 3,
+            "stderr_tail": [
+              "ERROR:  new row violates row-level security policy for table \"artifacts\""
+            ],
+            "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "promotion": {
+            "exit_code": 3,
+            "stderr_tail": [
+              "ERROR:  new row violates row-level security policy for table \"claims\""
+            ],
+            "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "reference": {
+            "exit_code": 3,
+            "stderr_tail": [
+              "ERROR:  insert or update on table \"artifact_references\" violates foreign key constraint \"artifact_references_target_artifact_fkey\"",
+              "DETAIL:  Key is not present in table \"artifacts\"."
+            ],
+            "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "share": {
+            "exit_code": 3,
+            "stderr_tail": [
+              "ERROR:  new row violates row-level security policy for table \"action_cards\""
+            ],
+            "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "audit_refs": [
+          "audit_a2bea3058bff548a"
+        ],
+        "checks": {
+          "copy_reference_share_promotion_denied": true,
+          "cross_tenant_transfer_policy_denied": true,
+          "transfer_denial_audited": true,
+          "zero_target_records_created": true
+        },
+        "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+        "policy_decision": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "decision_id": "policy_d90e64582d2424e8",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "bb96b81d075ec39f22c106ad70ca3885618a3da03a7daa0b95afde9168ab62c2",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "cross_tenant_scope"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_cross_tenant_transfer_023"
+        },
+        "status": "passed",
+        "target_state": {
+          "copy_rows": 0,
+          "promotion_rows": 0,
+          "reference_rows": 0,
+          "share_rows": 0
+        }
+      },
+      "name": "r08_direct_cross_tenant_transfer_cannot_mutate_target",
       "passed": true
     },
     {
@@ -41,8 +217,8 @@
   "required_evidence": "Gate failure or runtime denial, unchanged state, audit/anomaly evidence.",
   "scenario_id": "VS2-SEC-R08",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "The bypass is rejected by architecture lint, service guard, RLS, or runtime enforcement and cannot mutate state.",
   "validator": "verify_vs2_sec_r08",
   "verification_command": [

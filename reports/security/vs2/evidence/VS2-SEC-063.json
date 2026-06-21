@@ -2,89 +2,251 @@
   "assertions": [
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "connector_capability": "mock_provider.read",
+        "decision_id": "egress_bbdb9209c56f4dd1",
+        "destination_class": "reserved_loopback",
+        "raw_payload_stored": false,
+        "records": [
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "none",
+            "decision_id": "egress_bbdb9209c56f4dd1",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.default",
+            "external_http_calls": 0,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 12,
+            "bytes_sent": 0,
+            "connector_capability": "rule_mock_provider",
+            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.allowed.connectorhub",
+            "external_http_calls": 1,
+            "outcome": "sent",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "none",
+            "decision_id": "egress_8552010c7d90c02c",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.tenant_policy",
+            "external_http_calls": 0,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_b",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "rule_mock_provider_redirect",
+            "decision_id": "egress_a8ab896a06170eb3",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.redirect_hop",
+            "external_http_calls": 1,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "none",
+            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.controller_outage",
+            "external_http_calls": 0,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          }
+        ],
+        "trace_id": "trace_vs2_egress_local"
       },
-      "name": "default_deny_sends_zero_sink_calls",
+      "name": "egress_audit_records_correlate_attempts",
       "passed": true
     },
     {
       "evidence": {
-        "sink": {
-          "authorization_headers_seen": 0,
-          "calls": [
-            {
-              "authorization_header_seen": false,
-              "headers": {
-                "Host": "127.0.0.1:59132",
-                "User-Agent": "cornerstone-vs2-governed-egress/1",
-                "X-Cs-Credential-Ref": "credential_ref_mock_provider_read",
-                "X-Cs-Trace-Id": "trace_vs2_governed_egress"
-              },
-              "method": "GET",
-              "path": "/v1/read/status",
-              "request_bytes": 0
-            }
-          ],
-          "host": "127.0.0.1",
-          "port": 59132,
-          "request_bytes": 0,
-          "requests": 1
-        }
+        "connector_capability": "mock_provider.read",
+        "decision_id": "egress_bbdb9209c56f4dd1",
+        "destination_class": "reserved_loopback",
+        "raw_payload_stored": false,
+        "records": [
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "none",
+            "decision_id": "egress_bbdb9209c56f4dd1",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.default",
+            "external_http_calls": 0,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 12,
+            "bytes_sent": 0,
+            "connector_capability": "rule_mock_provider",
+            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.allowed.connectorhub",
+            "external_http_calls": 1,
+            "outcome": "sent",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "none",
+            "decision_id": "egress_8552010c7d90c02c",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.tenant_policy",
+            "external_http_calls": 0,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_b",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "rule_mock_provider_redirect",
+            "decision_id": "egress_a8ab896a06170eb3",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.redirect_hop",
+            "external_http_calls": 1,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "none",
+            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.controller_outage",
+            "external_http_calls": 0,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          }
+        ],
+        "trace_id": "trace_vs2_egress_local"
       },
-      "name": "declared_connectorhub_call_hits_sink_once",
+      "name": "egress_audit_records_have_byte_and_call_counts",
       "passed": true
     },
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "connector_capability": "mock_provider.read",
+        "decision_id": "egress_bbdb9209c56f4dd1",
+        "destination_class": "reserved_loopback",
+        "raw_payload_stored": false,
+        "records": [
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "none",
+            "decision_id": "egress_bbdb9209c56f4dd1",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.default",
+            "external_http_calls": 0,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 12,
+            "bytes_sent": 0,
+            "connector_capability": "rule_mock_provider",
+            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.allowed.connectorhub",
+            "external_http_calls": 1,
+            "outcome": "sent",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "none",
+            "decision_id": "egress_8552010c7d90c02c",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.tenant_policy",
+            "external_http_calls": 0,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_b",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "rule_mock_provider_redirect",
+            "decision_id": "egress_a8ab896a06170eb3",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.redirect_hop",
+            "external_http_calls": 1,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          },
+          {
+            "bytes_received": 0,
+            "bytes_sent": 0,
+            "connector_capability": "none",
+            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "destination_class": "reserved_loopback",
+            "event_name": "egress.denied.controller_outage",
+            "external_http_calls": 0,
+            "outcome": "denied_before_network",
+            "raw_credentials_stored": false,
+            "raw_payload_stored": false,
+            "tenant_id": "tenant_a",
+            "trace_id": "trace_vs2_egress_local"
+          }
+        ],
+        "trace_id": "trace_vs2_egress_local"
       },
-      "name": "tenant_b_and_adversarial_paths_blocked",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
-      },
-      "name": "credentials_and_payload_not_exposed",
+      "name": "egress_audit_records_exclude_raw_payloads_and_credentials",
       "passed": true
     },
     {
@@ -110,8 +272,8 @@
   "required_evidence": "Correlated records, counter assertions, decision IDs, secret-scan report.",
   "scenario_id": "VS2-SEC-063",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Records correlate tenant-safe trace, decision, action/workflow, connector capability, normalized destination class, outcome, and byte/call counts without storing secrets or raw payloads.",
   "validator": "verify_vs2_sec_063",
   "verification_command": [

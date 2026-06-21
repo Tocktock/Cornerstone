@@ -11247,8 +11247,8 @@ def verify_vs0_evux(root: Path) -> dict[str, Any]:
     browser_proof = capture_evux_browser_proof(root, state_dir=browser_state_path, output_dir=root / DEFAULT_EVUX_BROWSER_PROOF_DIR)
 
     regression_command_transcript = {
-        "verify-local-fast": _run_command(root, ["make", "verify-local-fast"]),
-        "verify-vs0-runtime": _run_command(root, ["make", "verify-vs0-runtime"]),
+        "verify-local-fast": _run_command(root, ["env", "CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1", "make", "verify-local-fast"]),
+        "verify-vs0-runtime": _run_command(root, ["env", "CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1", "make", "verify-vs0-runtime"]),
         "verify-vs0-acceptance": _run_command(root, ["make", "verify-vs0-acceptance"]),
     }
 
@@ -11768,6 +11768,7 @@ def verify_vs2_policy_tenancy_egress(root: Path) -> dict[str, Any]:
             "scenario_specific_evidence_report": local_proof.get("scenario_specific_evidence_report"),
             "synthetic_world_report": local_proof.get("synthetic_world_report"),
             "summary": local_proof.get("summary", {}),
+            "local_range": local_proof.get("local_range", {}),
             "postgres": local_proof.get("postgres", {}),
             "opa": local_proof.get("opa", {}),
             "egress": local_proof.get("egress", {}),

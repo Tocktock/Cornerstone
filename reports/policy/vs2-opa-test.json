@@ -1,4 +1,129 @@
 {
+  "ci_checks": {
+    "coverage_report_machine_readable": true,
+    "no_test_execution_failed": true,
+    "opa_build_passed": true,
+    "opa_check_passed": true,
+    "opa_test_details_passed": true,
+    "opa_test_passed": true,
+    "required_case_matrix_present": true
+  },
+  "ci_command_transcripts": [
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        "/Users/jiyong/playground/Cornerstone:/repo",
+        "-w",
+        "/repo",
+        "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "test",
+        "policies/vs2",
+        "--fail-on-empty",
+        "--coverage",
+        "--format=json"
+      ],
+      "elapsed_seconds": 0.857,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "  },",
+        "  \"covered_lines\": 175,",
+        "  \"not_covered_lines\": 12,",
+        "  \"coverage\": 93.58288770053476",
+        "}"
+      ]
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        "/Users/jiyong/playground/Cornerstone:/repo",
+        "-w",
+        "/repo",
+        "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "test",
+        "policies/vs2",
+        "--fail-on-empty",
+        "--format=json"
+      ],
+      "elapsed_seconds": 0.87,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "    \"package\": \"data.cornerstone.vs2\",",
+        "    \"name\": \"test_unexpected_authoritative_attribute_denied\",",
+        "    \"duration\": 46921459",
+        "  }",
+        "]"
+      ]
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        "/Users/jiyong/playground/Cornerstone:/repo",
+        "-w",
+        "/repo",
+        "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "check",
+        "policies/vs2"
+      ],
+      "elapsed_seconds": 0.778,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": []
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        "/Users/jiyong/playground/Cornerstone:/repo",
+        "-w",
+        "/repo",
+        "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "build",
+        "-b",
+        "policies/vs2",
+        "-o",
+        "/tmp/cornerstone-vs2-policy-bundle.tar.gz"
+      ],
+      "elapsed_seconds": 0.644,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": []
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        "/var/folders/hn/zz23wc011j119ttb26t_pnnm0000gn/T/cornerstone-vs2-empty-opa-jum9b07m:/empty:ro",
+        "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "test",
+        "/empty",
+        "--fail-on-empty",
+        "--format=json"
+      ],
+      "elapsed_seconds": 0.651,
+      "exit_code": 1,
+      "stderr_tail": [
+        "no tests were run"
+      ],
+      "stdout_tail": [
+        "[]"
+      ]
+    }
+  ],
   "exit_code": 0,
   "http_service": {
     "checks": {
@@ -7,7 +132,7 @@
       "http_invalid_schema_denied": true,
       "outage_fails_closed": true
     },
-    "container": "cornerstone-vs2-opa-6db2b97156",
+    "container": "cornerstone-vs2-opa-69aebe8f04",
     "decision_transcript": [
       {
         "case": "allow",
@@ -52,9 +177,9 @@
           "-d",
           "--rm",
           "--name",
-          "cornerstone-vs2-opa-6db2b97156",
+          "cornerstone-vs2-opa-69aebe8f04",
           "-p",
-          "127.0.0.1:60999:8181",
+          "127.0.0.1:52697:8181",
           "-v",
           "/Users/jiyong/playground/Cornerstone/policies/vs2:/policies:ro",
           "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
@@ -63,11 +188,11 @@
           "--addr=0.0.0.0:8181",
           "/policies"
         ],
-        "elapsed_seconds": 0.12,
+        "elapsed_seconds": 0.4,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [
-          "22adff10aed7cde531f51358bbd405f090ac28361bbd95781009411188d53eb4"
+          "390a97cc25933f8539f4723f0c73d4fa502be5549c6a54586996e14ea56dba3f"
         ]
       },
       {
@@ -75,13 +200,13 @@
           "docker",
           "rm",
           "-f",
-          "cornerstone-vs2-opa-6db2b97156"
+          "cornerstone-vs2-opa-69aebe8f04"
         ],
-        "elapsed_seconds": 0.185,
+        "elapsed_seconds": 0.566,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [
-          "cornerstone-vs2-opa-6db2b97156"
+          "cornerstone-vs2-opa-69aebe8f04"
         ]
       }
     ],
@@ -90,16 +215,28 @@
       "error_class": "URLError",
       "reason": "opa_unavailable_fail_closed"
     },
-    "port": 60999,
+    "port": 52697,
     "status": "passed"
   },
   "opa_image": "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+  "required_test_names": [
+    "test_connectorhub_capability_required",
+    "test_cross_tenant_data_scope_denied",
+    "test_cross_tenant_scope_denied",
+    "test_high_risk_approved_allowed",
+    "test_invalid_schema_fails_closed",
+    "test_member_write_denied",
+    "test_owner_read_allowed",
+    "test_revoked_principal_denied",
+    "test_unexpected_authoritative_attribute_denied",
+    "test_unknown_policy_default_deny"
+  ],
   "result": {
-    "coverage": 96.12403100775194,
-    "covered_lines": 124,
+    "coverage": 93.58288770053476,
+    "covered_lines": 175,
     "files": {
       "policies/vs2/policy.rego": {
-        "coverage": 93.75,
+        "coverage": 95.49549549549549,
         "covered": [
           {
             "end": {
@@ -111,7 +248,7 @@
           },
           {
             "end": {
-              "row": 23
+              "row": 30
             },
             "start": {
               "row": 5
@@ -119,146 +256,130 @@
           },
           {
             "end": {
-              "row": 28
+              "row": 35
             },
             "start": {
-              "row": 26
+              "row": 33
             }
           },
           {
             "end": {
-              "row": 32
+              "row": 39
             },
             "start": {
-              "row": 31
+              "row": 38
             }
           },
           {
             "end": {
-              "row": 45
-            },
-            "start": {
-              "row": 44
-            }
-          },
-          {
-            "end": {
-              "row": 49
-            },
-            "start": {
-              "row": 48
-            }
-          },
-          {
-            "end": {
-              "row": 54
-            },
-            "start": {
               "row": 52
+            },
+            "start": {
+              "row": 51
             }
           },
           {
             "end": {
-              "row": 58
+              "row": 56
             },
             "start": {
-              "row": 57
+              "row": 55
             }
           },
           {
             "end": {
-              "row": 63
-            },
-            "start": {
               "row": 61
+            },
+            "start": {
+              "row": 59
             }
           },
           {
             "end": {
-              "row": 74
+              "row": 65
             },
             "start": {
-              "row": 66
+              "row": 64
             }
           },
           {
             "end": {
-              "row": 78
+              "row": 69
             },
             "start": {
+              "row": 68
+            }
+          },
+          {
+            "end": {
+              "row": 73
+            },
+            "start": {
+              "row": 72
+            }
+          },
+          {
+            "end": {
               "row": 77
+            },
+            "start": {
+              "row": 76
             }
           },
           {
             "end": {
-              "row": 83
+              "row": 82
             },
             "start": {
-              "row": 81
+              "row": 80
             }
           },
           {
             "end": {
-              "row": 88
-            },
-            "start": {
               "row": 86
-            }
-          },
-          {
-            "end": {
-              "row": 93
             },
             "start": {
-              "row": 91
+              "row": 85
             }
           },
           {
             "end": {
-              "row": 99
+              "row": 101
             },
             "start": {
-              "row": 96
+              "row": 89
             }
           },
           {
             "end": {
+              "row": 105
+            },
+            "start": {
               "row": 104
-            },
-            "start": {
-              "row": 102
             }
           },
           {
             "end": {
-              "row": 109
+              "row": 110
             },
             "start": {
-              "row": 107
+              "row": 108
             }
           },
           {
             "end": {
-              "row": 114
+              "row": 115
             },
             "start": {
-              "row": 112
+              "row": 113
             }
           },
           {
             "end": {
-              "row": 117
+              "row": 120
             },
             "start": {
-              "row": 117
-            }
-          },
-          {
-            "end": {
-              "row": 123
-            },
-            "start": {
-              "row": 123
+              "row": 118
             }
           },
           {
@@ -266,34 +387,114 @@
               "row": 126
             },
             "start": {
-              "row": 126
+              "row": 123
             }
           },
           {
             "end": {
-              "row": 133
+              "row": 131
             },
             "start": {
-              "row": 132
+              "row": 129
+            }
+          },
+          {
+            "end": {
+              "row": 136
+            },
+            "start": {
+              "row": 134
+            }
+          },
+          {
+            "end": {
+              "row": 141
+            },
+            "start": {
+              "row": 139
+            }
+          },
+          {
+            "end": {
+              "row": 146
+            },
+            "start": {
+              "row": 144
+            }
+          },
+          {
+            "end": {
+              "row": 151
+            },
+            "start": {
+              "row": 149
+            }
+          },
+          {
+            "end": {
+              "row": 156
+            },
+            "start": {
+              "row": 154
+            }
+          },
+          {
+            "end": {
+              "row": 161
+            },
+            "start": {
+              "row": 159
+            }
+          },
+          {
+            "end": {
+              "row": 164
+            },
+            "start": {
+              "row": 164
+            }
+          },
+          {
+            "end": {
+              "row": 170
+            },
+            "start": {
+              "row": 170
+            }
+          },
+          {
+            "end": {
+              "row": 173
+            },
+            "start": {
+              "row": 173
+            }
+          },
+          {
+            "end": {
+              "row": 180
+            },
+            "start": {
+              "row": 179
             }
           }
         ],
-        "covered_lines": 75,
+        "covered_lines": 106,
         "not_covered": [
           {
             "end": {
-              "row": 36
+              "row": 43
             },
             "start": {
-              "row": 35
+              "row": 42
             }
           },
           {
             "end": {
-              "row": 41
+              "row": 48
             },
             "start": {
-              "row": 39
+              "row": 46
             }
           }
         ],
@@ -312,23 +513,7 @@
           },
           {
             "end": {
-              "row": 39
-            },
-            "start": {
-              "row": 36
-            }
-          },
-          {
-            "end": {
-              "row": 46
-            },
-            "start": {
-              "row": 42
-            }
-          },
-          {
-            "end": {
-              "row": 53
+              "row": 52
             },
             "start": {
               "row": 49
@@ -336,26 +521,26 @@
           },
           {
             "end": {
-              "row": 60
+              "row": 59
             },
             "start": {
-              "row": 56
+              "row": 55
             }
           },
           {
             "end": {
-              "row": 67
+              "row": 66
             },
             "start": {
-              "row": 63
+              "row": 62
             }
           },
           {
             "end": {
-              "row": 74
+              "row": 73
             },
             "start": {
-              "row": 70
+              "row": 69
             }
           },
           {
@@ -363,7 +548,7 @@
               "row": 80
             },
             "start": {
-              "row": 77
+              "row": 76
             }
           },
           {
@@ -389,13 +574,280 @@
             "start": {
               "row": 97
             }
+          },
+          {
+            "end": {
+              "row": 108
+            },
+            "start": {
+              "row": 104
+            }
+          },
+          {
+            "end": {
+              "row": 115
+            },
+            "start": {
+              "row": 111
+            }
+          },
+          {
+            "end": {
+              "row": 121
+            },
+            "start": {
+              "row": 118
+            }
+          },
+          {
+            "end": {
+              "row": 128
+            },
+            "start": {
+              "row": 124
+            }
+          },
+          {
+            "end": {
+              "row": 135
+            },
+            "start": {
+              "row": 131
+            }
+          },
+          {
+            "end": {
+              "row": 142
+            },
+            "start": {
+              "row": 138
+            }
           }
         ],
-        "covered_lines": 49
+        "covered_lines": 69
+      },
+      "policies/vs2/system_log_mask.rego": {
+        "not_covered": [
+          {
+            "end": {
+              "row": 3
+            },
+            "start": {
+              "row": 3
+            }
+          },
+          {
+            "end": {
+              "row": 5
+            },
+            "start": {
+              "row": 5
+            }
+          },
+          {
+            "end": {
+              "row": 7
+            },
+            "start": {
+              "row": 7
+            }
+          },
+          {
+            "end": {
+              "row": 9
+            },
+            "start": {
+              "row": 9
+            }
+          },
+          {
+            "end": {
+              "row": 11
+            },
+            "start": {
+              "row": 11
+            }
+          },
+          {
+            "end": {
+              "row": 13
+            },
+            "start": {
+              "row": 13
+            }
+          },
+          {
+            "end": {
+              "row": 15
+            },
+            "start": {
+              "row": 15
+            }
+          }
+        ],
+        "not_covered_lines": 7
       }
     },
-    "not_covered_lines": 5
+    "not_covered_lines": 12
   },
   "status": "passed",
-  "stderr_tail": []
+  "stderr_tail": [],
+  "test_names": [
+    "test_connectorhub_capability_required",
+    "test_cross_tenant_data_scope_denied",
+    "test_cross_tenant_scope_denied",
+    "test_external_workspace_mode_denied",
+    "test_high_risk_approved_allowed",
+    "test_high_risk_requires_approval",
+    "test_invalid_schema_fails_closed",
+    "test_member_write_denied",
+    "test_mission_authority_required",
+    "test_owner_read_allowed",
+    "test_revoked_principal_denied",
+    "test_secret_classification_denied",
+    "test_unexpected_authoritative_attribute_denied",
+    "test_unknown_policy_default_deny"
+  ],
+  "test_results": [
+    {
+      "duration": 6920625,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 49
+      },
+      "name": "test_owner_read_allowed",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 5026500,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 138
+      },
+      "name": "test_invalid_schema_fails_closed",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 112305167,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 104
+      },
+      "name": "test_external_workspace_mode_denied",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 111893625,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 76
+      },
+      "name": "test_high_risk_requires_approval",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 12700750,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 69
+      },
+      "name": "test_revoked_principal_denied",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 14176000,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 131
+      },
+      "name": "test_unknown_policy_default_deny",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 143824083,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 83
+      },
+      "name": "test_secret_classification_denied",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 144421875,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 55
+      },
+      "name": "test_member_write_denied",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 144040083,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 118
+      },
+      "name": "test_high_risk_approved_allowed",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 146586375,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 90
+      },
+      "name": "test_mission_authority_required",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 170146208,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 97
+      },
+      "name": "test_cross_tenant_data_scope_denied",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 168287792,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 62
+      },
+      "name": "test_cross_tenant_scope_denied",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 167038000,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 124
+      },
+      "name": "test_connectorhub_capability_required",
+      "package": "data.cornerstone.vs2"
+    },
+    {
+      "duration": 46921459,
+      "location": {
+        "col": 1,
+        "file": "policies/vs2/policy_test.rego",
+        "row": 111
+      },
+      "name": "test_unexpected_authoritative_attribute_denied",
+      "package": "data.cornerstone.vs2"
+    }
+  ]
 }

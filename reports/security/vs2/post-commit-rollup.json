@@ -1,7 +1,7 @@
 {
   "evidence_commit": "94b343b281980b90141880855cc5a22f05be314b",
   "evidence_manifest": "reports/security/vs2/evidence-manifest.json",
-  "evidence_manifest_sha256": "72c505a4454b799bc6f6c8a2e298bb9fde0bf97105ba8cac105479219785a1b3",
+  "evidence_manifest_sha256": "5f0ba6189888855f9c04d2fd7ec1393128795f52223ef4e20793a568ebef44f9",
   "h01_decision": "APPROVE WITH CONDITIONS recorded in docs/verification-reports/VS2_SEC_H01_OWNER_APPROVAL_2026-06-20.md",
   "human_gates_remaining": [
     "VS2-SEC-H02",
@@ -11,9 +11,9 @@
     "VS2-SEC-H06",
     "VS2-SEC-H07"
   ],
-  "local_claim": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
-  "notes": "Post-review rollup records that evidence commit 94b343b is not accepted as local VS2 readiness evidence.",
+  "local_claim": "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING",
+  "notes": "Post-review rollup records AI-verifiable VS2 local evidence separately from remaining human/external gates.",
   "schema_version": "cs.vs2.post_commit_rollup.v1",
-  "source_commit": "94b343b281980b90141880855cc5a22f05be314b",
-  "source_tree": "fd88514340017008cfe4e1722a6db9b8f0b84d8c"
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de"
 }

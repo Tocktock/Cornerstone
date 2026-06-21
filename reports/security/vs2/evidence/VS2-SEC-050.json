@@ -2,51 +2,476 @@
   "assertions": [
     {
       "evidence": {
-        "http_allow_observed": true,
-        "http_cross_tenant_denied": true,
-        "http_invalid_schema_denied": true,
-        "outage_fails_closed": true
+        "checks": {
+          "gateway_service_tool_cli_decisions_equivalent": true,
+          "mismatch_anomaly_audit_and_metric_recorded": true,
+          "mismatch_no_protected_side_effect": true,
+          "native_cli_observed_same_active_revision": true,
+          "revision_mismatch_fails_closed": true,
+          "same_policy_input_digest_across_enforcement_points": true
+        },
+        "decisions": {
+          "gateway": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          },
+          "native_cli": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          },
+          "service": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          },
+          "tool_runtime": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          }
+        },
+        "metric_insert": {
+          "command": [
+            "docker",
+            "exec",
+            "-i",
+            "cornerstone-vs2-range-pg-a973465896",
+            "psql",
+            "-U",
+            "postgres",
+            "-d",
+            "cornerstone",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-X",
+            "-q",
+            "-t",
+            "-A"
+          ],
+          "elapsed_seconds": 0.232,
+          "exit_code": 0,
+          "stderr_tail": [],
+          "stdout_bytes": 0,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "mismatch_audit_ref": "audit_ceaf7819173789c6",
+        "mismatch_decision": {
+          "bundle_revision": null,
+          "decision": "deny",
+          "decision_id": "policy_1f0c30ec82f8a9ed",
+          "fail_closed": true,
+          "failure_reason": "policy_revision_mismatch",
+          "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+          "policy_path": "cornerstone.vs2/fail_closed",
+          "reason_codes": [
+            "policy_revision_mismatch"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_conformance_050"
+        },
+        "native_cli_decision": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "decision_id": "policy_802ad12a4c864263",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "ebbbc0e7e1f9e7d97049ead9fd551db40494fc965ef1877ce91d0e104b0fa581",
+          "policy_path": "cornerstone.vs2/allow",
+          "reason_codes": [],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_local_range"
+        },
+        "policy_input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+        "side_effect_counts_after": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "side_effect_counts_before": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "source_map": {
+          "action": "gateway.declared_action",
+          "approval.required": "gateway.risk_classifier",
+          "approval.status": "gateway.approval_state",
+          "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+          "capability.declared": "gateway.capability_manifest",
+          "data_scope.purpose": "gateway.data_purpose",
+          "data_scope.scope": "gateway.data_scope",
+          "environment.deployment": "local_range.environment",
+          "environment.workspace_mode": "trusted_request_context.workspace_mode",
+          "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+          "mission_authority.authorized": "trusted_request_context.mission_authority",
+          "mission_authority.mission_id": "trusted_request_context.mission_authority",
+          "policy_path": "gateway.policy_entrypoint",
+          "resource.classification": "gateway.resource_record",
+          "resource.namespace_id": "gateway.resource_record",
+          "resource.resource_id": "gateway.resource_record",
+          "resource.tenant_id": "gateway.resource_record",
+          "risk": "gateway.risk_classifier",
+          "schema_version": "policy_client.constant",
+          "scope.namespace_id": "trusted_request_context.namespace_scope",
+          "scope.tenant_id": "trusted_request_context.tenant_scope",
+          "scope.workspace_id": "trusted_request_context.workspace_scope",
+          "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+          "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+          "subject.revoked": "trusted_request_context.postgres.revocation_state",
+          "subject.roles": "trusted_request_context.postgres.membership_roles",
+          "trace_id": "gateway.trace_context"
+        },
+        "status": "passed"
       },
-      "name": "opa_unit_and_http_decision_pass",
+      "name": "same_policy_input_used_across_gateway_service_tool_cli",
       "passed": true
     },
     {
       "evidence": {
-        "abac_denied": true,
-        "allow_decision_observed": true,
-        "capability_default_deny": true,
-        "deny_precedence_on_mismatch": true,
-        "high_risk_allowed_after_approval": true,
-        "high_risk_requires_approval": true,
-        "invalid_schema_denied": true,
-        "opa_unavailable_denied": true,
-        "role_denied": true,
-        "undefined_default_deny": true
+        "checks": {
+          "gateway_service_tool_cli_decisions_equivalent": true,
+          "mismatch_anomaly_audit_and_metric_recorded": true,
+          "mismatch_no_protected_side_effect": true,
+          "native_cli_observed_same_active_revision": true,
+          "revision_mismatch_fails_closed": true,
+          "same_policy_input_digest_across_enforcement_points": true
+        },
+        "decisions": {
+          "gateway": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          },
+          "native_cli": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          },
+          "service": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          },
+          "tool_runtime": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          }
+        },
+        "metric_insert": {
+          "command": [
+            "docker",
+            "exec",
+            "-i",
+            "cornerstone-vs2-range-pg-a973465896",
+            "psql",
+            "-U",
+            "postgres",
+            "-d",
+            "cornerstone",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-X",
+            "-q",
+            "-t",
+            "-A"
+          ],
+          "elapsed_seconds": 0.232,
+          "exit_code": 0,
+          "stderr_tail": [],
+          "stdout_bytes": 0,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "mismatch_audit_ref": "audit_ceaf7819173789c6",
+        "mismatch_decision": {
+          "bundle_revision": null,
+          "decision": "deny",
+          "decision_id": "policy_1f0c30ec82f8a9ed",
+          "fail_closed": true,
+          "failure_reason": "policy_revision_mismatch",
+          "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+          "policy_path": "cornerstone.vs2/fail_closed",
+          "reason_codes": [
+            "policy_revision_mismatch"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_conformance_050"
+        },
+        "native_cli_decision": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "decision_id": "policy_802ad12a4c864263",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "ebbbc0e7e1f9e7d97049ead9fd551db40494fc965ef1877ce91d0e104b0fa581",
+          "policy_path": "cornerstone.vs2/allow",
+          "reason_codes": [],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_local_range"
+        },
+        "policy_input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+        "side_effect_counts_after": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "side_effect_counts_before": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "source_map": {
+          "action": "gateway.declared_action",
+          "approval.required": "gateway.risk_classifier",
+          "approval.status": "gateway.approval_state",
+          "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+          "capability.declared": "gateway.capability_manifest",
+          "data_scope.purpose": "gateway.data_purpose",
+          "data_scope.scope": "gateway.data_scope",
+          "environment.deployment": "local_range.environment",
+          "environment.workspace_mode": "trusted_request_context.workspace_mode",
+          "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+          "mission_authority.authorized": "trusted_request_context.mission_authority",
+          "mission_authority.mission_id": "trusted_request_context.mission_authority",
+          "policy_path": "gateway.policy_entrypoint",
+          "resource.classification": "gateway.resource_record",
+          "resource.namespace_id": "gateway.resource_record",
+          "resource.resource_id": "gateway.resource_record",
+          "resource.tenant_id": "gateway.resource_record",
+          "risk": "gateway.risk_classifier",
+          "schema_version": "policy_client.constant",
+          "scope.namespace_id": "trusted_request_context.namespace_scope",
+          "scope.tenant_id": "trusted_request_context.tenant_scope",
+          "scope.workspace_id": "trusted_request_context.workspace_scope",
+          "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+          "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+          "subject.revoked": "trusted_request_context.postgres.revocation_state",
+          "subject.roles": "trusted_request_context.postgres.membership_roles",
+          "trace_id": "gateway.trace_context"
+        },
+        "status": "passed"
       },
-      "name": "policy_fail_closed_cases_observed",
+      "name": "gateway_service_tool_cli_decisions_equivalent",
       "passed": true
     },
     {
       "evidence": {
-        "bundle_hash": "a23617c575c760b9d10c16a4abfaa915c972f4492ea5c20214371f445ac6a529"
+        "checks": {
+          "gateway_service_tool_cli_decisions_equivalent": true,
+          "mismatch_anomaly_audit_and_metric_recorded": true,
+          "mismatch_no_protected_side_effect": true,
+          "native_cli_observed_same_active_revision": true,
+          "revision_mismatch_fails_closed": true,
+          "same_policy_input_digest_across_enforcement_points": true
+        },
+        "decisions": {
+          "gateway": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          },
+          "native_cli": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          },
+          "service": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          },
+          "tool_runtime": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_e5d4cf07c72fd677",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_policy_conformance_050"
+          }
+        },
+        "metric_insert": {
+          "command": [
+            "docker",
+            "exec",
+            "-i",
+            "cornerstone-vs2-range-pg-a973465896",
+            "psql",
+            "-U",
+            "postgres",
+            "-d",
+            "cornerstone",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-X",
+            "-q",
+            "-t",
+            "-A"
+          ],
+          "elapsed_seconds": 0.232,
+          "exit_code": 0,
+          "stderr_tail": [],
+          "stdout_bytes": 0,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "mismatch_audit_ref": "audit_ceaf7819173789c6",
+        "mismatch_decision": {
+          "bundle_revision": null,
+          "decision": "deny",
+          "decision_id": "policy_1f0c30ec82f8a9ed",
+          "fail_closed": true,
+          "failure_reason": "policy_revision_mismatch",
+          "input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+          "policy_path": "cornerstone.vs2/fail_closed",
+          "reason_codes": [
+            "policy_revision_mismatch"
+          ],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_policy_conformance_050"
+        },
+        "native_cli_decision": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "decision_id": "policy_802ad12a4c864263",
+          "fail_closed": false,
+          "failure_reason": null,
+          "input_digest": "ebbbc0e7e1f9e7d97049ead9fd551db40494fc965ef1877ce91d0e104b0fa581",
+          "policy_path": "cornerstone.vs2/allow",
+          "reason_codes": [],
+          "schema_version": "cs.policy_decision.vs2.v1",
+          "trace_id": "trace_vs2_local_range"
+        },
+        "policy_input_digest": "d62993b244f07c974d6ff0e273c288d7cc9d59fbd04cebd9d102149051985df3",
+        "side_effect_counts_after": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "side_effect_counts_before": {
+          "policy_probe_action_cards": 0,
+          "policy_probe_egress_grants": 0,
+          "policy_probe_jobs": 0,
+          "policy_probe_workflow_runs": 0
+        },
+        "source_map": {
+          "action": "gateway.declared_action",
+          "approval.required": "gateway.risk_classifier",
+          "approval.status": "gateway.approval_state",
+          "capability.connectorhub_mediated": "gateway.connectorhub_boundary",
+          "capability.declared": "gateway.capability_manifest",
+          "data_scope.purpose": "gateway.data_purpose",
+          "data_scope.scope": "gateway.data_scope",
+          "environment.deployment": "local_range.environment",
+          "environment.workspace_mode": "trusted_request_context.workspace_mode",
+          "mission_authority.authority_ref": "trusted_request_context.mission_authority",
+          "mission_authority.authorized": "trusted_request_context.mission_authority",
+          "mission_authority.mission_id": "trusted_request_context.mission_authority",
+          "policy_path": "gateway.policy_entrypoint",
+          "resource.classification": "gateway.resource_record",
+          "resource.namespace_id": "gateway.resource_record",
+          "resource.resource_id": "gateway.resource_record",
+          "resource.tenant_id": "gateway.resource_record",
+          "risk": "gateway.risk_classifier",
+          "schema_version": "policy_client.constant",
+          "scope.namespace_id": "trusted_request_context.namespace_scope",
+          "scope.tenant_id": "trusted_request_context.tenant_scope",
+          "scope.workspace_id": "trusted_request_context.workspace_scope",
+          "subject.membership_revision": "trusted_request_context.postgres.membership_revision",
+          "subject.principal_id": "trusted_request_context.postgres.resolve_membership",
+          "subject.revoked": "trusted_request_context.postgres.revocation_state",
+          "subject.roles": "trusted_request_context.postgres.membership_roles",
+          "trace_id": "gateway.trace_context"
+        },
+        "status": "passed"
       },
-      "name": "bundle_revision_and_lkg_recorded",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "abac_denied": true,
-        "allow_decision_observed": true,
-        "capability_default_deny": true,
-        "deny_precedence_on_mismatch": true,
-        "high_risk_allowed_after_approval": true,
-        "high_risk_requires_approval": true,
-        "invalid_schema_denied": true,
-        "opa_unavailable_denied": true,
-        "role_denied": true,
-        "undefined_default_deny": true
-      },
-      "name": "approval_or_deny_precedence_observed",
+      "name": "policy_mismatch_fails_closed_with_anomaly_and_no_side_effect",
       "passed": true
     },
     {
@@ -72,8 +497,8 @@
   "required_evidence": "Decision comparison report, mismatch denial, anomaly audit/metric.",
   "scenario_id": "VS2-SEC-050",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Materially equivalent decisions are produced; any mismatch fails closed, emits an anomaly, and cannot lead to a side effect.",
   "validator": "verify_vs2_sec_050",
   "verification_command": [

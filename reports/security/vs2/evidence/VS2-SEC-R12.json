@@ -18,12 +18,65 @@
           "reports/security/vs2-worker-proof.json",
           "reports/security/vs2-operator-status.json",
           "reports/security/vs2-regression-proof.json",
-          "reports/security/vs2-synthetic-world.json"
+          "reports/security/vs2-synthetic-world.json",
+          "reports/security/vs2-local-range.json"
         ],
         "secret_findings": 0,
         "status": "passed"
       },
-      "name": "leak_scan_has_zero_findings",
+      "name": "r12_leak_scan_has_zero_secret_or_cross_tenant_findings",
+      "passed": true
+    },
+    {
+      "evidence": [
+        "reports/db/vs2-rls-inventory.json",
+        "reports/db/vs2-tenant-isolation.json",
+        "reports/db/vs2-migration-rollback.json",
+        "reports/policy/vs2-opa-test.json",
+        "reports/policy/vs2-opa-coverage.json",
+        "reports/policy/vs2-bundle-lifecycle.json",
+        "reports/policy/vs2-policy-runtime.json",
+        "reports/network/vs2-egress-proof.json",
+        "reports/audit/vs2-audit-integrity.json",
+        "reports/security/vs2-surface-parity.json",
+        "reports/security/vs2-worker-proof.json",
+        "reports/security/vs2-operator-status.json",
+        "reports/security/vs2-regression-proof.json",
+        "reports/security/vs2-synthetic-world.json",
+        "reports/security/vs2-local-range.json"
+      ],
+      "name": "r12_leak_scan_covers_real_generated_outputs",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "concurrent_tenant_zero_foreign_canary_or_ids": true,
+        "connection_reuse_zero_cross_tenant_canary_or_ids": true,
+        "constraint_collision_zero_foreign_canary_or_ids": true,
+        "db_path_zero_beta_canary_or_ids": true,
+        "migration_zero_foreign_canary_or_ids": true,
+        "object_access_zero_beta_canary_or_ids": true,
+        "observability_zero_beta_canary_or_ids": true,
+        "operation_key_no_foreign_canary_in_tenant_outputs": true,
+        "search_matrix_zero_beta_canary_or_ids": true,
+        "tenant_b_canary_not_serialized": true,
+        "tenant_read_matrix_zero_beta_canary_or_ids": true
+      },
+      "name": "r12_denied_error_outputs_hide_foreign_tenant_values",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "connectorhub_credential_ref_only": true,
+        "opa_decision_log_canary_reached_opa_request": true,
+        "opa_decision_log_collector_entry_has_no_canary": true,
+        "opa_decision_log_source_map_retained_without_raw_values": true,
+        "reason_code_denial_responses_have_stable_codes": true,
+        "reason_code_denial_responses_match_decision_and_audit_refs": true,
+        "reason_code_ui_snapshots_render_denial_component": true,
+        "worker_scope_zero_payload_leak_or_egress": true
+      },
+      "name": "r12_secret_payload_and_decision_logs_are_masked",
       "passed": true
     },
     {
@@ -49,8 +102,8 @@
   "required_evidence": "Zero scanner findings or reviewed allowlist with justification.",
   "scenario_id": "VS2-SEC-R12",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "No secret, protected payload, raw credential, or foreign-tenant identifier appears unnecessarily.",
   "validator": "verify_vs2_sec_r12",
   "verification_command": [

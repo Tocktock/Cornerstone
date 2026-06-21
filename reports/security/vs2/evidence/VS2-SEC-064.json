@@ -2,49 +2,128 @@
   "assertions": [
     {
       "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
-      },
-      "name": "default_deny_sends_zero_sink_calls",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "sink": {
-          "authorization_headers_seen": 0,
-          "calls": [
-            {
-              "authorization_header_seen": false,
-              "headers": {
-                "Host": "127.0.0.1:59132",
-                "User-Agent": "cornerstone-vs2-governed-egress/1",
-                "X-Cs-Credential-Ref": "credential_ref_mock_provider_read",
-                "X-Cs-Trace-Id": "trace_vs2_governed_egress"
-              },
+        "degraded_component": "egress_controller",
+        "degraded_status": "unavailable",
+        "direct_client_fallback": false,
+        "outage_probe": {
+          "decision": {
+            "bytes_sent": 0,
+            "decision": "deny",
+            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
               "method": "GET",
               "path": "/v1/read/status",
-              "request_bytes": 0
-            }
-          ],
-          "host": "127.0.0.1",
-          "port": 59132,
-          "request_bytes": 0,
-          "requests": 1
-        }
+              "port": 53048,
+              "raw_path": "/v1/read/status",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 0,
+            "matched_rule": null,
+            "reason": "egress_controller_unavailable_fail_closed",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_sent": 0,
+            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "headers_sent": {},
+            "hops": [
+              {
+                "decision": "deny",
+                "decision_id": "egress_1bf7c5c50ee0eaa8",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/read/status",
+                  "port": 53048,
+                  "raw_path": "/v1/read/status",
+                  "scheme": "http"
+                },
+                "reason": "egress_controller_unavailable_fail_closed",
+                "request_sent": false,
+                "url": "http://127.0.0.1:53048/v1/read/status"
+              }
+            ],
+            "http_status": null,
+            "status": "denied_before_network"
+          },
+          "sink_calls_after": 1,
+          "sink_calls_before": 1
+        },
+        "protected_capabilities_fail_closed": true
       },
-      "name": "declared_connectorhub_call_hits_sink_once",
+      "name": "egress_controller_outage_attempted",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "degraded_component": "egress_controller",
+        "degraded_status": "unavailable",
+        "direct_client_fallback": false,
+        "outage_probe": {
+          "decision": {
+            "bytes_sent": 0,
+            "decision": "deny",
+            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "destination": {
+              "destination_class": "reserved_loopback",
+              "host": "127.0.0.1",
+              "method": "GET",
+              "path": "/v1/read/status",
+              "port": 53048,
+              "raw_path": "/v1/read/status",
+              "scheme": "http"
+            },
+            "destination_class": "reserved_loopback",
+            "external_http_calls": 0,
+            "matched_rule": null,
+            "reason": "egress_controller_unavailable_fail_closed",
+            "resolution_path": [
+              "Declare ConnectorHub capability",
+              "Bind approval and policy revision",
+              "Retry through governed client"
+            ],
+            "tenant_id": "tenant_a"
+          },
+          "execution": {
+            "bytes_sent": 0,
+            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "headers_sent": {},
+            "hops": [
+              {
+                "decision": "deny",
+                "decision_id": "egress_1bf7c5c50ee0eaa8",
+                "destination": {
+                  "destination_class": "reserved_loopback",
+                  "host": "127.0.0.1",
+                  "method": "GET",
+                  "path": "/v1/read/status",
+                  "port": 53048,
+                  "raw_path": "/v1/read/status",
+                  "scheme": "http"
+                },
+                "reason": "egress_controller_unavailable_fail_closed",
+                "request_sent": false,
+                "url": "http://127.0.0.1:53048/v1/read/status"
+              }
+            ],
+            "http_status": null,
+            "status": "denied_before_network"
+          },
+          "sink_calls_after": 1,
+          "sink_calls_before": 1
+        },
+        "protected_capabilities_fail_closed": true
+      },
+      "name": "protected_capabilities_fail_closed",
       "passed": true
     },
     {
@@ -55,36 +134,21 @@
         "default_denied_before_sink_call": true,
         "direct_socket_blocked": true,
         "dns_rebinding_guarded": true,
+        "egress_audit_records_correlate_attempts": true,
+        "egress_audit_records_have_byte_and_call_counts": true,
         "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
         "normalization_does_not_broaden": true,
+        "redirect_denied_hop_sensitive_headers_forwarded": true,
+        "redirect_loop_bounded": true,
         "redirects_reguarded": true,
         "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
+        "reserved_destination_matrix_denied_before_network": true,
+        "retry_timeout_idempotency_proved": true,
+        "sandbox_bypass_guard_proved": true,
+        "tenant_policy_isolated": true,
+        "untrusted_content_guard_proved": true
       },
-      "name": "tenant_b_and_adversarial_paths_blocked",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "audit_has_no_raw_payload": true,
-        "credentials_not_exposed": true,
-        "declared_call_allowed": true,
-        "default_denied_before_sink_call": true,
-        "direct_socket_blocked": true,
-        "dns_rebinding_guarded": true,
-        "fail_closed_without_fallback": true,
-        "idempotency_tenant_scoped": true,
-        "normalization_does_not_broaden": true,
-        "redirects_reguarded": true,
-        "reserved_destination_denied": true,
-        "sandbox_blocks_host_escape": true,
-        "stale_dry_run_blocked": true,
-        "tenant_policy_isolated": true
-      },
-      "name": "credentials_and_payload_not_exposed",
+      "name": "no_direct_client_fallback",
       "passed": true
     },
     {
@@ -110,8 +174,8 @@
   "required_evidence": "Degraded readiness, denied operations, zero sink/host counters, operator guidance.",
   "scenario_id": "VS2-SEC-064",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Protected capabilities fail closed; readiness reports the degraded component; no fallback direct connection or host access occurs.",
   "validator": "verify_vs2_sec_064",
   "verification_command": [

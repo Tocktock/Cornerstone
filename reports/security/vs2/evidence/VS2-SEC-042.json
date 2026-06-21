@@ -2,35 +2,160 @@
   "assertions": [
     {
       "evidence": {
-        "http_allow_observed": true,
-        "http_cross_tenant_denied": true,
-        "http_invalid_schema_denied": true,
-        "outage_fails_closed": true
+        "expected_code": "bundle_error",
+        "expected_revision": "vs2-rego-local-v1",
+        "observed": true,
+        "status": {
+          "active_revision": "vs2-rego-local-v1",
+          "code": "bundle_error",
+          "last_request": "2026-06-21T12:32:30.584212963Z",
+          "last_successful_activation": "2026-06-21T12:32:29.562208421Z",
+          "last_successful_download": "2026-06-21T12:32:29.543702796Z",
+          "message": "bundle read failed: archive read failed: gzip: invalid header",
+          "path": "/status",
+          "size": 1121
+        }
       },
-      "name": "opa_unit_and_http_decision_pass",
+      "name": "opa_malformed_bundle_error_visible",
+      "passed": true
+    },
+    {
+      "evidence": [
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 4.113,
+          "index": 0,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 4.512,
+          "index": 1,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 4.628,
+          "index": 2,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 3.954,
+          "index": 3,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 3.955,
+          "index": 4,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 3.433,
+          "index": 5,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 3.203,
+          "index": 6,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 3.058,
+          "index": 7,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 4.828,
+          "index": 8,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 3.679,
+          "index": 9,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 3.252,
+          "index": 10,
+          "reason_codes": [],
+          "status": 200
+        },
+        {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "elapsed_ms": 3.25,
+          "index": 11,
+          "reason_codes": [],
+          "status": 200
+        }
+      ],
+      "name": "opa_last_known_good_retained_after_malformed_update",
       "passed": true
     },
     {
       "evidence": {
-        "abac_denied": true,
-        "allow_decision_observed": true,
-        "capability_default_deny": true,
-        "deny_precedence_on_mismatch": true,
-        "high_risk_allowed_after_approval": true,
-        "high_risk_requires_approval": true,
-        "invalid_schema_denied": true,
-        "opa_unavailable_denied": true,
-        "role_denied": true,
-        "undefined_default_deny": true
+        "bundle_status": {
+          "expected_code": "bundle_error",
+          "expected_revision": null,
+          "observed": true,
+          "status": {
+            "active_revision": null,
+            "code": "bundle_error",
+            "last_request": "2026-06-21T12:32:33.06754359Z",
+            "last_successful_activation": "0001-01-01T00:00:00Z",
+            "last_successful_download": "0001-01-01T00:00:00Z",
+            "message": "bundle read failed: archive read failed: gzip: invalid header",
+            "path": "/status",
+            "size": null
+          }
+        },
+        "checks": {
+          "malformed_first_start_error_visible": true,
+          "malformed_first_start_fail_closed": true
+        },
+        "decision": {
+          "decision": "deny",
+          "elapsed_ms": 5.267,
+          "fail_closed_reason": "opa_result_undefined",
+          "status": 200
+        },
+        "health": {
+          "attempts": 2,
+          "http_status": 200,
+          "status": "passed"
+        },
+        "status": "passed"
       },
-      "name": "policy_fail_closed_cases_observed",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "bundle_hash": "a23617c575c760b9d10c16a4abfaa915c972f4492ea5c20214371f445ac6a529"
-      },
-      "name": "bundle_revision_and_lkg_recorded",
+      "name": "opa_malformed_first_start_fails_closed",
       "passed": true
     },
     {
@@ -56,8 +181,8 @@
   "required_evidence": "OPA status/error, unchanged active revision, decisions under failure, operator alert.",
   "scenario_id": "VS2-SEC-042",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Activation fails, the last known good bundle remains active (or protected operations fail closed if none exists), and status/error is visible without exposing secrets.",
   "validator": "verify_vs2_sec_042",
   "verification_command": [

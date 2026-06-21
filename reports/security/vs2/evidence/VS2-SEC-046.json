@@ -2,51 +2,1443 @@
   "assertions": [
     {
       "evidence": {
-        "http_allow_observed": true,
-        "http_cross_tenant_denied": true,
-        "http_invalid_schema_denied": true,
-        "outage_fails_closed": true
+        "policy_checks": {
+          "abac_denied": true,
+          "allow_decision_observed": true,
+          "capability_default_deny": true,
+          "deny_precedence_on_mismatch": true,
+          "high_risk_allowed_after_approval": true,
+          "high_risk_requires_approval": true,
+          "invalid_schema_denied": true,
+          "opa_unavailable_denied": true,
+          "role_denied": true,
+          "undefined_default_deny": true
+        },
+        "reason_snapshots": [
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_832a6f50bd9e5334",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "66eb788aed1014e8e1bb99ea4dc557d9904549deeabc29b7c4455ca19485a7a5",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "role_not_allowed"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_data_047"
+            },
+            "expected_reason": "role_not_allowed",
+            "response": {
+              "audit_ref": "audit_a97534c70eed55d8",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_832a6f50bd9e5334",
+              "message": "The current role cannot perform this operation.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "The current role cannot perform this operation.",
+                  "reason_code": "role_not_allowed",
+                  "resolution": "Request an appropriate role or change the operation scope."
+                }
+              ],
+              "resolution": "Request an appropriate role or change the operation scope.",
+              "safe_reason_codes": [
+                "role_not_allowed"
+              ],
+              "status_code": 403
+            },
+            "surface": "data",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='data' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='role_not_allowed' data-decision-id='policy_832a6f50bd9e5334' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>The current role cannot perform this operation.</p><p>Request an appropriate role or change the operation scope.</p></section>",
+              "html_sha256": "7d78826e873e06fdd95e1e020f3ca0016ff58071f2449ca62c558775a847a373",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_42ddded76b4d581b",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "1e182a3acf97a493dc30dddbc2dcb1715faa8912d8a7ca2464df5be42170da95",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "connectorhub_capability_required"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_tool_047"
+            },
+            "expected_reason": "connectorhub_capability_required",
+            "response": {
+              "audit_ref": "audit_766f59637651b155",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_42ddded76b4d581b",
+              "message": "The requested connector or tool capability is not declared.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "The requested connector or tool capability is not declared.",
+                  "reason_code": "connectorhub_capability_required",
+                  "resolution": "Use a declared ConnectorHub-mediated capability."
+                }
+              ],
+              "resolution": "Use a declared ConnectorHub-mediated capability.",
+              "safe_reason_codes": [
+                "connectorhub_capability_required"
+              ],
+              "status_code": 403
+            },
+            "surface": "tool",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='tool' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='connectorhub_capability_required' data-decision-id='policy_42ddded76b4d581b' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>The requested connector or tool capability is not declared.</p><p>Use a declared ConnectorHub-mediated capability.</p></section>",
+              "html_sha256": "37c265bde86a9d24fc0e5d3c7f2fac0cc42084ed2c43a8cf64863dc17722dc33",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_cc80d7fce02ab579",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "257f02d393beef847a910cd09089f3f409fbad77760bd0f0bc25fceb3b42e949",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "high_risk_requires_approval"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_action_047"
+            },
+            "expected_reason": "high_risk_requires_approval",
+            "response": {
+              "audit_ref": "audit_411f43be9d332f86",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_cc80d7fce02ab579",
+              "message": "This high-risk operation requires approval.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "This high-risk operation requires approval.",
+                  "reason_code": "high_risk_requires_approval",
+                  "resolution": "Complete the required approval workflow before retrying."
+                }
+              ],
+              "resolution": "Complete the required approval workflow before retrying.",
+              "safe_reason_codes": [
+                "high_risk_requires_approval"
+              ],
+              "status_code": 403
+            },
+            "surface": "action",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='action' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='high_risk_requires_approval' data-decision-id='policy_cc80d7fce02ab579' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>This high-risk operation requires approval.</p><p>Complete the required approval workflow before retrying.</p></section>",
+              "html_sha256": "c35e727b1dc7b831dc1061308f99efe90ce97c9f0bbb82615bd8cce6d3c297df",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_63036f01ae8136c9",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "9c1a7e1e6cecbfe0169dbb8e16fd4a2feea3a040a28bb7fe27b4bc9a11d19b49",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "connectorhub_capability_required"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_connector_047"
+            },
+            "expected_reason": "connectorhub_capability_required",
+            "response": {
+              "audit_ref": "audit_8ef68cb8067e332f",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_63036f01ae8136c9",
+              "message": "The requested connector or tool capability is not declared.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "The requested connector or tool capability is not declared.",
+                  "reason_code": "connectorhub_capability_required",
+                  "resolution": "Use a declared ConnectorHub-mediated capability."
+                }
+              ],
+              "resolution": "Use a declared ConnectorHub-mediated capability.",
+              "safe_reason_codes": [
+                "connectorhub_capability_required"
+              ],
+              "status_code": 403
+            },
+            "surface": "connector",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='connector' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='connectorhub_capability_required' data-decision-id='policy_63036f01ae8136c9' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>The requested connector or tool capability is not declared.</p><p>Use a declared ConnectorHub-mediated capability.</p></section>",
+              "html_sha256": "057a5f1e193b42aef6c60faf1a0b42d6e3f1baefe500c868604f9be858ba1f28",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_e042eb097310a30b",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "dfa715164be8a476622c9a01cb42ce9f12a719a30f6ea7369b137bb61d7fa23e",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "workspace_mode_denied"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_model_047"
+            },
+            "expected_reason": "workspace_mode_denied",
+            "response": {
+              "audit_ref": "audit_f8711032b2714bc6",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_e042eb097310a30b",
+              "message": "The workspace mode does not allow this operation.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "The workspace mode does not allow this operation.",
+                  "reason_code": "workspace_mode_denied",
+                  "resolution": "Use an allowed workspace mode for this operation."
+                }
+              ],
+              "resolution": "Use an allowed workspace mode for this operation.",
+              "safe_reason_codes": [
+                "workspace_mode_denied"
+              ],
+              "status_code": 403
+            },
+            "surface": "model",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='model' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='workspace_mode_denied' data-decision-id='policy_e042eb097310a30b' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>The workspace mode does not allow this operation.</p><p>Use an allowed workspace mode for this operation.</p></section>",
+              "html_sha256": "a7fa3cf033d6995b9df8b80b00e6ed61c39bc3b09238c809d3e5d812e30cfb13",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_1f474bd0bdecb07c",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "7cacd6fc2220a2e86c5f8530b9ad95d8ea70d9032e437046131b2df0a49332ab",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "cross_tenant_scope"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_egress_047"
+            },
+            "expected_reason": "cross_tenant_scope",
+            "response": {
+              "audit_ref": "audit_3c294e489eb1a9f6",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_1f474bd0bdecb07c",
+              "message": "The requested resource is outside the authorized tenant scope.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "The requested resource is outside the authorized tenant scope.",
+                  "reason_code": "cross_tenant_scope",
+                  "resolution": "Switch to an authorized tenant scope or request explicit approval."
+                }
+              ],
+              "resolution": "Switch to an authorized tenant scope or request explicit approval.",
+              "safe_reason_codes": [
+                "cross_tenant_scope"
+              ],
+              "status_code": 403
+            },
+            "surface": "egress",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='egress' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='cross_tenant_scope' data-decision-id='policy_1f474bd0bdecb07c' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>The requested resource is outside the authorized tenant scope.</p><p>Switch to an authorized tenant scope or request explicit approval.</p></section>",
+              "html_sha256": "b113292167ebbab61260474749b9699e3eb4828326963619a11f989de91d2318",
+              "protected_data_echoed": false
+            }
+          },
+          {
+            "decision": {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "deny",
+              "decision_id": "policy_177884ba0c2a5628",
+              "fail_closed": false,
+              "failure_reason": null,
+              "input_digest": "fce6084185422a29b96ced5aec65c825ce57cfae0e9e39f25642411909d83fc4",
+              "policy_path": "cornerstone.vs2/deny",
+              "reason_codes": [
+                "high_risk_requires_approval"
+              ],
+              "schema_version": "cs.policy_decision.vs2.v1",
+              "trace_id": "trace_vs2_reason_policy_admin_047"
+            },
+            "expected_reason": "high_risk_requires_approval",
+            "response": {
+              "audit_ref": "audit_ac8fab4a51498b30",
+              "bundle_revision": "vs2-rego-local-v1",
+              "code": "CS_POLICY_DENIED",
+              "decision_id": "policy_177884ba0c2a5628",
+              "message": "This high-risk operation requires approval.",
+              "policy_path": "cornerstone.vs2/deny",
+              "protected_data_echoed": false,
+              "reason_details": [
+                {
+                  "http_status": 403,
+                  "message": "This high-risk operation requires approval.",
+                  "reason_code": "high_risk_requires_approval",
+                  "resolution": "Complete the required approval workflow before retrying."
+                }
+              ],
+              "resolution": "Complete the required approval workflow before retrying.",
+              "safe_reason_codes": [
+                "high_risk_requires_approval"
+              ],
+              "status_code": 403
+            },
+            "surface": "policy_admin",
+            "ui_snapshot": {
+              "has_error_code": true,
+              "has_reason_code": true,
+              "html": "<section class='cs-denial' data-surface='policy_admin' data-status-code='403' data-error-code='CS_POLICY_DENIED' data-reason-codes='high_risk_requires_approval' data-decision-id='policy_177884ba0c2a5628' data-policy-path='cornerstone.vs2/deny' data-protected-data-echoed='false'><h2>Request denied</h2><p>This high-risk operation requires approval.</p><p>Complete the required approval workflow before retrying.</p></section>",
+              "html_sha256": "9e711e2e1fab863ef9cd73e669310b39431d79fd35696cc34424a3216d1b33d2",
+              "protected_data_echoed": false
+            }
+          }
+        ]
       },
-      "name": "opa_unit_and_http_decision_pass",
+      "name": "policy_admin_change_requires_governed_approval",
       "passed": true
     },
     {
       "evidence": {
-        "abac_denied": true,
-        "allow_decision_observed": true,
-        "capability_default_deny": true,
-        "deny_precedence_on_mismatch": true,
-        "high_risk_allowed_after_approval": true,
-        "high_risk_requires_approval": true,
-        "invalid_schema_denied": true,
-        "opa_unavailable_denied": true,
-        "role_denied": true,
-        "undefined_default_deny": true
+        "bundle_hashes": {
+          "malformed_v2": "ec330615bef0728dbe83798162ab0f89e1493ff10ed896c472f396b432a39347",
+          "v1": "fefd7698d532fe77f39ecf64d171301240554c6ef51eb73419c3f6b1bc979118",
+          "v3": "462d3761cc24524a36a6380e1c44c9bbbd96ad3af28a453512ab38875823b638"
+        },
+        "bundle_server": {
+          "host_url_used_by_opa": "http://host.docker.internal:52707",
+          "served_bundles": [
+            {
+              "byte_count": 1121,
+              "label": "valid_v1",
+              "path": "/bundle.tar.gz",
+              "revision": "vs2-rego-local-v1",
+              "sha256": "fefd7698d532fe77f39ecf64d171301240554c6ef51eb73419c3f6b1bc979118"
+            },
+            {
+              "byte_count": 22,
+              "label": "malformed_v2",
+              "path": "/bundle.tar.gz",
+              "revision": "vs2-rego-malformed-v2",
+              "sha256": "ec330615bef0728dbe83798162ab0f89e1493ff10ed896c472f396b432a39347"
+            },
+            {
+              "byte_count": 22,
+              "label": "malformed_v2",
+              "path": "/bundle.tar.gz",
+              "revision": "vs2-rego-malformed-v2",
+              "sha256": "ec330615bef0728dbe83798162ab0f89e1493ff10ed896c472f396b432a39347"
+            },
+            {
+              "byte_count": 22,
+              "label": "malformed_v2",
+              "path": "/bundle.tar.gz",
+              "revision": "vs2-rego-malformed-v2",
+              "sha256": "ec330615bef0728dbe83798162ab0f89e1493ff10ed896c472f396b432a39347"
+            },
+            {
+              "byte_count": 1121,
+              "label": "valid_v3",
+              "path": "/bundle.tar.gz",
+              "revision": "vs2-rego-local-v3",
+              "sha256": "462d3761cc24524a36a6380e1c44c9bbbd96ad3af28a453512ab38875823b638"
+            },
+            {
+              "byte_count": 22,
+              "label": "malformed_first_start",
+              "path": "/bundle.tar.gz",
+              "revision": "vs2-rego-malformed-first-start",
+              "sha256": "ec330615bef0728dbe83798162ab0f89e1493ff10ed896c472f396b432a39347"
+            },
+            {
+              "byte_count": 22,
+              "label": "malformed_first_start",
+              "path": "/bundle.tar.gz",
+              "revision": "vs2-rego-malformed-first-start",
+              "sha256": "ec330615bef0728dbe83798162ab0f89e1493ff10ed896c472f396b432a39347"
+            },
+            {
+              "byte_count": 22,
+              "label": "malformed_first_start",
+              "path": "/bundle.tar.gz",
+              "revision": "vs2-rego-malformed-first-start",
+              "sha256": "ec330615bef0728dbe83798162ab0f89e1493ff10ed896c472f396b432a39347"
+            }
+          ],
+          "served_count": 8
+        },
+        "checks": {
+          "concurrent_v1_decisions_all_defined": true,
+          "final_v3_decisions_all_defined": true,
+          "first_start_malformed_bundle_fails_closed": true,
+          "initial_valid_bundle_activated": true,
+          "last_known_good_retained_after_malformed_update": true,
+          "malformed_update_error_visible": true,
+          "post_activation_decisions_use_v3": true,
+          "previous_revision_traceable": true,
+          "valid_update_decisions_have_only_known_revisions": true,
+          "valid_v3_activated": true
+        },
+        "ci_command_transcripts": [
+          {
+            "command": [
+              "docker",
+              "run",
+              "--rm",
+              "-v",
+              "/var/folders/hn/zz23wc011j119ttb26t_pnnm0000gn/T/cornerstone-vs2-opa-lifecycle-w9gx1yrd:/work",
+              "-w",
+              "/work",
+              "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+              "build",
+              "-b",
+              "bundle_v1",
+              "-o",
+              "bundle-v1.tar.gz",
+              "--revision",
+              "vs2-rego-local-v1"
+            ],
+            "elapsed_seconds": 0.672,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": []
+          },
+          {
+            "command": [
+              "docker",
+              "run",
+              "--rm",
+              "-v",
+              "/var/folders/hn/zz23wc011j119ttb26t_pnnm0000gn/T/cornerstone-vs2-opa-lifecycle-w9gx1yrd:/work",
+              "-w",
+              "/work",
+              "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+              "build",
+              "-b",
+              "bundle_v3",
+              "-o",
+              "bundle-v3.tar.gz",
+              "--revision",
+              "vs2-rego-local-v3"
+            ],
+            "elapsed_seconds": 0.787,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": []
+          },
+          {
+            "command": [
+              "docker",
+              "run",
+              "-d",
+              "--rm",
+              "--name",
+              "cornerstone-vs2-opa-life-e263562bd5",
+              "-p",
+              "127.0.0.1:52708:8181",
+              "-v",
+              "/var/folders/hn/zz23wc011j119ttb26t_pnnm0000gn/T/cornerstone-vs2-opa-lifecycle-w9gx1yrd:/config:ro",
+              "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+              "run",
+              "--server",
+              "--addr=0.0.0.0:8181",
+              "--config-file",
+              "/config/opa-bundle-config.yaml"
+            ],
+            "elapsed_seconds": 0.561,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "dd8f0254662c001c7aeb4ee4f62af6b324aebc6c54fc42bbf737218250f6d850"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "rm",
+              "-f",
+              "cornerstone-vs2-opa-life-e263562bd5"
+            ],
+            "elapsed_seconds": 0.987,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "cornerstone-vs2-opa-life-e263562bd5"
+            ]
+          },
+          {
+            "command": [
+              "docker",
+              "run",
+              "-d",
+              "--rm",
+              "--name",
+              "cornerstone-vs2-opa-bad-40496bde0d",
+              "-p",
+              "127.0.0.1:53033:8181",
+              "-v",
+              "/var/folders/hn/zz23wc011j119ttb26t_pnnm0000gn/T/cornerstone-vs2-opa-lifecycle-w9gx1yrd:/config:ro",
+              "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+              "run",
+              "--server",
+              "--addr=0.0.0.0:8181",
+              "--config-file",
+              "/config/opa-bundle-config.yaml"
+            ],
+            "elapsed_seconds": 0.363,
+            "exit_code": 0,
+            "stderr_tail": [],
+            "stdout_tail": [
+              "00e132437ec215f8fe650932b295367a57b441c5839b104e99ce0c74baaeba7a"
+            ]
+          }
+        ],
+        "decision_samples": {
+          "after_malformed": [
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 4.113,
+              "index": 0,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 4.512,
+              "index": 1,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 4.628,
+              "index": 2,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 3.954,
+              "index": 3,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 3.955,
+              "index": 4,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 3.433,
+              "index": 5,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 3.203,
+              "index": 6,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 3.058,
+              "index": 7,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 4.828,
+              "index": 8,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 3.679,
+              "index": 9,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 3.252,
+              "index": 10,
+              "reason_codes": [],
+              "status": 200
+            },
+            {
+              "bundle_revision": "vs2-rego-local-v1",
+              "decision": "allow",
+              "elapsed_ms": 3.25,
+              "index": 11,
+              "reason_codes": [],
+              "status": 200
+            }
+          ],
+          "during_valid_update_count": 150,
+          "during_valid_update_revisions": [
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v1",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3",
+            "vs2-rego-local-v3"
+          ],
+          "v1_concurrent_count": 100,
+          "v1_concurrent_revisions": [
+            "vs2-rego-local-v1"
+          ],
+          "v3_concurrent_count": 40,
+          "v3_concurrent_revisions": [
+            "vs2-rego-local-v3"
+          ]
+        },
+        "first_start_malformed": {
+          "bundle_status": {
+            "expected_code": "bundle_error",
+            "expected_revision": null,
+            "observed": true,
+            "status": {
+              "active_revision": null,
+              "code": "bundle_error",
+              "last_request": "2026-06-21T12:32:33.06754359Z",
+              "last_successful_activation": "0001-01-01T00:00:00Z",
+              "last_successful_download": "0001-01-01T00:00:00Z",
+              "message": "bundle read failed: archive read failed: gzip: invalid header",
+              "path": "/status",
+              "size": null
+            }
+          },
+          "checks": {
+            "malformed_first_start_error_visible": true,
+            "malformed_first_start_fail_closed": true
+          },
+          "decision": {
+            "decision": "deny",
+            "elapsed_ms": 5.267,
+            "fail_closed_reason": "opa_result_undefined",
+            "status": 200
+          },
+          "health": {
+            "attempts": 2,
+            "http_status": 200,
+            "status": "passed"
+          },
+          "status": "passed"
+        },
+        "health": {
+          "attempts": 2,
+          "http_status": 200,
+          "status": "passed"
+        },
+        "malformed_status": {
+          "expected_code": "bundle_error",
+          "expected_revision": "vs2-rego-local-v1",
+          "observed": true,
+          "status": {
+            "active_revision": "vs2-rego-local-v1",
+            "code": "bundle_error",
+            "last_request": "2026-06-21T12:32:30.584212963Z",
+            "last_successful_activation": "2026-06-21T12:32:29.562208421Z",
+            "last_successful_download": "2026-06-21T12:32:29.543702796Z",
+            "message": "bundle read failed: archive read failed: gzip: invalid header",
+            "path": "/status",
+            "size": 1121
+          }
+        },
+        "opa_image": "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3",
+        "revisions": {
+          "malformed_v2": "vs2-rego-malformed-v2",
+          "v1": "vs2-rego-local-v1",
+          "v3": "vs2-rego-local-v3"
+        },
+        "schema_version": "cs.vs2.opa_bundle_lifecycle.v1",
+        "status": "passed",
+        "status_updates": [
+          {
+            "active_revision": null,
+            "code": null,
+            "last_request": null,
+            "last_successful_activation": null,
+            "last_successful_download": null,
+            "message": null,
+            "path": "/status",
+            "size": null
+          },
+          {
+            "active_revision": null,
+            "code": null,
+            "last_request": null,
+            "last_successful_activation": null,
+            "last_successful_download": null,
+            "message": null,
+            "path": "/status",
+            "size": null
+          },
+          {
+            "active_revision": "vs2-rego-local-v1",
+            "code": null,
+            "last_request": "2026-06-21T12:32:29.543702796Z",
+            "last_successful_activation": "2026-06-21T12:32:29.562208421Z",
+            "last_successful_download": "2026-06-21T12:32:29.543702796Z",
+            "message": null,
+            "path": "/status",
+            "size": 1121
+          },
+          {
+            "active_revision": "vs2-rego-local-v1",
+            "code": null,
+            "last_request": "2026-06-21T12:32:29.543702796Z",
+            "last_successful_activation": "2026-06-21T12:32:29.562208421Z",
+            "last_successful_download": "2026-06-21T12:32:29.543702796Z",
+            "message": null,
+            "path": "/status",
+            "size": 1121
+          },
+          {
+            "active_revision": "vs2-rego-local-v1",
+            "code": "bundle_error",
+            "last_request": "2026-06-21T12:32:30.584212963Z",
+            "last_successful_activation": "2026-06-21T12:32:29.562208421Z",
+            "last_successful_download": "2026-06-21T12:32:29.543702796Z",
+            "message": "bundle read failed: archive read failed: gzip: invalid header",
+            "path": "/status",
+            "size": 1121
+          },
+          {
+            "active_revision": "vs2-rego-local-v1",
+            "code": "bundle_error",
+            "last_request": "2026-06-21T12:32:30.587788672Z",
+            "last_successful_activation": "2026-06-21T12:32:29.562208421Z",
+            "last_successful_download": "2026-06-21T12:32:29.543702796Z",
+            "message": "bundle read failed: archive read failed: gzip: invalid header",
+            "path": "/status",
+            "size": 1121
+          },
+          {
+            "active_revision": "vs2-rego-local-v1",
+            "code": "bundle_error",
+            "last_request": "2026-06-21T12:32:30.788524588Z",
+            "last_successful_activation": "2026-06-21T12:32:29.562208421Z",
+            "last_successful_download": "2026-06-21T12:32:29.543702796Z",
+            "message": "bundle read failed: archive read failed: gzip: invalid header",
+            "path": "/status",
+            "size": 1121
+          },
+          {
+            "active_revision": "vs2-rego-local-v3",
+            "code": null,
+            "last_request": "2026-06-21T12:32:31.057586922Z",
+            "last_successful_activation": "2026-06-21T12:32:31.062038005Z",
+            "last_successful_download": "2026-06-21T12:32:31.057586922Z",
+            "message": null,
+            "path": "/status",
+            "size": 1121
+          },
+          {
+            "active_revision": null,
+            "code": null,
+            "last_request": null,
+            "last_successful_activation": null,
+            "last_successful_download": null,
+            "message": null,
+            "path": "/status",
+            "size": null
+          },
+          {
+            "active_revision": null,
+            "code": "bundle_error",
+            "last_request": "2026-06-21T12:32:33.06754359Z",
+            "last_successful_activation": "0001-01-01T00:00:00Z",
+            "last_successful_download": "0001-01-01T00:00:00Z",
+            "message": "bundle read failed: archive read failed: gzip: invalid header",
+            "path": "/status",
+            "size": null
+          },
+          {
+            "active_revision": null,
+            "code": "bundle_error",
+            "last_request": "2026-06-21T12:32:33.08089859Z",
+            "last_successful_activation": "0001-01-01T00:00:00Z",
+            "last_successful_download": "0001-01-01T00:00:00Z",
+            "message": "bundle read failed: archive read failed: gzip: invalid header",
+            "path": "/status",
+            "size": null
+          },
+          {
+            "active_revision": null,
+            "code": "bundle_error",
+            "last_request": "2026-06-21T12:32:33.08089859Z",
+            "last_successful_activation": "0001-01-01T00:00:00Z",
+            "last_successful_download": "0001-01-01T00:00:00Z",
+            "message": "bundle read failed: archive read failed: gzip: invalid header",
+            "path": "/status",
+            "size": null
+          },
+          {
+            "active_revision": null,
+            "code": "bundle_error",
+            "last_request": "2026-06-21T12:32:33.253144131Z",
+            "last_successful_activation": "0001-01-01T00:00:00Z",
+            "last_successful_download": "0001-01-01T00:00:00Z",
+            "message": "bundle read failed: archive read failed: gzip: invalid header",
+            "path": "/status",
+            "size": null
+          }
+        ],
+        "v1_ready": {
+          "attempts": 1,
+          "expected_revision": "vs2-rego-local-v1",
+          "last_sample": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "elapsed_ms": 5.468,
+            "reason_codes": [],
+            "status": 200
+          },
+          "revision_observed": true
+        },
+        "v3_ready": {
+          "attempts": 1,
+          "expected_revision": "vs2-rego-local-v3",
+          "last_sample": {
+            "bundle_revision": "vs2-rego-local-v3",
+            "decision": "allow",
+            "elapsed_ms": 9.431,
+            "reason_codes": [],
+            "status": 200
+          },
+          "revision_observed": true
+        }
       },
-      "name": "policy_fail_closed_cases_observed",
+      "name": "policy_bundle_activation_and_rollback_metadata_present",
       "passed": true
     },
     {
       "evidence": {
-        "bundle_hash": "a23617c575c760b9d10c16a4abfaa915c972f4492ea5c20214371f445ac6a529"
+        "http_status": 200,
+        "payload": {
+          "audit_refs": [
+            "audit_aef407bfdc0c7aca"
+          ],
+          "context": {
+            "membership_revision": "memrev-alpha-001",
+            "namespace_id": "personal",
+            "owner_id": "principal_alice",
+            "principal_id": "principal_alice",
+            "revoked": false,
+            "roles": [
+              "owner"
+            ],
+            "session_version": 1,
+            "tenant_id": "tenant_alpha",
+            "workspace_id": "alpha-home"
+          },
+          "context_digest": "abff4046f40466057895e4287f70bb864b036464626e69917616f766997a036a",
+          "counters": {
+            "audit_inserts": 1,
+            "db_calls": 11,
+            "egress_calls": 0,
+            "policy_calls": 2
+          },
+          "destructive_migration_decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "deny",
+            "decision_id": "policy_92259de292dbe2ab",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "28212d7906b445dc492b634663e7e4cc2fa92596d1823952e8c8ff3cf879a99a",
+            "policy_path": "cornerstone.vs2/deny",
+            "reason_codes": [
+              "high_risk_requires_approval"
+            ],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_upgrade_068_destructive"
+          },
+          "error": null,
+          "policy_decision": {
+            "bundle_revision": "vs2-rego-local-v1",
+            "decision": "allow",
+            "decision_id": "policy_edbb0e207b2bc8cb",
+            "fail_closed": false,
+            "failure_reason": null,
+            "input_digest": "2c2440a6262f429a4394464a7f9461e9a81f6cfab4df6c351ed2e11353e1fab1",
+            "policy_path": "cornerstone.vs2/allow",
+            "reason_codes": [],
+            "schema_version": "cs.policy_decision.vs2.v1",
+            "trace_id": "trace_vs2_upgrade_068"
+          },
+          "status": "allowed",
+          "status_code": 200,
+          "surface": "http_api",
+          "trace_id": "trace_vs2_upgrade_068",
+          "upgrade_path_matrix": {
+            "after_snapshot": {
+              "snapshot_digest": "a5ca19b55f740413c8e1f6b199691850",
+              "table_count": 7,
+              "tables": {
+                "artifacts": {
+                  "checksum": "3109be07149d4cd1b012778eaf37f468",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs0_artifact"
+                  ]
+                },
+                "audit_events": {
+                  "checksum": "71b038ce8cb0458910d35fac397dccda",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_audit_event"
+                  ]
+                },
+                "claims": {
+                  "checksum": "bbf6f1216cc003933feb54c253edb3e3",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_claim"
+                  ]
+                },
+                "evidence_bundles": {
+                  "checksum": "15d64ee967b83bfa19fcacfd227ab290",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_evidence_bundle"
+                  ]
+                },
+                "ontology_links": {
+                  "checksum": "249b0c79f0b0822dc97806e6b9d0c873",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_ontology_link"
+                  ]
+                },
+                "ontology_objects": {
+                  "checksum": "894aaa3bd981aeab3c209f99a16c4ebc",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_ontology_object"
+                  ]
+                },
+                "search_snapshots": {
+                  "checksum": "1452b159b38ce2496d3d1a9cc6fbb730",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_search_snapshot"
+                  ]
+                }
+              },
+              "total_rows": 7
+            },
+            "before_snapshot": {
+              "snapshot_digest": "a5ca19b55f740413c8e1f6b199691850",
+              "table_count": 7,
+              "tables": {
+                "artifacts": {
+                  "checksum": "3109be07149d4cd1b012778eaf37f468",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs0_artifact"
+                  ]
+                },
+                "audit_events": {
+                  "checksum": "71b038ce8cb0458910d35fac397dccda",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_audit_event"
+                  ]
+                },
+                "claims": {
+                  "checksum": "bbf6f1216cc003933feb54c253edb3e3",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_claim"
+                  ]
+                },
+                "evidence_bundles": {
+                  "checksum": "15d64ee967b83bfa19fcacfd227ab290",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_evidence_bundle"
+                  ]
+                },
+                "ontology_links": {
+                  "checksum": "249b0c79f0b0822dc97806e6b9d0c873",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_ontology_link"
+                  ]
+                },
+                "ontology_objects": {
+                  "checksum": "894aaa3bd981aeab3c209f99a16c4ebc",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_ontology_object"
+                  ]
+                },
+                "search_snapshots": {
+                  "checksum": "1452b159b38ce2496d3d1a9cc6fbb730",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_search_snapshot"
+                  ]
+                }
+              },
+              "total_rows": 7
+            },
+            "checks": {
+              "before_after_counts_hashes_match": true,
+              "compatibility_regression_reads_succeeded": true,
+              "destructive_migration_denied_without_approval": true,
+              "destructive_migration_not_executed": true,
+              "failed_migration_left_no_bad_constraint": true,
+              "failed_migration_rejected": true,
+              "forward_migration_succeeded": true,
+              "no_data_loss": true,
+              "rollback_preserved_counts_hashes": true,
+              "rollback_removed_upgrade_columns": true,
+              "rollback_succeeded": true,
+              "vs0_vs1_fixture_seeded": true
+            },
+            "compatibility_regression": {
+              "artifact_visible_after_upgrade": true,
+              "audit_visible_after_upgrade": true,
+              "claim_visible_after_upgrade": true,
+              "evidence_visible_after_upgrade": true,
+              "ontology_visible_after_upgrade": true,
+              "search_snapshot_visible_after_upgrade": true,
+              "upgrade_revision_values": {
+                "artifacts": [
+                  "vs2-local-upgrade-068"
+                ],
+                "audit_events": [
+                  "vs2-local-upgrade-068"
+                ],
+                "claims": [
+                  "vs2-local-upgrade-068"
+                ],
+                "evidence_bundles": [
+                  "vs2-local-upgrade-068"
+                ],
+                "ontology_links": [
+                  "vs2-local-upgrade-068"
+                ],
+                "ontology_objects": [
+                  "vs2-local-upgrade-068"
+                ],
+                "search_snapshots": [
+                  "vs2-local-upgrade-068"
+                ]
+              },
+              "visible_tenants": [
+                "tenant_alpha"
+              ]
+            },
+            "db_call_count": 10,
+            "destructive_migration": {
+              "db_attempted": false,
+              "policy_decision": {
+                "bundle_revision": "vs2-rego-local-v1",
+                "decision": "deny",
+                "decision_id": "policy_92259de292dbe2ab",
+                "fail_closed": false,
+                "failure_reason": null,
+                "input_digest": "28212d7906b445dc492b634663e7e4cc2fa92596d1823952e8c8ff3cf879a99a",
+                "policy_path": "cornerstone.vs2/deny",
+                "reason_codes": [
+                  "high_risk_requires_approval"
+                ],
+                "schema_version": "cs.policy_decision.vs2.v1",
+                "trace_id": "trace_vs2_upgrade_068_destructive"
+              }
+            },
+            "failed_migration": {
+              "command": [
+                "docker",
+                "exec",
+                "-i",
+                "cornerstone-vs2-range-pg-a973465896",
+                "psql",
+                "-U",
+                "postgres",
+                "-d",
+                "cornerstone",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-X",
+                "-q",
+                "-t",
+                "-A"
+              ],
+              "elapsed_seconds": 0.121,
+              "exit_code": 3,
+              "stderr_tail": [
+                "ERROR:  check constraint \"upgrade_068_bad_tenant_check\" of relation \"artifacts\" is violated by some row"
+              ],
+              "stdout_bytes": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "failed_migration_state": {
+              "bad_constraint_count": 0
+            },
+            "forward_migration": {
+              "command": [
+                "docker",
+                "exec",
+                "-i",
+                "cornerstone-vs2-range-pg-a973465896",
+                "psql",
+                "-U",
+                "postgres",
+                "-d",
+                "cornerstone",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-X",
+                "-q",
+                "-t",
+                "-A"
+              ],
+              "elapsed_seconds": 0.135,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_bytes": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "result_digest": "78d2ba78b02968fe14ba22166d35d41ddc95242aa6ea5fc35b2add0c817759fb",
+            "rollback": {
+              "command": [
+                "docker",
+                "exec",
+                "-i",
+                "cornerstone-vs2-range-pg-a973465896",
+                "psql",
+                "-U",
+                "postgres",
+                "-d",
+                "cornerstone",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-X",
+                "-q",
+                "-t",
+                "-A"
+              ],
+              "elapsed_seconds": 0.248,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_bytes": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "rollback_columns": {
+              "upgrade_revision_column_count": 0
+            },
+            "rollback_snapshot": {
+              "snapshot_digest": "a5ca19b55f740413c8e1f6b199691850",
+              "table_count": 7,
+              "tables": {
+                "artifacts": {
+                  "checksum": "3109be07149d4cd1b012778eaf37f468",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs0_artifact"
+                  ]
+                },
+                "audit_events": {
+                  "checksum": "71b038ce8cb0458910d35fac397dccda",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_audit_event"
+                  ]
+                },
+                "claims": {
+                  "checksum": "bbf6f1216cc003933feb54c253edb3e3",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_claim"
+                  ]
+                },
+                "evidence_bundles": {
+                  "checksum": "15d64ee967b83bfa19fcacfd227ab290",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_evidence_bundle"
+                  ]
+                },
+                "ontology_links": {
+                  "checksum": "249b0c79f0b0822dc97806e6b9d0c873",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_ontology_link"
+                  ]
+                },
+                "ontology_objects": {
+                  "checksum": "894aaa3bd981aeab3c209f99a16c4ebc",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_ontology_object"
+                  ]
+                },
+                "search_snapshots": {
+                  "checksum": "1452b159b38ce2496d3d1a9cc6fbb730",
+                  "count": 1,
+                  "object_ids": [
+                    "upgrade_068_vs1_search_snapshot"
+                  ]
+                }
+              },
+              "total_rows": 7
+            },
+            "scope": "synthetic VS0/VS1 local fixture; not production migration readiness",
+            "seed": {
+              "command": [
+                "docker",
+                "exec",
+                "-i",
+                "cornerstone-vs2-range-pg-a973465896",
+                "psql",
+                "-U",
+                "postgres",
+                "-d",
+                "cornerstone",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-X",
+                "-q",
+                "-t",
+                "-A"
+              ],
+              "elapsed_seconds": 0.128,
+              "exit_code": 0,
+              "stderr_tail": [],
+              "stdout_bytes": 0,
+              "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "status": "completed",
+            "tables": [
+              "artifacts",
+              "evidence_bundles",
+              "claims",
+              "ontology_objects",
+              "ontology_links",
+              "search_snapshots",
+              "audit_events"
+            ]
+          }
+        }
       },
-      "name": "bundle_revision_and_lkg_recorded",
-      "passed": true
-    },
-    {
-      "evidence": {
-        "abac_denied": true,
-        "allow_decision_observed": true,
-        "capability_default_deny": true,
-        "deny_precedence_on_mismatch": true,
-        "high_risk_allowed_after_approval": true,
-        "high_risk_requires_approval": true,
-        "invalid_schema_denied": true,
-        "opa_unavailable_denied": true,
-        "role_denied": true,
-        "undefined_default_deny": true
-      },
-      "name": "approval_or_deny_precedence_observed",
+      "name": "direct_sensitive_change_bypass_denied",
       "passed": true
     },
     {
@@ -72,8 +1464,8 @@
   "required_evidence": "Action/workflow records, bundle revisions, approvals, before/after decisions, rollback transcript.",
   "scenario_id": "VS2-SEC-046",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "It is represented as a sensitive governed change with diff, impact, tests, policy decision, authorized approval, version, rollback, and audit; direct mutation is blocked.",
   "validator": "verify_vs2_sec_046",
   "verification_command": [

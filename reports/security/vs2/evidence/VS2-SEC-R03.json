@@ -2,20 +2,49 @@
   "assertions": [
     {
       "evidence": {
-        "compileall_green": true,
-        "scenario_matrix_green": true,
-        "vs0_acceptance_green": true,
-        "vs0_evux_green": true,
-        "vs0_operator_ui_green": true,
-        "vs0_runtime_green": true,
-        "vs1_ontology_green": true
+        "bundle_revision": "vs2-rego-local-v1",
+        "decision": "deny",
+        "decision_id": "policy_e917745f3510b071",
+        "fail_closed": false,
+        "failure_reason": null,
+        "input_digest": "313f4a5eff3e86b4cb9ba17ca5199ef5dce769462274b67fe9780eb28e08d0e8",
+        "policy_path": "cornerstone.vs2/deny",
+        "reason_codes": [
+          "cross_tenant_scope"
+        ],
+        "schema_version": "cs.policy_decision.vs2.v1",
+        "trace_id": "trace_vs2_same_tenant_namespace_022"
       },
-      "name": "targeted_regression_guard_observed",
+      "name": "r03_personal_to_org_implicit_use_denied",
       "passed": true
     },
     {
-      "evidence": {},
-      "name": "security_foundation_still_default_deny",
+      "evidence": {
+        "explicit_org_namespace_rows_visible": 0,
+        "namespace_ids_returned": [],
+        "org_rows_visible": 0,
+        "tenant_ids_returned": []
+      },
+      "name": "r03_personal_context_does_not_expose_org_rows",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "promotion_payloads": [
+          {
+            "operation": "explicit_namespace_promotion",
+            "promotion_approval_ref": "approval_vs2_sec_022_namespace_promotion",
+            "provenance_ref": "audit_f6e88d117c3313cb",
+            "scenario_id": "VS2-SEC-022",
+            "source_artifact_digest": "e89c95cf86e159c52f37211d2c92a5c16651ac00806ce5351329a0f4c2a6ae83",
+            "source_namespace_id": "personal",
+            "source_tenant_id": "tenant_alpha",
+            "source_workspace_id": "alpha-home"
+          }
+        ],
+        "promotion_rows_visible": 1
+      },
+      "name": "r03_explicit_promotion_requires_provenance",
       "passed": true
     },
     {
@@ -41,8 +70,8 @@
   "required_evidence": "Zero personal refs/canary, denial or insufficient-evidence response.",
   "scenario_id": "VS2-SEC-R03",
   "schema_version": "cs.vs2.raw_scenario_evidence.v1",
-  "source_commit": "a823697176d0b2157888a0eb7a34f73400b05bd0",
-  "source_tree": "6fe4793d4c85a333acb25b17f7f4f753bdc513d8",
+  "source_commit": "7fea206f5f9e204612509334ebe511f13c148463",
+  "source_tree": "c5c80e6d1e1949cbd1063e3ffc45cc87c0d591de",
   "then": "Personal context is not used, cited, searched, or exposed.",
   "validator": "verify_vs2_sec_r03",
   "verification_command": [
