@@ -11666,6 +11666,11 @@ def verify_vs2_policy_tenancy_egress(root: Path, *, local_proof_report: Path | N
         proof_path = local_proof_report if local_proof_report.is_absolute() else root / local_proof_report
         candidate, read_error = _read_json_report(proof_path)
         expected_scenario_ids = {row.get("scenario_id", "") for row in rows if row.get("scenario_id")}
+        expected_scenario_owners = {
+            row.get("scenario_id", ""): "Human" if row.get("priority") == "HUMAN_REQUIRED" else "AI"
+            for row in rows
+            if row.get("scenario_id")
+        }
         reusable, errors, current_fingerprint = validate_reusable_report(
             candidate,
             root=root,
@@ -11673,6 +11678,7 @@ def verify_vs2_policy_tenancy_egress(root: Path, *, local_proof_report: Path | N
             expected_schema="cs.vs2_local_security_proof.v0",
             require_status=None,
             expected_scenario_ids=expected_scenario_ids,
+            expected_scenario_owners=expected_scenario_owners,
             validate_evidence=True,
         )
         if read_error:
@@ -11778,7 +11784,7 @@ def verify_vs2_policy_tenancy_egress(root: Path, *, local_proof_report: Path | N
     blocking = [
         row
         for row in scenario_results
-        if row.get("owner") != "Human" and row.get("status") in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+        if row.get("owner") == "AI" and row.get("status") != "PASS"
     ]
     report = {
         "status": "success" if not blocking else "failed",

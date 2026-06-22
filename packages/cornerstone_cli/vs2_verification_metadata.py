@@ -23,22 +23,30 @@ DEPENDENCY_FAMILIES: dict[str, list[str]] = {
         "packages/cornerstone_cli/**/*.py",
     ],
     "verification_scripts": [
+        "scripts/*",
         "scripts/**/*",
     ],
     "fixtures_and_tests": [
+        "fixtures/*",
         "fixtures/**/*",
+        "tests/*.py",
         "tests/**/*.py",
     ],
     "runtime_topology": [
         "compose*.yml",
         "docker-compose*.yml",
         "Dockerfile*",
+        "docker/*",
         "docker/**/*",
+        ".docker/*",
         ".docker/**/*",
     ],
     "vs2_configuration": [
+        "config/vs2/*",
         "config/vs2/**/*",
+        "migrations/vs2/*",
         "migrations/vs2/**/*",
+        "policies/vs2/*",
         "policies/vs2/**/*",
     ],
     "scenario_authority": [
@@ -107,6 +115,16 @@ def _command_value(command: list[str]) -> str | None:
     return (result.stdout or result.stderr).strip() or None
 
 
+def _command_json(command: list[str]) -> Any:
+    value = _command_value(command)
+    if not value:
+        return None
+    try:
+        return json.loads(value)
+    except ValueError:
+        return value
+
+
 def _matching_files(root: Path, patterns: list[str]) -> list[Path]:
     paths: set[Path] = set()
     for pattern in patterns:
@@ -154,6 +172,30 @@ def _git_status_paths(root: Path) -> list[str]:
 
 
 def _runtime_fingerprint() -> dict[str, Any]:
+    docker_info = _command_json(["docker", "info", "--format", "{{json .}}"])
+    docker_info_summary = None
+    if isinstance(docker_info, dict):
+        docker_info_summary = {
+            "id": docker_info.get("ID"),
+            "server_version": docker_info.get("ServerVersion"),
+            "operating_system": docker_info.get("OperatingSystem"),
+            "default_runtime": docker_info.get("DefaultRuntime"),
+            "runtimes": sorted((docker_info.get("Runtimes") or {}).keys()),
+            "cgroup_driver": docker_info.get("CgroupDriver"),
+            "security_options": docker_info.get("SecurityOptions"),
+        }
+    image_identities: dict[str, Any] = {}
+    for image in [POSTGRES_IMAGE, OPA_IMAGE]:
+        inspected = _command_json(["docker", "image", "inspect", image, "--format", "{{json .}}"])
+        if isinstance(inspected, dict):
+            image_identities[image] = {
+                "id": inspected.get("Id"),
+                "repo_digests": inspected.get("RepoDigests", []),
+                "repo_tags": inspected.get("RepoTags", []),
+                "created": inspected.get("Created"),
+            }
+        else:
+            image_identities[image] = {"available": False, "inspect_result": inspected}
     return {
         "schema_version": "cs.vs2_runtime_fingerprint.v1",
         "python_version": sys.version.split()[0],
@@ -161,8 +203,13 @@ def _runtime_fingerprint() -> dict[str, Any]:
         "platform": platform.platform(),
         "machine": platform.machine(),
         "docker_version": _command_value(["docker", "--version"]),
+        "docker_context": _command_value(["docker", "context", "show"]),
+        "docker_version_json": _command_json(["docker", "version", "--format", "{{json .}}"]),
+        "docker_info": docker_info_summary,
+        "container_runtime": docker_info_summary,
         "postgres_image": POSTGRES_IMAGE,
         "opa_image": OPA_IMAGE,
+        "image_identities": image_identities,
     }
 
 
@@ -228,6 +275,8 @@ APPROVED_EVIDENCE_ROOTS = (
     "reports/",
     "docs/scenario-contracts/",
     "docs/verification-reports/",
+    "config/vs2/",
+    "policies/vs2/",
     "tmp/",
 )
 
@@ -272,9 +321,10 @@ def _validate_artifact_ref(root: Path, artifact: dict[str, Any], errors: list[st
         errors.append(f"{field}_sha256_mismatch:{path_value}")
 
 
-def _validate_evidence_manifest(root: Path, report: dict[str, Any], errors: list[str]) -> None:
+def _validate_evidence_manifest(root: Path, report: dict[str, Any], errors: list[str], scenario_rows: list[dict[str, Any]]) -> None:
     manifest_value = report.get("evidence_manifest")
     if not manifest_value:
+        errors.append("evidence_manifest_missing")
         return
     manifest_path = _resolve_evidence_path(root, manifest_value, errors, field="evidence_manifest")
     if manifest_path is None:
@@ -301,6 +351,7 @@ def _validate_evidence_manifest(root: Path, report: dict[str, Any], errors: list
         errors.append("evidence_manifest_foundational_artifacts_invalid")
         foundational_artifacts = []
     raw_ids: list[str] = []
+    raw_status_by_id: dict[str, str] = {}
     for index, artifact in enumerate(raw_artifacts):
         if not isinstance(artifact, dict):
             errors.append(f"evidence_manifest_raw_artifact_not_object:{index}")
@@ -308,6 +359,8 @@ def _validate_evidence_manifest(root: Path, report: dict[str, Any], errors: list
         scenario_id = artifact.get("scenario_id")
         if isinstance(scenario_id, str):
             raw_ids.append(scenario_id)
+            if isinstance(artifact.get("status"), str):
+                raw_status_by_id[scenario_id] = artifact["status"]
         _validate_artifact_ref(root, artifact, errors, field="evidence_manifest_raw_artifact")
     duplicate_raw_ids = sorted({scenario_id for scenario_id in raw_ids if raw_ids.count(scenario_id) > 1})
     if duplicate_raw_ids:
@@ -317,6 +370,24 @@ def _validate_evidence_manifest(root: Path, report: dict[str, Any], errors: list
             errors.append(f"evidence_manifest_foundational_artifact_not_object:{index}")
             continue
         _validate_artifact_ref(root, artifact, errors, field="evidence_manifest_foundational_artifact")
+    ai_status_by_id = {
+        str(row.get("scenario_id") or row.get("id")): str(row.get("status"))
+        for row in scenario_rows
+        if row.get("owner") != "Human"
+    }
+    missing_raw = sorted(set(ai_status_by_id) - set(raw_status_by_id))
+    extra_raw = sorted(set(raw_status_by_id) - set(ai_status_by_id))
+    mismatched_status = sorted(
+        scenario_id
+        for scenario_id, status in raw_status_by_id.items()
+        if scenario_id in ai_status_by_id and ai_status_by_id[scenario_id] != status
+    )
+    if missing_raw:
+        errors.append("evidence_manifest_missing_ai_scenarios:" + ",".join(missing_raw[:10]))
+    if extra_raw:
+        errors.append("evidence_manifest_extra_scenarios:" + ",".join(extra_raw[:10]))
+    if mismatched_status:
+        errors.append("evidence_manifest_status_mismatch:" + ",".join(mismatched_status[:10]))
 
 
 def _validate_scenario_inventory(
@@ -325,13 +396,15 @@ def _validate_scenario_inventory(
     errors: list[str],
     *,
     expected_scenario_ids: set[str] | None,
+    expected_scenario_owners: dict[str, str] | None,
     validate_evidence: bool,
-) -> None:
+) -> list[dict[str, Any]]:
     rows = report.get("scenario_results")
     if not isinstance(rows, list):
         errors.append("scenario_results_invalid")
-        return
+        return []
     seen: list[str] = []
+    valid_rows: list[dict[str, Any]] = []
     for index, row in enumerate(rows):
         if not isinstance(row, dict):
             errors.append(f"scenario_result_not_object:{index}")
@@ -345,6 +418,15 @@ def _validate_scenario_inventory(
             errors.append(f"scenario_result_id_mismatch:{scenario_id}")
         if row.get("status") not in {"PASS", "FAIL", "NOT_VERIFIED", "NOT_RUN", "HUMAN_REQUIRED"}:
             errors.append(f"scenario_result_status_invalid:{scenario_id}")
+        expected_owner = expected_scenario_owners.get(scenario_id) if expected_scenario_owners else None
+        recorded_owner = row.get("owner")
+        if expected_owner is not None:
+            if recorded_owner != expected_owner:
+                errors.append(f"scenario_result_owner_mismatch:{scenario_id}")
+            if expected_owner == "AI" and row.get("status") == "HUMAN_REQUIRED":
+                errors.append(f"scenario_result_ai_human_required_invalid:{scenario_id}")
+            if expected_owner == "Human" and row.get("status") != "HUMAN_REQUIRED":
+                errors.append(f"scenario_result_human_status_invalid:{scenario_id}")
         evidence_paths = row.get("evidence_paths")
         evidence_hashes = row.get("evidence_hashes")
         if evidence_paths is None:
@@ -373,6 +455,7 @@ def _validate_scenario_inventory(
                 actual = hashlib.sha256(path.read_bytes()).hexdigest()
                 if actual not in evidence_hashes:
                     errors.append(f"scenario_result_evidence_sha256_mismatch:{path_value}")
+        valid_rows.append(row)
     duplicate_ids = sorted({scenario_id for scenario_id in seen if seen.count(scenario_id) > 1})
     if duplicate_ids:
         errors.append("scenario_results_duplicate_ids:" + ",".join(duplicate_ids))
@@ -384,6 +467,7 @@ def _validate_scenario_inventory(
             errors.append("scenario_results_missing_ids:" + ",".join(missing[:10]))
         if extra:
             errors.append("scenario_results_extra_ids:" + ",".join(extra[:10]))
+    return valid_rows
 
 
 def _validate_local_range_shape(report: dict[str, Any], errors: list[str]) -> None:
@@ -393,6 +477,15 @@ def _validate_local_range_shape(report: dict[str, Any], errors: list[str]) -> No
             errors.append("checks_missing")
         elif not all(value is True for value in checks.values()):
             errors.append("checks_not_all_passed")
+    profile = report.get("profile")
+    if isinstance(profile, dict):
+        if profile.get("cleanup_success") is False:
+            errors.append("cleanup_failed")
+        if profile.get("cleanup_errors"):
+            errors.append("cleanup_errors_present")
+        for result in profile.get("cleanup_results", []):
+            if isinstance(result, dict) and result.get("mandatory") is True and result.get("exit_code") != 0:
+                errors.append(f"cleanup_result_failed:{result.get('label')}")
 
 
 def validate_reusable_report(
@@ -403,6 +496,7 @@ def validate_reusable_report(
     expected_schema: str,
     require_status: str | None = None,
     expected_scenario_ids: set[str] | None = None,
+    expected_scenario_owners: dict[str, str] | None = None,
     validate_evidence: bool = True,
 ) -> tuple[bool, list[str], dict[str, Any]]:
     current = build_source_fingerprint(root, family=family)
@@ -436,12 +530,13 @@ def validate_reusable_report(
         for field in ["summary", "negative_evidence", "scenario_set"]:
             if field not in report:
                 errors.append(f"{field}_missing")
-        _validate_scenario_inventory(
+        scenario_rows = _validate_scenario_inventory(
             root,
             report,
             errors,
             expected_scenario_ids=expected_scenario_ids,
+            expected_scenario_owners=expected_scenario_owners,
             validate_evidence=validate_evidence,
         )
-        _validate_evidence_manifest(root, report, errors)
+        _validate_evidence_manifest(root, report, errors, scenario_rows)
     return not errors, errors, current

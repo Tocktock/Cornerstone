@@ -78,6 +78,7 @@ def _finalize_report_payload(
     started: float,
     cleanup_seconds: float = 0.0,
     cleanup_errors: list[str] | None = None,
+    cleanup_results: list[dict[str, Any]] | None = None,
 ) -> None:
     profile = payload.setdefault("profile", {"schema_version": "cs.vs2_local_range_profile.v1"})
     measured_wall = float(profile.get("wall_seconds") or 0.0)
@@ -91,6 +92,15 @@ def _finalize_report_payload(
     }
     if cleanup_errors:
         profile["cleanup_errors"] = cleanup_errors
+    profile["cleanup_results"] = cleanup_results or []
+    profile["cleanup_success"] = not cleanup_errors and all(
+        result.get("exit_code") == 0
+        for result in profile["cleanup_results"]
+        if result.get("mandatory") is True
+    )
+    if profile["cleanup_success"] is False and payload.get("status") == "passed":
+        payload["status"] = "failed"
+        payload["cleanup_failure_demoted_pass"] = True
     profile["total_command_wall_seconds"] = round(time.perf_counter() - started, 3)
     profile["wall_seconds"] = profile["total_command_wall_seconds"]
     serialization_started = time.perf_counter()
@@ -400,8 +410,10 @@ class _PostgresRange:
             time.sleep(0.5)
         return False
 
-    def stop(self) -> None:
-        self.transcript.append(_run(["docker", "rm", "-f", self.container], cwd=self.root, timeout=30))
+    def stop(self) -> dict[str, Any]:
+        result = _run(["docker", "rm", "-f", self.container], cwd=self.root, timeout=30)
+        self.transcript.append(result)
+        return result
 
     def psql(self, sql: str, *, database: str = "cornerstone", timeout: int = 120) -> dict[str, Any]:
         result = _run(
@@ -567,8 +579,10 @@ class _OpaRange:
                 time.sleep(0.25)
         return False
 
-    def stop(self) -> None:
-        self.transcript.append(_run(["docker", "rm", "-f", self.container], cwd=self.root, timeout=30))
+    def stop(self) -> dict[str, Any]:
+        result = _run(["docker", "rm", "-f", self.container], cwd=self.root, timeout=30)
+        self.transcript.append(result)
+        return result
 
 
 class _OpaRevisionRange:
@@ -636,10 +650,12 @@ class _OpaRevisionRange:
                 time.sleep(0.25)
         return False
 
-    def stop(self) -> None:
-        self.transcript.append(_run(["docker", "rm", "-f", self.container], cwd=self.root, timeout=30))
+    def stop(self) -> dict[str, Any]:
+        result = _run(["docker", "rm", "-f", self.container], cwd=self.root, timeout=30)
+        self.transcript.append(result)
         if self.policy_dir is not None:
             shutil.rmtree(self.policy_dir, ignore_errors=True)
+        return result
 
 
 class _MockProvider:
@@ -11639,6 +11655,7 @@ COMMIT;
     finally:
         cleanup_started = time.perf_counter()
         cleanup_errors: list[str] = []
+        cleanup_results: list[dict[str, Any]] = []
         for label, cleanup in [
             ("gateway", gateway.stop if gateway is not None else None),
             ("opa_revision_v2", opa_revision_v2.stop),
@@ -11650,9 +11667,23 @@ COMMIT;
             if cleanup is None:
                 continue
             try:
-                cleanup()
+                cleanup_result = cleanup()
+                if isinstance(cleanup_result, dict):
+                    result = {
+                        "label": label,
+                        "mandatory": True,
+                        "exit_code": cleanup_result.get("exit_code"),
+                        "elapsed_seconds": cleanup_result.get("elapsed_seconds"),
+                        "command": cleanup_result.get("command"),
+                    }
+                    cleanup_results.append(result)
+                    if cleanup_result.get("exit_code") != 0:
+                        cleanup_errors.append(f"{label}:exit_code:{cleanup_result.get('exit_code')}")
+                else:
+                    cleanup_results.append({"label": label, "mandatory": True, "exit_code": 0})
             except Exception as error:  # pragma: no cover - cleanup failure must preserve partial evidence
                 cleanup_errors.append(f"{label}:{type(error).__name__}:{error}")
+                cleanup_results.append({"label": label, "mandatory": True, "exit_code": 1, "error": f"{type(error).__name__}:{error}"})
         cleanup_seconds = time.perf_counter() - cleanup_started
         if payload is not None:
             _finalize_report_payload(
@@ -11662,6 +11693,7 @@ COMMIT;
                 started=started,
                 cleanup_seconds=cleanup_seconds,
                 cleanup_errors=cleanup_errors,
+                cleanup_results=cleanup_results,
             )
 
 
