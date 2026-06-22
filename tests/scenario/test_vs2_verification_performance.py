@@ -13,7 +13,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
-from cornerstone_cli import scenarios, vs2_local_range, vs2_security
+from cornerstone_cli import scenarios, vs2_local_range, vs2_security, vs2_verification_metadata
 from cornerstone_cli.vs2_verification_metadata import build_source_fingerprint, proof_hash, validate_reusable_report
 
 
@@ -552,6 +552,75 @@ class Vs2VerificationPerformanceTests(unittest.TestCase):
         self.assertFalse(reusable)
         self.assertIn("status_mismatch", errors)
         self.assertIn("cleanup_failed", errors)
+
+    def test_local_range_refreshes_runtime_fingerprint_after_cold_image_pull(self) -> None:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tmp") as tmp:
+            report_path = Path(tmp).relative_to(ROOT) / "cold-cache-runtime-refresh.json"
+            end_fingerprint = build_source_fingerprint(ROOT, family="vs2_local_range")
+            start_fingerprint = json.loads(json.dumps(end_fingerprint))
+            start_fingerprint["runtime"]["image_identities"] = {
+                vs2_local_range.POSTGRES_IMAGE: {"available": False},
+                vs2_local_range.OPA_IMAGE: {"available": False},
+            }
+            start_fingerprint["environment_digest"] = "cold-cache-before-pull"
+            payload = {
+                "schema_version": "cs.vs2_local_range.v1",
+                "status": "passed",
+                "source_fingerprint": start_fingerprint,
+                "checks": {"fixture_check": True},
+            }
+            with mock.patch.object(vs2_local_range, "build_source_fingerprint", return_value=end_fingerprint):
+                vs2_local_range._refresh_report_source_fingerprint(ROOT, payload)
+                vs2_local_range._finalize_report_payload(ROOT, report_path, payload, started=0.0)
+            written = json.loads((ROOT / report_path).read_text())
+
+            with mock.patch.object(vs2_verification_metadata, "build_source_fingerprint", return_value=end_fingerprint):
+                reusable, errors, _ = vs2_verification_metadata.validate_reusable_report(
+                    written,
+                    root=ROOT,
+                    family="vs2_local_range",
+                    expected_schema="cs.vs2_local_range.v1",
+                    require_status="passed",
+                )
+
+        self.assertEqual(written["status"], "passed")
+        self.assertNotEqual(written["run_start_source_fingerprint"]["environment_digest"], written["source_fingerprint"]["environment_digest"])
+        self.assertEqual(written["source_fingerprint"], end_fingerprint)
+        self.assertNotIn("source_changed_during_run", written)
+        self.assertTrue(reusable, errors)
+
+    def test_local_range_fails_if_source_inputs_change_during_run(self) -> None:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tmp") as tmp:
+            report_path = Path(tmp).relative_to(ROOT) / "source-change-local-range.json"
+            start_fingerprint = build_source_fingerprint(ROOT, family="vs2_local_range")
+            end_fingerprint = json.loads(json.dumps(start_fingerprint))
+            end_fingerprint["input_digest"] = "changed-during-run"
+            payload = {
+                "schema_version": "cs.vs2_local_range.v1",
+                "status": "passed",
+                "source_fingerprint": start_fingerprint,
+                "checks": {"fixture_check": True},
+            }
+            with mock.patch.object(vs2_local_range, "build_source_fingerprint", return_value=end_fingerprint):
+                vs2_local_range._refresh_report_source_fingerprint(ROOT, payload)
+                vs2_local_range._finalize_report_payload(ROOT, report_path, payload, started=0.0)
+            written = json.loads((ROOT / report_path).read_text())
+
+            with mock.patch.object(vs2_verification_metadata, "build_source_fingerprint", return_value=end_fingerprint):
+                reusable, errors, _ = vs2_verification_metadata.validate_reusable_report(
+                    written,
+                    root=ROOT,
+                    family="vs2_local_range",
+                    expected_schema="cs.vs2_local_range.v1",
+                    require_status="passed",
+                )
+
+        self.assertEqual(written["status"], "failed")
+        self.assertTrue(written["source_changed_during_run"])
+        self.assertEqual(written["source_changed_keys"], ["input_digest"])
+        self.assertEqual(written["source_fingerprint"], end_fingerprint)
+        self.assertFalse(reusable)
+        self.assertIn("status_mismatch", errors)
 
 
 if __name__ == "__main__":

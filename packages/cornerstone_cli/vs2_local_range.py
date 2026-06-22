@@ -25,6 +25,7 @@ POSTGRES_IMAGE = "postgres:16-alpine"
 OPA_IMAGE = "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3"
 PYTHON_IMAGE = "python:3.12-bookworm"
 VS2_LOCAL_RANGE_REPORT = Path("reports/security/vs2-local-range.json")
+SOURCE_STABILITY_KEYS = ("git_commit", "git_tree", "input_digest", "dirty", "working_tree_digest")
 POLICY_INPUT_SCHEMA_PATH = Path("config/vs2/policy_input_schema.v1.json")
 REASON_CODE_CATALOG_PATH = Path("config/vs2/reason_code_catalog.v1.json")
 POLICY_LIMITS_PATH = Path("config/vs2/policy_limits.v1.json")
@@ -68,6 +69,30 @@ def _write_json(root: Path, relative_path: Path, payload: dict[str, Any]) -> Pat
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     return path
+
+
+def _refresh_report_source_fingerprint(root: Path, payload: dict[str, Any]) -> None:
+    start_fingerprint = payload.get("source_fingerprint")
+    end_fingerprint = build_source_fingerprint(root, family="vs2_local_range")
+    payload["source_fingerprint"] = end_fingerprint
+    if not isinstance(start_fingerprint, dict):
+        payload["source_changed_during_run"] = True
+        payload["source_changed_keys"] = ["source_fingerprint"]
+        if payload.get("status") == "passed":
+            payload["status"] = "failed"
+        return
+
+    payload["run_start_source_fingerprint"] = start_fingerprint
+    changed_keys = [
+        key
+        for key in SOURCE_STABILITY_KEYS
+        if start_fingerprint.get(key) != end_fingerprint.get(key)
+    ]
+    if changed_keys:
+        payload["source_changed_during_run"] = True
+        payload["source_changed_keys"] = changed_keys
+        if payload.get("status") == "passed":
+            payload["status"] = "failed"
 
 
 def _finalize_report_payload(
@@ -10551,6 +10576,7 @@ def run_vs2_local_range(root: Path) -> dict[str, Any]:
                 "child_command_elapsed_seconds": 0.0,
             },
         }
+        _refresh_report_source_fingerprint(root, payload)
         _finalize_report_payload(root, VS2_LOCAL_RANGE_REPORT, payload, started=started)
         return payload
 
@@ -11686,6 +11712,7 @@ COMMIT;
                 cleanup_results.append({"label": label, "mandatory": True, "exit_code": 1, "error": f"{type(error).__name__}:{error}"})
         cleanup_seconds = time.perf_counter() - cleanup_started
         if payload is not None:
+            _refresh_report_source_fingerprint(root, payload)
             _finalize_report_payload(
                 root,
                 VS2_LOCAL_RANGE_REPORT,
