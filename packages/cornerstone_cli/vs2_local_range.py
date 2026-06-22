@@ -18,12 +18,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
-from cornerstone_cli.vs2_verification_metadata import build_source_fingerprint, proof_hash
+from cornerstone_cli.vs2_verification_metadata import (
+    OPA_IMAGE,
+    POSTGRES_IMAGE,
+    PYTHON_IMAGE,
+    build_source_fingerprint,
+    proof_hash,
+)
 
 
-POSTGRES_IMAGE = "postgres:16-alpine"
-OPA_IMAGE = "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3"
-PYTHON_IMAGE = "python:3.12-bookworm"
 VS2_LOCAL_RANGE_REPORT = Path("reports/security/vs2-local-range.json")
 SOURCE_STABILITY_KEYS = ("git_commit", "git_tree", "input_digest", "dirty", "working_tree_digest")
 POLICY_INPUT_SCHEMA_PATH = Path("config/vs2/policy_input_schema.v1.json")

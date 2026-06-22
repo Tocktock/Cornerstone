@@ -14,6 +14,12 @@ from typing import Any
 
 POSTGRES_IMAGE = "postgres:16-alpine"
 OPA_IMAGE = "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3"
+PYTHON_IMAGE = "python:3.12-bookworm"
+VERIFICATION_IMAGES = (
+    POSTGRES_IMAGE,
+    OPA_IMAGE,
+    PYTHON_IMAGE,
+)
 
 DEPENDENCY_FAMILIES: dict[str, list[str]] = {
     "cli_runtime": [
@@ -185,7 +191,7 @@ def _runtime_fingerprint() -> dict[str, Any]:
             "security_options": docker_info.get("SecurityOptions"),
         }
     image_identities: dict[str, Any] = {}
-    for image in [POSTGRES_IMAGE, OPA_IMAGE]:
+    for image in VERIFICATION_IMAGES:
         inspected = _command_json(["docker", "image", "inspect", image, "--format", "{{json .}}"])
         if isinstance(inspected, dict):
             image_identities[image] = {
@@ -209,6 +215,8 @@ def _runtime_fingerprint() -> dict[str, Any]:
         "container_runtime": docker_info_summary,
         "postgres_image": POSTGRES_IMAGE,
         "opa_image": OPA_IMAGE,
+        "python_image": PYTHON_IMAGE,
+        "verification_images": list(VERIFICATION_IMAGES),
         "image_identities": image_identities,
     }
 

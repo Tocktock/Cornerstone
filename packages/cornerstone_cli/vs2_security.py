@@ -24,11 +24,13 @@ from typing import Any, Callable
 from urllib.parse import unquote, urljoin, urlparse
 
 from cornerstone_cli.vs2_local_range import POLICY_INPUT_SCHEMA_PATH, POLICY_LIMITS_PATH, REASON_CODE_CATALOG_PATH, VS2_LOCAL_RANGE_REPORT, run_vs2_local_range
-from cornerstone_cli.vs2_verification_metadata import build_source_fingerprint, proof_hash, validate_reusable_report
-
-
-POSTGRES_IMAGE = "postgres:16-alpine"
-OPA_IMAGE = "openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3"
+from cornerstone_cli.vs2_verification_metadata import (
+    OPA_IMAGE,
+    POSTGRES_IMAGE,
+    build_source_fingerprint,
+    proof_hash,
+    validate_reusable_report,
+)
 
 VS2_MATRIX = Path("docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv")
 VS2_PROOF_REPORT = Path("reports/security/vs2-local-security-proof.json")

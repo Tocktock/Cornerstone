@@ -522,8 +522,8 @@ class Vs2VerificationPerformanceTests(unittest.TestCase):
         self.assertIn("docker_version_json", runtime)
         self.assertIn("docker_info", runtime)
         self.assertIn("image_identities", runtime)
-        self.assertIn("postgres:16-alpine", runtime["image_identities"])
-        self.assertIn("openpolicyagent/opa@sha256:dc009236137bb225a1ef09293bb32f2ee1861cc428870d297bf71412d50221c3", runtime["image_identities"])
+        for image in vs2_verification_metadata.VERIFICATION_IMAGES:
+            self.assertIn(image, runtime["image_identities"])
 
     def test_local_range_cleanup_failures_demote_pass_and_block_reuse(self) -> None:
         with tempfile.TemporaryDirectory(dir=ROOT / "tmp") as tmp:
@@ -559,8 +559,8 @@ class Vs2VerificationPerformanceTests(unittest.TestCase):
             end_fingerprint = build_source_fingerprint(ROOT, family="vs2_local_range")
             start_fingerprint = json.loads(json.dumps(end_fingerprint))
             start_fingerprint["runtime"]["image_identities"] = {
-                vs2_local_range.POSTGRES_IMAGE: {"available": False},
-                vs2_local_range.OPA_IMAGE: {"available": False},
+                image: {"available": False}
+                for image in vs2_verification_metadata.VERIFICATION_IMAGES
             }
             start_fingerprint["environment_digest"] = "cold-cache-before-pull"
             payload = {
