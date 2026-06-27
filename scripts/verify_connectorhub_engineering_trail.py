@@ -16,7 +16,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md"
 MATRIX_PATH = ROOT / "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_MATRIX.csv"
-AGGREGATE_REPORT_PATH = ROOT / "reports/scenario/connector-contract-adapter-2026-06-23.json"
+CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR = ROOT / "reports/scenario/connector-contract-adapter"
+AGGREGATE_REPORT_PATH = CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR / "aggregate-2026-06-23.json"
+COMPACT_REPORT_MANIFEST_PATH = CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR / "manifest-2026-06-23.json"
+COMPACT_SHARED_EVIDENCE_PATH = CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR / "shared-evidence-2026-06-23.json"
 HUMAN_GATE_READINESS_REPORT_PATH = ROOT / "reports/scenario/connectorhub-human-gate-readiness-2026-06-24.json"
 HUMAN_GATE_NEXT_REPORT_PATH = ROOT / "reports/scenario/connectorhub-human-gate-next-2026-06-24.json"
 HUMAN_GATE_VALIDATION_HANDOFF_PATH = (
@@ -409,6 +412,10 @@ EXPECTED_MATRIX_TEXT_BY_SCENARIO = {
 
 
 def _expected_ai_evidence_required(scenario_id: str) -> str:
+    return f"reports/scenario/connector-contract-adapter/scenarios/{scenario_id}.json"
+
+
+def _raw_ai_report_path(scenario_id: str) -> str:
     return f"reports/scenario/connector-contract-adapter-{scenario_id.lower()}-2026-06-23.json"
 
 
@@ -1480,7 +1487,7 @@ EXPECTED_H04_LOCAL_BASELINE_PREFLIGHT_COMMAND_PLAN = [
             "evidence until H04/H07 human proof exists."
         ),
         "expected_report_paths": [
-            "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
         ],
         "expected_report_count": 1,
         "review_input_only": True,
@@ -1501,7 +1508,7 @@ EXPECTED_H04_REQUIRED_DELTA_PREFLIGHT_TRACE = [
         "local_comparison_report_paths": [
             "reports/security/vs2-local-security-proof.json",
             "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
-            "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
         ],
         "missing_production_like_evidence": (
             "Production-like topology identifier and trusted RequestContext transcript."
@@ -1540,7 +1547,7 @@ EXPECTED_H04_REQUIRED_DELTA_PREFLIGHT_TRACE = [
         "local_comparison_report_paths": [
             "reports/security/vs2-local-security-proof.json",
             "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
-            "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
         ],
         "missing_production_like_evidence": (
             "Backup/restore evidence and audit-integrity report from the reviewed environment."
@@ -1598,7 +1605,7 @@ EXPECTED_H04_LOCAL_BASELINE_REPORT_FACTS = {
         "schema_version": "cs.vs2_local_range.v1",
         "status": "passed",
     },
-    "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json": {
+    "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json": {
         "schema_version": "cs.cli.v0",
         "status": "success",
         "command": "cornerstone scenario verify connector-contract-adapter",
@@ -6612,7 +6619,7 @@ EXPECTED_CONTRACT_DELIVERY_LOOP_STEPS = [
 
 EXPECTED_CONTRACT_PACKAGE_REFRESH_SEQUENCE = [
     "1. Regenerate AI-owned per-scenario reports with filtered `cornerstone scenario verify connector-contract-adapter --scenario <CS-CH-###> --json --output <matrix evidence_required>` commands and gate each report with `cornerstone scenario gate <report> --json`.",
-    "2. Regenerate the aggregate report with `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json` and gate it.",
+    "2. Regenerate the aggregate report with `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json` and gate it.",
     "3. Regenerate the pinned human-gate package/field-ref-contract/evidence-packet-contract/evidence-packet-file-contract/evidence-packet-scaffold/evidence-packet-validation/evidence-packet-record-draft/preflight-bundle/readiness/next/validation-handoff artifacts, scenario delivery-unit manifest, and engineering-trail manifest with `make generate-connectorhub-engineering-trail-manifest`.",
     "4. Verify the trail with `make verify-connectorhub-engineering-trail`.",
 ]
@@ -7396,7 +7403,7 @@ def _focused_report_delivery_facts(report_path: Path) -> dict[str, object]:
             "focused_report_failure_analysis_not_applicable": False,
             "focused_report_readiness_dimension_counts": {},
         }
-    payload = json.loads(report_path.read_text())
+    payload = _load_connector_contract_report(report_path)
     summary = payload.get("summary", {})
     scenario_results = payload.get("scenario_results") or []
     result = scenario_results[0] if len(scenario_results) == 1 and isinstance(scenario_results[0], dict) else {}
@@ -16154,7 +16161,7 @@ def _expected_contract_proof_commands(sorted_ai_pass_rows: list[dict[str, str]])
     ]
     commands.append(
         "cornerstone scenario verify connector-contract-adapter "
-        "--json --output reports/scenario/connector-contract-adapter-2026-06-23.json"
+        "--json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json"
     )
     return commands
 
@@ -16168,13 +16175,13 @@ def _expected_makefile_replay_commands(sorted_ai_pass_rows: list[dict[str, str]]
     ]
     for row in sorted_ai_pass_rows:
         scenario_id = row["scenario_id"]
-        evidence_required = row["evidence_required"]
+        raw_report = _raw_ai_report_path(scenario_id)
         commands.append(
             'PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter '
-            f"--scenario {scenario_id} --json --output {evidence_required}"
+            f"--scenario {scenario_id} --json --output {raw_report}"
         )
         commands.append(
-            f'PATH="$(PWD):$$PATH" cornerstone scenario gate {evidence_required} --json'
+            f'PATH="$(PWD):$$PATH" cornerstone scenario gate {raw_report} --json'
         )
     commands.extend(
         [
@@ -16182,6 +16189,12 @@ def _expected_makefile_replay_commands(sorted_ai_pass_rows: list[dict[str, str]]
             "--output reports/scenario/connector-contract-adapter-2026-06-23.json",
             'PATH="$(PWD):$$PATH" cornerstone scenario gate '
             "reports/scenario/connector-contract-adapter-2026-06-23.json --json",
+            "python3 scripts/compact_connectorhub_reports.py --delete-sources",
+            'PATH="$(PWD):$$PATH" cornerstone scenario gate '
+            "reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json --json",
+            "for report in reports/scenario/connector-contract-adapter/scenarios/CS-CH-*.json; do \\",
+            'PATH="$(PWD):$$PATH" cornerstone scenario gate "$$report" --json; \\',
+            "done",
             "python3 -m unittest tests.scenario.test_connectorhub_cli",
         ]
     )
@@ -16199,7 +16212,7 @@ def _makefile_target_commands(makefile_text: str, target: str) -> list[str] | No
                     break
                 if not next_line.startswith("\t"):
                     break
-                commands.append(next_line[1:])
+                commands.append(next_line[1:].lstrip("\t"))
             return commands
     return None
 
@@ -21948,6 +21961,72 @@ def _line_count(path: Path) -> int:
         return sum(1 for _ in file)
 
 
+def _canonical_json_sha256(payload: object) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _load_connector_contract_report(
+    report_path: Path,
+    errors: list[str] | None = None,
+    label: str = "connector report",
+) -> dict[str, object]:
+    report = json.loads(report_path.read_text())
+    if not isinstance(report, dict):
+        if errors is not None:
+            errors.append(f"{label} must be a JSON object: {report_path.relative_to(ROOT)}")
+        return {}
+    if report.get("compact_evidence_layout") != "content_addressed_shared_v1":
+        return report
+
+    shared_ref = report.get("shared_evidence_ref")
+    if not isinstance(shared_ref, dict):
+        if errors is not None:
+            errors.append(f"{label} compact report missing shared_evidence_ref")
+        return report
+    shared_path_value = shared_ref.get("path")
+    if not isinstance(shared_path_value, str) or not shared_path_value:
+        if errors is not None:
+            errors.append(f"{label} compact report shared_evidence_ref.path missing")
+        return report
+    shared_path = (ROOT / shared_path_value).resolve()
+    if not shared_path.exists():
+        if errors is not None:
+            errors.append(f"{label} compact shared evidence missing: {shared_path_value}")
+        return report
+    actual_shared_sha = _sha256(shared_path)
+    expected_shared_sha = shared_ref.get("sha256")
+    if expected_shared_sha != actual_shared_sha and errors is not None:
+        errors.append(
+            f"{label} compact shared evidence sha256 expected {expected_shared_sha}, "
+            f"found {actual_shared_sha}"
+        )
+    shared_payload = json.loads(shared_path.read_text())
+    if not isinstance(shared_payload, dict):
+        if errors is not None:
+            errors.append(f"{label} compact shared evidence must be a JSON object")
+        return report
+    sections = shared_payload.get("sections")
+    if not isinstance(sections, dict):
+        if errors is not None:
+            errors.append(f"{label} compact shared evidence missing sections")
+        return report
+    section_refs = shared_ref.get("sections") if isinstance(shared_ref.get("sections"), dict) else {}
+    expanded = dict(report)
+    for section_name, section_payload in sections.items():
+        expanded[section_name] = section_payload
+        expected_section_ref = section_refs.get(section_name) if isinstance(section_refs, dict) else None
+        if isinstance(expected_section_ref, dict):
+            expected_section_sha = expected_section_ref.get("sha256")
+            actual_section_sha = _canonical_json_sha256(section_payload)
+            if expected_section_sha != actual_section_sha and errors is not None:
+                errors.append(
+                    f"{label} compact section {section_name} sha256 expected "
+                    f"{expected_section_sha}, found {actual_section_sha}"
+                )
+    return expanded
+
+
 def _validate_source_inputs(errors: list[str], index_text: str) -> None:
     for token in SOURCE_RECONCILIATION_TOKENS:
         if token not in index_text:
@@ -22072,14 +22151,17 @@ def _validate_exact_artifact_sets(errors: list[str], matrix_rows: list[dict[str,
 
     expected_focused_reports = {ROOT / row.get("evidence_required", "") for row in ai_rows}
     observed_focused_reports = set(
-        (ROOT / "reports/scenario").glob("connector-contract-adapter-cs-ch-[0-9][0-9][0-9]-*.json")
+        (CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR / "scenarios").glob("CS-CH-[0-9][0-9][0-9].json")
     )
 
-    observed_aggregate_reports = {
-        path
-        for path in (ROOT / "reports/scenario").glob("connector-contract-adapter-*.json")
-        if re.fullmatch(r"connector-contract-adapter-\d{4}-\d{2}-\d{2}\.json", path.name)
-    }
+    observed_aggregate_reports = set(CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR.glob("aggregate-*.json"))
+    observed_compact_manifests = set(CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR.glob("manifest-*.json"))
+    observed_compact_shared_evidence = set(
+        CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR.glob("shared-evidence-*.json")
+    )
+    observed_stale_flat_reports = set(
+        (ROOT / "reports/scenario").glob("connector-contract-adapter*.json")
+    )
     observed_manifests = set(
         (ROOT / "reports/scenario").glob("connectorhub-engineering-trail-manifest-*.json")
     )
@@ -22131,7 +22213,8 @@ def _validate_exact_artifact_sets(errors: list[str], matrix_rows: list[dict[str,
     artifact_sets = [
         ("AI result docs", expected_ai_docs, observed_ai_docs),
         ("human templates", expected_human_templates, observed_human_templates),
-        ("focused JSON reports", expected_focused_reports, observed_focused_reports),
+        ("compact focused evidence envelopes", expected_focused_reports, observed_focused_reports),
+        ("stale flat connector-contract-adapter reports", set(), observed_stale_flat_reports),
         ("human package JSON reports", expected_human_package_reports, observed_human_package_reports),
         ("human next-selector JSON reports", {HUMAN_GATE_NEXT_REPORT_PATH}, observed_human_next_reports),
         (
@@ -22185,6 +22268,12 @@ def _validate_exact_artifact_sets(errors: list[str], matrix_rows: list[dict[str,
             observed_human_blank_validation_reports,
         ),
         ("aggregate JSON reports", {AGGREGATE_REPORT_PATH}, observed_aggregate_reports),
+        ("compact evidence manifests", {COMPACT_REPORT_MANIFEST_PATH}, observed_compact_manifests),
+        (
+            "compact shared evidence reports",
+            {COMPACT_SHARED_EVIDENCE_PATH},
+            observed_compact_shared_evidence,
+        ),
         ("engineering trail manifests", {ENGINEERING_TRAIL_MANIFEST}, observed_manifests),
         (
             "scenario delivery-unit manifests",
@@ -22327,7 +22416,11 @@ def _validate_ai_evidence_report(
     if stale_hits:
         errors.append(f"{scenario_id} matrix evidence report has stale aggregate metadata: {', '.join(stale_hits[:5])}")
     try:
-        report = json.loads(report_text)
+        report = _load_connector_contract_report(
+            report_path,
+            errors,
+            f"{scenario_id} matrix evidence",
+        )
     except json.JSONDecodeError as error:
         errors.append(f"{scenario_id} matrix evidence report is not valid JSON: {error}")
         return
@@ -29559,6 +29652,7 @@ def _validate_report_envelope(
             f"{label} output_path expected {expected_output_path}, found {report.get('output_path')}"
         )
     expected_output_arg = expected_report_path.resolve().relative_to(ROOT.resolve()).as_posix()
+    compact_report = report.get("compact_evidence_layout") == "content_addressed_shared_v1"
     transcript = report.get("self_command_transcript")
     if not isinstance(transcript, dict):
         errors.append(f"{label} self_command_transcript must be present")
@@ -29574,7 +29668,20 @@ def _validate_report_envelope(
                 errors.append(f"{label} self_command_transcript command missing token: {token}")
         if "--output" not in command:
             errors.append(f"{label} self_command_transcript command missing token: --output")
-        if expected_output_arg not in command:
+        if compact_report:
+            source_report = report.get("source_report")
+            if not isinstance(source_report, dict):
+                errors.append(f"{label} compact report missing source_report")
+            else:
+                source_path = source_report.get("path")
+                if not isinstance(source_path, str) or not source_path:
+                    errors.append(f"{label} compact source_report.path missing")
+                elif source_path not in command:
+                    errors.append(
+                        f"{label} compact self_command_transcript command missing source output path: "
+                        f"{source_path}"
+                    )
+        elif expected_output_arg not in command:
             errors.append(
                 f"{label} self_command_transcript command missing output path: {expected_output_arg}"
             )
@@ -29784,7 +29891,11 @@ def main() -> int:
         aggregate = {}
         aggregate_git_commit = None
     else:
-        aggregate = json.loads(AGGREGATE_REPORT_PATH.read_text())
+        aggregate = _load_connector_contract_report(
+            AGGREGATE_REPORT_PATH,
+            errors,
+            "aggregate connector report",
+        )
         aggregate_git_commit = _validate_report_envelope(
             errors,
             "aggregate connector report",
@@ -31210,7 +31321,7 @@ def main() -> int:
             "Acceptance Evidence Packet",
             "reject conditions",
             "full matrix row context",
-            "reports/scenario/connector-contract-adapter-2026-06-23.json",
+            "reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json",
             "reports/scenario/connectorhub-engineering-trail-manifest-2026-06-24.json",
             "reports/scenario/connectorhub-scenario-delivery-unit-manifest-2026-06-24.json",
             "scripts/verify_connectorhub_engineering_trail.py",

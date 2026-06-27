@@ -26,14 +26,14 @@
 
 | ID | Type | Status | Evidence | Notes |
 |---|---|---|---|---|
-| CS-CH-012 | MUST_PASS | PASS | `reports/scenario/connector-contract-adapter-cs-ch-012-2026-06-23.json` | Connector EvidenceRef metadata is promoted only through a normal Evidence Bundle that links Artifact, Delivery, Setup Result, Source Policy, EvidenceRef, query/search snapshot, Claim, policy, and audit refs; EvidenceRef-only and zero-evidence approval paths are denied. |
+| CS-CH-012 | MUST_PASS | PASS | `reports/scenario/connector-contract-adapter/scenarios/CS-CH-012.json` | Connector EvidenceRef metadata is promoted only through a normal Evidence Bundle that links Artifact, Delivery, Setup Result, Source Policy, EvidenceRef, query/search snapshot, Claim, policy, and audit refs; EvidenceRef-only and zero-evidence approval paths are denied. |
 
 ## Evidence Summary
 
 Filtered report:
 
 ```text
-reports/scenario/connector-contract-adapter-cs-ch-012-2026-06-23.json
+reports/scenario/connector-contract-adapter/scenarios/CS-CH-012.json
 status=success
 scenario_count=1
 pass=1
@@ -52,7 +52,7 @@ unsupported_claim_id=claim_1b11f4fc4037577f
 Unfiltered report:
 
 ```text
-reports/scenario/connector-contract-adapter-2026-06-23.json
+reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json
 status=success
 scenario_count=40
 pass=40
@@ -111,8 +111,8 @@ EvidenceRef-only bundle creation is explicitly denied because EvidenceRef metada
 | `python3 -m compileall packages/cornerstone_cli` | PASS |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connector_evidence_bundle_promotes_evidenceref_metadata_cs_ch_012` | PASS |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_scenario_list_and_filtered_verify` | PASS |
-| `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-012 --json --output reports/scenario/connector-contract-adapter-cs-ch-012-2026-06-23.json` | PASS; report status `success`, 1 PASS, 0 blocking |
-| `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json` | PASS; report status `success`, 40 PASS, 0 blocking |
+| `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-012 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-012.json` | PASS; report status `success`, 1 PASS, 0 blocking |
+| `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json` | PASS; report status `success`, 40 PASS, 0 blocking |
 | `make verify-connector-contract-adapter` | PASS; full gate status `success`, 40 PASS, 0 blocking, Connector Hub unittest suite 21 tests OK |
 
 ## Proof Surface
@@ -125,7 +125,7 @@ EvidenceRef-only bundle creation is explicitly denied because EvidenceRef metada
 - Product value: `CS-CH-012` advances Connector Hub adoption in CornerStone by proving `Promote EvidenceRef metadata into an Evidence Bundle` as a user-visible connected-source capability inside one CornerStone product, not as a separate ConnectorHub surface.
 - Domain correctness: the accepted outcome is `Evidence Bundle includes Artifact Delivery Setup Result Source Policy EvidenceRef query and audit refs`; anything outside that observable behavior remains outside this scenario's PASS claim.
 - Architecture: implementation stays behind native `cornerstone connector ...` and `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-012` paths, preserving Product / Archive / Connector / Policy / Evidence / Audit boundaries.
-- Data contracts: the result is bound to matrix row `CS-CH-012`, phase `CH-1`, related requirements `IR-06;IR-17`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-012-2026-06-23.json` rather than informal assistant confidence.
+- Data contracts: the result is bound to matrix row `CS-CH-012`, phase `CH-1`, related requirements `IR-06;IR-17`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-012.json` rather than informal assistant confidence.
 - Reliability: replayable local fixture CLI verification and durable local state serve as the acceptance surface for this independent delivery unit.
 - Security: provider credentials, raw provider payloads, unauthorized provider calls, live-provider readiness, human-acceptance, and production-readiness claims remain excluded unless explicitly evidenced elsewhere.
 - Observability: evidence refs, audit refs, negative counters, filtered scenario reports, and the aggregate connector scenario report are the trace surfaces for review.
@@ -138,8 +138,8 @@ EvidenceRef-only bundle creation is explicitly denied because EvidenceRef metada
 
 - Research perspectives: senior product/domain, architecture/data-contract, reliability/security, observability/performance/testability, and maintainability/migration reviewers converged on `CS-CH-012` as the independent delivery unit for `Promote EvidenceRef metadata into an Evidence Bundle`.
 - Implementation approach: use `Evidence assembly and claim creation tests` against matrix row `CS-CH-012`, preserving `proof_surface=local_fixture` and `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`.
-- Smallest complete solution: deliver `Evidence Bundle includes Artifact Delivery Setup Result Source Policy EvidenceRef query and audit refs` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-012-2026-06-23.json` as the acceptance record.
-- Refactor and hardening: `CS-CH-012` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter-cs-ch-012-2026-06-23.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
+- Smallest complete solution: deliver `Evidence Bundle includes Artifact Delivery Setup Result Source Policy EvidenceRef query and audit refs` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-012.json` as the acceptance record.
+- Refactor and hardening: `CS-CH-012` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter/scenarios/CS-CH-012.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
 - Verification result: `CS-CH-012` is recorded as `PASS` only on `local_fixture` evidence; live-provider, human-acceptance, and production claims remain outside this result unless the claim boundary explicitly allows them.
 - Documented result: this report records the scenario outcome, evidence path, proof surface, decision trail, lifecycle trail, and out-of-scope boundary before the next scenario is treated as complete.
 - ConnectorHub adoption contribution: it turns `EvidenceRef promotion into CornerStone Evidence Bundle` into the CornerStone adoption surface `Durable evidence archive policy audit and safety guardrails`, keeping provider internals behind ConnectorPort/evidence/audit/policy boundaries and preserving the local proof boundary.

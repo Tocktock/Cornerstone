@@ -1593,7 +1593,7 @@ Senior developer perspectives folded into the first implementation:
 - Untrusted-content review command: `cornerstone connector untrusted-content review --delivery-receipt-id <delivery_receipt_id> --json`
 - Upgrade command: `cornerstone connector upgrade plan --contract-id ccon_project_alpha_github --target-provider-pack-id local_source_control_readonly_alt.v1 --json`
 - Product-surface command: `cornerstone connector product-surface audit --json`
-- Report-lint command: `cornerstone connector report-lint --report reports/scenario/connector-contract-adapter-2026-06-23.json --json`
+- Report-lint command: `cornerstone connector report-lint --report reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json --json`
 - Audit-correlation command: `cornerstone connector audit correlate --json`
 - Human-gate package command: `cornerstone connector human-gate package --scenario <CS-CH-H01..CS-CH-H07> --json`
 - Human-gate package artifact command: `cornerstone connector human-gate package --scenario <CS-CH-H01..CS-CH-H07> --json --output reports/scenario/connectorhub-human-gate-package-<lower-scenario-id>-2026-06-24.json`
@@ -1668,7 +1668,7 @@ The per-scenario result document and JSON report are the acceptance record. The 
 ### Package Refresh Sequence
 
 1. Regenerate AI-owned per-scenario reports with filtered `cornerstone scenario verify connector-contract-adapter --scenario <CS-CH-###> --json --output <matrix evidence_required>` commands and gate each report with `cornerstone scenario gate <report> --json`.
-2. Regenerate the aggregate report with `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json` and gate it.
+2. Regenerate the aggregate report with `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json` and gate it.
 3. Regenerate the pinned human-gate package/field-ref-contract/evidence-packet-contract/evidence-packet-file-contract/evidence-packet-scaffold/evidence-packet-validation/evidence-packet-record-draft/preflight-bundle/readiness/next/validation-handoff artifacts, scenario delivery-unit manifest, and engineering-trail manifest with `make generate-connectorhub-engineering-trail-manifest`.
 4. Verify the trail with `make verify-connectorhub-engineering-trail`.
 
@@ -1690,45 +1690,45 @@ Unfiltered `connector-contract-adapter` verification is expected to pass the ver
 The independent delivery proof commands are:
 
 ```text
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-001 --json --output reports/scenario/connector-contract-adapter-cs-ch-001-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-002 --json --output reports/scenario/connector-contract-adapter-cs-ch-002-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-003 --json --output reports/scenario/connector-contract-adapter-cs-ch-003-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-004 --json --output reports/scenario/connector-contract-adapter-cs-ch-004-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-005 --json --output reports/scenario/connector-contract-adapter-cs-ch-005-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-006 --json --output reports/scenario/connector-contract-adapter-cs-ch-006-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-007 --json --output reports/scenario/connector-contract-adapter-cs-ch-007-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-008 --json --output reports/scenario/connector-contract-adapter-cs-ch-008-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-009 --json --output reports/scenario/connector-contract-adapter-cs-ch-009-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-010 --json --output reports/scenario/connector-contract-adapter-cs-ch-010-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-011 --json --output reports/scenario/connector-contract-adapter-cs-ch-011-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-012 --json --output reports/scenario/connector-contract-adapter-cs-ch-012-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-013 --json --output reports/scenario/connector-contract-adapter-cs-ch-013-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-014 --json --output reports/scenario/connector-contract-adapter-cs-ch-014-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-015 --json --output reports/scenario/connector-contract-adapter-cs-ch-015-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-016 --json --output reports/scenario/connector-contract-adapter-cs-ch-016-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-017 --json --output reports/scenario/connector-contract-adapter-cs-ch-017-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-018 --json --output reports/scenario/connector-contract-adapter-cs-ch-018-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-019 --json --output reports/scenario/connector-contract-adapter-cs-ch-019-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-020 --json --output reports/scenario/connector-contract-adapter-cs-ch-020-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-021 --json --output reports/scenario/connector-contract-adapter-cs-ch-021-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-022 --json --output reports/scenario/connector-contract-adapter-cs-ch-022-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-023 --json --output reports/scenario/connector-contract-adapter-cs-ch-023-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-024 --json --output reports/scenario/connector-contract-adapter-cs-ch-024-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-025 --json --output reports/scenario/connector-contract-adapter-cs-ch-025-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-026 --json --output reports/scenario/connector-contract-adapter-cs-ch-026-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-027 --json --output reports/scenario/connector-contract-adapter-cs-ch-027-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-028 --json --output reports/scenario/connector-contract-adapter-cs-ch-028-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-029 --json --output reports/scenario/connector-contract-adapter-cs-ch-029-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-030 --json --output reports/scenario/connector-contract-adapter-cs-ch-030-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-031 --json --output reports/scenario/connector-contract-adapter-cs-ch-031-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-032 --json --output reports/scenario/connector-contract-adapter-cs-ch-032-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-033 --json --output reports/scenario/connector-contract-adapter-cs-ch-033-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-034 --json --output reports/scenario/connector-contract-adapter-cs-ch-034-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-035 --json --output reports/scenario/connector-contract-adapter-cs-ch-035-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json --output reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-037 --json --output reports/scenario/connector-contract-adapter-cs-ch-037-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-038 --json --output reports/scenario/connector-contract-adapter-cs-ch-038-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-039 --json --output reports/scenario/connector-contract-adapter-cs-ch-039-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-040 --json --output reports/scenario/connector-contract-adapter-cs-ch-040-2026-06-23.json
-cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-001 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-001.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-002 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-002.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-003 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-003.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-004 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-004.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-005 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-005.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-006 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-006.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-007 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-007.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-008 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-008.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-009 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-009.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-010 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-010.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-011 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-011.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-012 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-012.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-013 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-013.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-014 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-014.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-015 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-015.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-016 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-016.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-017 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-017.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-018 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-018.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-019 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-019.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-020 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-020.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-021 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-021.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-022 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-022.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-023 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-023.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-024 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-024.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-025 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-025.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-026 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-026.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-027 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-027.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-028 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-028.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-029 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-029.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-030 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-030.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-031 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-031.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-032 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-032.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-033 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-033.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-034 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-034.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-035 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-035.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-037 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-037.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-038 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-038.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-039 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-039.json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-040 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-040.json
+cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json
 ```

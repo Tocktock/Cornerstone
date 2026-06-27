@@ -1,6 +1,6 @@
 {
   "audit_refs": [
-    "audit:audit_acaa9b2a53ad406d"
+    "audit:audit_092c69d52dcfc968"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate evidence-packet-contract",
@@ -11,7 +11,7 @@
       "no_sensitive_material"
     ],
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T13:35:28.759831Z",
+    "created_at": "2026-06-27T14:04:16.547782Z",
     "evidence_packet_contract": {
       "allowed_redaction_statuses": [
         "redacted",
@@ -60,7 +60,7 @@
       "status": "operator_preparation_only",
       "validation_scope": "evidence_packet_manifest_shape_only"
     },
-    "evidence_packet_contract_report_id": "cshuman_evidencepacket_98b5f61f12cd4e38",
+    "evidence_packet_contract_report_id": "cshuman_evidencepacket_428a046ad5966b76",
     "evidence_packet_contract_schema_version": "cs.connector_human_gate_evidence_packet_contract.v1",
     "evidence_packet_manifest_values_persisted_by_validator": false,
     "evidence_ref_required": true,
@@ -123,12 +123,12 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_evidence_packet_contract:cshuman_evidencepacket_98b5f61f12cd4e38"
+    "connector_human_gate_evidence_packet_contract:cshuman_evidencepacket_428a046ad5966b76"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_evidence_packet_contract_report_id": "cshuman_evidencepacket_98b5f61f12cd4e38",
-    "git_commit": "cb682e9"
+    "connector_human_gate_evidence_packet_contract_report_id": "cshuman_evidencepacket_428a046ad5966b76",
+    "git_commit": "97ba4ca"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -146,7 +146,7 @@
     ],
     "commands_executed_by_evidence_packet_contract": 0,
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "evidence_packet_contract_report_id": "cshuman_evidencepacket_98b5f61f12cd4e38",
+    "evidence_packet_contract_report_id": "cshuman_evidencepacket_428a046ad5966b76",
     "evidence_packet_contract_schema_version": "cs.connector_human_gate_evidence_packet_contract.v1",
     "evidence_packet_manifest_values_persisted_by_validator": false,
     "evidence_ref_required": true,

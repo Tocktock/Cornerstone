@@ -186,7 +186,7 @@ The H04 package includes a `local_baseline_review_inputs` object for operator co
 - `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json`
 - `reports/network/vs2-egress-proof.json`
 - `reports/security/vs2-local-range.json`
-- `reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json`
+- `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json`
 
 These files are review inputs only. They are not sufficient for H04 acceptance and cannot prove production-like RequestContext, PostgreSQL/RLS, OPA, egress, backup/restore, or audit readiness. The reviewer must attach fresh production-like evidence in the Acceptance Evidence Packet below.
 
@@ -238,7 +238,7 @@ Current local baseline reports:
 | `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json` | `success` | 93 | `976e21f4f0142d788e06885a32d57a3fbb0e1672dc3b4dd7759afd57148a994b` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 | `reports/network/vs2-egress-proof.json` | `passed` | n/a | `26505a8b3db9d44ad99657a35cf38e4cc4bcd8dffd3e145fcb6b49a29fdde9ec` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 | `reports/security/vs2-local-range.json` | `passed` | n/a | `e6257b6076598b1376573c649d2b8c59b205ae2b99787cc44c368431675c9eff` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
-| `reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json` | `success` | 1 | `3085bcf769aedcd00ba1b1a6a3722bf1daeb2ffe58022c78c38b423cddf0bea0` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
+| `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` | `success` | 1 | `8b91ccb9a307c8783ed28ca3182e80c0eab69b13e12d67c826523eec4f0d18a8` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 
 Required human delta:
 
@@ -276,7 +276,7 @@ Each row below is review input only: `review_input_only=true`, `acceptance_suffi
 |---:|---|---|---|---|---|
 | 1 | `refresh_local_vs2_baseline_inputs` | Refresh the current local VS2 proof inputs before H04 review without treating local proof as production-like acceptance. | `cornerstone security vs2-local-proof --json` | `reports/security/vs2-local-security-proof.json`; `reports/network/vs2-egress-proof.json`; `reports/security/vs2-local-range.json` | `claim_boundary=h04_local_baseline_preflight_is_review_input_not_human_acceptance` |
 | 2 | `refresh_vs2_scenario_report` | Refresh the local VS2 scenario report that H04 reviewers compare against the production-like environment transcript. | `cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json` | `reports/security/vs2-local-security-proof.json`; `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json` | `claim_boundary=h04_local_baseline_preflight_is_review_input_not_human_acceptance` |
-| 3 | `refresh_connectorhub_dependency_report` | Refresh the ConnectorHub CS-CH-036 dependency report that remains local fixture evidence until H04/H07 human proof exists. | `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json` | `reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json` | `claim_boundary=h04_local_baseline_preflight_is_review_input_not_human_acceptance` |
+| 3 | `refresh_connectorhub_dependency_report` | Refresh the ConnectorHub CS-CH-036 dependency report that remains local fixture evidence until H04/H07 human proof exists. | `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json` | `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` | `claim_boundary=h04_local_baseline_preflight_is_review_input_not_human_acceptance` |
 
 Current local preflight bundle:
 

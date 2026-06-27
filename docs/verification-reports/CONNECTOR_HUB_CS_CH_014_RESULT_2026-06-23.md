@@ -25,14 +25,14 @@
 
 | ID | Type | Status | Evidence | Notes |
 |---|---|---|---|---|
-| CS-CH-014 | REGRESSION_GUARD | PASS | `reports/scenario/connector-contract-adapter-cs-ch-014-2026-06-23.json` | Untrusted connector content can be archived, searched, quoted, and cited only as evidence; prompt/tool/action/egress/memory/policy manipulation attempts are blocked with zero side effects and audit refs. |
+| CS-CH-014 | REGRESSION_GUARD | PASS | `reports/scenario/connector-contract-adapter/scenarios/CS-CH-014.json` | Untrusted connector content can be archived, searched, quoted, and cited only as evidence; prompt/tool/action/egress/memory/policy manipulation attempts are blocked with zero side effects and audit refs. |
 
 ## Evidence Summary
 
 Filtered report:
 
 ```text
-reports/scenario/connector-contract-adapter-cs-ch-014-2026-06-23.json
+reports/scenario/connector-contract-adapter/scenarios/CS-CH-014.json
 status=success
 scenario_count=1
 pass=1
@@ -51,7 +51,7 @@ untrusted_memory_quarantine_id=memq_f91a388453478f13
 Unfiltered report:
 
 ```text
-reports/scenario/connector-contract-adapter-2026-06-23.json
+reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json
 status=success
 scenario_count=40
 pass=40
@@ -122,8 +122,8 @@ The scenario uses existing Product guardrails for the dependent surfaces: Agent 
 | `python3 -m compileall packages/cornerstone_cli` | PASS |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connector_untrusted_content_cannot_direct_agents_or_actions_cs_ch_014` | PASS |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_scenario_list_and_filtered_verify` | PASS |
-| `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-014 --json --output reports/scenario/connector-contract-adapter-cs-ch-014-2026-06-23.json` | PASS; report status `success`, 1 PASS, 0 blocking |
-| `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json` | PASS; report status `success`, 40 PASS, 0 blocking |
+| `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-014 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-014.json` | PASS; report status `success`, 1 PASS, 0 blocking |
+| `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json` | PASS; report status `success`, 40 PASS, 0 blocking |
 | `make verify-connector-contract-adapter` | PASS; full gate status `success`, 40 PASS, 0 blocking, Connector Hub unittest suite 21 tests OK |
 
 ## Proof Surface
@@ -136,7 +136,7 @@ The scenario uses existing Product guardrails for the dependent surfaces: Agent 
 - Product value: `CS-CH-014` advances Connector Hub adoption in CornerStone by proving `Untrusted connector content cannot direct agents or actions` as a user-visible connected-source capability inside one CornerStone product, not as a separate ConnectorHub surface.
 - Domain correctness: the accepted outcome is `Connector content remains untrusted evidence and cannot trigger authority tool action memory promotion policy override or egress`; anything outside that observable behavior remains outside this scenario's PASS claim.
 - Architecture: implementation stays behind native `cornerstone connector ...` and `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-014` paths, preserving Product / Archive / Connector / Policy / Evidence / Audit boundaries.
-- Data contracts: the result is bound to matrix row `CS-CH-014`, phase `CH-1`, related requirements `IR-10;IR-11;IR-18`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-014-2026-06-23.json` rather than informal assistant confidence.
+- Data contracts: the result is bound to matrix row `CS-CH-014`, phase `CH-1`, related requirements `IR-10;IR-11;IR-18`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-014.json` rather than informal assistant confidence.
 - Reliability: replayable local fixture CLI verification and durable local state serve as the acceptance surface for this independent delivery unit.
 - Security: provider credentials, raw provider payloads, unauthorized provider calls, live-provider readiness, human-acceptance, and production-readiness claims remain excluded unless explicitly evidenced elsewhere.
 - Observability: evidence refs, audit refs, negative counters, filtered scenario reports, and the aggregate connector scenario report are the trace surfaces for review.
@@ -149,8 +149,8 @@ The scenario uses existing Product guardrails for the dependent surfaces: Agent 
 
 - Research perspectives: senior product/domain, architecture/data-contract, reliability/security, observability/performance/testability, and maintainability/migration reviewers converged on `CS-CH-014` as the independent delivery unit for `Untrusted connector content cannot direct agents or actions`.
 - Implementation approach: use `Prompt-injection delivery review evidence-bundle claim agent memory and egress tests` against matrix row `CS-CH-014`, preserving `proof_surface=local_fixture` and `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`.
-- Smallest complete solution: deliver `Connector content remains untrusted evidence and cannot trigger authority tool action memory promotion policy override or egress` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-014-2026-06-23.json` as the acceptance record.
-- Refactor and hardening: `CS-CH-014` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter-cs-ch-014-2026-06-23.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
+- Smallest complete solution: deliver `Connector content remains untrusted evidence and cannot trigger authority tool action memory promotion policy override or egress` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-014.json` as the acceptance record.
+- Refactor and hardening: `CS-CH-014` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter/scenarios/CS-CH-014.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
 - Verification result: `CS-CH-014` is recorded as `PASS` only on `local_fixture` evidence; live-provider, human-acceptance, and production claims remain outside this result unless the claim boundary explicitly allows them.
 - Documented result: this report records the scenario outcome, evidence path, proof surface, decision trail, lifecycle trail, and out-of-scope boundary before the next scenario is treated as complete.
 - ConnectorHub adoption contribution: it turns `untrusted connector-content authority guard` into the CornerStone adoption surface `Durable evidence archive policy audit and safety guardrails`, keeping provider internals behind ConnectorPort/evidence/audit/policy boundaries and preserving the local proof boundary.

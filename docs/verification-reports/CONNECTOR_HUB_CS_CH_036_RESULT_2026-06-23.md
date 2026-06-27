@@ -6,8 +6,8 @@
 - Type: `MUST_PASS`
 - Status: `PASS`
 - Proof surface: current reusable VS2 local security proof scoped to the CS-CH-036 egress rows, Docker internal-network topology, controlled provider sink, governed egress proxy, default-deny egress proof, local range report, filtered scenario gate, aggregate scenario gate, and focused CLI regression test.
-- Filtered report: `reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json`
-- Aggregate report: `reports/scenario/connector-contract-adapter-2026-06-23.json`
+- Filtered report: `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json`
+- Aggregate report: `reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json`
 - Last evidence refresh: 2026-06-25
 
 ## Scenario Result
@@ -41,14 +41,14 @@ python3 -m py_compile packages/cornerstone_cli/scenarios.py tests/scenario/test_
 cornerstone security vs2-local-proof --json
 cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json --output reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json
 python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_default_deny_egress_topology_cs_ch_036
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json --output reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json
-cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json --json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json
+cornerstone scenario gate reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json --json
 python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_scenario_list_and_filtered_verify
-cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json
-cornerstone scenario gate reports/scenario/connector-contract-adapter-2026-06-23.json --json
+cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json
+cornerstone scenario gate reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json --json
 ```
 
-Filtered report facts observed from `reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json`:
+Filtered report facts observed from `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json`:
 
 ```text
 status=success
@@ -155,7 +155,7 @@ egress_topology_production_topology_overclaimed=0
 - Product value: `CS-CH-036` advances Connector Hub adoption in CornerStone by proving `Enforce default-deny egress around ConnectorHub and tools` as a user-visible connected-source capability inside one CornerStone product, not as a separate ConnectorHub surface.
 - Domain correctness: the accepted outcome is `Unauthorized egress attempts are blocked and logged under current VS2 local topology; production network topology NOT_VERIFIED`; anything outside that observable behavior remains outside this scenario's PASS claim.
 - Architecture: implementation stays behind native `cornerstone connector ...` and `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036` paths, preserving Product / Archive / Connector / Policy / Evidence / Audit boundaries.
-- Data contracts: the result is bound to matrix row `CS-CH-036`, phase `CH-1`, related requirements `IR-10;IR-18`, `proof_surface=local_vs2_topology`, `claim_boundary=current reusable local VS2 topology evidence only; no production network readiness claim`, and evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json` rather than informal assistant confidence.
+- Data contracts: the result is bound to matrix row `CS-CH-036`, phase `CH-1`, related requirements `IR-10;IR-18`, `proof_surface=local_vs2_topology`, `claim_boundary=current reusable local VS2 topology evidence only; no production network readiness claim`, and evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` rather than informal assistant confidence.
 - Reliability: the current reusable VS2 local topology proof and its source-fingerprint guard serve as the acceptance surface for this independent delivery unit.
 - Security: provider credentials, raw provider payloads, unauthorized provider calls, live-provider readiness, human-acceptance, and production-readiness claims remain excluded unless explicitly evidenced elsewhere.
 - Observability: evidence refs, audit refs, negative counters, filtered scenario reports, and the aggregate connector scenario report are the trace surfaces for review.
@@ -168,8 +168,8 @@ egress_topology_production_topology_overclaimed=0
 
 - Research perspectives: senior product/domain, architecture/data-contract, reliability/security, observability/performance/testability, and maintainability/migration reviewers converged on `CS-CH-036` as the independent delivery unit for `Enforce default-deny egress around ConnectorHub and tools`.
 - Implementation approach: use `Current reusable VS2 local proof with Docker internal-network boundary controlled provider sink governed proxy redirect DNS sandbox audit and no-secret checks` against matrix row `CS-CH-036`, preserving `proof_surface=local_vs2_topology` and `claim_boundary=current reusable local VS2 topology evidence only; no production network readiness claim`.
-- Smallest complete solution: deliver `Unauthorized egress attempts are blocked and logged under current VS2 local topology; production network topology NOT_VERIFIED` through the reusable local VS2 topology proof plus ConnectorHub scenario gating for the egress-specific row, with the evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json` as the acceptance record.
-- Refactor and hardening: `CS-CH-036` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_vs2_topology` guard, and claim-boundary guard `current reusable local VS2 topology evidence only; no production network readiness claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
+- Smallest complete solution: deliver `Unauthorized egress attempts are blocked and logged under current VS2 local topology; production network topology NOT_VERIFIED` through the reusable local VS2 topology proof plus ConnectorHub scenario gating for the egress-specific row, with the evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` as the acceptance record.
+- Refactor and hardening: `CS-CH-036` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_vs2_topology` guard, and claim-boundary guard `current reusable local VS2 topology evidence only; no production network readiness claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
 - Verification result: `CS-CH-036` is recorded as `PASS` only on `local_vs2_topology` evidence; live-provider, human-acceptance, and production claims remain outside this result unless the claim boundary explicitly allows them.
 - Documented result: this report records the scenario outcome, evidence path, proof surface, decision trail, lifecycle trail, and out-of-scope boundary before the next scenario is treated as complete.
 - ConnectorHub adoption contribution: it turns `default-deny egress around ConnectorHub and tools` into the CornerStone adoption surface `Durable evidence archive policy audit and safety guardrails`, keeping provider internals behind ConnectorPort/evidence/audit/policy boundaries and preserving the local proof boundary.

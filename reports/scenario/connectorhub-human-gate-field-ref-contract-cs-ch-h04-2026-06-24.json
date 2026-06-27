@@ -1,6 +1,6 @@
 {
   "audit_refs": [
-    "audit:audit_25db3cff78b84e98"
+    "audit:audit_4d878dce831ad8fb"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate field-ref-contract",
@@ -38,7 +38,7 @@
       ]
     },
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T13:35:26.994605Z",
+    "created_at": "2026-06-27T14:04:15.019067Z",
     "field_ref_contract": {
       "invalid_value_report_shape": "field_names_only",
       "raw_field_values_persisted_by_validator": false,
@@ -112,7 +112,7 @@
       "status": "operator_preparation_only",
       "validation_scope": "field_reference_shape_only"
     },
-    "field_ref_contract_report_id": "cshuman_fieldref_702555727d37e90c",
+    "field_ref_contract_report_id": "cshuman_fieldref_bd911881e6fa361e",
     "field_ref_contract_schema_version": "cs.connector_human_gate_field_ref_contract.v1",
     "final_verdict": "HUMAN_REQUIRED",
     "full_goal_completion_allowed": false,
@@ -169,12 +169,12 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_field_ref_contract:cshuman_fieldref_702555727d37e90c"
+    "connector_human_gate_field_ref_contract:cshuman_fieldref_bd911881e6fa361e"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_field_ref_contract_report_id": "cshuman_fieldref_702555727d37e90c",
-    "git_commit": "cb682e9"
+    "connector_human_gate_field_ref_contract_report_id": "cshuman_fieldref_bd911881e6fa361e",
+    "git_commit": "97ba4ca"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -188,7 +188,7 @@
     "commands_executed_by_field_ref_contract": 0,
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
     "external_mutations_executed_by_field_ref_contract": 0,
-    "field_ref_contract_report_id": "cshuman_fieldref_702555727d37e90c",
+    "field_ref_contract_report_id": "cshuman_fieldref_bd911881e6fa361e",
     "field_ref_contract_schema_version": "cs.connector_human_gate_field_ref_contract.v1",
     "final_verdict": "HUMAN_REQUIRED",
     "full_goal_completion_allowed": false,

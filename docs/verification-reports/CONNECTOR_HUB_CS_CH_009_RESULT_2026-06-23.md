@@ -26,14 +26,14 @@
 
 | ID | Type | Status | Evidence | Notes |
 |---|---|---|---|---|
-| CS-CH-009 | MUST_PASS | PASS | `reports/scenario/connector-contract-adapter-cs-ch-009-2026-06-23.json` | Transient Delivery failures retry with bounded backoff, poison Delivery reaches quarantine at the configured threshold with safe diagnostics, unrelated healthy Delivery still archives and acknowledges, and replay preserves failure evidence. |
+| CS-CH-009 | MUST_PASS | PASS | `reports/scenario/connector-contract-adapter/scenarios/CS-CH-009.json` | Transient Delivery failures retry with bounded backoff, poison Delivery reaches quarantine at the configured threshold with safe diagnostics, unrelated healthy Delivery still archives and acknowledges, and replay preserves failure evidence. |
 
 ## Evidence Summary
 
 Filtered report:
 
 ```text
-reports/scenario/connector-contract-adapter-cs-ch-009-2026-06-23.json
+reports/scenario/connector-contract-adapter/scenarios/CS-CH-009.json
 status=success
 scenario_count=1
 pass=1
@@ -48,7 +48,7 @@ state_dir=tmp/scenario/connector-contract-adapter-retry-82649
 Unfiltered report:
 
 ```text
-reports/scenario/connector-contract-adapter-2026-06-23.json
+reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json
 status=success
 scenario_count=40
 pass=40
@@ -123,7 +123,7 @@ This preserves CS-CH-007 and CS-CH-008 semantics: healthy deliveries still archi
 - Product value: `CS-CH-009` advances Connector Hub adoption in CornerStone by proving `Retry transient failures and quarantine poison deliveries` as a user-visible connected-source capability inside one CornerStone product, not as a separate ConnectorHub surface.
 - Domain correctness: the accepted outcome is `Bounded retry handles transient failures and poison deliveries enter quarantine safely`; anything outside that observable behavior remains outside this scenario's PASS claim.
 - Architecture: implementation stays behind native `cornerstone connector ...` and `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-009` paths, preserving Product / Archive / Connector / Policy / Evidence / Audit boundaries.
-- Data contracts: the result is bound to matrix row `CS-CH-009`, phase `CH-1`, related requirements `IR-07;IR-17`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-009-2026-06-23.json` rather than informal assistant confidence.
+- Data contracts: the result is bound to matrix row `CS-CH-009`, phase `CH-1`, related requirements `IR-07;IR-17`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-009.json` rather than informal assistant confidence.
 - Reliability: replayable local fixture CLI verification and durable local state serve as the acceptance surface for this independent delivery unit.
 - Security: provider credentials, raw provider payloads, unauthorized provider calls, live-provider readiness, human-acceptance, and production-readiness claims remain excluded unless explicitly evidenced elsewhere.
 - Observability: evidence refs, audit refs, negative counters, filtered scenario reports, and the aggregate connector scenario report are the trace surfaces for review.
@@ -136,8 +136,8 @@ This preserves CS-CH-007 and CS-CH-008 semantics: healthy deliveries still archi
 
 - Research perspectives: senior product/domain, architecture/data-contract, reliability/security, observability/performance/testability, and maintainability/migration reviewers converged on `CS-CH-009` as the independent delivery unit for `Retry transient failures and quarantine poison deliveries`.
 - Implementation approach: use `Retry clock and malformed payload tests` against matrix row `CS-CH-009`, preserving `proof_surface=local_fixture` and `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`.
-- Smallest complete solution: deliver `Bounded retry handles transient failures and poison deliveries enter quarantine safely` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-009-2026-06-23.json` as the acceptance record.
-- Refactor and hardening: `CS-CH-009` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter-cs-ch-009-2026-06-23.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
+- Smallest complete solution: deliver `Bounded retry handles transient failures and poison deliveries enter quarantine safely` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-009.json` as the acceptance record.
+- Refactor and hardening: `CS-CH-009` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter/scenarios/CS-CH-009.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
 - Verification result: `CS-CH-009` is recorded as `PASS` only on `local_fixture` evidence; live-provider, human-acceptance, and production claims remain outside this result unless the claim boundary explicitly allows them.
 - Documented result: this report records the scenario outcome, evidence path, proof surface, decision trail, lifecycle trail, and out-of-scope boundary before the next scenario is treated as complete.
 - ConnectorHub adoption contribution: it turns `bounded Delivery retry and quarantine` into the CornerStone adoption surface `Durable evidence archive policy audit and safety guardrails`, keeping provider internals behind ConnectorPort/evidence/audit/policy boundaries and preserving the local proof boundary.

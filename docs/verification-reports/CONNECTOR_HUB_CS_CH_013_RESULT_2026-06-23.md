@@ -25,14 +25,14 @@
 
 | ID | Type | Status | Evidence | Notes |
 |---|---|---|---|---|
-| CS-CH-013 | MUST_PASS | PASS | `reports/scenario/connector-contract-adapter-cs-ch-013-2026-06-23.json` | Temporary raw access is denied by default; declared grants are purpose-bound, human-approved, expiring, read-counted, redacted, scoped, revocable, audited, and exported only as metadata without raw content or reusable handles. |
+| CS-CH-013 | MUST_PASS | PASS | `reports/scenario/connector-contract-adapter/scenarios/CS-CH-013.json` | Temporary raw access is denied by default; declared grants are purpose-bound, human-approved, expiring, read-counted, redacted, scoped, revocable, audited, and exported only as metadata without raw content or reusable handles. |
 
 ## Evidence Summary
 
 Filtered report:
 
 ```text
-reports/scenario/connector-contract-adapter-cs-ch-013-2026-06-23.json
+reports/scenario/connector-contract-adapter/scenarios/CS-CH-013.json
 status=success
 scenario_count=1
 pass=1
@@ -49,7 +49,7 @@ raw_access_revoke_grant_id=crawgrant_9a8de0871b3abc91
 Unfiltered report:
 
 ```text
-reports/scenario/connector-contract-adapter-2026-06-23.json
+reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json
 status=success
 scenario_count=40
 pass=40
@@ -112,8 +112,8 @@ Reads decrement the durable grant counter and re-check expiry, exhaustion, and r
 | `python3 -m compileall packages/cornerstone_cli` | PASS |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connector_raw_access_is_denied_and_tightly_bounded_cs_ch_013` | PASS |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_scenario_list_and_filtered_verify` | PASS |
-| `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-013 --json --output reports/scenario/connector-contract-adapter-cs-ch-013-2026-06-23.json` | PASS; report status `success`, 1 PASS, 0 blocking |
-| `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json` | PASS; report status `success`, 40 PASS, 0 blocking |
+| `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-013 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-013.json` | PASS; report status `success`, 1 PASS, 0 blocking |
+| `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json` | PASS; report status `success`, 40 PASS, 0 blocking |
 | `make verify-connector-contract-adapter` | PASS; full gate status `success`, 40 PASS, 0 blocking, Connector Hub unittest suite 21 tests OK |
 
 ## Proof Surface
@@ -126,7 +126,7 @@ Reads decrement the durable grant counter and re-check expiry, exhaustion, and r
 - Product value: `CS-CH-013` advances Connector Hub adoption in CornerStone by proving `Temporary raw access is denied and tightly bounded` as a user-visible connected-source capability inside one CornerStone product, not as a separate ConnectorHub surface.
 - Domain correctness: the accepted outcome is `Default raw request is denied and any allowed grant is scoped expiring counted redacted and revocable`; anything outside that observable behavior remains outside this scenario's PASS claim.
 - Architecture: implementation stays behind native `cornerstone connector ...` and `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-013` paths, preserving Product / Archive / Connector / Policy / Evidence / Audit boundaries.
-- Data contracts: the result is bound to matrix row `CS-CH-013`, phase `CH-1`, related requirements `IR-09;IR-11`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-013-2026-06-23.json` rather than informal assistant confidence.
+- Data contracts: the result is bound to matrix row `CS-CH-013`, phase `CH-1`, related requirements `IR-09;IR-11`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-013.json` rather than informal assistant confidence.
 - Reliability: replayable local fixture CLI verification and durable local state serve as the acceptance surface for this independent delivery unit.
 - Security: provider credentials, raw provider payloads, unauthorized provider calls, live-provider readiness, human-acceptance, and production-readiness claims remain excluded unless explicitly evidenced elsewhere.
 - Observability: evidence refs, audit refs, negative counters, filtered scenario reports, and the aggregate connector scenario report are the trace surfaces for review.
@@ -139,8 +139,8 @@ Reads decrement the durable grant counter and re-check expiry, exhaustion, and r
 
 - Research perspectives: senior product/domain, architecture/data-contract, reliability/security, observability/performance/testability, and maintainability/migration reviewers converged on `CS-CH-013` as the independent delivery unit for `Temporary raw access is denied and tightly bounded`.
 - Implementation approach: use `Denial TTL max-read and revocation tests` against matrix row `CS-CH-013`, preserving `proof_surface=local_fixture` and `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`.
-- Smallest complete solution: deliver `Default raw request is denied and any allowed grant is scoped expiring counted redacted and revocable` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-013-2026-06-23.json` as the acceptance record.
-- Refactor and hardening: `CS-CH-013` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter-cs-ch-013-2026-06-23.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
+- Smallest complete solution: deliver `Default raw request is denied and any allowed grant is scoped expiring counted redacted and revocable` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-013.json` as the acceptance record.
+- Refactor and hardening: `CS-CH-013` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter/scenarios/CS-CH-013.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
 - Verification result: `CS-CH-013` is recorded as `PASS` only on `local_fixture` evidence; live-provider, human-acceptance, and production claims remain outside this result unless the claim boundary explicitly allows them.
 - Documented result: this report records the scenario outcome, evidence path, proof surface, decision trail, lifecycle trail, and out-of-scope boundary before the next scenario is treated as complete.
 - ConnectorHub adoption contribution: it turns `temporary scoped raw-access control` into the CornerStone adoption surface `Durable evidence archive policy audit and safety guardrails`, keeping provider internals behind ConnectorPort/evidence/audit/policy boundaries and preserving the local proof boundary.

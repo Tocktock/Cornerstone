@@ -1,13 +1,13 @@
 {
   "audit_refs": [
-    "audit:audit_15fb206ddec5754a"
+    "audit:audit_54552d19a74ba442"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate package",
   "connector_human_gate_package": {
     "approval_status": "pending",
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T13:35:26.194830Z",
+    "created_at": "2026-06-27T14:04:14.326769Z",
     "depends_on_human_gates": [
       "CS-CH-H04",
       "CS-CH-H07"
@@ -35,7 +35,7 @@
       "provider_mutations_executed_by_package": 0,
       "secret_material_read_by_package": false
     },
-    "package_id": "cshuman_897750ed96f75168",
+    "package_id": "cshuman_3b59934f259ab0a4",
     "proof_boundary": {
       "live_provider_read_verified": "HUMAN_REQUIRED",
       "live_provider_write_verified": "OUT_OF_SCOPE_READ_ONLY",
@@ -1054,12 +1054,12 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_package:cshuman_897750ed96f75168"
+    "connector_human_gate_package:cshuman_3b59934f259ab0a4"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_package_id": "cshuman_897750ed96f75168",
-    "git_commit": "cb682e9"
+    "connector_human_gate_package_id": "cshuman_3b59934f259ab0a4",
+    "git_commit": "97ba4ca"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -1084,7 +1084,7 @@
     "local_baseline_preflight_bundle_report_count": null,
     "local_baseline_preflight_command_plan_count": 0,
     "local_baseline_review_input_report_count": 0,
-    "package_id": "cshuman_897750ed96f75168",
+    "package_id": "cshuman_3b59934f259ab0a4",
     "pass_claim_allowed_without_human_record": false,
     "product_claim_allowed": false,
     "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",

@@ -2063,7 +2063,7 @@ def connector_human_gate_h04_local_baseline_preflight_command_plan() -> list[dic
                 "evidence until H04/H07 human proof exists."
             ),
             "expected_report_paths": [
-                "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+                "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
             ],
         },
     ]
@@ -2176,7 +2176,7 @@ def connector_human_gate_local_baseline_review_inputs(root: Path, scenario_id: s
         "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
         "reports/network/vs2-egress-proof.json",
         "reports/security/vs2-local-range.json",
-        "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+        "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
     ]
     reports = []
     for path in report_paths:

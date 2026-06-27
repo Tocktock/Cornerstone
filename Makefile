@@ -136,6 +136,11 @@ verify-connector-contract-adapter:
 	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-040-2026-06-23.json --json
 	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json
 	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-2026-06-23.json --json
+	python3 scripts/compact_connectorhub_reports.py --delete-sources
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json --json
+	for report in reports/scenario/connector-contract-adapter/scenarios/CS-CH-*.json; do \
+		PATH="$(PWD):$$PATH" cornerstone scenario gate "$$report" --json; \
+	done
 	python3 -m unittest tests.scenario.test_connectorhub_cli
 
 verify-connectorhub-engineering-trail:

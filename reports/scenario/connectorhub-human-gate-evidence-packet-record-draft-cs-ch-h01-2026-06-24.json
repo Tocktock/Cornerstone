@@ -1,14 +1,14 @@
 {
   "audit_refs": [
-    "audit:audit_fe143040681bd33e",
-    "audit:audit_197a1f6f34fbe0dc"
+    "audit:audit_8cb8d1e5c663b294",
+    "audit:audit_7e97e18149b2425a"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate evidence-packet-record-draft",
   "connector_human_gate_evidence_packet_record_draft_report": {
     "acceptance_sufficient": false,
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T13:35:27.567585Z",
+    "created_at": "2026-06-27T14:04:15.487997Z",
     "dependency_unlock_allowed_by_record_draft": false,
     "draft_record": null,
     "draft_record_available": false,
@@ -24,7 +24,7 @@
     "draft_record_output_allowed": false,
     "draft_record_output_written_by_runtime": false,
     "draft_record_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <reviewer-record-draft.json> --json --output <redacted-validation-envelope.json>",
-    "evidence_packet_record_draft_report_id": "cshuman_evidencepacketrecorddraft_3d741fac8933f255",
+    "evidence_packet_record_draft_report_id": "cshuman_evidencepacketrecorddraft_f847f808cf7855eb",
     "final_verdict": "HUMAN_REQUIRED",
     "full_goal_completion_allowed": false,
     "goal_completion_claim_blocked": true,
@@ -57,7 +57,7 @@
     "packet_file_contents_persisted_by_draft": false,
     "packet_file_hashes_used_by_draft": false,
     "packet_structurally_complete": false,
-    "packet_validation_report_id": "cshuman_evidencepacketvalidation_d3a40271f0cf5bb9",
+    "packet_validation_report_id": "cshuman_evidencepacketvalidation_e296a1b6a2eebd4e",
     "packet_validation_status": "packet_not_submitted",
     "pass_claim_allowed": false,
     "product_claim_allowed": false,
@@ -98,14 +98,14 @@
     }
   ],
   "evidence_refs": [
-    "connector_human_gate_evidence_packet_validation:cshuman_evidencepacketvalidation_d3a40271f0cf5bb9",
-    "connector_human_gate_evidence_packet_record_draft:cshuman_evidencepacketrecorddraft_3d741fac8933f255"
+    "connector_human_gate_evidence_packet_validation:cshuman_evidencepacketvalidation_e296a1b6a2eebd4e",
+    "connector_human_gate_evidence_packet_record_draft:cshuman_evidencepacketrecorddraft_f847f808cf7855eb"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_evidence_packet_record_draft_report_id": "cshuman_evidencepacketrecorddraft_3d741fac8933f255",
-    "connector_human_gate_evidence_packet_validation_report_id": "cshuman_evidencepacketvalidation_d3a40271f0cf5bb9",
-    "git_commit": "cb682e9"
+    "connector_human_gate_evidence_packet_record_draft_report_id": "cshuman_evidencepacketrecorddraft_f847f808cf7855eb",
+    "connector_human_gate_evidence_packet_validation_report_id": "cshuman_evidencepacketvalidation_e296a1b6a2eebd4e",
+    "git_commit": "97ba4ca"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -136,7 +136,7 @@
     "draft_record_output_written": false,
     "draft_record_output_written_by_runtime": false,
     "draft_record_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <reviewer-record-draft.json> --json --output <redacted-validation-envelope.json>",
-    "evidence_packet_record_draft_report_id": "cshuman_evidencepacketrecorddraft_3d741fac8933f255",
+    "evidence_packet_record_draft_report_id": "cshuman_evidencepacketrecorddraft_f847f808cf7855eb",
     "external_mutations_executed_by_evidence_packet_record_draft": 0,
     "final_verdict": "HUMAN_REQUIRED",
     "full_goal_completion_allowed": false,
@@ -151,7 +151,7 @@
     "packet_file_contents_persisted_by_evidence_packet_record_draft": false,
     "packet_file_hashes_used_by_draft": false,
     "packet_structurally_complete": false,
-    "packet_validation_report_id": "cshuman_evidencepacketvalidation_d3a40271f0cf5bb9",
+    "packet_validation_report_id": "cshuman_evidencepacketvalidation_e296a1b6a2eebd4e",
     "packet_validation_status": "packet_not_submitted",
     "pass_claim_allowed": false,
     "product_claim_allowed": false,

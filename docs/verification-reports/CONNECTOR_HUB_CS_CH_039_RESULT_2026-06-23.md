@@ -36,14 +36,14 @@ Expected behavior:
 
 | ID | Type | Status | Evidence | Notes |
 |---|---|---|---|---|
-| CS-CH-039 | REGRESSION_GUARD | PASS | `reports/scenario/connector-contract-adapter-cs-ch-039-2026-06-23.json` | Connected Sources stays a CornerStone product surface: default navigation uses product concepts, connector implementation names stay admin details, and native commands begin with cornerstone. |
+| CS-CH-039 | REGRESSION_GUARD | PASS | `reports/scenario/connector-contract-adapter/scenarios/CS-CH-039.json` | Connected Sources stays a CornerStone product surface: default navigation uses product concepts, connector implementation names stay admin details, and native commands begin with cornerstone. |
 
 ## Evidence Summary
 
 Filtered report:
 
 ```text
-reports/scenario/connector-contract-adapter-cs-ch-039-2026-06-23.json
+reports/scenario/connector-contract-adapter/scenarios/CS-CH-039.json
 status=success
 scenario_count=1
 pass=1
@@ -54,7 +54,7 @@ product_feature_claims=LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_40_AI_ROWS_HUMAN
 Unfiltered report:
 
 ```text
-reports/scenario/connector-contract-adapter-2026-06-23.json
+reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json
 status=success
 scenario_count=40
 pass=40
@@ -94,7 +94,7 @@ production_readiness_overclaims=0
 | `python3 -m compileall packages/cornerstone_cli` | PASS |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli` | PASS, 10 tests |
 | `make verify-connector-contract-adapter` | PASS |
-| `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json` | PASS; report status `success`, 40 PASS, 0 blocking |
+| `cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json` | PASS; report status `success`, 40 PASS, 0 blocking |
 
 ## Proof Surface
 
@@ -106,7 +106,7 @@ production_readiness_overclaims=0
 - Product value: `CS-CH-039` advances Connector Hub adoption in CornerStone by proving `Present one CornerStone product not a ConnectorHub sub-product` as a user-visible connected-source capability inside one CornerStone product, not as a separate ConnectorHub surface.
 - Domain correctness: the accepted outcome is `Users see one CornerStone experience with connector internals as admin details`; anything outside that observable behavior remains outside this scenario's PASS claim.
 - Architecture: implementation stays behind native `cornerstone connector ...` and `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-039` paths, preserving Product / Archive / Connector / Policy / Evidence / Audit boundaries.
-- Data contracts: the result is bound to matrix row `CS-CH-039`, phase `CH-0`, related requirements `IR-01;IR-12;IR-16`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-039-2026-06-23.json` rather than informal assistant confidence.
+- Data contracts: the result is bound to matrix row `CS-CH-039`, phase `CH-0`, related requirements `IR-01;IR-12;IR-16`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-039.json` rather than informal assistant confidence.
 - Reliability: replayable local fixture CLI verification and durable local state serve as the acceptance surface for this independent delivery unit.
 - Security: provider credentials, raw provider payloads, unauthorized provider calls, live-provider readiness, human-acceptance, and production-readiness claims remain excluded unless explicitly evidenced elsewhere.
 - Observability: evidence refs, audit refs, negative counters, filtered scenario reports, and the aggregate connector scenario report are the trace surfaces for review.
@@ -119,8 +119,8 @@ production_readiness_overclaims=0
 
 - Research perspectives: senior product/domain, architecture/data-contract, reliability/security, observability/performance/testability, and maintainability/migration reviewers converged on `CS-CH-039` as the independent delivery unit for `Present one CornerStone product not a ConnectorHub sub-product`.
 - Implementation approach: use `UI navigation copy scan and onboarding test` against matrix row `CS-CH-039`, preserving `proof_surface=local_fixture` and `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`.
-- Smallest complete solution: deliver `Users see one CornerStone experience with connector internals as admin details` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-039-2026-06-23.json` as the acceptance record.
-- Refactor and hardening: `CS-CH-039` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter-cs-ch-039-2026-06-23.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
+- Smallest complete solution: deliver `Users see one CornerStone experience with connector internals as admin details` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-039.json` as the acceptance record.
+- Refactor and hardening: `CS-CH-039` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter/scenarios/CS-CH-039.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
 - Verification result: `CS-CH-039` is recorded as `PASS` only on `local_fixture` evidence; live-provider, human-acceptance, and production claims remain outside this result unless the claim boundary explicitly allows them.
 - Documented result: this report records the scenario outcome, evidence path, proof surface, decision trail, lifecycle trail, and out-of-scope boundary before the next scenario is treated as complete.
 - ConnectorHub adoption contribution: it turns `one CornerStone Connected Sources product surface` into the CornerStone adoption surface `ConnectorPort setup and versioned provider-pack foundation`, keeping provider internals behind ConnectorPort/evidence/audit/policy boundaries and preserving the local proof boundary.

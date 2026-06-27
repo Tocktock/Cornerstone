@@ -141,7 +141,7 @@ EXPECTED_H04_PREFLIGHT_COMMAND_PLAN = [
             "evidence until H04/H07 human proof exists."
         ),
         "expected_report_paths": [
-            "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
         ],
         "expected_report_count": 1,
         "review_input_only": True,
@@ -7015,7 +7015,7 @@ class ConnectorHubCliTests(unittest.TestCase):
                         {report["path"] for report in baseline["reports"]},
                     )
                     self.assertIn(
-                        "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+                        "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
                         {report["path"] for report in baseline["reports"]},
                     )
                     self.assertEqual(
@@ -7091,7 +7091,7 @@ class ConnectorHubCliTests(unittest.TestCase):
                             "schema_version": "cs.vs2_local_range.v1",
                             "status": "passed",
                         },
-                        "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json": {
+                        "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json": {
                             "schema_version": "cs.cli.v0",
                             "status": "success",
                             "command": "cornerstone scenario verify connector-contract-adapter",
@@ -10059,7 +10059,7 @@ class ConnectorHubCliTests(unittest.TestCase):
             "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
             "reports/network/vs2-egress-proof.json",
             "reports/security/vs2-local-range.json",
-            "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
         ]
         report_rows = {row["path"]: row for row in bundle["current_report_fingerprints"]}
         self.assert_h04_local_baseline_preflight_bundle(bundle, report_paths, report_rows)
@@ -10879,7 +10879,7 @@ class ConnectorHubCliTests(unittest.TestCase):
                 "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
                 "reports/network/vs2-egress-proof.json",
                 "reports/security/vs2-local-range.json",
-                "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+                "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
             ],
             next_baseline_report_rows,
         )
@@ -11670,7 +11670,7 @@ class ConnectorHubCliTests(unittest.TestCase):
                         "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
                         "reports/network/vs2-egress-proof.json",
                         "reports/security/vs2-local-range.json",
-                        "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+                        "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
                     ],
                 )
                 baseline_report_summaries = {
@@ -11692,7 +11692,7 @@ class ConnectorHubCliTests(unittest.TestCase):
                 )
                 self.assertEqual(
                     baseline_report_summaries[
-                        "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json"
+                        "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
                     ]["summary"],
                     {
                         "pass": 1,

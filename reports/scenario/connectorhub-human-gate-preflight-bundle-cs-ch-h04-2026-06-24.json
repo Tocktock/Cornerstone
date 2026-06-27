@@ -1,12 +1,12 @@
 {
   "audit_refs": [
-    "audit:audit_474d693b2908031d"
+    "audit:audit_4496d8b935fafbd2"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate preflight-bundle",
   "connector_human_gate_preflight_bundle_report": {
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T13:35:30.975165Z",
+    "created_at": "2026-06-27T14:04:18.523704Z",
     "final_verdict": "HUMAN_REQUIRED",
     "full_goal_completion_allowed": false,
     "goal_completion_claim_blocked": true,
@@ -85,7 +85,7 @@
           "command": "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json",
           "expected_report_count": 1,
           "expected_report_paths": [
-            "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json"
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
           ],
           "operator_phase": "refresh_connectorhub_dependency_report",
           "pass_claim_allowed": false,
@@ -100,14 +100,14 @@
       "command_plan_expected_report_path_count": 5,
       "command_plan_expected_report_paths": [
         "reports/network/vs2-egress-proof.json",
-        "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+        "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
         "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
         "reports/security/vs2-local-range.json",
         "reports/security/vs2-local-security-proof.json"
       ],
       "command_plan_paths_covered_by_current_reports": [
         "reports/network/vs2-egress-proof.json",
-        "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+        "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
         "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
         "reports/security/vs2-local-range.json",
         "reports/security/vs2-local-security-proof.json"
@@ -177,13 +177,13 @@
           "command": "cornerstone scenario verify connector-contract-adapter",
           "json_valid": true,
           "pass_claim_allowed": false,
-          "path": "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json",
+          "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
           "present": true,
           "product_claim_allowed": false,
           "review_input_only": true,
           "scenario_count": 1,
           "schema_version": "cs.cli.v0",
-          "sha256": "3085bcf769aedcd00ba1b1a6a3722bf1daeb2ffe58022c78c38b423cddf0bea0",
+          "sha256": "8b91ccb9a307c8783ed28ca3182e80c0eab69b13e12d67c826523eec4f0d18a8",
           "status": "success"
         }
       ],
@@ -192,7 +192,7 @@
         "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
         "reports/network/vs2-egress-proof.json",
         "reports/security/vs2-local-range.json",
-        "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json"
+        "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
       ],
       "external_mutations_executed_by_bundle": 0,
       "human_acceptance_collected_by_bundle": false,
@@ -209,7 +209,7 @@
         "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
         "reports/network/vs2-egress-proof.json",
         "reports/security/vs2-local-range.json",
-        "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json"
+        "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
       ],
       "recommended_preflight_command_plan": [
         {
@@ -253,7 +253,7 @@
           "command": "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json",
           "expected_report_count": 1,
           "expected_report_paths": [
-            "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json"
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
           ],
           "operator_phase": "refresh_connectorhub_dependency_report",
           "pass_claim_allowed": false,
@@ -284,7 +284,7 @@
       "schema_version": "cs.connector_human_gate_local_baseline_preflight_bundle.v1",
       "status": "operator_preparation_only"
     },
-    "preflight_bundle_report_id": "cshuman_preflight_c8a06e7683281a35",
+    "preflight_bundle_report_id": "cshuman_preflight_d9aab04af291d13c",
     "product_feature_claims": "CONNECTOR_HUB_H04_PREFLIGHT_BUNDLE_PREPARED_HUMAN_EVIDENCE_REQUIRED",
     "recommended_preflight_command_plan": [
       {
@@ -328,7 +328,7 @@
         "command": "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json",
         "expected_report_count": 1,
         "expected_report_paths": [
-          "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json"
+          "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
         ],
         "operator_phase": "refresh_connectorhub_dependency_report",
         "pass_claim_allowed": false,
@@ -364,12 +364,12 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_preflight_bundle:cshuman_preflight_c8a06e7683281a35"
+    "connector_human_gate_preflight_bundle:cshuman_preflight_d9aab04af291d13c"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_preflight_bundle_report_id": "cshuman_preflight_c8a06e7683281a35",
-    "git_commit": "cb682e9"
+    "connector_human_gate_preflight_bundle_report_id": "cshuman_preflight_d9aab04af291d13c",
+    "git_commit": "97ba4ca"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -397,7 +397,7 @@
     "local_baseline_review_inputs_schema_version": "cs.connector_human_gate_local_baseline_review_inputs.v1",
     "operator_rule": "This report exposes H04 local comparison inputs only. Run the command plan, collect fresh production-like evidence, and validate a dated human reviewer record before claiming dependency unlock.",
     "pass_claim_allowed": false,
-    "preflight_bundle_report_id": "cshuman_preflight_c8a06e7683281a35",
+    "preflight_bundle_report_id": "cshuman_preflight_d9aab04af291d13c",
     "preflight_bundle_schema_version": "cs.connector_human_gate_local_baseline_preflight_bundle.v1",
     "product_claim_allowed": false,
     "product_feature_claims": "CONNECTOR_HUB_H04_PREFLIGHT_BUNDLE_PREPARED_HUMAN_EVIDENCE_REQUIRED",
@@ -446,7 +446,7 @@
         "command": "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json",
         "expected_report_count": 1,
         "expected_report_paths": [
-          "reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json"
+          "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
         ],
         "operator_phase": "refresh_connectorhub_dependency_report",
         "pass_claim_allowed": false,

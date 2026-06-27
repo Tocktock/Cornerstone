@@ -6522,6 +6522,58 @@ def command_connector_report_lint(args: argparse.Namespace) -> int:
         payload["errors"].append({"code": "CS_CONNECTOR_REPORT_FILE_INVALID", "message": str(error), "path": str(report_path)})
         print_payload(payload, args.json)
         return EXIT_INVALID
+    if isinstance(report, dict) and report.get("compact_evidence_layout") == "content_addressed_shared_v1":
+        shared_ref = report.get("shared_evidence_ref")
+        shared_path_value = shared_ref.get("path") if isinstance(shared_ref, dict) else None
+        if not isinstance(shared_path_value, str) or not shared_path_value:
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_CONNECTOR_REPORT_COMPACT_SHARED_REF_INVALID",
+                    "message": "Compact connector report is missing shared_evidence_ref.path.",
+                    "path": str(report_path),
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_INVALID
+        shared_path = (root / shared_path_value).resolve()
+        if not shared_path.exists() or not shared_path.is_file():
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_CONNECTOR_REPORT_COMPACT_SHARED_FILE_MISSING",
+                    "message": "Compact connector report shared evidence file does not exist.",
+                    "path": str(shared_path),
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_NOT_FOUND
+        try:
+            shared_payload = json.loads(shared_path.read_text())
+        except (OSError, ValueError) as error:
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_CONNECTOR_REPORT_COMPACT_SHARED_FILE_INVALID",
+                    "message": str(error),
+                    "path": str(shared_path),
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_INVALID
+        sections = shared_payload.get("sections") if isinstance(shared_payload, dict) else None
+        if not isinstance(sections, dict):
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_CONNECTOR_REPORT_COMPACT_SHARED_SECTIONS_INVALID",
+                    "message": "Compact connector report shared evidence file must include a sections object.",
+                    "path": str(shared_path),
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_INVALID
+        report = {**report, **sections}
 
     lint = lint_connector_report_claims(report)
     passed = lint["status"] == "pass"

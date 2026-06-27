@@ -6,8 +6,8 @@
 - Type: `MUST_PASS`
 - Status: `PASS`
 - Proof surface: local ConnectorHub lifecycle fixture, `cornerstone connector audit correlate`, CornerStone audit hash-chain verification, tampered audit copy verification, filtered scenario gate, aggregate ConnectorHub gate, and focused CLI regression test.
-- Filtered report: `reports/scenario/connector-contract-adapter-cs-ch-037-2026-06-23.json`
-- Aggregate report: `reports/scenario/connector-contract-adapter-2026-06-23.json`
+- Filtered report: `reports/scenario/connector-contract-adapter/scenarios/CS-CH-037.json`
+- Aggregate report: `reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json`
 
 ## Scenario Result
 
@@ -34,15 +34,15 @@ Commands:
 
 ```bash
 python3 -m py_compile packages/cornerstone_cli/connector.py packages/cornerstone_cli/main.py packages/cornerstone_cli/scenarios.py tests/scenario/test_connectorhub_cli.py
-cornerstone scenario verify connector-contract-adapter --scenario CS-CH-037 --json --output reports/scenario/connector-contract-adapter-cs-ch-037-2026-06-23.json
-cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-037-2026-06-23.json --json
+cornerstone scenario verify connector-contract-adapter --scenario CS-CH-037 --json --output reports/scenario/connector-contract-adapter/scenarios/CS-CH-037.json
+cornerstone scenario gate reports/scenario/connector-contract-adapter/scenarios/CS-CH-037.json --json
 python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_audit_correlation_cs_ch_037
 CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1 cornerstone security vs2-local-proof --json
-cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json
-cornerstone scenario gate reports/scenario/connector-contract-adapter-2026-06-23.json --json
+cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json
+cornerstone scenario gate reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json --json
 ```
 
-Filtered report facts observed from `reports/scenario/connector-contract-adapter-cs-ch-037-2026-06-23.json`:
+Filtered report facts observed from `reports/scenario/connector-contract-adapter/scenarios/CS-CH-037.json`:
 
 ```text
 status=success
@@ -91,7 +91,7 @@ tamper_error_code=AUDIT_EVENT_HASH_MISMATCH
 Aggregate ConnectorHub facts:
 
 ```text
-cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json
+cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json
 exit_code=0
 status=success
 summary.scenario_count=40
@@ -106,7 +106,7 @@ CS-CH-037 audit_correlation_checks all true
 Aggregate gate:
 
 ```text
-cornerstone scenario gate reports/scenario/connector-contract-adapter-2026-06-23.json --json
+cornerstone scenario gate reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json --json
 status=success
 scenario_count=40
 blocking_count=0
@@ -141,7 +141,7 @@ CS-CH-037 and the aggregate ConnectorHub report do not claim full VS2 closure or
 - Product value: `CS-CH-037` advances Connector Hub adoption in CornerStone by proving `Correlate connector audit with CornerStone audit` as a user-visible connected-source capability inside one CornerStone product, not as a separate ConnectorHub surface.
 - Domain correctness: the accepted outcome is `Connector event IDs correlate to CornerStone audit without secrets or raw payloads`; anything outside that observable behavior remains outside this scenario's PASS claim.
 - Architecture: implementation stays behind native `cornerstone connector ...` and `cornerstone scenario verify connector-contract-adapter --scenario CS-CH-037` paths, preserving Product / Archive / Connector / Policy / Evidence / Audit boundaries.
-- Data contracts: the result is bound to matrix row `CS-CH-037`, phase `CH-1`, related requirements `IR-17;IR-18`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-037-2026-06-23.json` rather than informal assistant confidence.
+- Data contracts: the result is bound to matrix row `CS-CH-037`, phase `CH-1`, related requirements `IR-17;IR-18`, `proof_surface=local_fixture`, `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`, and evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-037.json` rather than informal assistant confidence.
 - Reliability: replayable local fixture CLI verification and durable local state serve as the acceptance surface for this independent delivery unit.
 - Security: provider credentials, raw provider payloads, unauthorized provider calls, live-provider readiness, human-acceptance, and production-readiness claims remain excluded unless explicitly evidenced elsewhere.
 - Observability: evidence refs, audit refs, negative counters, filtered scenario reports, and the aggregate connector scenario report are the trace surfaces for review.
@@ -154,8 +154,8 @@ CS-CH-037 and the aggregate ConnectorHub report do not claim full VS2 closure or
 
 - Research perspectives: senior product/domain, architecture/data-contract, reliability/security, observability/performance/testability, and maintainability/migration reviewers converged on `CS-CH-037` as the independent delivery unit for `Correlate connector audit with CornerStone audit`.
 - Implementation approach: use `Audit contract and tamper tests` against matrix row `CS-CH-037`, preserving `proof_surface=local_fixture` and `claim_boundary=deterministic local fixture evidence only; no live-provider production or human-acceptance claim`.
-- Smallest complete solution: deliver `Connector event IDs correlate to CornerStone audit without secrets or raw payloads` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter-cs-ch-037-2026-06-23.json` as the acceptance record.
-- Refactor and hardening: `CS-CH-037` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter-cs-ch-037-2026-06-23.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
+- Smallest complete solution: deliver `Connector event IDs correlate to CornerStone audit without secrets or raw payloads` through a deterministic local fixture path behind the native ConnectorHub CLI and scenario verifier, with the evidence artifact `reports/scenario/connector-contract-adapter/scenarios/CS-CH-037.json` as the acceptance record.
+- Refactor and hardening: `CS-CH-037` was folded into the matrix, focused report `reports/scenario/connector-contract-adapter/scenarios/CS-CH-037.json`, result document, aggregate report, stale-metadata guard, `proof_surface=local_fixture` guard, and claim-boundary guard `deterministic local fixture evidence only; no live-provider production or human-acceptance claim` so this independent delivery unit cannot depend on ad hoc prose or a broader ConnectorHub claim.
 - Verification result: `CS-CH-037` is recorded as `PASS` only on `local_fixture` evidence; live-provider, human-acceptance, and production claims remain outside this result unless the claim boundary explicitly allows them.
 - Documented result: this report records the scenario outcome, evidence path, proof surface, decision trail, lifecycle trail, and out-of-scope boundary before the next scenario is treated as complete.
 - ConnectorHub adoption contribution: it turns `ConnectorAuditBridge correlation to CornerStone audit` into the CornerStone adoption surface `Durable evidence archive policy audit and safety guardrails`, keeping provider internals behind ConnectorPort/evidence/audit/policy boundaries and preserving the local proof boundary.
