@@ -394,8 +394,14 @@ class _PostgresRange:
         self.root = root
         self.container = f"cornerstone-vs2-range-pg-{hashlib.sha1(str(time.time()).encode()).hexdigest()[:10]}"
         self.transcript: list[dict[str, Any]] = []
+        self.data_dir_context: tempfile.TemporaryDirectory[str] | None = None
+        self.data_dir: Path | None = None
 
     def start(self) -> bool:
+        data_root = self.root / "tmp" / "vs2-local-range-postgres"
+        data_root.mkdir(parents=True, exist_ok=True)
+        self.data_dir_context = tempfile.TemporaryDirectory(prefix=f"{self.container}-data-", dir=data_root)
+        self.data_dir = Path(self.data_dir_context.name).resolve()
         started = _run(
             [
                 "docker",
@@ -404,6 +410,8 @@ class _PostgresRange:
                 "--rm",
                 "--name",
                 self.container,
+                "--mount",
+                f"type=bind,source={self.data_dir},target=/var/lib/postgresql/data",
                 "-e",
                 "POSTGRES_PASSWORD=cornerstone",
                 "-e",
@@ -441,6 +449,33 @@ class _PostgresRange:
     def stop(self) -> dict[str, Any]:
         result = _run(["docker", "rm", "-f", self.container], cwd=self.root, timeout=30)
         self.transcript.append(result)
+        if self.data_dir_context is not None:
+            cleanup_started = time.perf_counter()
+            try:
+                cleanup_path = str(self.data_dir) if self.data_dir is not None else "<unknown>"
+                self.data_dir_context.cleanup()
+                self.transcript.append(
+                    {
+                        "command": ["python", "tempfile.cleanup", cleanup_path],
+                        "exit_code": 0,
+                        "elapsed_seconds": round(time.perf_counter() - cleanup_started, 3),
+                        "stdout": "",
+                        "stderr": "",
+                    }
+                )
+            except Exception as error:  # pragma: no cover - cleanup evidence is recorded for operators
+                self.transcript.append(
+                    {
+                        "command": ["python", "tempfile.cleanup", str(self.data_dir)],
+                        "exit_code": 1,
+                        "elapsed_seconds": round(time.perf_counter() - cleanup_started, 3),
+                        "stdout": "",
+                        "stderr": f"{type(error).__name__}: {error}",
+                    }
+                )
+            finally:
+                self.data_dir_context = None
+                self.data_dir = None
         return result
 
     def psql(self, sql: str, *, database: str = "cornerstone", timeout: int = 120) -> dict[str, Any]:

@@ -1,0 +1,50 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_alpha_file_docs_private_key",
+  "projection_id": "cproj_github_file_docs_private_key",
+  "contract_id": "ccon_project_alpha_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-alpha:file:docs/private-key.md:ab91ee20",
+  "common_capability": "source_control.file.read",
+  "projection_type": "source_control.file_snapshot.v1",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha:file:docs/private-key.md:ab91ee20",
+    "title": "docs/private-key.md at ab91ee20",
+    "path": "docs/private-key.md",
+    "classification": "metadata_and_markdown_excerpt",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_alpha_file_docs_private_key",
+    "kind": "connectorhub_projection_evidence",
+    "provider_event_id": "github:repo:owner/project-alpha:file:docs/private-key.md:ab91ee20",
+    "permitted_fields": [
+      "path",
+      "ref",
+      "content_hash",
+      "size_bytes",
+      "mime_type",
+      "markdown_excerpt",
+      "source_url_hash"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "path": "docs/private-key.md",
+    "ref": "ab91ee20",
+    "content_hash": "sha256:c016d0a8e55fed22119d825c8c5ec6a1e48a8db672fcb6825ac6f56a9cc83eb6",
+    "size_bytes": 1804,
+    "mime_type": "text/markdown",
+    "markdown_excerpt": "Do not import this block: -----BEGIN PRIVATE KEY-----\nCS_CH_018_PRIVATE_KEY_MUST_NOT_PERSIST\n-----END PRIVATE KEY-----",
+    "source_url_hash": "sha256:3e001835d9ff0c6ddff4ae6d43bf9d575d3cc9387a113478ecf4134505efc84e",
+    "source_revision": "blob:docs/private-key.md:ab91ee20",
+    "updated_at": "2026-06-23T00:31:00Z"
+  }
+}

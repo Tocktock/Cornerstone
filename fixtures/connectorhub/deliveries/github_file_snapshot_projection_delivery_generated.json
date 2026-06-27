@@ -1,0 +1,50 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_alpha_file_docs_generated",
+  "projection_id": "cproj_github_file_docs_generated",
+  "contract_id": "ccon_project_alpha_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-alpha:file:docs/generated/bundle.min.js:88fc10de",
+  "common_capability": "source_control.file.read",
+  "projection_type": "source_control.file_snapshot.v1",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha:file:docs/generated/bundle.min.js:88fc10de",
+    "title": "docs/generated/bundle.min.js at 88fc10de",
+    "path": "docs/generated/bundle.min.js",
+    "classification": "metadata_and_markdown_excerpt",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_alpha_file_docs_generated",
+    "kind": "connectorhub_projection_evidence",
+    "provider_event_id": "github:repo:owner/project-alpha:file:docs/generated/bundle.min.js:88fc10de",
+    "permitted_fields": [
+      "path",
+      "ref",
+      "content_hash",
+      "size_bytes",
+      "mime_type",
+      "markdown_excerpt",
+      "source_url_hash"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "path": "docs/generated/bundle.min.js",
+    "ref": "88fc10de",
+    "content_hash": "sha256:beee1d777b8a5cfd9a813c3024da330f4a4f31c9d01907f37c64d8a7bfcf0258",
+    "size_bytes": 48120,
+    "mime_type": "text/javascript",
+    "markdown_excerpt": "Generated bundle excerpt should not become Product truth.",
+    "source_url_hash": "sha256:30a17619cbce7d50ef1e5a010fe1cf0db4b605d02822e9f734e744463d196bde",
+    "source_revision": "blob:docs/generated/bundle.min.js:88fc10de",
+    "updated_at": "2026-06-23T00:35:00Z"
+  }
+}

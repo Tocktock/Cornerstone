@@ -1,0 +1,371 @@
+{
+  "audit_refs": [
+    "audit:audit_363fe6067c964286"
+  ],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone connector human-gate evidence-packet-validate",
+  "connector_human_gate_evidence_packet_validation_report": {
+    "acceptance_sufficient": false,
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "created_at": "2026-06-27T13:35:29.069870Z",
+    "dependency_unlock_allowed_by_packet_validator": false,
+    "empty_packet_file_count": 0,
+    "empty_packet_file_names": [],
+    "evidence_packet_file_contract_schema_version": "cs.connector_human_gate_evidence_packet_file_contract.v1",
+    "evidence_packet_scaffold_schema_version": "cs.connector_human_gate_evidence_packet_scaffold.v1",
+    "evidence_packet_validation_report_id": "cshuman_evidencepacketvalidation_3072f2fe9835a343",
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "hashed_packet_file_count": 0,
+    "hashed_packet_file_names": [],
+    "missing_packet_file_count": 8,
+    "missing_packet_file_names": [
+      "environment-topology.md",
+      "request-context-trace.json",
+      "postgres-rls-transcript.txt",
+      "opa-policy-transcript.json",
+      "egress-transcript.txt",
+      "backup-restore-evidence.md",
+      "audit-integrity-report.json",
+      "review-decision.md"
+    ],
+    "negative_evidence": {
+      "approvals_collected_by_evidence_packet_validation": 0,
+      "dependency_unlocks_allowed_by_evidence_packet_validation": 0,
+      "external_mutations_executed_by_evidence_packet_validation": 0,
+      "human_rows_marked_pass_by_evidence_packet_validation": 0,
+      "live_provider_calls_executed_by_evidence_packet_validation": 0,
+      "packet_file_contents_persisted_by_evidence_packet_validation": 0,
+      "pass_claims_allowed_by_evidence_packet_validation": 0,
+      "product_claims_allowed_by_evidence_packet_validation": 0,
+      "provider_mutations_executed_by_evidence_packet_validation": 0,
+      "raw_packet_file_contents_recorded_by_evidence_packet_validation": 0
+    },
+    "non_mutation_evidence": {
+      "approval_collected_by_evidence_packet_validation": false,
+      "commands_executed_by_evidence_packet_validation": 0,
+      "external_mutations_executed_by_evidence_packet_validation": 0,
+      "human_acceptance_collected_by_evidence_packet_validation": false,
+      "human_decisions_recorded_by_evidence_packet_validation": 0,
+      "live_provider_calls_executed_by_evidence_packet_validation": 0,
+      "packet_file_contents_persisted_by_evidence_packet_validation": false,
+      "packet_file_hashes_recorded_by_evidence_packet_validation": 0,
+      "provider_mutations_executed_by_evidence_packet_validation": 0,
+      "raw_packet_file_contents_recorded_by_evidence_packet_validation": false
+    },
+    "observed_packet_file_count": 0,
+    "operator_rule": "This report validates CS-CH-H04 acceptance-packet file presence, non-empty status, and blank-template replacement by recording metadata and hashes only. It does not record packet contents, collect approval, unlock dependencies, or mark CS-CH-H04 accepted.",
+    "packet_directory": "<h04-acceptance-packet-dir>",
+    "packet_directory_exists": false,
+    "packet_file_contents_persisted_by_validator": false,
+    "packet_file_hashes_recorded_by_validator": true,
+    "packet_files": [
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "environment-topology.md",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Scope identifiers, service versions, deployment or compose/task references, policy bundle version, DB revision, network topology, reviewer, timestamp.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "request-context-trace.json",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Trusted RequestContext fields, connector app/source ids, owner/namespace/workspace, evidence refs, audit refs.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "postgres-rls-transcript.txt",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Allowed and denied product-path cases, RLS policy refs, redacted row identifiers, zero cross-namespace read/write finding.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "opa-policy-transcript.json",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Allowed and denied decisions, bundle digest, input shape, decision ids, denial reasons.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "egress-transcript.txt",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "ConnectorHub allowed path, Product/API denied path, worker denied path, tool/agent denied path, gateway/audit refs.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "backup-restore-evidence.md",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Backup id, restore command or run reference, restored checksum/sample proof, recovery limitations.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "audit-integrity-report.json",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Audit event ids, correlation ids, tamper/evidence manifest result, redacted exceptions.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "review-decision.md",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "ACCEPT or REJECT, reviewer, timestamp, evidence packet path, exceptions, release impact.",
+        "sha256": null,
+        "size_bytes": null
+      }
+    ],
+    "packet_structurally_complete": false,
+    "pass_claim_allowed": false,
+    "product_claim_allowed": false,
+    "product_feature_claims": "CONNECTOR_HUB_H04_EVIDENCE_PACKET_VALIDATION_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "raw_packet_file_contents_included_in_report": false,
+    "raw_packet_file_contents_recorded_by_validator": false,
+    "required_packet_file_count": 8,
+    "review_input_only": true,
+    "scenario_id": "CS-CH-H04",
+    "schema_version": "cs.connector_human_gate_evidence_packet_validation_report.v1",
+    "scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    },
+    "status": "packet_not_submitted",
+    "structural_errors": [
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_DIR_NOT_FOUND",
+        "message": "CS-CH-H04 evidence packet directory was not found.",
+        "packet_directory": "<h04-acceptance-packet-dir>"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "environment-topology.md"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "request-context-trace.json"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "postgres-rls-transcript.txt"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "opa-policy-transcript.json"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "egress-transcript.txt"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "backup-restore-evidence.md"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "audit-integrity-report.json"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "review-decision.md"
+      }
+    ],
+    "template_only_packet_file_count": 0,
+    "template_only_packet_file_names": [],
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "errors": [
+    {
+      "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_STRUCTURAL_ISSUES",
+      "message": "CS-CH-H04 evidence packet is missing, incomplete, empty, or still contains blank template files.",
+      "negative_evidence": {
+        "approvals_collected_by_evidence_packet_validation": 0,
+        "dependency_unlocks_allowed_by_evidence_packet_validation": 0,
+        "external_mutations_executed_by_evidence_packet_validation": 0,
+        "human_rows_marked_pass_by_evidence_packet_validation": 0,
+        "live_provider_calls_executed_by_evidence_packet_validation": 0,
+        "packet_file_contents_persisted_by_evidence_packet_validation": 0,
+        "pass_claims_allowed_by_evidence_packet_validation": 0,
+        "product_claims_allowed_by_evidence_packet_validation": 0,
+        "provider_mutations_executed_by_evidence_packet_validation": 0,
+        "raw_packet_file_contents_recorded_by_evidence_packet_validation": 0
+      },
+      "structural_errors": [
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_DIR_NOT_FOUND",
+          "message": "CS-CH-H04 evidence packet directory was not found.",
+          "packet_directory": "<h04-acceptance-packet-dir>"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "environment-topology.md"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "request-context-trace.json"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "postgres-rls-transcript.txt"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "opa-policy-transcript.json"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "egress-transcript.txt"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "backup-restore-evidence.md"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "audit-integrity-report.json"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "review-decision.md"
+        }
+      ]
+    }
+  ],
+  "evidence_refs": [
+    "connector_human_gate_evidence_packet_validation:cshuman_evidencepacketvalidation_3072f2fe9835a343"
+  ],
+  "final_verdict": "HUMAN_REQUIRED",
+  "ids": {
+    "connector_human_gate_evidence_packet_validation_report_id": "cshuman_evidencepacketvalidation_3072f2fe9835a343",
+    "git_commit": "cb682e9"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h04-2026-06-24.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "schema_version": "cs.cli.v0",
+  "status": "blocked",
+  "summary": {
+    "acceptance_sufficient": false,
+    "commands_executed_by_evidence_packet_validation": 0,
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "dependency_unlock_allowed_by_packet_validator": false,
+    "empty_packet_file_count": 0,
+    "empty_packet_file_names": [],
+    "evidence_packet_file_contract_schema_version": "cs.connector_human_gate_evidence_packet_file_contract.v1",
+    "evidence_packet_scaffold_schema_version": "cs.connector_human_gate_evidence_packet_scaffold.v1",
+    "evidence_packet_validation_report_id": "cshuman_evidencepacketvalidation_3072f2fe9835a343",
+    "external_mutations_executed_by_evidence_packet_validation": 0,
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "hashed_packet_file_count": 0,
+    "hashed_packet_file_names": [],
+    "human_acceptance_collected_by_evidence_packet_validation": false,
+    "live_provider_calls_executed_by_evidence_packet_validation": 0,
+    "missing_packet_file_count": 8,
+    "missing_packet_file_names": [
+      "environment-topology.md",
+      "request-context-trace.json",
+      "postgres-rls-transcript.txt",
+      "opa-policy-transcript.json",
+      "egress-transcript.txt",
+      "backup-restore-evidence.md",
+      "audit-integrity-report.json",
+      "review-decision.md"
+    ],
+    "observed_packet_file_count": 0,
+    "operator_rule": "This report validates CS-CH-H04 acceptance-packet file presence, non-empty status, and blank-template replacement by recording metadata and hashes only. It does not record packet contents, collect approval, unlock dependencies, or mark CS-CH-H04 accepted.",
+    "packet_directory": "<h04-acceptance-packet-dir>",
+    "packet_directory_exists": false,
+    "packet_file_contents_persisted_by_validator": false,
+    "packet_file_hashes_recorded_by_validator": true,
+    "packet_structurally_complete": false,
+    "pass_claim_allowed": false,
+    "product_claim_allowed": false,
+    "product_feature_claims": "CONNECTOR_HUB_H04_EVIDENCE_PACKET_VALIDATION_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "provider_mutations_executed_by_evidence_packet_validation": 0,
+    "raw_packet_file_contents_included_in_report": false,
+    "raw_packet_file_contents_recorded_by_validator": false,
+    "required_packet_file_count": 8,
+    "review_input_only": true,
+    "scenario_id": "CS-CH-H04",
+    "status": "packet_not_submitted",
+    "template_only_packet_file_count": 0,
+    "template_only_packet_file_names": [],
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

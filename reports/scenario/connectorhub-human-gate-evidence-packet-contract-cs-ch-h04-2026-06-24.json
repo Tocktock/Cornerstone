@@ -1,0 +1,188 @@
+{
+  "audit_refs": [
+    "audit:audit_acaa9b2a53ad406d"
+  ],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone connector human-gate evidence-packet-contract",
+  "connector_human_gate_evidence_packet_contract_report": {
+    "allowed_redaction_statuses": [
+      "redacted",
+      "public_safe",
+      "no_sensitive_material"
+    ],
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "created_at": "2026-06-27T13:35:28.759831Z",
+    "evidence_packet_contract": {
+      "allowed_redaction_statuses": [
+        "redacted",
+        "public_safe",
+        "no_sensitive_material"
+      ],
+      "evidence_packet_manifest_values_persisted_by_validator": false,
+      "evidence_ref_required": true,
+      "evidence_ref_uniqueness_required": true,
+      "invalid_value_report_shape": "field_names_and_required_evidence_indexes_only",
+      "raw_evidence_ref_values_recorded_by_report": false,
+      "redaction_status_required": true,
+      "required_evidence_indexes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "required_evidence_labels": [
+        "Production-like topology description and trusted RequestContext proof.",
+        "Scenario-specific PostgreSQL/RLS and OPA transcripts.",
+        "Network default-deny and governed-egress transcripts.",
+        "Backup/restore, evidence manifest, and audit integrity reports."
+      ],
+      "required_evidence_packet_manifest": [
+        {
+          "required_evidence": "Production-like topology description and trusted RequestContext proof.",
+          "required_evidence_index": 1
+        },
+        {
+          "required_evidence": "Scenario-specific PostgreSQL/RLS and OPA transcripts.",
+          "required_evidence_index": 2
+        },
+        {
+          "required_evidence": "Network default-deny and governed-egress transcripts.",
+          "required_evidence_index": 3
+        },
+        {
+          "required_evidence": "Backup/restore, evidence manifest, and audit integrity reports.",
+          "required_evidence_index": 4
+        }
+      ],
+      "required_evidence_packet_manifest_count": 4,
+      "scenario_id": "CS-CH-H04",
+      "schema_version": "cs.connector_human_gate_evidence_packet_contract.v1",
+      "status": "operator_preparation_only",
+      "validation_scope": "evidence_packet_manifest_shape_only"
+    },
+    "evidence_packet_contract_report_id": "cshuman_evidencepacket_98b5f61f12cd4e38",
+    "evidence_packet_contract_schema_version": "cs.connector_human_gate_evidence_packet_contract.v1",
+    "evidence_packet_manifest_values_persisted_by_validator": false,
+    "evidence_ref_required": true,
+    "evidence_ref_uniqueness_required": true,
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "invalid_value_report_shape": "field_names_and_required_evidence_indexes_only",
+    "negative_evidence": {
+      "approvals_collected_by_evidence_packet_contract": 0,
+      "commands_executed_by_evidence_packet_contract": 0,
+      "evidence_packet_manifest_values_persisted_by_evidence_packet_contract": 0,
+      "external_mutations_executed_by_evidence_packet_contract": 0,
+      "human_rows_marked_pass_by_evidence_packet_contract": 0,
+      "live_provider_calls_executed_by_evidence_packet_contract": 0,
+      "pass_claims_allowed_by_evidence_packet_contract": 0,
+      "product_claims_allowed_by_evidence_packet_contract": 0,
+      "provider_mutations_executed_by_evidence_packet_contract": 0,
+      "raw_evidence_ref_values_recorded_by_evidence_packet_contract": 0,
+      "secret_material_read_by_evidence_packet_contract": 0
+    },
+    "non_mutation_evidence": {
+      "approval_collected_by_evidence_packet_contract": false,
+      "commands_executed_by_evidence_packet_contract": 0,
+      "evidence_packet_manifest_values_persisted_by_evidence_packet_contract": false,
+      "external_mutations_executed_by_evidence_packet_contract": 0,
+      "human_decisions_recorded_by_evidence_packet_contract": 0,
+      "live_provider_calls_executed_by_evidence_packet_contract": 0,
+      "provider_mutations_executed_by_evidence_packet_contract": 0,
+      "raw_evidence_ref_values_recorded_by_evidence_packet_contract": false,
+      "secret_material_read_by_evidence_packet_contract": false
+    },
+    "operator_rule": "This report exposes required CS-CH-H04 evidence-packet manifest rows and redaction statuses only. It does not include, record, validate, or persist submitted evidence refs or human decisions.",
+    "product_feature_claims": "CONNECTOR_HUB_H04_EVIDENCE_PACKET_CONTRACT_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "raw_evidence_ref_values_recorded_by_report": false,
+    "redaction_status_required": true,
+    "required_evidence_indexes": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "required_evidence_labels": [
+      "Production-like topology description and trusted RequestContext proof.",
+      "Scenario-specific PostgreSQL/RLS and OPA transcripts.",
+      "Network default-deny and governed-egress transcripts.",
+      "Backup/restore, evidence manifest, and audit integrity reports."
+    ],
+    "required_evidence_packet_manifest_count": 4,
+    "scenario_id": "CS-CH-H04",
+    "schema_version": "cs.connector_human_gate_evidence_packet_contract_report.v1",
+    "scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    },
+    "status": "operator_preparation_only",
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "errors": [],
+  "evidence_refs": [
+    "connector_human_gate_evidence_packet_contract:cshuman_evidencepacket_98b5f61f12cd4e38"
+  ],
+  "final_verdict": "HUMAN_REQUIRED",
+  "ids": {
+    "connector_human_gate_evidence_packet_contract_report_id": "cshuman_evidencepacket_98b5f61f12cd4e38",
+    "git_commit": "cb682e9"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h04-2026-06-24.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "schema_version": "cs.cli.v0",
+  "status": "success",
+  "summary": {
+    "allowed_redaction_statuses": [
+      "redacted",
+      "public_safe",
+      "no_sensitive_material"
+    ],
+    "commands_executed_by_evidence_packet_contract": 0,
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "evidence_packet_contract_report_id": "cshuman_evidencepacket_98b5f61f12cd4e38",
+    "evidence_packet_contract_schema_version": "cs.connector_human_gate_evidence_packet_contract.v1",
+    "evidence_packet_manifest_values_persisted_by_validator": false,
+    "evidence_ref_required": true,
+    "evidence_ref_uniqueness_required": true,
+    "external_mutations_executed_by_evidence_packet_contract": 0,
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "human_acceptance_collected_by_evidence_packet_contract": false,
+    "invalid_value_report_shape": "field_names_and_required_evidence_indexes_only",
+    "live_provider_calls_executed_by_evidence_packet_contract": 0,
+    "operator_rule": "This report exposes required CS-CH-H04 evidence-packet manifest rows and redaction statuses only. It does not include, record, validate, or persist submitted evidence refs or human decisions.",
+    "pass_claim_allowed": false,
+    "product_claim_allowed": false,
+    "product_feature_claims": "CONNECTOR_HUB_H04_EVIDENCE_PACKET_CONTRACT_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "provider_mutations_executed_by_evidence_packet_contract": 0,
+    "raw_evidence_ref_values_recorded_by_report": false,
+    "redaction_status_required": true,
+    "required_evidence_indexes": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "required_evidence_labels": [
+      "Production-like topology description and trusted RequestContext proof.",
+      "Scenario-specific PostgreSQL/RLS and OPA transcripts.",
+      "Network default-deny and governed-egress transcripts.",
+      "Backup/restore, evidence manifest, and audit integrity reports."
+    ],
+    "required_evidence_packet_manifest_count": 4,
+    "scenario_id": "CS-CH-H04",
+    "status": "operator_preparation_only",
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

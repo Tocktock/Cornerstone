@@ -1,0 +1,47 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_beta_unselected_issue_2501",
+  "projection_id": "cproj_github_unselected_issue_2501",
+  "contract_id": "ccon_selected_repos_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-beta:issue:2501:updated:2026-06-23T01:30:00Z",
+  "common_capability": "source_control.issue.read",
+  "projection_type": "source_control.issue.v1",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-beta",
+    "object_ref": "github:repo:owner/project-beta:issue:2501",
+    "title": "Unselected repository must not ingest",
+    "classification": "metadata_and_markdown_excerpt",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_beta_unselected_issue_2501",
+    "kind": "connectorhub_projection_evidence",
+    "provider_event_id": "github:repo:owner/project-beta:issue:2501:updated:2026-06-23T01:30:00Z",
+    "permitted_fields": [
+      "issue_number",
+      "title",
+      "state",
+      "labels",
+      "body_markdown_excerpt"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "issue_number": 2501,
+    "title": "Unselected repository must not ingest",
+    "state": "open",
+    "labels": [
+      "connectorhub",
+      "unselected-repository"
+    ],
+    "body_markdown_excerpt": "This issue is from an unselected repository and must not become a CornerStone Artifact.",
+    "updated_at": "2026-06-23T01:30:00Z"
+  }
+}

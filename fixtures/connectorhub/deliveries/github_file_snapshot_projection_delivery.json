@@ -1,0 +1,50 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_alpha_file_docs_architecture",
+  "projection_id": "cproj_github_file_docs_architecture",
+  "contract_id": "ccon_project_alpha_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-alpha:file:docs/architecture.md:8f3ad2c1",
+  "common_capability": "source_control.file.read",
+  "projection_type": "source_control.file_snapshot.v1",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha:file:docs/architecture.md:8f3ad2c1",
+    "title": "docs/architecture.md at 8f3ad2c1",
+    "path": "docs/architecture.md",
+    "classification": "metadata_and_markdown_excerpt",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_alpha_file_docs_architecture",
+    "kind": "connectorhub_projection_evidence",
+    "provider_event_id": "github:repo:owner/project-alpha:file:docs/architecture.md:8f3ad2c1",
+    "permitted_fields": [
+      "path",
+      "ref",
+      "content_hash",
+      "size_bytes",
+      "mime_type",
+      "markdown_excerpt",
+      "source_url_hash"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "path": "docs/architecture.md",
+    "ref": "8f3ad2c1",
+    "content_hash": "sha256:3d79d0f81d3cf7772b3de1f31de0c5e0377ec1d92dc5838fbd22af8eb0f0a08a",
+    "size_bytes": 1234,
+    "mime_type": "text/markdown",
+    "markdown_excerpt": "CornerStone archives connector projections before product interpretation.",
+    "source_url_hash": "sha256:0dc0ad98b946db8f7a0ad9db2fd8a8e9df3795fd721567aa0f53d6a62a34dd24",
+    "source_revision": "blob:docs/architecture.md:8f3ad2c1",
+    "updated_at": "2026-06-23T00:15:00Z"
+  }
+}

@@ -56,6 +56,7 @@ VS2_OPERATOR_STATUS = Path("reports/security/vs2-operator-status.json")
 VS2_REGRESSION_PROOF = Path("reports/security/vs2-regression-proof.json")
 VS2_OVERCLAIM_SCAN = Path("reports/security/vs2-overclaim-scan.json")
 VS2_REGRESSION_DIR = Path("reports/vs2/regression")
+VS2_CANONICAL_EVUX_REPORT = Path("reports/scenario/vs0-evux-2026-06-13.json")
 
 LOCAL_RANGE_SCENARIO_IDS = {
     "VS2-SEC-001",
@@ -267,6 +268,36 @@ def _psql(container: str, sql: str, *, database: str = "postgres", timeout: int 
     )
 
 
+def _wait_for_postgres_ready(root: Path, container: str, transcript: list[dict[str, Any]], *, attempts: int = 90) -> bool:
+    stable_successes = 0
+    for _ in range(attempts):
+        check = _run(["docker", "exec", container, "pg_isready", "-U", "postgres"], cwd=root, timeout=10)
+        transcript.append(check)
+        if check["exit_code"] == 0:
+            probe = _psql(container, "SELECT 1;", timeout=10)
+            transcript.append(probe)
+            if probe["exit_code"] == 0 and probe["stdout"].strip() == "1":
+                stable_successes += 1
+                if stable_successes >= 2:
+                    return True
+            else:
+                stable_successes = 0
+                if _container_disappeared(probe):
+                    inspect = _run(["docker", "container", "inspect", container], cwd=root, timeout=10)
+                    transcript.append(inspect)
+                    if inspect["exit_code"] != 0:
+                        return False
+        else:
+            stable_successes = 0
+            if _container_disappeared(check):
+                inspect = _run(["docker", "container", "inspect", container], cwd=root, timeout=10)
+                transcript.append(inspect)
+                if inspect["exit_code"] != 0:
+                    return False
+        time.sleep(0.5)
+    return False
+
+
 def _postgres_schema_sql() -> str:
     table_sql = []
     policy_sql = []
@@ -389,8 +420,24 @@ def _verify_postgres_rls(root: Path) -> dict[str, Any]:
         return payload
 
     container = f"cornerstone-vs2-pg-{hashlib.sha1(str(time.time()).encode()).hexdigest()[:10]}"
+    data_root = root / "tmp" / "vs2-security-postgres"
+    data_root.mkdir(parents=True, exist_ok=True)
+    data_dir_context = tempfile.TemporaryDirectory(prefix=f"{container}-data-", dir=data_root)
+    data_dir = Path(data_dir_context.name).resolve()
     started = _run(
-        ["docker", "run", "-d", "--rm", "--name", container, "-e", "POSTGRES_PASSWORD=cornerstone", POSTGRES_IMAGE],
+        [
+            "docker",
+            "run",
+            "-d",
+            "--rm",
+            "--name",
+            container,
+            "--mount",
+            f"type=bind,source={data_dir},target=/var/lib/postgresql/data",
+            "-e",
+            "POSTGRES_PASSWORD=cornerstone",
+            POSTGRES_IMAGE,
+        ],
         cwd=root,
         timeout=120,
     )
@@ -401,19 +448,7 @@ def _verify_postgres_rls(root: Path) -> dict[str, Any]:
         return payload
 
     try:
-        ready = False
-        for _ in range(60):
-            check = _run(["docker", "exec", container, "pg_isready", "-U", "postgres"], cwd=root, timeout=10)
-            transcript.append(check)
-            if check["exit_code"] == 0:
-                ready = True
-                break
-            if _container_disappeared(check):
-                inspect = _run(["docker", "container", "inspect", container], cwd=root, timeout=10)
-                transcript.append(inspect)
-                if inspect["exit_code"] != 0:
-                    break
-            time.sleep(0.5)
+        ready = _wait_for_postgres_ready(root, container, transcript)
         if not ready:
             payload = {"status": "failed", "container": container, "reason": "postgres_not_ready", "transcript": transcript}
             _write_json(root, VS2_RLS_INVENTORY, payload)
@@ -680,6 +715,7 @@ SELECT jsonb_build_object(
         }
     finally:
         _run(["docker", "rm", "-f", container], cwd=root, timeout=30)
+        data_dir_context.cleanup()
 
 
 def _summarize_transcript(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1342,13 +1378,23 @@ def _probe_opa_first_start_malformed_bundle(
 ) -> dict[str, Any]:
     bundle_state.update({"label": "malformed_first_start", "revision": "vs2-rego-malformed-first-start", "bytes": malformed_bytes})
     start_index = len(status_posts)
-    opa_port = _free_port()
-    container = f"cornerstone-vs2-opa-bad-{hashlib.sha1(str(time.time()).encode()).hexdigest()[:10]}"
-    container_names.append(container)
-    start = _start_opa_bundle_container(root, tmp, config_path, container, opa_port)
-    transcript.append(start)
-    if start["exit_code"] != 0:
-        container_names.remove(container)
+    container = ""
+    start: dict[str, Any] | None = None
+    opa_port = 0
+    for attempt in range(3):
+        opa_port = _free_port()
+        container = f"cornerstone-vs2-opa-bad-{hashlib.sha1(f'{time.time()}-{attempt}'.encode()).hexdigest()[:10]}"
+        container_names.append(container)
+        start = _start_opa_bundle_container(root, tmp, config_path, container, opa_port)
+        transcript.append(start)
+        if start["exit_code"] == 0:
+            break
+        if container in container_names:
+            container_names.remove(container)
+        if "port is already allocated" not in (start.get("stderr") or ""):
+            return {"status": "failed", "reason": "opa_malformed_first_start_container_start_failed"}
+        time.sleep(0.25)
+    if start is None or start["exit_code"] != 0:
         return {"status": "failed", "reason": "opa_malformed_first_start_container_start_failed"}
     try:
         health = _wait_for_opa_health(opa_port)
@@ -4004,12 +4050,21 @@ def _verify_regression_gates(root: Path) -> dict[str, Any]:
         "vs1_ontology": "vs1-ontology-suggest-promote",
         "vs0_operator_ui": "vs0-operator-acceptance-ui",
     }
+    verify_output_paths = dict(report_paths)
+    verify_output_paths["vs0_evux"] = str(VS2_CANONICAL_EVUX_REPORT)
     verify_commands = {
-        name: [str(root / "cornerstone"), "scenario", "verify", contract, "--json", "--output", report_paths[name]]
+        name: [str(root / "cornerstone"), "scenario", "verify", contract, "--json", "--output", verify_output_paths[name]]
         for name, contract in verify_contracts.items()
     }
     regression_env = {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "1"}
-    verify_results = {name: _run(command, cwd=root, timeout=420, env=regression_env) for name, command in verify_commands.items()}
+    verify_results = {name: _run(command, cwd=root, timeout=1800, env=regression_env) for name, command in verify_commands.items()}
+    evux_copy_status = "not_copied"
+    evux_source = root / VS2_CANONICAL_EVUX_REPORT
+    evux_target = root / report_paths["vs0_evux"]
+    if evux_source.exists():
+        evux_target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(evux_source, evux_target)
+        evux_copy_status = "copied"
     gate_commands = {
         name: [str(root / "cornerstone"), "scenario", "gate", path, "--json"]
         for name, path in report_paths.items()
@@ -4054,6 +4109,12 @@ def _verify_regression_gates(root: Path) -> dict[str, Any]:
     report = {
         "status": "passed" if all(checks.values()) else "failed",
         "fresh_verify_commands": {name: value["command"] for name, value in verify_results.items()},
+        "fresh_verify_output_paths": verify_output_paths,
+        "evux_canonical_report_copy": {
+            "status": evux_copy_status,
+            "source": str(VS2_CANONICAL_EVUX_REPORT),
+            "target": report_paths["vs0_evux"],
+        },
         "fresh_verify_exit_codes": {name: value["exit_code"] for name, value in verify_results.items()},
         "gate_commands": {name: value["command"] for name, value in gate_results.items()},
         "gate_exit_codes": {name: value["exit_code"] for name, value in gate_results.items()},

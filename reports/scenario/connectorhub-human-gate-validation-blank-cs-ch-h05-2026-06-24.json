@@ -1,0 +1,488 @@
+{
+  "audit_refs": [
+    "audit:audit_fdf46ca809a78299"
+  ],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone connector human-gate validate-record",
+  "connector_human_gate_record_validation": {
+    "allowed_decision_values": [
+      "ACCEPT",
+      "REJECT"
+    ],
+    "allowed_redaction_statuses": [
+      "redacted",
+      "public_safe",
+      "no_sensitive_material"
+    ],
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "created_at": "2026-06-27T13:35:34.441717Z",
+    "decision_allowed": false,
+    "decision_present": false,
+    "decision_recorded_by_validator": false,
+    "dependency_human_gate_refs_present": [],
+    "dependency_human_gate_validation_refs": {},
+    "dependency_unlock_allowed_by_validator": false,
+    "dependency_unlock_blocked_reason": "structural_errors",
+    "depends_on_human_gates": [
+      "CS-CH-H04",
+      "CS-CH-H07"
+    ],
+    "duplicate_evidence_packet_manifest_items": [],
+    "duplicate_evidence_packet_manifest_ref_fingerprints": [],
+    "empty_evidence_packet_manifest_items": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "empty_required_fields": [
+      "reviewer",
+      "review_timestamp",
+      "approved_provider",
+      "reversible_test_target",
+      "rollback_or_compensation_plan",
+      "approval_ref",
+      "redacted_request_result",
+      "provider_receipt",
+      "idempotency_evidence",
+      "audit_refs",
+      "issues_or_exceptions"
+    ],
+    "empty_senior_review_perspectives": [
+      "product_value",
+      "domain_architecture",
+      "data_contract",
+      "reliability_observability",
+      "security_privacy",
+      "testability_migration"
+    ],
+    "evidence_packet_manifest_complete": false,
+    "evidence_packet_manifest_present": true,
+    "evidence_packet_manifest_recorded_by_validator": false,
+    "field_ref_contract": null,
+    "field_ref_contract_present": false,
+    "field_ref_values_recorded_by_validator": false,
+    "format_rules": {
+      "review_timestamp": "ISO-8601 timestamp with timezone, for example 2026-06-24T12:00:00Z"
+    },
+    "full_goal_completion_allowed": false,
+    "gate_category": "live_non_github_action",
+    "goal_completion_claim_blocked": true,
+    "invalid_dependency_human_gate_refs": [],
+    "invalid_evidence_packet_manifest_items": [],
+    "invalid_field_formats": [],
+    "invalid_required_field_ref_shapes": [],
+    "invalid_senior_review_perspective_roles": [],
+    "matrix_status_after_validation": "HUMAN_REQUIRED",
+    "missing_dependency_human_gates": [
+      "CS-CH-H04",
+      "CS-CH-H07"
+    ],
+    "missing_evidence_packet_manifest_items": [],
+    "missing_required_fields": [],
+    "missing_senior_review_perspectives": [],
+    "negative_evidence": {
+      "duplicate_evidence_packet_manifest_items": 0,
+      "duplicate_evidence_packet_manifest_refs": 0,
+      "empty_evidence_packet_manifest_items": 4,
+      "empty_required_fields": 11,
+      "empty_senior_review_perspectives": 6,
+      "evidence_packet_manifest_values_persisted_by_validator": 0,
+      "external_mutations_executed_by_validator": 0,
+      "field_ref_values_persisted_by_validator": 0,
+      "human_decision_value_persisted_by_validator": 0,
+      "human_rows_marked_pass_by_validator": 0,
+      "invalid_dependency_human_gate_refs": 0,
+      "invalid_evidence_packet_manifest_items": 0,
+      "invalid_field_formats": 0,
+      "invalid_required_field_ref_shapes": 0,
+      "invalid_senior_review_perspective_roles": 0,
+      "live_provider_calls_executed_by_validator": 0,
+      "missing_dependency_human_gates": 2,
+      "missing_evidence_packet_manifest_items": 0,
+      "missing_required_fields": 0,
+      "missing_senior_review_perspectives": 0,
+      "pass_without_owner_promotion_allowed_by_validator": 0,
+      "product_claims_allowed_by_validator": 0,
+      "provider_mutations_executed_by_validator": 0,
+      "record_body_persisted_by_validator": 0,
+      "record_path_persisted_by_validator": 0,
+      "senior_review_perspective_findings_persisted_by_validator": 0,
+      "sensitive_marker_findings": 0
+    },
+    "non_mutation_evidence": {
+      "approval_collected_by_validator": false,
+      "evidence_packet_manifest_values_persisted_by_validator": false,
+      "external_mutations_executed_by_validator": 0,
+      "field_ref_values_persisted_by_validator": false,
+      "human_decision_recorded_by_validator": false,
+      "live_provider_calls_executed_by_validator": 0,
+      "provider_mutations_executed_by_validator": 0,
+      "record_body_persisted_by_validator": false,
+      "record_path_persisted_by_validator": false,
+      "senior_review_perspective_findings_persisted_by_validator": false
+    },
+    "pass_claim_allowed_by_validator": false,
+    "product_claim_allowed": false,
+    "promotion_rule": "This validator checks record structure and safety only. A human owner must attach dated external evidence and explicitly promote the scenario before any H row can move toward PASS.",
+    "provided_evidence_packet_manifest_indexes": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "provided_fields": [
+      "approval_ref",
+      "approved_provider",
+      "audit_refs",
+      "decision",
+      "dependency_human_gate_refs",
+      "evidence_packet_manifest",
+      "idempotency_evidence",
+      "issues_or_exceptions",
+      "provider_receipt",
+      "redacted_request_result",
+      "reversible_test_target",
+      "review_timestamp",
+      "reviewer",
+      "rollback_or_compensation_plan",
+      "scenario_id",
+      "senior_review_perspective_findings"
+    ],
+    "provided_senior_review_perspective_roles": [
+      "data_contract",
+      "domain_architecture",
+      "product_value",
+      "reliability_observability",
+      "security_privacy",
+      "testability_migration"
+    ],
+    "record_file": {
+      "path_recorded_by_validator": false,
+      "path_sha256": "2974520bc8d536e29859878ae972d855df6b48058bbed2fb3b92c79bad17816d",
+      "sha256": "4db2079b48ddeea5513bfcd218a45a8c8ec46c53787e5f3ce810818853704c02"
+    },
+    "record_scenario_id": "CS-CH-H05",
+    "redaction_guidance": {
+      "allowed_redaction_statuses": [
+        "redacted",
+        "public_safe",
+        "no_sensitive_material"
+      ],
+      "dependency_human_gate_refs": {
+        "accepted_ref_prefix": "connector_human_gate_record_validation:",
+        "must_reference_structurally_valid_accept_validation": true,
+        "required_gates": [
+          "CS-CH-H04",
+          "CS-CH-H07"
+        ]
+      },
+      "evidence_packet_manifest": {
+        "allowed_redaction_statuses": [
+          "redacted",
+          "public_safe",
+          "no_sensitive_material"
+        ],
+        "evidence_ref_shape": "redacted evidence reference or public-safe artifact id",
+        "evidence_ref_uniqueness_required": true,
+        "redaction_status_required": true,
+        "required_evidence_count": 4,
+        "required_evidence_labels": [
+          "Non-GitHub provider and reversible target approval.",
+          "Pre-execution rollback or compensation plan.",
+          "Redacted request/result and provider receipt/state evidence.",
+          "Idempotency and audit refs proving exactly-once execution."
+        ],
+        "values_persisted_by_validator": false
+      },
+      "field_guidance": {
+        "approval_ref": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        },
+        "approved_provider": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        },
+        "audit_refs": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        },
+        "idempotency_evidence": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        },
+        "issues_or_exceptions": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        },
+        "provider_receipt": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        },
+        "redacted_request_result": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        },
+        "reversible_test_target": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        },
+        "review_timestamp": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        },
+        "reviewer": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        },
+        "rollback_or_compensation_plan": {
+          "accepted_value_shape": "redacted reference, artifact id, or public-safe summary",
+          "raw_provider_payloads_allowed": false,
+          "raw_secret_values_allowed": false,
+          "required": true
+        }
+      },
+      "operator_warning": "Do not paste raw secrets, provider payloads, local file paths, private user data, or unredacted external transcripts into the reviewer record. Use redacted refs or public-safe summaries; validate-record will fail on detected sensitive markers.",
+      "raw_evidence_values_allowed": false,
+      "raw_provider_payloads_allowed": false,
+      "raw_record_body_persisted_by_validator": false,
+      "raw_record_path_persisted_by_validator": false,
+      "raw_secret_values_allowed": false,
+      "scenario_id": "CS-CH-H05",
+      "schema_version": "cs.connector_human_gate_redaction_guidance.v1",
+      "senior_review_perspective_findings": {
+        "accepted_value_shape": "redacted finding summary per required senior-review perspective",
+        "persisted_by_validator": false,
+        "raw_provider_payloads_allowed": false,
+        "raw_secret_values_allowed": false,
+        "required_roles": [
+          "product_value",
+          "domain_architecture",
+          "data_contract",
+          "reliability_observability",
+          "security_privacy",
+          "testability_migration"
+        ]
+      },
+      "sensitive_marker_policy": {
+        "finding_fields": [
+          "marker_type",
+          "fingerprint",
+          "length"
+        ],
+        "fingerprints_only": true,
+        "marker_types": [
+          "github_token_like",
+          "aws_access_key_like",
+          "private_key_block",
+          "scenario_sensitive_canary"
+        ],
+        "operator_action": "Replace any matching material with a redacted evidence reference or public-safe summary before submitting the reviewer record.",
+        "raw_match_values_persisted": false,
+        "raw_match_values_returned": false,
+        "schema_version": "cs.connector_sensitive_marker_policy.v1",
+        "validator_structural_error": "sensitive_marker_detected"
+      },
+      "sensitive_marker_scan_required_by_validator": true,
+      "status": "operator_guidance_only"
+    },
+    "required_evidence": [
+      "Non-GitHub provider and reversible target approval.",
+      "Pre-execution rollback or compensation plan.",
+      "Redacted request/result and provider receipt/state evidence.",
+      "Idempotency and audit refs proving exactly-once execution."
+    ],
+    "required_evidence_packet_manifest": [
+      {
+        "required_evidence": "Non-GitHub provider and reversible target approval.",
+        "required_evidence_index": 1
+      },
+      {
+        "required_evidence": "Pre-execution rollback or compensation plan.",
+        "required_evidence_index": 2
+      },
+      {
+        "required_evidence": "Redacted request/result and provider receipt/state evidence.",
+        "required_evidence_index": 3
+      },
+      {
+        "required_evidence": "Idempotency and audit refs proving exactly-once execution.",
+        "required_evidence_index": 4
+      }
+    ],
+    "required_evidence_packet_manifest_indexes": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "required_fields": [
+      "reviewer",
+      "review_timestamp",
+      "approved_provider",
+      "reversible_test_target",
+      "rollback_or_compensation_plan",
+      "approval_ref",
+      "redacted_request_result",
+      "provider_receipt",
+      "idempotency_evidence",
+      "audit_refs",
+      "issues_or_exceptions"
+    ],
+    "required_senior_review_perspectives": [
+      "product_value",
+      "domain_architecture",
+      "data_contract",
+      "reliability_observability",
+      "security_privacy",
+      "testability_migration"
+    ],
+    "review_order": 6,
+    "scenario_id": "CS-CH-H05",
+    "scenario_matches": true,
+    "schema_version": "cs.connector_human_gate_record_validation.v1",
+    "scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    },
+    "senior_review_perspective_findings_complete": false,
+    "senior_review_perspective_findings_present": true,
+    "senior_review_perspective_findings_recorded_by_validator": false,
+    "sensitive_fields": [],
+    "sensitive_marker_findings": [],
+    "status": "record_structurally_invalid",
+    "stop_or_reject_when": "Approval is ambiguous, provider receipt is missing, idempotency cannot be demonstrated, or the action uses GitHub instead of the selected non-GitHub provider.",
+    "structural_errors": [
+      "decision_not_allowed",
+      "empty_required_fields",
+      "empty_senior_review_perspectives",
+      "empty_evidence_packet_manifest_items",
+      "missing_dependency_human_gate_refs"
+    ],
+    "template_path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_H05_HUMAN_REVIEW_TEMPLATE_2026-06-24.md",
+    "template_structure": {
+      "has_acceptance_evidence_packet": true,
+      "has_no_pass_boundary": true,
+      "has_pending_human_result_rows": true,
+      "has_reject_conditions": true,
+      "has_scenario_first_runbook_or_study": true,
+      "has_scenario_id": true,
+      "has_senior_review_perspectives": true,
+      "missing_required_tokens": [],
+      "missing_senior_review_perspectives": [],
+      "structure_ready": true,
+      "template_present": true
+    },
+    "title": "Human live non-GitHub Action execution",
+    "valid_dependency_human_gate_refs": [],
+    "validation_id": "cshval_c49977fde38bfac7",
+    "validation_scope": "structure_and_safety_only",
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "errors": [
+    {
+      "code": "CS_CONNECTOR_HUMAN_GATE_RECORD_INVALID",
+      "message": "Human-gate record is not structurally valid or contains unsafe markers.",
+      "negative_evidence": {
+        "duplicate_evidence_packet_manifest_items": 0,
+        "duplicate_evidence_packet_manifest_refs": 0,
+        "empty_evidence_packet_manifest_items": 4,
+        "empty_required_fields": 11,
+        "empty_senior_review_perspectives": 6,
+        "evidence_packet_manifest_values_persisted_by_validator": 0,
+        "external_mutations_executed_by_validator": 0,
+        "field_ref_values_persisted_by_validator": 0,
+        "human_decision_value_persisted_by_validator": 0,
+        "human_rows_marked_pass_by_validator": 0,
+        "invalid_dependency_human_gate_refs": 0,
+        "invalid_evidence_packet_manifest_items": 0,
+        "invalid_field_formats": 0,
+        "invalid_required_field_ref_shapes": 0,
+        "invalid_senior_review_perspective_roles": 0,
+        "live_provider_calls_executed_by_validator": 0,
+        "missing_dependency_human_gates": 2,
+        "missing_evidence_packet_manifest_items": 0,
+        "missing_required_fields": 0,
+        "missing_senior_review_perspectives": 0,
+        "pass_without_owner_promotion_allowed_by_validator": 0,
+        "product_claims_allowed_by_validator": 0,
+        "provider_mutations_executed_by_validator": 0,
+        "record_body_persisted_by_validator": 0,
+        "record_path_persisted_by_validator": 0,
+        "senior_review_perspective_findings_persisted_by_validator": 0,
+        "sensitive_marker_findings": 0
+      },
+      "structural_errors": [
+        "decision_not_allowed",
+        "empty_required_fields",
+        "empty_senior_review_perspectives",
+        "empty_evidence_packet_manifest_items",
+        "missing_dependency_human_gate_refs"
+      ]
+    }
+  ],
+  "evidence_refs": [
+    "connector_human_gate_record_validation:cshval_c49977fde38bfac7"
+  ],
+  "final_verdict": "HUMAN_REQUIRED",
+  "ids": {
+    "connector_human_gate_record_validation_id": "cshval_c49977fde38bfac7",
+    "git_commit": "cb682e9"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/connectorhub-human-gate-validation-blank-cs-ch-h05-2026-06-24.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "schema_version": "cs.cli.v0",
+  "status": "blocked",
+  "summary": {
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "dependency_unlock_allowed_by_validator": false,
+    "evidence_packet_manifest_complete": false,
+    "external_mutations_executed_by_validator": 0,
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "live_provider_calls_executed_by_validator": 0,
+    "pass_claim_allowed_by_validator": false,
+    "product_claim_allowed": false,
+    "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "provider_mutations_executed_by_validator": 0,
+    "record_body_persisted_by_validator": false,
+    "record_path_persisted_by_validator": false,
+    "scenario_id": "CS-CH-H05",
+    "senior_review_perspective_findings_complete": false,
+    "status": "record_structurally_invalid",
+    "structurally_valid": false,
+    "validation_id": "cshval_c49977fde38bfac7",
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

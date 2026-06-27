@@ -1,4 +1,4 @@
-.PHONY: verify-docs verify-scenario-matrix verify-scaffold-cli verify-vs0-runtime verify-vs0-acceptance verify-vs0-evux verify-vs0-operator-ui verify-vs1-ontology verify-vs2-local-range verify-vs2-security verify-local-fast
+.PHONY: verify-docs verify-scenario-matrix verify-scaffold-cli verify-vs0-runtime verify-vs0-acceptance verify-vs0-evux verify-vs0-operator-ui verify-vs1-ontology verify-vs2-local-range verify-vs2-production-like verify-vs2-security verify-connector-contract-adapter generate-connectorhub-human-gate-artifacts generate-connectorhub-engineering-trail-manifest verify-connectorhub-engineering-trail verify-local-fast
 
 verify-docs:
 	scripts/verify_sot_docs.sh
@@ -11,12 +11,12 @@ verify-scaffold-cli:
 	scripts/verify_scaffold_cli.sh
 
 verify-vs0-runtime:
-	PATH="$(PWD):$$PATH" cornerstone scenario verify vs0-product-runtime --output reports/scenario/vs0-product-runtime-2026-06-11.json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify vs0-product-runtime --json --output reports/scenario/vs0-product-runtime-2026-06-11.json
 	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/vs0-product-runtime-2026-06-11.json --json
 	python3 -m unittest tests.scenario.test_scaffold_cli
 
 verify-vs0-acceptance:
-	PATH="$(PWD):$$PATH" cornerstone scenario verify vs0-runtime-acceptance --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify vs0-runtime-acceptance --json --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json
 	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/vs0-runtime-acceptance-2026-06-11.json --json
 	PATH="$(PWD):$$PATH" cornerstone release evidence collect --scope vs0-runtime-acceptance --json
 
@@ -46,5 +46,136 @@ verify-vs2-security:
 verify-vs2-local-range:
 	mkdir -p reports/security
 	PATH="$(PWD):$$PATH" cornerstone security vs2-local-range --json > reports/security/vs2-local-range-command.json
+
+verify-vs2-production-like:
+	mkdir -p reports/security
+	PATH="$(PWD):$$PATH" cornerstone security vs2-production-like-integration --json > reports/security/vs2-production-like-integration-command.json
+
+verify-connector-contract-adapter:
+	PATH="$(PWD):$$PATH" cornerstone security vs2-local-proof --json > reports/security/vs2-local-security-proof-command.json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json --output reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-001 --json --output reports/scenario/connector-contract-adapter-cs-ch-001-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-001-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-002 --json --output reports/scenario/connector-contract-adapter-cs-ch-002-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-002-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-003 --json --output reports/scenario/connector-contract-adapter-cs-ch-003-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-003-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-004 --json --output reports/scenario/connector-contract-adapter-cs-ch-004-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-004-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-005 --json --output reports/scenario/connector-contract-adapter-cs-ch-005-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-005-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-006 --json --output reports/scenario/connector-contract-adapter-cs-ch-006-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-006-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-007 --json --output reports/scenario/connector-contract-adapter-cs-ch-007-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-007-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-008 --json --output reports/scenario/connector-contract-adapter-cs-ch-008-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-008-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-009 --json --output reports/scenario/connector-contract-adapter-cs-ch-009-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-009-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-010 --json --output reports/scenario/connector-contract-adapter-cs-ch-010-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-010-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-011 --json --output reports/scenario/connector-contract-adapter-cs-ch-011-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-011-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-012 --json --output reports/scenario/connector-contract-adapter-cs-ch-012-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-012-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-013 --json --output reports/scenario/connector-contract-adapter-cs-ch-013-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-013-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-014 --json --output reports/scenario/connector-contract-adapter-cs-ch-014-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-014-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-015 --json --output reports/scenario/connector-contract-adapter-cs-ch-015-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-015-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-016 --json --output reports/scenario/connector-contract-adapter-cs-ch-016-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-016-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-017 --json --output reports/scenario/connector-contract-adapter-cs-ch-017-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-017-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-018 --json --output reports/scenario/connector-contract-adapter-cs-ch-018-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-018-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-019 --json --output reports/scenario/connector-contract-adapter-cs-ch-019-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-019-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-020 --json --output reports/scenario/connector-contract-adapter-cs-ch-020-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-020-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-021 --json --output reports/scenario/connector-contract-adapter-cs-ch-021-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-021-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-022 --json --output reports/scenario/connector-contract-adapter-cs-ch-022-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-022-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-023 --json --output reports/scenario/connector-contract-adapter-cs-ch-023-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-023-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-024 --json --output reports/scenario/connector-contract-adapter-cs-ch-024-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-024-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-025 --json --output reports/scenario/connector-contract-adapter-cs-ch-025-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-025-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-026 --json --output reports/scenario/connector-contract-adapter-cs-ch-026-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-026-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-027 --json --output reports/scenario/connector-contract-adapter-cs-ch-027-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-027-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-028 --json --output reports/scenario/connector-contract-adapter-cs-ch-028-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-028-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-029 --json --output reports/scenario/connector-contract-adapter-cs-ch-029-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-029-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-030 --json --output reports/scenario/connector-contract-adapter-cs-ch-030-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-030-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-031 --json --output reports/scenario/connector-contract-adapter-cs-ch-031-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-031-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-032 --json --output reports/scenario/connector-contract-adapter-cs-ch-032-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-032-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-033 --json --output reports/scenario/connector-contract-adapter-cs-ch-033-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-033-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-034 --json --output reports/scenario/connector-contract-adapter-cs-ch-034-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-034-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-035 --json --output reports/scenario/connector-contract-adapter-cs-ch-035-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-035-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json --output reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-036-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-037 --json --output reports/scenario/connector-contract-adapter-cs-ch-037-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-037-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-038 --json --output reports/scenario/connector-contract-adapter-cs-ch-038-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-038-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-039 --json --output reports/scenario/connector-contract-adapter-cs-ch-039-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-039-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-040 --json --output reports/scenario/connector-contract-adapter-cs-ch-040-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-cs-ch-040-2026-06-23.json --json
+	PATH="$(PWD):$$PATH" cornerstone scenario verify connector-contract-adapter --json --output reports/scenario/connector-contract-adapter-2026-06-23.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/connector-contract-adapter-2026-06-23.json --json
+	python3 -m unittest tests.scenario.test_connectorhub_cli
+
+verify-connectorhub-engineering-trail:
+	python3 scripts/verify_connectorhub_engineering_trail.py
+
+generate-connectorhub-human-gate-artifacts:
+	mkdir -p reports/scenario
+	for scenario in CS-CH-H01 CS-CH-H02 CS-CH-H03 CS-CH-H04 CS-CH-H05 CS-CH-H06 CS-CH-H07; do \
+		lower=$$(printf "%s" "$$scenario" | tr '[:upper:]' '[:lower:]'); \
+		PATH="$(PWD):$$PATH" cornerstone connector human-gate package --scenario "$$scenario" --state-dir tmp/manual-connector-human-gates --json --output "reports/scenario/connectorhub-human-gate-package-$${lower}-2026-06-24.json" >/dev/null; \
+	done
+	PATH="$(PWD):$$PATH" cornerstone connector human-gate field-ref-contract --scenario CS-CH-H04 --state-dir tmp/manual-connector-human-gates --json --output reports/scenario/connectorhub-human-gate-field-ref-contract-cs-ch-h04-2026-06-24.json >/dev/null
+	for scenario in CS-CH-H01 CS-CH-H02 CS-CH-H03 CS-CH-H04 CS-CH-H05 CS-CH-H06 CS-CH-H07; do \
+		lower=$$(printf "%s" "$$scenario" | tr '[:upper:]' '[:lower:]'); \
+		case "$$scenario" in \
+			CS-CH-H01) packet_dir="<h01-github-readonly-packet-dir>" ;; \
+			CS-CH-H02) packet_dir="<h02-macos-permission-packet-dir>" ;; \
+			CS-CH-H03) packet_dir="<h03-chrome-privacy-packet-dir>" ;; \
+			CS-CH-H04) packet_dir="<h04-acceptance-packet-dir>" ;; \
+			CS-CH-H05) packet_dir="<h05-live-action-packet-dir>" ;; \
+			CS-CH-H06) packet_dir="<h06-usability-trust-packet-dir>" ;; \
+			CS-CH-H07) packet_dir="<h07-recovery-packet-dir>" ;; \
+		esac; \
+		PATH="$(PWD):$$PATH" cornerstone connector human-gate evidence-packet-contract --scenario "$$scenario" --state-dir tmp/manual-connector-human-gates --json --output "reports/scenario/connectorhub-human-gate-evidence-packet-contract-$${lower}-2026-06-24.json" >/dev/null; \
+		PATH="$(PWD):$$PATH" cornerstone connector human-gate evidence-packet-file-contract --scenario "$$scenario" --state-dir tmp/manual-connector-human-gates --json --output "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-$${lower}-2026-06-24.json" >/dev/null; \
+		PATH="$(PWD):$$PATH" cornerstone connector human-gate evidence-packet-scaffold --scenario "$$scenario" --packet-dir "$$packet_dir" --state-dir tmp/manual-connector-human-gates --json --output "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-$${lower}-2026-06-24.json" >/dev/null; \
+		PATH="$(PWD):$$PATH" cornerstone connector human-gate evidence-packet-validate --scenario "$$scenario" --packet-dir "$$packet_dir" --state-dir tmp/manual-connector-human-gates --json --output "reports/scenario/connectorhub-human-gate-evidence-packet-validation-$${lower}-2026-06-24.json" >/dev/null; status=$$?; if test $$status -ne 1; then exit 1; fi; \
+		PATH="$(PWD):$$PATH" cornerstone connector human-gate evidence-packet-record-draft --scenario "$$scenario" --packet-dir "$$packet_dir" --state-dir tmp/manual-connector-human-gates --json --output "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-$${lower}-2026-06-24.json" >/dev/null; status=$$?; if test $$status -ne 1; then exit 1; fi; \
+	done
+	PATH="$(PWD):$$PATH" cornerstone connector human-gate preflight-bundle --scenario CS-CH-H04 --state-dir tmp/manual-connector-human-gates --json --output reports/scenario/connectorhub-human-gate-preflight-bundle-cs-ch-h04-2026-06-24.json >/dev/null
+	PATH="$(PWD):$$PATH" cornerstone connector human-gate report --state-dir tmp/manual-connector-human-gates --json --output reports/scenario/connectorhub-human-gate-readiness-2026-06-24.json >/dev/null
+	PATH="$(PWD):$$PATH" cornerstone connector human-gate next --state-dir tmp/manual-connector-human-gates --json --output reports/scenario/connectorhub-human-gate-next-2026-06-24.json >/dev/null
+	PATH="$(PWD):$$PATH" cornerstone connector human-gate validation-handoff --state-dir tmp/manual-connector-human-gates --json --output reports/scenario/connectorhub-human-gate-validation-handoff-2026-06-24.json >/dev/null
+	for scenario in CS-CH-H01 CS-CH-H02 CS-CH-H03 CS-CH-H04 CS-CH-H05 CS-CH-H06 CS-CH-H07; do \
+		lower=$$(printf "%s" "$$scenario" | tr '[:upper:]' '[:lower:]'); \
+		PATH="$(PWD):$$PATH" cornerstone connector human-gate package --scenario "$$scenario" --state-dir tmp/manual-connector-human-gate-template-checks --json --record-template-output "reports/scenario/connectorhub-human-gate-record-template-$${lower}-2026-06-24.json" >/dev/null; \
+		PATH="$(PWD):$$PATH" cornerstone connector human-gate validate-record --scenario "$$scenario" --record-file "reports/scenario/connectorhub-human-gate-record-template-$${lower}-2026-06-24.json" --state-dir tmp/manual-connector-human-gate-template-checks --json --output "reports/scenario/connectorhub-human-gate-validation-blank-$${lower}-2026-06-24.json" >/dev/null; status=$$?; if test $$status -ne 1; then exit 1; fi; \
+	done
+
+generate-connectorhub-engineering-trail-manifest: generate-connectorhub-human-gate-artifacts
+	python3 scripts/generate_connectorhub_engineering_trail_manifest.py
 
 verify-local-fast: verify-docs verify-scenario-matrix verify-scaffold-cli

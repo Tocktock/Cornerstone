@@ -1,0 +1,197 @@
+{
+  "schema_version": "cs.capture_lifecycle_seed.v1",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "scenario_id": "CS-CH-027",
+  "sources": [
+    {
+      "source_id": "macos_activity",
+      "source_type": "watch_agent_macos_activity",
+      "target_kind": "source",
+      "target_id": "macos_activity",
+      "display_name": "macOS activity WatchAgent",
+      "status": "active",
+      "collection_enabled": true,
+      "active_consent": true,
+      "capability_active": true,
+      "retention_days": 30,
+      "sample_count": 3,
+      "session_count": 1,
+      "watch_rule_refs": [
+        "wrule_project_alpha_capture"
+      ],
+      "local_state_items": [
+        {
+          "item_id": "sample_window_metadata_001",
+          "item_type": "activity_sample",
+          "classification": "internal",
+          "deletion_eligibility": "eligible_derived",
+          "eligible_for_delete": true,
+          "anonymize_on_delete": false,
+          "payload_hash": "sha256:697f6c6de79d7f2015678a2410dd83a2294f0f19e988e64d43d9bd55c22a1a19",
+          "raw_content_stored": false,
+          "raw_browser_payload_stored": false,
+          "created_at": "2026-06-23T01:00:00Z"
+        },
+        {
+          "item_id": "session_project_alpha_001",
+          "item_type": "activity_session",
+          "classification": "internal",
+          "deletion_eligibility": "eligible_derived",
+          "eligible_for_delete": true,
+          "anonymize_on_delete": false,
+          "payload_hash": "sha256:d4b3eb7a9576f2e018ec1308424615c622c7ac22a9403e860c46e8cf781d62dd",
+          "raw_content_stored": false,
+          "raw_browser_payload_stored": false,
+          "created_at": "2026-06-23T01:10:00Z"
+        },
+        {
+          "item_id": "audit_capture_consent_001",
+          "item_type": "audit_ref",
+          "classification": "internal",
+          "deletion_eligibility": "retained_audit",
+          "eligible_for_delete": false,
+          "anonymize_on_delete": false,
+          "retention_requirement": "audit_obligation",
+          "payload_hash": "sha256:bcf23286f67b1ff08015a9690729c5f1a96f799cabddb5fc0c3d91d5a3f2f9f9",
+          "raw_content_stored": false,
+          "raw_browser_payload_stored": false,
+          "created_at": "2026-06-23T01:15:00Z"
+        },
+        {
+          "item_id": "evidence_ref_project_alpha_001",
+          "item_type": "immutable_evidence_ref",
+          "classification": "internal",
+          "deletion_eligibility": "retained_evidence",
+          "eligible_for_delete": false,
+          "anonymize_on_delete": false,
+          "retention_requirement": "immutable_evidence",
+          "payload_hash": "sha256:ea45de1684ab5bf67ad7df960642ceaa4e08723dab7d3d827d66bcf984ea2588",
+          "raw_content_stored": false,
+          "raw_browser_payload_stored": false,
+          "created_at": "2026-06-23T01:20:00Z"
+        },
+        {
+          "item_id": "candidate_summary_user_label_001",
+          "item_type": "watch_candidate",
+          "classification": "personal",
+          "deletion_eligibility": "anonymize",
+          "eligible_for_delete": false,
+          "anonymize_on_delete": true,
+          "payload_hash": "sha256:203928a8f23ee128b30799ee2c408b7864f7f9d2a65688c0796fa06a917c5ea0",
+          "raw_content_stored": false,
+          "raw_browser_payload_stored": false,
+          "created_at": "2026-06-23T01:25:00Z"
+        }
+      ],
+      "capture_results": [
+        {
+          "result_id": "capres_project_alpha_activity_summary",
+          "kind": "activity_session_summary",
+          "status": "pending_review",
+          "evidence_refs": [
+            "evidence:activity_session:actsess_project_alpha_001"
+          ],
+          "raw_content_stored": false,
+          "raw_browser_payload_stored": false
+        }
+      ]
+    },
+    {
+      "source_id": "chrome_auto_capture",
+      "source_type": "chrome_auto_capture",
+      "target_kind": "source",
+      "target_id": "chrome_auto_capture",
+      "display_name": "Chrome auto capture",
+      "status": "active",
+      "collection_enabled": true,
+      "active_consent": true,
+      "capability_active": true,
+      "retention_days": 14,
+      "sample_count": 1,
+      "session_count": 0,
+      "watch_rule_refs": [
+        "wrule_project_alpha_capture"
+      ],
+      "local_state_items": [
+        {
+          "item_id": "chrome_domain_hash_001",
+          "item_type": "chrome_capture_metadata",
+          "classification": "internal",
+          "deletion_eligibility": "eligible_derived",
+          "eligible_for_delete": true,
+          "anonymize_on_delete": false,
+          "payload_hash": "sha256:b3f879a366014a289d67d34898f98d81e2ee9d8b22db6e3c20f6891d3dce6d90",
+          "raw_content_stored": false,
+          "raw_browser_payload_stored": false,
+          "created_at": "2026-06-23T02:00:00Z"
+        },
+        {
+          "item_id": "chrome_capture_audit_001",
+          "item_type": "audit_ref",
+          "classification": "internal",
+          "deletion_eligibility": "retained_audit",
+          "eligible_for_delete": false,
+          "anonymize_on_delete": false,
+          "retention_requirement": "audit_obligation",
+          "payload_hash": "sha256:856d662cbf9eba2bfbbf396f88f0177a2c3f66977831623825bf039ca0dc1bc6",
+          "raw_content_stored": false,
+          "raw_browser_payload_stored": false,
+          "created_at": "2026-06-23T02:10:00Z"
+        }
+      ],
+      "capture_results": [
+        {
+          "result_id": "capres_chrome_project_page_hint",
+          "kind": "chrome_page_hint",
+          "status": "pending_review",
+          "evidence_refs": [
+            "evidence:chrome_page:hash_only_project_alpha"
+          ],
+          "raw_content_stored": false,
+          "raw_browser_payload_stored": false
+        }
+      ]
+    },
+    {
+      "source_id": "macos_activity",
+      "source_type": "watch_rule_capture_scope",
+      "target_kind": "watch_rule",
+      "target_id": "wrule_project_alpha_capture",
+      "display_name": "Project Alpha capture Watch Rule",
+      "status": "active",
+      "collection_enabled": true,
+      "active_consent": true,
+      "capability_active": true,
+      "retention_days": 30,
+      "sample_count": 0,
+      "session_count": 0,
+      "watch_rule_refs": [
+        "wrule_project_alpha_capture"
+      ],
+      "local_state_items": [],
+      "capture_results": []
+    },
+    {
+      "source_id": "all_collection",
+      "source_type": "global_capture_scope",
+      "target_kind": "global",
+      "target_id": "global_collection",
+      "display_name": "All continuous collection",
+      "status": "active",
+      "collection_enabled": true,
+      "active_consent": true,
+      "capability_active": true,
+      "retention_days": 30,
+      "sample_count": 0,
+      "session_count": 0,
+      "watch_rule_refs": [],
+      "local_state_items": [],
+      "capture_results": []
+    }
+  ]
+}

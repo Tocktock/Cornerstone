@@ -1,0 +1,67 @@
+{
+  "schema_version": "cs.chrome_auto_capture_trigger.v1",
+  "source_id": "chrome_auto_capture",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "config_version": "stale-auto-capture-config",
+  "consent_version": "stale-auto-capture-consent",
+  "source_pack_id": "source_pack_unapproved_docs",
+  "extension": {
+    "extension_id_hash": "sha256:9a2c1c4b6f4d7a11",
+    "manifest_version": 3,
+    "permissions": [
+      "storage"
+    ],
+    "host_permissions": [
+      "https://unapproved.example/*"
+    ],
+    "optional_host_permissions": [],
+    "broad_all_urls_permission": false
+  },
+  "trigger": {
+    "event_id": "chrome-auto-capture-blocked-001",
+    "trigger_type": "background_scan",
+    "idempotency_key": "chrome-auto-capture:blocked:unapproved:v1",
+    "within_throttle_window": true,
+    "session_capture_count": 2,
+    "session_id_hash": "sha256:auto-session-blocked"
+  },
+  "page": {
+    "url_hash": "sha256:unapproved-auto-capture-url",
+    "origin": "https://unapproved.example",
+    "title_hash": "sha256:unapproved-auto-title",
+    "active": true,
+    "incognito": false,
+    "browser_internal": false,
+    "sensitive_surface": false
+  },
+  "bounded_payload": {
+    "metadata": {
+      "language": "en",
+      "content_type": "text/html",
+      "clip_strategy": "none_blocked"
+    },
+    "text_clip": "",
+    "max_text_clip_chars": 512,
+    "raw_html_included": false,
+    "cookies_included": false,
+    "local_storage_included": false,
+    "session_storage_included": false,
+    "screenshot_included": false,
+    "form_values_included": false,
+    "browser_history_included": false
+  },
+  "summary": {
+    "summary_text": "",
+    "confidence": {
+      "score": 0.0,
+      "caveats": [
+        "blocked_before_capture"
+      ]
+    }
+  }
+}

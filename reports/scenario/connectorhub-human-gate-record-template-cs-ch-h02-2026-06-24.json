@@ -1,0 +1,52 @@
+{
+  "audit_refs": [],
+  "consent_record": "",
+  "decision": "",
+  "dependency_human_gate_refs": {
+    "CS-CH-H04": "",
+    "CS-CH-H07": ""
+  },
+  "device_os_version_redacted": "",
+  "evidence_packet_manifest": [
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Recording or screenshots of consent, permission grant, pause, and revoke.",
+      "required_evidence_index": 1
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Status transcript showing permission and capture state transitions.",
+      "required_evidence_index": 2
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "First bounded sample reference with owner/workspace scope.",
+      "required_evidence_index": 3
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Proof that pause and revoke stop capture or block sample attempts.",
+      "required_evidence_index": 4
+    }
+  ],
+  "first_sample_ref": "",
+  "issues_or_exceptions": "",
+  "pause_revoke_timestamps": [],
+  "permission_state_snapshot": "",
+  "review_timestamp": "",
+  "reviewer": "",
+  "scenario_id": "CS-CH-H02",
+  "screenshots_or_recording_ref": "",
+  "senior_review_perspective_findings": {
+    "data_contract": "",
+    "domain_architecture": "",
+    "product_value": "",
+    "reliability_observability": "",
+    "security_privacy": "",
+    "testability_migration": ""
+  }
+}

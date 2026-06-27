@@ -1,0 +1,153 @@
+{
+  "schema_version": "cs.watch_result_fixture.v1",
+  "scenario_id": "CS-CH-028",
+  "watch_result_key": "project-alpha-watch-result-2026-06-23",
+  "title": "Project Alpha watch result",
+  "created_at": "2026-06-23T09:25:00Z",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "source_refs": {
+    "watch_rule_ref": "watch_rule:wrule_project_alpha_capture",
+    "watch_rule_evaluation_trace_ref": "watch_rule_evaluation_trace:wtrace_project_alpha_fixture",
+    "activity_session_ref": "connector_activity_session:actsess_project_alpha_001",
+    "capture_inbox_item_ref": "capture_inbox_item:capin_project_alpha_fixture"
+  },
+  "observations": [
+    {
+      "source_kind": "activity_session",
+      "source_id": "macos_activity",
+      "observed_at": "2026-06-23T09:03:00Z",
+      "source_restrictions": [
+        "metadata_only",
+        "raw_titles_absent",
+        "full_urls_absent"
+      ],
+      "observed_facts": {
+        "activity_session_id": "actsess_project_alpha_001",
+        "sample_count": 3,
+        "app_categories": [
+          "browser_docs",
+          "editor"
+        ],
+        "app_switch_count": 2,
+        "project_hints": [
+          "connectorhub"
+        ],
+        "first_sample_at": "2026-06-23T09:00:00Z",
+        "last_sample_at": "2026-06-23T09:02:00Z"
+      },
+      "source_refs": {
+        "activity_sample_batch_ref": "connector_activity_sample_batch:casb_project_alpha_fixture",
+        "activity_sessionization_ref": "connector_activity_sessionization:csessrun_project_alpha_fixture"
+      },
+      "evidence_refs": [
+        "connector_activity_session:actsess_project_alpha_001",
+        "connector_activity_sample_batch:casb_project_alpha_fixture"
+      ]
+    },
+    {
+      "source_kind": "capture_inbox_item",
+      "source_id": "chrome_auto_capture",
+      "observed_at": "2026-06-23T09:05:00Z",
+      "source_restrictions": [
+        "redacted_summary_only",
+        "raw_browser_payload_absent",
+        "owner_review_required"
+      ],
+      "observed_facts": {
+        "capture_inbox_item_id": "capin_project_alpha_fixture",
+        "source_domain_hash": "domainhash:docs-project-alpha",
+        "summary_kind": "browser_page_hint",
+        "policy_decision": "allow_metadata_summary",
+        "owner_review_status": "pending_review"
+      },
+      "source_refs": {
+        "chrome_auto_capture_policy_decision_ref": "chrome_auto_capture_policy_decision:capol_project_alpha_fixture",
+        "chrome_auto_capture_summary_ref": "chrome_auto_capture_summary:casum_project_alpha_fixture"
+      },
+      "evidence_refs": [
+        "capture_inbox_item:capin_project_alpha_fixture",
+        "chrome_auto_capture_summary:casum_project_alpha_fixture"
+      ]
+    }
+  ],
+  "inferences": [
+    {
+      "inference_key": "project-alpha-review-hypothesis",
+      "hypothesis": "Project Alpha connector adoption may need review before the launch note is finalized.",
+      "confidence": {
+        "score": 0.62
+      },
+      "model": {
+        "provider": "local_test",
+        "name": "deterministic_watch_result_fixture",
+        "version": "watch_result_v1"
+      },
+      "caveats": [
+        "metadata_only_observations",
+        "no_raw_browser_text",
+        "no_direct_user_intent_evidence",
+        "single_short_activity_window"
+      ],
+      "alternatives": [
+        "The observed activity may be routine documentation review.",
+        "The browser hint may be unrelated to launch risk."
+      ],
+      "observation_refs": [
+        "activity_session",
+        "capture_inbox_item"
+      ],
+      "evidence_refs": [
+        "connector_activity_session:actsess_project_alpha_001",
+        "capture_inbox_item:capin_project_alpha_fixture"
+      ],
+      "unsupported": false,
+      "eligible_for_approved_memory": false
+    },
+    {
+      "inference_key": "unsupported-owner-intent",
+      "hypothesis": "The owner intends to delay Project Alpha launch.",
+      "confidence": {
+        "score": 0.31
+      },
+      "model": {
+        "provider": "local_test",
+        "name": "deterministic_watch_result_fixture",
+        "version": "watch_result_v1"
+      },
+      "caveats": [
+        "unsupported_intent",
+        "no_owner_statement",
+        "no_action_approval"
+      ],
+      "alternatives": [
+        "The owner may only be reading related context.",
+        "The launch note may not require any schedule change."
+      ],
+      "observation_refs": [
+        "activity_session"
+      ],
+      "evidence_refs": [
+        "connector_activity_session:actsess_project_alpha_001"
+      ],
+      "unsupported": true,
+      "eligible_for_approved_memory": false
+    }
+  ],
+  "evidence_caveats": [
+    "Evidence is metadata-only local fixture data.",
+    "No raw window title, full URL, browser text, screenshot, or user statement is present.",
+    "Inference must remain Draft/Hypothesis until owner review or stronger evidence exists."
+  ],
+  "proposal": {
+    "kind": "draft_memory",
+    "summary": "Save a draft memory that Project Alpha connector adoption should be reviewed before final launch communication.",
+    "required_authority": "owner_review",
+    "risk": "medium",
+    "action_card_required": false
+  }
+}

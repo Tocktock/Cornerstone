@@ -1,0 +1,52 @@
+{
+  "schema_version": "cs.chrome_auto_capture_config.v1",
+  "source_id": "chrome_auto_capture",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "config_version": "chrome-auto-capture-config-v1",
+  "consent_version": "chrome-auto-capture-consent-v1",
+  "owner_rule": {
+    "rule_id": "watchrule_project_alpha_browser_auto_capture",
+    "confirmed": true,
+    "active_page_only": true,
+    "allowed_trigger_types": [
+      "page_load",
+      "url_change",
+      "tab_activate"
+    ]
+  },
+  "site_allowance": {
+    "site_allowed": true,
+    "allowed_origins": [
+      "https://docs.project-alpha.example"
+    ],
+    "allowed_url_hashes": [
+      "sha256:project-alpha-auto-capture-url"
+    ],
+    "blocked_origins": []
+  },
+  "source_pack_allowance": {
+    "source_pack_id": "source_pack_project_alpha_docs",
+    "allowed": true,
+    "policy_snapshot_ref": "cspol_project_alpha_browser_domains"
+  },
+  "browser_permission": {
+    "optional_host_permission_granted": true,
+    "host_permissions": [
+      "https://docs.project-alpha.example/*"
+    ],
+    "broad_all_urls_permission": false
+  },
+  "limits": {
+    "throttle_seconds": 120,
+    "max_captures_per_session": 2
+  },
+  "diagnostics": {
+    "label": "Project Alpha docs auto capture",
+    "human_browser_privacy_review": "HUMAN_REQUIRED"
+  }
+}

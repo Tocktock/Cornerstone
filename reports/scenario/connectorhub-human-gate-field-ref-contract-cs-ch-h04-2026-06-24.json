@@ -1,0 +1,223 @@
+{
+  "audit_refs": [
+    "audit:audit_25db3cff78b84e98"
+  ],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone connector human-gate field-ref-contract",
+  "connector_human_gate_field_ref_contract_report": {
+    "accepted_container_by_field": {
+      "audit_integrity_report": "string",
+      "backup_restore_evidence": "non_empty_string_list",
+      "db_policy_transcripts": "non_empty_string_list",
+      "environment_topology_ref": "string",
+      "evidence_manifest_ref": "string_or_non_empty_string_list",
+      "network_egress_transcripts": "non_empty_string_list",
+      "request_context_proof": "string"
+    },
+    "accepted_ref_prefixes_by_field": {
+      "audit_integrity_report": [
+        "audit_integrity:"
+      ],
+      "backup_restore_evidence": [
+        "backup_restore:"
+      ],
+      "db_policy_transcripts": [
+        "db_policy:"
+      ],
+      "environment_topology_ref": [
+        "topology:"
+      ],
+      "evidence_manifest_ref": [
+        "evidence_manifest:"
+      ],
+      "network_egress_transcripts": [
+        "egress:"
+      ],
+      "request_context_proof": [
+        "request_context:"
+      ]
+    },
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "created_at": "2026-06-27T13:35:26.994605Z",
+    "field_ref_contract": {
+      "invalid_value_report_shape": "field_names_only",
+      "raw_field_values_persisted_by_validator": false,
+      "required_field_ref_items": [
+        {
+          "accepted_container": "string",
+          "accepted_ref_prefixes": [
+            "topology:"
+          ],
+          "field": "environment_topology_ref",
+          "raw_value_persisted_by_validator": false,
+          "required": true
+        },
+        {
+          "accepted_container": "string",
+          "accepted_ref_prefixes": [
+            "request_context:"
+          ],
+          "field": "request_context_proof",
+          "raw_value_persisted_by_validator": false,
+          "required": true
+        },
+        {
+          "accepted_container": "non_empty_string_list",
+          "accepted_ref_prefixes": [
+            "db_policy:"
+          ],
+          "field": "db_policy_transcripts",
+          "raw_value_persisted_by_validator": false,
+          "required": true
+        },
+        {
+          "accepted_container": "non_empty_string_list",
+          "accepted_ref_prefixes": [
+            "egress:"
+          ],
+          "field": "network_egress_transcripts",
+          "raw_value_persisted_by_validator": false,
+          "required": true
+        },
+        {
+          "accepted_container": "non_empty_string_list",
+          "accepted_ref_prefixes": [
+            "backup_restore:"
+          ],
+          "field": "backup_restore_evidence",
+          "raw_value_persisted_by_validator": false,
+          "required": true
+        },
+        {
+          "accepted_container": "string",
+          "accepted_ref_prefixes": [
+            "audit_integrity:"
+          ],
+          "field": "audit_integrity_report",
+          "raw_value_persisted_by_validator": false,
+          "required": true
+        },
+        {
+          "accepted_container": "string_or_non_empty_string_list",
+          "accepted_ref_prefixes": [
+            "evidence_manifest:"
+          ],
+          "field": "evidence_manifest_ref",
+          "raw_value_persisted_by_validator": false,
+          "required": true
+        }
+      ],
+      "scenario_id": "CS-CH-H04",
+      "schema_version": "cs.connector_human_gate_field_ref_contract.v1",
+      "status": "operator_preparation_only",
+      "validation_scope": "field_reference_shape_only"
+    },
+    "field_ref_contract_report_id": "cshuman_fieldref_702555727d37e90c",
+    "field_ref_contract_schema_version": "cs.connector_human_gate_field_ref_contract.v1",
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "invalid_value_report_shape": "field_names_only",
+    "negative_evidence": {
+      "approvals_collected_by_field_ref_contract": 0,
+      "commands_executed_by_field_ref_contract": 0,
+      "external_mutations_executed_by_field_ref_contract": 0,
+      "human_rows_marked_pass_by_field_ref_contract": 0,
+      "live_provider_calls_executed_by_field_ref_contract": 0,
+      "pass_claims_allowed_by_field_ref_contract": 0,
+      "product_claims_allowed_by_field_ref_contract": 0,
+      "provider_mutations_executed_by_field_ref_contract": 0,
+      "raw_field_values_persisted_by_field_ref_contract": 0,
+      "raw_field_values_recorded_by_field_ref_contract": 0,
+      "secret_material_read_by_field_ref_contract": 0
+    },
+    "non_mutation_evidence": {
+      "approval_collected_by_field_ref_contract": false,
+      "commands_executed_by_field_ref_contract": 0,
+      "external_mutations_executed_by_field_ref_contract": 0,
+      "human_decisions_recorded_by_field_ref_contract": 0,
+      "live_provider_calls_executed_by_field_ref_contract": 0,
+      "provider_mutations_executed_by_field_ref_contract": 0,
+      "raw_field_values_persisted_by_field_ref_contract": false,
+      "raw_field_values_recorded_by_field_ref_contract": false,
+      "secret_material_read_by_field_ref_contract": false
+    },
+    "operator_rule": "This report exposes accepted evidence-reference shapes for H04 production-like proof. It does not include, record, validate, or persist submitted field values.",
+    "product_feature_claims": "CONNECTOR_HUB_H04_FIELD_REF_CONTRACT_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "raw_field_values_persisted_by_validator": false,
+    "raw_field_values_recorded_by_report": false,
+    "required_field_ref_fields": [
+      "environment_topology_ref",
+      "request_context_proof",
+      "db_policy_transcripts",
+      "network_egress_transcripts",
+      "backup_restore_evidence",
+      "audit_integrity_report",
+      "evidence_manifest_ref"
+    ],
+    "required_field_ref_item_count": 7,
+    "scenario_id": "CS-CH-H04",
+    "schema_version": "cs.connector_human_gate_field_ref_contract_report.v1",
+    "scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    },
+    "status": "operator_preparation_only",
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "errors": [],
+  "evidence_refs": [
+    "connector_human_gate_field_ref_contract:cshuman_fieldref_702555727d37e90c"
+  ],
+  "final_verdict": "HUMAN_REQUIRED",
+  "ids": {
+    "connector_human_gate_field_ref_contract_report_id": "cshuman_fieldref_702555727d37e90c",
+    "git_commit": "cb682e9"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/connectorhub-human-gate-field-ref-contract-cs-ch-h04-2026-06-24.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "schema_version": "cs.cli.v0",
+  "status": "success",
+  "summary": {
+    "commands_executed_by_field_ref_contract": 0,
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "external_mutations_executed_by_field_ref_contract": 0,
+    "field_ref_contract_report_id": "cshuman_fieldref_702555727d37e90c",
+    "field_ref_contract_schema_version": "cs.connector_human_gate_field_ref_contract.v1",
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "human_acceptance_collected_by_field_ref_contract": false,
+    "invalid_value_report_shape": "field_names_only",
+    "live_provider_calls_executed_by_field_ref_contract": 0,
+    "operator_rule": "This report exposes accepted evidence-reference shapes for H04 production-like proof. It does not include, record, validate, or persist submitted field values.",
+    "pass_claim_allowed": false,
+    "product_claim_allowed": false,
+    "product_feature_claims": "CONNECTOR_HUB_H04_FIELD_REF_CONTRACT_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "provider_mutations_executed_by_field_ref_contract": 0,
+    "raw_field_values_persisted_by_validator": false,
+    "raw_field_values_recorded_by_report": false,
+    "required_field_ref_fields": [
+      "environment_topology_ref",
+      "request_context_proof",
+      "db_policy_transcripts",
+      "network_egress_transcripts",
+      "backup_restore_evidence",
+      "audit_integrity_report",
+      "evidence_manifest_ref"
+    ],
+    "required_field_ref_item_count": 7,
+    "scenario_id": "CS-CH-H04",
+    "status": "operator_preparation_only",
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

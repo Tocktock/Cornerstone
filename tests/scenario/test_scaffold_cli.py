@@ -4,11 +4,17 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import unittest
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "packages"))
+
+from cornerstone_cli.acceptance import _source_snapshot
+from cornerstone_cli.scenarios import _vs2_regression_guard_enabled, _vs2_regression_guard_transcript
+
 SKIP_VS2_REGRESSION_TESTS = os.environ.get("CORNERSTONE_SKIP_VS2_REGRESSION_TESTS") == "1"
 
 
@@ -26,6 +32,53 @@ def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 class ScaffoldCliTests(unittest.TestCase):
+    def test_source_snapshot_expands_dirty_directory_to_hashable_files(self) -> None:
+        snapshot_root = ROOT / "tmp/test-source-snapshot-directory"
+        if snapshot_root.exists():
+            shutil.rmtree(snapshot_root)
+        try:
+            fixture_dir = snapshot_root / "fixtures/connectorhub/contracts"
+            fixture_dir.mkdir(parents=True)
+            fixture_file = fixture_dir / "sample.json"
+            fixture_file.write_text('{"scenario":"CS-CH-001"}\n')
+
+            snapshot = _source_snapshot(
+                snapshot_root,
+                "base",
+                "tree",
+                [{"status": "??", "path": "fixtures/connectorhub/"}],
+            )
+            self.assertEqual(len(snapshot["paths"]), 1)
+            self.assertEqual(snapshot["paths"][0]["path"], "fixtures/connectorhub/contracts/sample.json")
+            self.assertEqual(snapshot["paths"][0]["state"], "present")
+            self.assertIsInstance(snapshot["paths"][0]["sha256"], str)
+            self.assertEqual(len(snapshot["paths"][0]["sha256"]), 64)
+        finally:
+            if snapshot_root.exists():
+                shutil.rmtree(snapshot_root)
+
+    def test_vs2_regression_guard_transcript_keeps_nested_regressions_explicit(self) -> None:
+        original = os.environ.get("CORNERSTONE_SKIP_VS2_REGRESSION_TESTS")
+        try:
+            os.environ["CORNERSTONE_SKIP_VS2_REGRESSION_TESTS"] = "1"
+            self.assertTrue(_vs2_regression_guard_enabled())
+        finally:
+            if original is None:
+                os.environ.pop("CORNERSTONE_SKIP_VS2_REGRESSION_TESTS", None)
+            else:
+                os.environ["CORNERSTONE_SKIP_VS2_REGRESSION_TESTS"] = original
+
+        transcript = _vs2_regression_guard_transcript(
+            ["make", "verify-vs0-evux"],
+            report_refs=["reports/vs2/regression/vs0-evux.json"],
+        )
+        self.assertEqual(transcript["schema_version"], "cs.command_transcript.v0")
+        self.assertEqual(transcript["command"], ["make", "verify-vs0-evux"])
+        self.assertEqual(transcript["exit_code"], 0)
+        self.assertFalse(transcript["timed_out"])
+        self.assertTrue(transcript["skipped_by_vs2_regression_guard"])
+        self.assertIn("reports/vs2/regression/vs0-evux.json", transcript["report_refs"])
+
     def test_version_json(self) -> None:
         result = run_cli("version", "--json")
         self.assertEqual(result.returncode, 0, result.stderr)

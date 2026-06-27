@@ -1,7 +1,7 @@
 {
   "audit_schema": {
     "connector_capability": "mock_provider.read",
-    "decision_id": "egress_bbdb9209c56f4dd1",
+    "decision_id": "egress_37e34974a6531e0e",
     "destination_class": "reserved_loopback",
     "raw_payload_stored": false,
     "records": [
@@ -9,7 +9,7 @@
         "bytes_received": 0,
         "bytes_sent": 0,
         "connector_capability": "none",
-        "decision_id": "egress_bbdb9209c56f4dd1",
+        "decision_id": "egress_37e34974a6531e0e",
         "destination_class": "reserved_loopback",
         "event_name": "egress.denied.default",
         "external_http_calls": 0,
@@ -23,7 +23,7 @@
         "bytes_received": 12,
         "bytes_sent": 0,
         "connector_capability": "rule_mock_provider",
-        "decision_id": "egress_1bf7c5c50ee0eaa8",
+        "decision_id": "egress_57aaa1407244dfb8",
         "destination_class": "reserved_loopback",
         "event_name": "egress.allowed.connectorhub",
         "external_http_calls": 1,
@@ -37,7 +37,7 @@
         "bytes_received": 0,
         "bytes_sent": 0,
         "connector_capability": "none",
-        "decision_id": "egress_8552010c7d90c02c",
+        "decision_id": "egress_823aa4fb6fcc16c2",
         "destination_class": "reserved_loopback",
         "event_name": "egress.denied.tenant_policy",
         "external_http_calls": 0,
@@ -51,7 +51,7 @@
         "bytes_received": 0,
         "bytes_sent": 0,
         "connector_capability": "rule_mock_provider_redirect",
-        "decision_id": "egress_a8ab896a06170eb3",
+        "decision_id": "egress_c2678680d14b4062",
         "destination_class": "reserved_loopback",
         "event_name": "egress.denied.redirect_hop",
         "external_http_calls": 1,
@@ -65,7 +65,7 @@
         "bytes_received": 0,
         "bytes_sent": 0,
         "connector_capability": "none",
-        "decision_id": "egress_1bf7c5c50ee0eaa8",
+        "decision_id": "egress_57aaa1407244dfb8",
         "destination_class": "reserved_loopback",
         "event_name": "egress.denied.controller_outage",
         "external_http_calls": 0,
@@ -112,13 +112,13 @@
   "declared_allowed": {
     "bytes_sent": 64,
     "decision": "allow",
-    "decision_id": "egress_1bf7c5c50ee0eaa8",
+    "decision_id": "egress_57aaa1407244dfb8",
     "destination": {
       "destination_class": "reserved_loopback",
       "host": "127.0.0.1",
       "method": "GET",
       "path": "/v1/read/status",
-      "port": 53048,
+      "port": 64875,
       "raw_path": "/v1/read/status",
       "scheme": "http"
     },
@@ -135,7 +135,7 @@
   },
   "declared_allowed_execution": {
     "bytes_received": 12,
-    "decision_id": "egress_1bf7c5c50ee0eaa8",
+    "decision_id": "egress_57aaa1407244dfb8",
     "headers_sent": {
       "user-agent": "cornerstone-vs2-governed-egress/1",
       "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -145,13 +145,13 @@
       {
         "bytes_received": 12,
         "decision": "allow",
-        "decision_id": "egress_1bf7c5c50ee0eaa8",
+        "decision_id": "egress_57aaa1407244dfb8",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/v1/read/status",
-          "port": 53048,
+          "port": 64875,
           "raw_path": "/v1/read/status",
           "scheme": "http"
         },
@@ -164,7 +164,7 @@
         "location": null,
         "reason": "declared_connectorhub_capability",
         "request_sent": true,
-        "url": "http://127.0.0.1:53048/v1/read/status"
+        "url": "http://127.0.0.1:64875/v1/read/status"
       }
     ],
     "http_status": 200,
@@ -173,13 +173,13 @@
   "default_denied": {
     "bytes_sent": 0,
     "decision": "deny",
-    "decision_id": "egress_bbdb9209c56f4dd1",
+    "decision_id": "egress_37e34974a6531e0e",
     "destination": {
       "destination_class": "reserved_loopback",
       "host": "127.0.0.1",
       "method": "GET",
       "path": "/blocked",
-      "port": 53048,
+      "port": 64875,
       "raw_path": "/blocked",
       "scheme": "http"
     },
@@ -196,24 +196,24 @@
   },
   "default_denied_execution": {
     "bytes_sent": 0,
-    "decision_id": "egress_bbdb9209c56f4dd1",
+    "decision_id": "egress_37e34974a6531e0e",
     "headers_sent": {},
     "hops": [
       {
         "decision": "deny",
-        "decision_id": "egress_bbdb9209c56f4dd1",
+        "decision_id": "egress_37e34974a6531e0e",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/blocked",
-          "port": 53048,
+          "port": 64875,
           "raw_path": "/blocked",
           "scheme": "http"
         },
         "reason": "reserved_destination_denied",
         "request_sent": false,
-        "url": "http://127.0.0.1:53048/blocked"
+        "url": "http://127.0.0.1:64875/blocked"
       }
     ],
     "http_status": null,
@@ -319,7 +319,7 @@
     }
   },
   "dry_run_recheck": {
-    "fingerprint": "249c15346b46359157de0c1e2924699307912d3b21243a7d1aedc753b9251799",
+    "fingerprint": "af5446b4d880ef7627282b152eae33e5214d995e8666693d6c284edde39aa028",
     "scenario_boundary": "VS2-SEC-061 is verified by the local range proof; timeout/retry/idempotency evidence is recorded under retry_idempotency.",
     "status": "not_verified_in_this_slice"
   },
@@ -328,7 +328,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53051",
+          "Host": "127.0.0.1:64878",
           "Idempotency-Key": "tenant_a:timeout:001",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -342,7 +342,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53051",
+          "Host": "127.0.0.1:64878",
           "Idempotency-Key": "tenant_a:action:001",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -356,7 +356,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53051",
+          "Host": "127.0.0.1:64878",
           "Idempotency-Key": "tenant_a:action:001",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -370,7 +370,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53051",
+          "Host": "127.0.0.1:64878",
           "Idempotency-Key": "tenant_b:action:001",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -384,7 +384,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53051",
+          "Host": "127.0.0.1:64878",
           "Idempotency-Key": "tenant_b:action:001",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -397,7 +397,7 @@
       }
     ],
     "host": "127.0.0.1",
-    "port": 53051,
+    "port": 64878,
     "requests": 5,
     "retry_counts": {
       "tenant_a:action:001": 2,
@@ -421,13 +421,13 @@
       "decision": {
         "bytes_sent": 0,
         "decision": "deny",
-        "decision_id": "egress_19ca4b32a320977b",
+        "decision_id": "egress_a6e57adc8b171145",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "localhost",
           "method": "GET",
           "path": "/v1/read/status",
-          "port": 53048,
+          "port": 64875,
           "raw_path": "/v1/read/status",
           "scheme": "http"
         },
@@ -444,24 +444,24 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_19ca4b32a320977b",
+        "decision_id": "egress_a6e57adc8b171145",
         "headers_sent": {},
         "hops": [
           {
             "decision": "deny",
-            "decision_id": "egress_19ca4b32a320977b",
+            "decision_id": "egress_a6e57adc8b171145",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "localhost",
               "method": "GET",
               "path": "/v1/read/status",
-              "port": 53048,
+              "port": 64875,
               "raw_path": "/v1/read/status",
               "scheme": "http"
             },
             "reason": "reserved_destination_denied",
             "request_sent": false,
-            "url": "http://localhost:53048/v1/read/status"
+            "url": "http://localhost:64875/v1/read/status"
           }
         ],
         "http_status": null,
@@ -471,19 +471,19 @@
       "name": "alternate_host",
       "sink_calls_after": 1,
       "sink_calls_before": 1,
-      "url": "http://localhost:53048/v1/read/status"
+      "url": "http://localhost:64875/v1/read/status"
     },
     {
       "decision": {
         "bytes_sent": 0,
         "decision": "deny",
-        "decision_id": "egress_4736daa997137f94",
+        "decision_id": "egress_8529fee3935a18d3",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/v1/read/status",
-          "port": 53049,
+          "port": 64876,
           "raw_path": "/v1/read/status",
           "scheme": "http"
         },
@@ -500,24 +500,24 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_4736daa997137f94",
+        "decision_id": "egress_8529fee3935a18d3",
         "headers_sent": {},
         "hops": [
           {
             "decision": "deny",
-            "decision_id": "egress_4736daa997137f94",
+            "decision_id": "egress_8529fee3935a18d3",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/v1/read/status",
-              "port": 53049,
+              "port": 64876,
               "raw_path": "/v1/read/status",
               "scheme": "http"
             },
             "reason": "reserved_destination_denied",
             "request_sent": false,
-            "url": "http://127.0.0.1:53049/v1/read/status"
+            "url": "http://127.0.0.1:64876/v1/read/status"
           }
         ],
         "http_status": null,
@@ -527,19 +527,19 @@
       "name": "alternate_port",
       "sink_calls_after": 1,
       "sink_calls_before": 1,
-      "url": "http://127.0.0.1:53049/v1/read/status"
+      "url": "http://127.0.0.1:64876/v1/read/status"
     },
     {
       "decision": {
         "bytes_sent": 0,
         "decision": "deny",
-        "decision_id": "egress_9e8a1ce46efac1ed",
+        "decision_id": "egress_486e3a65491cff13",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/v1/read/status",
-          "port": 53048,
+          "port": 64875,
           "raw_path": "/v1/read/status",
           "scheme": "https"
         },
@@ -556,24 +556,24 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_9e8a1ce46efac1ed",
+        "decision_id": "egress_486e3a65491cff13",
         "headers_sent": {},
         "hops": [
           {
             "decision": "deny",
-            "decision_id": "egress_9e8a1ce46efac1ed",
+            "decision_id": "egress_486e3a65491cff13",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/v1/read/status",
-              "port": 53048,
+              "port": 64875,
               "raw_path": "/v1/read/status",
               "scheme": "https"
             },
             "reason": "reserved_destination_denied",
             "request_sent": false,
-            "url": "https://127.0.0.1:53048/v1/read/status"
+            "url": "https://127.0.0.1:64875/v1/read/status"
           }
         ],
         "http_status": null,
@@ -583,19 +583,19 @@
       "name": "alternate_scheme",
       "sink_calls_after": 1,
       "sink_calls_before": 1,
-      "url": "https://127.0.0.1:53048/v1/read/status"
+      "url": "https://127.0.0.1:64875/v1/read/status"
     },
     {
       "decision": {
         "bytes_sent": 0,
         "decision": "deny",
-        "decision_id": "egress_d6ef4e53d4345cdd",
+        "decision_id": "egress_799c2ebfd382e7af",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/v1/readwrite/status",
-          "port": 53048,
+          "port": 64875,
           "raw_path": "/v1/readwrite/status",
           "scheme": "http"
         },
@@ -612,24 +612,24 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_d6ef4e53d4345cdd",
+        "decision_id": "egress_799c2ebfd382e7af",
         "headers_sent": {},
         "hops": [
           {
             "decision": "deny",
-            "decision_id": "egress_d6ef4e53d4345cdd",
+            "decision_id": "egress_799c2ebfd382e7af",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/v1/readwrite/status",
-              "port": 53048,
+              "port": 64875,
               "raw_path": "/v1/readwrite/status",
               "scheme": "http"
             },
             "reason": "reserved_destination_denied",
             "request_sent": false,
-            "url": "http://127.0.0.1:53048/v1/readwrite/status"
+            "url": "http://127.0.0.1:64875/v1/readwrite/status"
           }
         ],
         "http_status": null,
@@ -639,19 +639,19 @@
       "name": "path_prefix_shadow",
       "sink_calls_after": 1,
       "sink_calls_before": 1,
-      "url": "http://127.0.0.1:53048/v1/readwrite/status"
+      "url": "http://127.0.0.1:64875/v1/readwrite/status"
     },
     {
       "decision": {
         "bytes_sent": 0,
         "decision": "deny",
-        "decision_id": "egress_ca584b4bbd91e98a",
+        "decision_id": "egress_36a69c2e0afdcc2c",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/v1/write/status",
-          "port": 53048,
+          "port": 64875,
           "raw_path": "/v1/read/%2e%2e/write/status",
           "scheme": "http"
         },
@@ -668,24 +668,24 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_ca584b4bbd91e98a",
+        "decision_id": "egress_36a69c2e0afdcc2c",
         "headers_sent": {},
         "hops": [
           {
             "decision": "deny",
-            "decision_id": "egress_ca584b4bbd91e98a",
+            "decision_id": "egress_36a69c2e0afdcc2c",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/v1/write/status",
-              "port": 53048,
+              "port": 64875,
               "raw_path": "/v1/read/%2e%2e/write/status",
               "scheme": "http"
             },
             "reason": "reserved_destination_denied",
             "request_sent": false,
-            "url": "http://127.0.0.1:53048/v1/read/%2e%2e/write/status"
+            "url": "http://127.0.0.1:64875/v1/read/%2e%2e/write/status"
           }
         ],
         "http_status": null,
@@ -695,19 +695,19 @@
       "name": "encoded_traversal",
       "sink_calls_after": 1,
       "sink_calls_before": 1,
-      "url": "http://127.0.0.1:53048/v1/read/%2e%2e/write/status"
+      "url": "http://127.0.0.1:64875/v1/read/%2e%2e/write/status"
     },
     {
       "decision": {
         "bytes_sent": 0,
         "decision": "deny",
-        "decision_id": "egress_678fd88b188c24d5",
+        "decision_id": "egress_3d97f84ec4251c53",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "POST",
           "path": "/v1/read/status",
-          "port": 53048,
+          "port": 64875,
           "raw_path": "/v1/read/status",
           "scheme": "http"
         },
@@ -724,24 +724,24 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_678fd88b188c24d5",
+        "decision_id": "egress_3d97f84ec4251c53",
         "headers_sent": {},
         "hops": [
           {
             "decision": "deny",
-            "decision_id": "egress_678fd88b188c24d5",
+            "decision_id": "egress_3d97f84ec4251c53",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "POST",
               "path": "/v1/read/status",
-              "port": 53048,
+              "port": 64875,
               "raw_path": "/v1/read/status",
               "scheme": "http"
             },
             "reason": "reserved_destination_denied",
             "request_sent": false,
-            "url": "http://127.0.0.1:53048/v1/read/status"
+            "url": "http://127.0.0.1:64875/v1/read/status"
           }
         ],
         "http_status": null,
@@ -751,7 +751,7 @@
       "name": "alternate_method",
       "sink_calls_after": 1,
       "sink_calls_before": 1,
-      "url": "http://127.0.0.1:53048/v1/read/status"
+      "url": "http://127.0.0.1:64875/v1/read/status"
     }
   ],
   "readiness": {
@@ -762,13 +762,13 @@
       "decision": {
         "bytes_sent": 0,
         "decision": "deny",
-        "decision_id": "egress_1bf7c5c50ee0eaa8",
+        "decision_id": "egress_57aaa1407244dfb8",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/v1/read/status",
-          "port": 53048,
+          "port": 64875,
           "raw_path": "/v1/read/status",
           "scheme": "http"
         },
@@ -785,24 +785,24 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_1bf7c5c50ee0eaa8",
+        "decision_id": "egress_57aaa1407244dfb8",
         "headers_sent": {},
         "hops": [
           {
             "decision": "deny",
-            "decision_id": "egress_1bf7c5c50ee0eaa8",
+            "decision_id": "egress_57aaa1407244dfb8",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/v1/read/status",
-              "port": 53048,
+              "port": 64875,
               "raw_path": "/v1/read/status",
               "scheme": "http"
             },
             "reason": "egress_controller_unavailable_fail_closed",
             "request_sent": false,
-            "url": "http://127.0.0.1:53048/v1/read/status"
+            "url": "http://127.0.0.1:64875/v1/read/status"
           }
         ],
         "http_status": null,
@@ -819,13 +819,13 @@
       "decision": {
         "bytes_sent": 64,
         "decision": "allow",
-        "decision_id": "egress_e9cc98f98033c9a5",
+        "decision_id": "egress_7046dace9e2a0268",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/v1/read/redirect-loop",
-          "port": 53050,
+          "port": 64877,
           "raw_path": "/v1/read/redirect-loop",
           "scheme": "http"
         },
@@ -842,7 +842,7 @@
       },
       "execution": {
         "bytes_received": 0,
-        "decision_id": "egress_e9cc98f98033c9a5",
+        "decision_id": "egress_7046dace9e2a0268",
         "headers_sent": {
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -852,13 +852,13 @@
           {
             "bytes_received": 0,
             "decision": "allow",
-            "decision_id": "egress_e9cc98f98033c9a5",
+            "decision_id": "egress_7046dace9e2a0268",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/v1/read/redirect-loop",
-              "port": 53050,
+              "port": 64877,
               "raw_path": "/v1/read/redirect-loop",
               "scheme": "http"
             },
@@ -868,21 +868,21 @@
               "x-cs-trace-id": "trace_vs2_governed_egress"
             },
             "http_status": 302,
-            "location": "http://127.0.0.1:53050/v1/read/redirect-loop",
+            "location": "http://127.0.0.1:64877/v1/read/redirect-loop",
             "reason": "declared_connectorhub_capability",
             "request_sent": true,
-            "url": "http://127.0.0.1:53050/v1/read/redirect-loop"
+            "url": "http://127.0.0.1:64877/v1/read/redirect-loop"
           },
           {
             "bytes_received": 0,
             "decision": "allow",
-            "decision_id": "egress_e9cc98f98033c9a5",
+            "decision_id": "egress_7046dace9e2a0268",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/v1/read/redirect-loop",
-              "port": 53050,
+              "port": 64877,
               "raw_path": "/v1/read/redirect-loop",
               "scheme": "http"
             },
@@ -892,10 +892,10 @@
               "x-cs-trace-id": "trace_vs2_governed_egress"
             },
             "http_status": 302,
-            "location": "http://127.0.0.1:53050/v1/read/redirect-loop",
+            "location": "http://127.0.0.1:64877/v1/read/redirect-loop",
             "reason": "declared_connectorhub_capability",
             "request_sent": true,
-            "url": "http://127.0.0.1:53050/v1/read/redirect-loop"
+            "url": "http://127.0.0.1:64877/v1/read/redirect-loop"
           }
         ],
         "http_status": 302,
@@ -907,13 +907,13 @@
       "decision": {
         "bytes_sent": 64,
         "decision": "allow",
-        "decision_id": "egress_a8ab896a06170eb3",
+        "decision_id": "egress_c2678680d14b4062",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/v1/read/redirect-private",
-          "port": 53050,
+          "port": 64877,
           "raw_path": "/v1/read/redirect-private",
           "scheme": "http"
         },
@@ -930,19 +930,19 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_7f7846f06d7350a8",
+        "decision_id": "egress_2608b6c3e34d2ca1",
         "headers_sent": {},
         "hops": [
           {
             "bytes_received": 0,
             "decision": "allow",
-            "decision_id": "egress_a8ab896a06170eb3",
+            "decision_id": "egress_c2678680d14b4062",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/v1/read/redirect-private",
-              "port": 53050,
+              "port": 64877,
               "raw_path": "/v1/read/redirect-private",
               "scheme": "http"
             },
@@ -952,26 +952,26 @@
               "x-cs-trace-id": "trace_vs2_governed_egress"
             },
             "http_status": 302,
-            "location": "http://127.0.0.1:53049/blocked",
+            "location": "http://127.0.0.1:64876/blocked",
             "reason": "declared_connectorhub_capability",
             "request_sent": true,
-            "url": "http://127.0.0.1:53050/v1/read/redirect-private"
+            "url": "http://127.0.0.1:64877/v1/read/redirect-private"
           },
           {
             "decision": "deny",
-            "decision_id": "egress_7f7846f06d7350a8",
+            "decision_id": "egress_2608b6c3e34d2ca1",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/blocked",
-              "port": 53049,
+              "port": 64876,
               "raw_path": "/blocked",
               "scheme": "http"
             },
             "reason": "reserved_destination_denied",
             "request_sent": false,
-            "url": "http://127.0.0.1:53049/blocked"
+            "url": "http://127.0.0.1:64876/blocked"
           }
         ],
         "http_status": null,
@@ -987,7 +987,7 @@
         "authorization_header_seen": false,
         "credential_ref_header_seen": true,
         "headers": {
-          "Host": "127.0.0.1:53050",
+          "Host": "127.0.0.1:64877",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
           "x-cs-trace-id": "trace_vs2_governed_egress"
@@ -1000,7 +1000,7 @@
         "authorization_header_seen": false,
         "credential_ref_header_seen": true,
         "headers": {
-          "Host": "127.0.0.1:53050",
+          "Host": "127.0.0.1:64877",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
           "x-cs-trace-id": "trace_vs2_governed_egress"
@@ -1013,7 +1013,7 @@
         "authorization_header_seen": false,
         "credential_ref_header_seen": true,
         "headers": {
-          "Host": "127.0.0.1:53050",
+          "Host": "127.0.0.1:64877",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
           "x-cs-trace-id": "trace_vs2_governed_egress"
@@ -1024,7 +1024,7 @@
       }
     ],
     "host": "127.0.0.1",
-    "port": 53050,
+    "port": 64877,
     "requests": 3
   },
   "reserved_destination_cases": [
@@ -1032,13 +1032,13 @@
       "decision": {
         "bytes_sent": 0,
         "decision": "deny",
-        "decision_id": "egress_f4b60808de73275b",
+        "decision_id": "egress_aa4fca6687f34b7f",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/metadata",
-          "port": 53049,
+          "port": 64876,
           "raw_path": "/metadata",
           "scheme": "http"
         },
@@ -1055,24 +1055,24 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_f4b60808de73275b",
+        "decision_id": "egress_aa4fca6687f34b7f",
         "headers_sent": {},
         "hops": [
           {
             "decision": "deny",
-            "decision_id": "egress_f4b60808de73275b",
+            "decision_id": "egress_aa4fca6687f34b7f",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/metadata",
-              "port": 53049,
+              "port": 64876,
               "raw_path": "/metadata",
               "scheme": "http"
             },
             "reason": "reserved_destination_denied",
             "request_sent": false,
-            "url": "http://127.0.0.1:53049/metadata"
+            "url": "http://127.0.0.1:64876/metadata"
           }
         ],
         "http_status": null,
@@ -1089,19 +1089,19 @@
       ],
       "trap_calls_after": 0,
       "trap_calls_before": 0,
-      "url": "http://127.0.0.1:53049/metadata"
+      "url": "http://127.0.0.1:64876/metadata"
     },
     {
       "decision": {
         "bytes_sent": 0,
         "decision": "deny",
-        "decision_id": "egress_17a8cdcda092ec6c",
+        "decision_id": "egress_546b15d2766483eb",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "localhost",
           "method": "GET",
           "path": "/metadata",
-          "port": 53049,
+          "port": 64876,
           "raw_path": "/metadata",
           "scheme": "http"
         },
@@ -1118,24 +1118,24 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_17a8cdcda092ec6c",
+        "decision_id": "egress_546b15d2766483eb",
         "headers_sent": {},
         "hops": [
           {
             "decision": "deny",
-            "decision_id": "egress_17a8cdcda092ec6c",
+            "decision_id": "egress_546b15d2766483eb",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "localhost",
               "method": "GET",
               "path": "/metadata",
-              "port": 53049,
+              "port": 64876,
               "raw_path": "/metadata",
               "scheme": "http"
             },
             "reason": "reserved_destination_denied",
             "request_sent": false,
-            "url": "http://localhost:53049/metadata"
+            "url": "http://localhost:64876/metadata"
           }
         ],
         "http_status": null,
@@ -1158,7 +1158,7 @@
       ],
       "trap_calls_after": 0,
       "trap_calls_before": 0,
-      "url": "http://localhost:53049/metadata"
+      "url": "http://localhost:64876/metadata"
     },
     {
       "decision": {
@@ -1290,13 +1290,13 @@
       "decision": {
         "bytes_sent": 0,
         "decision": "deny",
-        "decision_id": "egress_1dcfc83d9398f5ca",
+        "decision_id": "egress_66b463da6cc676f7",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "::1",
           "method": "GET",
           "path": "/metadata",
-          "port": 53049,
+          "port": 64876,
           "raw_path": "/metadata",
           "scheme": "http"
         },
@@ -1313,24 +1313,24 @@
       },
       "execution": {
         "bytes_sent": 0,
-        "decision_id": "egress_1dcfc83d9398f5ca",
+        "decision_id": "egress_66b463da6cc676f7",
         "headers_sent": {},
         "hops": [
           {
             "decision": "deny",
-            "decision_id": "egress_1dcfc83d9398f5ca",
+            "decision_id": "egress_66b463da6cc676f7",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "::1",
               "method": "GET",
               "path": "/metadata",
-              "port": 53049,
+              "port": 64876,
               "raw_path": "/metadata",
               "scheme": "http"
             },
             "reason": "reserved_destination_denied",
             "request_sent": false,
-            "url": "http://[::1]:53049/metadata"
+            "url": "http://[::1]:64876/metadata"
           }
         ],
         "http_status": null,
@@ -1347,7 +1347,7 @@
       ],
       "trap_calls_after": 0,
       "trap_calls_before": 0,
-      "url": "http://[::1]:53049/metadata"
+      "url": "http://[::1]:64876/metadata"
     },
     {
       "decision": {
@@ -1441,7 +1441,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53051",
+          "Host": "127.0.0.1:64878",
           "Idempotency-Key": "tenant_a:timeout:001",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -1455,7 +1455,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53051",
+          "Host": "127.0.0.1:64878",
           "Idempotency-Key": "tenant_a:action:001",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -1469,7 +1469,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53051",
+          "Host": "127.0.0.1:64878",
           "Idempotency-Key": "tenant_a:action:001",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -1483,7 +1483,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53051",
+          "Host": "127.0.0.1:64878",
           "Idempotency-Key": "tenant_b:action:001",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -1497,7 +1497,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53051",
+          "Host": "127.0.0.1:64878",
           "Idempotency-Key": "tenant_b:action:001",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -1515,7 +1515,7 @@
           "attempt": 1,
           "execution": {
             "bytes_received": 75,
-            "decision_id": "egress_4f95017ec0fd8ea0",
+            "decision_id": "egress_4ed8dc6ec0d024b7",
             "headers_sent": {
               "Idempotency-Key": "tenant_a:action:001",
               "user-agent": "cornerstone-vs2-governed-egress/1",
@@ -1526,13 +1526,13 @@
               {
                 "bytes_received": 75,
                 "decision": "allow",
-                "decision_id": "egress_4f95017ec0fd8ea0",
+                "decision_id": "egress_4ed8dc6ec0d024b7",
                 "destination": {
                   "destination_class": "reserved_loopback",
                   "host": "127.0.0.1",
                   "method": "POST",
                   "path": "/v1/execute/retryable",
-                  "port": 53051,
+                  "port": 64878,
                   "raw_path": "/v1/execute/retryable",
                   "scheme": "http"
                 },
@@ -1546,7 +1546,7 @@
                 "location": null,
                 "reason": "declared_connectorhub_capability",
                 "request_sent": true,
-                "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                "url": "http://127.0.0.1:64878/v1/execute/retryable"
               }
             ],
             "http_status": 503,
@@ -1557,7 +1557,7 @@
           "attempt": 2,
           "execution": {
             "bytes_received": 59,
-            "decision_id": "egress_4f95017ec0fd8ea0",
+            "decision_id": "egress_4ed8dc6ec0d024b7",
             "headers_sent": {
               "Idempotency-Key": "tenant_a:action:001",
               "user-agent": "cornerstone-vs2-governed-egress/1",
@@ -1568,13 +1568,13 @@
               {
                 "bytes_received": 59,
                 "decision": "allow",
-                "decision_id": "egress_4f95017ec0fd8ea0",
+                "decision_id": "egress_4ed8dc6ec0d024b7",
                 "destination": {
                   "destination_class": "reserved_loopback",
                   "host": "127.0.0.1",
                   "method": "POST",
                   "path": "/v1/execute/retryable",
-                  "port": 53051,
+                  "port": 64878,
                   "raw_path": "/v1/execute/retryable",
                   "scheme": "http"
                 },
@@ -1588,7 +1588,7 @@
                 "location": null,
                 "reason": "declared_connectorhub_capability",
                 "request_sent": true,
-                "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                "url": "http://127.0.0.1:64878/v1/execute/retryable"
               }
             ],
             "http_status": 200,
@@ -1624,7 +1624,7 @@
           "attempt": 1,
           "execution": {
             "bytes_received": 75,
-            "decision_id": "egress_2dc2d7caa6b22dd0",
+            "decision_id": "egress_fe84f9138c40766c",
             "headers_sent": {
               "Idempotency-Key": "tenant_b:action:001",
               "user-agent": "cornerstone-vs2-governed-egress/1",
@@ -1635,13 +1635,13 @@
               {
                 "bytes_received": 75,
                 "decision": "allow",
-                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "decision_id": "egress_fe84f9138c40766c",
                 "destination": {
                   "destination_class": "reserved_loopback",
                   "host": "127.0.0.1",
                   "method": "POST",
                   "path": "/v1/execute/retryable",
-                  "port": 53051,
+                  "port": 64878,
                   "raw_path": "/v1/execute/retryable",
                   "scheme": "http"
                 },
@@ -1655,7 +1655,7 @@
                 "location": null,
                 "reason": "declared_connectorhub_capability",
                 "request_sent": true,
-                "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                "url": "http://127.0.0.1:64878/v1/execute/retryable"
               }
             ],
             "http_status": 503,
@@ -1666,7 +1666,7 @@
           "attempt": 2,
           "execution": {
             "bytes_received": 59,
-            "decision_id": "egress_2dc2d7caa6b22dd0",
+            "decision_id": "egress_fe84f9138c40766c",
             "headers_sent": {
               "Idempotency-Key": "tenant_b:action:001",
               "user-agent": "cornerstone-vs2-governed-egress/1",
@@ -1677,13 +1677,13 @@
               {
                 "bytes_received": 59,
                 "decision": "allow",
-                "decision_id": "egress_2dc2d7caa6b22dd0",
+                "decision_id": "egress_fe84f9138c40766c",
                 "destination": {
                   "destination_class": "reserved_loopback",
                   "host": "127.0.0.1",
                   "method": "POST",
                   "path": "/v1/execute/retryable",
-                  "port": 53051,
+                  "port": 64878,
                   "raw_path": "/v1/execute/retryable",
                   "scheme": "http"
                 },
@@ -1697,7 +1697,7 @@
                 "location": null,
                 "reason": "declared_connectorhub_capability",
                 "request_sent": true,
-                "url": "http://127.0.0.1:53051/v1/execute/retryable"
+                "url": "http://127.0.0.1:64878/v1/execute/retryable"
               }
             ],
             "http_status": 200,
@@ -1721,7 +1721,7 @@
           "attempt": 1,
           "execution": {
             "bytes_received": 0,
-            "decision_id": "egress_d33039995581da96",
+            "decision_id": "egress_25c89cb7837df8cc",
             "error_class": "TimeoutError",
             "headers_sent": {
               "Idempotency-Key": "tenant_a:timeout:001",
@@ -1732,13 +1732,13 @@
             "hops": [
               {
                 "decision": "allow",
-                "decision_id": "egress_d33039995581da96",
+                "decision_id": "egress_25c89cb7837df8cc",
                 "destination": {
                   "destination_class": "reserved_loopback",
                   "host": "127.0.0.1",
                   "method": "POST",
                   "path": "/v1/execute/timeout",
-                  "port": 53051,
+                  "port": 64878,
                   "raw_path": "/v1/execute/timeout",
                   "scheme": "http"
                 },
@@ -1754,7 +1754,7 @@
                 "reason": "declared_connectorhub_capability",
                 "request_sent": true,
                 "timeout": true,
-                "url": "http://127.0.0.1:53051/v1/execute/timeout"
+                "url": "http://127.0.0.1:64878/v1/execute/timeout"
               }
             ],
             "http_status": null,
@@ -1779,7 +1779,7 @@
         "capability": "network.unmanaged_http",
         "category": "proxy_environment",
         "decision": "deny",
-        "decision_id": "sandbox_70cc5b0bb1a1715e",
+        "decision_id": "sandbox_2ac54545b09f4710",
         "dns_query_sent": false,
         "env_keys_present": [
           "HTTPS_PROXY",
@@ -1801,7 +1801,7 @@
         "capability": "network.raw_socket",
         "category": "direct_socket",
         "decision": "deny",
-        "decision_id": "sandbox_7266cee9913fa60e",
+        "decision_id": "sandbox_57940aa1020cdc03",
         "dns_query_sent": false,
         "host_access_performed": false,
         "name": "direct_raw_socket",
@@ -1810,7 +1810,7 @@
         "process_spawned": false,
         "reason": "raw_socket_forbidden",
         "shell_spawned": false,
-        "target": "127.0.0.1:53049",
+        "target": "127.0.0.1:64876",
         "trap_calls_after": 0,
         "trap_calls_before": 0
       },
@@ -1835,7 +1835,7 @@
         "capability": "network.websocket",
         "category": "alternate_protocol",
         "decision": "deny",
-        "decision_id": "sandbox_977bb94b2f2559cc",
+        "decision_id": "sandbox_6afcb470c7716d92",
         "dns_query_sent": false,
         "host_access_performed": false,
         "name": "websocket_scheme",
@@ -1844,7 +1844,7 @@
         "process_spawned": false,
         "reason": "undeclared_protocol_forbidden",
         "shell_spawned": false,
-        "target": "ws://127.0.0.1:53049/socket",
+        "target": "ws://127.0.0.1:64876/socket",
         "trap_calls_after": 0,
         "trap_calls_before": 0
       },
@@ -1852,7 +1852,7 @@
         "capability": "network.ftp",
         "category": "alternate_protocol",
         "decision": "deny",
-        "decision_id": "sandbox_47067eaccb3aac7d",
+        "decision_id": "sandbox_fe1b7222722cd7cc",
         "dns_query_sent": false,
         "host_access_performed": false,
         "name": "ftp_scheme",
@@ -1861,7 +1861,7 @@
         "process_spawned": false,
         "reason": "undeclared_protocol_forbidden",
         "shell_spawned": false,
-        "target": "ftp://127.0.0.1:53049/drop",
+        "target": "ftp://127.0.0.1:64876/drop",
         "trap_calls_after": 0,
         "trap_calls_before": 0
       },
@@ -1869,7 +1869,7 @@
         "capability": "network.smtp",
         "category": "alternate_protocol",
         "decision": "deny",
-        "decision_id": "sandbox_3b8bcba1b5556b43",
+        "decision_id": "sandbox_76fb0d5133db9ee0",
         "dns_query_sent": false,
         "host_access_performed": false,
         "name": "smtp_scheme",
@@ -1878,7 +1878,7 @@
         "process_spawned": false,
         "reason": "undeclared_protocol_forbidden",
         "shell_spawned": false,
-        "target": "smtp://127.0.0.1:53049",
+        "target": "smtp://127.0.0.1:64876",
         "trap_calls_after": 0,
         "trap_calls_before": 0
       },
@@ -1886,7 +1886,7 @@
         "capability": "process.spawn",
         "category": "subprocess",
         "decision": "deny",
-        "decision_id": "sandbox_be45bd2cd94f1a8f",
+        "decision_id": "sandbox_961323a8bc3cecb4",
         "dns_query_sent": false,
         "host_access_performed": false,
         "name": "subprocess_curl",
@@ -1895,7 +1895,7 @@
         "process_spawned": false,
         "reason": "subprocess_network_client_forbidden",
         "shell_spawned": false,
-        "target": "curl -fsS http://127.0.0.1:53049/curl",
+        "target": "curl -fsS http://127.0.0.1:64876/curl",
         "trap_calls_after": 0,
         "trap_calls_before": 0
       },
@@ -1903,7 +1903,7 @@
         "capability": "network.bundled_client",
         "category": "bundled_client",
         "decision": "deny",
-        "decision_id": "sandbox_41d50490fa4dd87f",
+        "decision_id": "sandbox_f2dec57ad603662c",
         "dns_query_sent": false,
         "host_access_performed": false,
         "name": "bundled_http_client",
@@ -1912,7 +1912,7 @@
         "process_spawned": false,
         "reason": "bundled_network_client_forbidden",
         "shell_spawned": false,
-        "target": "http://127.0.0.1:53049/bundled-client",
+        "target": "http://127.0.0.1:64876/bundled-client",
         "trap_calls_after": 0,
         "trap_calls_before": 0
       },
@@ -1955,7 +1955,7 @@
       {
         "actor": "tool_runtime",
         "capability": "network.unmanaged_http",
-        "decision_id": "sandbox_70cc5b0bb1a1715e",
+        "decision_id": "sandbox_2ac54545b09f4710",
         "dns_query_sent": false,
         "event_name": "sandbox.capability.denied",
         "host_access_performed": false,
@@ -1972,7 +1972,7 @@
       {
         "actor": "tool_runtime",
         "capability": "network.raw_socket",
-        "decision_id": "sandbox_7266cee9913fa60e",
+        "decision_id": "sandbox_57940aa1020cdc03",
         "dns_query_sent": false,
         "event_name": "sandbox.capability.denied",
         "host_access_performed": false,
@@ -2006,7 +2006,7 @@
       {
         "actor": "tool_runtime",
         "capability": "network.websocket",
-        "decision_id": "sandbox_977bb94b2f2559cc",
+        "decision_id": "sandbox_6afcb470c7716d92",
         "dns_query_sent": false,
         "event_name": "sandbox.capability.denied",
         "host_access_performed": false,
@@ -2023,7 +2023,7 @@
       {
         "actor": "tool_runtime",
         "capability": "network.ftp",
-        "decision_id": "sandbox_47067eaccb3aac7d",
+        "decision_id": "sandbox_fe1b7222722cd7cc",
         "dns_query_sent": false,
         "event_name": "sandbox.capability.denied",
         "host_access_performed": false,
@@ -2040,7 +2040,7 @@
       {
         "actor": "tool_runtime",
         "capability": "network.smtp",
-        "decision_id": "sandbox_3b8bcba1b5556b43",
+        "decision_id": "sandbox_76fb0d5133db9ee0",
         "dns_query_sent": false,
         "event_name": "sandbox.capability.denied",
         "host_access_performed": false,
@@ -2057,7 +2057,7 @@
       {
         "actor": "tool_runtime",
         "capability": "process.spawn",
-        "decision_id": "sandbox_be45bd2cd94f1a8f",
+        "decision_id": "sandbox_961323a8bc3cecb4",
         "dns_query_sent": false,
         "event_name": "sandbox.capability.denied",
         "host_access_performed": false,
@@ -2074,7 +2074,7 @@
       {
         "actor": "tool_runtime",
         "capability": "network.bundled_client",
-        "decision_id": "sandbox_41d50490fa4dd87f",
+        "decision_id": "sandbox_f2dec57ad603662c",
         "dns_query_sent": false,
         "event_name": "sandbox.capability.denied",
         "host_access_performed": false,
@@ -2139,7 +2139,7 @@
     },
     "governed_http_positive_control": {
       "bytes_received": 12,
-      "decision_id": "egress_1bf7c5c50ee0eaa8",
+      "decision_id": "egress_57aaa1407244dfb8",
       "headers_sent": {
         "user-agent": "cornerstone-vs2-governed-egress/1",
         "x-cs-credential-ref": "credential_ref_mock_provider_read",
@@ -2149,13 +2149,13 @@
         {
           "bytes_received": 12,
           "decision": "allow",
-          "decision_id": "egress_1bf7c5c50ee0eaa8",
+          "decision_id": "egress_57aaa1407244dfb8",
           "destination": {
             "destination_class": "reserved_loopback",
             "host": "127.0.0.1",
             "method": "GET",
             "path": "/v1/read/status",
-            "port": 53048,
+            "port": 64875,
             "raw_path": "/v1/read/status",
             "scheme": "http"
           },
@@ -2168,7 +2168,7 @@
           "location": null,
           "reason": "declared_connectorhub_capability",
           "request_sent": true,
-          "url": "http://127.0.0.1:53048/v1/read/status"
+          "url": "http://127.0.0.1:64875/v1/read/status"
         }
       ],
       "http_status": 200,
@@ -2185,7 +2185,7 @@
       {
         "authorization_header_seen": false,
         "headers": {
-          "Host": "127.0.0.1:53048",
+          "Host": "127.0.0.1:64875",
           "user-agent": "cornerstone-vs2-governed-egress/1",
           "x-cs-credential-ref": "credential_ref_mock_provider_read",
           "x-cs-trace-id": "trace_vs2_governed_egress"
@@ -2196,7 +2196,7 @@
       }
     ],
     "host": "127.0.0.1",
-    "port": 53048,
+    "port": 64875,
     "request_bytes": 0,
     "requests": 1
   },
@@ -2204,13 +2204,13 @@
   "tenant_b_denied": {
     "bytes_sent": 0,
     "decision": "deny",
-    "decision_id": "egress_8552010c7d90c02c",
+    "decision_id": "egress_823aa4fb6fcc16c2",
     "destination": {
       "destination_class": "reserved_loopback",
       "host": "127.0.0.1",
       "method": "GET",
       "path": "/v1/read/status",
-      "port": 53048,
+      "port": 64875,
       "raw_path": "/v1/read/status",
       "scheme": "http"
     },
@@ -2227,24 +2227,24 @@
   },
   "tenant_b_execution": {
     "bytes_sent": 0,
-    "decision_id": "egress_8552010c7d90c02c",
+    "decision_id": "egress_823aa4fb6fcc16c2",
     "headers_sent": {},
     "hops": [
       {
         "decision": "deny",
-        "decision_id": "egress_8552010c7d90c02c",
+        "decision_id": "egress_823aa4fb6fcc16c2",
         "destination": {
           "destination_class": "reserved_loopback",
           "host": "127.0.0.1",
           "method": "GET",
           "path": "/v1/read/status",
-          "port": 53048,
+          "port": 64875,
           "raw_path": "/v1/read/status",
           "scheme": "http"
         },
         "reason": "reserved_destination_denied",
         "request_sent": false,
-        "url": "http://127.0.0.1:53048/v1/read/status"
+        "url": "http://127.0.0.1:64875/v1/read/status"
       }
     ],
     "http_status": null,
@@ -2255,14 +2255,14 @@
     "calls": [],
     "credential_ref_headers_seen": 0,
     "host": "127.0.0.1",
-    "port": 53049,
+    "port": 64876,
     "requests": 0
   },
   "untrusted_content_guard": {
     "attempts": [
       {
         "decision": "deny",
-        "decision_id": "egress_6086464b22e0bd29",
+        "decision_id": "egress_f5e7f275715e2677",
         "intent_kind": "call_url",
         "mutation_attempted": false,
         "network_request_sent": false,
@@ -2271,13 +2271,13 @@
           "decision": {
             "bytes_sent": 0,
             "decision": "deny",
-            "decision_id": "egress_6086464b22e0bd29",
+            "decision_id": "egress_f5e7f275715e2677",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/exfiltrate",
-              "port": 53049,
+              "port": 64876,
               "raw_path": "/exfiltrate",
               "scheme": "http"
             },
@@ -2294,24 +2294,24 @@
           },
           "execution": {
             "bytes_sent": 0,
-            "decision_id": "egress_6086464b22e0bd29",
+            "decision_id": "egress_f5e7f275715e2677",
             "headers_sent": {},
             "hops": [
               {
                 "decision": "deny",
-                "decision_id": "egress_6086464b22e0bd29",
+                "decision_id": "egress_f5e7f275715e2677",
                 "destination": {
                   "destination_class": "reserved_loopback",
                   "host": "127.0.0.1",
                   "method": "GET",
                   "path": "/exfiltrate",
-                  "port": 53049,
+                  "port": 64876,
                   "raw_path": "/exfiltrate",
                   "scheme": "http"
                 },
                 "reason": "reserved_destination_denied",
                 "request_sent": false,
-                "url": "http://127.0.0.1:53049/exfiltrate?source=artifact"
+                "url": "http://127.0.0.1:64876/exfiltrate?source=artifact"
               }
             ],
             "http_status": null,
@@ -2342,7 +2342,7 @@
           "tool_calls": 0
         },
         "status": "denied_before_network",
-        "target": "http://127.0.0.1:53049/exfiltrate?source=artifact",
+        "target": "http://127.0.0.1:64876/exfiltrate?source=artifact",
         "untrusted_label": true
       },
       {
@@ -2555,7 +2555,7 @@
       },
       {
         "decision": "deny",
-        "decision_id": "egress_da15b5022dfc06eb",
+        "decision_id": "egress_536b955a127055ae",
         "intent_kind": "call_url",
         "mutation_attempted": false,
         "network_request_sent": false,
@@ -2564,13 +2564,13 @@
           "decision": {
             "bytes_sent": 0,
             "decision": "deny",
-            "decision_id": "egress_da15b5022dfc06eb",
+            "decision_id": "egress_536b955a127055ae",
             "destination": {
               "destination_class": "reserved_loopback",
               "host": "127.0.0.1",
               "method": "GET",
               "path": "/connector-callback",
-              "port": 53049,
+              "port": 64876,
               "raw_path": "/connector-callback",
               "scheme": "http"
             },
@@ -2587,24 +2587,24 @@
           },
           "execution": {
             "bytes_sent": 0,
-            "decision_id": "egress_da15b5022dfc06eb",
+            "decision_id": "egress_536b955a127055ae",
             "headers_sent": {},
             "hops": [
               {
                 "decision": "deny",
-                "decision_id": "egress_da15b5022dfc06eb",
+                "decision_id": "egress_536b955a127055ae",
                 "destination": {
                   "destination_class": "reserved_loopback",
                   "host": "127.0.0.1",
                   "method": "GET",
                   "path": "/connector-callback",
-                  "port": 53049,
+                  "port": 64876,
                   "raw_path": "/connector-callback",
                   "scheme": "http"
                 },
                 "reason": "reserved_destination_denied",
                 "request_sent": false,
-                "url": "http://127.0.0.1:53049/connector-callback"
+                "url": "http://127.0.0.1:64876/connector-callback"
               }
             ],
             "http_status": null,
@@ -2635,7 +2635,7 @@
           "tool_calls": 0
         },
         "status": "denied_before_network",
-        "target": "http://127.0.0.1:53049/connector-callback",
+        "target": "http://127.0.0.1:64876/connector-callback",
         "untrusted_label": true
       },
       {
@@ -3111,7 +3111,7 @@
       {
         "action_cards_created": 0,
         "authority_mutations": 0,
-        "decision_id": "egress_6086464b22e0bd29",
+        "decision_id": "egress_f5e7f275715e2677",
         "egress_network_sends": 0,
         "event_name": "untrusted_content.intent.denied",
         "intent_kind": "call_url",
@@ -3120,7 +3120,7 @@
         "raw_payload_stored": false,
         "source_ref": "artifact:untrusted_artifact_059",
         "source_type": "artifact",
-        "target_digest": "779f03e8bee189b70da59c80136e34ae789feb79649f7ce3c5d1089e1dde7752",
+        "target_digest": "8603492e4aa158afed22cacec447aeab699025bb62d42b7ad99c380d7bd5d0c8",
         "tool_calls_created": 0,
         "trace_id": "trace_vs2_untrusted_content_059"
       },
@@ -3191,7 +3191,7 @@
       {
         "action_cards_created": 0,
         "authority_mutations": 0,
-        "decision_id": "egress_da15b5022dfc06eb",
+        "decision_id": "egress_536b955a127055ae",
         "egress_network_sends": 0,
         "event_name": "untrusted_content.intent.denied",
         "intent_kind": "call_url",
@@ -3200,7 +3200,7 @@
         "raw_payload_stored": false,
         "source_ref": "connector:mock_payload_059",
         "source_type": "connector_payload",
-        "target_digest": "d2a5ee65a873bda81e823923a661d59ea513e146e1b9e383c67087460c954ba7",
+        "target_digest": "54ad0eca2f803fe66d32923418f99f4a1fd142521fb27a0e515341743a602dcc",
         "tool_calls_created": 0,
         "trace_id": "trace_vs2_untrusted_content_059"
       },

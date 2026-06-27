@@ -1,0 +1,71 @@
+{
+  "schema_version": "cs.watch_rule_definition.v1",
+  "watch_rule_slug": "project-alpha-evidence-watch",
+  "title": "Project Alpha evidence watch",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "owner_id": "local-user",
+  "goal": "Watch selected GitHub repositories and approved browser domains for evidence related to Project Alpha launch risk.",
+  "sources": [
+    {
+      "source_ref": "github:repo:owner/project-alpha",
+      "source_kind": "github_repository",
+      "required": true,
+      "connector_contract_ref": "ccon_project_alpha_github",
+      "source_policy_ref": "cspol_project_alpha_selected_sources"
+    },
+    {
+      "source_ref": "browser-domain:docs.project-alpha.example",
+      "source_kind": "approved_browser_domain",
+      "required": true,
+      "connector_contract_ref": "ccon_project_alpha_browser_readonly",
+      "source_policy_ref": "cspol_project_alpha_browser_domains"
+    }
+  ],
+  "match_criteria": {
+    "all_terms": [
+      "Project Alpha",
+      "launch"
+    ],
+    "any_terms": [
+      "risk",
+      "dependency"
+    ],
+    "excluded_terms": [
+      "personal secret",
+      "off-topic"
+    ]
+  },
+  "schedule": {
+    "mode": "interval",
+    "every_minutes": 60,
+    "time_window": {
+      "starts_at": "2026-06-23T00:00:00Z",
+      "ends_at": "2026-07-23T00:00:00Z"
+    }
+  },
+  "sensitivity": "internal",
+  "retention_days": 14,
+  "allowed_outputs": [
+    "watch_result",
+    "evidence_bundle_draft",
+    "owner_notification"
+  ],
+  "connector_contract_refs": [
+    "ccon_project_alpha_github",
+    "ccon_project_alpha_browser_readonly"
+  ],
+  "source_policy_refs": [
+    "cspol_project_alpha_selected_sources",
+    "cspol_project_alpha_browser_domains"
+  ],
+  "authority": {
+    "external_action_execution": false,
+    "provider_mutation": false,
+    "workflow_execution_requires_action_path": true
+  }
+}
