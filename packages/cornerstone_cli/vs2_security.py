@@ -420,10 +420,6 @@ def _verify_postgres_rls(root: Path) -> dict[str, Any]:
         return payload
 
     container = f"cornerstone-vs2-pg-{hashlib.sha1(str(time.time()).encode()).hexdigest()[:10]}"
-    data_root = root / "tmp" / "vs2-security-postgres"
-    data_root.mkdir(parents=True, exist_ok=True)
-    data_dir_context = tempfile.TemporaryDirectory(prefix=f"{container}-data-", dir=data_root)
-    data_dir = Path(data_dir_context.name).resolve()
     started = _run(
         [
             "docker",
@@ -432,8 +428,6 @@ def _verify_postgres_rls(root: Path) -> dict[str, Any]:
             "--rm",
             "--name",
             container,
-            "--mount",
-            f"type=bind,source={data_dir},target=/var/lib/postgresql/data",
             "-e",
             "POSTGRES_PASSWORD=cornerstone",
             POSTGRES_IMAGE,
@@ -715,7 +709,6 @@ SELECT jsonb_build_object(
         }
     finally:
         _run(["docker", "rm", "-f", container], cwd=root, timeout=30)
-        data_dir_context.cleanup()
 
 
 def _summarize_transcript(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
