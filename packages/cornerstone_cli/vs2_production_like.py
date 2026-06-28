@@ -162,6 +162,10 @@ def _compose_exec(
     return _compose(compose_file, ["exec", "-T", service, *command], root=root, input_text=input_text, timeout=timeout)
 
 
+def _compose_logs(compose_file: Path, service: str, *, root: Path, timeout: int = 30) -> dict[str, Any]:
+    return _compose(compose_file, ["logs", "--no-color", service], root=root, timeout=timeout)
+
+
 def _psql(compose_file: Path, database: str, sql: str, *, root: Path, timeout: int = 120) -> dict[str, Any]:
     return _compose_exec(
         compose_file,
@@ -345,6 +349,103 @@ for name, payload in cases:
 print(json.dumps({"cases": results}, sort_keys=True))
 """
     ).replace("__CASES__", repr([("allow", sample_input), ("cross_tenant", cross_tenant), ("invalid", invalid)]))
+
+
+def _controlled_sink_probe_script(run_id: str) -> str:
+    sample_input = {
+        "schema_version": "cs.policy_input.vs2.v1",
+        "trace_id": f"trace_vs2_sink_{run_id}",
+        "subject": {
+            "principal_id": "principal_alice",
+            "roles": ["owner"],
+            "membership_revision": "memrev-alpha-001",
+            "revoked": False,
+        },
+        "scope": {"tenant_id": "tenant_a", "namespace_id": "personal", "workspace_id": "default"},
+        "resource": {
+            "resource_id": "provider_sink",
+            "tenant_id": "tenant_a",
+            "namespace_id": "personal",
+            "classification": "internal",
+        },
+        "action": "connector.egress",
+        "risk": "low",
+        "policy_path": "artifact.read",
+        "mission_authority": {"mission_id": "mission_alpha", "authorized": True, "authority_ref": "authority_alpha_owner"},
+        "data_scope": {"scope": "tenant", "purpose": "connector_egress_probe"},
+        "approval": {"required": False, "status": "not_required"},
+        "capability": {"declared": True, "connectorhub_mediated": True},
+        "environment": {"deployment": "local", "workspace_mode": "assist"},
+    }
+    forbidden_input = json.loads(json.dumps(sample_input))
+    forbidden_input["trace_id"] = f"trace_vs2_forbidden_sink_{run_id}"
+    forbidden_input["resource"]["resource_id"] = "forbidden_sink"
+    forbidden_input["resource"]["tenant_id"] = "tenant_b"
+    provider_url = f"http://provider-sink:8080/?probe=provider_allowed_{run_id}"
+    forbidden_url = f"http://forbidden-sink:8080/?probe=forbidden_denied_{run_id}"
+    return (
+        """
+import json
+import urllib.request
+
+provider_url = __PROVIDER_URL__
+forbidden_url = __FORBIDDEN_URL__
+allow_input = __ALLOW_INPUT__
+forbidden_input = __FORBIDDEN_INPUT__
+
+def opa_decision(payload):
+    request = urllib.request.Request(
+        "http://opa:8181/v1/data/cornerstone/vs2/decision",
+        data=json.dumps({"input": payload}, sort_keys=True).encode(),
+        headers={"content-type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=5) as response:
+        body = json.loads(response.read().decode())
+        return {"http_status": response.status, "result": body.get("result", {})}
+
+allow_decision = opa_decision(allow_input)
+forbidden_decision = opa_decision(forbidden_input)
+provider_request_sent = False
+provider_status = None
+provider_error = None
+if allow_decision["result"].get("decision") == "allow":
+    provider_request_sent = True
+    try:
+        with urllib.request.urlopen(provider_url, timeout=5) as response:
+            provider_status = response.status
+            response.read()
+    except Exception as error:
+        provider_error = {"class": type(error).__name__, "message": str(error)}
+
+forbidden_request_sent = False
+forbidden_status = None
+forbidden_error = None
+if forbidden_decision["result"].get("decision") == "allow":
+    forbidden_request_sent = True
+    try:
+        with urllib.request.urlopen(forbidden_url, timeout=5) as response:
+            forbidden_status = response.status
+            response.read()
+    except Exception as error:
+        forbidden_error = {"class": type(error).__name__, "message": str(error)}
+
+print(json.dumps({
+    "provider_url": provider_url,
+    "forbidden_url": forbidden_url,
+    "allow_decision": allow_decision,
+    "forbidden_decision": forbidden_decision,
+    "provider_request_sent": provider_request_sent,
+    "provider_status": provider_status,
+    "provider_error": provider_error,
+    "forbidden_request_sent": forbidden_request_sent,
+    "forbidden_status": forbidden_status,
+    "forbidden_error": forbidden_error,
+}, sort_keys=True))
+"""
+    ).replace("__PROVIDER_URL__", repr(provider_url)).replace(
+        "__FORBIDDEN_URL__", repr(forbidden_url)
+    ).replace("__ALLOW_INPUT__", repr(sample_input)).replace("__FORBIDDEN_INPUT__", repr(forbidden_input))
 
 
 def _network_probe_script(gateway_url: str) -> str:
@@ -758,7 +859,8 @@ def _inspect_json(root: Path, object_id: str) -> dict[str, Any]:
 
 
 def _verify_network(compose_file: Path, root: Path) -> dict[str, Any]:
-    containers = {service: _container_id(compose_file, root, service) for service in ["postgres", "opa", "egress-gateway"]}
+    services = ["postgres", "opa", "egress-gateway", "provider-sink", "forbidden-sink"]
+    containers = {service: _container_id(compose_file, root, service) for service in services}
     inspected = {service: _inspect_json(root, container_id) for service, container_id in containers.items()}
     networks_by_service = {
         service: set(item["NetworkSettings"]["Networks"].keys())
@@ -784,6 +886,8 @@ def _verify_network(compose_file: Path, root: Path) -> dict[str, Any]:
         "internal_network_is_docker_internal": internal_inspect.get("Internal") is True,
         "postgres_and_opa_only_internal": networks_by_service["postgres"] == {internal_network} and networks_by_service["opa"] == {internal_network},
         "egress_gateway_bridges_internal_to_external_test": bool(external_networks) and internal_network in networks_by_service["egress-gateway"],
+        "provider_sink_external_only": networks_by_service["provider-sink"] == set(external_networks),
+        "forbidden_sink_external_only": networks_by_service["forbidden-sink"] == set(external_networks),
         "postgres_host_bound_to_loopback": port_bindings.get("5432/tcp") == [{"HostIp": "127.0.0.1", "HostPort": "55432"}] and host_socket,
         "opa_not_published_to_host": not host_opa,
         "controlled_gateway_reachable_from_internal_probe": probe_payload.get("controlled_gateway_reachable") is True and probe_payload.get("controlled_gateway_status") == 200,
@@ -799,6 +903,54 @@ def _verify_network(compose_file: Path, root: Path) -> dict[str, Any]:
         "probe": probe_payload,
         "checks": checks,
         "probe_transcript": _summarize(probe),
+    }
+
+
+def _verify_controlled_sink_egress(compose_file: Path, root: Path, run_id: str) -> dict[str, Any]:
+    probe = _compose_exec(
+        compose_file,
+        "egress-gateway",
+        ["python", "-"],
+        root=root,
+        input_text=_controlled_sink_probe_script(run_id),
+        timeout=30,
+    )
+    payload = _load_json_stdout(probe)
+    provider_logs = _compose_logs(compose_file, "provider-sink", root=root)
+    forbidden_logs = _compose_logs(compose_file, "forbidden-sink", root=root)
+    provider_log_text = str(provider_logs.get("stdout", ""))
+    forbidden_log_text = str(forbidden_logs.get("stdout", ""))
+    provider_token = f"provider_allowed_{run_id}"
+    forbidden_token = f"forbidden_denied_{run_id}"
+    allow_decision = payload.get("allow_decision", {}).get("result", {})
+    forbidden_decision = payload.get("forbidden_decision", {}).get("result", {})
+    checks = {
+        "provider_sink_service_reached_once": payload.get("provider_request_sent") is True
+        and payload.get("provider_status") == 200
+        and provider_log_text.count(provider_token) == 1,
+        "forbidden_sink_denied_by_policy": forbidden_decision.get("decision") == "deny"
+        and "cross_tenant_scope" in forbidden_decision.get("reason_codes", []),
+        "forbidden_sink_not_contacted": payload.get("forbidden_request_sent") is False
+        and forbidden_token not in forbidden_log_text,
+        "opa_allow_decision_recorded": allow_decision.get("decision") == "allow",
+    }
+    return {
+        "status": "passed" if all(checks.values()) else "failed",
+        "checks": checks,
+        "probe": payload,
+        "log_evidence": {
+            "provider_sink_token": provider_token,
+            "provider_sink_token_count": provider_log_text.count(provider_token),
+            "forbidden_sink_token": forbidden_token,
+            "forbidden_sink_token_count": forbidden_log_text.count(forbidden_token),
+            "provider_sink_log_tail": provider_log_text.splitlines()[-8:],
+            "forbidden_sink_log_tail": forbidden_log_text.splitlines()[-8:],
+        },
+        "transcripts": {
+            "probe": _summarize(probe),
+            "provider_logs": _summarize(provider_logs),
+            "forbidden_logs": _summarize(forbidden_logs),
+        },
     }
 
 
@@ -913,6 +1065,13 @@ def run_vs2_production_like_integration(root: Path, *, compose_file: Path | None
         {
             "id": "PLIKE-006",
             "type": "MUST_PASS",
+            "expected": "Controlled local sink rehearsal proves egress-gateway can reach only the policy-allowed provider sink and does not contact the forbidden sink.",
+            "verification": "OPA-mediated egress-gateway probe plus provider-sink and forbidden-sink Docker logs.",
+            "owner": "AI",
+        },
+        {
+            "id": "PLIKE-007",
+            "type": "MUST_PASS",
             "expected": "pg_dump/pg_restore preserve tenant-scoped counts, RLS checks, and audit verification.",
             "verification": "Dump fresh database, restore into fresh database, rerun RLS and audit checks.",
             "owner": "AI",
@@ -934,6 +1093,11 @@ def run_vs2_production_like_integration(root: Path, *, compose_file: Path | None
     audit = _verify_audit(compose, root, database) if seed.get("status") == "passed" else {"status": "skipped"}
     opa = _verify_opa(compose, root) if stack.get("opa_http_ready_inside_stack") else {"status": "skipped"}
     network = _verify_network(compose, root) if compose_up["exit_code"] == 0 else {"status": "skipped"}
+    controlled_sink_egress = (
+        _verify_controlled_sink_egress(compose, root, run_id)
+        if compose_up["exit_code"] == 0 and stack.get("opa_http_ready_inside_stack") and network.get("status") == "passed"
+        else {"status": "skipped"}
+    )
     backup_restore = (
         _verify_backup_restore(compose, root, database, restore_database, run_id)
         if seed.get("status") == "passed" and rls.get("status") == "passed" and audit.get("status") == "passed"
@@ -969,6 +1133,11 @@ def run_vs2_production_like_integration(root: Path, *, compose_file: Path | None
         },
         {
             "id": "PLIKE-006",
+            "status": "PASS" if controlled_sink_egress.get("status") == "passed" else "FAIL",
+            "evidence": ["egress-gateway OPA-mediated sink probe", "provider-sink logs", "forbidden-sink logs"],
+        },
+        {
+            "id": "PLIKE-007",
             "status": "PASS" if backup_restore.get("status") == "passed" else "FAIL",
             "evidence": [backup_restore.get("backup_path", ""), f"restore_database:{restore_database}"],
         },
@@ -1002,6 +1171,7 @@ def run_vs2_production_like_integration(root: Path, *, compose_file: Path | None
         "audit": audit,
         "opa": opa,
         "network": network,
+        "controlled_sink_egress": controlled_sink_egress,
         "backup_restore": backup_restore,
         "overclaim": overclaim,
         "stack_left_running": True,

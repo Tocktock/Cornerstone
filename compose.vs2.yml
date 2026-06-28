@@ -40,6 +40,18 @@ services:
       - cornerstone_internal
       - cornerstone_external_test
 
+  provider-sink:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8080"]
+    networks:
+      - cornerstone_external_test
+
+  forbidden-sink:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8080"]
+    networks:
+      - cornerstone_external_test
+
 networks:
   cornerstone_internal:
     internal: true

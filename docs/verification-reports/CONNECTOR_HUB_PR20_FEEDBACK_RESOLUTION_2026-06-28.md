@@ -24,7 +24,7 @@ The review correctly found that PR #20 was too broad to merge safely and that se
 | B5: PR too large | ADR-0008 defines the split sequence and target package/test module map. The split-readiness manifest makes the proposed slices locally verifiable. PR #20 stays a draft evidence branch. | `docs/adr/ADR-0008-connectorhub-review-split-and-module-map.md`; `docs/verification-reports/CONNECTOR_HUB_REVIEW_SPLIT_MANIFEST_2026-06-28.json`; `scripts/verify_connectorhub_review_split.py`; `docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md` | Still blocks merge as one broad PR unless maintainer explicitly chooses a scoped slice. |
 | M1: `connector.py`/test monolith | ADR-0008 records the target module/test map and the split-readiness verifier guards that map. This branch does not claim the split is complete. | `docs/adr/ADR-0008-connectorhub-review-split-and-module-map.md`; `docs/verification-reports/CONNECTOR_HUB_REVIEW_SPLIT_MANIFEST_2026-06-28.json`; `scripts/verify_connectorhub_review_split.py` | Follow-up implementation before merge or split PRs. |
 | M2: Action lane boundary | `CS-CH-031` wording is local fixture Action and fixture outcome only; live side-effecting connector Actions remain out of scope. | `docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md`; `docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md` | Fixed for current local review. |
-| M3: weak simulated egress checks | Current reports keep local-only/synthetic boundaries visible. Controlled forbidden-sink hardening remains a future VS2 local/manual proof slice. | `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md`; `docs/adr/ADR-0008-connectorhub-review-split-and-module-map.md` | Follow-up security hardening; do not claim production egress enforcement. |
+| M3: weak simulated egress checks | Strict local VS2 rehearsal now adds controlled `provider-sink` and `forbidden-sink` containers. `egress-gateway` records an OPA-mediated allowed provider request and a policy-denied forbidden request with Docker log evidence. | `compose.vs2.yml`; `packages/cornerstone_cli/vs2_production_like.py`; `reports/security/vs2-production-like-integration-2026-06-27.json` | Fixed for local/manual Docker rehearsal; still no production egress enforcement claim. |
 | M4: milestone wording | PR/body/docs use ConnectorHub adoption overlay wording, not milestone-complete wording. | PR body; `docs/adr/ADR-0008-connectorhub-review-split-and-module-map.md`; `README.md` | Fixed for wording boundary. |
 | M5: generated evidence hard to review | Reviewer guide plus local verifier define how to validate generated trail without reading every large report. The 41 source reports are represented by compact envelopes, a shared evidence index, and SHA-256-addressed JSON objects. | `docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md`; `reports/scenario/connector-contract-adapter/shared-evidence-index-2026-06-23.json`; `scripts/verify_connectorhub_local_evidence.sh`; `scripts/verify_connectorhub_engineering_trail.py` | Fixed for local review; still no CI artifact by design. |
 | N1: README as status source | README now points to authoritative reports for ConnectorHub and VS2 generated status. | `README.md` | Fixed. |
@@ -72,7 +72,7 @@ The review-required local command set was rerun after aligning the VS2 overclaim
 | `python3 -m unittest tests.scenario.test_connectorhub_cli` | PASS | Covered by the clean-clone default gate: `Ran 84 tests in 255.951s`; `OK`. |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_default_deny_egress_topology_cs_ch_036` | PASS | Targeted clean-clone regression check after removing the bind mount: `Ran 1 test in 109.410s`; `OK`. |
 | `python3 -m unittest tests.scenario.test_scaffold_cli` | PASS | Covered by the clean-clone default gate: `Ran 53 tests in 272.216s`; `OK`. |
-| `make verify-vs2-production-like` | PASS | Clean clone command report `status=passed`; elapsed `133.873s`; 7 scenario rows, all `PASS`; report git commit `b343393`. |
+| `make verify-vs2-production-like` | PASS | Local command report `status=passed`; controlled provider/forbidden sink proof included; 8 scenario rows, all `PASS`. |
 
 Proof boundary remains unchanged: this is local deterministic and local production-like rehearsal evidence only. It does not claim live connector readiness, production security readiness, or human acceptance.
 
@@ -80,7 +80,7 @@ Proof boundary remains unchanged: this is local deterministic and local producti
 
 - Maintainer decides whether to split PR #20 or select a smaller merge slice.
 - Human/external gates `CS-CH-H01` through `CS-CH-H07` require dated human records.
-- Controlled forbidden-sink egress proof remains a future VS2 hardening slice.
+- Controlled forbidden-sink egress proof is now part of the strict local VS2 rehearsal; production network-control review remains human/external.
 - `connector.py` and `tests/scenario/test_connectorhub_cli.py` still need the ADR-0008 module/test split before this becomes a clean implementation merge candidate.
 
 ## Current Verdict

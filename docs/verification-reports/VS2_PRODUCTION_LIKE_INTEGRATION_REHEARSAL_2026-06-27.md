@@ -13,6 +13,7 @@ Create and verify a production-like local VS2 environment for CornerStone using:
 - real OPA/Rego HTTP decision service;
 - Docker internal network default egress denial;
 - controlled local egress gateway;
+- controlled provider and forbidden egress sinks;
 - real VS2 migrations;
 - tenant-isolation checks through the `cornerstone_app` role;
 - backup/restore rehearsal;
@@ -27,7 +28,8 @@ Create and verify a production-like local VS2 environment for CornerStone using:
 | PLIKE-003 | MUST_PASS | RLS hides tenant B and denies forged cross-tenant writes for `cornerstone_app`. | PASS | SQL transcript and `pg_policies` inventory in report |
 | PLIKE-004 | MUST_PASS | OPA allows valid owner input and denies cross-tenant and invalid-schema input. | PASS | Internal `POST /v1/data/cornerstone/vs2/decision` probe |
 | PLIKE-005 | MUST_PASS | Internal-network runtime cannot reach external egress directly; controlled gateway remains reachable. | PASS | Ephemeral internal-network probe in report |
-| PLIKE-006 | MUST_PASS | `pg_dump`/`pg_restore` preserve tenant-scoped counts, RLS checks, and audit verification. | PASS | Backup path and restore database in report |
+| PLIKE-006 | MUST_PASS | `egress-gateway` reaches the allowed provider sink exactly once and denies the forbidden sink before network. | PASS | OPA-mediated sink probe plus provider-sink and forbidden-sink Docker logs |
+| PLIKE-007 | MUST_PASS | `pg_dump`/`pg_restore` preserve tenant-scoped counts, RLS checks, and audit verification. | PASS | Backup path and restore database in report |
 | PLIKE-R01 | REGRESSION_GUARD | Local rehearsal does not claim production readiness, live-provider readiness, or human acceptance. | PASS | Claim-boundary and human-required fields in report |
 
 ## Command Evidence
@@ -46,10 +48,10 @@ The latest report is:
 
 - `reports/security/vs2-production-like-integration-2026-06-27.json`
 - `reports/security/vs2-production-like-integration-command.json`
-- `run_id`: `20260627T105721Z_29362`
-- `report_payload_sha256_without_hash`: `b5907b345835c38999edf929e414c3385d84ce49f0b370f67b9c6fab76bc46bb`
+- `run_id`: `20260628T060401Z_53455`
+- `report_payload_sha256_without_hash`: `f0e38f8f8f516c333886c2913c53aed3b074c4415e057273b15513c026914704`
 
-All seven local production-like rehearsal rows are `PASS`.
+All eight local production-like rehearsal rows are `PASS`.
 
 ## Human Required Boundary
 

@@ -22517,7 +22517,7 @@ def _validate_connectorhub_feedback_resolution_report(errors: list[str]) -> None
         "M1: `connector.py`/test monolith",
         "M2: Action lane boundary",
         "M3: weak simulated egress checks",
-        "Controlled forbidden-sink hardening remains a future VS2 local/manual proof slice.",
+        "Controlled forbidden-sink egress proof is now part of the strict local VS2 rehearsal",
         "M4: milestone wording",
         "M5: generated evidence hard to review",
         "N1: README as status source",

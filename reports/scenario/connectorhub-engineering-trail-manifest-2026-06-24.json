@@ -282,8 +282,8 @@
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_PR20_FEEDBACK_RESOLUTION_2026-06-28.md",
-      "sha256": "229b936e09abedeab15ab0ad2851497ae97e27e5da54a9531a5628cb748669dd",
-      "size_bytes": 10401
+      "sha256": "bedd8971183fd9535d808a59b783385e38b154f2c23d10b425a89a302dd28972",
+      "size_bytes": 10534
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md",
@@ -847,8 +847,8 @@
     },
     {
       "path": "scripts/verify_connectorhub_engineering_trail.py",
-      "sha256": "f7efdb885213ac507b0fcc19915de5a866f453c3b433a02add96050e7a153679",
-      "size_bytes": 1685232
+      "sha256": "aadc600885b4d3b10a1445ddf994bae8962fe620b2620e7ad45dd0421c628ce2",
+      "size_bytes": 1685234
     },
     {
       "path": "scripts/verify_connectorhub_local_evidence.sh",
@@ -871,7 +871,7 @@
       "size_bytes": 7216
     }
   ],
-  "generated_at": "2026-06-28T05:44:43.244816+00:00",
+  "generated_at": "2026-06-28T06:08:37.428148+00:00",
   "manifest_schema": "cornerstone.connectorhub.engineering_trail_manifest.v1",
   "source_inputs": [
     {

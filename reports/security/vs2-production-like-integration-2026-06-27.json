@@ -10,9 +10,9 @@
     "status": "passed"
   },
   "backup_restore": {
-    "backup_bytes": 64701,
-    "backup_path": "tmp/vs2-production-like/20260627T133245Z_34549/backup.dump",
-    "backup_sha256": "3d7cbe749f15ecd93e65584e6f174b400b4c90e34bf34c90b1bf929681dfdc00",
+    "backup_bytes": 64691,
+    "backup_path": "tmp/vs2-production-like/20260628T060401Z_53455/backup.dump",
+    "backup_sha256": "77b33478836fa9ee7e89d6ec877f944736f219f7762240f7244fe87752b2010d",
     "checks": {
       "audit_rechecked_after_restore": true,
       "pg_dump_succeeded": true,
@@ -20,7 +20,7 @@
       "rls_rechecked_after_restore": true,
       "tenant_counts_match_after_restore": true
     },
-    "restore_database": "cornerstone_plike_20260627t133245z_34549_restore",
+    "restore_database": "cornerstone_plike_20260628t060401z_53455_restore",
     "status": "passed",
     "transcript": [
       {
@@ -36,13 +36,13 @@
           "-U",
           "postgres",
           "-Fc",
-          "cornerstone_plike_20260627t133245z_34549"
+          "cornerstone_plike_20260628t060401z_53455"
         ],
-        "elapsed_seconds": 3.147,
+        "elapsed_seconds": 3.401,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [
-          "<64701 bytes>"
+          "<64691 bytes>"
         ],
         "timed_out": false
       },
@@ -67,7 +67,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.107,
+        "elapsed_seconds": 3.238,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -86,10 +86,10 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549_restore",
+          "cornerstone_plike_20260628t060401z_53455_restore",
           "--no-owner"
         ],
-        "elapsed_seconds": 3.165,
+        "elapsed_seconds": 3.417,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [
@@ -110,21 +110,131 @@
       "up",
       "-d"
     ],
-    "elapsed_seconds": 0.115,
+    "elapsed_seconds": 0.309,
     "exit_code": 0,
     "stderr_tail": [
-      " Container cornerstone-opa-1 Running ",
-      " Container cornerstone-egress-gateway-1 Running ",
-      " Container cornerstone-postgres-1 Running "
+      " Container cornerstone-forbidden-sink-1 Creating ",
+      " Container cornerstone-provider-sink-1 Creating ",
+      " Container cornerstone-forbidden-sink-1 Created ",
+      " Container cornerstone-provider-sink-1 Created ",
+      " Container cornerstone-provider-sink-1 Starting ",
+      " Container cornerstone-forbidden-sink-1 Starting ",
+      " Container cornerstone-forbidden-sink-1 Started ",
+      " Container cornerstone-provider-sink-1 Started "
     ],
     "stdout_tail": [],
     "timed_out": false
   },
-  "database": "cornerstone_plike_20260627t133245z_34549",
-  "elapsed_seconds": 133.233,
-  "finished_at": "2026-06-27T13:34:58.657785+00:00",
+  "controlled_sink_egress": {
+    "checks": {
+      "forbidden_sink_denied_by_policy": true,
+      "forbidden_sink_not_contacted": true,
+      "opa_allow_decision_recorded": true,
+      "provider_sink_service_reached_once": true
+    },
+    "log_evidence": {
+      "forbidden_sink_log_tail": [],
+      "forbidden_sink_token": "forbidden_denied_20260628T060401Z_53455",
+      "forbidden_sink_token_count": 0,
+      "provider_sink_log_tail": [
+        "provider-sink-1  | 172.19.0.2 - - [28/Jun/2026 06:05:26] \"GET /?probe=provider_allowed_20260628T060401Z_53455 HTTP/1.1\" 200 -"
+      ],
+      "provider_sink_token": "provider_allowed_20260628T060401Z_53455",
+      "provider_sink_token_count": 1
+    },
+    "probe": {
+      "allow_decision": {
+        "http_status": 200,
+        "result": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "policy_path": "cornerstone.vs2/allow",
+          "reason_codes": []
+        }
+      },
+      "forbidden_decision": {
+        "http_status": 200,
+        "result": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "cross_tenant_scope"
+          ]
+        }
+      },
+      "forbidden_error": null,
+      "forbidden_request_sent": false,
+      "forbidden_status": null,
+      "forbidden_url": "http://forbidden-sink:8080/?probe=forbidden_denied_20260628T060401Z_53455",
+      "provider_error": null,
+      "provider_request_sent": true,
+      "provider_status": 200,
+      "provider_url": "http://provider-sink:8080/?probe=provider_allowed_20260628T060401Z_53455"
+    },
+    "status": "passed",
+    "transcripts": {
+      "forbidden_logs": {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "logs",
+          "--no-color",
+          "forbidden-sink"
+        ],
+        "elapsed_seconds": 0.063,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      "probe": {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "egress-gateway",
+          "python",
+          "-"
+        ],
+        "elapsed_seconds": 0.314,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [
+          "{\"allow_decision\": {\"http_status\": 200, \"result\": {\"bundle_revision\": \"vs2-rego-local-v1\", \"decision\": \"allow\", \"policy_path\": \"cornerstone.vs2/allow\", \"reason_codes\": []}}, \"forbidden_decision\": {\"http_status\": 200, \"result\": {\"bundle_revision\": \"vs2-rego-local-v1\", \"decision\": \"deny\", \"policy_path\": \"cornerstone.vs2/deny\", \"reason_codes\": [\"cross_tenant_scope\"]}}, \"forbidden_error\": null, \"forbidden_request_sent\": false, \"forbidden_status\": null, \"forbidden_url\": \"http://forbidden-sink:8080/?probe=forbidden_denied_20260628T060401Z_53455\", \"provider_error\": null, \"provider_request_sent\": true, \"provider_status\": 200, \"provider_url\": \"http://provider-sink:8080/?probe=provider_allowed_20260628T060401Z_53455\"}"
+        ],
+        "timed_out": false
+      },
+      "provider_logs": {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "logs",
+          "--no-color",
+          "provider-sink"
+        ],
+        "elapsed_seconds": 0.083,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [
+          "provider-sink-1  | 172.19.0.2 - - [28/Jun/2026 06:05:26] \"GET /?probe=provider_allowed_20260628T060401Z_53455 HTTP/1.1\" 200 -"
+        ],
+        "timed_out": false
+      }
+    }
+  },
+  "database": "cornerstone_plike_20260628t060401z_53455",
+  "elapsed_seconds": 140.38,
+  "finished_at": "2026-06-28T06:06:22.004816+00:00",
   "migrations": {
-    "database": "cornerstone_plike_20260627t133245z_34549",
+    "database": "cornerstone_plike_20260628t060401z_53455",
     "status": "passed",
     "transcript": [
       {
@@ -148,7 +258,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.098,
+        "elapsed_seconds": 3.206,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -175,7 +285,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.109,
+        "elapsed_seconds": 3.658,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -194,7 +304,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -202,7 +312,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.125,
+        "elapsed_seconds": 3.192,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -221,7 +331,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -229,7 +339,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.146,
+        "elapsed_seconds": 3.231,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -248,7 +358,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -256,7 +366,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.105,
+        "elapsed_seconds": 3.212,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -275,7 +385,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -283,7 +393,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.098,
+        "elapsed_seconds": 3.225,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -302,7 +412,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -310,7 +420,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.11,
+        "elapsed_seconds": 3.298,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -329,7 +439,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -337,7 +447,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.101,
+        "elapsed_seconds": 3.149,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -356,7 +466,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -364,7 +474,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.116,
+        "elapsed_seconds": 3.265,
         "exit_code": 0,
         "stderr_tail": [
           "NOTICE:  policy \"operator_metrics_tenant_scope\" for relation \"cs.operator_metrics\" does not exist, skipping",
@@ -387,7 +497,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -395,7 +505,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.104,
+        "elapsed_seconds": 3.169,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -408,16 +518,20 @@
       "controlled_gateway_reachable_from_internal_probe": true,
       "direct_external_from_internal_probe_denied": true,
       "egress_gateway_bridges_internal_to_external_test": true,
+      "forbidden_sink_external_only": true,
       "internal_network_exists": true,
       "internal_network_is_docker_internal": true,
       "opa_not_published_to_host": true,
       "postgres_and_opa_only_internal": true,
-      "postgres_host_bound_to_loopback": true
+      "postgres_host_bound_to_loopback": true,
+      "provider_sink_external_only": true
     },
     "containers": {
       "egress-gateway": "e2a440020c8483da5d580f1885e5c4174ec8a97e437a3ec44533962544d07f5e",
+      "forbidden-sink": "0aaa97804e6a0595e5dfbc66b39d82d4037ab653d04e8e7e0be9c933e1f372ce",
       "opa": "a335666fea6b6ca1dd6068e9d7b8cc4bbd495a332b80aea3acb82168c5115e15",
-      "postgres": "768a025a9b43428946d6572a3cbcf33ca9b317508504aed6ca2bfa2f8edb47f4"
+      "postgres": "768a025a9b43428946d6572a3cbcf33ca9b317508504aed6ca2bfa2f8edb47f4",
+      "provider-sink": "dda1b7953525c8e7ba4023a8d4cf8910ee59cc3c962e321bd0b4b52f1e68a382"
     },
     "external_networks": [
       "cornerstone_cornerstone_external_test"
@@ -428,11 +542,17 @@
         "cornerstone_cornerstone_external_test",
         "cornerstone_cornerstone_internal"
       ],
+      "forbidden-sink": [
+        "cornerstone_cornerstone_external_test"
+      ],
       "opa": [
         "cornerstone_cornerstone_internal"
       ],
       "postgres": [
         "cornerstone_cornerstone_internal"
+      ],
+      "provider-sink": [
+        "cornerstone_cornerstone_external_test"
       ]
     },
     "postgres_port_bindings": {
@@ -462,7 +582,7 @@
         "python",
         "-"
       ],
-      "elapsed_seconds": 5.422,
+      "elapsed_seconds": 6.49,
       "exit_code": 0,
       "stderr_tail": [],
       "stdout_tail": [
@@ -528,7 +648,7 @@
         "python",
         "-"
       ],
-      "elapsed_seconds": 0.118,
+      "elapsed_seconds": 0.374,
       "exit_code": 0,
       "stderr_tail": [],
       "stdout_tail": [
@@ -559,8 +679,8 @@
   },
   "product": "CornerStone",
   "report_path": "reports/security/vs2-production-like-integration-2026-06-27.json",
-  "report_payload_sha256_without_hash": "6c15d552e2e0a87ae9bf0ece5a9e25956c702e9362241c769e2913ba866a8487",
-  "restore_database": "cornerstone_plike_20260627t133245z_34549_restore",
+  "report_payload_sha256_without_hash": "f0e38f8f8f516c333886c2913c53aed3b074c4415e057273b15513c026914704",
+  "restore_database": "cornerstone_plike_20260628t060401z_53455_restore",
   "rls": {
     "checks": {
       "app_role_cannot_bypass_rls": true,
@@ -732,7 +852,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -740,7 +860,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.089,
+        "elapsed_seconds": 3.204,
         "exit_code": 3,
         "stderr_tail": [
           "ERROR:  new row violates row-level security policy for table \"artifacts\""
@@ -761,7 +881,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -769,7 +889,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.098,
+        "elapsed_seconds": 3.174,
         "exit_code": 3,
         "stderr_tail": [
           "ERROR:  new row violates row-level security policy for table \"artifacts\""
@@ -790,7 +910,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -798,7 +918,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.1,
+        "elapsed_seconds": 3.226,
         "exit_code": 3,
         "stderr_tail": [
           "ERROR:  permission denied for function unsafe_all_artifacts"
@@ -838,8 +958,8 @@
           "relation": "audit_events",
           "visible_count": 2,
           "visible_ids": [
-            "audit_20260627T133245Z_34549_001",
-            "audit_20260627T133245Z_34549_002"
+            "audit_20260628T060401Z_53455_001",
+            "audit_20260628T060401Z_53455_002"
           ]
         },
         {
@@ -971,7 +1091,7 @@
     },
     "status": "passed"
   },
-  "run_id": "20260627T133245Z_34549",
+  "run_id": "20260628T060401Z_53455",
   "scenario_contract": [
     {
       "expected": "Production-like local stack starts with real Postgres, OPA, and egress gateway services.",
@@ -1009,8 +1129,15 @@
       "verification": "Ephemeral internal-network probe container attempts controlled gateway and external URL."
     },
     {
-      "expected": "pg_dump/pg_restore preserve tenant-scoped counts, RLS checks, and audit verification.",
+      "expected": "Controlled local sink rehearsal proves egress-gateway can reach only the policy-allowed provider sink and does not contact the forbidden sink.",
       "id": "PLIKE-006",
+      "owner": "AI",
+      "type": "MUST_PASS",
+      "verification": "OPA-mediated egress-gateway probe plus provider-sink and forbidden-sink Docker logs."
+    },
+    {
+      "expected": "pg_dump/pg_restore preserve tenant-scoped counts, RLS checks, and audit verification.",
+      "id": "PLIKE-007",
       "owner": "AI",
       "type": "MUST_PASS",
       "verification": "Dump fresh database, restore into fresh database, rerun RLS and audit checks."
@@ -1035,7 +1162,7 @@
     },
     {
       "evidence": [
-        "database:cornerstone_plike_20260627t133245z_34549",
+        "database:cornerstone_plike_20260628t060401z_53455",
         "migrations/vs2/*.sql"
       ],
       "id": "PLIKE-002",
@@ -1066,10 +1193,19 @@
     },
     {
       "evidence": [
-        "tmp/vs2-production-like/20260627T133245Z_34549/backup.dump",
-        "restore_database:cornerstone_plike_20260627t133245z_34549_restore"
+        "egress-gateway OPA-mediated sink probe",
+        "provider-sink logs",
+        "forbidden-sink logs"
       ],
       "id": "PLIKE-006",
+      "status": "PASS"
+    },
+    {
+      "evidence": [
+        "tmp/vs2-production-like/20260628T060401Z_53455/backup.dump",
+        "restore_database:cornerstone_plike_20260628t060401z_53455_restore"
+      ],
+      "id": "PLIKE-007",
       "status": "PASS"
     },
     {
@@ -1088,8 +1224,8 @@
         "action": "artifact.ingest",
         "actor": "principal_alice",
         "decision_id": "decision_allow_artifact_read",
-        "event_hash": "be41fc2e26354121f0d4523157ba1484e4e09f7bdf4702095fd0bb627c13180a",
-        "event_id": "audit_20260627T133245Z_34549_001",
+        "event_hash": "57e339e903a329c7eb09f9e424fc1e38fd34aeb48255538f4ddbed3d761d4551",
+        "event_id": "audit_20260628T060401Z_53455_001",
         "event_type": "artifact.ingested",
         "evidence_refs": [
           "artifact:artifacts_a"
@@ -1110,8 +1246,8 @@
         "action": "policy.evaluate",
         "actor": "cornerstone_policy",
         "decision_id": "decision_allow_artifact_read",
-        "event_hash": "d3ebcd578fef69fe3f8bca7fdd65329bf1688e25063a2899aa2998fdfb07db37",
-        "event_id": "audit_20260627T133245Z_34549_002",
+        "event_hash": "e92dcefc5c131a915d6077f9c3fd3b1de2907d0c68c9108545c6d2ed45eb3ebe",
+        "event_id": "audit_20260628T060401Z_53455_002",
         "event_type": "policy.decision",
         "evidence_refs": [
           "policy:decision_allow_artifact_read"
@@ -1119,7 +1255,7 @@
         "namespace_id": "personal",
         "owner_id": "local-user",
         "policy_revision": "vs2-rego-local-v1",
-        "previous_hash": "be41fc2e26354121f0d4523157ba1484e4e09f7bdf4702095fd0bb627c13180a",
+        "previous_hash": "57e339e903a329c7eb09f9e424fc1e38fd34aeb48255538f4ddbed3d761d4551",
         "subject": {
           "decision": "allow",
           "resource_id": "artifact_a"
@@ -1144,7 +1280,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -1152,7 +1288,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.109,
+        "elapsed_seconds": 3.211,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -1171,7 +1307,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -1179,7 +1315,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.114,
+        "elapsed_seconds": 3.192,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -1198,7 +1334,7 @@
           "-U",
           "postgres",
           "-d",
-          "cornerstone_plike_20260627t133245z_34549",
+          "cornerstone_plike_20260628t060401z_53455",
           "-v",
           "ON_ERROR_STOP=1",
           "-X",
@@ -1206,7 +1342,7 @@
           "-t",
           "-A"
         ],
-        "elapsed_seconds": 3.088,
+        "elapsed_seconds": 3.229,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [],
@@ -1233,7 +1369,7 @@
           "-d",
           "cornerstone"
         ],
-        "elapsed_seconds": 3.099,
+        "elapsed_seconds": 3.124,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [
@@ -1253,7 +1389,7 @@
           "python",
           "-"
         ],
-        "elapsed_seconds": 0.125,
+        "elapsed_seconds": 0.186,
         "exit_code": 0,
         "stderr_tail": [],
         "stdout_tail": [
@@ -1264,6 +1400,6 @@
     ]
   },
   "stack_left_running": true,
-  "started_at": "2026-06-27T13:32:45.425060+00:00",
+  "started_at": "2026-06-28T06:04:01.624870+00:00",
   "status": "passed"
 }
