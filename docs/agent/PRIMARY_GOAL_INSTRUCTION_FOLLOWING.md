@@ -14,6 +14,7 @@ This document defines how agents should follow broad CornerStone goals without t
 It preserves the scenario-first direction:
 
 - work from frozen scenario contracts;
+- always map the full MUST_PASS and REGRESSION scenarios that the user names or clearly implies;
 - solve scenarios as independent delivery slices;
 - keep strict proof boundaries;
 - document implementation decisions and evidence;
@@ -33,13 +34,14 @@ Use this instruction when continuing CornerStone ConnectorHub, VS milestone, or 
 Continue CornerStone ConnectorHub scenario-first development, but operate in small verified slices.
 
 For each slice:
-1. Freeze a short scenario contract.
-2. Inspect the relevant product/docs/code context.
-3. Use senior review lenses, but keep research bounded.
-4. Implement the smallest complete AI-verifiable solution.
-5. Refactor only for the current slice's correctness and maintainability.
-6. Run targeted tests/checks yourself.
-7. Document evidence, remaining HUMAN_REQUIRED gates, and the decision before moving on.
+1. Map every full MUST_PASS and REGRESSION scenario that the user names or clearly implies.
+2. Freeze a short scenario contract for the current delivery slice.
+3. Inspect the relevant product/docs/code context.
+4. Use senior review lenses, but keep research bounded.
+5. Implement the smallest complete AI-verifiable solution.
+6. Refactor only for the current slice's correctness and maintainability.
+7. Run targeted tests/checks yourself.
+8. Document evidence, remaining HUMAN_REQUIRED gates, and the decision before moving on.
 
 Do not claim production readiness, external-provider readiness, human acceptance, or security acceptance without the matching proof surface. Keep local proof, integration proof, staging/prod proof, PR state, and human review separate.
 
@@ -59,13 +61,15 @@ CornerStone ConnectorHub work must continue scenario-first, but execution must b
 
 Maintain the original direction:
 - Treat each Must Pass Scenario or tightly related scenario group as an independent delivery slice.
+- Always map every full MUST_PASS and REGRESSION scenario that I mention or clearly imply, even when the execution slice is smaller.
 - Preserve product value, domain correctness, architecture, data contracts, reliability, security, observability, performance, testability, maintainability, and migration feasibility as review lenses.
 - Keep proof boundaries strict: local tests, browser checks, integration tests, staging/prod evidence, human review, and PR state must not be merged into one claim.
 - Never promote HUMAN_REQUIRED or external-provider evidence to PASS based only on local proof.
 
 Execution limits:
 - Work on only one delivery slice at a time unless I explicitly approve a wider batch.
-- Before coding, write a short slice contract: goal, scope, non-scope, scenarios, proof needed, human-required items, and done criteria.
+- Before coding, write a short slice contract: goal, scope, non-scope, full scenario mapping, scenarios selected for this slice, proof needed, human-required items, and done criteria.
+- If the user mentions a full scenario set, map every mentioned scenario as one of: in this slice, later slice, HUMAN_REQUIRED, blocked, or out of scope. Do not silently drop scenarios because they are too broad for the current slice.
 - Research from multiple senior perspectives, but timebox it to the smallest useful set: product/domain, architecture/data contract, security/reliability, and verification.
 - Prefer the smallest complete implementation that can be verified.
 - Refactor only where it directly improves the current slice or prevents obvious follow-on risk.
@@ -87,6 +91,7 @@ Speed rule:
 
 Done means:
 - The current slice has a documented decision trail.
+- The user-mentioned full MUST_PASS and REGRESSION scenarios are mapped, even if only a subset is executed now.
 - AI-verifiable checks passed with evidence.
 - Human-required gates remain explicit.
 - The repo is clean or remaining changes are explained.
@@ -96,9 +101,23 @@ Done means:
 
 ## Operating Rules
 
-### 1. Slice first, map second
+### 0. Full scenario mapping gate
 
-Start each continuation by identifying the smallest delivery slice that still advances the larger goal. A slice may be:
+If the user names, links, or clearly implies a full scenario set, the agent must map every referenced `MUST_PASS` and `REGRESSION` scenario before narrowing execution.
+
+The mapping can be compact, but it must include:
+
+- scenario ID;
+- scenario type;
+- current execution classification: `in_this_slice`, `later_slice`, `HUMAN_REQUIRED`, `blocked`, or `out_of_scope`;
+- required proof surface;
+- reason when not included in the current slice.
+
+This mapping is not the same as claiming completion. It is a coverage guard that keeps small-slice execution from losing the full scenario context.
+
+### 1. Map first, slice second
+
+Start each continuation by mapping the full user-mentioned scenario set, then identify the smallest delivery slice that still advances the larger goal. A slice may be:
 
 - one `MUST_PASS` scenario;
 - one tightly related scenario group;
@@ -106,7 +125,7 @@ Start each continuation by identifying the smallest delivery slice that still ad
 - one verifier or evidence-layout improvement;
 - one integration rehearsal that replaces an unverifiable human claim with local proof.
 
-Do not start a broad implementation pass until the slice boundary is explicit.
+Do not start implementation until both the full user-mentioned scenario mapping and the slice boundary are explicit.
 
 ### 2. Keep the review lenses, reduce the depth
 
@@ -196,4 +215,3 @@ The adopted decision is:
 - keep strict proof boundaries;
 - reduce each execution unit to one verified slice;
 - checkpoint before continuing.
-
