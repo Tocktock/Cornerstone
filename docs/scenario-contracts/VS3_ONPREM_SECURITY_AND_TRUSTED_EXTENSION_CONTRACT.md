@@ -1,9 +1,9 @@
 # CornerStone VS3 On-Prem Security and Trusted Extension Contract
 
-**Date:** 2026-06-29 KST  
-**Owner:** JiYong / Tars  
-**Status:** Frozen task-scoped scenario contract for VS3 planning and implementation.  
-**Matrix:** `docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv`  
+**Date:** 2026-06-29 KST
+**Owner:** JiYong / Tars
+**Status:** Frozen task-scoped scenario contract for VS3 planning and implementation.
+**Matrix:** `docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv`
 **Canonical milestone name:** VS3 - Verified On-Prem Control Plane + Trusted Extension/Connector Substrate
 
 ## Summary
@@ -391,4 +391,3 @@ Start VS3 with VS3-0 only:
 3. add report lint for VS2/VS3 claim conflicts and overclaims;
 4. produce a canonical VS2 carry-over status report;
 5. only then start VS3-1 RequestContext work.
-
