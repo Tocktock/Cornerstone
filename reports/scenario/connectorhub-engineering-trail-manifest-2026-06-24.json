@@ -847,8 +847,8 @@
     },
     {
       "path": "scripts/verify_connectorhub_local_evidence.sh",
-      "sha256": "710c4a68e23529af954fe90030e01e164516b8aa1a8c812dbdb1d07c7351baad",
-      "size_bytes": 869
+      "sha256": "2379a53628dcda1c1c89aa7186d769a2b2f1c25816626d558453c52b1dc9a54e",
+      "size_bytes": 873
     },
     {
       "path": "tests/scenario/test_connectorhub_cli.py",
