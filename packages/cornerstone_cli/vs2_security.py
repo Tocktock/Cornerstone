@@ -3027,16 +3027,28 @@ def _proof_overclaim_scan(root: Path, paths: list[Path], *, expected_pass: int, 
             for phrase in positive_claim_phrases:
                 if phrase in lowered and not any(word in lowered for word in allowed_boundary_words):
                     findings.append({"path": str(relative), "line": line_number, "kind": "unqualified_overclaim", "phrase": phrase, "text": line.strip()})
+    current_verification_report_path = Path("docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md")
     current_state = text_by_path.get(str(Path("docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md")), "")
+    current_verification_report = text_by_path.get(str(current_verification_report_path), "")
     readme = text_by_path.get(str(Path("README.md")), "")
     local_report = text_by_path.get(str(Path("docs/verification-reports/VS2_LOCAL_RANGE_FIRST_SLICE_REPORT_2026-06-21.md")), "")
     required_boundaries = {
         "current_state_counts_match_report": f"{expected_pass} AI-verifiable rows are `PASS`, {expected_not_verified} AI-verifiable rows remain `NOT_VERIFIED`, and {human_required} rows remain `HUMAN_REQUIRED`" in current_state,
         "current_state_ai_verified_human_gates_label_present": "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING" in current_state,
         "current_state_non_production_boundary_present": "Production security, live-provider readiness, independent penetration-test completion, human UX acceptance, and production-like migration/restore readiness are not claimed" in current_state,
-        "readme_counts_match_report": f"{expected_pass} PASS, {expected_not_verified} NOT_VERIFIED, and {human_required} HUMAN_REQUIRED" in readme,
-        "readme_ai_verified_human_gates_label_present": "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING" in readme,
-        "readme_human_boundaries_present": "H02-H07 still block production security, real IdP, production network, live provider, human UX, and production-like migration/restore claims" in readme,
+        "current_verification_report_counts_match": all(
+            phrase in current_verification_report
+            for phrase in [
+                f"| PASS | {expected_pass} |",
+                f"| HUMAN_REQUIRED | {human_required} |",
+                f"| NOT_VERIFIED | {expected_not_verified} |",
+            ]
+        ),
+        "current_verification_report_human_boundaries_present": "human/external gates remain HUMAN_REQUIRED" in current_verification_report
+        and "production topology readiness, real IdP readiness, live provider readiness, human UX acceptance, or migration/restore acceptance" in current_verification_report,
+        "readme_delegates_current_status_to_report": str(current_verification_report_path) in readme
+        and "current generated status is recorded" in readme,
+        "readme_human_external_boundaries_present": "production security, real IdP, production network, live provider, human UX, and production-like migration/restore claims remain separate human/external gates" in readme,
         "local_report_still_not_claimed_section_present": "Still not claimed:" in local_report,
         "local_report_human_external_boundaries_present": all(
             phrase in local_report
@@ -6404,6 +6416,7 @@ def run_vs2_local_security_proof(root: Path, *, local_range_report: Path | None 
         [
             Path("README.md"),
             Path("docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md"),
+            Path("docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md"),
             Path("docs/verification-reports/VS2_LOCAL_RANGE_FIRST_SLICE_REPORT_2026-06-21.md"),
         ],
         expected_pass=expected_pass_count,
