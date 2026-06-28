@@ -17,7 +17,7 @@ The review correctly found that PR #20 was too broad to merge safely and that se
 
 | Finding | Current resolution | Evidence | Merge impact |
 | --- | --- | --- | --- |
-| B1: draft/no visible CI | PR remains draft. No GitHub Actions workflow is added. `scripts/verify_connectorhub_local_evidence.sh` is the local review gate; strict mode remains local/manual. | `docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md`; PR body; `scripts/verify_connectorhub_local_evidence.sh` | Still blocks merge confidence until maintainer accepts local logs or a future CI plan. |
+| B1: draft/no visible CI | PR remains draft. No GitHub Actions workflow is added. `scripts/verify_connectorhub_local_evidence.sh` is the local review gate for non-Docker checks; strict mode adds the local Docker VS2 rehearsal. | `docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md`; PR body; `scripts/verify_connectorhub_local_evidence.sh` | Still blocks merge confidence until maintainer accepts local logs or a future CI plan. |
 | B2: contract mixed status/PASS | Contract status is separated from implementation status; README also points to reports instead of carrying ConnectorHub row counts as authority. | `docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md`; `README.md`; `reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json`; `docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md` | Fixed for current local review. |
 | B3: VS2 status inconsistent | Current VS2 status is delegated to `VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md`; README no longer repeats generated counts. | `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md`; `README.md` | Fixed for status authority; production/human gates remain outside this PR. |
 | B4: non-portable evidence paths | Source documents are repo-archived, compact reports have `path_portability`, and the delivery-unit manifest marks `tmp/scenario/...` as regenerable local transcript refs. | `docs/archive/research/`; `reports/scenario/connector-contract-adapter/`; `reports/scenario/connectorhub-scenario-delivery-unit-manifest-2026-06-24.json`; `scripts/verify_connectorhub_engineering_trail.py` | Fixed for committed ConnectorHub review artifacts. |
@@ -40,13 +40,32 @@ Default local evidence gate:
 scripts/verify_connectorhub_local_evidence.sh
 ```
 
+Default mode runs `git diff --check`, SoT docs verification, ConnectorHub engineering-trail verification, the full ConnectorHub CLI unittest suite, compact-report tests, scaffold CLI unittest suite, and `compileall`.
+
 Strict local/manual gate:
 
 ```sh
 scripts/verify_connectorhub_local_evidence.sh --strict
 ```
 
-Strict mode is not represented as GitHub Actions in this branch. It depends on current local VS2 reusable proof state, Docker/network support, and a clean review workspace.
+Strict mode adds `make verify-vs2-production-like`. It is not represented as GitHub Actions in this branch because it depends on current local VS2 reusable proof state, Docker/network support, and a clean review workspace.
+
+## Local Merge-Gate Rehearsal - 2026-06-28
+
+The review-required local command set was rerun after aligning the VS2 overclaim scanner with the README status-authority decision and after expanding the default local evidence gate. The latest clean-clone gate evidence was captured at commit `073850f`.
+
+| Command | Result | Evidence summary |
+| --- | --- | --- |
+| `PATH="$PWD:$PATH" cornerstone security vs2-local-proof --json` | PASS | `status=success`; `86 PASS`, `0 blocking`, `7 HUMAN_REQUIRED`; overclaim scan `status=passed`. |
+| `PATH="$PWD:$PATH" cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json` | PASS | `status=success`; `86 PASS`, `0 blocking`, `7 HUMAN_REQUIRED`. |
+| `PATH="$PWD:$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json` | PASS | `status=success`; `scenario_count=1`, `pass=1`, `blocking=0`; all egress topology checks true. |
+| `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_default_deny_egress_topology_cs_ch_036` | PASS | `Ran 1 test in 320.978s`; `OK`. |
+| `scripts/verify_connectorhub_local_evidence.sh` | PASS | Clean clone default gate included `git diff --check`, SoT docs, ConnectorHub engineering trail, full ConnectorHub CLI suite, compact report unittest, scaffold suite, and `compileall`. |
+| `python3 -m unittest tests.scenario.test_connectorhub_cli` | PASS | Covered by the clean-clone default gate: `Ran 84 tests in 263.652s`; `OK`. |
+| `python3 -m unittest tests.scenario.test_scaffold_cli` | PASS | Covered by the clean-clone default gate: `Ran 53 tests in 294.534s`; `OK`. |
+| `make verify-vs2-production-like` | PASS | Clean clone command report `status=passed`; elapsed `133.408s`; 7 scenario rows, all `PASS`; report git commit `073850f`. |
+
+Proof boundary remains unchanged: this is local deterministic and local production-like rehearsal evidence only. It does not claim live connector readiness, production security readiness, or human acceptance.
 
 ## Remaining Non-Local Decisions
 
@@ -57,4 +76,4 @@ Strict mode is not represented as GitHub Actions in this branch. It depends on c
 
 ## Current Verdict
 
-The review feedback is addressed for local evidence review and proof-boundary clarity. PR #20 should remain draft and `needs-follow-up` until split/strict-gate/human-gate decisions are made.
+The review feedback is addressed for local evidence review and proof-boundary clarity. PR #20 should remain draft and `needs-follow-up` until split, merge strategy, and human-gate decisions are made.

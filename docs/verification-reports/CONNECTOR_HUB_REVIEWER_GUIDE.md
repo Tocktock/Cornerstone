@@ -26,7 +26,7 @@ The scenario delivery-unit manifest also carries a top-level `path_portability` 
 scripts/verify_connectorhub_local_evidence.sh
 ```
 
-This default local gate runs whitespace, SoT docs, the ConnectorHub engineering-trail verifier, compact-report tests, and Python compile checks without depending on GitHub Actions.
+This default local gate runs whitespace, SoT docs, the ConnectorHub engineering-trail verifier, the full ConnectorHub CLI unittest suite, compact-report tests, the scaffold CLI unittest suite, and Python compile checks without depending on GitHub Actions.
 
 For a clean review workspace with current VS2 reusable proof state and Docker/network support, run:
 
@@ -34,7 +34,7 @@ For a clean review workspace with current VS2 reusable proof state and Docker/ne
 scripts/verify_connectorhub_local_evidence.sh --strict
 ```
 
-Strict mode additionally runs the broader ConnectorHub CLI suite, scaffold suite, and `make verify-vs2-production-like`. These remain local/manual gates and must not be replaced by a README claim.
+Strict mode additionally runs `make verify-vs2-production-like`. This remains a local/manual Docker rehearsal and must not be replaced by a README claim.
 
 ## Review Sequence
 

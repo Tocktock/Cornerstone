@@ -282,13 +282,13 @@
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_PR20_FEEDBACK_RESOLUTION_2026-06-28.md",
-      "sha256": "14828ac9c036219b46961112f587f58eea358ac583937bf830b5f48ce4f5b4a8",
-      "size_bytes": 6732
+      "sha256": "653a87580bbbda203f00b085f1cbaf5c3a5bfcae86d71a3e4994c88fedfdc2f6",
+      "size_bytes": 9121
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md",
-      "sha256": "3b2614049a55c434414501a315868d00fe840d26637e4028b1aaddeed0b00b96",
-      "size_bytes": 4214
+      "sha256": "a0222e1598150adaba60cfdcb017bd47cebda8abaf9dad493995599cf0e177c4",
+      "size_bytes": 4246
     },
     {
       "path": "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md",
