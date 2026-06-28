@@ -52,7 +52,7 @@ Strict mode adds `make verify-vs2-production-like`. It is not represented as Git
 
 ## Local Merge-Gate Rehearsal - 2026-06-28
 
-The review-required local command set was rerun after aligning the VS2 overclaim scanner with the README status-authority decision and after expanding the default local evidence gate. The latest clean-clone gate evidence was captured at commit `073850f`.
+The review-required local command set was rerun after aligning the VS2 overclaim scanner with the README status-authority decision, expanding the default local evidence gate, and removing non-portable Postgres bind mounts from VS2 local probes. The latest clean-clone runtime evidence was captured at commit `b343393`.
 
 | Command | Result | Evidence summary |
 | --- | --- | --- |
@@ -61,9 +61,10 @@ The review-required local command set was rerun after aligning the VS2 overclaim
 | `PATH="$PWD:$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json` | PASS | `status=success`; `scenario_count=1`, `pass=1`, `blocking=0`; all egress topology checks true. |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_default_deny_egress_topology_cs_ch_036` | PASS | `Ran 1 test in 320.978s`; `OK`. |
 | `scripts/verify_connectorhub_local_evidence.sh` | PASS | Clean clone default gate included `git diff --check`, SoT docs, ConnectorHub engineering trail, full ConnectorHub CLI suite, compact report unittest, scaffold suite, and `compileall`. |
-| `python3 -m unittest tests.scenario.test_connectorhub_cli` | PASS | Covered by the clean-clone default gate: `Ran 84 tests in 263.652s`; `OK`. |
-| `python3 -m unittest tests.scenario.test_scaffold_cli` | PASS | Covered by the clean-clone default gate: `Ran 53 tests in 294.534s`; `OK`. |
-| `make verify-vs2-production-like` | PASS | Clean clone command report `status=passed`; elapsed `133.408s`; 7 scenario rows, all `PASS`; report git commit `073850f`. |
+| `python3 -m unittest tests.scenario.test_connectorhub_cli` | PASS | Covered by the clean-clone default gate: `Ran 84 tests in 255.951s`; `OK`. |
+| `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_default_deny_egress_topology_cs_ch_036` | PASS | Targeted clean-clone regression check after removing the bind mount: `Ran 1 test in 109.410s`; `OK`. |
+| `python3 -m unittest tests.scenario.test_scaffold_cli` | PASS | Covered by the clean-clone default gate: `Ran 53 tests in 272.216s`; `OK`. |
+| `make verify-vs2-production-like` | PASS | Clean clone command report `status=passed`; elapsed `133.873s`; 7 scenario rows, all `PASS`; report git commit `b343393`. |
 
 Proof boundary remains unchanged: this is local deterministic and local production-like rehearsal evidence only. It does not claim live connector readiness, production security readiness, or human acceptance.
 
