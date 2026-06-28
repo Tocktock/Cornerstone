@@ -1,0 +1,58 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_alpha_issue_1001_bad_webhook_signature",
+  "projection_id": "cproj_github_issue_1001_bad_webhook_signature",
+  "contract_id": "ccon_project_alpha_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-alpha:issue:1001:updated:2026-06-23T00:00:00Z",
+  "sync": {
+    "provider_installation_id": "github-installation:project-alpha-readonly",
+    "repository_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha:issue:1001",
+    "action": "updated",
+    "source_revision": "issue:1001:2026-06-23T00:00:00Z",
+    "webhook_origin_verified": false,
+    "webhook_signature_verified": false
+  },
+  "common_capability": "source_control.issue.read",
+  "projection_type": "source_control.issue.v1",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha:issue:1001",
+    "title": "Clarify Connector Hub evidence path",
+    "classification": "metadata_and_markdown_excerpt",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_alpha_issue_1001_bad_webhook_signature",
+    "kind": "connectorhub_projection_evidence",
+    "source_policy_id": "cspol_f652156613a8173a",
+    "provider_event_id": "github:repo:owner/project-alpha:issue:1001:updated:2026-06-23T00:00:00Z",
+    "permitted_fields": [
+      "issue_number",
+      "title",
+      "state",
+      "labels",
+      "body_markdown_excerpt"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "issue_number": 1001,
+    "title": "Clarify Connector Hub evidence path",
+    "state": "open",
+    "labels": [
+      "connectorhub",
+      "evidence"
+    ],
+    "body_markdown_excerpt": "Document how Projection Delivery becomes immutable CornerStone evidence before any product interpretation.",
+    "source_revision": "issue:1001:2026-06-23T00:00:00Z",
+    "updated_at": "2026-06-23T00:00:00Z"
+  }
+}

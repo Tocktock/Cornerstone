@@ -1,0 +1,58 @@
+{
+  "audit_refs": [],
+  "call_ledger": [],
+  "decision": "",
+  "delivery_refs": [],
+  "dependency_human_gate_refs": {
+    "CS-CH-H04": "",
+    "CS-CH-H07": ""
+  },
+  "evidence_packet_manifest": [
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Redacted GitHub App or equivalent least-privilege installation permission snapshot.",
+      "required_evidence_index": 1
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Selected repository list and explicit confirmation that no unselected repositories were ingested.",
+      "required_evidence_index": 2
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Read-only call ledger showing zero write-capable HTTP methods or endpoints.",
+      "required_evidence_index": 3
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Connector Delivery, Artifact/Evidence, and audit refs produced from selected repositories.",
+      "required_evidence_index": 4
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Independent zero-write proof covering permissions, declared actions, routes, UI/CLI, and observed calls.",
+      "required_evidence_index": 5
+    }
+  ],
+  "github_app_installation_id_redacted": "",
+  "issues_or_exceptions": "",
+  "permission_snapshot": "",
+  "review_timestamp": "",
+  "reviewer": "",
+  "scenario_id": "CS-CH-H01",
+  "selected_repositories": [],
+  "senior_review_perspective_findings": {
+    "data_contract": "",
+    "domain_architecture": "",
+    "product_value": "",
+    "reliability_observability": "",
+    "security_privacy": "",
+    "testability_migration": ""
+  },
+  "zero_write_proof": ""
+}

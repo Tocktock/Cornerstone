@@ -1,0 +1,256 @@
+{
+  "schema_version": "cs.chrome_sensitive_page_policy_evaluation.v1",
+  "source_id": "chrome_sensitive_page",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "policy_snapshot_ref": "chrome_sensitive_page_policy_v1",
+  "cases": [
+    {
+      "case_id": "password-page-client-block",
+      "page": {
+        "url": "https://accounts.example/login",
+        "origin": "https://accounts.example",
+        "title": "Account sign in",
+        "scheme": "https",
+        "page_classification": "password",
+        "active": true,
+        "browser_internal": false,
+        "incognito": false,
+        "sensitive_surface": true
+      },
+      "client_preflight": {
+        "decision": "block",
+        "reason_codes": [
+          "CS_CHROME_PREFLIGHT_PASSWORD_FIELD"
+        ]
+      },
+      "sensitive_signals": {
+        "password_field_count": 2
+      },
+      "bounded_payload": {
+        "raw_text_included": false,
+        "raw_html_included": false,
+        "form_values_included": false,
+        "visible_text_hash": "sha256:password-visible-text-hash",
+        "forbidden_raw_marker": "CS_CH_026_PASSWORD_RAW_TEXT_MUST_NOT_PERSIST"
+      }
+    },
+    {
+      "case_id": "payment-page-client-block",
+      "page": {
+        "url": "https://billing.example/checkout",
+        "origin": "https://billing.example",
+        "title": "Payment details",
+        "scheme": "https",
+        "page_classification": "payment",
+        "active": true,
+        "browser_internal": false,
+        "incognito": false,
+        "sensitive_surface": true
+      },
+      "client_preflight": {
+        "decision": "block",
+        "reason_codes": [
+          "CS_CHROME_PREFLIGHT_PAYMENT_FIELD"
+        ]
+      },
+      "sensitive_signals": {
+        "payment_field_count": 4
+      },
+      "bounded_payload": {
+        "raw_text_included": false,
+        "raw_html_included": false,
+        "form_values_included": false,
+        "visible_text_hash": "sha256:payment-visible-text-hash",
+        "forbidden_raw_marker": "CS_CH_026_PAYMENT_RAW_TEXT_MUST_NOT_PERSIST"
+      }
+    },
+    {
+      "case_id": "secret-token-false-safe",
+      "page": {
+        "url": "https://console.example/settings/tokens",
+        "origin": "https://console.example",
+        "title": "API tokens",
+        "scheme": "https",
+        "page_classification": "token_management",
+        "active": true,
+        "browser_internal": false,
+        "incognito": false,
+        "sensitive_surface": true
+      },
+      "client_preflight": {
+        "decision": "allow",
+        "reason_codes": [
+          "CS_CHROME_PREFLIGHT_FALSE_SAFE_ALLOW"
+        ]
+      },
+      "sensitive_signals": {
+        "secret_field_count": 1,
+        "token_like_count": 2,
+        "secret_canary_present": true
+      },
+      "bounded_payload": {
+        "raw_text_included": true,
+        "raw_html_included": false,
+        "form_values_included": false,
+        "visible_text_hash": "sha256:token-visible-text-hash",
+        "forbidden_raw_marker": "CS_CH_026_TOKEN_RAW_TEXT_MUST_NOT_PERSIST"
+      }
+    },
+    {
+      "case_id": "mail-compose-degraded",
+      "page": {
+        "url": "https://mail.example/compose",
+        "origin": "https://mail.example",
+        "title": "New message",
+        "scheme": "https",
+        "page_classification": "mail_compose",
+        "active": true,
+        "browser_internal": false,
+        "incognito": false,
+        "sensitive_surface": true
+      },
+      "client_preflight": {
+        "decision": "degraded",
+        "reason_codes": [
+          "CS_CHROME_PREFLIGHT_EDITABLE_SURFACE"
+        ]
+      },
+      "sensitive_signals": {
+        "compose_surface": true,
+        "unknown_editable_surface": true
+      },
+      "bounded_payload": {
+        "raw_text_included": false,
+        "raw_html_included": false,
+        "form_values_included": false,
+        "visible_text_hash": "sha256:compose-visible-text-hash",
+        "forbidden_raw_marker": "CS_CH_026_COMPOSE_RAW_TEXT_MUST_NOT_PERSIST"
+      }
+    },
+    {
+      "case_id": "private-account-block",
+      "page": {
+        "url": "https://account.example/profile",
+        "origin": "https://account.example",
+        "title": "Private account",
+        "scheme": "https",
+        "page_classification": "private_account",
+        "active": true,
+        "browser_internal": false,
+        "incognito": true,
+        "sensitive_surface": true
+      },
+      "client_preflight": {
+        "decision": "block",
+        "reason_codes": [
+          "CS_CHROME_PREFLIGHT_PRIVATE_CONTEXT"
+        ]
+      },
+      "sensitive_signals": {
+        "private_account": true
+      },
+      "bounded_payload": {
+        "raw_text_included": false,
+        "raw_html_included": false,
+        "form_values_included": false,
+        "visible_text_hash": "sha256:private-account-visible-text-hash",
+        "forbidden_raw_marker": "CS_CH_026_PRIVATE_ACCOUNT_RAW_TEXT_MUST_NOT_PERSIST"
+      }
+    },
+    {
+      "case_id": "browser-internal-block",
+      "page": {
+        "url": "chrome://settings/passwords",
+        "origin": "chrome://settings",
+        "title": "Chrome passwords",
+        "scheme": "chrome",
+        "page_classification": "browser_internal",
+        "active": true,
+        "browser_internal": true,
+        "incognito": false,
+        "sensitive_surface": true
+      },
+      "client_preflight": {
+        "decision": "block",
+        "reason_codes": [
+          "CS_CHROME_PREFLIGHT_BROWSER_INTERNAL"
+        ]
+      },
+      "sensitive_signals": {
+        "password_field_count": 1
+      },
+      "bounded_payload": {
+        "raw_text_included": false,
+        "raw_html_included": false,
+        "form_values_included": false,
+        "visible_text_hash": "sha256:browser-internal-visible-text-hash",
+        "forbidden_raw_marker": "CS_CH_026_BROWSER_INTERNAL_RAW_TEXT_MUST_NOT_PERSIST"
+      }
+    },
+    {
+      "case_id": "unsupported-scheme-block",
+      "page": {
+        "url": "file:///Users/local/private-note.html",
+        "origin": "file://",
+        "title": "Local private note",
+        "scheme": "file",
+        "page_classification": "unsupported_scheme",
+        "active": true,
+        "browser_internal": false,
+        "incognito": false,
+        "sensitive_surface": true
+      },
+      "client_preflight": {
+        "decision": "block",
+        "reason_codes": [
+          "CS_CHROME_PREFLIGHT_UNSUPPORTED_SCHEME"
+        ]
+      },
+      "sensitive_signals": {},
+      "bounded_payload": {
+        "raw_text_included": false,
+        "raw_html_included": false,
+        "form_values_included": false,
+        "visible_text_hash": "sha256:unsupported-scheme-visible-text-hash",
+        "forbidden_raw_marker": "CS_CH_026_UNSUPPORTED_SCHEME_RAW_TEXT_MUST_NOT_PERSIST"
+      }
+    },
+    {
+      "case_id": "oversized-page-degraded",
+      "page": {
+        "url": "https://docs.example/huge-export",
+        "origin": "https://docs.example",
+        "title": "Huge export",
+        "scheme": "https",
+        "page_classification": "oversized_page",
+        "active": true,
+        "browser_internal": false,
+        "incognito": false,
+        "sensitive_surface": false
+      },
+      "client_preflight": {
+        "decision": "degraded",
+        "reason_codes": [
+          "CS_CHROME_PREFLIGHT_OVERSIZED_PAGE"
+        ]
+      },
+      "sensitive_signals": {
+        "oversized_page": true
+      },
+      "bounded_payload": {
+        "page_size_bytes": 4194304,
+        "max_page_size_bytes": 524288,
+        "raw_text_included": false,
+        "raw_html_included": false,
+        "form_values_included": false,
+        "visible_text_hash": "sha256:oversized-page-visible-text-hash",
+        "forbidden_raw_marker": "CS_CH_026_OVERSIZED_RAW_TEXT_MUST_NOT_PERSIST"
+      }
+    }
+  ]
+}

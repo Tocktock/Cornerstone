@@ -1,0 +1,2742 @@
+{
+  "audit_refs": [
+    "audit:audit_d6c10abdaa5cdc02"
+  ],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone connector human-gate validation-handoff",
+  "connector_human_gate_validation_handoff": {
+    "blocked_scenario_ids": [
+      "CS-CH-H07",
+      "CS-CH-H01",
+      "CS-CH-H02",
+      "CS-CH-H03",
+      "CS-CH-H05",
+      "CS-CH-H06"
+    ],
+    "completed_dependency_unlock_record_validation_scenarios": [],
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "created_at": "2026-06-28T07:42:02.702089Z",
+    "dependency_unlock_allowed_count": 0,
+    "dependency_unlock_denied_count": 0,
+    "execution_queue_scenario_order": [
+      "CS-CH-H04",
+      "CS-CH-H07",
+      "CS-CH-H01",
+      "CS-CH-H02",
+      "CS-CH-H03",
+      "CS-CH-H05",
+      "CS-CH-H06"
+    ],
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "handoff_id": "cshandoff_b385618f73dc2e1e",
+    "human_required_count": 7,
+    "negative_evidence": {
+      "approvals_collected_by_handoff": 0,
+      "external_mutations_executed_by_handoff": 0,
+      "human_rows_marked_pass_by_handoff": 0,
+      "live_provider_calls_executed_by_handoff": 0,
+      "pass_claims_allowed_by_handoff": 0,
+      "product_claims_allowed_by_handoff": 0,
+      "provider_mutations_executed_by_handoff": 0,
+      "record_bodies_persisted_by_handoff": 0,
+      "secret_material_read_by_handoff": 0
+    },
+    "next_scenario_id": "CS-CH-H04",
+    "non_mutation_evidence": {
+      "approval_collected_by_handoff": false,
+      "external_mutations_executed_by_handoff": 0,
+      "human_decisions_recorded_by_handoff": 0,
+      "live_provider_calls_executed_by_handoff": 0,
+      "provider_mutations_executed_by_handoff": 0,
+      "record_bodies_persisted_by_handoff": false,
+      "secret_material_read_by_handoff": false
+    },
+    "operator_rule": "Use the next_scenario_id row first, fill only redacted/public-safe reviewer records, run validate-record with --output, and treat validation refs as dependency-unlock inputs only when they are structurally valid ACCEPT records. This handoff cannot collect approval or promote HUMAN_REQUIRED rows.",
+    "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "readiness_report_id": "cshuman_report_d9e1b55f8615d82c",
+    "readiness_report_ref": "connector_human_gate_readiness_report:cshuman_report_d9e1b55f8615d82c",
+    "ready_scenario_ids": [
+      "CS-CH-H04"
+    ],
+    "record_validation_count": 0,
+    "remaining_human_evidence_claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+    "remaining_human_evidence_summary_count": 7,
+    "remaining_human_evidence_total": 29,
+    "remaining_human_field_total": 72,
+    "required_before_pass": [
+      "Attach dated human records for H01 through H07 before changing any human row to PASS.",
+      "Keep live-provider, physical-device, browser privacy, production-like VS2, live Action, UX/trust, and recovery evidence separate."
+    ],
+    "scenario_count": 7,
+    "scenario_validation_handoff_rows": [
+      {
+        "allowed_redaction_statuses": [
+          "redacted",
+          "public_safe",
+          "no_sensitive_material"
+        ],
+        "approval_collected": false,
+        "blocked_by_missing_dependency_unlock_validations": [],
+        "blocked_dependency_details": [],
+        "dependency_ready": true,
+        "dependency_status": "not_applicable",
+        "dependency_unlock_record_validation_present": false,
+        "depends_on_human_gates": [],
+        "gate_category": "production_like_security",
+        "latest_record_validation_dependency_unlock_allowed": false,
+        "latest_record_validation_issue_summary": null,
+        "latest_record_validation_ref": null,
+        "local_baseline_preflight_bundle": {
+          "acceptance_sufficient": false,
+          "all_reports_json_valid": true,
+          "all_reports_present": true,
+          "baseline_scope": "local_ai_verifiable_vs2_and_connectorhub_dependency_proof",
+          "claim_boundary": "h04_local_baseline_preflight_bundle_is_review_input_not_human_acceptance",
+          "command_plan": [
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+              "command": "cornerstone security vs2-local-proof --json",
+              "expected_report_count": 3,
+              "expected_report_paths": [
+                "reports/security/vs2-local-security-proof.json",
+                "reports/network/vs2-egress-proof.json",
+                "reports/security/vs2-local-range.json"
+              ],
+              "operator_phase": "refresh_local_vs2_baseline_inputs",
+              "pass_claim_allowed": false,
+              "product_claim_allowed": false,
+              "purpose": "Refresh the current local VS2 proof inputs before H04 review without treating local proof as production-like acceptance.",
+              "review_input_only": true,
+              "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+              "step_order": 1
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+              "command": "cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json",
+              "expected_report_count": 2,
+              "expected_report_paths": [
+                "reports/security/vs2-local-security-proof.json",
+                "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+              ],
+              "operator_phase": "refresh_vs2_scenario_report",
+              "pass_claim_allowed": false,
+              "product_claim_allowed": false,
+              "purpose": "Refresh the local VS2 scenario report that H04 reviewers compare against the production-like environment transcript.",
+              "review_input_only": true,
+              "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+              "step_order": 2
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+              "command": "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json",
+              "expected_report_count": 1,
+              "expected_report_paths": [
+                "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+              ],
+              "operator_phase": "refresh_connectorhub_dependency_report",
+              "pass_claim_allowed": false,
+              "product_claim_allowed": false,
+              "purpose": "Refresh the ConnectorHub CS-CH-036 dependency report that remains local fixture evidence until H04/H07 human proof exists.",
+              "review_input_only": true,
+              "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+              "step_order": 3
+            }
+          ],
+          "command_plan_count": 3,
+          "command_plan_expected_report_path_count": 5,
+          "command_plan_expected_report_paths": [
+            "reports/network/vs2-egress-proof.json",
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
+            "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+            "reports/security/vs2-local-range.json",
+            "reports/security/vs2-local-security-proof.json"
+          ],
+          "command_plan_paths_covered_by_current_reports": [
+            "reports/network/vs2-egress-proof.json",
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
+            "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+            "reports/security/vs2-local-range.json",
+            "reports/security/vs2-local-security-proof.json"
+          ],
+          "command_plan_paths_missing_from_current_reports": [],
+          "command_plan_schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+          "commands_executed_by_bundle": 0,
+          "current_report_count": 5,
+          "current_report_fingerprints": [
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+              "json_valid": true,
+              "pass_claim_allowed": false,
+              "path": "reports/security/vs2-local-security-proof.json",
+              "present": true,
+              "product_claim_allowed": false,
+              "review_input_only": true,
+              "scenario_count": 93,
+              "schema_version": "cs.vs2_local_security_proof.v0",
+              "sha256": "4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff",
+              "status": "success"
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+              "command": "cornerstone scenario verify vs2-policy-tenancy-egress",
+              "json_valid": true,
+              "pass_claim_allowed": false,
+              "path": "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+              "present": true,
+              "product_claim_allowed": false,
+              "review_input_only": true,
+              "scenario_count": 93,
+              "schema_version": "cs.cli.v0",
+              "sha256": "ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276",
+              "status": "success"
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+              "json_valid": true,
+              "pass_claim_allowed": false,
+              "path": "reports/network/vs2-egress-proof.json",
+              "present": true,
+              "product_claim_allowed": false,
+              "review_input_only": true,
+              "sha256": "26505a8b3db9d44ad99657a35cf38e4cc4bcd8dffd3e145fcb6b49a29fdde9ec",
+              "status": "passed"
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+              "json_valid": true,
+              "pass_claim_allowed": false,
+              "path": "reports/security/vs2-local-range.json",
+              "present": true,
+              "product_claim_allowed": false,
+              "review_input_only": true,
+              "schema_version": "cs.vs2_local_range.v1",
+              "sha256": "e6257b6076598b1376573c649d2b8c59b205ae2b99787cc44c368431675c9eff",
+              "status": "passed"
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+              "command": "cornerstone scenario verify connector-contract-adapter",
+              "json_valid": true,
+              "pass_claim_allowed": false,
+              "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
+              "present": true,
+              "product_claim_allowed": false,
+              "review_input_only": true,
+              "scenario_count": 1,
+              "schema_version": "cs.cli.v0",
+              "sha256": "515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f",
+              "status": "success"
+            }
+          ],
+          "current_report_paths": [
+            "reports/security/vs2-local-security-proof.json",
+            "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+            "reports/network/vs2-egress-proof.json",
+            "reports/security/vs2-local-range.json",
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+          ],
+          "external_mutations_executed_by_bundle": 0,
+          "human_acceptance_collected_by_bundle": false,
+          "invalid_json_reports": [],
+          "live_provider_calls_executed_by_bundle": 0,
+          "missing_reports": [],
+          "operator_next_step": "Run the command plan, collect production-like H04 evidence, and validate a dated human reviewer record; this bundle is only a local comparison input.",
+          "pass_claim_allowed": false,
+          "product_claim_allowed": false,
+          "provider_mutations_executed_by_bundle": 0,
+          "ready_report_count": 5,
+          "ready_report_paths": [
+            "reports/security/vs2-local-security-proof.json",
+            "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+            "reports/network/vs2-egress-proof.json",
+            "reports/security/vs2-local-range.json",
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+          ],
+          "recommended_preflight_command_plan": [
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+              "command": "cornerstone security vs2-local-proof --json",
+              "expected_report_count": 3,
+              "expected_report_paths": [
+                "reports/security/vs2-local-security-proof.json",
+                "reports/network/vs2-egress-proof.json",
+                "reports/security/vs2-local-range.json"
+              ],
+              "operator_phase": "refresh_local_vs2_baseline_inputs",
+              "pass_claim_allowed": false,
+              "product_claim_allowed": false,
+              "purpose": "Refresh the current local VS2 proof inputs before H04 review without treating local proof as production-like acceptance.",
+              "review_input_only": true,
+              "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+              "step_order": 1
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+              "command": "cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json",
+              "expected_report_count": 2,
+              "expected_report_paths": [
+                "reports/security/vs2-local-security-proof.json",
+                "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+              ],
+              "operator_phase": "refresh_vs2_scenario_report",
+              "pass_claim_allowed": false,
+              "product_claim_allowed": false,
+              "purpose": "Refresh the local VS2 scenario report that H04 reviewers compare against the production-like environment transcript.",
+              "review_input_only": true,
+              "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+              "step_order": 2
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+              "command": "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json",
+              "expected_report_count": 1,
+              "expected_report_paths": [
+                "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+              ],
+              "operator_phase": "refresh_connectorhub_dependency_report",
+              "pass_claim_allowed": false,
+              "product_claim_allowed": false,
+              "purpose": "Refresh the ConnectorHub CS-CH-036 dependency report that remains local fixture evidence until H04/H07 human proof exists.",
+              "review_input_only": true,
+              "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+              "step_order": 3
+            }
+          ],
+          "recommended_preflight_command_plan_count": 3,
+          "recommended_preflight_command_plan_schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+          "recommended_preflight_commands": [
+            "cornerstone security vs2-local-proof --json",
+            "cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json",
+            "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json"
+          ],
+          "required_human_delta": [
+            "Production-like topology identifier and trusted RequestContext transcript.",
+            "Scenario-specific PostgreSQL/RLS and OPA transcripts from the reviewed environment.",
+            "Network default-deny and governed-egress transcripts from the reviewed topology.",
+            "Backup/restore evidence and audit-integrity report from the reviewed environment.",
+            "Dated ACCEPT or REJECT decision with redacted evidence packet manifest."
+          ],
+          "required_human_delta_count": 5,
+          "review_input_only": true,
+          "scenario_id": "CS-CH-H04",
+          "schema_version": "cs.connector_human_gate_local_baseline_preflight_bundle.v1",
+          "status": "operator_preparation_only"
+        },
+        "local_baseline_review_input_summary": {
+          "acceptance_sufficient": false,
+          "pass_claim_allowed": false,
+          "preflight_bundle": {
+            "acceptance_sufficient": false,
+            "all_reports_json_valid": true,
+            "all_reports_present": true,
+            "baseline_scope": "local_ai_verifiable_vs2_and_connectorhub_dependency_proof",
+            "claim_boundary": "h04_local_baseline_preflight_bundle_is_review_input_not_human_acceptance",
+            "command_plan": [
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+                "command": "cornerstone security vs2-local-proof --json",
+                "expected_report_count": 3,
+                "expected_report_paths": [
+                  "reports/security/vs2-local-security-proof.json",
+                  "reports/network/vs2-egress-proof.json",
+                  "reports/security/vs2-local-range.json"
+                ],
+                "operator_phase": "refresh_local_vs2_baseline_inputs",
+                "pass_claim_allowed": false,
+                "product_claim_allowed": false,
+                "purpose": "Refresh the current local VS2 proof inputs before H04 review without treating local proof as production-like acceptance.",
+                "review_input_only": true,
+                "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+                "step_order": 1
+              },
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+                "command": "cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json",
+                "expected_report_count": 2,
+                "expected_report_paths": [
+                  "reports/security/vs2-local-security-proof.json",
+                  "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+                ],
+                "operator_phase": "refresh_vs2_scenario_report",
+                "pass_claim_allowed": false,
+                "product_claim_allowed": false,
+                "purpose": "Refresh the local VS2 scenario report that H04 reviewers compare against the production-like environment transcript.",
+                "review_input_only": true,
+                "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+                "step_order": 2
+              },
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+                "command": "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json",
+                "expected_report_count": 1,
+                "expected_report_paths": [
+                  "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+                ],
+                "operator_phase": "refresh_connectorhub_dependency_report",
+                "pass_claim_allowed": false,
+                "product_claim_allowed": false,
+                "purpose": "Refresh the ConnectorHub CS-CH-036 dependency report that remains local fixture evidence until H04/H07 human proof exists.",
+                "review_input_only": true,
+                "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+                "step_order": 3
+              }
+            ],
+            "command_plan_count": 3,
+            "command_plan_expected_report_path_count": 5,
+            "command_plan_expected_report_paths": [
+              "reports/network/vs2-egress-proof.json",
+              "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
+              "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+              "reports/security/vs2-local-range.json",
+              "reports/security/vs2-local-security-proof.json"
+            ],
+            "command_plan_paths_covered_by_current_reports": [
+              "reports/network/vs2-egress-proof.json",
+              "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
+              "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+              "reports/security/vs2-local-range.json",
+              "reports/security/vs2-local-security-proof.json"
+            ],
+            "command_plan_paths_missing_from_current_reports": [],
+            "command_plan_schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+            "commands_executed_by_bundle": 0,
+            "current_report_count": 5,
+            "current_report_fingerprints": [
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+                "json_valid": true,
+                "pass_claim_allowed": false,
+                "path": "reports/security/vs2-local-security-proof.json",
+                "present": true,
+                "product_claim_allowed": false,
+                "review_input_only": true,
+                "scenario_count": 93,
+                "schema_version": "cs.vs2_local_security_proof.v0",
+                "sha256": "4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff",
+                "status": "success"
+              },
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+                "command": "cornerstone scenario verify vs2-policy-tenancy-egress",
+                "json_valid": true,
+                "pass_claim_allowed": false,
+                "path": "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+                "present": true,
+                "product_claim_allowed": false,
+                "review_input_only": true,
+                "scenario_count": 93,
+                "schema_version": "cs.cli.v0",
+                "sha256": "ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276",
+                "status": "success"
+              },
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+                "json_valid": true,
+                "pass_claim_allowed": false,
+                "path": "reports/network/vs2-egress-proof.json",
+                "present": true,
+                "product_claim_allowed": false,
+                "review_input_only": true,
+                "sha256": "26505a8b3db9d44ad99657a35cf38e4cc4bcd8dffd3e145fcb6b49a29fdde9ec",
+                "status": "passed"
+              },
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+                "json_valid": true,
+                "pass_claim_allowed": false,
+                "path": "reports/security/vs2-local-range.json",
+                "present": true,
+                "product_claim_allowed": false,
+                "review_input_only": true,
+                "schema_version": "cs.vs2_local_range.v1",
+                "sha256": "e6257b6076598b1376573c649d2b8c59b205ae2b99787cc44c368431675c9eff",
+                "status": "passed"
+              },
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+                "command": "cornerstone scenario verify connector-contract-adapter",
+                "json_valid": true,
+                "pass_claim_allowed": false,
+                "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
+                "present": true,
+                "product_claim_allowed": false,
+                "review_input_only": true,
+                "scenario_count": 1,
+                "schema_version": "cs.cli.v0",
+                "sha256": "515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f",
+                "status": "success"
+              }
+            ],
+            "current_report_paths": [
+              "reports/security/vs2-local-security-proof.json",
+              "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+              "reports/network/vs2-egress-proof.json",
+              "reports/security/vs2-local-range.json",
+              "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+            ],
+            "external_mutations_executed_by_bundle": 0,
+            "human_acceptance_collected_by_bundle": false,
+            "invalid_json_reports": [],
+            "live_provider_calls_executed_by_bundle": 0,
+            "missing_reports": [],
+            "operator_next_step": "Run the command plan, collect production-like H04 evidence, and validate a dated human reviewer record; this bundle is only a local comparison input.",
+            "pass_claim_allowed": false,
+            "product_claim_allowed": false,
+            "provider_mutations_executed_by_bundle": 0,
+            "ready_report_count": 5,
+            "ready_report_paths": [
+              "reports/security/vs2-local-security-proof.json",
+              "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+              "reports/network/vs2-egress-proof.json",
+              "reports/security/vs2-local-range.json",
+              "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+            ],
+            "recommended_preflight_command_plan": [
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+                "command": "cornerstone security vs2-local-proof --json",
+                "expected_report_count": 3,
+                "expected_report_paths": [
+                  "reports/security/vs2-local-security-proof.json",
+                  "reports/network/vs2-egress-proof.json",
+                  "reports/security/vs2-local-range.json"
+                ],
+                "operator_phase": "refresh_local_vs2_baseline_inputs",
+                "pass_claim_allowed": false,
+                "product_claim_allowed": false,
+                "purpose": "Refresh the current local VS2 proof inputs before H04 review without treating local proof as production-like acceptance.",
+                "review_input_only": true,
+                "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+                "step_order": 1
+              },
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+                "command": "cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json",
+                "expected_report_count": 2,
+                "expected_report_paths": [
+                  "reports/security/vs2-local-security-proof.json",
+                  "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+                ],
+                "operator_phase": "refresh_vs2_scenario_report",
+                "pass_claim_allowed": false,
+                "product_claim_allowed": false,
+                "purpose": "Refresh the local VS2 scenario report that H04 reviewers compare against the production-like environment transcript.",
+                "review_input_only": true,
+                "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+                "step_order": 2
+              },
+              {
+                "acceptance_sufficient": false,
+                "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+                "command": "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json",
+                "expected_report_count": 1,
+                "expected_report_paths": [
+                  "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+                ],
+                "operator_phase": "refresh_connectorhub_dependency_report",
+                "pass_claim_allowed": false,
+                "product_claim_allowed": false,
+                "purpose": "Refresh the ConnectorHub CS-CH-036 dependency report that remains local fixture evidence until H04/H07 human proof exists.",
+                "review_input_only": true,
+                "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+                "step_order": 3
+              }
+            ],
+            "recommended_preflight_command_plan_count": 3,
+            "recommended_preflight_command_plan_schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+            "recommended_preflight_commands": [
+              "cornerstone security vs2-local-proof --json",
+              "cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json",
+              "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json"
+            ],
+            "required_human_delta": [
+              "Production-like topology identifier and trusted RequestContext transcript.",
+              "Scenario-specific PostgreSQL/RLS and OPA transcripts from the reviewed environment.",
+              "Network default-deny and governed-egress transcripts from the reviewed topology.",
+              "Backup/restore evidence and audit-integrity report from the reviewed environment.",
+              "Dated ACCEPT or REJECT decision with redacted evidence packet manifest."
+            ],
+            "required_human_delta_count": 5,
+            "review_input_only": true,
+            "scenario_id": "CS-CH-H04",
+            "schema_version": "cs.connector_human_gate_local_baseline_preflight_bundle.v1",
+            "status": "operator_preparation_only"
+          },
+          "preflight_bundle_acceptance_sufficient": false,
+          "preflight_bundle_ready_report_count": 5,
+          "preflight_bundle_schema_version": "cs.connector_human_gate_local_baseline_preflight_bundle.v1",
+          "product_claim_allowed": false,
+          "recommended_preflight_command_count": 3,
+          "recommended_preflight_command_plan": [
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+              "command": "cornerstone security vs2-local-proof --json",
+              "expected_report_count": 3,
+              "expected_report_paths": [
+                "reports/security/vs2-local-security-proof.json",
+                "reports/network/vs2-egress-proof.json",
+                "reports/security/vs2-local-range.json"
+              ],
+              "operator_phase": "refresh_local_vs2_baseline_inputs",
+              "pass_claim_allowed": false,
+              "product_claim_allowed": false,
+              "purpose": "Refresh the current local VS2 proof inputs before H04 review without treating local proof as production-like acceptance.",
+              "review_input_only": true,
+              "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+              "step_order": 1
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+              "command": "cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json",
+              "expected_report_count": 2,
+              "expected_report_paths": [
+                "reports/security/vs2-local-security-proof.json",
+                "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+              ],
+              "operator_phase": "refresh_vs2_scenario_report",
+              "pass_claim_allowed": false,
+              "product_claim_allowed": false,
+              "purpose": "Refresh the local VS2 scenario report that H04 reviewers compare against the production-like environment transcript.",
+              "review_input_only": true,
+              "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+              "step_order": 2
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+              "command": "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json",
+              "expected_report_count": 1,
+              "expected_report_paths": [
+                "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+              ],
+              "operator_phase": "refresh_connectorhub_dependency_report",
+              "pass_claim_allowed": false,
+              "product_claim_allowed": false,
+              "purpose": "Refresh the ConnectorHub CS-CH-036 dependency report that remains local fixture evidence until H04/H07 human proof exists.",
+              "review_input_only": true,
+              "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+              "step_order": 3
+            }
+          ],
+          "recommended_preflight_command_plan_count": 3,
+          "recommended_preflight_command_plan_schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+          "report_count": 5,
+          "report_paths": [
+            "reports/security/vs2-local-security-proof.json",
+            "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+            "reports/network/vs2-egress-proof.json",
+            "reports/security/vs2-local-range.json",
+            "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+          ],
+          "report_summaries": [
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+              "pass_claim_allowed": false,
+              "path": "reports/security/vs2-local-security-proof.json",
+              "product_claim_allowed": false,
+              "review_input_only": true,
+              "scenario_count": 93,
+              "schema_version": "cs.vs2_local_security_proof.v0",
+              "sha256": "4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff",
+              "status": "success",
+              "summary": {
+                "blocking": 0,
+                "fail": 0,
+                "human_required": 7,
+                "not_run": 0,
+                "not_verified": 0,
+                "pass": 86,
+                "product_feature_claims": "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING",
+                "scenario_count": 93
+              }
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+              "command": "cornerstone scenario verify vs2-policy-tenancy-egress",
+              "pass_claim_allowed": false,
+              "path": "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+              "product_claim_allowed": false,
+              "review_input_only": true,
+              "scenario_count": 93,
+              "schema_version": "cs.cli.v0",
+              "sha256": "ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276",
+              "status": "success",
+              "summary": {
+                "blocking": 0,
+                "fail": 0,
+                "human_required": 7,
+                "not_run": 0,
+                "not_verified": 0,
+                "pass": 86,
+                "product_feature_claims": "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING",
+                "scenario_count": 93
+              }
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+              "pass_claim_allowed": false,
+              "path": "reports/network/vs2-egress-proof.json",
+              "product_claim_allowed": false,
+              "review_input_only": true,
+              "sha256": "26505a8b3db9d44ad99657a35cf38e4cc4bcd8dffd3e145fcb6b49a29fdde9ec",
+              "status": "passed"
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+              "pass_claim_allowed": false,
+              "path": "reports/security/vs2-local-range.json",
+              "product_claim_allowed": false,
+              "review_input_only": true,
+              "schema_version": "cs.vs2_local_range.v1",
+              "sha256": "e6257b6076598b1376573c649d2b8c59b205ae2b99787cc44c368431675c9eff",
+              "status": "passed"
+            },
+            {
+              "acceptance_sufficient": false,
+              "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
+              "command": "cornerstone scenario verify connector-contract-adapter",
+              "pass_claim_allowed": false,
+              "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
+              "product_claim_allowed": false,
+              "review_input_only": true,
+              "scenario_count": 1,
+              "schema_version": "cs.cli.v0",
+              "sha256": "515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f",
+              "status": "success",
+              "summary": {
+                "blocking": 0,
+                "fail": 0,
+                "human_required": 0,
+                "not_verified": 0,
+                "pass": 1,
+                "product_feature_claims": "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_40_AI_ROWS_HUMAN_GATES_PENDING",
+                "scenario_count": 1
+              }
+            }
+          ],
+          "required_human_delta_count": 5,
+          "schema_version": "cs.connector_human_gate_local_baseline_review_inputs.v1",
+          "status": "review_input_only"
+        },
+        "owner": "Human",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "record_validation_count": 0,
+        "record_validation_status": "not_submitted",
+        "redaction_guidance_dependency_human_gate_count": 0,
+        "redaction_guidance_raw_evidence_values_allowed": false,
+        "redaction_guidance_raw_provider_payloads_allowed": false,
+        "redaction_guidance_raw_record_body_persisted_by_validator": false,
+        "redaction_guidance_raw_record_path_persisted_by_validator": false,
+        "redaction_guidance_raw_secret_values_allowed": false,
+        "redaction_guidance_required_evidence_count": 4,
+        "redaction_guidance_required_field_count": 10,
+        "redaction_guidance_schema_version": "cs.connector_human_gate_redaction_guidance.v1",
+        "redaction_guidance_sensitive_marker_fingerprints_only": true,
+        "redaction_guidance_sensitive_marker_policy_schema_version": "cs.connector_sensitive_marker_policy.v1",
+        "redaction_guidance_status": "operator_guidance_only",
+        "release_impact": "Blocks production connected-source and security readiness. Local fixture and current local VS2 proofs remain separate.",
+        "remaining_human_evidence_summary": {
+          "claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+          "dependency_unlock_allowed_by_evidence_packet_workflow": false,
+          "evidence_packet_workflow": {
+            "acceptance_sufficient": false,
+            "claim_boundary": "h04_evidence_packet_workflow_is_operator_handoff_not_human_acceptance",
+            "command_count": 6,
+            "command_sequence": [
+              {
+                "command": "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H04 --json",
+                "output_role": "required evidence manifest and redaction contract",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_contract",
+                "step_order": 1
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H04 --json",
+                "output_role": "required acceptance packet file list and content expectations",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_file_contract",
+                "step_order": 2
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --write",
+                "output_role": "blank local packet templates without overwriting existing evidence",
+                "owner": "operator",
+                "phase": "scaffold_packet_templates",
+                "step_order": 3
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json",
+                "output_role": "hash-only packet validation envelope",
+                "owner": "operator",
+                "phase": "validate_packet_hashes",
+                "step_order": 4
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --record-output <reviewer-record-draft.json>",
+                "output_role": "hash-only reviewer record draft; human decision fields remain human-owned",
+                "owner": "operator",
+                "phase": "draft_record_from_packet_hashes",
+                "step_order": 5
+              },
+              {
+                "command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>",
+                "output_role": "redacted structural validation envelope for the completed reviewer record",
+                "owner": "operator",
+                "phase": "validate_completed_reviewer_record",
+                "step_order": 6
+              }
+            ],
+            "commands": [
+              "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H04 --json",
+              "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H04 --json",
+              "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --write",
+              "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json",
+              "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --record-output <reviewer-record-draft.json>",
+              "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+            ],
+            "dependency_unlock_allowed_by_workflow": false,
+            "human_acceptance_collected_by_workflow": false,
+            "packet_dir_placeholder": "<h04-acceptance-packet-dir>",
+            "packet_file_contents_persisted_by_workflow": false,
+            "pass_claim_allowed": false,
+            "product_claim_allowed": false,
+            "raw_packet_file_contents_recorded_by_workflow": false,
+            "record_output_placeholder": "<reviewer-record-draft.json>",
+            "review_input_only": true,
+            "scenario_id": "CS-CH-H04",
+            "schema_version": "cs.connector_human_gate_h04_evidence_packet_workflow.v1",
+            "status": "operator_preparation_only",
+            "validation_output_placeholder": "<redacted-validation-envelope.json>"
+          },
+          "evidence_packet_workflow_claim_boundary": "h04_evidence_packet_workflow_is_operator_handoff_not_human_acceptance",
+          "evidence_packet_workflow_command_count": 6,
+          "evidence_packet_workflow_commands": [
+            "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H04 --json",
+            "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H04 --json",
+            "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --write",
+            "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json",
+            "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --record-output <reviewer-record-draft.json>",
+            "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+          ],
+          "human_acceptance_collected_by_evidence_packet_workflow": false,
+          "packet_file_contents_persisted_by_evidence_packet_workflow": false,
+          "raw_packet_file_contents_recorded_by_evidence_packet_workflow": false,
+          "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+          "release_impact": "Blocks production connected-source and security readiness. Local fixture and current local VS2 proofs remain separate.",
+          "required_evidence": [
+            "Production-like topology description and trusted RequestContext proof.",
+            "Scenario-specific PostgreSQL/RLS and OPA transcripts.",
+            "Network default-deny and governed-egress transcripts.",
+            "Backup/restore, evidence manifest, and audit integrity reports."
+          ],
+          "required_evidence_count": 4,
+          "required_human_field_count": 10,
+          "required_human_fields": [
+            "reviewer",
+            "review_timestamp",
+            "environment_topology_ref",
+            "request_context_proof",
+            "db_policy_transcripts",
+            "network_egress_transcripts",
+            "backup_restore_evidence",
+            "audit_integrity_report",
+            "evidence_manifest_ref",
+            "findings_or_exceptions"
+          ],
+          "scenario_id": "CS-CH-H04",
+          "schema_version": "cs.connector_human_gate_remaining_evidence_summary.v1",
+          "stop_or_reject_when": "Any cross-namespace read, unexpected egress, missing audit ref, unredacted secret, or unverifiable restore appears.",
+          "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "required_evidence": [
+          "Production-like topology description and trusted RequestContext proof.",
+          "Scenario-specific PostgreSQL/RLS and OPA transcripts.",
+          "Network default-deny and governed-egress transcripts.",
+          "Backup/restore, evidence manifest, and audit integrity reports."
+        ],
+        "required_evidence_count": 4,
+        "required_human_field_count": 10,
+        "required_human_fields": [
+          "reviewer",
+          "review_timestamp",
+          "environment_topology_ref",
+          "request_context_proof",
+          "db_policy_transcripts",
+          "network_egress_transcripts",
+          "backup_restore_evidence",
+          "audit_integrity_report",
+          "evidence_manifest_ref",
+          "findings_or_exceptions"
+        ],
+        "review_order": 1,
+        "reviewer_checklist_dependency_human_gate_ref_count": 0,
+        "reviewer_checklist_evidence_packet_manifest_item_count": 4,
+        "reviewer_checklist_evidence_packet_workflow_claim_boundary": "h04_evidence_packet_workflow_is_operator_handoff_not_human_acceptance",
+        "reviewer_checklist_evidence_packet_workflow_command_count": 6,
+        "reviewer_checklist_pass_claim_allowed": false,
+        "reviewer_checklist_product_claim_allowed": false,
+        "reviewer_checklist_record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+        "reviewer_checklist_required_field_item_count": 10,
+        "reviewer_checklist_reviewer_record_validation_required": true,
+        "reviewer_checklist_schema_version": "cs.connector_human_gate_reviewer_checklist.v1",
+        "reviewer_checklist_senior_review_perspective_count": 6,
+        "reviewer_checklist_status": "operator_preparation_only",
+        "reviewer_checklist_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <filled-json> --json --output <redacted-validation-envelope.json>",
+        "reviewer_commands": {
+          "package": "cornerstone connector human-gate package --scenario CS-CH-H04 --json",
+          "record_template_output": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+          "validate_record": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json",
+          "validate_record_output": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "scenario_delivery_unit_plan_ready": true,
+        "scenario_id": "CS-CH-H04",
+        "senior_review_perspective_count": 6,
+        "source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",
+        "source_requirement_count": 2,
+        "source_requirement_ids": [
+          "IR-04",
+          "IR-18"
+        ],
+        "source_requirement_status": "human_external_pending",
+        "status": "HUMAN_REQUIRED",
+        "stop_or_reject_when": "Any cross-namespace read, unexpected egress, missing audit ref, unredacted secret, or unverifiable restore appears.",
+        "structurally_valid_record_validation_present": false
+      },
+      {
+        "allowed_redaction_statuses": [
+          "redacted",
+          "public_safe",
+          "no_sensitive_material"
+        ],
+        "approval_collected": false,
+        "blocked_by_missing_dependency_unlock_validations": [
+          "CS-CH-H04"
+        ],
+        "blocked_dependency_details": [
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H04",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          }
+        ],
+        "dependency_ready": false,
+        "dependency_status": "missing_dependency_validations",
+        "dependency_unlock_record_validation_present": false,
+        "depends_on_human_gates": [
+          "CS-CH-H04"
+        ],
+        "gate_category": "production_like_recovery",
+        "latest_record_validation_dependency_unlock_allowed": false,
+        "latest_record_validation_issue_summary": null,
+        "latest_record_validation_ref": null,
+        "local_baseline_preflight_bundle": null,
+        "local_baseline_review_input_summary": null,
+        "owner": "Human",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "record_validation_count": 0,
+        "record_validation_status": "not_submitted",
+        "redaction_guidance_dependency_human_gate_count": 1,
+        "redaction_guidance_raw_evidence_values_allowed": false,
+        "redaction_guidance_raw_provider_payloads_allowed": false,
+        "redaction_guidance_raw_record_body_persisted_by_validator": false,
+        "redaction_guidance_raw_record_path_persisted_by_validator": false,
+        "redaction_guidance_raw_secret_values_allowed": false,
+        "redaction_guidance_required_evidence_count": 4,
+        "redaction_guidance_required_field_count": 9,
+        "redaction_guidance_schema_version": "cs.connector_human_gate_redaction_guidance.v1",
+        "redaction_guidance_sensitive_marker_fingerprints_only": true,
+        "redaction_guidance_sensitive_marker_policy_schema_version": "cs.connector_sensitive_marker_policy.v1",
+        "redaction_guidance_status": "operator_guidance_only",
+        "release_impact": "Blocks production operations and recovery readiness. Does not block local fixture ConnectorHub adoption proof.",
+        "remaining_human_evidence_summary": {
+          "claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+          "dependency_unlock_allowed_by_evidence_packet_workflow": false,
+          "evidence_packet_workflow": {
+            "acceptance_sufficient": false,
+            "claim_boundary": "h07_recovery_packet_workflow_is_operator_handoff_not_human_acceptance",
+            "command_count": 6,
+            "command_sequence": [
+              {
+                "command": "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H07 --json",
+                "output_role": "required evidence manifest and redaction contract",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_contract",
+                "step_order": 1
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H07 --json",
+                "output_role": "required acceptance packet file list and content expectations",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_file_contract",
+                "step_order": 2
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H07 --packet-dir <h07-recovery-packet-dir> --json --write",
+                "output_role": "blank local packet templates without overwriting existing evidence",
+                "owner": "operator",
+                "phase": "scaffold_packet_templates",
+                "step_order": 3
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H07 --packet-dir <h07-recovery-packet-dir> --json",
+                "output_role": "hash-only packet validation envelope",
+                "owner": "operator",
+                "phase": "validate_packet_hashes",
+                "step_order": 4
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H07 --packet-dir <h07-recovery-packet-dir> --json --record-output <reviewer-record-draft.json>",
+                "output_role": "hash-only reviewer record draft; human decision fields remain human-owned",
+                "owner": "operator",
+                "phase": "draft_record_from_packet_hashes",
+                "step_order": 5
+              },
+              {
+                "command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>",
+                "output_role": "redacted structural validation envelope for the completed reviewer record",
+                "owner": "operator",
+                "phase": "validate_completed_reviewer_record",
+                "step_order": 6
+              }
+            ],
+            "commands": [
+              "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H07 --json",
+              "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H07 --json",
+              "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H07 --packet-dir <h07-recovery-packet-dir> --json --write",
+              "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H07 --packet-dir <h07-recovery-packet-dir> --json",
+              "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H07 --packet-dir <h07-recovery-packet-dir> --json --record-output <reviewer-record-draft.json>",
+              "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+            ],
+            "dependency_unlock_allowed_by_workflow": false,
+            "human_acceptance_collected_by_workflow": false,
+            "packet_dir_placeholder": "<h07-recovery-packet-dir>",
+            "packet_file_contents_persisted_by_workflow": false,
+            "pass_claim_allowed": false,
+            "product_claim_allowed": false,
+            "raw_packet_file_contents_recorded_by_workflow": false,
+            "record_output_placeholder": "<reviewer-record-draft.json>",
+            "review_input_only": true,
+            "scenario_id": "CS-CH-H07",
+            "schema_version": "cs.connector_human_gate_h07_evidence_packet_workflow.v1",
+            "status": "operator_preparation_only",
+            "validation_output_placeholder": "<redacted-validation-envelope.json>"
+          },
+          "evidence_packet_workflow_claim_boundary": "h07_recovery_packet_workflow_is_operator_handoff_not_human_acceptance",
+          "evidence_packet_workflow_command_count": 6,
+          "evidence_packet_workflow_commands": [
+            "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H07 --json",
+            "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H07 --json",
+            "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H07 --packet-dir <h07-recovery-packet-dir> --json --write",
+            "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H07 --packet-dir <h07-recovery-packet-dir> --json",
+            "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H07 --packet-dir <h07-recovery-packet-dir> --json --record-output <reviewer-record-draft.json>",
+            "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+          ],
+          "human_acceptance_collected_by_evidence_packet_workflow": false,
+          "packet_file_contents_persisted_by_evidence_packet_workflow": false,
+          "raw_packet_file_contents_recorded_by_evidence_packet_workflow": false,
+          "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H07 --json --record-template-output <reviewer-record-template.json>",
+          "release_impact": "Blocks production operations and recovery readiness. Does not block local fixture ConnectorHub adoption proof.",
+          "required_evidence": [
+            "Backup manifest and restore logs for production-like durable state.",
+            "Cursor reconciliation and replay results.",
+            "Before/after logical counts and hashes.",
+            "Audit verification proving recovered state integrity."
+          ],
+          "required_evidence_count": 4,
+          "required_human_field_count": 9,
+          "required_human_fields": [
+            "reviewer",
+            "review_timestamp",
+            "backup_manifest_ref",
+            "restore_log_ref",
+            "cursor_reconciliation_ref",
+            "replay_results_ref",
+            "audit_verification_ref",
+            "before_after_counts_hashes",
+            "issues_or_exceptions"
+          ],
+          "scenario_id": "CS-CH-H07",
+          "schema_version": "cs.connector_human_gate_remaining_evidence_summary.v1",
+          "stop_or_reject_when": "Replay changes external state unexpectedly, cursors diverge, audit continuity is broken, or restore evidence is incomplete.",
+          "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "required_evidence": [
+          "Backup manifest and restore logs for production-like durable state.",
+          "Cursor reconciliation and replay results.",
+          "Before/after logical counts and hashes.",
+          "Audit verification proving recovered state integrity."
+        ],
+        "required_evidence_count": 4,
+        "required_human_field_count": 9,
+        "required_human_fields": [
+          "reviewer",
+          "review_timestamp",
+          "backup_manifest_ref",
+          "restore_log_ref",
+          "cursor_reconciliation_ref",
+          "replay_results_ref",
+          "audit_verification_ref",
+          "before_after_counts_hashes",
+          "issues_or_exceptions"
+        ],
+        "review_order": 2,
+        "reviewer_checklist_dependency_human_gate_ref_count": 1,
+        "reviewer_checklist_evidence_packet_manifest_item_count": 4,
+        "reviewer_checklist_evidence_packet_workflow_claim_boundary": "h07_recovery_packet_workflow_is_operator_handoff_not_human_acceptance",
+        "reviewer_checklist_evidence_packet_workflow_command_count": 6,
+        "reviewer_checklist_pass_claim_allowed": false,
+        "reviewer_checklist_product_claim_allowed": false,
+        "reviewer_checklist_record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H07 --json --record-template-output <reviewer-record-template.json>",
+        "reviewer_checklist_required_field_item_count": 9,
+        "reviewer_checklist_reviewer_record_validation_required": true,
+        "reviewer_checklist_schema_version": "cs.connector_human_gate_reviewer_checklist.v1",
+        "reviewer_checklist_senior_review_perspective_count": 6,
+        "reviewer_checklist_status": "operator_preparation_only",
+        "reviewer_checklist_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <filled-json> --json --output <redacted-validation-envelope.json>",
+        "reviewer_commands": {
+          "package": "cornerstone connector human-gate package --scenario CS-CH-H07 --json",
+          "record_template_output": "cornerstone connector human-gate package --scenario CS-CH-H07 --json --record-template-output <reviewer-record-template.json>",
+          "validate_record": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json",
+          "validate_record_output": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "scenario_delivery_unit_plan_ready": true,
+        "scenario_id": "CS-CH-H07",
+        "senior_review_perspective_count": 6,
+        "source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",
+        "source_requirement_count": 3,
+        "source_requirement_ids": [
+          "IR-07",
+          "IR-17",
+          "IR-18"
+        ],
+        "source_requirement_status": "human_external_pending",
+        "status": "HUMAN_REQUIRED",
+        "stop_or_reject_when": "Replay changes external state unexpectedly, cursors diverge, audit continuity is broken, or restore evidence is incomplete.",
+        "structurally_valid_record_validation_present": false
+      },
+      {
+        "allowed_redaction_statuses": [
+          "redacted",
+          "public_safe",
+          "no_sensitive_material"
+        ],
+        "approval_collected": false,
+        "blocked_by_missing_dependency_unlock_validations": [
+          "CS-CH-H04",
+          "CS-CH-H07"
+        ],
+        "blocked_dependency_details": [
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H04",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          },
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H07 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H07 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H07",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          }
+        ],
+        "dependency_ready": false,
+        "dependency_status": "missing_dependency_validations",
+        "dependency_unlock_record_validation_present": false,
+        "depends_on_human_gates": [
+          "CS-CH-H04",
+          "CS-CH-H07"
+        ],
+        "gate_category": "live_readonly_provider",
+        "latest_record_validation_dependency_unlock_allowed": false,
+        "latest_record_validation_issue_summary": null,
+        "latest_record_validation_ref": null,
+        "local_baseline_preflight_bundle": null,
+        "local_baseline_review_input_summary": null,
+        "owner": "Human",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "record_validation_count": 0,
+        "record_validation_status": "not_submitted",
+        "redaction_guidance_dependency_human_gate_count": 2,
+        "redaction_guidance_raw_evidence_values_allowed": false,
+        "redaction_guidance_raw_provider_payloads_allowed": false,
+        "redaction_guidance_raw_record_body_persisted_by_validator": false,
+        "redaction_guidance_raw_record_path_persisted_by_validator": false,
+        "redaction_guidance_raw_secret_values_allowed": false,
+        "redaction_guidance_required_evidence_count": 5,
+        "redaction_guidance_required_field_count": 10,
+        "redaction_guidance_schema_version": "cs.connector_human_gate_redaction_guidance.v1",
+        "redaction_guidance_sensitive_marker_fingerprints_only": true,
+        "redaction_guidance_sensitive_marker_policy_schema_version": "cs.connector_sensitive_marker_policy.v1",
+        "redaction_guidance_status": "operator_guidance_only",
+        "release_impact": "Blocks live GitHub read-only readiness. Does not block local fixture ConnectorHub adoption proof.",
+        "remaining_human_evidence_summary": {
+          "claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+          "dependency_unlock_allowed_by_evidence_packet_workflow": false,
+          "evidence_packet_workflow": {
+            "acceptance_sufficient": false,
+            "claim_boundary": "h01_github_readonly_packet_workflow_is_operator_handoff_not_human_acceptance",
+            "command_count": 6,
+            "command_sequence": [
+              {
+                "command": "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H01 --json",
+                "output_role": "required evidence manifest and redaction contract",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_contract",
+                "step_order": 1
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H01 --json",
+                "output_role": "required acceptance packet file list and content expectations",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_file_contract",
+                "step_order": 2
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H01 --packet-dir <h01-github-readonly-packet-dir> --json --write",
+                "output_role": "blank local packet templates without overwriting existing evidence",
+                "owner": "operator",
+                "phase": "scaffold_packet_templates",
+                "step_order": 3
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H01 --packet-dir <h01-github-readonly-packet-dir> --json",
+                "output_role": "hash-only packet validation envelope",
+                "owner": "operator",
+                "phase": "validate_packet_hashes",
+                "step_order": 4
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H01 --packet-dir <h01-github-readonly-packet-dir> --json --record-output <reviewer-record-draft.json>",
+                "output_role": "hash-only reviewer record draft; human decision fields remain human-owned",
+                "owner": "operator",
+                "phase": "draft_record_from_packet_hashes",
+                "step_order": 5
+              },
+              {
+                "command": "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>",
+                "output_role": "redacted structural validation envelope for the completed reviewer record",
+                "owner": "operator",
+                "phase": "validate_completed_reviewer_record",
+                "step_order": 6
+              }
+            ],
+            "commands": [
+              "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H01 --json",
+              "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H01 --json",
+              "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H01 --packet-dir <h01-github-readonly-packet-dir> --json --write",
+              "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H01 --packet-dir <h01-github-readonly-packet-dir> --json",
+              "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H01 --packet-dir <h01-github-readonly-packet-dir> --json --record-output <reviewer-record-draft.json>",
+              "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+            ],
+            "dependency_unlock_allowed_by_workflow": false,
+            "human_acceptance_collected_by_workflow": false,
+            "packet_dir_placeholder": "<h01-github-readonly-packet-dir>",
+            "packet_file_contents_persisted_by_workflow": false,
+            "pass_claim_allowed": false,
+            "product_claim_allowed": false,
+            "raw_packet_file_contents_recorded_by_workflow": false,
+            "record_output_placeholder": "<reviewer-record-draft.json>",
+            "review_input_only": true,
+            "scenario_id": "CS-CH-H01",
+            "schema_version": "cs.connector_human_gate_h01_evidence_packet_workflow.v1",
+            "status": "operator_preparation_only",
+            "validation_output_placeholder": "<redacted-validation-envelope.json>"
+          },
+          "evidence_packet_workflow_claim_boundary": "h01_github_readonly_packet_workflow_is_operator_handoff_not_human_acceptance",
+          "evidence_packet_workflow_command_count": 6,
+          "evidence_packet_workflow_commands": [
+            "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H01 --json",
+            "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H01 --json",
+            "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H01 --packet-dir <h01-github-readonly-packet-dir> --json --write",
+            "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H01 --packet-dir <h01-github-readonly-packet-dir> --json",
+            "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H01 --packet-dir <h01-github-readonly-packet-dir> --json --record-output <reviewer-record-draft.json>",
+            "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+          ],
+          "human_acceptance_collected_by_evidence_packet_workflow": false,
+          "packet_file_contents_persisted_by_evidence_packet_workflow": false,
+          "raw_packet_file_contents_recorded_by_evidence_packet_workflow": false,
+          "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H01 --json --record-template-output <reviewer-record-template.json>",
+          "release_impact": "Blocks live GitHub read-only readiness. Does not block local fixture ConnectorHub adoption proof.",
+          "required_evidence": [
+            "Redacted GitHub App or equivalent least-privilege installation permission snapshot.",
+            "Selected repository list and explicit confirmation that no unselected repositories were ingested.",
+            "Read-only call ledger showing zero write-capable HTTP methods or endpoints.",
+            "Connector Delivery, Artifact/Evidence, and audit refs produced from selected repositories.",
+            "Independent zero-write proof covering permissions, declared actions, routes, UI/CLI, and observed calls."
+          ],
+          "required_evidence_count": 5,
+          "required_human_field_count": 10,
+          "required_human_fields": [
+            "reviewer",
+            "review_timestamp",
+            "github_app_installation_id_redacted",
+            "selected_repositories",
+            "permission_snapshot",
+            "call_ledger",
+            "delivery_refs",
+            "audit_refs",
+            "zero_write_proof",
+            "issues_or_exceptions"
+          ],
+          "scenario_id": "CS-CH-H01",
+          "schema_version": "cs.connector_human_gate_remaining_evidence_summary.v1",
+          "stop_or_reject_when": "Any write-capable scope is granted, a mutation endpoint is called, repository scope is wider than approved, or audit refs are missing.",
+          "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "required_evidence": [
+          "Redacted GitHub App or equivalent least-privilege installation permission snapshot.",
+          "Selected repository list and explicit confirmation that no unselected repositories were ingested.",
+          "Read-only call ledger showing zero write-capable HTTP methods or endpoints.",
+          "Connector Delivery, Artifact/Evidence, and audit refs produced from selected repositories.",
+          "Independent zero-write proof covering permissions, declared actions, routes, UI/CLI, and observed calls."
+        ],
+        "required_evidence_count": 5,
+        "required_human_field_count": 10,
+        "required_human_fields": [
+          "reviewer",
+          "review_timestamp",
+          "github_app_installation_id_redacted",
+          "selected_repositories",
+          "permission_snapshot",
+          "call_ledger",
+          "delivery_refs",
+          "audit_refs",
+          "zero_write_proof",
+          "issues_or_exceptions"
+        ],
+        "review_order": 3,
+        "reviewer_checklist_dependency_human_gate_ref_count": 2,
+        "reviewer_checklist_evidence_packet_manifest_item_count": 5,
+        "reviewer_checklist_evidence_packet_workflow_claim_boundary": "h01_github_readonly_packet_workflow_is_operator_handoff_not_human_acceptance",
+        "reviewer_checklist_evidence_packet_workflow_command_count": 6,
+        "reviewer_checklist_pass_claim_allowed": false,
+        "reviewer_checklist_product_claim_allowed": false,
+        "reviewer_checklist_record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H01 --json --record-template-output <reviewer-record-template.json>",
+        "reviewer_checklist_required_field_item_count": 10,
+        "reviewer_checklist_reviewer_record_validation_required": true,
+        "reviewer_checklist_schema_version": "cs.connector_human_gate_reviewer_checklist.v1",
+        "reviewer_checklist_senior_review_perspective_count": 6,
+        "reviewer_checklist_status": "operator_preparation_only",
+        "reviewer_checklist_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <filled-json> --json --output <redacted-validation-envelope.json>",
+        "reviewer_commands": {
+          "package": "cornerstone connector human-gate package --scenario CS-CH-H01 --json",
+          "record_template_output": "cornerstone connector human-gate package --scenario CS-CH-H01 --json --record-template-output <reviewer-record-template.json>",
+          "validate_record": "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <json> --json",
+          "validate_record_output": "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "scenario_delivery_unit_plan_ready": true,
+        "scenario_id": "CS-CH-H01",
+        "senior_review_perspective_count": 6,
+        "source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",
+        "source_requirement_count": 2,
+        "source_requirement_ids": [
+          "ER-06",
+          "IR-13"
+        ],
+        "source_requirement_status": "human_external_pending",
+        "status": "HUMAN_REQUIRED",
+        "stop_or_reject_when": "Any write-capable scope is granted, a mutation endpoint is called, repository scope is wider than approved, or audit refs are missing.",
+        "structurally_valid_record_validation_present": false
+      },
+      {
+        "allowed_redaction_statuses": [
+          "redacted",
+          "public_safe",
+          "no_sensitive_material"
+        ],
+        "approval_collected": false,
+        "blocked_by_missing_dependency_unlock_validations": [
+          "CS-CH-H04",
+          "CS-CH-H07"
+        ],
+        "blocked_dependency_details": [
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H04",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          },
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H07 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H07 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H07",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          }
+        ],
+        "dependency_ready": false,
+        "dependency_status": "missing_dependency_validations",
+        "dependency_unlock_record_validation_present": false,
+        "depends_on_human_gates": [
+          "CS-CH-H04",
+          "CS-CH-H07"
+        ],
+        "gate_category": "physical_device_capture",
+        "latest_record_validation_dependency_unlock_allowed": false,
+        "latest_record_validation_issue_summary": null,
+        "latest_record_validation_ref": null,
+        "local_baseline_preflight_bundle": null,
+        "local_baseline_review_input_summary": null,
+        "owner": "Human",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "record_validation_count": 0,
+        "record_validation_status": "not_submitted",
+        "redaction_guidance_dependency_human_gate_count": 2,
+        "redaction_guidance_raw_evidence_values_allowed": false,
+        "redaction_guidance_raw_provider_payloads_allowed": false,
+        "redaction_guidance_raw_record_body_persisted_by_validator": false,
+        "redaction_guidance_raw_record_path_persisted_by_validator": false,
+        "redaction_guidance_raw_secret_values_allowed": false,
+        "redaction_guidance_required_evidence_count": 4,
+        "redaction_guidance_required_field_count": 10,
+        "redaction_guidance_schema_version": "cs.connector_human_gate_redaction_guidance.v1",
+        "redaction_guidance_sensitive_marker_fingerprints_only": true,
+        "redaction_guidance_sensitive_marker_policy_schema_version": "cs.connector_sensitive_marker_policy.v1",
+        "redaction_guidance_status": "operator_guidance_only",
+        "release_impact": "Blocks physical-device Watch and capture readiness. Does not block local fixture capture contract proof.",
+        "remaining_human_evidence_summary": {
+          "claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+          "dependency_unlock_allowed_by_evidence_packet_workflow": false,
+          "evidence_packet_workflow": {
+            "acceptance_sufficient": false,
+            "claim_boundary": "h02_macos_permission_packet_workflow_is_operator_handoff_not_human_acceptance",
+            "command_count": 6,
+            "command_sequence": [
+              {
+                "command": "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H02 --json",
+                "output_role": "required evidence manifest and redaction contract",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_contract",
+                "step_order": 1
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H02 --json",
+                "output_role": "required acceptance packet file list and content expectations",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_file_contract",
+                "step_order": 2
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H02 --packet-dir <h02-macos-permission-packet-dir> --json --write",
+                "output_role": "blank local packet templates without overwriting existing evidence",
+                "owner": "operator",
+                "phase": "scaffold_packet_templates",
+                "step_order": 3
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H02 --packet-dir <h02-macos-permission-packet-dir> --json",
+                "output_role": "hash-only packet validation envelope",
+                "owner": "operator",
+                "phase": "validate_packet_hashes",
+                "step_order": 4
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H02 --packet-dir <h02-macos-permission-packet-dir> --json --record-output <reviewer-record-draft.json>",
+                "output_role": "hash-only reviewer record draft; human decision fields remain human-owned",
+                "owner": "operator",
+                "phase": "draft_record_from_packet_hashes",
+                "step_order": 5
+              },
+              {
+                "command": "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>",
+                "output_role": "redacted structural validation envelope for the completed reviewer record",
+                "owner": "operator",
+                "phase": "validate_completed_reviewer_record",
+                "step_order": 6
+              }
+            ],
+            "commands": [
+              "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H02 --json",
+              "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H02 --json",
+              "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H02 --packet-dir <h02-macos-permission-packet-dir> --json --write",
+              "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H02 --packet-dir <h02-macos-permission-packet-dir> --json",
+              "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H02 --packet-dir <h02-macos-permission-packet-dir> --json --record-output <reviewer-record-draft.json>",
+              "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+            ],
+            "dependency_unlock_allowed_by_workflow": false,
+            "human_acceptance_collected_by_workflow": false,
+            "packet_dir_placeholder": "<h02-macos-permission-packet-dir>",
+            "packet_file_contents_persisted_by_workflow": false,
+            "pass_claim_allowed": false,
+            "product_claim_allowed": false,
+            "raw_packet_file_contents_recorded_by_workflow": false,
+            "record_output_placeholder": "<reviewer-record-draft.json>",
+            "review_input_only": true,
+            "scenario_id": "CS-CH-H02",
+            "schema_version": "cs.connector_human_gate_h02_evidence_packet_workflow.v1",
+            "status": "operator_preparation_only",
+            "validation_output_placeholder": "<redacted-validation-envelope.json>"
+          },
+          "evidence_packet_workflow_claim_boundary": "h02_macos_permission_packet_workflow_is_operator_handoff_not_human_acceptance",
+          "evidence_packet_workflow_command_count": 6,
+          "evidence_packet_workflow_commands": [
+            "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H02 --json",
+            "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H02 --json",
+            "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H02 --packet-dir <h02-macos-permission-packet-dir> --json --write",
+            "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H02 --packet-dir <h02-macos-permission-packet-dir> --json",
+            "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H02 --packet-dir <h02-macos-permission-packet-dir> --json --record-output <reviewer-record-draft.json>",
+            "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+          ],
+          "human_acceptance_collected_by_evidence_packet_workflow": false,
+          "packet_file_contents_persisted_by_evidence_packet_workflow": false,
+          "raw_packet_file_contents_recorded_by_evidence_packet_workflow": false,
+          "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H02 --json --record-template-output <reviewer-record-template.json>",
+          "release_impact": "Blocks physical-device Watch and capture readiness. Does not block local fixture capture contract proof.",
+          "required_evidence": [
+            "Recording or screenshots of consent, permission grant, pause, and revoke.",
+            "Status transcript showing permission and capture state transitions.",
+            "First bounded sample reference with owner/workspace scope.",
+            "Proof that pause and revoke stop capture or block sample attempts."
+          ],
+          "required_evidence_count": 4,
+          "required_human_field_count": 10,
+          "required_human_fields": [
+            "reviewer",
+            "review_timestamp",
+            "device_os_version_redacted",
+            "consent_record",
+            "permission_state_snapshot",
+            "first_sample_ref",
+            "pause_revoke_timestamps",
+            "screenshots_or_recording_ref",
+            "audit_refs",
+            "issues_or_exceptions"
+          ],
+          "scenario_id": "CS-CH-H02",
+          "schema_version": "cs.connector_human_gate_remaining_evidence_summary.v1",
+          "stop_or_reject_when": "Capture starts before consent, pause/revoke is ineffective, status is misleading, or sensitive data is exposed in proof artifacts.",
+          "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "required_evidence": [
+          "Recording or screenshots of consent, permission grant, pause, and revoke.",
+          "Status transcript showing permission and capture state transitions.",
+          "First bounded sample reference with owner/workspace scope.",
+          "Proof that pause and revoke stop capture or block sample attempts."
+        ],
+        "required_evidence_count": 4,
+        "required_human_field_count": 10,
+        "required_human_fields": [
+          "reviewer",
+          "review_timestamp",
+          "device_os_version_redacted",
+          "consent_record",
+          "permission_state_snapshot",
+          "first_sample_ref",
+          "pause_revoke_timestamps",
+          "screenshots_or_recording_ref",
+          "audit_refs",
+          "issues_or_exceptions"
+        ],
+        "review_order": 4,
+        "reviewer_checklist_dependency_human_gate_ref_count": 2,
+        "reviewer_checklist_evidence_packet_manifest_item_count": 4,
+        "reviewer_checklist_evidence_packet_workflow_claim_boundary": "h02_macos_permission_packet_workflow_is_operator_handoff_not_human_acceptance",
+        "reviewer_checklist_evidence_packet_workflow_command_count": 6,
+        "reviewer_checklist_pass_claim_allowed": false,
+        "reviewer_checklist_product_claim_allowed": false,
+        "reviewer_checklist_record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H02 --json --record-template-output <reviewer-record-template.json>",
+        "reviewer_checklist_required_field_item_count": 10,
+        "reviewer_checklist_reviewer_record_validation_required": true,
+        "reviewer_checklist_schema_version": "cs.connector_human_gate_reviewer_checklist.v1",
+        "reviewer_checklist_senior_review_perspective_count": 6,
+        "reviewer_checklist_status": "operator_preparation_only",
+        "reviewer_checklist_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <filled-json> --json --output <redacted-validation-envelope.json>",
+        "reviewer_commands": {
+          "package": "cornerstone connector human-gate package --scenario CS-CH-H02 --json",
+          "record_template_output": "cornerstone connector human-gate package --scenario CS-CH-H02 --json --record-template-output <reviewer-record-template.json>",
+          "validate_record": "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <json> --json",
+          "validate_record_output": "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "scenario_delivery_unit_plan_ready": true,
+        "scenario_id": "CS-CH-H02",
+        "senior_review_perspective_count": 6,
+        "source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",
+        "source_requirement_count": 2,
+        "source_requirement_ids": [
+          "ER-05",
+          "IR-14"
+        ],
+        "source_requirement_status": "human_external_pending",
+        "status": "HUMAN_REQUIRED",
+        "stop_or_reject_when": "Capture starts before consent, pause/revoke is ineffective, status is misleading, or sensitive data is exposed in proof artifacts.",
+        "structurally_valid_record_validation_present": false
+      },
+      {
+        "allowed_redaction_statuses": [
+          "redacted",
+          "public_safe",
+          "no_sensitive_material"
+        ],
+        "approval_collected": false,
+        "blocked_by_missing_dependency_unlock_validations": [
+          "CS-CH-H02"
+        ],
+        "blocked_dependency_details": [
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H02 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H02 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H02",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          }
+        ],
+        "dependency_ready": false,
+        "dependency_status": "missing_dependency_validations",
+        "dependency_unlock_record_validation_present": false,
+        "depends_on_human_gates": [
+          "CS-CH-H02"
+        ],
+        "gate_category": "browser_privacy",
+        "latest_record_validation_dependency_unlock_allowed": false,
+        "latest_record_validation_issue_summary": null,
+        "latest_record_validation_ref": null,
+        "local_baseline_preflight_bundle": null,
+        "local_baseline_review_input_summary": null,
+        "owner": "Human",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "record_validation_count": 0,
+        "record_validation_status": "not_submitted",
+        "redaction_guidance_dependency_human_gate_count": 1,
+        "redaction_guidance_raw_evidence_values_allowed": false,
+        "redaction_guidance_raw_provider_payloads_allowed": false,
+        "redaction_guidance_raw_record_body_persisted_by_validator": false,
+        "redaction_guidance_raw_record_path_persisted_by_validator": false,
+        "redaction_guidance_raw_secret_values_allowed": false,
+        "redaction_guidance_required_evidence_count": 4,
+        "redaction_guidance_required_field_count": 12,
+        "redaction_guidance_schema_version": "cs.connector_human_gate_redaction_guidance.v1",
+        "redaction_guidance_sensitive_marker_fingerprints_only": true,
+        "redaction_guidance_sensitive_marker_policy_schema_version": "cs.connector_sensitive_marker_policy.v1",
+        "redaction_guidance_status": "operator_guidance_only",
+        "release_impact": "Blocks Chrome capture and browser privacy acceptance. Does not block backend fixture policy proof.",
+        "remaining_human_evidence_summary": {
+          "claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+          "dependency_unlock_allowed_by_evidence_packet_workflow": false,
+          "evidence_packet_workflow": {
+            "acceptance_sufficient": false,
+            "claim_boundary": "h03_chrome_privacy_packet_workflow_is_operator_handoff_not_human_acceptance",
+            "command_count": 6,
+            "command_sequence": [
+              {
+                "command": "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H03 --json",
+                "output_role": "required evidence manifest and redaction contract",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_contract",
+                "step_order": 1
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H03 --json",
+                "output_role": "required acceptance packet file list and content expectations",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_file_contract",
+                "step_order": 2
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H03 --packet-dir <h03-chrome-privacy-packet-dir> --json --write",
+                "output_role": "blank local packet templates without overwriting existing evidence",
+                "owner": "operator",
+                "phase": "scaffold_packet_templates",
+                "step_order": 3
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H03 --packet-dir <h03-chrome-privacy-packet-dir> --json",
+                "output_role": "hash-only packet validation envelope",
+                "owner": "operator",
+                "phase": "validate_packet_hashes",
+                "step_order": 4
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H03 --packet-dir <h03-chrome-privacy-packet-dir> --json --record-output <reviewer-record-draft.json>",
+                "output_role": "hash-only reviewer record draft; human decision fields remain human-owned",
+                "owner": "operator",
+                "phase": "draft_record_from_packet_hashes",
+                "step_order": 5
+              },
+              {
+                "command": "cornerstone connector human-gate validate-record --scenario CS-CH-H03 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>",
+                "output_role": "redacted structural validation envelope for the completed reviewer record",
+                "owner": "operator",
+                "phase": "validate_completed_reviewer_record",
+                "step_order": 6
+              }
+            ],
+            "commands": [
+              "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H03 --json",
+              "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H03 --json",
+              "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H03 --packet-dir <h03-chrome-privacy-packet-dir> --json --write",
+              "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H03 --packet-dir <h03-chrome-privacy-packet-dir> --json",
+              "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H03 --packet-dir <h03-chrome-privacy-packet-dir> --json --record-output <reviewer-record-draft.json>",
+              "cornerstone connector human-gate validate-record --scenario CS-CH-H03 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+            ],
+            "dependency_unlock_allowed_by_workflow": false,
+            "human_acceptance_collected_by_workflow": false,
+            "packet_dir_placeholder": "<h03-chrome-privacy-packet-dir>",
+            "packet_file_contents_persisted_by_workflow": false,
+            "pass_claim_allowed": false,
+            "product_claim_allowed": false,
+            "raw_packet_file_contents_recorded_by_workflow": false,
+            "record_output_placeholder": "<reviewer-record-draft.json>",
+            "review_input_only": true,
+            "scenario_id": "CS-CH-H03",
+            "schema_version": "cs.connector_human_gate_h03_evidence_packet_workflow.v1",
+            "status": "operator_preparation_only",
+            "validation_output_placeholder": "<redacted-validation-envelope.json>"
+          },
+          "evidence_packet_workflow_claim_boundary": "h03_chrome_privacy_packet_workflow_is_operator_handoff_not_human_acceptance",
+          "evidence_packet_workflow_command_count": 6,
+          "evidence_packet_workflow_commands": [
+            "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H03 --json",
+            "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H03 --json",
+            "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H03 --packet-dir <h03-chrome-privacy-packet-dir> --json --write",
+            "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H03 --packet-dir <h03-chrome-privacy-packet-dir> --json",
+            "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H03 --packet-dir <h03-chrome-privacy-packet-dir> --json --record-output <reviewer-record-draft.json>",
+            "cornerstone connector human-gate validate-record --scenario CS-CH-H03 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+          ],
+          "human_acceptance_collected_by_evidence_packet_workflow": false,
+          "packet_file_contents_persisted_by_evidence_packet_workflow": false,
+          "raw_packet_file_contents_recorded_by_evidence_packet_workflow": false,
+          "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H03 --json --record-template-output <reviewer-record-template.json>",
+          "release_impact": "Blocks Chrome capture and browser privacy acceptance. Does not block backend fixture policy proof.",
+          "required_evidence": [
+            "Recording or screenshots of permission UX and capture controls.",
+            "Timeline covering active-tab capture, allowlist auto-capture, sensitive-page handling, pause, and revoke.",
+            "Policy and audit refs for allowed, blocked, and degraded browser capture decisions.",
+            "Human privacy acceptance or rejection note."
+          ],
+          "required_evidence_count": 4,
+          "required_human_field_count": 12,
+          "required_human_fields": [
+            "reviewer",
+            "review_timestamp",
+            "browser_profile_redacted",
+            "extension_version",
+            "permission_pages_or_recording_ref",
+            "active_tab_capture_ref",
+            "allowlist_auto_capture_ref",
+            "sensitive_block_ref",
+            "pause_revoke_ref",
+            "audit_refs",
+            "accept_or_reject_note",
+            "issues_or_exceptions"
+          ],
+          "scenario_id": "CS-CH-H03",
+          "schema_version": "cs.connector_human_gate_remaining_evidence_summary.v1",
+          "stop_or_reject_when": "Browser state is captured without clear consent, denied permission is bypassed, degraded mode is unclear, or redaction is insufficient.",
+          "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H03 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "required_evidence": [
+          "Recording or screenshots of permission UX and capture controls.",
+          "Timeline covering active-tab capture, allowlist auto-capture, sensitive-page handling, pause, and revoke.",
+          "Policy and audit refs for allowed, blocked, and degraded browser capture decisions.",
+          "Human privacy acceptance or rejection note."
+        ],
+        "required_evidence_count": 4,
+        "required_human_field_count": 12,
+        "required_human_fields": [
+          "reviewer",
+          "review_timestamp",
+          "browser_profile_redacted",
+          "extension_version",
+          "permission_pages_or_recording_ref",
+          "active_tab_capture_ref",
+          "allowlist_auto_capture_ref",
+          "sensitive_block_ref",
+          "pause_revoke_ref",
+          "audit_refs",
+          "accept_or_reject_note",
+          "issues_or_exceptions"
+        ],
+        "review_order": 5,
+        "reviewer_checklist_dependency_human_gate_ref_count": 1,
+        "reviewer_checklist_evidence_packet_manifest_item_count": 4,
+        "reviewer_checklist_evidence_packet_workflow_claim_boundary": "h03_chrome_privacy_packet_workflow_is_operator_handoff_not_human_acceptance",
+        "reviewer_checklist_evidence_packet_workflow_command_count": 6,
+        "reviewer_checklist_pass_claim_allowed": false,
+        "reviewer_checklist_product_claim_allowed": false,
+        "reviewer_checklist_record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H03 --json --record-template-output <reviewer-record-template.json>",
+        "reviewer_checklist_required_field_item_count": 12,
+        "reviewer_checklist_reviewer_record_validation_required": true,
+        "reviewer_checklist_schema_version": "cs.connector_human_gate_reviewer_checklist.v1",
+        "reviewer_checklist_senior_review_perspective_count": 6,
+        "reviewer_checklist_status": "operator_preparation_only",
+        "reviewer_checklist_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H03 --record-file <filled-json> --json --output <redacted-validation-envelope.json>",
+        "reviewer_commands": {
+          "package": "cornerstone connector human-gate package --scenario CS-CH-H03 --json",
+          "record_template_output": "cornerstone connector human-gate package --scenario CS-CH-H03 --json --record-template-output <reviewer-record-template.json>",
+          "validate_record": "cornerstone connector human-gate validate-record --scenario CS-CH-H03 --record-file <json> --json",
+          "validate_record_output": "cornerstone connector human-gate validate-record --scenario CS-CH-H03 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "scenario_delivery_unit_plan_ready": true,
+        "scenario_id": "CS-CH-H03",
+        "senior_review_perspective_count": 6,
+        "source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",
+        "source_requirement_count": 2,
+        "source_requirement_ids": [
+          "ER-05",
+          "IR-14"
+        ],
+        "source_requirement_status": "human_external_pending",
+        "status": "HUMAN_REQUIRED",
+        "stop_or_reject_when": "Browser state is captured without clear consent, denied permission is bypassed, degraded mode is unclear, or redaction is insufficient.",
+        "structurally_valid_record_validation_present": false
+      },
+      {
+        "allowed_redaction_statuses": [
+          "redacted",
+          "public_safe",
+          "no_sensitive_material"
+        ],
+        "approval_collected": false,
+        "blocked_by_missing_dependency_unlock_validations": [
+          "CS-CH-H04",
+          "CS-CH-H07"
+        ],
+        "blocked_dependency_details": [
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H04",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          },
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H07 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H07 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H07",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          }
+        ],
+        "dependency_ready": false,
+        "dependency_status": "missing_dependency_validations",
+        "dependency_unlock_record_validation_present": false,
+        "depends_on_human_gates": [
+          "CS-CH-H04",
+          "CS-CH-H07"
+        ],
+        "gate_category": "live_non_github_action",
+        "latest_record_validation_dependency_unlock_allowed": false,
+        "latest_record_validation_issue_summary": null,
+        "latest_record_validation_ref": null,
+        "local_baseline_preflight_bundle": null,
+        "local_baseline_review_input_summary": null,
+        "owner": "Human",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "record_validation_count": 0,
+        "record_validation_status": "not_submitted",
+        "redaction_guidance_dependency_human_gate_count": 2,
+        "redaction_guidance_raw_evidence_values_allowed": false,
+        "redaction_guidance_raw_provider_payloads_allowed": false,
+        "redaction_guidance_raw_record_body_persisted_by_validator": false,
+        "redaction_guidance_raw_record_path_persisted_by_validator": false,
+        "redaction_guidance_raw_secret_values_allowed": false,
+        "redaction_guidance_required_evidence_count": 4,
+        "redaction_guidance_required_field_count": 11,
+        "redaction_guidance_schema_version": "cs.connector_human_gate_redaction_guidance.v1",
+        "redaction_guidance_sensitive_marker_fingerprints_only": true,
+        "redaction_guidance_sensitive_marker_policy_schema_version": "cs.connector_sensitive_marker_policy.v1",
+        "redaction_guidance_status": "operator_guidance_only",
+        "release_impact": "Blocks live Action readiness. GitHub remains excluded from this human mutation gate.",
+        "remaining_human_evidence_summary": {
+          "claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+          "dependency_unlock_allowed_by_evidence_packet_workflow": false,
+          "evidence_packet_workflow": {
+            "acceptance_sufficient": false,
+            "claim_boundary": "h05_live_action_packet_workflow_is_operator_handoff_not_human_acceptance",
+            "command_count": 6,
+            "command_sequence": [
+              {
+                "command": "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H05 --json",
+                "output_role": "required evidence manifest and redaction contract",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_contract",
+                "step_order": 1
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H05 --json",
+                "output_role": "required acceptance packet file list and content expectations",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_file_contract",
+                "step_order": 2
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H05 --packet-dir <h05-live-action-packet-dir> --json --write",
+                "output_role": "blank local packet templates without overwriting existing evidence",
+                "owner": "operator",
+                "phase": "scaffold_packet_templates",
+                "step_order": 3
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H05 --packet-dir <h05-live-action-packet-dir> --json",
+                "output_role": "hash-only packet validation envelope",
+                "owner": "operator",
+                "phase": "validate_packet_hashes",
+                "step_order": 4
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H05 --packet-dir <h05-live-action-packet-dir> --json --record-output <reviewer-record-draft.json>",
+                "output_role": "hash-only reviewer record draft; human decision fields remain human-owned",
+                "owner": "operator",
+                "phase": "draft_record_from_packet_hashes",
+                "step_order": 5
+              },
+              {
+                "command": "cornerstone connector human-gate validate-record --scenario CS-CH-H05 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>",
+                "output_role": "redacted structural validation envelope for the completed reviewer record",
+                "owner": "operator",
+                "phase": "validate_completed_reviewer_record",
+                "step_order": 6
+              }
+            ],
+            "commands": [
+              "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H05 --json",
+              "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H05 --json",
+              "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H05 --packet-dir <h05-live-action-packet-dir> --json --write",
+              "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H05 --packet-dir <h05-live-action-packet-dir> --json",
+              "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H05 --packet-dir <h05-live-action-packet-dir> --json --record-output <reviewer-record-draft.json>",
+              "cornerstone connector human-gate validate-record --scenario CS-CH-H05 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+            ],
+            "dependency_unlock_allowed_by_workflow": false,
+            "human_acceptance_collected_by_workflow": false,
+            "packet_dir_placeholder": "<h05-live-action-packet-dir>",
+            "packet_file_contents_persisted_by_workflow": false,
+            "pass_claim_allowed": false,
+            "product_claim_allowed": false,
+            "raw_packet_file_contents_recorded_by_workflow": false,
+            "record_output_placeholder": "<reviewer-record-draft.json>",
+            "review_input_only": true,
+            "scenario_id": "CS-CH-H05",
+            "schema_version": "cs.connector_human_gate_h05_evidence_packet_workflow.v1",
+            "status": "operator_preparation_only",
+            "validation_output_placeholder": "<redacted-validation-envelope.json>"
+          },
+          "evidence_packet_workflow_claim_boundary": "h05_live_action_packet_workflow_is_operator_handoff_not_human_acceptance",
+          "evidence_packet_workflow_command_count": 6,
+          "evidence_packet_workflow_commands": [
+            "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H05 --json",
+            "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H05 --json",
+            "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H05 --packet-dir <h05-live-action-packet-dir> --json --write",
+            "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H05 --packet-dir <h05-live-action-packet-dir> --json",
+            "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H05 --packet-dir <h05-live-action-packet-dir> --json --record-output <reviewer-record-draft.json>",
+            "cornerstone connector human-gate validate-record --scenario CS-CH-H05 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+          ],
+          "human_acceptance_collected_by_evidence_packet_workflow": false,
+          "packet_file_contents_persisted_by_evidence_packet_workflow": false,
+          "raw_packet_file_contents_recorded_by_evidence_packet_workflow": false,
+          "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H05 --json --record-template-output <reviewer-record-template.json>",
+          "release_impact": "Blocks live Action readiness. GitHub remains excluded from this human mutation gate.",
+          "required_evidence": [
+            "Non-GitHub provider and reversible target approval.",
+            "Pre-execution rollback or compensation plan.",
+            "Redacted request/result and provider receipt/state evidence.",
+            "Idempotency and audit refs proving exactly-once execution."
+          ],
+          "required_evidence_count": 4,
+          "required_human_field_count": 11,
+          "required_human_fields": [
+            "reviewer",
+            "review_timestamp",
+            "approved_provider",
+            "reversible_test_target",
+            "rollback_or_compensation_plan",
+            "approval_ref",
+            "redacted_request_result",
+            "provider_receipt",
+            "idempotency_evidence",
+            "audit_refs",
+            "issues_or_exceptions"
+          ],
+          "scenario_id": "CS-CH-H05",
+          "schema_version": "cs.connector_human_gate_remaining_evidence_summary.v1",
+          "stop_or_reject_when": "Approval is ambiguous, provider receipt is missing, idempotency cannot be demonstrated, or the action uses GitHub instead of the selected non-GitHub provider.",
+          "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H05 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "required_evidence": [
+          "Non-GitHub provider and reversible target approval.",
+          "Pre-execution rollback or compensation plan.",
+          "Redacted request/result and provider receipt/state evidence.",
+          "Idempotency and audit refs proving exactly-once execution."
+        ],
+        "required_evidence_count": 4,
+        "required_human_field_count": 11,
+        "required_human_fields": [
+          "reviewer",
+          "review_timestamp",
+          "approved_provider",
+          "reversible_test_target",
+          "rollback_or_compensation_plan",
+          "approval_ref",
+          "redacted_request_result",
+          "provider_receipt",
+          "idempotency_evidence",
+          "audit_refs",
+          "issues_or_exceptions"
+        ],
+        "review_order": 6,
+        "reviewer_checklist_dependency_human_gate_ref_count": 2,
+        "reviewer_checklist_evidence_packet_manifest_item_count": 4,
+        "reviewer_checklist_evidence_packet_workflow_claim_boundary": "h05_live_action_packet_workflow_is_operator_handoff_not_human_acceptance",
+        "reviewer_checklist_evidence_packet_workflow_command_count": 6,
+        "reviewer_checklist_pass_claim_allowed": false,
+        "reviewer_checklist_product_claim_allowed": false,
+        "reviewer_checklist_record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H05 --json --record-template-output <reviewer-record-template.json>",
+        "reviewer_checklist_required_field_item_count": 11,
+        "reviewer_checklist_reviewer_record_validation_required": true,
+        "reviewer_checklist_schema_version": "cs.connector_human_gate_reviewer_checklist.v1",
+        "reviewer_checklist_senior_review_perspective_count": 6,
+        "reviewer_checklist_status": "operator_preparation_only",
+        "reviewer_checklist_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H05 --record-file <filled-json> --json --output <redacted-validation-envelope.json>",
+        "reviewer_commands": {
+          "package": "cornerstone connector human-gate package --scenario CS-CH-H05 --json",
+          "record_template_output": "cornerstone connector human-gate package --scenario CS-CH-H05 --json --record-template-output <reviewer-record-template.json>",
+          "validate_record": "cornerstone connector human-gate validate-record --scenario CS-CH-H05 --record-file <json> --json",
+          "validate_record_output": "cornerstone connector human-gate validate-record --scenario CS-CH-H05 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "scenario_delivery_unit_plan_ready": true,
+        "scenario_id": "CS-CH-H05",
+        "senior_review_perspective_count": 6,
+        "source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",
+        "source_requirement_count": 3,
+        "source_requirement_ids": [
+          "IR-11",
+          "IR-13",
+          "IR-18"
+        ],
+        "source_requirement_status": "human_external_pending",
+        "status": "HUMAN_REQUIRED",
+        "stop_or_reject_when": "Approval is ambiguous, provider receipt is missing, idempotency cannot be demonstrated, or the action uses GitHub instead of the selected non-GitHub provider.",
+        "structurally_valid_record_validation_present": false
+      },
+      {
+        "allowed_redaction_statuses": [
+          "redacted",
+          "public_safe",
+          "no_sensitive_material"
+        ],
+        "approval_collected": false,
+        "blocked_by_missing_dependency_unlock_validations": [
+          "CS-CH-H01",
+          "CS-CH-H02",
+          "CS-CH-H03",
+          "CS-CH-H04",
+          "CS-CH-H05",
+          "CS-CH-H07"
+        ],
+        "blocked_dependency_details": [
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H01 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H01 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H01",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H01 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          },
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H02 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H02 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H02",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H02 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          },
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H03 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H03 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H03",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H03 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H03 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          },
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H04",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          },
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H05 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H05 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H05",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H05 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H05 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          },
+          {
+            "accepted_ref_prefix": "connector_human_gate_record_validation:",
+            "package_command": "cornerstone connector human-gate package --scenario CS-CH-H07 --json",
+            "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H07 --json --record-template-output <reviewer-record-template.json>",
+            "required_status": "structurally_valid_accept_record",
+            "scenario_id": "CS-CH-H07",
+            "unlock_rule": "Only structurally valid ACCEPT validation refs unlock dependent H gates.",
+            "validate_record_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json",
+            "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H07 --record-file <json> --json --output <redacted-validation-envelope.json>"
+          }
+        ],
+        "dependency_ready": false,
+        "dependency_status": "missing_dependency_validations",
+        "dependency_unlock_record_validation_present": false,
+        "depends_on_human_gates": [
+          "CS-CH-H01",
+          "CS-CH-H02",
+          "CS-CH-H03",
+          "CS-CH-H04",
+          "CS-CH-H05",
+          "CS-CH-H07"
+        ],
+        "gate_category": "human_usability_trust",
+        "latest_record_validation_dependency_unlock_allowed": false,
+        "latest_record_validation_issue_summary": null,
+        "latest_record_validation_ref": null,
+        "local_baseline_preflight_bundle": null,
+        "local_baseline_review_input_summary": null,
+        "owner": "Human",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "record_validation_count": 0,
+        "record_validation_status": "not_submitted",
+        "redaction_guidance_dependency_human_gate_count": 6,
+        "redaction_guidance_raw_evidence_values_allowed": false,
+        "redaction_guidance_raw_provider_payloads_allowed": false,
+        "redaction_guidance_raw_record_body_persisted_by_validator": false,
+        "redaction_guidance_raw_record_path_persisted_by_validator": false,
+        "redaction_guidance_raw_secret_values_allowed": false,
+        "redaction_guidance_required_evidence_count": 4,
+        "redaction_guidance_required_field_count": 10,
+        "redaction_guidance_schema_version": "cs.connector_human_gate_redaction_guidance.v1",
+        "redaction_guidance_sensitive_marker_fingerprints_only": true,
+        "redaction_guidance_sensitive_marker_policy_schema_version": "cs.connector_sensitive_marker_policy.v1",
+        "redaction_guidance_status": "operator_guidance_only",
+        "release_impact": "Blocks human UX and trust acceptance. Does not block local CLI/data-contract proof.",
+        "remaining_human_evidence_summary": {
+          "claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+          "dependency_unlock_allowed_by_evidence_packet_workflow": false,
+          "evidence_packet_workflow": {
+            "acceptance_sufficient": false,
+            "claim_boundary": "h06_usability_trust_packet_workflow_is_operator_handoff_not_human_acceptance",
+            "command_count": 6,
+            "command_sequence": [
+              {
+                "command": "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H06 --json",
+                "output_role": "required evidence manifest and redaction contract",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_contract",
+                "step_order": 1
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H06 --json",
+                "output_role": "required acceptance packet file list and content expectations",
+                "owner": "operator",
+                "phase": "inspect_evidence_packet_file_contract",
+                "step_order": 2
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H06 --packet-dir <h06-usability-trust-packet-dir> --json --write",
+                "output_role": "blank local packet templates without overwriting existing evidence",
+                "owner": "operator",
+                "phase": "scaffold_packet_templates",
+                "step_order": 3
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H06 --packet-dir <h06-usability-trust-packet-dir> --json",
+                "output_role": "hash-only packet validation envelope",
+                "owner": "operator",
+                "phase": "validate_packet_hashes",
+                "step_order": 4
+              },
+              {
+                "command": "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H06 --packet-dir <h06-usability-trust-packet-dir> --json --record-output <reviewer-record-draft.json>",
+                "output_role": "hash-only reviewer record draft; human decision fields remain human-owned",
+                "owner": "operator",
+                "phase": "draft_record_from_packet_hashes",
+                "step_order": 5
+              },
+              {
+                "command": "cornerstone connector human-gate validate-record --scenario CS-CH-H06 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>",
+                "output_role": "redacted structural validation envelope for the completed reviewer record",
+                "owner": "operator",
+                "phase": "validate_completed_reviewer_record",
+                "step_order": 6
+              }
+            ],
+            "commands": [
+              "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H06 --json",
+              "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H06 --json",
+              "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H06 --packet-dir <h06-usability-trust-packet-dir> --json --write",
+              "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H06 --packet-dir <h06-usability-trust-packet-dir> --json",
+              "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H06 --packet-dir <h06-usability-trust-packet-dir> --json --record-output <reviewer-record-draft.json>",
+              "cornerstone connector human-gate validate-record --scenario CS-CH-H06 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+            ],
+            "dependency_unlock_allowed_by_workflow": false,
+            "human_acceptance_collected_by_workflow": false,
+            "packet_dir_placeholder": "<h06-usability-trust-packet-dir>",
+            "packet_file_contents_persisted_by_workflow": false,
+            "pass_claim_allowed": false,
+            "product_claim_allowed": false,
+            "raw_packet_file_contents_recorded_by_workflow": false,
+            "record_output_placeholder": "<reviewer-record-draft.json>",
+            "review_input_only": true,
+            "scenario_id": "CS-CH-H06",
+            "schema_version": "cs.connector_human_gate_h06_evidence_packet_workflow.v1",
+            "status": "operator_preparation_only",
+            "validation_output_placeholder": "<redacted-validation-envelope.json>"
+          },
+          "evidence_packet_workflow_claim_boundary": "h06_usability_trust_packet_workflow_is_operator_handoff_not_human_acceptance",
+          "evidence_packet_workflow_command_count": 6,
+          "evidence_packet_workflow_commands": [
+            "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H06 --json",
+            "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H06 --json",
+            "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H06 --packet-dir <h06-usability-trust-packet-dir> --json --write",
+            "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H06 --packet-dir <h06-usability-trust-packet-dir> --json",
+            "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H06 --packet-dir <h06-usability-trust-packet-dir> --json --record-output <reviewer-record-draft.json>",
+            "cornerstone connector human-gate validate-record --scenario CS-CH-H06 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+          ],
+          "human_acceptance_collected_by_evidence_packet_workflow": false,
+          "packet_file_contents_persisted_by_evidence_packet_workflow": false,
+          "raw_packet_file_contents_recorded_by_evidence_packet_workflow": false,
+          "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H06 --json --record-template-output <reviewer-record-template.json>",
+          "release_impact": "Blocks human UX and trust acceptance. Does not block local CLI/data-contract proof.",
+          "required_evidence": [
+            "Task script and fixture workspace used for the study.",
+            "Timed task notes and recording or screenshots.",
+            "Scoring rubric for comprehension, trust, completion, and risk.",
+            "Acceptance decision with issue list and release impact."
+          ],
+          "required_evidence_count": 4,
+          "required_human_field_count": 10,
+          "required_human_fields": [
+            "reviewer",
+            "review_timestamp",
+            "participant_profile_redacted",
+            "task_script_ref",
+            "fixture_workspace_ref",
+            "timed_task_notes",
+            "screenshots_or_recording_ref",
+            "scoring_rubric",
+            "acceptance_decision",
+            "issues_or_exceptions"
+          ],
+          "scenario_id": "CS-CH-H06",
+          "schema_version": "cs.connector_human_gate_remaining_evidence_summary.v1",
+          "stop_or_reject_when": "Operators cannot explain source scope, evidence basis, risk labels, or action consequences without assistance.",
+          "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H06 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "required_evidence": [
+          "Task script and fixture workspace used for the study.",
+          "Timed task notes and recording or screenshots.",
+          "Scoring rubric for comprehension, trust, completion, and risk.",
+          "Acceptance decision with issue list and release impact."
+        ],
+        "required_evidence_count": 4,
+        "required_human_field_count": 10,
+        "required_human_fields": [
+          "reviewer",
+          "review_timestamp",
+          "participant_profile_redacted",
+          "task_script_ref",
+          "fixture_workspace_ref",
+          "timed_task_notes",
+          "screenshots_or_recording_ref",
+          "scoring_rubric",
+          "acceptance_decision",
+          "issues_or_exceptions"
+        ],
+        "review_order": 7,
+        "reviewer_checklist_dependency_human_gate_ref_count": 6,
+        "reviewer_checklist_evidence_packet_manifest_item_count": 4,
+        "reviewer_checklist_evidence_packet_workflow_claim_boundary": "h06_usability_trust_packet_workflow_is_operator_handoff_not_human_acceptance",
+        "reviewer_checklist_evidence_packet_workflow_command_count": 6,
+        "reviewer_checklist_pass_claim_allowed": false,
+        "reviewer_checklist_product_claim_allowed": false,
+        "reviewer_checklist_record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H06 --json --record-template-output <reviewer-record-template.json>",
+        "reviewer_checklist_required_field_item_count": 10,
+        "reviewer_checklist_reviewer_record_validation_required": true,
+        "reviewer_checklist_schema_version": "cs.connector_human_gate_reviewer_checklist.v1",
+        "reviewer_checklist_senior_review_perspective_count": 6,
+        "reviewer_checklist_status": "operator_preparation_only",
+        "reviewer_checklist_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H06 --record-file <filled-json> --json --output <redacted-validation-envelope.json>",
+        "reviewer_commands": {
+          "package": "cornerstone connector human-gate package --scenario CS-CH-H06 --json",
+          "record_template_output": "cornerstone connector human-gate package --scenario CS-CH-H06 --json --record-template-output <reviewer-record-template.json>",
+          "validate_record": "cornerstone connector human-gate validate-record --scenario CS-CH-H06 --record-file <json> --json",
+          "validate_record_output": "cornerstone connector human-gate validate-record --scenario CS-CH-H06 --record-file <json> --json --output <redacted-validation-envelope.json>"
+        },
+        "scenario_delivery_unit_plan_ready": true,
+        "scenario_id": "CS-CH-H06",
+        "senior_review_perspective_count": 6,
+        "source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",
+        "source_requirement_count": 3,
+        "source_requirement_ids": [
+          "IR-01",
+          "IR-14",
+          "IR-16"
+        ],
+        "source_requirement_status": "human_external_pending",
+        "status": "HUMAN_REQUIRED",
+        "stop_or_reject_when": "Operators cannot explain source scope, evidence basis, risk labels, or action consequences without assistance.",
+        "structurally_valid_record_validation_present": false
+      }
+    ],
+    "schema_version": "cs.connector_human_gate_validation_handoff.v1",
+    "scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    },
+    "source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",
+    "source_requirement_human_pending_count": 11,
+    "source_requirement_human_pending_ids": [
+      "ER-05",
+      "ER-06",
+      "IR-01",
+      "IR-04",
+      "IR-07",
+      "IR-11",
+      "IR-13",
+      "IR-14",
+      "IR-16",
+      "IR-17",
+      "IR-18"
+    ],
+    "status": "human_validation_handoff_ready",
+    "structurally_valid_record_validation_count": 0,
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "errors": [],
+  "evidence_refs": [
+    "connector_human_gate_validation_handoff:cshandoff_b385618f73dc2e1e",
+    "connector_human_gate_readiness_report:cshuman_report_d9e1b55f8615d82c"
+  ],
+  "final_verdict": "HUMAN_REQUIRED",
+  "ids": {
+    "connector_human_gate_readiness_report_id": "cshuman_report_d9e1b55f8615d82c",
+    "connector_human_gate_validation_handoff_id": "cshandoff_b385618f73dc2e1e",
+    "git_commit": "7415792"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/connectorhub-human-gate-validation-handoff-2026-06-24.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "schema_version": "cs.cli.v0",
+  "status": "success",
+  "summary": {
+    "approvals_collected_by_handoff": 0,
+    "blocked_scenario_count": 6,
+    "completed_dependency_unlock_record_validation_count": 0,
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "dependency_unlock_allowed_count": 0,
+    "dependency_unlock_denied_count": 0,
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "handoff_id": "cshandoff_b385618f73dc2e1e",
+    "human_required_count": 7,
+    "human_rows_marked_pass_by_handoff": 0,
+    "next_allowed_redaction_statuses": [
+      "redacted",
+      "public_safe",
+      "no_sensitive_material"
+    ],
+    "next_approval_collected": false,
+    "next_blocked_by_missing_dependency_unlock_validations": [],
+    "next_blocked_dependency_details": [],
+    "next_dependency_ready": true,
+    "next_dependency_status": "not_applicable",
+    "next_dependency_unlock_allowed_by_evidence_packet_workflow": false,
+    "next_dependency_unlock_record_validation_present": false,
+    "next_depends_on_human_gates": [],
+    "next_evidence_packet_workflow_acceptance_sufficient": false,
+    "next_evidence_packet_workflow_claim_boundary": "h04_evidence_packet_workflow_is_operator_handoff_not_human_acceptance",
+    "next_evidence_packet_workflow_command_count": 6,
+    "next_evidence_packet_workflow_commands": [
+      "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H04 --json",
+      "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H04 --json",
+      "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --write",
+      "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json",
+      "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --record-output <reviewer-record-draft.json>",
+      "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+    ],
+    "next_evidence_packet_workflow_pass_claim_allowed": false,
+    "next_evidence_packet_workflow_product_claim_allowed": false,
+    "next_evidence_packet_workflow_review_input_only": true,
+    "next_evidence_packet_workflow_schema_version": "cs.connector_human_gate_h04_evidence_packet_workflow.v1",
+    "next_evidence_packet_workflow_status": "operator_preparation_only",
+    "next_gate_category": "production_like_security",
+    "next_human_acceptance_collected_by_evidence_packet_workflow": false,
+    "next_latest_record_validation_dependency_unlock_allowed": false,
+    "next_latest_record_validation_issue_summary_present": false,
+    "next_latest_record_validation_ref": null,
+    "next_local_baseline_preflight_bundle_acceptance_sufficient": false,
+    "next_local_baseline_preflight_bundle_claim_boundary": "h04_local_baseline_preflight_bundle_is_review_input_not_human_acceptance",
+    "next_local_baseline_preflight_bundle_pass_claim_allowed": false,
+    "next_local_baseline_preflight_bundle_product_claim_allowed": false,
+    "next_local_baseline_preflight_bundle_ready_report_count": 5,
+    "next_local_baseline_preflight_bundle_review_input_only": true,
+    "next_owner": "Human",
+    "next_packet_file_contents_persisted_by_evidence_packet_workflow": false,
+    "next_pass_claim_allowed": false,
+    "next_product_claim_allowed": false,
+    "next_raw_packet_file_contents_recorded_by_evidence_packet_workflow": false,
+    "next_recommended_preflight_command_count": 3,
+    "next_recommended_preflight_command_plan": [
+      {
+        "acceptance_sufficient": false,
+        "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+        "command": "cornerstone security vs2-local-proof --json",
+        "expected_report_count": 3,
+        "expected_report_paths": [
+          "reports/security/vs2-local-security-proof.json",
+          "reports/network/vs2-egress-proof.json",
+          "reports/security/vs2-local-range.json"
+        ],
+        "operator_phase": "refresh_local_vs2_baseline_inputs",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "purpose": "Refresh the current local VS2 proof inputs before H04 review without treating local proof as production-like acceptance.",
+        "review_input_only": true,
+        "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+        "step_order": 1
+      },
+      {
+        "acceptance_sufficient": false,
+        "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+        "command": "cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json",
+        "expected_report_count": 2,
+        "expected_report_paths": [
+          "reports/security/vs2-local-security-proof.json",
+          "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+        ],
+        "operator_phase": "refresh_vs2_scenario_report",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "purpose": "Refresh the local VS2 scenario report that H04 reviewers compare against the production-like environment transcript.",
+        "review_input_only": true,
+        "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+        "step_order": 2
+      },
+      {
+        "acceptance_sufficient": false,
+        "claim_boundary": "h04_local_baseline_preflight_is_review_input_not_human_acceptance",
+        "command": "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json",
+        "expected_report_count": 1,
+        "expected_report_paths": [
+          "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json"
+        ],
+        "operator_phase": "refresh_connectorhub_dependency_report",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "purpose": "Refresh the ConnectorHub CS-CH-036 dependency report that remains local fixture evidence until H04/H07 human proof exists.",
+        "review_input_only": true,
+        "schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+        "step_order": 3
+      }
+    ],
+    "next_recommended_preflight_command_plan_count": 3,
+    "next_recommended_preflight_command_plan_schema_version": "cs.connector_human_gate_local_baseline_preflight_command_plan.v1",
+    "next_recommended_preflight_commands": [
+      "cornerstone security vs2-local-proof --json",
+      "cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json",
+      "cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json"
+    ],
+    "next_record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+    "next_record_validation_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json",
+    "next_record_validation_count": 0,
+    "next_record_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>",
+    "next_record_validation_status": "not_submitted",
+    "next_redaction_guidance_dependency_human_gate_count": 0,
+    "next_redaction_guidance_raw_evidence_values_allowed": false,
+    "next_redaction_guidance_raw_provider_payloads_allowed": false,
+    "next_redaction_guidance_raw_record_body_persisted_by_validator": false,
+    "next_redaction_guidance_raw_record_path_persisted_by_validator": false,
+    "next_redaction_guidance_raw_secret_values_allowed": false,
+    "next_redaction_guidance_required_evidence_count": 4,
+    "next_redaction_guidance_required_field_count": 10,
+    "next_redaction_guidance_schema_version": "cs.connector_human_gate_redaction_guidance.v1",
+    "next_redaction_guidance_sensitive_marker_fingerprints_only": true,
+    "next_redaction_guidance_sensitive_marker_policy_schema_version": "cs.connector_sensitive_marker_policy.v1",
+    "next_redaction_guidance_status": "operator_guidance_only",
+    "next_release_impact": "Blocks production connected-source and security readiness. Local fixture and current local VS2 proofs remain separate.",
+    "next_remaining_human_evidence_claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+    "next_remaining_human_evidence_count": 4,
+    "next_remaining_human_evidence_schema_version": "cs.connector_human_gate_remaining_evidence_summary.v1",
+    "next_remaining_human_evidence_summary": {
+      "claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+      "dependency_unlock_allowed_by_evidence_packet_workflow": false,
+      "evidence_packet_workflow": {
+        "acceptance_sufficient": false,
+        "claim_boundary": "h04_evidence_packet_workflow_is_operator_handoff_not_human_acceptance",
+        "command_count": 6,
+        "command_sequence": [
+          {
+            "command": "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H04 --json",
+            "output_role": "required evidence manifest and redaction contract",
+            "owner": "operator",
+            "phase": "inspect_evidence_packet_contract",
+            "step_order": 1
+          },
+          {
+            "command": "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H04 --json",
+            "output_role": "required acceptance packet file list and content expectations",
+            "owner": "operator",
+            "phase": "inspect_evidence_packet_file_contract",
+            "step_order": 2
+          },
+          {
+            "command": "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --write",
+            "output_role": "blank local packet templates without overwriting existing evidence",
+            "owner": "operator",
+            "phase": "scaffold_packet_templates",
+            "step_order": 3
+          },
+          {
+            "command": "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json",
+            "output_role": "hash-only packet validation envelope",
+            "owner": "operator",
+            "phase": "validate_packet_hashes",
+            "step_order": 4
+          },
+          {
+            "command": "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --record-output <reviewer-record-draft.json>",
+            "output_role": "hash-only reviewer record draft; human decision fields remain human-owned",
+            "owner": "operator",
+            "phase": "draft_record_from_packet_hashes",
+            "step_order": 5
+          },
+          {
+            "command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>",
+            "output_role": "redacted structural validation envelope for the completed reviewer record",
+            "owner": "operator",
+            "phase": "validate_completed_reviewer_record",
+            "step_order": 6
+          }
+        ],
+        "commands": [
+          "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H04 --json",
+          "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H04 --json",
+          "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --write",
+          "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json",
+          "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --record-output <reviewer-record-draft.json>",
+          "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+        ],
+        "dependency_unlock_allowed_by_workflow": false,
+        "human_acceptance_collected_by_workflow": false,
+        "packet_dir_placeholder": "<h04-acceptance-packet-dir>",
+        "packet_file_contents_persisted_by_workflow": false,
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "raw_packet_file_contents_recorded_by_workflow": false,
+        "record_output_placeholder": "<reviewer-record-draft.json>",
+        "review_input_only": true,
+        "scenario_id": "CS-CH-H04",
+        "schema_version": "cs.connector_human_gate_h04_evidence_packet_workflow.v1",
+        "status": "operator_preparation_only",
+        "validation_output_placeholder": "<redacted-validation-envelope.json>"
+      },
+      "evidence_packet_workflow_claim_boundary": "h04_evidence_packet_workflow_is_operator_handoff_not_human_acceptance",
+      "evidence_packet_workflow_command_count": 6,
+      "evidence_packet_workflow_commands": [
+        "cornerstone connector human-gate evidence-packet-contract --scenario CS-CH-H04 --json",
+        "cornerstone connector human-gate evidence-packet-file-contract --scenario CS-CH-H04 --json",
+        "cornerstone connector human-gate evidence-packet-scaffold --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --write",
+        "cornerstone connector human-gate evidence-packet-validate --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json",
+        "cornerstone connector human-gate evidence-packet-record-draft --scenario CS-CH-H04 --packet-dir <h04-acceptance-packet-dir> --json --record-output <reviewer-record-draft.json>",
+        "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <filled-reviewer-record.json> --json --output <redacted-validation-envelope.json>"
+      ],
+      "human_acceptance_collected_by_evidence_packet_workflow": false,
+      "packet_file_contents_persisted_by_evidence_packet_workflow": false,
+      "raw_packet_file_contents_recorded_by_evidence_packet_workflow": false,
+      "record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+      "release_impact": "Blocks production connected-source and security readiness. Local fixture and current local VS2 proofs remain separate.",
+      "required_evidence": [
+        "Production-like topology description and trusted RequestContext proof.",
+        "Scenario-specific PostgreSQL/RLS and OPA transcripts.",
+        "Network default-deny and governed-egress transcripts.",
+        "Backup/restore, evidence manifest, and audit integrity reports."
+      ],
+      "required_evidence_count": 4,
+      "required_human_field_count": 10,
+      "required_human_fields": [
+        "reviewer",
+        "review_timestamp",
+        "environment_topology_ref",
+        "request_context_proof",
+        "db_policy_transcripts",
+        "network_egress_transcripts",
+        "backup_restore_evidence",
+        "audit_integrity_report",
+        "evidence_manifest_ref",
+        "findings_or_exceptions"
+      ],
+      "scenario_id": "CS-CH-H04",
+      "schema_version": "cs.connector_human_gate_remaining_evidence_summary.v1",
+      "stop_or_reject_when": "Any cross-namespace read, unexpected egress, missing audit ref, unredacted secret, or unverifiable restore appears.",
+      "validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>"
+    },
+    "next_remaining_human_field_count": 10,
+    "next_required_evidence": [
+      "Production-like topology description and trusted RequestContext proof.",
+      "Scenario-specific PostgreSQL/RLS and OPA transcripts.",
+      "Network default-deny and governed-egress transcripts.",
+      "Backup/restore, evidence manifest, and audit integrity reports."
+    ],
+    "next_required_human_delta": [
+      "Production-like topology identifier and trusted RequestContext transcript.",
+      "Scenario-specific PostgreSQL/RLS and OPA transcripts from the reviewed environment.",
+      "Network default-deny and governed-egress transcripts from the reviewed topology.",
+      "Backup/restore evidence and audit-integrity report from the reviewed environment.",
+      "Dated ACCEPT or REJECT decision with redacted evidence packet manifest."
+    ],
+    "next_required_human_delta_count": 5,
+    "next_required_human_fields": [
+      "reviewer",
+      "review_timestamp",
+      "environment_topology_ref",
+      "request_context_proof",
+      "db_policy_transcripts",
+      "network_egress_transcripts",
+      "backup_restore_evidence",
+      "audit_integrity_report",
+      "evidence_manifest_ref",
+      "findings_or_exceptions"
+    ],
+    "next_review_order": 1,
+    "next_reviewer_checklist_dependency_human_gate_ref_count": 0,
+    "next_reviewer_checklist_evidence_packet_manifest_item_count": 4,
+    "next_reviewer_checklist_evidence_packet_workflow_claim_boundary": "h04_evidence_packet_workflow_is_operator_handoff_not_human_acceptance",
+    "next_reviewer_checklist_evidence_packet_workflow_command_count": 6,
+    "next_reviewer_checklist_pass_claim_allowed": false,
+    "next_reviewer_checklist_product_claim_allowed": false,
+    "next_reviewer_checklist_record_template_output_command": "cornerstone connector human-gate package --scenario CS-CH-H04 --json --record-template-output <reviewer-record-template.json>",
+    "next_reviewer_checklist_required_field_item_count": 10,
+    "next_reviewer_checklist_reviewer_record_validation_required": true,
+    "next_reviewer_checklist_schema_version": "cs.connector_human_gate_reviewer_checklist.v1",
+    "next_reviewer_checklist_senior_review_perspective_count": 6,
+    "next_reviewer_checklist_status": "operator_preparation_only",
+    "next_reviewer_checklist_validation_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <filled-json> --json --output <redacted-validation-envelope.json>",
+    "next_scenario_delivery_unit_plan_ready": true,
+    "next_scenario_id": "CS-CH-H04",
+    "next_senior_review_perspective_count": 6,
+    "next_source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",
+    "next_source_requirement_count": 2,
+    "next_source_requirement_ids": [
+      "IR-04",
+      "IR-18"
+    ],
+    "next_source_requirement_status": "human_external_pending",
+    "next_status": "HUMAN_REQUIRED",
+    "next_stop_or_reject_when": "Any cross-namespace read, unexpected egress, missing audit ref, unredacted secret, or unverifiable restore appears.",
+    "next_structurally_valid_record_validation_present": false,
+    "next_validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>",
+    "operator_rule": "Use the next_scenario_id row first, fill only redacted/public-safe reviewer records, run validate-record with --output, and treat validation refs as dependency-unlock inputs only when they are structurally valid ACCEPT records. This handoff cannot collect approval or promote HUMAN_REQUIRED rows.",
+    "pass_claims_allowed_by_handoff": 0,
+    "product_claims_allowed_by_handoff": 0,
+    "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "readiness_report_id": "cshuman_report_d9e1b55f8615d82c",
+    "readiness_report_ref": "connector_human_gate_readiness_report:cshuman_report_d9e1b55f8615d82c",
+    "ready_scenario_count": 1,
+    "remaining_human_evidence_claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
+    "remaining_human_evidence_summary_count": 7,
+    "remaining_human_evidence_total": 29,
+    "remaining_human_field_total": 72,
+    "scenario_count": 7,
+    "source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",
+    "source_requirement_human_pending_count": 11,
+    "source_requirement_human_pending_ids": [
+      "ER-05",
+      "ER-06",
+      "IR-01",
+      "IR-04",
+      "IR-07",
+      "IR-11",
+      "IR-13",
+      "IR-14",
+      "IR-16",
+      "IR-17",
+      "IR-18"
+    ],
+    "structurally_valid_record_validation_count": 0,
+    "validation_count": 0,
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

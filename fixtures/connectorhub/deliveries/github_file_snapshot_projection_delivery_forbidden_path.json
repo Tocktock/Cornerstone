@@ -1,0 +1,50 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_alpha_file_src_credentials",
+  "projection_id": "cproj_github_file_src_credentials",
+  "contract_id": "ccon_project_alpha_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-alpha:file:src/credentials.md:42aa109e",
+  "common_capability": "source_control.file.read",
+  "projection_type": "source_control.file_snapshot.v1",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha:file:src/credentials.md:42aa109e",
+    "title": "src/credentials.md at 42aa109e",
+    "path": "src/credentials.md",
+    "classification": "metadata_and_markdown_excerpt",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_alpha_file_src_credentials",
+    "kind": "connectorhub_projection_evidence",
+    "provider_event_id": "github:repo:owner/project-alpha:file:src/credentials.md:42aa109e",
+    "permitted_fields": [
+      "path",
+      "ref",
+      "content_hash",
+      "size_bytes",
+      "mime_type",
+      "markdown_excerpt",
+      "source_url_hash"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "path": "src/credentials.md",
+    "ref": "42aa109e",
+    "content_hash": "sha256:1f49c04cdb2b66d8ca1cab821625a44fc695626c34983c48ec60ecef567037d1",
+    "size_bytes": 944,
+    "mime_type": "text/markdown",
+    "markdown_excerpt": "CS_CH_018_FORBIDDEN_PATH_MUST_NOT_IMPORT",
+    "source_url_hash": "sha256:0c6b2a6a405e20ab1bca09d70b44e2e6767a6f1c4f99e6485ce56b5837e6ee9a",
+    "source_revision": "blob:src/credentials.md:42aa109e",
+    "updated_at": "2026-06-23T00:34:00Z"
+  }
+}

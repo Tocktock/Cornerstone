@@ -1,0 +1,50 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_alpha_file_docs_large",
+  "projection_id": "cproj_github_file_docs_large",
+  "contract_id": "ccon_project_alpha_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-alpha:file:docs/huge-design.md:7221e4cf",
+  "common_capability": "source_control.file.read",
+  "projection_type": "source_control.file_snapshot.v1",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha:file:docs/huge-design.md:7221e4cf",
+    "title": "docs/huge-design.md at 7221e4cf",
+    "path": "docs/huge-design.md",
+    "classification": "metadata_and_markdown_excerpt",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_alpha_file_docs_large",
+    "kind": "connectorhub_projection_evidence",
+    "provider_event_id": "github:repo:owner/project-alpha:file:docs/huge-design.md:7221e4cf",
+    "permitted_fields": [
+      "path",
+      "ref",
+      "content_hash",
+      "size_bytes",
+      "mime_type",
+      "markdown_excerpt",
+      "source_url_hash"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "path": "docs/huge-design.md",
+    "ref": "7221e4cf",
+    "content_hash": "sha256:f4482db689049459a333db16c2bb87991222f4c0e94293b9dd78b56b31b0b7f5",
+    "size_bytes": 300001,
+    "mime_type": "text/markdown",
+    "markdown_excerpt": "Only metadata may be used because the declared repository file is above the local Source Policy byte limit.",
+    "source_url_hash": "sha256:e487bcd05614c40c633a31df4cda3f74e473407567571a76336a02ad5ef350ec",
+    "source_revision": "blob:docs/huge-design.md:7221e4cf",
+    "updated_at": "2026-06-23T00:33:00Z"
+  }
+}

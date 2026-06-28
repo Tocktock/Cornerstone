@@ -1,0 +1,53 @@
+{
+  "accept_or_reject_note": "",
+  "active_tab_capture_ref": "",
+  "allowlist_auto_capture_ref": "",
+  "audit_refs": [],
+  "browser_profile_redacted": "",
+  "decision": "",
+  "dependency_human_gate_refs": {
+    "CS-CH-H02": ""
+  },
+  "evidence_packet_manifest": [
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Recording or screenshots of permission UX and capture controls.",
+      "required_evidence_index": 1
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Timeline covering active-tab capture, allowlist auto-capture, sensitive-page handling, pause, and revoke.",
+      "required_evidence_index": 2
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Policy and audit refs for allowed, blocked, and degraded browser capture decisions.",
+      "required_evidence_index": 3
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Human privacy acceptance or rejection note.",
+      "required_evidence_index": 4
+    }
+  ],
+  "extension_version": "",
+  "issues_or_exceptions": "",
+  "pause_revoke_ref": "",
+  "permission_pages_or_recording_ref": "",
+  "review_timestamp": "",
+  "reviewer": "",
+  "scenario_id": "CS-CH-H03",
+  "senior_review_perspective_findings": {
+    "data_contract": "",
+    "domain_architecture": "",
+    "product_value": "",
+    "reliability_observability": "",
+    "security_privacy": "",
+    "testability_migration": ""
+  },
+  "sensitive_block_ref": ""
+}

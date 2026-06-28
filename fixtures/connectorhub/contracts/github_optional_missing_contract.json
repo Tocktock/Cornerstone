@@ -1,0 +1,47 @@
+{
+  "schema_version": "cornerstone.connector_contract.v1",
+  "contract_id": "ccon_project_alpha_optional_missing",
+  "contract_version": "1.0.0",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "purpose": "Prove that unavailable optional source-control capabilities degrade safely without blocking setup.",
+  "needs": [
+    {
+      "common_capability": "source_control.repository.read",
+      "required": true,
+      "accepted_projection_types": [
+        "source_control.repository.v1"
+      ]
+    },
+    {
+      "common_capability": "source_control.pull_request.read",
+      "required": false,
+      "accepted_projection_types": [
+        "source_control.pull_request.v1"
+      ]
+    }
+  ],
+  "source_policy_request": {
+    "selected_resources": [
+      "github:repo:owner/project-alpha"
+    ],
+    "content_mode": "metadata_and_markdown_excerpt",
+    "max_content_bytes": 200000,
+    "allowed_paths": [
+      "docs/**",
+      "README.md"
+    ],
+    "raw_access": "denied",
+    "retention_days": 90
+  },
+  "actions": [],
+  "delivery": {
+    "ack_required": true,
+    "retry_policy": "bounded_exponential",
+    "quarantine_after_attempts": 3
+  }
+}

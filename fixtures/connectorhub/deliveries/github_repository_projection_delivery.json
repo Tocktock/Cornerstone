@@ -1,0 +1,51 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_alpha_repository",
+  "projection_id": "cproj_github_repository_project_alpha",
+  "contract_id": "ccon_project_alpha_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-alpha:repository:updated:2026-06-23T00:00:00Z",
+  "common_capability": "source_control.repository.read",
+  "projection_type": "source_control.repository.v1",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha",
+    "title": "owner/project-alpha",
+    "classification": "metadata_and_markdown_excerpt",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_alpha_repository",
+    "kind": "connectorhub_projection_evidence",
+    "provider_event_id": "github:repo:owner/project-alpha:repository:updated:2026-06-23T00:00:00Z",
+    "permitted_fields": [
+      "repository_id",
+      "name",
+      "full_name",
+      "default_branch",
+      "visibility",
+      "description_excerpt",
+      "selected_refs"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "repository_id": "repo_project_alpha",
+    "name": "project-alpha",
+    "full_name": "owner/project-alpha",
+    "default_branch": "main",
+    "visibility": "private",
+    "description_excerpt": "Selected repository used to validate Connector Hub read-only evidence ingestion.",
+    "selected_refs": [
+      "refs/heads/main"
+    ],
+    "source_revision": "repo:project-alpha:main:2026-06-23T00:00:00Z",
+    "updated_at": "2026-06-23T00:00:00Z"
+  }
+}

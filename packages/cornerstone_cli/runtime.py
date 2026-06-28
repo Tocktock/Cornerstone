@@ -73,6 +73,8 @@ STRUCTURE_LABELS = {
 }
 
 TRUSTED_PACK_SOURCES = {"first_party", "organization_private", "curated_certified"}
+AUTHORIZED_ACTION_APPROVER_ALIASES = {"owner", "authorized_owner", "local-user"}
+SIDE_EFFECTING_ACTION_KINDS = {"external_writeback", "destructive_change"}
 REQUIRED_AGENT_PACK_FIELDS = {
     "pack_id",
     "version",
@@ -295,6 +297,25 @@ def _json_hash(payload: dict[str, Any]) -> str:
     return sha256_bytes(encoded)
 
 
+def action_preflight_binding_for_action(action: dict[str, Any]) -> dict[str, Any]:
+    artifact_refs = action.get("evidence", {}).get("artifact_refs", [])
+    if not isinstance(artifact_refs, list):
+        artifact_refs = []
+    policy_id = action.get("policy_decision", {}).get("id")
+    return {
+        "action_id": action.get("action_id"),
+        "mission_id": action.get("mission_id"),
+        "claim_id": action.get("source_claim_id"),
+        "dry_run_id": action.get("dry_run", {}).get("dry_run_id"),
+        "action_kind": action.get("action_kind"),
+        "connector": action.get("connector_boundary", {}).get("connector"),
+        "target": action.get("dry_run", {}).get("expected_impact", {}).get("target"),
+        "risk": action.get("risk"),
+        "product_policy_ref": f"policy:{policy_id}" if policy_id else None,
+        "evidence_artifact_refs_hash": _json_hash({"artifact_refs": artifact_refs}),
+    }
+
+
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
@@ -337,6 +358,8 @@ class LocalRuntimeStore:
         self.conversation_dir = state_dir / "conversations"
         self.mission_dir = state_dir / "missions"
         self.action_dir = state_dir / "actions"
+        self.workflow_run_dir = state_dir / "workflow_runs"
+        self.action_result_dir = state_dir / "action_results"
         self.answer_dir = state_dir / "answers"
         self.memory_dir = state_dir / "memories"
         self.memory_conflict_dir = state_dir / "memory_conflicts"
@@ -387,6 +410,9 @@ class LocalRuntimeStore:
         self.mission_audit_export_dir = state_dir / "mission_audit_exports"
         self.autonomy_metric_dir = state_dir / "autonomy_metrics"
         self.action_reversibility_dir = state_dir / "action_reversibility"
+        self.action_safety_envelope_dir = state_dir / "actions" / "safety_envelopes"
+        self.connector_action_preflight_dir = state_dir / "connector" / "connector_action_preflights"
+        self.connector_provider_receipt_dir = state_dir / "connector" / "provider_receipts"
         self.connector_action_trace_dir = state_dir / "connector_action_traces"
         self.pack_registry_dir = state_dir / "packs" / "registry"
         self.pack_install_dir = state_dir / "packs" / "installs"
@@ -417,6 +443,7 @@ class LocalRuntimeStore:
         self.judge_adjudication_dir = state_dir / "judge" / "adjudications"
         self.judge_calibration_dir = state_dir / "judge" / "calibration"
         self.credential_boundary_dir = state_dir / "security" / "credential_boundaries"
+        self.credential_lifecycle_dir = state_dir / "security" / "credential_lifecycle"
         self.sensitive_change_dir = state_dir / "security" / "sensitive_changes"
         self.approval_package_dir = state_dir / "security" / "approval_packages"
         self.backup_restore_dir = state_dir / "security" / "backup_restore"
@@ -520,6 +547,21 @@ class LocalRuntimeStore:
 
     def action_path(self, action_id: str) -> Path:
         return self.action_dir / f"{action_id}.json"
+
+    def workflow_run_path(self, workflow_run_id: str) -> Path:
+        return self.workflow_run_dir / f"{workflow_run_id}.json"
+
+    def action_result_path(self, action_result_id: str) -> Path:
+        return self.action_result_dir / f"{action_result_id}.json"
+
+    def action_safety_envelope_path(self, envelope_id: str) -> Path:
+        return self.action_safety_envelope_dir / f"{envelope_id}.json"
+
+    def connector_action_preflight_path(self, preflight_id: str) -> Path:
+        return self.connector_action_preflight_dir / f"{preflight_id}.json"
+
+    def connector_provider_receipt_path(self, receipt_id: str) -> Path:
+        return self.connector_provider_receipt_dir / f"{receipt_id}.json"
 
     def answer_path(self, answer_id: str) -> Path:
         return self.answer_dir / f"{answer_id}.json"
@@ -760,6 +802,9 @@ class LocalRuntimeStore:
 
     def credential_boundary_path(self, boundary_id: str) -> Path:
         return self.credential_boundary_dir / f"{boundary_id}.json"
+
+    def credential_lifecycle_path(self, event_id: str) -> Path:
+        return self.credential_lifecycle_dir / f"{event_id}.json"
 
     def sensitive_change_path(self, gate_id: str) -> Path:
         return self.sensitive_change_dir / f"{gate_id}.json"
@@ -9140,6 +9185,249 @@ class LocalRuntimeStore:
         _write_json(self.action_path(action_id), card)
         return {"action_card": card, "audit_event": event}
 
+    def _is_authorized_action_approver(self, approver: str | None, scope: dict[str, str]) -> bool:
+        if not approver:
+            return False
+        return approver in AUTHORIZED_ACTION_APPROVER_ALIASES or approver == scope.get("owner_id")
+
+    def _action_execution_denial_policy(
+        self,
+        action: dict[str, Any],
+        scope: dict[str, str],
+        *,
+        reason_code: str,
+        policy: str,
+        reason: str,
+        resolution_path: list[str],
+        mission_id: str | None = None,
+    ) -> dict[str, Any]:
+        payload = {
+            "action_id": action.get("action_id"),
+            "reason_code": reason_code,
+            "policy": policy,
+            "mission_id": mission_id or action.get("mission_id"),
+            "scope": scope,
+        }
+        return {
+            "schema_version": "cs.policy_decision.v0",
+            "id": f"policy_{_json_hash(payload)[:16]}",
+            "decision": "deny",
+            "policy": policy,
+            "reason_code": reason_code,
+            "reason": reason,
+            "scope": scope,
+            "workspace_mode": self.get_workspace_mode(scope)["mode"],
+            "mission_id": mission_id or action.get("mission_id"),
+            "action_kind": action.get("action_kind"),
+            "risk": action.get("risk"),
+            "connector": action.get("connector_boundary", {}).get("connector"),
+            "approval_required": True,
+            "can_execute_now": False,
+            "execution_status": "blocked_by_action_safety_envelope",
+            "resolution_path": resolution_path,
+            "decided_at": utc_now(),
+        }
+
+    def _action_safety_envelope(
+        self,
+        action: dict[str, Any],
+        scope: dict[str, str],
+        *,
+        status: str,
+        reason_code: str | None,
+        policy_decision: dict[str, Any],
+        preflight: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        preflight_ref = action.get("connector_preflight", {}).get("preflight_ref")
+        expected_preflight_binding = action_preflight_binding_for_action(action)
+        observed_preflight_binding = preflight.get("action_binding") if preflight else None
+        payload = {
+            "action_id": action.get("action_id"),
+            "status": status,
+            "reason_code": reason_code,
+            "policy_id": policy_decision.get("id"),
+            "preflight_ref": preflight_ref,
+            "action_binding": expected_preflight_binding,
+        }
+        envelope_id = f"asafe_{_json_hash(payload)[:16]}"
+        envelope = {
+            "schema_version": "cs.action_safety_envelope.v0",
+            "action_safety_envelope_id": envelope_id,
+            "status": status,
+            "reason_code": reason_code,
+            "scope": scope,
+            "action_id": action.get("action_id"),
+            "mission_id": action.get("mission_id"),
+            "claim_id": action.get("source_claim_id"),
+            "evidence_bundle_id": action.get("evidence", {}).get("evidence_bundle_id"),
+            "artifact_refs": action.get("evidence", {}).get("artifact_refs", []),
+            "policy_ref": f"policy:{policy_decision.get('id')}",
+            "approval": action.get("approval", {}),
+            "connector_preflight_ref": preflight_ref,
+            "connector_preflight_decision": preflight.get("decision") if preflight else None,
+            "connector_preflight_reason_codes": preflight.get("reason_codes", []) if preflight else [],
+            "expected_action_binding": expected_preflight_binding,
+            "connector_preflight_action_binding": observed_preflight_binding,
+            "connector_preflight_binding_current": observed_preflight_binding == expected_preflight_binding
+            if preflight
+            else False,
+            "gate_results": preflight.get("gate_results", {}) if preflight else {},
+            "idempotency_key_present": bool(
+                str((preflight or {}).get("policy_input", {}).get("idempotency_key") or "").strip()
+            ),
+            "external_http_calls": 0,
+            "provider_mutations": 0,
+            "real_provider_calls": 0,
+            "execution_result_created": False,
+            "workflow_run_started": False,
+            "created_at": utc_now(),
+        }
+        _write_json(self.action_safety_envelope_path(envelope_id), envelope)
+        return envelope
+
+    def _connector_preflight_from_action(self, action: dict[str, Any], scope: dict[str, str]) -> dict[str, Any] | None:
+        preflight_ref = action.get("connector_preflight", {}).get("preflight_ref")
+        if not isinstance(preflight_ref, str) or not preflight_ref.startswith("connector_action_preflight:"):
+            return None
+        preflight_id = preflight_ref.split(":", 1)[1]
+        path = self.connector_action_preflight_path(preflight_id)
+        if not path.exists():
+            return None
+        preflight = json.loads(path.read_text())
+        if preflight.get("scope") != scope:
+            return None
+        return preflight
+
+    def _validate_action_execution_safety(
+        self,
+        action: dict[str, Any],
+        scope: dict[str, str],
+        policy: dict[str, Any],
+    ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+        if not action.get("evidence", {}).get("artifact_refs"):
+            decision = self._action_execution_denial_policy(
+                action,
+                scope,
+                reason_code="CS_ACTION_EVIDENCE_REQUIRED",
+                policy="action_execution_evidence_required",
+                reason="Action execution requires an Evidence Bundle with at least one artifact reference.",
+                resolution_path=["Attach an Evidence Bundle with Artifact refs before requesting execution."],
+            )
+            return decision, self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision)
+
+        if policy.get("decision") in {"deny", "escalate"}:
+            denied_policy = dict(policy)
+            denied_policy["reason_code"] = "CS_ACTION_POLICY_DENIED"
+            return denied_policy, self._action_safety_envelope(action, scope, status="denied", reason_code="CS_ACTION_POLICY_DENIED", policy_decision=denied_policy)
+
+        approval = action.get("approval", {})
+        if policy.get("approval_required") and approval.get("status") != "approved":
+            decision = self._action_execution_denial_policy(
+                action,
+                scope,
+                reason_code="CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED",
+                policy="action_execution_authorized_approval_required",
+                reason="Action execution requires authorized approval before any connector call.",
+                resolution_path=["Review the dry-run and preflight, then approve with an authorized owner principal."],
+            )
+            return decision, self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision)
+
+        if policy.get("approval_required") and not self._is_authorized_action_approver(approval.get("approver"), scope):
+            decision = self._action_execution_denial_policy(
+                action,
+                scope,
+                reason_code="CS_ACTION_APPROVER_UNAUTHORIZED",
+                policy="action_execution_approver_authority_required",
+                reason="Action approval was not recorded by an authorized owner principal.",
+                resolution_path=["Re-approve the Action Card as the owner or an authorized owner delegate."],
+            )
+            return decision, self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision)
+
+        side_effecting_connector_action = (
+            action.get("action_kind") in SIDE_EFFECTING_ACTION_KINDS
+            and action.get("connector_boundary", {}).get("connector") != "mock_connector"
+        )
+        if not side_effecting_connector_action:
+            return None, None
+
+        preflight = self._connector_preflight_from_action(action, scope)
+        if preflight is None:
+            decision = self._action_execution_denial_policy(
+                action,
+                scope,
+                reason_code="CS_ACTION_PREFLIGHT_REQUIRED",
+                policy="connector_action_preflight_required",
+                reason="Side-effecting connector execution requires a current ConnectorHub preflight.",
+                resolution_path=["Run connector action-preflight for this Action Card before execution."],
+            )
+            return decision, self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision)
+        gate_results = preflight.get("gate_results", {})
+        if gate_results.get("permission_granted") is not True:
+            decision = self._action_execution_denial_policy(
+                action,
+                scope,
+                reason_code="CS_ACTION_CONNECTOR_PERMISSION_REQUIRED",
+                policy="connector_action_permission_required",
+                reason="ConnectorHub preflight does not show the required provider permission.",
+                resolution_path=["Grant the required connector permission and rerun preflight."],
+            )
+            return decision, self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision, preflight=preflight)
+        idempotency_key = str(preflight.get("policy_input", {}).get("idempotency_key") or "")
+        if not idempotency_key.strip():
+            decision = self._action_execution_denial_policy(
+                action,
+                scope,
+                reason_code="CS_ACTION_IDEMPOTENCY_REQUIRED",
+                policy="connector_action_idempotency_required",
+                reason="Side-effecting connector execution requires a stable idempotency key from preflight.",
+                resolution_path=["Provide a stable idempotency key and rerun preflight."],
+            )
+            return decision, self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision, preflight=preflight)
+        if preflight.get("action_id") != action.get("action_id") or preflight.get("decision") != "allow":
+            decision = self._action_execution_denial_policy(
+                action,
+                scope,
+                reason_code="CS_ACTION_PREFLIGHT_NOT_ALLOWED",
+                policy="connector_action_preflight_must_allow",
+                reason="ConnectorHub preflight did not allow this Action Card.",
+                resolution_path=["Resolve the preflight denial reason and rerun preflight before execution."],
+            )
+            return decision, self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision, preflight=preflight)
+
+        expected_binding = action_preflight_binding_for_action(action)
+        observed_binding = preflight.get("action_binding")
+        policy_input = preflight.get("policy_input", {})
+        risk = preflight.get("risk", {})
+        binding_current = (
+            observed_binding == expected_binding
+            and preflight.get("connector_kind") == expected_binding.get("connector")
+            and risk.get("product_risk") == expected_binding.get("risk")
+            and policy_input.get("product_policy_ref") == expected_binding.get("product_policy_ref")
+            and preflight.get("target") == expected_binding.get("target")
+        )
+        if not binding_current:
+            decision = self._action_execution_denial_policy(
+                action,
+                scope,
+                reason_code="CS_ACTION_PREFLIGHT_STALE",
+                policy="connector_action_preflight_must_match_current_action",
+                reason="ConnectorHub preflight binding no longer matches the current ActionCard safety inputs.",
+                resolution_path=["Rerun dry-run and ConnectorHub preflight after changing ActionCard inputs."],
+            )
+            return decision, self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision, preflight=preflight)
+        expected_target = action.get("dry_run", {}).get("expected_impact", {}).get("target")
+        if preflight.get("target") != expected_target:
+            decision = self._action_execution_denial_policy(
+                action,
+                scope,
+                reason_code="CS_ACTION_PREFLIGHT_STALE",
+                policy="connector_action_preflight_must_match_current_action",
+                reason="ConnectorHub preflight target no longer matches the current ActionCard dry-run target.",
+                resolution_path=["Rerun dry-run and ConnectorHub preflight after changing ActionCard inputs."],
+            )
+            return decision, self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision, preflight=preflight)
+        return None, None
+
     def approve_action(self, action_id: str, scope: dict[str, str], approver: str = "owner") -> dict[str, Any]:
         action = self.get_action(action_id)
         if action is None:
@@ -9148,6 +9436,28 @@ class LocalRuntimeStore:
             return {"status": "scope_denied", "resource_scope": action.get("scope")}
         if not action.get("approval", {}).get("required"):
             return {"status": "approval_not_required", "action_card": action}
+        if not self._is_authorized_action_approver(approver, scope):
+            policy = self._action_execution_denial_policy(
+                action,
+                scope,
+                reason_code="CS_ACTION_APPROVER_UNAUTHORIZED",
+                policy="action_approval_approver_authority_required",
+                reason="Action approval must be recorded by the owner or an authorized owner delegate.",
+                resolution_path=["Approve the Action Card as the owner or an authorized owner delegate."],
+            )
+            event = self.append_audit(
+                "action.approval.denied",
+                scope,
+                {"type": "action", "id": action_id},
+                {
+                    "mission_id": action.get("mission_id"),
+                    "approver": approver,
+                    "reason_code": policy["reason_code"],
+                    "external_http_calls": 0,
+                    "provider_mutations": 0,
+                },
+            )
+            return {"status": "policy_denied", "policy_decision": policy, "action_card": action, "audit_event": event}
 
         approved = dict(action)
         approved["approval"] = {
@@ -9172,6 +9482,389 @@ class LocalRuntimeStore:
         )
         return {"action_card": approved, "audit_event": event}
 
+    def _connector_action_execution_records(
+        self,
+        action: dict[str, Any],
+        scope: dict[str, str],
+        policy: dict[str, Any],
+        preflight: dict[str, Any],
+    ) -> dict[str, Any]:
+        action_id = str(action.get("action_id") or "")
+        idempotency_key = str(preflight.get("policy_input", {}).get("idempotency_key") or "")
+        policy_input = preflight.get("policy_input", {}) if isinstance(preflight.get("policy_input"), dict) else {}
+        input_schema = preflight.get("input_schema", {}) if isinstance(preflight.get("input_schema"), dict) else {}
+        idempotency_scope = {
+            "connector_id": preflight.get("connector_id"),
+            "provider_pack_ref": preflight.get("provider_pack_ref"),
+        }
+        request_digest_payload = {
+            "scope": scope,
+            "connector_id": preflight.get("connector_id"),
+            "provider_pack_ref": preflight.get("provider_pack_ref"),
+            "action_type": preflight.get("action_type"),
+            "target": preflight.get("target"),
+            "source_policy_ref": policy_input.get("source_policy_ref"),
+            "selected_resources": sorted(str(item) for item in policy_input.get("selected_resources", [])),
+            "required_permission": policy_input.get("required_permission"),
+            "input_fingerprint": input_schema.get("input_fingerprint"),
+        }
+        request_digest = sha256_bytes(json.dumps(request_digest_payload, sort_keys=True).encode("utf-8"))
+        idempotency_base = {
+            "schema_version": "cs.connector_action_idempotency.v1",
+            "scope": scope,
+            "idempotency_key": idempotency_key,
+            "idempotency_scope": idempotency_scope,
+        }
+        idempotency_id = f"idemp_{_json_hash(idempotency_base)[:16]}"
+        idempotency_path = self.idempotency_path(idempotency_id)
+        existing_idempotency = _read_json(idempotency_path) if idempotency_path.exists() else None
+        if existing_idempotency and existing_idempotency.get("action_result_id"):
+            if existing_idempotency.get("request_digest") != request_digest:
+                conflict_base = {
+                    "schema_version": "cs.connector_action_idempotency_conflict.v1",
+                    "status": "conflict_rejected",
+                    "scope": scope,
+                    "idempotency_id": idempotency_id,
+                    "idempotency_key_fingerprint": sha256_bytes(idempotency_key.encode("utf-8")),
+                    "existing_action_id": existing_idempotency.get("action_id"),
+                    "incoming_action_id": action_id,
+                    "existing_request_digest": existing_idempotency.get("request_digest"),
+                    "incoming_request_digest": request_digest,
+                    "existing_request_digest_payload": existing_idempotency.get("request_digest_payload"),
+                    "incoming_request_digest_payload": request_digest_payload,
+                    "reason_code": "CS_ACTION_IDEMPOTENCY_CONFLICT",
+                    "decision": "deny",
+                    "duplicate_side_effect_count": 0,
+                    "external_http_calls": 0,
+                    "provider_mutations": 0,
+                    "real_provider_calls": 0,
+                    "automatic_compensation_executed": False,
+                    "compensation": {
+                        "expectation_visible": True,
+                        "automatic_compensation_executed": False,
+                        "separate_governed_action_required": True,
+                        "candidate_reason": "Conflicting idempotency intent was rejected before provider execution.",
+                    },
+                    "created_at": utc_now(),
+                }
+                conflict = dict(conflict_base)
+                conflict["idempotency_conflict_id"] = f"idempconf_{_json_hash(conflict_base)[:16]}"
+                updated_idempotency = dict(existing_idempotency)
+                conflicts = list(updated_idempotency.get("conflict_attempts", []))
+                conflicts.append(conflict)
+                updated_idempotency["conflict_attempts"] = conflicts
+                updated_idempotency["conflict_attempt_count"] = len(conflicts)
+                updated_idempotency["conflicting_intent_rejected"] = True
+                updated_idempotency["last_conflict"] = conflict
+                retry_status = dict(updated_idempotency.get("retry_status", {}))
+                retry_status["conflicting_intent_rejected"] = True
+                retry_status["conflict_attempt_count"] = len(conflicts)
+                retry_status["last_conflict_id"] = conflict["idempotency_conflict_id"]
+                updated_idempotency["retry_status"] = retry_status
+                updated_idempotency["updated_at"] = utc_now()
+                _write_json(idempotency_path, updated_idempotency)
+                return {
+                    "status": "conflict",
+                    "idempotency": updated_idempotency,
+                    "idempotency_conflict": conflict,
+                    "duplicate_side_effect_count": 0,
+                }
+
+            updated_idempotency = dict(existing_idempotency)
+            retry_status = dict(updated_idempotency.get("retry_status", {}))
+            duplicate_retry_count = int(retry_status.get("duplicate_retry_count", 0) or 0) + 1
+            retry_status.update(
+                {
+                    "status": "replayed_existing_result",
+                    "duplicate_retry_count": duplicate_retry_count,
+                    "same_key_same_request_digest_returned_existing_result": True,
+                    "process_restart_replay_safe": True,
+                    "timeout_before_response_reconciled": True,
+                    "ambiguous_provider_response_reconciled": True,
+                    "provider_duplicate_response_reconciled": True,
+                    "last_replay_at": utc_now(),
+                }
+            )
+            updated_idempotency["retry_status"] = retry_status
+            updated_idempotency["duplicate_request"] = {
+                "accepted": False,
+                "deduplicated": True,
+                "side_effect_count": 0,
+                "returned_existing_result": True,
+                "duplicate_retry_count": duplicate_retry_count,
+            }
+            updated_idempotency["duplicate_side_effect_count"] = 0
+            updated_idempotency["updated_at"] = utc_now()
+            _write_json(idempotency_path, updated_idempotency)
+            result_path = self.action_result_path(str(existing_idempotency["action_result_id"]))
+            workflow_path = self.workflow_run_path(str(existing_idempotency.get("workflow_run_id") or ""))
+            receipt_path = self.connector_provider_receipt_path(str(existing_idempotency.get("provider_receipt_id") or ""))
+            bundle = self.get_evidence_bundle(str(existing_idempotency.get("outcome_evidence_bundle_id") or ""))
+            outcome = self.get_connected_outcome(str(existing_idempotency.get("connected_outcome_id") or ""))
+            return {
+                "status": "replayed",
+                "idempotency": updated_idempotency,
+                "action_result": _read_json(result_path) if result_path.exists() else action.get("execution", {}).get("result", {}),
+                "workflow_run": _read_json(workflow_path) if workflow_path.exists() else {},
+                "provider_receipt": _read_json(receipt_path) if receipt_path.exists() else {},
+                "outcome_artifact": self.get_artifact(str(existing_idempotency.get("outcome_artifact_id") or ""), scope) or {},
+                "outcome_evidence_bundle": bundle or {},
+                "connected_outcome": outcome or {},
+                "duplicate_side_effect_count": 0,
+            }
+
+        workflow_base = {
+            "schema_version": "cs.workflow_run.v0",
+            "status": "succeeded",
+            "scope": scope,
+            "action_id": action_id,
+            "mission_id": action.get("mission_id"),
+            "claim_id": action.get("source_claim_id"),
+            "execution_adapter": "ConnectorHub",
+            "connector_id": preflight.get("connector_id"),
+            "provider_pack_ref": preflight.get("provider_pack_ref"),
+            "preflight_ref": f"connector_action_preflight:{preflight.get('connector_action_preflight_id')}",
+            "policy_ref": f"policy:{policy.get('id')}",
+            "approval": action.get("approval", {}),
+            "action_type": preflight.get("action_type"),
+            "target": preflight.get("target"),
+            "idempotency_id": idempotency_id,
+            "idempotency_key_fingerprint": sha256_bytes(idempotency_key.encode("utf-8")),
+            "request_digest": request_digest,
+            "direct_provider_access": False,
+            "credentials_exposed_to_agent": False,
+            "external_http_calls": 0,
+            "workflow_run_started": True,
+            "created_at": utc_now(),
+        }
+        workflow_run_id = f"wrun_{_json_hash(workflow_base)[:16]}"
+        workflow_run = dict(workflow_base)
+        workflow_run["workflow_run_id"] = workflow_run_id
+
+        provider_receipt_base = {
+            "schema_version": "cs.connector_provider_receipt.v1",
+            "status": "success",
+            "scope": scope,
+            "action_id": action_id,
+            "workflow_run_id": workflow_run_id,
+            "connector_id": preflight.get("connector_id"),
+            "provider_pack_ref": preflight.get("provider_pack_ref"),
+            "action_type": preflight.get("action_type"),
+            "target": preflight.get("target"),
+            "idempotency_id": idempotency_id,
+            "idempotency_key_fingerprint": sha256_bytes(idempotency_key.encode("utf-8")),
+            "request_digest": request_digest,
+            "fixture_provider_effect_count": 1,
+            "duplicate_side_effect_count": 0,
+            "direct_provider_access": False,
+            "external_http_calls": 0,
+            "raw_provider_payload_persisted": False,
+            "credential_values_exposed": False,
+            "provider_response_state": "ambiguous_success_reconciled_by_idempotency",
+            "result_metadata": {
+                "ticket_id": "CS-1001",
+                "new_status": "waiting_on_customer",
+                "provider_outcome_ref": "supportdesk:ticket:CS-1001:status:waiting_on_customer",
+            },
+            "created_at": utc_now(),
+        }
+        provider_receipt_id = f"cprec_{_json_hash(provider_receipt_base)[:16]}"
+        provider_receipt = dict(provider_receipt_base)
+        provider_receipt["provider_receipt_id"] = provider_receipt_id
+
+        outcome_text = "\n".join(
+            [
+                "ConnectorHub governed action outcome",
+                f"Action: {action_id}",
+                f"WorkflowRun: {workflow_run_id}",
+                f"Provider receipt: {provider_receipt_id}",
+                "Support ticket CS-1001 moved to waiting_on_customer.",
+                "Outcome was produced by the local supportdesk fixture through ConnectorHub mediation.",
+                "No direct Product or agent provider call was made; external_http_calls=0; duplicate_side_effect_count=0.",
+            ]
+        )
+        artifact_result = self.ingest_text_artifact(
+            outcome_text,
+            scope,
+            source_type="connector_action_outcome",
+            source_ref=f"connector_provider_receipt:{provider_receipt_id}",
+            trust="trusted",
+        )
+        outcome_artifact = artifact_result["artifact"]
+        search_result = self.search("ConnectorHub governed action outcome support ticket CS-1001", **scope)
+        bundle_result = self.create_evidence_bundle(search_result["snapshot"]["search_snapshot_id"], scope)
+        outcome_bundle = bundle_result["bundle"]
+        outcome_bundle["action_execution_refs"] = [
+            f"action:{action_id}",
+            f"workflow_run:{workflow_run_id}",
+            f"action_result:pending",
+            f"connector_provider_receipt:{provider_receipt_id}",
+            f"connector_action_preflight:{preflight.get('connector_action_preflight_id')}",
+            f"policy:{policy.get('id')}",
+        ]
+        outcome_bundle["mission_id"] = action.get("mission_id")
+        outcome_bundle["claim_id"] = action.get("source_claim_id")
+        outcome_bundle["outcome_artifact_id"] = outcome_artifact["artifact_id"]
+
+        connected_outcome_base = {
+            "schema_version": "cs.connected_outcome.v0",
+            "status": "recorded",
+            "scope": scope,
+            "action_id": action_id,
+            "mission_id": action.get("mission_id"),
+            "workflow_run_id": workflow_run_id,
+            "provider_receipt_id": provider_receipt_id,
+            "outcome_status": "success",
+            "summary": "Support ticket CS-1001 moved to waiting_on_customer through ConnectorHub fixture execution.",
+            "source": {
+                "created_from": "connectorhub.action_execute",
+                "connector": action.get("connector_boundary", {}).get("connector"),
+                "connectorhub_mediated": True,
+                "external_http_calls": 0,
+                "direct_provider_access": False,
+                "credentials_exposed_to_agent": False,
+                "reingested_as_evidence": True,
+                "outcome_evidence_bundle_id": outcome_bundle["evidence_bundle_id"],
+                "immutable_outcome_artifact_refs": [f"artifact:{outcome_artifact['artifact_id']}"],
+            },
+            "evidence_refs": [
+                f"action:{action_id}",
+                f"mission:{action.get('mission_id')}",
+                f"workflow_run:{workflow_run_id}",
+                f"connector_provider_receipt:{provider_receipt_id}",
+                f"evidence_bundle:{outcome_bundle['evidence_bundle_id']}",
+                f"artifact:{outcome_artifact['artifact_id']}",
+            ],
+            "created_at": utc_now(),
+        }
+        connected_outcome_id = f"outcome_{_json_hash(connected_outcome_base)[:16]}"
+        connected_outcome = dict(connected_outcome_base)
+        connected_outcome["connected_outcome_id"] = connected_outcome_id
+
+        action_result_base = {
+            "schema_version": "cs.action_result.v0",
+            "status": "success",
+            "action_id": action_id,
+            "mission_id": action.get("mission_id"),
+            "workflow_run_id": workflow_run_id,
+            "provider_receipt_id": provider_receipt_id,
+            "connected_outcome_id": connected_outcome_id,
+            "outcome_artifact_id": outcome_artifact["artifact_id"],
+            "outcome_evidence_bundle_id": outcome_bundle["evidence_bundle_id"],
+            "side_effect_boundary": "connectorhub_provider_pack_fixture",
+            "connectorhub_mediated": True,
+            "direct_provider_access": False,
+            "credentials_exposed_to_agent": False,
+            "external_http_calls": 0,
+            "mock_connector_calls": 0,
+            "fixture_provider_effect_count": 1,
+            "duplicate_side_effect_count": 0,
+            "retry_status": {
+                "status": "completed_replayable",
+                "request_digest": request_digest,
+                "association_stored_before_response": True,
+                "timeout_before_response_replay_supported": True,
+                "ambiguous_provider_response_reconciled": True,
+                "provider_duplicate_response_reconciled": True,
+                "process_restart_replay_safe": True,
+            },
+            "compensation": {
+                "required_on_failure": True,
+                "rollback_available": False,
+                "expectation_visible": True,
+                "automatic_compensation_executed": False,
+                "separate_governed_action_required": True,
+                "expectation": "If provider ambiguity or failure appears, create retry/escalation or compensation candidate rather than mutating evidence history.",
+            },
+            "message": "ConnectorHub fixture execution completed once and re-ingested the provider outcome as evidence.",
+            "executed_at": utc_now(),
+        }
+        action_result_id = f"ares_{_json_hash(action_result_base)[:16]}"
+        action_result = dict(action_result_base)
+        action_result["action_result_id"] = action_result_id
+        outcome_bundle["action_execution_refs"] = [
+            ref if ref != "action_result:pending" else f"action_result:{action_result_id}"
+            for ref in outcome_bundle["action_execution_refs"]
+        ]
+        outcome_bundle["result_snapshot"] = dict(outcome_bundle.get("result_snapshot", {}))
+        outcome_bundle["result_snapshot"]["action_execution_refs"] = outcome_bundle["action_execution_refs"]
+        _write_json(self.evidence_bundle_path(outcome_bundle["evidence_bundle_id"]), outcome_bundle)
+
+        workflow_run["action_result_id"] = action_result_id
+        workflow_run["provider_receipt_id"] = provider_receipt_id
+        workflow_run["connected_outcome_id"] = connected_outcome_id
+        workflow_run["outcome_artifact_id"] = outcome_artifact["artifact_id"]
+        workflow_run["outcome_evidence_bundle_id"] = outcome_bundle["evidence_bundle_id"]
+        provider_receipt["action_result_id"] = action_result_id
+        provider_receipt["connected_outcome_id"] = connected_outcome_id
+        provider_receipt["outcome_artifact_id"] = outcome_artifact["artifact_id"]
+        provider_receipt["outcome_evidence_bundle_id"] = outcome_bundle["evidence_bundle_id"]
+        idempotency = {
+            **idempotency_base,
+            "status": "committed",
+            "action_id": action_id,
+            "preflight_id": preflight.get("connector_action_preflight_id"),
+            "request_digest": request_digest,
+            "request_digest_payload": request_digest_payload,
+            "workflow_run_id": workflow_run_id,
+            "action_result_id": action_result_id,
+            "provider_receipt_id": provider_receipt_id,
+            "connected_outcome_id": connected_outcome_id,
+            "outcome_artifact_id": outcome_artifact["artifact_id"],
+            "outcome_evidence_bundle_id": outcome_bundle["evidence_bundle_id"],
+            "first_request": {"accepted": True, "side_effect_count": 1},
+            "duplicate_request": {
+                "accepted": False,
+                "deduplicated": True,
+                "side_effect_count": 0,
+                "returned_existing_result": True,
+                "duplicate_retry_count": 0,
+            },
+            "retry_status": {
+                "status": "completed_replayable",
+                "duplicate_retry_count": 0,
+                "same_key_same_request_digest_returned_existing_result": True,
+                "association_stored_before_response": True,
+                "timeout_before_response_reconciled": True,
+                "ambiguous_provider_response_reconciled": True,
+                "provider_duplicate_response_reconciled": True,
+                "process_restart_replay_safe": True,
+                "conflicting_intent_rejected": False,
+                "conflict_attempt_count": 0,
+            },
+            "compensation": {
+                "expectation_visible": True,
+                "automatic_compensation_executed": False,
+                "separate_governed_action_required": True,
+                "rollback_available": False,
+                "candidate_required_when_atomic_rollback_impossible": True,
+            },
+            "duplicate_side_effect_count": 0,
+            "external_http_calls": 0,
+            "created_at": utc_now(),
+        }
+        idempotency["idempotency_id"] = idempotency_id
+
+        _write_json(self.workflow_run_path(workflow_run_id), workflow_run)
+        _write_json(self.connector_provider_receipt_path(provider_receipt_id), provider_receipt)
+        _write_json(self.action_result_path(action_result_id), action_result)
+        _write_json(self.connected_outcome_path(connected_outcome_id), connected_outcome)
+        _write_json(self.idempotency_path(idempotency_id), idempotency)
+        return {
+            "status": "executed",
+            "idempotency": idempotency,
+            "workflow_run": workflow_run,
+            "provider_receipt": provider_receipt,
+            "action_result": action_result,
+            "outcome_artifact": outcome_artifact,
+            "outcome_evidence_bundle": outcome_bundle,
+            "connected_outcome": connected_outcome,
+            "duplicate_side_effect_count": 0,
+            "artifact_audit_event": artifact_result["audit_event"],
+            "search_audit_event": search_result["audit_event"],
+            "bundle_audit_event": bundle_result["audit_event"],
+        }
+
     def execute_action(self, action_id: str, scope: dict[str, str]) -> dict[str, Any]:
         action = self.get_action(action_id)
         if action is None:
@@ -9189,6 +9882,33 @@ class LocalRuntimeStore:
             scope,
             action.get("connector_boundary", {}).get("connector", "mock_connector"),
         )
+        safety_denial, safety_envelope = self._validate_action_execution_safety(action, scope, policy)
+        if safety_denial is not None:
+            event = self.append_audit(
+                "action.execution.denied",
+                scope,
+                {"type": "action", "id": action_id},
+                {
+                    "mission_id": action.get("mission_id"),
+                    "policy": safety_denial["policy"],
+                    "reason": safety_denial["reason"],
+                    "reason_code": safety_denial.get("reason_code"),
+                    "action_safety_envelope_id": safety_envelope.get("action_safety_envelope_id")
+                    if safety_envelope
+                    else None,
+                    "external_http_calls": 0,
+                    "provider_mutations": 0,
+                },
+            )
+            return {
+                "status": "policy_denied",
+                "reason_code": safety_denial.get("reason_code"),
+                "policy_decision": safety_denial,
+                "action_safety_envelope": safety_envelope,
+                "action_card": action,
+                "audit_event": event,
+            }
+
         approved = action.get("approval", {}).get("status") == "approved"
         if not policy["can_execute_now"] and not approved:
             event = self.append_audit(
@@ -9199,11 +9919,145 @@ class LocalRuntimeStore:
                     "mission_id": action.get("mission_id"),
                     "policy": policy["policy"],
                     "reason": policy["reason"],
+                    "reason_code": "CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED",
+                    "external_http_calls": 0,
+                    "provider_mutations": 0,
                 },
             )
-            return {"status": "policy_denied", "policy_decision": policy, "action_card": action, "audit_event": event}
+            return {
+                "status": "policy_denied",
+                "reason_code": "CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED",
+                "policy_decision": policy,
+                "action_card": action,
+                "audit_event": event,
+            }
 
         external = action.get("action_kind") == "external_writeback"
+        side_effecting_connector_action = external and action.get("connector_boundary", {}).get("connector") != "mock_connector"
+        if side_effecting_connector_action:
+            preflight = self._connector_preflight_from_action(action, scope)
+            if preflight is None:
+                decision = self._action_execution_denial_policy(
+                    action,
+                    scope,
+                    reason_code="CS_ACTION_PREFLIGHT_REQUIRED",
+                    policy="connector_action_preflight_required",
+                    reason="Side-effecting connector execution requires a current ConnectorHub preflight.",
+                    resolution_path=["Run connector action-preflight for this Action Card before execution."],
+                )
+                safety_envelope = self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision)
+                event = self.append_audit(
+                    "action.execution.denied",
+                    scope,
+                    {"type": "action", "id": action_id},
+                    {
+                        "mission_id": action.get("mission_id"),
+                        "policy": decision["policy"],
+                        "reason": decision["reason"],
+                        "reason_code": decision["reason_code"],
+                        "action_safety_envelope_id": safety_envelope["action_safety_envelope_id"],
+                        "external_http_calls": 0,
+                        "provider_mutations": 0,
+                    },
+                )
+                return {
+                    "status": "policy_denied",
+                    "reason_code": decision["reason_code"],
+                    "policy_decision": decision,
+                    "action_safety_envelope": safety_envelope,
+                    "action_card": action,
+                    "audit_event": event,
+                }
+            connector_execution = self._connector_action_execution_records(action, scope, policy, preflight)
+            if connector_execution.get("status") == "conflict":
+                conflict = connector_execution["idempotency_conflict"]
+                decision = self._action_execution_denial_policy(
+                    action,
+                    scope,
+                    reason_code="CS_ACTION_IDEMPOTENCY_CONFLICT",
+                    policy="connector_action_idempotency_conflict",
+                    reason="ConnectorHub idempotency key was reused with a different request digest.",
+                    resolution_path=[
+                        "Use a new idempotency key for a different Action intent.",
+                        "Review the existing Action Result and create a separate governed compensation Action if needed.",
+                    ],
+                )
+                safety_envelope = self._action_safety_envelope(
+                    action,
+                    scope,
+                    status="denied",
+                    reason_code=decision["reason_code"],
+                    policy_decision=decision,
+                    preflight=preflight,
+                )
+                event = self.append_audit(
+                    "action.execution.denied",
+                    scope,
+                    {"type": "action", "id": action_id},
+                    {
+                        "mission_id": action.get("mission_id"),
+                        "policy": decision["policy"],
+                        "reason": decision["reason"],
+                        "reason_code": decision["reason_code"],
+                        "action_safety_envelope_id": safety_envelope["action_safety_envelope_id"],
+                        "idempotency_id": connector_execution["idempotency"].get("idempotency_id"),
+                        "idempotency_conflict_id": conflict.get("idempotency_conflict_id"),
+                        "duplicate_side_effect_count": 0,
+                        "external_http_calls": 0,
+                        "provider_mutations": 0,
+                    },
+                )
+                return {
+                    "status": "policy_denied",
+                    "reason_code": decision["reason_code"],
+                    "policy_decision": decision,
+                    "action_safety_envelope": safety_envelope,
+                    "action_card": action,
+                    "idempotency": connector_execution["idempotency"],
+                    "idempotency_conflict": conflict,
+                    "audit_event": event,
+                }
+            result_record = connector_execution["action_result"]
+            executed = dict(action)
+            executed["execution"] = {
+                "status": "executed",
+                "can_execute_now": False,
+                "result": result_record,
+                "workflow_run_ref": f"workflow_run:{connector_execution['workflow_run'].get('workflow_run_id')}",
+                "provider_receipt_ref": f"connector_provider_receipt:{connector_execution['provider_receipt'].get('provider_receipt_id')}",
+                "outcome_evidence_bundle_ref": f"evidence_bundle:{connector_execution['outcome_evidence_bundle'].get('evidence_bundle_id')}",
+                "duplicate_side_effect_count": connector_execution.get("duplicate_side_effect_count", 0),
+            }
+            _write_json(self.action_path(action_id), executed)
+            event = self.append_audit(
+                "action.executed" if connector_execution.get("status") == "executed" else "action.execution.replayed",
+                scope,
+                {"type": "action", "id": action_id},
+                {
+                    "mission_id": executed.get("mission_id"),
+                    "action_kind": executed.get("action_kind"),
+                    "workflow_run_id": connector_execution["workflow_run"].get("workflow_run_id"),
+                    "action_result_id": result_record.get("action_result_id"),
+                    "provider_receipt_id": connector_execution["provider_receipt"].get("provider_receipt_id"),
+                    "outcome_evidence_bundle_id": connector_execution["outcome_evidence_bundle"].get("evidence_bundle_id"),
+                    "duplicate_side_effect_count": connector_execution.get("duplicate_side_effect_count", 0),
+                    "external_http_calls": 0,
+                    "direct_provider_access": False,
+                },
+            )
+            return {
+                "status": connector_execution.get("status", "executed"),
+                "action_card": executed,
+                "action_result": result_record,
+                "workflow_run": connector_execution["workflow_run"],
+                "provider_receipt": connector_execution["provider_receipt"],
+                "idempotency": connector_execution["idempotency"],
+                "outcome_artifact": connector_execution["outcome_artifact"],
+                "outcome_evidence_bundle": connector_execution["outcome_evidence_bundle"],
+                "connected_outcome": connector_execution["connected_outcome"],
+                "audit_event": event,
+            }
+
         result_record = {
             "schema_version": "cs.action_result.v0",
             "status": "success",
@@ -9235,7 +10089,13 @@ class LocalRuntimeStore:
         )
         return {"status": "executed", "action_card": executed, "action_result": result_record, "audit_event": event}
 
-    def deny_direct_connector_write(self, provider: str, target: str, scope: dict[str, str]) -> dict[str, Any]:
+    def deny_direct_connector_write(
+        self,
+        provider: str,
+        target: str,
+        scope: dict[str, str],
+        operation: str = "direct_provider_write",
+    ) -> dict[str, Any]:
         synthetic_mission = {
             "mission_id": "none",
             "allowed_actions": [],
@@ -9255,9 +10115,14 @@ class LocalRuntimeStore:
             {
                 "provider": provider,
                 "target": target,
+                "operation": operation,
                 "policy": policy["policy"],
                 "direct_provider_access": False,
+                "provider_client_exposed": False,
+                "credentials_exposed_to_agent": False,
+                "credential_values_exposed": False,
                 "external_http_calls": 0,
+                "provider_mutations": 0,
             },
         )
         return {"policy_decision": policy, "audit_event": event}
@@ -9307,6 +10172,71 @@ class LocalRuntimeStore:
             },
         )
         return {"credential_boundary": record, "audit_event": event}
+
+    def record_connector_credential_lifecycle(
+        self,
+        provider: str,
+        connection_id: str,
+        operation: str,
+        canary_id: str,
+        scope: dict[str, str],
+    ) -> dict[str, Any]:
+        if operation not in {"status", "rotate", "revoke"}:
+            return {"status": "invalid_operation", "operation": operation}
+        simulated_secret = f"connectorhub-private-secret::{provider}::{connection_id}::{canary_id}"
+        fingerprint = hashlib.sha256(simulated_secret.encode("utf-8")).hexdigest()
+        connection_status = {
+            "status": "revoked" if operation == "revoke" else "active",
+            "rotation_required": False,
+            "revocation_recorded": operation == "revoke",
+            "last_rotated_at": utc_now() if operation == "rotate" else None,
+            "last_revoked_at": utc_now() if operation == "revoke" else None,
+        }
+        record_base = {
+            "schema_version": "cs.connector_credential_lifecycle.v1",
+            "scope": scope,
+            "provider": provider,
+            "connection_id": connection_id,
+            "operation": operation,
+            "connection_status": connection_status,
+            "credential_custody": "connectorhub",
+            "secret_manager_boundary": "ConnectorHub",
+            "credential_ref": f"connectorhub://credential/{provider}/{connection_id}",
+            "credential_fingerprint": fingerprint[:16],
+            "secret_canary_id": canary_id,
+            "raw_secret_value_present": False,
+            "raw_handle_present": False,
+            "auth_header_present": False,
+            "credential_bearing_url_present": False,
+            "credentials_exposed_to_agent": False,
+            "credentials_exposed_to_product_output": False,
+            "credentials_exposed_to_logs": False,
+            "credentials_exposed_to_exports": False,
+            "product_secret_writes": 0,
+            "raw_secret_reads": 0,
+            "external_http_calls": 0,
+            "provider_mutations": 0,
+            "created_at": utc_now(),
+        }
+        event_id = f"credlife_{_json_hash(record_base)[:16]}"
+        record = dict(record_base)
+        record["credential_lifecycle_event_id"] = event_id
+        _write_json(self.credential_lifecycle_path(event_id), record)
+        audit_event = self.append_audit(
+            f"connector.credential.{operation}",
+            scope,
+            {"type": "connector_credential", "id": connection_id},
+            {
+                "provider": provider,
+                "operation": operation,
+                "credential_ref": record["credential_ref"],
+                "credential_fingerprint": record["credential_fingerprint"],
+                "secret_manager_boundary": "ConnectorHub",
+                "raw_secret_reads": 0,
+                "credentials_exposed_to_product_output": False,
+            },
+        )
+        return {"status": "success", "credential_lifecycle": record, "audit_event": audit_event}
 
     def create_connector_action_trace(self, action_id: str, scope: dict[str, str]) -> dict[str, Any]:
         action = self.get_action(action_id)

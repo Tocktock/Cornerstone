@@ -1,0 +1,53 @@
+{
+  "approval_ref": "",
+  "approved_provider": "",
+  "audit_refs": [],
+  "decision": "",
+  "dependency_human_gate_refs": {
+    "CS-CH-H04": "",
+    "CS-CH-H07": ""
+  },
+  "evidence_packet_manifest": [
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Non-GitHub provider and reversible target approval.",
+      "required_evidence_index": 1
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Pre-execution rollback or compensation plan.",
+      "required_evidence_index": 2
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Redacted request/result and provider receipt/state evidence.",
+      "required_evidence_index": 3
+    },
+    {
+      "evidence_ref": "",
+      "redaction_status": "",
+      "required_evidence": "Idempotency and audit refs proving exactly-once execution.",
+      "required_evidence_index": 4
+    }
+  ],
+  "idempotency_evidence": [],
+  "issues_or_exceptions": "",
+  "provider_receipt": "",
+  "redacted_request_result": "",
+  "reversible_test_target": "",
+  "review_timestamp": "",
+  "reviewer": "",
+  "rollback_or_compensation_plan": "",
+  "scenario_id": "CS-CH-H05",
+  "senior_review_perspective_findings": {
+    "data_contract": "",
+    "domain_architecture": "",
+    "product_value": "",
+    "reliability_observability": "",
+    "security_privacy": "",
+    "testability_migration": ""
+  }
+}

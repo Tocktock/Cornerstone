@@ -1,0 +1,446 @@
+{
+  "audit_refs": [
+    "audit:audit_e7d9dabbed759a87"
+  ],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone connector human-gate evidence-packet-validate",
+  "connector_human_gate_evidence_packet_validation_report": {
+    "acceptance_sufficient": false,
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "created_at": "2026-06-28T07:41:59.969686Z",
+    "dependency_unlock_allowed_by_packet_validator": false,
+    "empty_packet_file_count": 0,
+    "empty_packet_file_names": [],
+    "evidence_packet_file_contract_schema_version": "cs.connector_human_gate_evidence_packet_file_contract.v1",
+    "evidence_packet_scaffold_schema_version": "cs.connector_human_gate_evidence_packet_scaffold.v1",
+    "evidence_packet_validation_report_id": "cshuman_evidencepacketvalidation_5adbeec54f8bd38d",
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "hashed_packet_file_count": 0,
+    "hashed_packet_file_names": [],
+    "missing_packet_file_count": 11,
+    "missing_packet_file_names": [
+      "chrome-review-scope.md",
+      "permission-baseline.md",
+      "active-tab-capture-proof.json",
+      "allowlist-auto-capture-proof.json",
+      "sensitive-page-policy-proof.json",
+      "pause-revoke-proof.json",
+      "timeline-diagnostics.json",
+      "retention-export-delete-notes.md",
+      "privacy-issue-log.md",
+      "audit-redaction-report.json",
+      "review-decision.md"
+    ],
+    "negative_evidence": {
+      "approvals_collected_by_evidence_packet_validation": 0,
+      "dependency_unlocks_allowed_by_evidence_packet_validation": 0,
+      "external_mutations_executed_by_evidence_packet_validation": 0,
+      "human_rows_marked_pass_by_evidence_packet_validation": 0,
+      "live_provider_calls_executed_by_evidence_packet_validation": 0,
+      "packet_file_contents_persisted_by_evidence_packet_validation": 0,
+      "pass_claims_allowed_by_evidence_packet_validation": 0,
+      "product_claims_allowed_by_evidence_packet_validation": 0,
+      "provider_mutations_executed_by_evidence_packet_validation": 0,
+      "raw_packet_file_contents_recorded_by_evidence_packet_validation": 0
+    },
+    "non_mutation_evidence": {
+      "approval_collected_by_evidence_packet_validation": false,
+      "commands_executed_by_evidence_packet_validation": 0,
+      "external_mutations_executed_by_evidence_packet_validation": 0,
+      "human_acceptance_collected_by_evidence_packet_validation": false,
+      "human_decisions_recorded_by_evidence_packet_validation": 0,
+      "live_provider_calls_executed_by_evidence_packet_validation": 0,
+      "packet_file_contents_persisted_by_evidence_packet_validation": false,
+      "packet_file_hashes_recorded_by_evidence_packet_validation": 0,
+      "provider_mutations_executed_by_evidence_packet_validation": 0,
+      "raw_packet_file_contents_recorded_by_evidence_packet_validation": false
+    },
+    "observed_packet_file_count": 0,
+    "operator_rule": "This report validates CS-CH-H03 acceptance-packet file presence, non-empty status, and blank-template replacement by recording metadata and hashes only. It does not record packet contents, collect approval, unlock dependencies, or mark CS-CH-H03 accepted.",
+    "packet_directory": "<h03-chrome-privacy-packet-dir>",
+    "packet_directory_exists": false,
+    "packet_file_contents_persisted_by_validator": false,
+    "packet_file_hashes_recorded_by_validator": true,
+    "packet_files": [
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "chrome-review-scope.md",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Chrome profile label, Chrome version, extension/build id, backend version, source id, workspace, approved domains/source packs, sensitive fixture list, evidence directory.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "permission-baseline.md",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Extension permission pages, host/optional permissions, first-use copy, explicit no-default-capture statement.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "active-tab-capture-proof.json",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "User gesture, active tab identifier, preflight/confirmation state, bounded payload metadata, backend policy/audit refs, raw persistence counters.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "allowlist-auto-capture-proof.json",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Approved-domain capture, unapproved-domain skip, consent/config refs, trigger metadata, throttle/idempotency evidence, timeline refs.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "sensitive-page-policy-proof.json",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Synthetic sensitive classes, block/degrade decisions, backend revalidation result, user-facing reason, raw persistence/model-send counters.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "pause-revoke-proof.json",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Pause timestamp, paused capture attempt denial, revoke timestamp, post-revoke denial, stale-payload rejection, audit refs.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "timeline-diagnostics.json",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Captured/degraded/skipped/duplicate/blocked/paused/revoked entries, reason codes, evidence refs, audit refs, no private payloads.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "retention-export-delete-notes.md",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Scoped export or state-review notes, deletion/dismissal guidance, retained-audit explanation.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "privacy-issue-log.md",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Reviewer issue list, severity, scenario reference, accept/reject impact, follow-up owner.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "audit-redaction-report.json",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Evidence manifest or checksum, redaction scan result, zero raw secrets/private payload/browser-history exposure.",
+        "sha256": null,
+        "size_bytes": null
+      },
+      {
+        "acceptance_sufficient": false,
+        "line_count": null,
+        "matches_blank_template": false,
+        "packet_file": "review-decision.md",
+        "pass_claim_allowed": false,
+        "present": false,
+        "product_claim_allowed": false,
+        "raw_contents_included_in_report": false,
+        "raw_contents_persisted_by_validator": false,
+        "required": true,
+        "required_contents": "Reviewer decision, timestamp, accept/reject rationale, exceptions, follow-ups.",
+        "sha256": null,
+        "size_bytes": null
+      }
+    ],
+    "packet_structurally_complete": false,
+    "pass_claim_allowed": false,
+    "product_claim_allowed": false,
+    "product_feature_claims": "CONNECTOR_HUB_H03_EVIDENCE_PACKET_VALIDATION_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "raw_packet_file_contents_included_in_report": false,
+    "raw_packet_file_contents_recorded_by_validator": false,
+    "required_packet_file_count": 11,
+    "review_input_only": true,
+    "scenario_id": "CS-CH-H03",
+    "schema_version": "cs.connector_human_gate_evidence_packet_validation_report.v1",
+    "scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    },
+    "status": "packet_not_submitted",
+    "structural_errors": [
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_DIR_NOT_FOUND",
+        "message": "CS-CH-H03 evidence packet directory was not found.",
+        "packet_directory": "<h03-chrome-privacy-packet-dir>"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "chrome-review-scope.md"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "permission-baseline.md"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "active-tab-capture-proof.json"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "allowlist-auto-capture-proof.json"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "sensitive-page-policy-proof.json"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "pause-revoke-proof.json"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "timeline-diagnostics.json"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "retention-export-delete-notes.md"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "privacy-issue-log.md"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "audit-redaction-report.json"
+      },
+      {
+        "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+        "packet_file": "review-decision.md"
+      }
+    ],
+    "template_only_packet_file_count": 0,
+    "template_only_packet_file_names": [],
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "errors": [
+    {
+      "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_STRUCTURAL_ISSUES",
+      "message": "CS-CH-H03 evidence packet is missing, incomplete, empty, or still contains blank template files.",
+      "negative_evidence": {
+        "approvals_collected_by_evidence_packet_validation": 0,
+        "dependency_unlocks_allowed_by_evidence_packet_validation": 0,
+        "external_mutations_executed_by_evidence_packet_validation": 0,
+        "human_rows_marked_pass_by_evidence_packet_validation": 0,
+        "live_provider_calls_executed_by_evidence_packet_validation": 0,
+        "packet_file_contents_persisted_by_evidence_packet_validation": 0,
+        "pass_claims_allowed_by_evidence_packet_validation": 0,
+        "product_claims_allowed_by_evidence_packet_validation": 0,
+        "provider_mutations_executed_by_evidence_packet_validation": 0,
+        "raw_packet_file_contents_recorded_by_evidence_packet_validation": 0
+      },
+      "structural_errors": [
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_DIR_NOT_FOUND",
+          "message": "CS-CH-H03 evidence packet directory was not found.",
+          "packet_directory": "<h03-chrome-privacy-packet-dir>"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "chrome-review-scope.md"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "permission-baseline.md"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "active-tab-capture-proof.json"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "allowlist-auto-capture-proof.json"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "sensitive-page-policy-proof.json"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "pause-revoke-proof.json"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "timeline-diagnostics.json"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "retention-export-delete-notes.md"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "privacy-issue-log.md"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "audit-redaction-report.json"
+        },
+        {
+          "code": "CS_CONNECTOR_HUMAN_GATE_EVIDENCE_PACKET_FILE_MISSING",
+          "packet_file": "review-decision.md"
+        }
+      ]
+    }
+  ],
+  "evidence_refs": [
+    "connector_human_gate_evidence_packet_validation:cshuman_evidencepacketvalidation_5adbeec54f8bd38d"
+  ],
+  "final_verdict": "HUMAN_REQUIRED",
+  "ids": {
+    "connector_human_gate_evidence_packet_validation_report_id": "cshuman_evidencepacketvalidation_5adbeec54f8bd38d",
+    "git_commit": "7415792"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h03-2026-06-24.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "schema_version": "cs.cli.v0",
+  "status": "blocked",
+  "summary": {
+    "acceptance_sufficient": false,
+    "commands_executed_by_evidence_packet_validation": 0,
+    "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
+    "dependency_unlock_allowed_by_packet_validator": false,
+    "empty_packet_file_count": 0,
+    "empty_packet_file_names": [],
+    "evidence_packet_file_contract_schema_version": "cs.connector_human_gate_evidence_packet_file_contract.v1",
+    "evidence_packet_scaffold_schema_version": "cs.connector_human_gate_evidence_packet_scaffold.v1",
+    "evidence_packet_validation_report_id": "cshuman_evidencepacketvalidation_5adbeec54f8bd38d",
+    "external_mutations_executed_by_evidence_packet_validation": 0,
+    "final_verdict": "HUMAN_REQUIRED",
+    "full_goal_completion_allowed": false,
+    "goal_completion_claim_blocked": true,
+    "hashed_packet_file_count": 0,
+    "hashed_packet_file_names": [],
+    "human_acceptance_collected_by_evidence_packet_validation": false,
+    "live_provider_calls_executed_by_evidence_packet_validation": 0,
+    "missing_packet_file_count": 11,
+    "missing_packet_file_names": [
+      "chrome-review-scope.md",
+      "permission-baseline.md",
+      "active-tab-capture-proof.json",
+      "allowlist-auto-capture-proof.json",
+      "sensitive-page-policy-proof.json",
+      "pause-revoke-proof.json",
+      "timeline-diagnostics.json",
+      "retention-export-delete-notes.md",
+      "privacy-issue-log.md",
+      "audit-redaction-report.json",
+      "review-decision.md"
+    ],
+    "observed_packet_file_count": 0,
+    "operator_rule": "This report validates CS-CH-H03 acceptance-packet file presence, non-empty status, and blank-template replacement by recording metadata and hashes only. It does not record packet contents, collect approval, unlock dependencies, or mark CS-CH-H03 accepted.",
+    "packet_directory": "<h03-chrome-privacy-packet-dir>",
+    "packet_directory_exists": false,
+    "packet_file_contents_persisted_by_validator": false,
+    "packet_file_hashes_recorded_by_validator": true,
+    "packet_structurally_complete": false,
+    "pass_claim_allowed": false,
+    "product_claim_allowed": false,
+    "product_feature_claims": "CONNECTOR_HUB_H03_EVIDENCE_PACKET_VALIDATION_PREPARED_HUMAN_EVIDENCE_REQUIRED",
+    "provider_mutations_executed_by_evidence_packet_validation": 0,
+    "raw_packet_file_contents_included_in_report": false,
+    "raw_packet_file_contents_recorded_by_validator": false,
+    "required_packet_file_count": 11,
+    "review_input_only": true,
+    "scenario_id": "CS-CH-H03",
+    "status": "packet_not_submitted",
+    "template_only_packet_file_count": 0,
+    "template_only_packet_file_names": [],
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

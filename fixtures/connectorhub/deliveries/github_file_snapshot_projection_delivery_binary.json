@@ -1,0 +1,48 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_alpha_file_docs_binary",
+  "projection_id": "cproj_github_file_docs_binary",
+  "contract_id": "ccon_project_alpha_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-alpha:file:docs/diagram.png:109fcf12",
+  "common_capability": "source_control.file.read",
+  "projection_type": "source_control.file_snapshot.v1",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha:file:docs/diagram.png:109fcf12",
+    "title": "docs/diagram.png at 109fcf12",
+    "path": "docs/diagram.png",
+    "classification": "metadata_only",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_alpha_file_docs_binary",
+    "kind": "connectorhub_projection_evidence",
+    "provider_event_id": "github:repo:owner/project-alpha:file:docs/diagram.png:109fcf12",
+    "permitted_fields": [
+      "path",
+      "ref",
+      "content_hash",
+      "size_bytes",
+      "mime_type",
+      "source_url_hash"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "path": "docs/diagram.png",
+    "ref": "109fcf12",
+    "content_hash": "sha256:3c9f9960f6b868f2b6f92eae1f2c5df8d29b9d9a4a99f95f5a8634ebd2c7c63d",
+    "size_bytes": 51233,
+    "mime_type": "image/png",
+    "source_url_hash": "sha256:8f64deab18aaf6f53f24b26133cfbb73a88f9c2cf5dfb767eb182d1202f16426",
+    "source_revision": "blob:docs/diagram.png:109fcf12",
+    "updated_at": "2026-06-23T00:32:00Z"
+  }
+}

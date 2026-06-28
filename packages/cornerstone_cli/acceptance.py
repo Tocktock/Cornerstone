@@ -1854,8 +1854,25 @@ def _is_generated_evidence_path(path: str) -> bool:
     return path.startswith(GENERATED_EVIDENCE_PREFIXES)
 
 
+def _expand_source_snapshot_entries(root: Path, entries: list[dict[str, str]]) -> list[dict[str, str]]:
+    expanded: list[dict[str, str]] = []
+    for entry in entries:
+        rel_path = entry["path"]
+        if _is_generated_evidence_path(rel_path):
+            continue
+        path = root / rel_path
+        if path.exists() and path.is_dir():
+            for child in sorted(candidate for candidate in path.rglob("*") if candidate.is_file()):
+                child_rel = relative_to_root(root, child)
+                if not _is_generated_evidence_path(child_rel):
+                    expanded.append({"status": entry["status"], "path": child_rel})
+            continue
+        expanded.append(entry)
+    return expanded
+
+
 def _source_snapshot(root: Path, base_commit: str | None, base_tree_hash: str | None, entries: list[dict[str, str]]) -> dict[str, Any]:
-    source_entries = [entry for entry in entries if not _is_generated_evidence_path(entry["path"])]
+    source_entries = _expand_source_snapshot_entries(root, entries)
     digest = hashlib.sha256()
     digest.update(f"base_commit={base_commit or ''}\n".encode("utf-8"))
     digest.update(f"base_tree_hash={base_tree_hash or ''}\n".encode("utf-8"))

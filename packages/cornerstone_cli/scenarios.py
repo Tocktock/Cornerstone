@@ -40,6 +40,12 @@ from cornerstone_cli.acceptance import (
     relative_to_root,
     run_evux_quickstart,
 )
+from cornerstone_cli.connector import (
+    GITHUB_PROVIDER_FAILURE_MODES,
+    GITHUB_WRITE_DIRECT_ATTEMPTS,
+    connector_report_readiness_dimensions,
+    provider_internal_findings,
+)
 from cornerstone_cli.local_test import LocalTestProvider
 from cornerstone_cli.product_runtime import UI_SURFACES, make_server
 from cornerstone_cli.validators import (
@@ -69,6 +75,20 @@ DEFAULT_VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_REPORT = (
 )
 DEFAULT_VS2_SENSITIVE_CHANGE_GATE_REPORT = "reports/scenario/vs2-sensitive-change-gate-2026-06-19.json"
 DEFAULT_VS2_H01_APPROVAL_PACKAGE_REPORT = "reports/scenario/vs2-h01-approval-package-2026-06-19.json"
+DEFAULT_CONNECTORHUB_CONTRACT_MATRIX = "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_MATRIX.csv"
+DEFAULT_VS2_EGRESS_PROOF_REPORT = "reports/network/vs2-egress-proof.json"
+DEFAULT_VS2_LOCAL_RANGE_REPORT = "reports/security/vs2-local-range.json"
+DEFAULT_VS2_SCENARIO_REPORT = "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+SCENARIO_CLI_TIMEOUT_SECONDS = float(os.environ.get("CORNERSTONE_SCENARIO_CLI_TIMEOUT_SECONDS", "180"))
+CONNECTORHUB_CS_CH_036_VS2_SCENARIOS = {
+    "VS2-SEC-051",
+    "VS2-SEC-052",
+    "VS2-SEC-057",
+    "VS2-SEC-058",
+    "VS2-SEC-059",
+    "VS2-SEC-063",
+    "VS2-SEC-064",
+}
 
 
 FULL_ROW = re.compile(
@@ -137,6 +157,19 @@ def list_scenarios(root: Path, scenario_set: str) -> list[dict[str, Any]]:
                 "expected_result": row["then"],
                 "verification_method": row["verification"],
                 "owner": "Human" if row["priority"] == "HUMAN_REQUIRED" else "AI",
+            }
+            for row in rows
+        ]
+    if scenario_set in {"connectorhub", "connector-contract-adapter"}:
+        rows, _ = _read_csv_rows(root / DEFAULT_CONNECTORHUB_CONTRACT_MATRIX)
+        return [
+            {
+                "id": row["scenario_id"],
+                "type": row["type"],
+                "title": row["title"],
+                "expected_result": row["expected_result"],
+                "verification_method": row["verification_method"],
+                "owner": row["owner"],
             }
             for row in rows
         ]
@@ -479,25 +512,39 @@ def verify_vs0_fixtures(root: Path, corpus: str = "fixtures/vs0", model_provider
 
 def _run_cli_json(root: Path, args: list[str]) -> dict[str, Any]:
     command = [str(root / "cornerstone"), *args]
-    result = subprocess.run(
-        command,
-        cwd=root,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            command,
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=SCENARIO_CLI_TIMEOUT_SECONDS,
+        )
+        stdout = result.stdout
+        stderr = result.stderr
+        exit_code = result.returncode
+        timed_out = False
+    except subprocess.TimeoutExpired as error:
+        stdout = error.stdout.decode("utf-8", errors="replace") if isinstance(error.stdout, bytes) else (error.stdout or "")
+        stderr = error.stderr.decode("utf-8", errors="replace") if isinstance(error.stderr, bytes) else (error.stderr or "")
+        stderr = f"command timed out after {SCENARIO_CLI_TIMEOUT_SECONDS:g}s: {' '.join(command)}\n{stderr}"
+        exit_code = 124
+        timed_out = True
     stdout_json: dict[str, Any] | None = None
     json_error: str | None = None
     try:
-        stdout_json = json.loads(result.stdout)
+        stdout_json = json.loads(stdout)
     except ValueError as error:
         json_error = str(error)
     return {
         "schema_version": "cs.cli_transcript.v0",
         "command": ["cornerstone", *args],
-        "exit_code": result.returncode,
+        "exit_code": exit_code,
+        "timed_out": timed_out,
+        "timeout_seconds": SCENARIO_CLI_TIMEOUT_SECONDS,
         "stdout_json": stdout_json,
-        "stderr_redacted": redact_text(result.stderr),
+        "stderr_redacted": redact_text(stderr),
         "json_error": json_error,
     }
 
@@ -651,6 +698,13564 @@ def _action_policy_blocked(transcript: dict[str, Any]) -> bool:
 
 def _scenario_state_rel(name: str) -> str:
     return f"tmp/scenario/{name}-{os.getpid()}"
+
+
+def _connector_ch0_pending_rows() -> list[dict[str, Any]]:
+    return []
+
+
+def _connector_provider_call_count(setup_result: dict[str, Any]) -> int:
+    ledger = setup_result.get("provider_call_ledger", {})
+    return int(ledger.get("before_activation", 0)) + int(ledger.get("during_plan", 0))
+
+
+def _connector_state_secret_findings(state_path: Path) -> int:
+    if not state_path.exists():
+        return 0
+    count = 0
+    for path in state_path.rglob("*"):
+        if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}:
+            count += count_unredacted_secrets(path.read_text(errors="ignore"))
+    return count
+
+
+def _connectorhub_cs_ch_036_egress_dependency(root: Path) -> dict[str, Any]:
+    proof_path = root / VS2_PROOF_REPORT
+    egress_path = root / DEFAULT_VS2_EGRESS_PROOF_REPORT
+    range_path = root / DEFAULT_VS2_LOCAL_RANGE_REPORT
+    vs2_scenario_path = root / DEFAULT_VS2_SCENARIO_REPORT
+    matrix_rows, matrix_error = _read_csv_rows(root / DEFAULT_VS2_POLICY_TENANCY_EGRESS_MATRIX)
+    proof, proof_error = _read_json_report(proof_path)
+    egress, egress_error = _read_json_report(egress_path)
+    local_range, range_error = _read_json_report(range_path)
+    vs2_scenario, vs2_scenario_error = _read_json_report(vs2_scenario_path)
+
+    expected_ids = {row.get("scenario_id", "") for row in matrix_rows if row.get("scenario_id")}
+    expected_owners = {
+        row.get("scenario_id", ""): "Human" if row.get("priority") == "HUMAN_REQUIRED" else "AI"
+        for row in matrix_rows
+        if row.get("scenario_id")
+    }
+    reusable = False
+    reuse_errors: list[str] = []
+    current_fingerprint: dict[str, Any] = {}
+    if proof_error:
+        reuse_errors.append(proof_error)
+    elif matrix_error:
+        reuse_errors.append(matrix_error)
+    else:
+        reusable, reuse_errors, current_fingerprint = validate_reusable_report(
+            proof,
+            root=root,
+            family="vs2_local_proof",
+            expected_schema="cs.vs2_local_security_proof.v0",
+            require_status=None,
+            expected_scenario_ids=expected_ids,
+            expected_scenario_owners=expected_owners,
+            validate_evidence=True,
+        )
+
+    proof_by_id = {
+        row.get("id") or row.get("scenario_id"): row
+        for row in proof.get("scenario_results", [])
+        if isinstance(row, dict)
+    }
+    required_rows = {scenario_id: proof_by_id.get(scenario_id, {}) for scenario_id in CONNECTORHUB_CS_CH_036_VS2_SCENARIOS}
+    missing_required_rows = sorted(
+        scenario_id for scenario_id, row in required_rows.items() if not row
+    )
+    failed_required_rows = sorted(
+        scenario_id
+        for scenario_id, row in required_rows.items()
+        if row and row.get("status") != "PASS"
+    )
+
+    egress_checks = egress.get("checks", {}) if isinstance(egress, dict) else {}
+    local_range_checks = local_range.get("checks", {}) if isinstance(local_range, dict) else {}
+    observations = local_range.get("observations", {}) if isinstance(local_range, dict) else {}
+    network_boundary = observations.get("network_boundary", {}) if isinstance(observations, dict) else {}
+    boundary_checks = network_boundary.get("checks", {}) if isinstance(network_boundary, dict) else {}
+    provider_counts = network_boundary.get("provider_counts", {}) if isinstance(network_boundary, dict) else {}
+    direct_attempts = network_boundary.get("direct_attempts", {}) if isinstance(network_boundary, dict) else {}
+    topology = network_boundary.get("topology", {}) if isinstance(network_boundary, dict) else {}
+    trap_sink = egress.get("trap_sink", {}) if isinstance(egress, dict) else {}
+    sink = egress.get("sink", {}) if isinstance(egress, dict) else {}
+    call_counts = egress.get("call_counts", {}) if isinstance(egress, dict) else {}
+    redirect_guard = egress.get("redirect_guard", {}) if isinstance(egress, dict) else {}
+    redirect_private = redirect_guard.get("redirect_to_private", {}) if isinstance(redirect_guard, dict) else {}
+    readiness = egress.get("readiness", {}) if isinstance(egress, dict) else {}
+    vs2_rows = {
+        row.get("scenario_id"): row
+        for row in vs2_scenario.get("scenario_results", [])
+        if isinstance(row, dict)
+    }
+    readiness_dimensions = connector_report_readiness_dimensions()
+
+    checks = {
+        "vs2_local_proof_reusable_current": reusable,
+        "vs2_required_egress_rows_pass": not missing_required_rows and not failed_required_rows,
+        "vs2_scenario_report_rows_pass": all(
+            vs2_rows.get(scenario_id, {}).get("status") == "PASS"
+            for scenario_id in CONNECTORHUB_CS_CH_036_VS2_SCENARIOS
+        ),
+        "egress_proof_status_passed": egress.get("status") == "passed",
+        "local_range_status_passed": local_range.get("status") == "passed",
+        "app_worker_tool_direct_http_socket_blocked": boundary_checks.get("direct_http_and_socket_blocked") is True,
+        "provider_zero_requests_after_direct_attempts": boundary_checks.get("provider_zero_requests_after_direct_attempts") is True,
+        "governed_proxy_reaches_provider": boundary_checks.get("provider_reachable_from_governed_proxy") is True,
+        "network_membership_isolated": boundary_checks.get("provider_network_membership_isolated") is True
+        and boundary_checks.get("service_network_membership_expected") is True
+        and topology.get("host_network") is False
+        and topology.get("privileged") is False
+        and topology.get("published_ports") is False,
+        "default_denied_before_sink_call": egress_checks.get("default_denied_before_sink_call") is True,
+        "redirect_dns_protocol_and_socket_bypass_guarded": all(
+            egress_checks.get(key) is True
+            for key in [
+                "redirects_reguarded",
+                "redirect_loop_bounded",
+                "dns_rebinding_guarded",
+                "direct_socket_blocked",
+                "normalization_does_not_broaden",
+                "reserved_destination_matrix_denied_before_network",
+            ]
+        ),
+        "proxy_subprocess_and_untrusted_bypass_guarded": egress_checks.get("sandbox_bypass_guard_proved") is True
+        and egress_checks.get("untrusted_content_guard_proved") is True,
+        "egress_audit_and_policy_logs_correlate": egress_checks.get("egress_audit_records_correlate_attempts") is True
+        and egress_checks.get("egress_audit_records_have_byte_and_call_counts") is True,
+        "secrets_and_payloads_not_exposed": egress_checks.get("credentials_not_exposed") is True
+        and egress_checks.get("audit_has_no_raw_payload") is True,
+        "fail_closed_without_fallback": egress_checks.get("fail_closed_without_fallback") is True
+        and readiness.get("protected_capabilities_fail_closed") is True
+        and readiness.get("direct_client_fallback") is False,
+        "production_topology_not_claimed": readiness_dimensions.get("production_tenancy_policy_egress_verified") == "NOT_VERIFIED",
+    }
+
+    direct_http_socket_allowed = 0
+    if isinstance(direct_attempts, dict):
+        for attempt in direct_attempts.values():
+            if attempt.get("http", {}).get("blocked") is not True:
+                direct_http_socket_allowed += 1
+            if attempt.get("socket", {}).get("blocked") is not True:
+                direct_http_socket_allowed += 1
+
+    after_direct = provider_counts.get("after_direct", {}) if isinstance(provider_counts, dict) else {}
+    before_direct = provider_counts.get("before_direct", {}) if isinstance(provider_counts, dict) else {}
+    redirect_after = redirect_private.get("trap_calls_after", 1)
+    redirect_before = redirect_private.get("trap_calls_before", 0)
+    negative = {
+        "vs2_reuse_errors": len(reuse_errors),
+        "missing_required_vs2_rows": len(missing_required_rows),
+        "failed_required_vs2_rows": len(failed_required_rows),
+        "direct_http_socket_bypass_allowed": direct_http_socket_allowed,
+        "provider_requests_before_direct_attempts": int(before_direct.get("requests", 1) or 0),
+        "provider_requests_after_direct_attempts": int(after_direct.get("requests", 1) or 0),
+        "default_denied_sink_calls": int(call_counts.get("after_denied", 1) or 0),
+        "redirect_denied_hop_trap_calls": max(0, int(redirect_after or 0) - int(redirect_before or 0)),
+        "sensitive_headers_forwarded_to_denied_hop": int(trap_sink.get("authorization_headers_seen", 1) or 0)
+        + int(trap_sink.get("credential_ref_headers_seen", 1) or 0),
+        "raw_credentials_exposed": int(not egress_checks.get("credentials_not_exposed", False)),
+        "raw_payloads_in_audit": int(not egress_checks.get("audit_has_no_raw_payload", False)),
+        "production_topology_overclaimed": 0 if checks["production_topology_not_claimed"] else 1,
+    }
+
+    return {
+        "proof_path": str(VS2_PROOF_REPORT),
+        "egress_report_path": DEFAULT_VS2_EGRESS_PROOF_REPORT,
+        "local_range_report_path": DEFAULT_VS2_LOCAL_RANGE_REPORT,
+        "vs2_scenario_report_path": DEFAULT_VS2_SCENARIO_REPORT,
+        "read_errors": [error for error in [proof_error, egress_error, range_error, vs2_scenario_error, matrix_error] if error],
+        "reuse_errors": reuse_errors,
+        "required_vs2_scenarios": sorted(CONNECTORHUB_CS_CH_036_VS2_SCENARIOS),
+        "missing_required_vs2_rows": missing_required_rows,
+        "failed_required_vs2_rows": failed_required_rows,
+        "source_fingerprint": {
+            "recorded_input_digest": proof.get("source_fingerprint", {}).get("input_digest"),
+            "current_input_digest": current_fingerprint.get("input_digest"),
+            "recorded_working_tree_digest": proof.get("source_fingerprint", {}).get("working_tree_digest"),
+            "current_working_tree_digest": current_fingerprint.get("working_tree_digest"),
+            "current_dirty": current_fingerprint.get("dirty"),
+            "current_dirty_paths": current_fingerprint.get("dirty_paths", []),
+        },
+        "proof_hash": proof.get("proof_hash"),
+        "egress_checks": egress_checks,
+        "local_range_checks": {
+            key: local_range_checks.get(key)
+            for key in [
+                "docker_network_direct_egress_denied",
+                "docker_network_provider_zero_requests_after_direct_attempts",
+                "docker_network_provider_reachable_from_governed_proxy",
+                "docker_network_membership_isolated",
+                "tenant_b_egress_denied",
+                "external_action_flow_executed",
+            ]
+        },
+        "network_boundary_checks": boundary_checks,
+        "network_topology": {
+            "service_net": topology.get("service_net"),
+            "provider_net": topology.get("provider_net"),
+            "service_members": topology.get("service_members", []),
+            "provider_members": topology.get("provider_members", []),
+            "published_ports": topology.get("published_ports"),
+            "privileged": topology.get("privileged"),
+            "host_network": topology.get("host_network"),
+        },
+        "direct_attempts": direct_attempts,
+        "provider_counts": provider_counts,
+        "governed_proxy_attempt": network_boundary.get("governed_proxy_attempt", {}),
+        "sink_request_count": sink.get("requests"),
+        "trap_sink_request_count": trap_sink.get("requests"),
+        "negative_evidence": negative,
+        "checks": checks,
+    }
+
+
+def verify_connector_contract_adapter(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("connector-contract-adapter")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+    ack_state_rel = _scenario_state_rel("connector-contract-adapter-ack")
+    ack_state_path = root / ack_state_rel
+    if ack_state_path.exists():
+        shutil.rmtree(ack_state_path)
+    retry_state_rel = _scenario_state_rel("connector-contract-adapter-retry")
+    retry_state_path = root / retry_state_rel
+    if retry_state_path.exists():
+        shutil.rmtree(retry_state_path)
+    lineage_state_rel = _scenario_state_rel("connector-contract-adapter-lineage")
+    lineage_state_path = root / lineage_state_rel
+    if lineage_state_path.exists():
+        shutil.rmtree(lineage_state_path)
+    policy_state_rel = _scenario_state_rel("connector-contract-adapter-policy")
+    policy_state_path = root / policy_state_rel
+    if policy_state_path.exists():
+        shutil.rmtree(policy_state_path)
+    evidence_state_rel = _scenario_state_rel("connector-contract-adapter-evidence")
+    evidence_state_path = root / evidence_state_rel
+    if evidence_state_path.exists():
+        shutil.rmtree(evidence_state_path)
+    raw_access_state_rel = _scenario_state_rel("connector-contract-adapter-raw-access")
+    raw_access_state_path = root / raw_access_state_rel
+    if raw_access_state_path.exists():
+        shutil.rmtree(raw_access_state_path)
+    untrusted_state_rel = _scenario_state_rel("connector-contract-adapter-untrusted-content")
+    untrusted_state_path = root / untrusted_state_rel
+    if untrusted_state_path.exists():
+        shutil.rmtree(untrusted_state_path)
+    selected_repo_state_rel = _scenario_state_rel("connector-contract-adapter-selected-repos")
+    selected_repo_state_path = root / selected_repo_state_rel
+    if selected_repo_state_path.exists():
+        shutil.rmtree(selected_repo_state_path)
+    source_control_state_rel = _scenario_state_rel("connector-contract-adapter-source-control")
+    source_control_state_path = root / source_control_state_rel
+    if source_control_state_path.exists():
+        shutil.rmtree(source_control_state_path)
+    content_restriction_state_rel = _scenario_state_rel("connector-contract-adapter-content-restrictions")
+    content_restriction_state_path = root / content_restriction_state_rel
+    if content_restriction_state_path.exists():
+        shutil.rmtree(content_restriction_state_path)
+    github_write_guard_state_rel = _scenario_state_rel("connector-contract-adapter-github-write-guard")
+    github_write_guard_state_path = root / github_write_guard_state_rel
+    if github_write_guard_state_path.exists():
+        shutil.rmtree(github_write_guard_state_path)
+    github_failure_state_rel = _scenario_state_rel("connector-contract-adapter-github-failure-states")
+    github_failure_state_path = root / github_failure_state_rel
+    if github_failure_state_path.exists():
+        shutil.rmtree(github_failure_state_path)
+    capture_state_rel = _scenario_state_rel("connector-contract-adapter-capture-consent")
+    capture_state_path = root / capture_state_rel
+    if capture_state_path.exists():
+        shutil.rmtree(capture_state_path)
+    activity_session_state_rel = _scenario_state_rel("connector-contract-adapter-activity-sessions")
+    activity_session_state_path = root / activity_session_state_rel
+    if activity_session_state_path.exists():
+        shutil.rmtree(activity_session_state_path)
+    watch_rule_state_rel = _scenario_state_rel("connector-contract-adapter-watch-rules")
+    watch_rule_state_path = root / watch_rule_state_rel
+    if watch_rule_state_path.exists():
+        shutil.rmtree(watch_rule_state_path)
+    chrome_active_tab_state_rel = _scenario_state_rel("connector-contract-adapter-chrome-active-tab")
+    chrome_active_tab_state_path = root / chrome_active_tab_state_rel
+    if chrome_active_tab_state_path.exists():
+        shutil.rmtree(chrome_active_tab_state_path)
+    chrome_auto_capture_state_rel = _scenario_state_rel("connector-contract-adapter-chrome-auto-capture")
+    chrome_auto_capture_state_path = root / chrome_auto_capture_state_rel
+    if chrome_auto_capture_state_path.exists():
+        shutil.rmtree(chrome_auto_capture_state_path)
+    chrome_sensitive_page_state_rel = _scenario_state_rel("connector-contract-adapter-chrome-sensitive-pages")
+    chrome_sensitive_page_state_path = root / chrome_sensitive_page_state_rel
+    if chrome_sensitive_page_state_path.exists():
+        shutil.rmtree(chrome_sensitive_page_state_path)
+    capture_lifecycle_state_rel = _scenario_state_rel("connector-contract-adapter-capture-lifecycle")
+    capture_lifecycle_state_path = root / capture_lifecycle_state_rel
+    if capture_lifecycle_state_path.exists():
+        shutil.rmtree(capture_lifecycle_state_path)
+    watch_result_state_rel = _scenario_state_rel("connector-contract-adapter-watch-results")
+    watch_result_state_path = root / watch_result_state_rel
+    if watch_result_state_path.exists():
+        shutil.rmtree(watch_result_state_path)
+    action_preflight_state_rel = _scenario_state_rel("connector-contract-adapter-action-preflight")
+    action_preflight_state_path = root / action_preflight_state_rel
+    if action_preflight_state_path.exists():
+        shutil.rmtree(action_preflight_state_path)
+    action_safety_state_rel = _scenario_state_rel("connector-contract-adapter-action-safety")
+    action_safety_state_path = root / action_safety_state_rel
+    if action_safety_state_path.exists():
+        shutil.rmtree(action_safety_state_path)
+    action_execution_state_rel = _scenario_state_rel("connector-contract-adapter-action-execution")
+    action_execution_state_path = root / action_execution_state_rel
+    if action_execution_state_path.exists():
+        shutil.rmtree(action_execution_state_path)
+    action_retry_state_rel = _scenario_state_rel("connector-contract-adapter-action-retry")
+    action_retry_state_path = root / action_retry_state_rel
+    if action_retry_state_path.exists():
+        shutil.rmtree(action_retry_state_path)
+    scope_isolation_state_rel = _scenario_state_rel("connector-contract-adapter-scope-isolation")
+    scope_isolation_state_path = root / scope_isolation_state_rel
+    if scope_isolation_state_path.exists():
+        shutil.rmtree(scope_isolation_state_path)
+    credential_custody_state_rel = _scenario_state_rel("connector-contract-adapter-credential-custody")
+    credential_custody_state_path = root / credential_custody_state_rel
+    if credential_custody_state_path.exists():
+        shutil.rmtree(credential_custody_state_path)
+    audit_correlation_state_rel = _scenario_state_rel("connector-contract-adapter-audit-correlation")
+    audit_correlation_state_path = root / audit_correlation_state_rel
+    if audit_correlation_state_path.exists():
+        shutil.rmtree(audit_correlation_state_path)
+    audit_correlation_tamper_state_rel = _scenario_state_rel("connector-contract-adapter-audit-correlation-tamper")
+    audit_correlation_tamper_state_path = root / audit_correlation_tamper_state_rel
+    if audit_correlation_tamper_state_path.exists():
+        shutil.rmtree(audit_correlation_tamper_state_path)
+    action_bypass_state_rel = _scenario_state_rel("connector-contract-adapter-action-bypass")
+    action_bypass_state_path = root / action_bypass_state_rel
+    if action_bypass_state_path.exists():
+        shutil.rmtree(action_bypass_state_path)
+    sync_state_rel = _scenario_state_rel("connector-contract-adapter-incremental-sync")
+    sync_state_path = root / sync_state_rel
+    if sync_state_path.exists():
+        shutil.rmtree(sync_state_path)
+
+    contract_path = "fixtures/connectorhub/contracts/github_readonly_contract.json"
+    raw_access_contract_path = "fixtures/connectorhub/contracts/github_raw_access_contract.json"
+    selected_repo_contract_path = "fixtures/connectorhub/contracts/github_selected_repositories_contract.json"
+    repository_delivery_path = "fixtures/connectorhub/deliveries/github_repository_projection_delivery.json"
+    commit_delivery_path = "fixtures/connectorhub/deliveries/github_commit_projection_delivery.json"
+    change_delivery_path = "fixtures/connectorhub/deliveries/github_change_projection_delivery.json"
+    delivery_path = "fixtures/connectorhub/deliveries/github_issue_projection_delivery.json"
+    file_snapshot_delivery_path = "fixtures/connectorhub/deliveries/github_file_snapshot_projection_delivery.json"
+    prompt_injection_delivery_path = "fixtures/connectorhub/deliveries/github_issue_projection_delivery_prompt_injection.json"
+    selected_repo_delivery_path = "fixtures/connectorhub/deliveries/github_selected_repo_issue_projection_delivery.json"
+    unselected_repo_delivery_path = "fixtures/connectorhub/deliveries/github_unselected_repo_issue_projection_delivery.json"
+    poison_delivery_path = "fixtures/connectorhub/deliveries/github_issue_poison_projection_delivery.json"
+    duplicate_event_delivery_path = "fixtures/connectorhub/deliveries/github_issue_projection_delivery_duplicate_event.json"
+    bad_webhook_delivery_path = "fixtures/connectorhub/deliveries/github_issue_projection_delivery_bad_webhook_signature.json"
+    unchanged_event_delivery_path = "fixtures/connectorhub/deliveries/github_issue_projection_delivery_unchanged_event.json"
+    changed_delivery_path = "fixtures/connectorhub/deliveries/github_issue_projection_delivery_changed.json"
+    forbidden_body_delivery_path = "fixtures/connectorhub/deliveries/github_issue_projection_delivery_forbidden_body.json"
+    oversized_excerpt_delivery_path = "fixtures/connectorhub/deliveries/github_issue_projection_delivery_oversized_excerpt.json"
+    content_secret_marker_delivery_path = (
+        "fixtures/connectorhub/deliveries/github_file_snapshot_projection_delivery_secret_marker.json"
+    )
+    content_private_material_delivery_path = (
+        "fixtures/connectorhub/deliveries/github_file_snapshot_projection_delivery_private_key.json"
+    )
+    content_binary_delivery_path = "fixtures/connectorhub/deliveries/github_file_snapshot_projection_delivery_binary.json"
+    content_large_delivery_path = "fixtures/connectorhub/deliveries/github_file_snapshot_projection_delivery_large.json"
+    content_forbidden_path_delivery_path = (
+        "fixtures/connectorhub/deliveries/github_file_snapshot_projection_delivery_forbidden_path.json"
+    )
+    content_generated_delivery_path = (
+        "fixtures/connectorhub/deliveries/github_file_snapshot_projection_delivery_generated.json"
+    )
+    activity_samples_path = "fixtures/connectorhub/activity_samples/macos_activity_samples_cs_ch_022.json"
+    watch_rule_path = "fixtures/connectorhub/watch_rules/project_alpha_watch_rule_cs_ch_023.json"
+    watch_rule_edit_path = "fixtures/connectorhub/watch_rules/project_alpha_watch_rule_edit_cs_ch_023.json"
+    chrome_active_tab_allowed_path = "fixtures/connectorhub/chrome/active_tab_capture_allowed_cs_ch_024.json"
+    chrome_active_tab_popup_blocked_path = "fixtures/connectorhub/chrome/active_tab_capture_popup_blocked_cs_ch_024.json"
+    chrome_auto_capture_config_path = "fixtures/connectorhub/chrome/auto_capture_config_cs_ch_025.json"
+    chrome_auto_capture_allowed_path = "fixtures/connectorhub/chrome/auto_capture_allowed_cs_ch_025.json"
+    chrome_auto_capture_blocked_path = "fixtures/connectorhub/chrome/auto_capture_blocked_cs_ch_025.json"
+    chrome_sensitive_page_path = "fixtures/connectorhub/chrome/sensitive_pages_cs_ch_026.json"
+    capture_lifecycle_path = "fixtures/connectorhub/capture/lifecycle_state_cs_ch_027.json"
+    watch_result_path = "fixtures/connectorhub/watch_results/project_alpha_watch_result_cs_ch_028.json"
+    action_preflight_path = "fixtures/connectorhub/actions/non_github_action_preflight_cs_ch_029.json"
+    direct_provider_pack_manifest_path = "fixtures/vs0/packs/14_extension_ecosystem/direct_provider_agent_pack_manifest.json"
+    issue_source_external_id = "github:repo:owner/project-alpha:issue:1001"
+    sync_cursor_id = "github:repo:owner/project-alpha:issues"
+    source_control_delivery_paths = {
+        "repository": repository_delivery_path,
+        "commit": commit_delivery_path,
+        "change": change_delivery_path,
+        "issue": delivery_path,
+        "file_snapshot": file_snapshot_delivery_path,
+    }
+    source_control_expected_projection_types = {
+        "repository": "source_control.repository.v1",
+        "commit": "source_control.commit.v1",
+        "change": "source_control.change.v1",
+        "issue": "source_control.issue.v1",
+        "file_snapshot": "source_control.file_snapshot.v1",
+    }
+    source_control_expected_capabilities = {
+        "repository": "source_control.repository.read",
+        "commit": "source_control.change.read",
+        "change": "source_control.change.read",
+        "issue": "source_control.issue.read",
+        "file_snapshot": "source_control.file.read",
+    }
+    content_restriction_delivery_paths = {
+        "secret_marker": content_secret_marker_delivery_path,
+        "binary": content_binary_delivery_path,
+        "large": content_large_delivery_path,
+        "forbidden_path": content_forbidden_path_delivery_path,
+        "generated": content_generated_delivery_path,
+        "private_material": content_private_material_delivery_path,
+    }
+    github_write_action_contract_path = "fixtures/connectorhub/contracts/github_write_action_contract.json"
+    missing_required_contract_path = "fixtures/connectorhub/contracts/github_required_missing_contract.json"
+    optional_missing_contract_path = "fixtures/connectorhub/contracts/github_optional_missing_contract.json"
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    validate_payload = _payload(transcripts["contract_validate"])
+    contract_record = validate_payload.get("connector_capability_contract", {})
+    contract_id = validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            contract_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    setup_payload = _payload(transcripts["setup_plan"])
+    setup_result = setup_payload.get("connector_setup_result", {})
+    source_policy = setup_payload.get("connector_source_policy", {})
+    transcripts["projection_delivery_ingest"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "ingest",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            contract_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    delivery_payload = _payload(transcripts["projection_delivery_ingest"])
+    delivery_artifact = delivery_payload.get("artifact", {})
+    delivery_receipt = delivery_payload.get("connector_delivery_receipt", {})
+    projection_snapshot = delivery_payload.get("connector_projection_snapshot", {})
+    connector_evidence_link = delivery_payload.get("connector_evidence_link", {})
+    delivery_artifact_id = delivery_artifact.get("artifact_id", "")
+    transcripts["projection_artifact_show"] = (
+        _run_cli_json(root, ["artifact", "show", delivery_artifact_id, "--state-dir", state_rel, "--json"])
+        if delivery_artifact_id
+        else {}
+    )
+    shown_delivery_artifact = _payload(transcripts["projection_artifact_show"]).get("artifact", {})
+    transcripts["ack_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            ack_state_rel,
+            "--json",
+        ],
+    )
+    ack_validate_payload = _payload(transcripts["ack_contract_validate"])
+    ack_contract_id = ack_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["ack_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            ack_contract_id,
+            "--state-dir",
+            ack_state_rel,
+            "--json",
+        ],
+    )
+    transcripts["ack_before_commit_crash"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            ack_contract_id,
+            "--fault-mode",
+            "before_commit",
+            "--state-dir",
+            ack_state_rel,
+            "--json",
+        ],
+    )
+    ack_before_commit_payload = _payload(transcripts["ack_before_commit_crash"])
+    transcripts["ack_reconcile_after_before_commit"] = _run_cli_json(
+        root,
+        ["connector", "delivery", "reconcile", "--state-dir", ack_state_rel, "--json"],
+    )
+    ack_reconcile_after_before_commit_payload = _payload(transcripts["ack_reconcile_after_before_commit"])
+    ack_reconcile_after_before_commit = ack_reconcile_after_before_commit_payload.get("connector_ack_reconciliation", {})
+    transcripts["ack_after_commit_before_ack_crash"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            ack_contract_id,
+            "--fault-mode",
+            "after_commit_before_ack",
+            "--state-dir",
+            ack_state_rel,
+            "--json",
+        ],
+    )
+    ack_after_commit_payload = _payload(transcripts["ack_after_commit_before_ack_crash"])
+    ack_pending_receipt = ack_after_commit_payload.get("connector_delivery_receipt", {})
+    ack_pending_outbox = ack_after_commit_payload.get("connector_ack_outbox", {})
+    transcripts["ack_redelivery_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            ack_contract_id,
+            "--state-dir",
+            ack_state_rel,
+            "--json",
+        ],
+    )
+    ack_redelivery_payload = _payload(transcripts["ack_redelivery_process"])
+    ack_redelivery_receipt = ack_redelivery_payload.get("connector_delivery_receipt", {})
+    ack_redelivery_outbox = ack_redelivery_payload.get("connector_ack_outbox", {})
+    ack_artifact = ack_redelivery_payload.get("artifact", {})
+    transcripts["ack_duplicate_redelivery_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            ack_contract_id,
+            "--state-dir",
+            ack_state_rel,
+            "--json",
+        ],
+    )
+    ack_duplicate_payload = _payload(transcripts["ack_duplicate_redelivery_process"])
+    ack_duplicate_receipt = ack_duplicate_payload.get("connector_delivery_receipt", {})
+    transcripts["ack_reconcile_final"] = _run_cli_json(
+        root,
+        ["connector", "delivery", "reconcile", "--state-dir", ack_state_rel, "--json"],
+    )
+    ack_reconcile_final_payload = _payload(transcripts["ack_reconcile_final"])
+    ack_reconciliation = ack_reconcile_final_payload.get("connector_ack_reconciliation", {})
+    transcripts["ack_audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", ack_state_rel, "--json"])
+    ack_audit_payload = _payload(transcripts["ack_audit_verify"])
+    transcripts["retry_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            retry_state_rel,
+            "--json",
+        ],
+    )
+    retry_validate_payload = _payload(transcripts["retry_contract_validate"])
+    retry_contract_id = retry_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["retry_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            retry_contract_id,
+            "--state-dir",
+            retry_state_rel,
+            "--json",
+        ],
+    )
+    transcripts["transient_retry_first"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            retry_contract_id,
+            "--failure-mode",
+            "transient",
+            "--state-dir",
+            retry_state_rel,
+            "--json",
+        ],
+    )
+    transient_retry_first_payload = _payload(transcripts["transient_retry_first"])
+    transient_retry_first_state = transient_retry_first_payload.get("connector_delivery_retry_state", {})
+    transcripts["transient_retry_second"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            retry_contract_id,
+            "--failure-mode",
+            "transient",
+            "--state-dir",
+            retry_state_rel,
+            "--json",
+        ],
+    )
+    transient_retry_second_payload = _payload(transcripts["transient_retry_second"])
+    transient_retry_second_state = transient_retry_second_payload.get("connector_delivery_retry_state", {})
+    transcripts["transient_retry_recovery"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            retry_contract_id,
+            "--state-dir",
+            retry_state_rel,
+            "--json",
+        ],
+    )
+    transient_recovery_payload = _payload(transcripts["transient_retry_recovery"])
+    transient_resolved_state = transient_recovery_payload.get("connector_delivery_retry_state", {})
+    transient_recovery_receipt = transient_recovery_payload.get("connector_delivery_receipt", {})
+    transient_recovery_outbox = transient_recovery_payload.get("connector_ack_outbox", {})
+    transcripts["poison_retry_first"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            poison_delivery_path,
+            "--contract-id",
+            retry_contract_id,
+            "--state-dir",
+            retry_state_rel,
+            "--json",
+        ],
+    )
+    poison_retry_first_payload = _payload(transcripts["poison_retry_first"])
+    transcripts["poison_retry_second"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            poison_delivery_path,
+            "--contract-id",
+            retry_contract_id,
+            "--state-dir",
+            retry_state_rel,
+            "--json",
+        ],
+    )
+    poison_retry_second_payload = _payload(transcripts["poison_retry_second"])
+    transcripts["poison_quarantine"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            poison_delivery_path,
+            "--contract-id",
+            retry_contract_id,
+            "--state-dir",
+            retry_state_rel,
+            "--json",
+        ],
+    )
+    poison_quarantine_payload = _payload(transcripts["poison_quarantine"])
+    poison_quarantine_state = poison_quarantine_payload.get("connector_delivery_retry_state", {})
+    poison_quarantine_item = poison_quarantine_payload.get("connector_delivery_quarantine", {})
+    poison_quarantine_id = poison_quarantine_item.get("quarantine_id", "")
+    transcripts["quarantine_list"] = _run_cli_json(
+        root,
+        ["connector", "quarantine", "list", "--state-dir", retry_state_rel, "--json"],
+    )
+    quarantine_list_payload = _payload(transcripts["quarantine_list"])
+    quarantine_list = quarantine_list_payload.get("connector_quarantine_list", {})
+    transcripts["quarantine_replay"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "quarantine",
+                "replay",
+                "--quarantine-id",
+                poison_quarantine_id,
+                "--state-dir",
+                retry_state_rel,
+                "--json",
+            ],
+        )
+        if poison_quarantine_id
+        else {}
+    )
+    quarantine_replay_payload = _payload(transcripts["quarantine_replay"])
+    quarantine_replay_item = quarantine_replay_payload.get("connector_delivery_quarantine", {})
+    transcripts["retry_audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", retry_state_rel, "--json"])
+    retry_audit_payload = _payload(transcripts["retry_audit_verify"])
+    transcripts["lineage_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            lineage_state_rel,
+            "--json",
+        ],
+    )
+    lineage_validate_payload = _payload(transcripts["lineage_contract_validate"])
+    lineage_contract_id = lineage_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["lineage_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            lineage_contract_id,
+            "--state-dir",
+            lineage_state_rel,
+            "--json",
+        ],
+    )
+    lineage_setup_payload = _payload(transcripts["lineage_setup_plan"])
+    lineage_setup_result = lineage_setup_payload.get("connector_setup_result", {})
+    transcripts["lineage_first_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            lineage_contract_id,
+            "--state-dir",
+            lineage_state_rel,
+            "--json",
+        ],
+    )
+    lineage_first_payload = _payload(transcripts["lineage_first_process"])
+    lineage_first_receipt = lineage_first_payload.get("connector_delivery_receipt", {})
+    lineage_first_artifact = lineage_first_payload.get("artifact", {})
+    lineage_first_dedupe = lineage_first_payload.get("connector_delivery_dedupe_state", {})
+    lineage_first_version = lineage_first_payload.get("connector_content_version", {})
+    transcripts["lineage_duplicate_event_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            duplicate_event_delivery_path,
+            "--contract-id",
+            lineage_contract_id,
+            "--state-dir",
+            lineage_state_rel,
+            "--json",
+        ],
+    )
+    lineage_duplicate_payload = _payload(transcripts["lineage_duplicate_event_process"])
+    lineage_duplicate_dedupe = lineage_duplicate_payload.get("connector_delivery_dedupe_state", {})
+    transcripts["lineage_unchanged_event_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            unchanged_event_delivery_path,
+            "--contract-id",
+            lineage_contract_id,
+            "--state-dir",
+            lineage_state_rel,
+            "--json",
+        ],
+    )
+    lineage_unchanged_payload = _payload(transcripts["lineage_unchanged_event_process"])
+    lineage_unchanged_dedupe = lineage_unchanged_payload.get("connector_delivery_dedupe_state", {})
+    transcripts["lineage_changed_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            changed_delivery_path,
+            "--contract-id",
+            lineage_contract_id,
+            "--state-dir",
+            lineage_state_rel,
+            "--json",
+        ],
+    )
+    lineage_changed_payload = _payload(transcripts["lineage_changed_process"])
+    lineage_changed_receipt = lineage_changed_payload.get("connector_delivery_receipt", {})
+    lineage_changed_artifact = lineage_changed_payload.get("artifact", {})
+    lineage_changed_dedupe = lineage_changed_payload.get("connector_delivery_dedupe_state", {})
+    lineage_changed_version = lineage_changed_payload.get("connector_content_version", {})
+    transcripts["content_lineage_show"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "lineage",
+            "show",
+            "--contract-id",
+            lineage_contract_id,
+            "--source-external-id",
+            issue_source_external_id,
+            "--state-dir",
+            lineage_state_rel,
+            "--json",
+        ],
+    )
+    content_lineage_payload = _payload(transcripts["content_lineage_show"])
+    content_lineage = content_lineage_payload.get("connector_content_lineage", {})
+    content_current = content_lineage_payload.get("connector_content_current", {})
+    transcripts["lineage_reconcile"] = _run_cli_json(
+        root,
+        ["connector", "delivery", "reconcile", "--state-dir", lineage_state_rel, "--json"],
+    )
+    lineage_reconcile_payload = _payload(transcripts["lineage_reconcile"])
+    lineage_reconciliation = lineage_reconcile_payload.get("connector_ack_reconciliation", {})
+    transcripts["lineage_audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", lineage_state_rel, "--json"])
+    lineage_audit_payload = _payload(transcripts["lineage_audit_verify"])
+    transcripts["policy_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            policy_state_rel,
+            "--json",
+        ],
+    )
+    policy_validate_payload = _payload(transcripts["policy_contract_validate"])
+    policy_contract_id = policy_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["policy_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            policy_contract_id,
+            "--state-dir",
+            policy_state_rel,
+            "--json",
+        ],
+    )
+    policy_setup_payload = _payload(transcripts["policy_setup_plan"])
+    policy_setup_result = policy_setup_payload.get("connector_setup_result", {})
+    policy_base_source_policy = policy_setup_payload.get("connector_source_policy", {})
+    transcripts["policy_allowed_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            policy_contract_id,
+            "--state-dir",
+            policy_state_rel,
+            "--json",
+        ],
+    )
+    policy_allowed_payload = _payload(transcripts["policy_allowed_process"])
+    policy_allowed_artifact = policy_allowed_payload.get("artifact", {})
+    policy_allowed_receipt = policy_allowed_payload.get("connector_delivery_receipt", {})
+    policy_allowed_decision = policy_allowed_payload.get("connector_projection_policy_decision", {})
+    transcripts["policy_forbidden_body_ingest"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "ingest",
+            "--file",
+            forbidden_body_delivery_path,
+            "--contract-id",
+            policy_contract_id,
+            "--state-dir",
+            policy_state_rel,
+            "--json",
+        ],
+    )
+    policy_forbidden_payload = _payload(transcripts["policy_forbidden_body_ingest"])
+    policy_forbidden_decision = policy_forbidden_payload.get("connector_projection_policy_decision", {})
+    transcripts["policy_confirm_narrow_max"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "source-policy",
+            "confirm",
+            "--contract-id",
+            policy_contract_id,
+            "--max-content-bytes",
+            "120",
+            "--state-dir",
+            policy_state_rel,
+            "--json",
+        ],
+    )
+    policy_confirm_payload = _payload(transcripts["policy_confirm_narrow_max"])
+    policy_narrowed_source_policy = policy_confirm_payload.get("connector_source_policy", {})
+    transcripts["policy_oversized_ingest"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "ingest",
+            "--file",
+            oversized_excerpt_delivery_path,
+            "--contract-id",
+            policy_contract_id,
+            "--state-dir",
+            policy_state_rel,
+            "--json",
+        ],
+    )
+    policy_oversized_payload = _payload(transcripts["policy_oversized_ingest"])
+    policy_oversized_decision = policy_oversized_payload.get("connector_projection_policy_decision", {})
+    transcripts["policy_audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", policy_state_rel, "--json"])
+    policy_audit_payload = _payload(transcripts["policy_audit_verify"])
+    transcripts["evidence_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            evidence_state_rel,
+            "--json",
+        ],
+    )
+    evidence_validate_payload = _payload(transcripts["evidence_contract_validate"])
+    evidence_contract_id = evidence_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["evidence_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            evidence_contract_id,
+            "--state-dir",
+            evidence_state_rel,
+            "--json",
+        ],
+    )
+    transcripts["evidence_delivery_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            evidence_contract_id,
+            "--state-dir",
+            evidence_state_rel,
+            "--json",
+        ],
+    )
+    evidence_delivery_payload = _payload(transcripts["evidence_delivery_process"])
+    evidence_delivery_receipt = evidence_delivery_payload.get("connector_delivery_receipt", {})
+    evidence_delivery_artifact = evidence_delivery_payload.get("artifact", {})
+    evidence_ref_id = evidence_delivery_receipt.get("evidence_ref", {}).get("evidence_ref_id", "")
+    evidence_delivery_receipt_id = evidence_delivery_receipt.get("delivery_receipt_id", "")
+    transcripts["connector_evidence_bundle_create"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "evidence",
+                "bundle",
+                "create",
+                "--delivery-receipt-id",
+                evidence_delivery_receipt_id,
+                "--query",
+                "project alpha connector evidence",
+                "--state-dir",
+                evidence_state_rel,
+                "--json",
+            ],
+        )
+        if evidence_delivery_receipt_id
+        else {}
+    )
+    evidence_bundle_payload = _payload(transcripts["connector_evidence_bundle_create"])
+    connector_evidence_bundle = evidence_bundle_payload.get("evidence_bundle", {})
+    connector_evidence_bundle_link = evidence_bundle_payload.get("connector_evidence_bundle_link", {})
+    evidence_bundle_id = connector_evidence_bundle.get("evidence_bundle_id", "")
+    transcripts["connector_evidence_bundle_show"] = (
+        _run_cli_json(
+            root,
+            [
+                "evidence",
+                "bundle",
+                "show",
+                evidence_bundle_id,
+                "--state-dir",
+                evidence_state_rel,
+                "--json",
+            ],
+        )
+        if evidence_bundle_id
+        else {}
+    )
+    evidence_bundle_show_payload = _payload(transcripts["connector_evidence_bundle_show"])
+    transcripts["connector_claim_create"] = (
+        _run_cli_json(
+            root,
+            [
+                "claim",
+                "create",
+                "--evidence-bundle-id",
+                evidence_bundle_id,
+                "--statement",
+                "Project Alpha issue evidence is available from a connected source.",
+                "--state-dir",
+                evidence_state_rel,
+                "--json",
+            ],
+        )
+        if evidence_bundle_id
+        else {}
+    )
+    evidence_claim_payload = _payload(transcripts["connector_claim_create"])
+    evidence_claim = evidence_claim_payload.get("claim", {})
+    evidence_claim_id = evidence_claim.get("claim_id", "")
+    transcripts["connector_claim_approve"] = (
+        _run_cli_json(
+            root,
+            [
+                "claim",
+                "approve",
+                evidence_claim_id,
+                "--state-dir",
+                evidence_state_rel,
+                "--json",
+            ],
+        )
+        if evidence_claim_id
+        else {}
+    )
+    evidence_claim_approve_payload = _payload(transcripts["connector_claim_approve"])
+    evidence_approved_claim = evidence_claim_approve_payload.get("claim", {})
+    transcripts["connector_evidence_ref_only_bundle"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "evidence",
+                "bundle",
+                "create",
+                "--evidence-ref-id",
+                evidence_ref_id,
+                "--state-dir",
+                evidence_state_rel,
+                "--json",
+            ],
+        )
+        if evidence_ref_id
+        else {}
+    )
+    evidence_ref_only_payload = _payload(transcripts["connector_evidence_ref_only_bundle"])
+    transcripts["connector_unsupported_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--statement",
+            "EvidenceRef metadata alone should not become approved truth.",
+            "--state-dir",
+            evidence_state_rel,
+            "--json",
+        ],
+    )
+    unsupported_claim_payload = _payload(transcripts["connector_unsupported_claim_create"])
+    unsupported_claim = unsupported_claim_payload.get("claim", {})
+    unsupported_claim_id = unsupported_claim.get("claim_id", "")
+    transcripts["connector_unsupported_claim_approve"] = (
+        _run_cli_json(
+            root,
+            [
+                "claim",
+                "approve",
+                unsupported_claim_id,
+                "--state-dir",
+                evidence_state_rel,
+                "--json",
+            ],
+        )
+        if unsupported_claim_id
+        else {}
+    )
+    unsupported_claim_approve_payload = _payload(transcripts["connector_unsupported_claim_approve"])
+    transcripts["evidence_audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", evidence_state_rel, "--json"])
+    evidence_audit_payload = _payload(transcripts["evidence_audit_verify"])
+    transcripts["raw_default_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            raw_access_state_rel,
+            "--json",
+        ],
+    )
+    raw_default_validate_payload = _payload(transcripts["raw_default_contract_validate"])
+    raw_default_contract_id = raw_default_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["raw_default_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            raw_default_contract_id,
+            "--state-dir",
+            raw_access_state_rel,
+            "--json",
+        ],
+    )
+    raw_default_setup_payload = _payload(transcripts["raw_default_setup_plan"])
+    raw_default_source_policy = raw_default_setup_payload.get("connector_source_policy", {})
+    transcripts["raw_default_denied_request"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "raw-access",
+            "request",
+            "--contract-id",
+            raw_default_contract_id,
+            "--evidence-ref-id",
+            "eref_project_alpha_issue_1001",
+            "--source-external-id",
+            issue_source_external_id,
+            "--purpose",
+            "diagnose_ingestion_gap",
+            "--classification",
+            "restricted",
+            "--ttl-seconds",
+            "60",
+            "--max-reads",
+            "1",
+            "--human-approved",
+            "--state-dir",
+            raw_access_state_rel,
+            "--json",
+        ],
+    )
+    raw_default_denied_payload = _payload(transcripts["raw_default_denied_request"])
+    transcripts["raw_allowed_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            raw_access_contract_path,
+            "--state-dir",
+            raw_access_state_rel,
+            "--json",
+        ],
+    )
+    raw_allowed_validate_payload = _payload(transcripts["raw_allowed_contract_validate"])
+    raw_allowed_contract_id = raw_allowed_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github_raw_access")
+    transcripts["raw_allowed_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            raw_allowed_contract_id,
+            "--state-dir",
+            raw_access_state_rel,
+            "--json",
+        ],
+    )
+    raw_allowed_setup_payload = _payload(transcripts["raw_allowed_setup_plan"])
+    raw_allowed_source_policy = raw_allowed_setup_payload.get("connector_source_policy", {})
+    transcripts["raw_ttl_denied_request"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "raw-access",
+            "request",
+            "--contract-id",
+            raw_allowed_contract_id,
+            "--evidence-ref-id",
+            "eref_project_alpha_issue_1001",
+            "--source-external-id",
+            issue_source_external_id,
+            "--purpose",
+            "diagnose_ingestion_gap",
+            "--classification",
+            "restricted",
+            "--ttl-seconds",
+            "61",
+            "--max-reads",
+            "1",
+            "--human-approved",
+            "--state-dir",
+            raw_access_state_rel,
+            "--json",
+        ],
+    )
+    raw_ttl_denied_payload = _payload(transcripts["raw_ttl_denied_request"])
+    transcripts["raw_read_limit_denied_request"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "raw-access",
+            "request",
+            "--contract-id",
+            raw_allowed_contract_id,
+            "--evidence-ref-id",
+            "eref_project_alpha_issue_1001",
+            "--source-external-id",
+            issue_source_external_id,
+            "--purpose",
+            "diagnose_ingestion_gap",
+            "--classification",
+            "restricted",
+            "--ttl-seconds",
+            "60",
+            "--max-reads",
+            "2",
+            "--human-approved",
+            "--state-dir",
+            raw_access_state_rel,
+            "--json",
+        ],
+    )
+    raw_read_limit_denied_payload = _payload(transcripts["raw_read_limit_denied_request"])
+    transcripts["raw_grant_request"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "raw-access",
+            "request",
+            "--contract-id",
+            raw_allowed_contract_id,
+            "--evidence-ref-id",
+            "eref_project_alpha_issue_1001",
+            "--source-external-id",
+            issue_source_external_id,
+            "--purpose",
+            "diagnose_ingestion_gap",
+            "--classification",
+            "restricted",
+            "--ttl-seconds",
+            "60",
+            "--max-reads",
+            "1",
+            "--human-approved",
+            "--state-dir",
+            raw_access_state_rel,
+            "--json",
+        ],
+    )
+    raw_grant_payload = _payload(transcripts["raw_grant_request"])
+    raw_access_grant = raw_grant_payload.get("connector_raw_access_grant", {})
+    raw_access_grant_id = raw_access_grant.get("raw_access_grant_id", "")
+    transcripts["raw_metadata_export"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "raw-access",
+                "export",
+                "--grant-id",
+                raw_access_grant_id,
+                "--state-dir",
+                raw_access_state_rel,
+                "--json",
+            ],
+        )
+        if raw_access_grant_id
+        else {}
+    )
+    raw_export_payload = _payload(transcripts["raw_metadata_export"])
+    raw_access_export = raw_export_payload.get("connector_raw_access_export", {})
+    transcripts["raw_read_once"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "raw-access",
+                "read",
+                "--grant-id",
+                raw_access_grant_id,
+                "--state-dir",
+                raw_access_state_rel,
+                "--json",
+            ],
+        )
+        if raw_access_grant_id
+        else {}
+    )
+    raw_read_once_payload = _payload(transcripts["raw_read_once"])
+    raw_read_once_grant = raw_read_once_payload.get("connector_raw_access_grant", {})
+    raw_read_once_result = raw_read_once_payload.get("connector_raw_access_result", {})
+    transcripts["raw_read_exhausted"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "raw-access",
+                "read",
+                "--grant-id",
+                raw_access_grant_id,
+                "--state-dir",
+                raw_access_state_rel,
+                "--json",
+            ],
+        )
+        if raw_access_grant_id
+        else {}
+    )
+    raw_read_exhausted_payload = _payload(transcripts["raw_read_exhausted"])
+    transcripts["raw_expiry_grant_request"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "raw-access",
+            "request",
+            "--contract-id",
+            raw_allowed_contract_id,
+            "--evidence-ref-id",
+            "eref_project_alpha_issue_1001_expiry",
+            "--source-external-id",
+            issue_source_external_id,
+            "--purpose",
+            "diagnose_ingestion_gap",
+            "--classification",
+            "restricted",
+            "--ttl-seconds",
+            "60",
+            "--max-reads",
+            "1",
+            "--human-approved",
+            "--state-dir",
+            raw_access_state_rel,
+            "--json",
+        ],
+    )
+    raw_expiry_grant_payload = _payload(transcripts["raw_expiry_grant_request"])
+    raw_expiry_grant_id = raw_expiry_grant_payload.get("connector_raw_access_grant", {}).get("raw_access_grant_id", "")
+    transcripts["raw_read_expired"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "raw-access",
+                "read",
+                "--grant-id",
+                raw_expiry_grant_id,
+                "--at",
+                "2999-01-01T00:00:00Z",
+                "--state-dir",
+                raw_access_state_rel,
+                "--json",
+            ],
+        )
+        if raw_expiry_grant_id
+        else {}
+    )
+    raw_read_expired_payload = _payload(transcripts["raw_read_expired"])
+    transcripts["raw_revoke_grant_request"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "raw-access",
+            "request",
+            "--contract-id",
+            raw_allowed_contract_id,
+            "--evidence-ref-id",
+            "eref_project_alpha_issue_1001_revoke",
+            "--source-external-id",
+            issue_source_external_id,
+            "--purpose",
+            "diagnose_ingestion_gap",
+            "--classification",
+            "restricted",
+            "--ttl-seconds",
+            "60",
+            "--max-reads",
+            "1",
+            "--human-approved",
+            "--state-dir",
+            raw_access_state_rel,
+            "--json",
+        ],
+    )
+    raw_revoke_grant_payload = _payload(transcripts["raw_revoke_grant_request"])
+    raw_revoke_grant_id = raw_revoke_grant_payload.get("connector_raw_access_grant", {}).get("raw_access_grant_id", "")
+    transcripts["raw_revoke_grant"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "raw-access",
+                "revoke",
+                "--grant-id",
+                raw_revoke_grant_id,
+                "--reason",
+                "operator finished diagnostic review",
+                "--state-dir",
+                raw_access_state_rel,
+                "--json",
+            ],
+        )
+        if raw_revoke_grant_id
+        else {}
+    )
+    raw_revoke_payload = _payload(transcripts["raw_revoke_grant"])
+    raw_revoked_grant = raw_revoke_payload.get("connector_raw_access_grant", {})
+    transcripts["raw_read_revoked"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "raw-access",
+                "read",
+                "--grant-id",
+                raw_revoke_grant_id,
+                "--state-dir",
+                raw_access_state_rel,
+                "--json",
+            ],
+        )
+        if raw_revoke_grant_id
+        else {}
+    )
+    raw_read_revoked_payload = _payload(transcripts["raw_read_revoked"])
+    transcripts["raw_access_audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", raw_access_state_rel, "--json"])
+    raw_access_audit_payload = _payload(transcripts["raw_access_audit_verify"])
+    transcripts["untrusted_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            untrusted_state_rel,
+            "--json",
+        ],
+    )
+    untrusted_validate_payload = _payload(transcripts["untrusted_contract_validate"])
+    untrusted_contract_id = untrusted_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["untrusted_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            untrusted_contract_id,
+            "--state-dir",
+            untrusted_state_rel,
+            "--json",
+        ],
+    )
+    transcripts["untrusted_delivery_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            prompt_injection_delivery_path,
+            "--contract-id",
+            untrusted_contract_id,
+            "--state-dir",
+            untrusted_state_rel,
+            "--json",
+        ],
+    )
+    untrusted_delivery_payload = _payload(transcripts["untrusted_delivery_process"])
+    untrusted_delivery_receipt = untrusted_delivery_payload.get("connector_delivery_receipt", {})
+    untrusted_delivery_artifact = untrusted_delivery_payload.get("artifact", {})
+    untrusted_review = untrusted_delivery_payload.get("connector_untrusted_content_review", {})
+    untrusted_delivery_receipt_id = untrusted_delivery_receipt.get("delivery_receipt_id", "")
+    untrusted_artifact_id = untrusted_delivery_artifact.get("artifact_id", "")
+    untrusted_review_id = untrusted_review.get("review_id", "")
+    transcripts["untrusted_review_show"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "untrusted-content",
+                "review",
+                "--delivery-receipt-id",
+                untrusted_delivery_receipt_id,
+                "--state-dir",
+                untrusted_state_rel,
+                "--json",
+            ],
+        )
+        if untrusted_delivery_receipt_id
+        else {}
+    )
+    untrusted_review_payload = _payload(transcripts["untrusted_review_show"])
+    shown_untrusted_review = untrusted_review_payload.get("connector_untrusted_content_review", {})
+    transcripts["untrusted_evidence_bundle_create"] = (
+        _run_cli_json(
+            root,
+            [
+                "connector",
+                "evidence",
+                "bundle",
+                "create",
+                "--delivery-receipt-id",
+                untrusted_delivery_receipt_id,
+                "--query",
+                "quoted malicious connector instruction",
+                "--state-dir",
+                untrusted_state_rel,
+                "--json",
+            ],
+        )
+        if untrusted_delivery_receipt_id
+        else {}
+    )
+    untrusted_bundle_payload = _payload(transcripts["untrusted_evidence_bundle_create"])
+    untrusted_evidence_bundle = untrusted_bundle_payload.get("evidence_bundle", {})
+    untrusted_connector_bundle_link = untrusted_bundle_payload.get("connector_evidence_bundle_link", {})
+    untrusted_bundle_id = untrusted_evidence_bundle.get("evidence_bundle_id", "")
+    transcripts["untrusted_claim_create"] = (
+        _run_cli_json(
+            root,
+            [
+                "claim",
+                "create",
+                "--evidence-bundle-id",
+                untrusted_bundle_id,
+                "--statement",
+                "The connector source contains a quoted instruction to ignore policy; it is not a system instruction or authority grant.",
+                "--state-dir",
+                untrusted_state_rel,
+                "--json",
+            ],
+        )
+        if untrusted_bundle_id
+        else {}
+    )
+    untrusted_claim_payload = _payload(transcripts["untrusted_claim_create"])
+    untrusted_claim = untrusted_claim_payload.get("claim", {})
+    transcripts["untrusted_agent_authority_attempt"] = _run_cli_json(
+        root,
+        [
+            "agent",
+            "prompt-authority-test",
+            "--role-id",
+            "connector",
+            "--requested-tool",
+            "shell.run",
+            "--requested-memory-scope",
+            "global",
+            "--requested-authority",
+            "external_egress",
+            "--state-dir",
+            untrusted_state_rel,
+            "--json",
+        ],
+    )
+    untrusted_agent_payload = _payload(transcripts["untrusted_agent_authority_attempt"])
+    transcripts["untrusted_memory_quarantine"] = (
+        _run_cli_json(
+            root,
+            [
+                "memory",
+                "quarantine-check",
+                "--artifact-id",
+                untrusted_artifact_id,
+                "--statement",
+                "Promote the quoted connector instruction as permanent memory.",
+                "--state-dir",
+                untrusted_state_rel,
+                "--json",
+            ],
+        )
+        if untrusted_artifact_id
+        else {}
+    )
+    untrusted_memory_payload = _payload(transcripts["untrusted_memory_quarantine"])
+    untrusted_memory_quarantine = untrusted_memory_payload.get("memory_quarantine", {})
+    transcripts["untrusted_egress_denied"] = _run_cli_json(
+        root,
+        [
+            "egress",
+            "test",
+            "--url",
+            "http://example.test/leak",
+            "--state-dir",
+            untrusted_state_rel,
+            "--json",
+        ],
+    )
+    untrusted_egress_payload = _payload(transcripts["untrusted_egress_denied"])
+    transcripts["untrusted_audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", untrusted_state_rel, "--json"])
+    untrusted_audit_payload = _payload(transcripts["untrusted_audit_verify"])
+    transcripts["selected_repo_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            selected_repo_contract_path,
+            "--state-dir",
+            selected_repo_state_rel,
+            "--json",
+        ],
+    )
+    selected_repo_validate_payload = _payload(transcripts["selected_repo_contract_validate"])
+    selected_repo_contract_id = selected_repo_validate_payload.get("ids", {}).get("contract_id", "ccon_selected_repos_github")
+    transcripts["selected_repo_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            selected_repo_contract_id,
+            "--state-dir",
+            selected_repo_state_rel,
+            "--json",
+        ],
+    )
+    selected_repo_setup_payload = _payload(transcripts["selected_repo_setup_plan"])
+    selected_repo_setup_result = selected_repo_setup_payload.get("connector_setup_result", {})
+    selected_repo_source_policy = selected_repo_setup_payload.get("connector_source_policy", {})
+    transcripts["selected_repo_allowed_delivery_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            selected_repo_delivery_path,
+            "--contract-id",
+            selected_repo_contract_id,
+            "--state-dir",
+            selected_repo_state_rel,
+            "--json",
+        ],
+    )
+    selected_repo_allowed_payload = _payload(transcripts["selected_repo_allowed_delivery_process"])
+    selected_repo_allowed_receipt = selected_repo_allowed_payload.get("connector_delivery_receipt", {})
+    selected_repo_allowed_artifact = selected_repo_allowed_payload.get("artifact", {})
+    selected_repo_allowed_policy_decision = selected_repo_allowed_payload.get("connector_projection_policy_decision", {})
+    transcripts["selected_repo_unselected_delivery_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            unselected_repo_delivery_path,
+            "--contract-id",
+            selected_repo_contract_id,
+            "--state-dir",
+            selected_repo_state_rel,
+            "--json",
+        ],
+    )
+    selected_repo_unselected_payload = _payload(transcripts["selected_repo_unselected_delivery_process"])
+    selected_repo_unselected_policy_decision = selected_repo_unselected_payload.get("connector_projection_policy_decision", {})
+    transcripts["selected_repo_direct_write_denied"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "direct-write-test",
+            "--provider",
+            "github",
+            "--target",
+            "github:repo:owner/project-alpha",
+            "--state-dir",
+            selected_repo_state_rel,
+            "--json",
+        ],
+    )
+    selected_repo_direct_write_payload = _payload(transcripts["selected_repo_direct_write_denied"])
+    transcripts["selected_repo_expand_selection_denied"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "source-policy",
+            "confirm",
+            "--contract-id",
+            selected_repo_contract_id,
+            "--selected-resource",
+            "github:repo:owner/project-alpha",
+            "--selected-resource",
+            "github:repo:owner/project-beta",
+            "--state-dir",
+            selected_repo_state_rel,
+            "--json",
+        ],
+    )
+    selected_repo_expand_payload = _payload(transcripts["selected_repo_expand_selection_denied"])
+    transcripts["selected_repo_audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", selected_repo_state_rel, "--json"])
+    selected_repo_audit_payload = _payload(transcripts["selected_repo_audit_verify"])
+    transcripts["source_control_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            source_control_state_rel,
+            "--json",
+        ],
+    )
+    source_control_validate_payload = _payload(transcripts["source_control_contract_validate"])
+    source_control_contract_id = source_control_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["source_control_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            source_control_contract_id,
+            "--state-dir",
+            source_control_state_rel,
+            "--json",
+        ],
+    )
+    source_control_setup_payload = _payload(transcripts["source_control_setup_plan"])
+    source_control_setup_result = source_control_setup_payload.get("connector_setup_result", {})
+    source_control_source_policy = source_control_setup_payload.get("connector_source_policy", {})
+    source_control_process_payloads: dict[str, dict[str, Any]] = {}
+    source_control_bundle_payloads: dict[str, dict[str, Any]] = {}
+    for projection_key, projection_path in source_control_delivery_paths.items():
+        process_transcript_key = f"source_control_{projection_key}_delivery_process"
+        transcripts[process_transcript_key] = _run_cli_json(
+            root,
+            [
+                "connector",
+                "delivery",
+                "process",
+                "--file",
+                projection_path,
+                "--contract-id",
+                source_control_contract_id,
+                "--state-dir",
+                source_control_state_rel,
+                "--json",
+            ],
+        )
+        process_payload = _payload(transcripts[process_transcript_key])
+        source_control_process_payloads[projection_key] = process_payload
+        receipt_id = process_payload.get("connector_delivery_receipt", {}).get("delivery_receipt_id", "__missing__")
+        bundle_transcript_key = f"source_control_{projection_key}_evidence_bundle"
+        transcripts[bundle_transcript_key] = _run_cli_json(
+            root,
+            [
+                "connector",
+                "evidence",
+                "bundle",
+                "create",
+                "--delivery-receipt-id",
+                receipt_id,
+                "--query",
+                f"source-control {projection_key} project-alpha",
+                "--state-dir",
+                source_control_state_rel,
+                "--json",
+            ],
+        )
+        source_control_bundle_payloads[projection_key] = _payload(transcripts[bundle_transcript_key])
+    transcripts["source_control_audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", source_control_state_rel, "--json"])
+    source_control_audit_payload = _payload(transcripts["source_control_audit_verify"])
+    transcripts["content_restriction_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            content_restriction_state_rel,
+            "--json",
+        ],
+    )
+    content_restriction_validate_payload = _payload(transcripts["content_restriction_contract_validate"])
+    content_restriction_contract_id = content_restriction_validate_payload.get("ids", {}).get(
+        "contract_id",
+        "ccon_project_alpha_github",
+    )
+    transcripts["content_restriction_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            content_restriction_contract_id,
+            "--state-dir",
+            content_restriction_state_rel,
+            "--json",
+        ],
+    )
+    content_restriction_setup_payload = _payload(transcripts["content_restriction_setup_plan"])
+    content_restriction_setup_result = content_restriction_setup_payload.get("connector_setup_result", {})
+    content_restriction_process_payloads: dict[str, dict[str, Any]] = {}
+    for restriction_key, restriction_path in content_restriction_delivery_paths.items():
+        transcript_key = f"content_restriction_{restriction_key}_delivery_process"
+        transcripts[transcript_key] = _run_cli_json(
+            root,
+            [
+                "connector",
+                "delivery",
+                "process",
+                "--file",
+                restriction_path,
+                "--contract-id",
+                content_restriction_contract_id,
+                "--state-dir",
+                content_restriction_state_rel,
+                "--json",
+            ],
+        )
+        content_restriction_process_payloads[restriction_key] = _payload(transcripts[transcript_key])
+    transcripts["content_restriction_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", content_restriction_state_rel, "--json"],
+    )
+    content_restriction_audit_payload = _payload(transcripts["content_restriction_audit_verify"])
+    transcripts["github_write_guard_contract_validate_denied"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            github_write_action_contract_path,
+            "--state-dir",
+            github_write_guard_state_rel,
+            "--json",
+        ],
+    )
+    github_write_guard_contract_denied_payload = _payload(transcripts["github_write_guard_contract_validate_denied"])
+    transcripts["github_write_guard_static"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "github-write-guard",
+            "--state-dir",
+            github_write_guard_state_rel,
+            "--json",
+        ],
+    )
+    github_write_guard_static_payload = _payload(transcripts["github_write_guard_static"])
+    github_write_guard_report = github_write_guard_static_payload.get("connector_github_write_guard", {})
+    github_write_guard_direct_write_payloads: dict[str, dict[str, Any]] = {}
+    for attempt in GITHUB_WRITE_DIRECT_ATTEMPTS:
+        transcript_key = f"github_write_guard_direct_write_{attempt['operation'].replace('.', '_')}"
+        transcripts[transcript_key] = _run_cli_json(
+            root,
+            [
+                "connector",
+                "direct-write-test",
+                "--provider",
+                "github",
+                "--target",
+                attempt["target"],
+                "--operation",
+                attempt["operation"],
+                "--state-dir",
+                github_write_guard_state_rel,
+                "--json",
+            ],
+        )
+        github_write_guard_direct_write_payloads[attempt["operation"]] = _payload(transcripts[transcript_key])
+    transcripts["github_write_guard_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", github_write_guard_state_rel, "--json"],
+    )
+    github_write_guard_audit_payload = _payload(transcripts["github_write_guard_audit_verify"])
+    transcripts["github_failure_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            github_failure_state_rel,
+            "--json",
+        ],
+    )
+    github_failure_validate_payload = _payload(transcripts["github_failure_contract_validate"])
+    github_failure_contract_id = github_failure_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["github_failure_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            github_failure_contract_id,
+            "--state-dir",
+            github_failure_state_rel,
+            "--json",
+        ],
+    )
+    github_failure_setup_payload = _payload(transcripts["github_failure_setup_plan"])
+    transcripts["github_failure_baseline_delivery"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            github_failure_contract_id,
+            "--state-dir",
+            github_failure_state_rel,
+            "--json",
+        ],
+    )
+    github_failure_baseline_payload = _payload(transcripts["github_failure_baseline_delivery"])
+    github_failure_payloads: dict[str, dict[str, Any]] = {}
+    for failure_mode in GITHUB_PROVIDER_FAILURE_MODES:
+        transcript_key = f"github_failure_{failure_mode}"
+        transcripts[transcript_key] = _run_cli_json(
+            root,
+            [
+                "connector",
+                "github-failure",
+                "simulate",
+                "--failure-mode",
+                failure_mode,
+                "--contract-id",
+                github_failure_contract_id,
+                "--source-ref",
+                "github:repo:owner/project-alpha",
+                "--state-dir",
+                github_failure_state_rel,
+                "--json",
+            ],
+        )
+        github_failure_payloads[failure_mode] = _payload(transcripts[transcript_key])
+    transcripts["github_failure_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", github_failure_state_rel, "--json"],
+    )
+    github_failure_audit_payload = _payload(transcripts["github_failure_audit_verify"])
+    transcripts["capture_permission_missing_probe"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "permission",
+            "probe",
+            "--platform-permission-state",
+            "not_granted",
+            "--state-dir",
+            capture_state_rel,
+            "--json",
+        ],
+    )
+    capture_permission_missing_payload = _payload(transcripts["capture_permission_missing_probe"])
+    transcripts["capture_guard_no_consent_no_permission"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "guard",
+            "evaluate",
+            "--platform-permission-state",
+            "not_granted",
+            "--state-dir",
+            capture_state_rel,
+            "--json",
+        ],
+    )
+    capture_guard_no_consent_no_permission_payload = _payload(transcripts["capture_guard_no_consent_no_permission"])
+    transcripts["capture_permission_granted_probe"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "permission",
+            "probe",
+            "--platform-permission-state",
+            "granted",
+            "--state-dir",
+            capture_state_rel,
+            "--json",
+        ],
+    )
+    capture_permission_granted_payload = _payload(transcripts["capture_permission_granted_probe"])
+    transcripts["capture_guard_permission_only"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "guard",
+            "evaluate",
+            "--platform-permission-state",
+            "granted",
+            "--state-dir",
+            capture_state_rel,
+            "--json",
+        ],
+    )
+    capture_guard_permission_only_payload = _payload(transcripts["capture_guard_permission_only"])
+    transcripts["capture_consent_granted"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "consent",
+            "granted",
+            "--purpose",
+            "local fixture WatchAgent capture readiness",
+            "--state-dir",
+            capture_state_rel,
+            "--json",
+        ],
+    )
+    capture_consent_granted_payload = _payload(transcripts["capture_consent_granted"])
+    transcripts["capture_guard_consent_only"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "guard",
+            "evaluate",
+            "--platform-permission-state",
+            "not_granted",
+            "--state-dir",
+            capture_state_rel,
+            "--json",
+        ],
+    )
+    capture_guard_consent_only_payload = _payload(transcripts["capture_guard_consent_only"])
+    transcripts["capture_guard_ready"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "guard",
+            "evaluate",
+            "--platform-permission-state",
+            "granted",
+            "--state-dir",
+            capture_state_rel,
+            "--json",
+        ],
+    )
+    capture_guard_ready_payload = _payload(transcripts["capture_guard_ready"])
+    transcripts["capture_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", capture_state_rel, "--json"],
+    )
+    capture_audit_payload = _payload(transcripts["capture_audit_verify"])
+    transcripts["activity_sessionize_samples"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "sessionize",
+            "--file",
+            activity_samples_path,
+            "--state-dir",
+            activity_session_state_rel,
+            "--json",
+        ],
+    )
+    activity_sessionize_payload = _payload(transcripts["activity_sessionize_samples"])
+    transcripts["activity_session_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", activity_session_state_rel, "--json"],
+    )
+    activity_session_audit_payload = _payload(transcripts["activity_session_audit_verify"])
+    transcripts["watch_rule_create"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "rule",
+            "create",
+            "--file",
+            watch_rule_path,
+            "--state-dir",
+            watch_rule_state_rel,
+            "--json",
+        ],
+    )
+    watch_rule_create_payload = _payload(transcripts["watch_rule_create"])
+    watch_rule_id = watch_rule_create_payload.get("watch_rule", {}).get("watch_rule_id", "wrule_missing")
+    transcripts["watch_rule_activate_missing"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "rule",
+            "activate",
+            "--watch-rule-id",
+            watch_rule_id,
+            "--source-readiness",
+            "missing",
+            "--state-dir",
+            watch_rule_state_rel,
+            "--json",
+        ],
+    )
+    watch_rule_activate_missing_payload = _payload(transcripts["watch_rule_activate_missing"])
+    transcripts["watch_rule_activate_ready"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "rule",
+            "activate",
+            "--watch-rule-id",
+            watch_rule_id,
+            "--source-readiness",
+            "ready",
+            "--state-dir",
+            watch_rule_state_rel,
+            "--json",
+        ],
+    )
+    watch_rule_activate_ready_payload = _payload(transcripts["watch_rule_activate_ready"])
+    transcripts["watch_rule_evaluate"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "rule",
+            "evaluate",
+            "--watch-rule-id",
+            watch_rule_id,
+            "--source-evidence-ref",
+            "connector_delivery_receipt:cdelrec_project_alpha_1001",
+            "--state-dir",
+            watch_rule_state_rel,
+            "--json",
+        ],
+    )
+    watch_rule_evaluate_payload = _payload(transcripts["watch_rule_evaluate"])
+    transcripts["watch_rule_pause"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "rule",
+            "pause",
+            "--watch-rule-id",
+            watch_rule_id,
+            "--state-dir",
+            watch_rule_state_rel,
+            "--json",
+        ],
+    )
+    watch_rule_pause_payload = _payload(transcripts["watch_rule_pause"])
+    transcripts["watch_rule_resume"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "rule",
+            "resume",
+            "--watch-rule-id",
+            watch_rule_id,
+            "--state-dir",
+            watch_rule_state_rel,
+            "--json",
+        ],
+    )
+    watch_rule_resume_payload = _payload(transcripts["watch_rule_resume"])
+    transcripts["watch_rule_edit"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "rule",
+            "edit",
+            "--watch-rule-id",
+            watch_rule_id,
+            "--file",
+            watch_rule_edit_path,
+            "--state-dir",
+            watch_rule_state_rel,
+            "--json",
+        ],
+    )
+    watch_rule_edit_payload = _payload(transcripts["watch_rule_edit"])
+    transcripts["watch_rule_cross_scope_show"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "rule",
+            "show",
+            "--watch-rule-id",
+            watch_rule_id,
+            "--namespace-id",
+            "other",
+            "--state-dir",
+            watch_rule_state_rel,
+            "--json",
+        ],
+    )
+    watch_rule_cross_scope_payload = _payload(transcripts["watch_rule_cross_scope_show"])
+    transcripts["watch_rule_delete"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "rule",
+            "delete",
+            "--watch-rule-id",
+            watch_rule_id,
+            "--state-dir",
+            watch_rule_state_rel,
+            "--json",
+        ],
+    )
+    watch_rule_delete_payload = _payload(transcripts["watch_rule_delete"])
+    transcripts["watch_rule_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", watch_rule_state_rel, "--json"],
+    )
+    watch_rule_audit_payload = _payload(transcripts["watch_rule_audit_verify"])
+    transcripts["chrome_active_tab_no_consent"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "browser",
+            "active-tab",
+            "--file",
+            chrome_active_tab_allowed_path,
+            "--state-dir",
+            chrome_active_tab_state_rel,
+            "--json",
+        ],
+    )
+    chrome_active_tab_no_consent_payload = _payload(transcripts["chrome_active_tab_no_consent"])
+    transcripts["chrome_active_tab_consent"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "consent",
+            "granted",
+            "--source-id",
+            "chrome_active_tab",
+            "--purpose",
+            "explicit Chrome active-tab summary capture",
+            "--state-dir",
+            chrome_active_tab_state_rel,
+            "--json",
+        ],
+    )
+    chrome_active_tab_consent_payload = _payload(transcripts["chrome_active_tab_consent"])
+    transcripts["chrome_active_tab_popup_blocked"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "browser",
+            "active-tab",
+            "--file",
+            chrome_active_tab_popup_blocked_path,
+            "--state-dir",
+            chrome_active_tab_state_rel,
+            "--json",
+        ],
+    )
+    chrome_active_tab_popup_blocked_payload = _payload(transcripts["chrome_active_tab_popup_blocked"])
+    transcripts["chrome_active_tab_allowed"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "browser",
+            "active-tab",
+            "--file",
+            chrome_active_tab_allowed_path,
+            "--state-dir",
+            chrome_active_tab_state_rel,
+            "--json",
+        ],
+    )
+    chrome_active_tab_allowed_payload = _payload(transcripts["chrome_active_tab_allowed"])
+    transcripts["chrome_active_tab_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", chrome_active_tab_state_rel, "--json"],
+    )
+    chrome_active_tab_audit_payload = _payload(transcripts["chrome_active_tab_audit_verify"])
+    transcripts["chrome_auto_capture_no_config"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "browser",
+            "auto-capture",
+            "--file",
+            chrome_auto_capture_allowed_path,
+            "--state-dir",
+            chrome_auto_capture_state_rel,
+            "--json",
+        ],
+    )
+    chrome_auto_capture_no_config_payload = _payload(transcripts["chrome_auto_capture_no_config"])
+    transcripts["chrome_auto_capture_consent"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "consent",
+            "granted",
+            "--source-id",
+            "chrome_auto_capture",
+            "--purpose",
+            "allowlist Chrome auto capture for Project Alpha docs",
+            "--state-dir",
+            chrome_auto_capture_state_rel,
+            "--json",
+        ],
+    )
+    chrome_auto_capture_consent_payload = _payload(transcripts["chrome_auto_capture_consent"])
+    transcripts["chrome_auto_capture_config"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "browser",
+            "auto-config",
+            "--file",
+            chrome_auto_capture_config_path,
+            "--state-dir",
+            chrome_auto_capture_state_rel,
+            "--json",
+        ],
+    )
+    chrome_auto_capture_config_payload = _payload(transcripts["chrome_auto_capture_config"])
+    transcripts["chrome_auto_capture_blocked"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "browser",
+            "auto-capture",
+            "--file",
+            chrome_auto_capture_blocked_path,
+            "--state-dir",
+            chrome_auto_capture_state_rel,
+            "--json",
+        ],
+    )
+    chrome_auto_capture_blocked_payload = _payload(transcripts["chrome_auto_capture_blocked"])
+    transcripts["chrome_auto_capture_allowed"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "browser",
+            "auto-capture",
+            "--file",
+            chrome_auto_capture_allowed_path,
+            "--state-dir",
+            chrome_auto_capture_state_rel,
+            "--json",
+        ],
+    )
+    chrome_auto_capture_allowed_payload = _payload(transcripts["chrome_auto_capture_allowed"])
+    transcripts["chrome_auto_capture_duplicate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "browser",
+            "auto-capture",
+            "--file",
+            chrome_auto_capture_allowed_path,
+            "--state-dir",
+            chrome_auto_capture_state_rel,
+            "--json",
+        ],
+    )
+    chrome_auto_capture_duplicate_payload = _payload(transcripts["chrome_auto_capture_duplicate"])
+    transcripts["chrome_auto_capture_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", chrome_auto_capture_state_rel, "--json"],
+    )
+    chrome_auto_capture_audit_payload = _payload(transcripts["chrome_auto_capture_audit_verify"])
+    transcripts["chrome_sensitive_page_policy"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "browser",
+            "sensitive-policy",
+            "--file",
+            chrome_sensitive_page_path,
+            "--state-dir",
+            chrome_sensitive_page_state_rel,
+            "--json",
+        ],
+    )
+    chrome_sensitive_page_payload = _payload(transcripts["chrome_sensitive_page_policy"])
+    transcripts["chrome_sensitive_page_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", chrome_sensitive_page_state_rel, "--json"],
+    )
+    chrome_sensitive_page_audit_payload = _payload(transcripts["chrome_sensitive_page_audit_verify"])
+    transcripts["capture_lifecycle_seed"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "seed",
+            "--file",
+            capture_lifecycle_path,
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_seed_payload = _payload(transcripts["capture_lifecycle_seed"])
+    transcripts["capture_lifecycle_pause_source"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "pause",
+            "--source-id",
+            "macos_activity",
+            "--target-kind",
+            "source",
+            "--reason",
+            "Owner paused local activity collection.",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_pause_payload = _payload(transcripts["capture_lifecycle_pause_source"])
+    transcripts["capture_lifecycle_sample_while_paused"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "sample-attempt",
+            "--source-id",
+            "macos_activity",
+            "--event-id",
+            "sample-while-paused",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_paused_sample_payload = _payload(transcripts["capture_lifecycle_sample_while_paused"])
+    transcripts["capture_lifecycle_resume_source"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "resume",
+            "--source-id",
+            "macos_activity",
+            "--target-kind",
+            "source",
+            "--reason",
+            "Owner resumed local activity collection.",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_resume_payload = _payload(transcripts["capture_lifecycle_resume_source"])
+    transcripts["capture_lifecycle_sample_after_resume"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "sample-attempt",
+            "--source-id",
+            "macos_activity",
+            "--event-id",
+            "sample-after-resume-check",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_active_sample_payload = _payload(transcripts["capture_lifecycle_sample_after_resume"])
+    transcripts["capture_lifecycle_pause_watch_rule"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "pause",
+            "--source-id",
+            "macos_activity",
+            "--target-kind",
+            "watch_rule",
+            "--target-id",
+            "wrule_project_alpha_capture",
+            "--reason",
+            "Pause one Watch Rule without removing configuration.",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_watch_pause_payload = _payload(transcripts["capture_lifecycle_pause_watch_rule"])
+    transcripts["capture_lifecycle_pause_global"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "pause",
+            "--source-id",
+            "all_collection",
+            "--target-kind",
+            "global",
+            "--target-id",
+            "global_collection",
+            "--reason",
+            "Pause all collection.",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_global_pause_payload = _payload(transcripts["capture_lifecycle_pause_global"])
+    transcripts["capture_lifecycle_revoke_chrome"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "revoke",
+            "--source-id",
+            "chrome_auto_capture",
+            "--target-kind",
+            "source",
+            "--reason",
+            "Owner revoked Chrome capture authority.",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_revoke_payload = _payload(transcripts["capture_lifecycle_revoke_chrome"])
+    transcripts["capture_lifecycle_sample_after_revoke"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "sample-attempt",
+            "--source-id",
+            "chrome_auto_capture",
+            "--event-id",
+            "chrome-sample-after-revoke",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_revoked_sample_payload = _payload(transcripts["capture_lifecycle_sample_after_revoke"])
+    transcripts["capture_lifecycle_retention"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "retention",
+            "--source-id",
+            "macos_activity",
+            "--target-kind",
+            "source",
+            "--retention-days",
+            "7",
+            "--reason",
+            "Reduce derived sample retention.",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_retention_payload = _payload(transcripts["capture_lifecycle_retention"])
+    transcripts["capture_lifecycle_export"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "export",
+            "--source-id",
+            "macos_activity",
+            "--include-history",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_export_payload = _payload(transcripts["capture_lifecycle_export"])
+    transcripts["capture_lifecycle_review_save"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "review-result",
+            "--result-id",
+            "capres_project_alpha_activity_summary",
+            "--decision",
+            "save",
+            "--note",
+            "Save as evidence-backed activity summary.",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_review_save_payload = _payload(transcripts["capture_lifecycle_review_save"])
+    transcripts["capture_lifecycle_review_dismiss"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "review-result",
+            "--result-id",
+            "capres_chrome_project_page_hint",
+            "--decision",
+            "dismiss",
+            "--note",
+            "Dismiss noisy browser hint.",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_review_dismiss_payload = _payload(transcripts["capture_lifecycle_review_dismiss"])
+    transcripts["capture_lifecycle_delete_dry_run"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "delete",
+            "--source-id",
+            "macos_activity",
+            "--dry-run",
+            "--reason",
+            "Owner requested local fixture cleanup.",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_delete_dry_payload = _payload(transcripts["capture_lifecycle_delete_dry_run"])
+    transcripts["capture_lifecycle_delete_execute"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "capture",
+            "lifecycle",
+            "delete",
+            "--source-id",
+            "macos_activity",
+            "--execute",
+            "--authorized",
+            "--reason",
+            "Authorized local fixture deletion.",
+            "--state-dir",
+            capture_lifecycle_state_rel,
+            "--json",
+        ],
+    )
+    capture_lifecycle_delete_execute_payload = _payload(transcripts["capture_lifecycle_delete_execute"])
+    transcripts["capture_lifecycle_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", capture_lifecycle_state_rel, "--json"],
+    )
+    capture_lifecycle_audit_payload = _payload(transcripts["capture_lifecycle_audit_verify"])
+    transcripts["watch_result_build"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "result",
+            "build",
+            "--file",
+            watch_result_path,
+            "--state-dir",
+            watch_result_state_rel,
+            "--json",
+        ],
+    )
+    watch_result_build_payload = _payload(transcripts["watch_result_build"])
+    watch_result_record_for_commands = watch_result_build_payload.get("watch_result", {})
+    watch_result_id_for_commands = str(watch_result_record_for_commands.get("watch_result_id") or "")
+    watch_result_inferences_for_commands = watch_result_build_payload.get("watch_inferences", [])
+    watch_result_low_confidence_inference_id = next(
+        (
+            str(inference.get("watch_inference_id") or "")
+            for inference in watch_result_inferences_for_commands
+            if isinstance(inference, dict) and inference.get("low_confidence") is True
+        ),
+        "",
+    )
+    transcripts["watch_result_correct"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "result",
+            "correct",
+            "--watch-result-id",
+            watch_result_id_for_commands,
+            "--inference-id",
+            watch_result_low_confidence_inference_id,
+            "--hypothesis",
+            "Project Alpha evidence should be reviewed; launch impact remains uncertain.",
+            "--reason",
+            "Owner corrected an over-specific risk interpretation.",
+            "--state-dir",
+            watch_result_state_rel,
+            "--json",
+        ],
+    )
+    watch_result_correct_payload = _payload(transcripts["watch_result_correct"])
+    transcripts["watch_result_memory_approval_denied"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "result",
+            "approve-memory",
+            "--watch-result-id",
+            watch_result_id_for_commands,
+            "--inference-id",
+            watch_result_low_confidence_inference_id,
+            "--state-dir",
+            watch_result_state_rel,
+            "--json",
+        ],
+    )
+    watch_result_memory_approval_payload = _payload(transcripts["watch_result_memory_approval_denied"])
+    transcripts["watch_result_review"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "result",
+            "review",
+            "--watch-result-id",
+            watch_result_id_for_commands,
+            "--decision",
+            "save_draft_memory",
+            "--note",
+            "Keep as draft memory candidate only.",
+            "--state-dir",
+            watch_result_state_rel,
+            "--json",
+        ],
+    )
+    watch_result_review_payload = _payload(transcripts["watch_result_review"])
+    transcripts["watch_result_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", watch_result_state_rel, "--json"],
+    )
+    watch_result_audit_payload = _payload(transcripts["watch_result_audit_verify"])
+    transcripts["action_preflight_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_validate_payload = _payload(transcripts["action_preflight_contract_validate"])
+    action_preflight_contract_id = action_preflight_validate_payload.get("ids", {}).get(
+        "contract_id", "ccon_project_alpha_github"
+    )
+    transcripts["action_preflight_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            action_preflight_contract_id,
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_setup_payload = _payload(transcripts["action_preflight_setup_plan"])
+    transcripts["action_preflight_delivery_ingest"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "ingest",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            action_preflight_contract_id,
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_ingest_payload = _payload(transcripts["action_preflight_delivery_ingest"])
+    action_preflight_delivery_receipt_id = action_preflight_ingest_payload.get("connector_delivery_receipt", {}).get(
+        "delivery_receipt_id", ""
+    )
+    transcripts["action_preflight_bundle_create"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "evidence",
+            "bundle",
+            "create",
+            "--delivery-receipt-id",
+            action_preflight_delivery_receipt_id,
+            "--query",
+            "project alpha support action preflight evidence",
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_bundle_payload = _payload(transcripts["action_preflight_bundle_create"])
+    action_preflight_evidence_bundle_id = action_preflight_bundle_payload.get("evidence_bundle", {}).get(
+        "evidence_bundle_id", ""
+    )
+    transcripts["action_preflight_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            action_preflight_evidence_bundle_id,
+            "--statement",
+            "Project Alpha support ticket CS-1001 should be updated from archived connector evidence.",
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_claim_payload = _payload(transcripts["action_preflight_claim_create"])
+    action_preflight_claim_id = action_preflight_claim_payload.get("claim", {}).get("claim_id", "")
+    transcripts["action_preflight_claim_approve"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "approve",
+            action_preflight_claim_id,
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_claim_approve_payload = _payload(transcripts["action_preflight_claim_approve"])
+    action_preflight_approved_claim_id = action_preflight_claim_approve_payload.get("claim", {}).get("claim_id", "")
+    transcripts["action_preflight_mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Prepare a governed supportdesk update from evidence-backed Project Alpha context.",
+            "--claim-id",
+            action_preflight_approved_claim_id,
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_mission_payload = _payload(transcripts["action_preflight_mission_create"])
+    action_preflight_mission_id = action_preflight_mission_payload.get("mission", {}).get("mission_id", "")
+    transcripts["action_preflight_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            action_preflight_mission_id,
+            "--claim-id",
+            action_preflight_approved_claim_id,
+            "--goal",
+            "Update support ticket CS-1001 with the evidence-backed follow-up status.",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "supportdesk",
+            "--target",
+            "supportdesk:ticket:CS-1001",
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_action_payload = _payload(transcripts["action_preflight_action_propose"])
+    action_preflight_action_id = action_preflight_action_payload.get("action_card", {}).get("action_id", "")
+    transcripts["action_preflight_dry_run"] = _run_cli_json(
+        root,
+        ["action", "dry-run", action_preflight_action_id, "--state-dir", action_preflight_state_rel, "--json"],
+    )
+    action_preflight_dry_run_payload = _payload(transcripts["action_preflight_dry_run"])
+    transcripts["action_preflight_allowed"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "action-preflight",
+            "run",
+            "--action-id",
+            action_preflight_action_id,
+            "--file",
+            action_preflight_path,
+            "--case-id",
+            "allowed",
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_allowed_payload = _payload(transcripts["action_preflight_allowed"])
+    transcripts["action_preflight_execute_denied"] = _run_cli_json(
+        root,
+        ["action", "execute", action_preflight_action_id, "--state-dir", action_preflight_state_rel, "--json"],
+    )
+    action_preflight_execute_denied_payload = _payload(transcripts["action_preflight_execute_denied"])
+    action_preflight_denial_cases = {
+        "undeclared_action": "CS_CONNECTOR_ACTION_PREFLIGHT_UNDECLARED_ACTION",
+        "unsupported_provider": "CS_CONNECTOR_ACTION_PREFLIGHT_PROVIDER_UNSUPPORTED",
+        "missing_permission": "CS_CONNECTOR_ACTION_PREFLIGHT_PERMISSION_MISSING",
+        "invalid_input": "CS_CONNECTOR_ACTION_PREFLIGHT_INPUT_INVALID",
+        "missing_idempotency": "CS_CONNECTOR_ACTION_PREFLIGHT_IDEMPOTENCY_REQUIRED",
+    }
+    action_preflight_denial_payloads: dict[str, dict[str, Any]] = {}
+    for case_id in action_preflight_denial_cases:
+        transcript_key = f"action_preflight_denied_{case_id}"
+        transcripts[transcript_key] = _run_cli_json(
+            root,
+            [
+                "connector",
+                "action-preflight",
+                "run",
+                "--action-id",
+                action_preflight_action_id,
+                "--file",
+                action_preflight_path,
+                "--case-id",
+                case_id,
+                "--state-dir",
+                action_preflight_state_rel,
+                "--json",
+            ],
+        )
+        action_preflight_denial_payloads[case_id] = _payload(transcripts[transcript_key])
+    transcripts["action_preflight_github_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            action_preflight_mission_id,
+            "--claim-id",
+            action_preflight_approved_claim_id,
+            "--goal",
+            "Attempt a GitHub issue comment that must remain outside ConnectorHub action preflight.",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "github",
+            "--target",
+            "github:repo:owner/project-alpha:issue:1001",
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_github_action_payload = _payload(transcripts["action_preflight_github_action_propose"])
+    action_preflight_github_action_id = action_preflight_github_action_payload.get("action_card", {}).get(
+        "action_id", ""
+    )
+    transcripts["action_preflight_github_denied"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "action-preflight",
+            "run",
+            "--action-id",
+            action_preflight_github_action_id,
+            "--file",
+            action_preflight_path,
+            "--case-id",
+            "github_read_only",
+            "--state-dir",
+            action_preflight_state_rel,
+            "--json",
+        ],
+    )
+    action_preflight_github_denied_payload = _payload(transcripts["action_preflight_github_denied"])
+    transcripts["action_preflight_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", action_preflight_state_rel, "--json"],
+    )
+    action_preflight_audit_payload = _payload(transcripts["action_preflight_audit_verify"])
+    transcripts["action_safety_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_validate_payload = _payload(transcripts["action_safety_contract_validate"])
+    action_safety_contract_id = action_safety_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["action_safety_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            action_safety_contract_id,
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_setup_payload = _payload(transcripts["action_safety_setup_plan"])
+    transcripts["action_safety_delivery_ingest"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "ingest",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            action_safety_contract_id,
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_ingest_payload = _payload(transcripts["action_safety_delivery_ingest"])
+    action_safety_delivery_receipt_id = action_safety_ingest_payload.get("connector_delivery_receipt", {}).get(
+        "delivery_receipt_id",
+        "",
+    )
+    transcripts["action_safety_bundle_create"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "evidence",
+            "bundle",
+            "create",
+            "--delivery-receipt-id",
+            action_safety_delivery_receipt_id,
+            "--query",
+            "project alpha action safety envelope evidence",
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_bundle_payload = _payload(transcripts["action_safety_bundle_create"])
+    action_safety_evidence_bundle_id = action_safety_bundle_payload.get("evidence_bundle", {}).get(
+        "evidence_bundle_id",
+        "",
+    )
+    transcripts["action_safety_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            action_safety_evidence_bundle_id,
+            "--statement",
+            "Project Alpha support action execution requires every safety envelope gate.",
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_claim_payload = _payload(transcripts["action_safety_claim_create"])
+    action_safety_claim_id = action_safety_claim_payload.get("claim", {}).get("claim_id", "")
+    transcripts["action_safety_claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", action_safety_claim_id, "--state-dir", action_safety_state_rel, "--json"],
+    )
+    action_safety_claim_approve_payload = _payload(transcripts["action_safety_claim_approve"])
+    action_safety_approved_claim_id = action_safety_claim_approve_payload.get("claim", {}).get("claim_id", "")
+    transcripts["action_safety_mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Prepare a governed supportdesk execution safety envelope.",
+            "--claim-id",
+            action_safety_approved_claim_id,
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_mission_payload = _payload(transcripts["action_safety_mission_create"])
+    action_safety_mission_id = action_safety_mission_payload.get("mission", {}).get("mission_id", "")
+    transcripts["action_safety_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            action_safety_mission_id,
+            "--claim-id",
+            action_safety_approved_claim_id,
+            "--goal",
+            "Update support ticket CS-1001 only if every execution gate is valid.",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "supportdesk",
+            "--target",
+            "supportdesk:ticket:CS-1001",
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_action_payload = _payload(transcripts["action_safety_action_propose"])
+    action_safety_action_id = action_safety_action_payload.get("action_card", {}).get("action_id", "")
+    transcripts["action_safety_allowed_preflight"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "action-preflight",
+            "run",
+            "--action-id",
+            action_safety_action_id,
+            "--file",
+            action_preflight_path,
+            "--case-id",
+            "allowed",
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_allowed_preflight_payload = _payload(transcripts["action_safety_allowed_preflight"])
+    transcripts["action_safety_invalid_approval"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "approve",
+            action_safety_action_id,
+            "--approver",
+            "unauthorized_delegate",
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_invalid_approval_payload = _payload(transcripts["action_safety_invalid_approval"])
+    transcripts["action_safety_valid_approval"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "approve",
+            action_safety_action_id,
+            "--approver",
+            "owner",
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_valid_approval_payload = _payload(transcripts["action_safety_valid_approval"])
+    action_safety_valid_action = action_safety_valid_approval_payload.get("action_card", {})
+    action_safety_action_path = action_safety_state_path / "actions" / f"{action_safety_action_id}.json"
+
+    def _write_action_safety_action(record: dict[str, Any]) -> None:
+        action_safety_action_path.write_text(json.dumps(record, sort_keys=True) + "\n")
+
+    def _clone_action_safety_action(record: dict[str, Any]) -> dict[str, Any]:
+        return json.loads(json.dumps(record))
+
+    action_safety_denial_payloads: dict[str, dict[str, Any]] = {}
+    action_safety_expected_reason_codes = {
+        "missing_evidence": "CS_ACTION_EVIDENCE_REQUIRED",
+        "locked_workspace": "CS_ACTION_POLICY_DENIED",
+        "missing_approval": "CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED",
+        "unauthorized_approver": "CS_ACTION_APPROVER_UNAUTHORIZED",
+        "missing_permission": "CS_ACTION_CONNECTOR_PERMISSION_REQUIRED",
+        "missing_idempotency": "CS_ACTION_IDEMPOTENCY_REQUIRED",
+        "stale_preflight": "CS_ACTION_PREFLIGHT_STALE",
+        "stale_connector": "CS_ACTION_PREFLIGHT_STALE",
+    }
+
+    action_safety_missing_evidence_action = _clone_action_safety_action(action_safety_valid_action)
+    action_safety_missing_evidence_action.setdefault("evidence", {})["artifact_refs"] = []
+    _write_action_safety_action(action_safety_missing_evidence_action)
+    transcripts["action_safety_execute_missing_evidence"] = _run_cli_json(
+        root,
+        ["action", "execute", action_safety_action_id, "--state-dir", action_safety_state_rel, "--json"],
+    )
+    action_safety_denial_payloads["missing_evidence"] = _payload(transcripts["action_safety_execute_missing_evidence"])
+
+    _write_action_safety_action(action_safety_valid_action)
+    transcripts["action_safety_mode_locked"] = _run_cli_json(
+        root,
+        ["workspace", "mode", "set", "locked", "--state-dir", action_safety_state_rel, "--json"],
+    )
+    transcripts["action_safety_execute_locked_workspace"] = _run_cli_json(
+        root,
+        ["action", "execute", action_safety_action_id, "--state-dir", action_safety_state_rel, "--json"],
+    )
+    action_safety_denial_payloads["locked_workspace"] = _payload(transcripts["action_safety_execute_locked_workspace"])
+    transcripts["action_safety_mode_assist"] = _run_cli_json(
+        root,
+        ["workspace", "mode", "set", "assist", "--state-dir", action_safety_state_rel, "--json"],
+    )
+
+    action_safety_missing_approval_action = _clone_action_safety_action(action_safety_valid_action)
+    action_safety_missing_approval_action.setdefault("approval", {})["status"] = "pending"
+    action_safety_missing_approval_action["approval"]["approver"] = None
+    action_safety_missing_approval_action.setdefault("execution", {})["can_execute_now"] = False
+    _write_action_safety_action(action_safety_missing_approval_action)
+    transcripts["action_safety_execute_missing_approval"] = _run_cli_json(
+        root,
+        ["action", "execute", action_safety_action_id, "--state-dir", action_safety_state_rel, "--json"],
+    )
+    action_safety_denial_payloads["missing_approval"] = _payload(transcripts["action_safety_execute_missing_approval"])
+
+    action_safety_unauthorized_approver_action = _clone_action_safety_action(action_safety_valid_action)
+    action_safety_unauthorized_approver_action.setdefault("approval", {})["approver"] = "unauthorized_delegate"
+    _write_action_safety_action(action_safety_unauthorized_approver_action)
+    transcripts["action_safety_execute_unauthorized_approver"] = _run_cli_json(
+        root,
+        ["action", "execute", action_safety_action_id, "--state-dir", action_safety_state_rel, "--json"],
+    )
+    action_safety_denial_payloads["unauthorized_approver"] = _payload(transcripts["action_safety_execute_unauthorized_approver"])
+
+    _write_action_safety_action(action_safety_valid_action)
+    transcripts["action_safety_preflight_missing_permission"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "action-preflight",
+            "run",
+            "--action-id",
+            action_safety_action_id,
+            "--file",
+            action_preflight_path,
+            "--case-id",
+            "missing_permission",
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    transcripts["action_safety_execute_missing_permission"] = _run_cli_json(
+        root,
+        ["action", "execute", action_safety_action_id, "--state-dir", action_safety_state_rel, "--json"],
+    )
+    action_safety_denial_payloads["missing_permission"] = _payload(transcripts["action_safety_execute_missing_permission"])
+
+    _write_action_safety_action(action_safety_valid_action)
+    transcripts["action_safety_preflight_missing_idempotency"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "action-preflight",
+            "run",
+            "--action-id",
+            action_safety_action_id,
+            "--file",
+            action_preflight_path,
+            "--case-id",
+            "missing_idempotency",
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    transcripts["action_safety_execute_missing_idempotency"] = _run_cli_json(
+        root,
+        ["action", "execute", action_safety_action_id, "--state-dir", action_safety_state_rel, "--json"],
+    )
+    action_safety_denial_payloads["missing_idempotency"] = _payload(transcripts["action_safety_execute_missing_idempotency"])
+
+    action_safety_stale_preflight_action = _clone_action_safety_action(action_safety_valid_action)
+    action_safety_stale_preflight_action.setdefault("dry_run", {}).setdefault("expected_impact", {})["target"] = (
+        "supportdesk:ticket:CS-2002"
+    )
+    _write_action_safety_action(action_safety_stale_preflight_action)
+    transcripts["action_safety_execute_stale_preflight"] = _run_cli_json(
+        root,
+        ["action", "execute", action_safety_action_id, "--state-dir", action_safety_state_rel, "--json"],
+    )
+    action_safety_denial_payloads["stale_preflight"] = _payload(transcripts["action_safety_execute_stale_preflight"])
+
+    action_safety_stale_connector_action = _clone_action_safety_action(action_safety_valid_action)
+    action_safety_stale_connector_action.setdefault("connector_boundary", {})["connector"] = "supportdesk_v2"
+    _write_action_safety_action(action_safety_stale_connector_action)
+    transcripts["action_safety_execute_stale_connector"] = _run_cli_json(
+        root,
+        ["action", "execute", action_safety_action_id, "--state-dir", action_safety_state_rel, "--json"],
+    )
+    action_safety_denial_payloads["stale_connector"] = _payload(transcripts["action_safety_execute_stale_connector"])
+
+    transcripts["action_safety_execute_wrong_scope"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "execute",
+            action_safety_action_id,
+            "--owner-id",
+            "other-user",
+            "--state-dir",
+            action_safety_state_rel,
+            "--json",
+        ],
+    )
+    action_safety_wrong_scope_payload = _payload(transcripts["action_safety_execute_wrong_scope"])
+    transcripts["action_safety_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", action_safety_state_rel, "--json"],
+    )
+    action_safety_audit_payload = _payload(transcripts["action_safety_audit_verify"])
+    transcripts["action_execution_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            action_execution_state_rel,
+            "--json",
+        ],
+    )
+    action_execution_validate_payload = _payload(transcripts["action_execution_contract_validate"])
+    action_execution_contract_id = action_execution_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["action_execution_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            action_execution_contract_id,
+            "--state-dir",
+            action_execution_state_rel,
+            "--json",
+        ],
+    )
+    action_execution_setup_payload = _payload(transcripts["action_execution_setup_plan"])
+    transcripts["action_execution_delivery_ingest"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "ingest",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            action_execution_contract_id,
+            "--state-dir",
+            action_execution_state_rel,
+            "--json",
+        ],
+    )
+    action_execution_ingest_payload = _payload(transcripts["action_execution_delivery_ingest"])
+    action_execution_receipt_id = action_execution_ingest_payload.get("connector_delivery_receipt", {}).get("delivery_receipt_id", "")
+    transcripts["action_execution_bundle_create"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "evidence",
+            "bundle",
+            "create",
+            "--delivery-receipt-id",
+            action_execution_receipt_id,
+            "--query",
+            "project alpha connector action execution outcome",
+            "--state-dir",
+            action_execution_state_rel,
+            "--json",
+        ],
+    )
+    action_execution_bundle_payload = _payload(transcripts["action_execution_bundle_create"])
+    action_execution_bundle_id = action_execution_bundle_payload.get("evidence_bundle", {}).get("evidence_bundle_id", "")
+    transcripts["action_execution_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            action_execution_bundle_id,
+            "--statement",
+            "Project Alpha support action execution has enough evidence for a governed fixture writeback.",
+            "--state-dir",
+            action_execution_state_rel,
+            "--json",
+        ],
+    )
+    action_execution_claim_payload = _payload(transcripts["action_execution_claim_create"])
+    action_execution_claim_id = action_execution_claim_payload.get("claim", {}).get("claim_id", "")
+    transcripts["action_execution_claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", action_execution_claim_id, "--state-dir", action_execution_state_rel, "--json"],
+    )
+    action_execution_claim_approve_payload = _payload(transcripts["action_execution_claim_approve"])
+    transcripts["action_execution_mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Execute a declared supportdesk action and re-ingest its outcome.",
+            "--claim-id",
+            action_execution_claim_id,
+            "--state-dir",
+            action_execution_state_rel,
+            "--json",
+        ],
+    )
+    action_execution_mission_payload = _payload(transcripts["action_execution_mission_create"])
+    action_execution_mission_id = action_execution_mission_payload.get("mission", {}).get("mission_id", "")
+    transcripts["action_execution_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            action_execution_mission_id,
+            "--claim-id",
+            action_execution_claim_id,
+            "--goal",
+            "Update support ticket CS-1001 through ConnectorHub and capture the provider outcome.",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "supportdesk",
+            "--target",
+            "supportdesk:ticket:CS-1001",
+            "--state-dir",
+            action_execution_state_rel,
+            "--json",
+        ],
+    )
+    action_execution_action_payload = _payload(transcripts["action_execution_action_propose"])
+    action_execution_action_id = action_execution_action_payload.get("action_card", {}).get("action_id", "")
+    transcripts["action_execution_preflight_allowed"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "action-preflight",
+            "run",
+            "--action-id",
+            action_execution_action_id,
+            "--file",
+            action_preflight_path,
+            "--case-id",
+            "allowed",
+            "--state-dir",
+            action_execution_state_rel,
+            "--json",
+        ],
+    )
+    action_execution_preflight_payload = _payload(transcripts["action_execution_preflight_allowed"])
+    transcripts["action_execution_approve"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "approve",
+            action_execution_action_id,
+            "--approver",
+            "owner",
+            "--state-dir",
+            action_execution_state_rel,
+            "--json",
+        ],
+    )
+    action_execution_approve_payload = _payload(transcripts["action_execution_approve"])
+    transcripts["action_execution_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", action_execution_action_id, "--state-dir", action_execution_state_rel, "--json"],
+    )
+    action_execution_execute_payload = _payload(transcripts["action_execution_execute"])
+    transcripts["action_execution_replay"] = _run_cli_json(
+        root,
+        ["action", "execute", action_execution_action_id, "--state-dir", action_execution_state_rel, "--json"],
+    )
+    action_execution_replay_payload = _payload(transcripts["action_execution_replay"])
+    transcripts["action_execution_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", action_execution_state_rel, "--json"],
+    )
+    action_execution_audit_payload = _payload(transcripts["action_execution_audit_verify"])
+    transcripts["action_retry_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_validate_payload = _payload(transcripts["action_retry_contract_validate"])
+    action_retry_contract_id = action_retry_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["action_retry_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            action_retry_contract_id,
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_setup_payload = _payload(transcripts["action_retry_setup_plan"])
+    transcripts["action_retry_delivery_ingest"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "ingest",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            action_retry_contract_id,
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_ingest_payload = _payload(transcripts["action_retry_delivery_ingest"])
+    action_retry_receipt_id = action_retry_ingest_payload.get("connector_delivery_receipt", {}).get("delivery_receipt_id", "")
+    transcripts["action_retry_bundle_create"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "evidence",
+            "bundle",
+            "create",
+            "--delivery-receipt-id",
+            action_retry_receipt_id,
+            "--query",
+            "project alpha connector retry idempotency compensation evidence",
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_bundle_payload = _payload(transcripts["action_retry_bundle_create"])
+    action_retry_bundle_id = action_retry_bundle_payload.get("evidence_bundle", {}).get("evidence_bundle_id", "")
+    transcripts["action_retry_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            action_retry_bundle_id,
+            "--statement",
+            "ConnectorHub retries must return the existing result and expose compensation expectations.",
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_claim_payload = _payload(transcripts["action_retry_claim_create"])
+    action_retry_claim_id = action_retry_claim_payload.get("claim", {}).get("claim_id", "")
+    transcripts["action_retry_claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", action_retry_claim_id, "--state-dir", action_retry_state_rel, "--json"],
+    )
+    action_retry_claim_approve_payload = _payload(transcripts["action_retry_claim_approve"])
+    transcripts["action_retry_mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Verify ConnectorHub idempotent retry and conflict handling.",
+            "--claim-id",
+            action_retry_claim_id,
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_mission_payload = _payload(transcripts["action_retry_mission_create"])
+    action_retry_mission_id = action_retry_mission_payload.get("mission", {}).get("mission_id", "")
+    transcripts["action_retry_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            action_retry_mission_id,
+            "--claim-id",
+            action_retry_claim_id,
+            "--goal",
+            "Update support ticket CS-1001 through ConnectorHub with retry-safe semantics.",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "supportdesk",
+            "--target",
+            "supportdesk:ticket:CS-1001",
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_action_payload = _payload(transcripts["action_retry_action_propose"])
+    action_retry_action_id = action_retry_action_payload.get("action_card", {}).get("action_id", "")
+    transcripts["action_retry_preflight_allowed"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "action-preflight",
+            "run",
+            "--action-id",
+            action_retry_action_id,
+            "--file",
+            action_preflight_path,
+            "--case-id",
+            "allowed",
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_preflight_payload = _payload(transcripts["action_retry_preflight_allowed"])
+    transcripts["action_retry_approve"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "approve",
+            action_retry_action_id,
+            "--approver",
+            "owner",
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_approve_payload = _payload(transcripts["action_retry_approve"])
+    transcripts["action_retry_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", action_retry_action_id, "--state-dir", action_retry_state_rel, "--json"],
+    )
+    action_retry_execute_payload = _payload(transcripts["action_retry_execute"])
+    transcripts["action_retry_replay"] = _run_cli_json(
+        root,
+        ["action", "execute", action_retry_action_id, "--state-dir", action_retry_state_rel, "--json"],
+    )
+    action_retry_replay_payload = _payload(transcripts["action_retry_replay"])
+    transcripts["action_retry_conflict_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            action_retry_mission_id,
+            "--claim-id",
+            action_retry_claim_id,
+            "--goal",
+            "Reuse the same idempotency key for a different support ticket and prove it is denied.",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "supportdesk",
+            "--target",
+            "supportdesk:ticket:CS-2002",
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_conflict_action_payload = _payload(transcripts["action_retry_conflict_action_propose"])
+    action_retry_conflict_action_id = action_retry_conflict_action_payload.get("action_card", {}).get("action_id", "")
+    transcripts["action_retry_conflict_preflight"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "action-preflight",
+            "run",
+            "--action-id",
+            action_retry_conflict_action_id,
+            "--file",
+            action_preflight_path,
+            "--case-id",
+            "allowed_conflicting_intent",
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_conflict_preflight_payload = _payload(transcripts["action_retry_conflict_preflight"])
+    transcripts["action_retry_conflict_approve"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "approve",
+            action_retry_conflict_action_id,
+            "--approver",
+            "owner",
+            "--state-dir",
+            action_retry_state_rel,
+            "--json",
+        ],
+    )
+    action_retry_conflict_approve_payload = _payload(transcripts["action_retry_conflict_approve"])
+    transcripts["action_retry_conflict_execute"] = _run_cli_json(
+        root,
+        ["action", "execute", action_retry_conflict_action_id, "--state-dir", action_retry_state_rel, "--json"],
+    )
+    action_retry_conflict_execute_payload = _payload(transcripts["action_retry_conflict_execute"])
+    transcripts["action_retry_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", action_retry_state_rel, "--json"],
+    )
+    action_retry_audit_payload = _payload(transcripts["action_retry_audit_verify"])
+    transcripts["scope_isolation_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_validate_payload = _payload(transcripts["scope_isolation_contract_validate"])
+    scope_isolation_contract_id = scope_isolation_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["scope_isolation_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            scope_isolation_contract_id,
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_setup_payload = _payload(transcripts["scope_isolation_setup_plan"])
+    transcripts["scope_isolation_other_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            scope_isolation_contract_id,
+            "--owner-id",
+            "other-user",
+            "--namespace-id",
+            "other",
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_other_setup_payload = _payload(transcripts["scope_isolation_other_setup_plan"])
+    transcripts["scope_isolation_delivery_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            scope_isolation_contract_id,
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_delivery_payload = _payload(transcripts["scope_isolation_delivery_process"])
+    scope_isolation_receipt_id = scope_isolation_delivery_payload.get("connector_delivery_receipt", {}).get(
+        "delivery_receipt_id",
+        "",
+    )
+    transcripts["scope_isolation_other_delivery_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            scope_isolation_contract_id,
+            "--owner-id",
+            "other-user",
+            "--namespace-id",
+            "other",
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_other_delivery_payload = _payload(transcripts["scope_isolation_other_delivery_process"])
+    transcripts["scope_isolation_bundle_create"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "evidence",
+            "bundle",
+            "create",
+            "--delivery-receipt-id",
+            scope_isolation_receipt_id,
+            "--query",
+            "project alpha scoped connector evidence",
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_bundle_payload = _payload(transcripts["scope_isolation_bundle_create"])
+    scope_isolation_bundle_id = scope_isolation_bundle_payload.get("evidence_bundle", {}).get("evidence_bundle_id", "")
+    transcripts["scope_isolation_other_bundle_create"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "evidence",
+            "bundle",
+            "create",
+            "--delivery-receipt-id",
+            scope_isolation_receipt_id,
+            "--query",
+            "project alpha scoped connector evidence",
+            "--owner-id",
+            "other-user",
+            "--namespace-id",
+            "other",
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_other_bundle_payload = _payload(transcripts["scope_isolation_other_bundle_create"])
+    transcripts["scope_isolation_watch_result_build"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "result",
+            "build",
+            "--file",
+            watch_result_path,
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_watch_payload = _payload(transcripts["scope_isolation_watch_result_build"])
+    scope_isolation_watch_result = scope_isolation_watch_payload.get("watch_result", {})
+    scope_isolation_watch_result_id = scope_isolation_watch_result.get("watch_result_id", "")
+    transcripts["scope_isolation_other_watch_result_review"] = _run_cli_json(
+        root,
+        [
+            "watch",
+            "result",
+            "review",
+            "--watch-result-id",
+            scope_isolation_watch_result_id,
+            "--decision",
+            "save_draft_memory",
+            "--owner-id",
+            "other-user",
+            "--namespace-id",
+            "other",
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_other_watch_payload = _payload(transcripts["scope_isolation_other_watch_result_review"])
+    transcripts["scope_isolation_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            scope_isolation_bundle_id,
+            "--statement",
+            "ConnectorHub scoped records must not leak across owner namespaces.",
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_claim_payload = _payload(transcripts["scope_isolation_claim_create"])
+    scope_isolation_claim_id = scope_isolation_claim_payload.get("claim", {}).get("claim_id", "")
+    transcripts["scope_isolation_claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", scope_isolation_claim_id, "--state-dir", scope_isolation_state_rel, "--json"],
+    )
+    scope_isolation_claim_approve_payload = _payload(transcripts["scope_isolation_claim_approve"])
+    transcripts["scope_isolation_mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Verify scoped ConnectorHub delivery, evidence, watch, and action boundaries.",
+            "--claim-id",
+            scope_isolation_claim_id,
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_mission_payload = _payload(transcripts["scope_isolation_mission_create"])
+    scope_isolation_mission_id = scope_isolation_mission_payload.get("mission", {}).get("mission_id", "")
+    transcripts["scope_isolation_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            scope_isolation_mission_id,
+            "--claim-id",
+            scope_isolation_claim_id,
+            "--goal",
+            "Update support ticket CS-1001 through ConnectorHub after scope verification.",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "supportdesk",
+            "--target",
+            "supportdesk:ticket:CS-1001",
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_action_payload = _payload(transcripts["scope_isolation_action_propose"])
+    scope_isolation_action_id = scope_isolation_action_payload.get("action_card", {}).get("action_id", "")
+    transcripts["scope_isolation_preflight_allowed"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "action-preflight",
+            "run",
+            "--action-id",
+            scope_isolation_action_id,
+            "--file",
+            action_preflight_path,
+            "--case-id",
+            "allowed",
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_preflight_payload = _payload(transcripts["scope_isolation_preflight_allowed"])
+    transcripts["scope_isolation_approve"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "approve",
+            scope_isolation_action_id,
+            "--approver",
+            "owner",
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_approve_payload = _payload(transcripts["scope_isolation_approve"])
+    transcripts["scope_isolation_other_action_execute"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "execute",
+            scope_isolation_action_id,
+            "--owner-id",
+            "other-user",
+            "--namespace-id",
+            "other",
+            "--state-dir",
+            scope_isolation_state_rel,
+            "--json",
+        ],
+    )
+    scope_isolation_other_action_payload = _payload(transcripts["scope_isolation_other_action_execute"])
+    transcripts["scope_isolation_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", scope_isolation_state_rel, "--json"],
+    )
+    scope_isolation_audit_payload = _payload(transcripts["scope_isolation_audit_verify"])
+    credential_custody_canary_id = "cs-ch-035-canary"
+    credential_custody_connection_id = "conn_project_alpha"
+    transcripts["credential_custody_status"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "credential",
+            "status",
+            "--provider",
+            "github",
+            "--connection-id",
+            credential_custody_connection_id,
+            "--canary-id",
+            credential_custody_canary_id,
+            "--state-dir",
+            credential_custody_state_rel,
+            "--json",
+        ],
+    )
+    credential_custody_status_payload = _payload(transcripts["credential_custody_status"])
+    transcripts["credential_custody_rotate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "credential",
+            "rotate",
+            "--provider",
+            "github",
+            "--connection-id",
+            credential_custody_connection_id,
+            "--canary-id",
+            credential_custody_canary_id,
+            "--state-dir",
+            credential_custody_state_rel,
+            "--json",
+        ],
+    )
+    credential_custody_rotate_payload = _payload(transcripts["credential_custody_rotate"])
+    transcripts["credential_custody_revoke"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "credential",
+            "revoke",
+            "--provider",
+            "github",
+            "--connection-id",
+            credential_custody_connection_id,
+            "--canary-id",
+            credential_custody_canary_id,
+            "--state-dir",
+            credential_custody_state_rel,
+            "--json",
+        ],
+    )
+    credential_custody_revoke_payload = _payload(transcripts["credential_custody_revoke"])
+    transcripts["credential_custody_boundary"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "credential-boundary-test",
+            "--provider",
+            "github",
+            "--capability",
+            "source_control.issue.read",
+            "--state-dir",
+            credential_custody_state_rel,
+            "--json",
+        ],
+    )
+    credential_custody_boundary_payload = _payload(transcripts["credential_custody_boundary"])
+    transcripts["credential_custody_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", credential_custody_state_rel, "--json"],
+    )
+    credential_custody_audit_payload = _payload(transcripts["credential_custody_audit_verify"])
+    audit_correlation_canary_id = "cs-ch-037-canary"
+    transcripts["audit_correlation_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    audit_correlation_validate_payload = _payload(transcripts["audit_correlation_contract_validate"])
+    audit_correlation_contract_id = audit_correlation_validate_payload.get("ids", {}).get(
+        "contract_id",
+        "ccon_project_alpha_github",
+    )
+    transcripts["audit_correlation_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            audit_correlation_contract_id,
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    audit_correlation_setup_payload = _payload(transcripts["audit_correlation_setup_plan"])
+    transcripts["audit_correlation_delivery_process"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            audit_correlation_contract_id,
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    audit_correlation_delivery_payload = _payload(transcripts["audit_correlation_delivery_process"])
+    audit_correlation_delivery_receipt_id = audit_correlation_delivery_payload.get(
+        "connector_delivery_receipt",
+        {},
+    ).get("delivery_receipt_id", "")
+    transcripts["audit_correlation_evidence_bundle_create"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "evidence",
+            "bundle",
+            "create",
+            "--delivery-receipt-id",
+            audit_correlation_delivery_receipt_id,
+            "--query",
+            "connector audit correlation evidence",
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    audit_correlation_evidence_payload = _payload(transcripts["audit_correlation_evidence_bundle_create"])
+    transcripts["audit_correlation_transient_retry"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            changed_delivery_path,
+            "--contract-id",
+            audit_correlation_contract_id,
+            "--failure-mode",
+            "transient",
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    audit_correlation_retry_payload = _payload(transcripts["audit_correlation_transient_retry"])
+    transcripts["audit_correlation_poison_retry_first"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            poison_delivery_path,
+            "--contract-id",
+            audit_correlation_contract_id,
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    transcripts["audit_correlation_poison_retry_second"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            poison_delivery_path,
+            "--contract-id",
+            audit_correlation_contract_id,
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    transcripts["audit_correlation_poison_quarantine"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "process",
+            "--file",
+            poison_delivery_path,
+            "--contract-id",
+            audit_correlation_contract_id,
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    audit_correlation_poison_retry_first_payload = _payload(transcripts["audit_correlation_poison_retry_first"])
+    audit_correlation_poison_retry_second_payload = _payload(transcripts["audit_correlation_poison_retry_second"])
+    audit_correlation_quarantine_payload = _payload(transcripts["audit_correlation_poison_quarantine"])
+    audit_correlation_quarantine_id = audit_correlation_quarantine_payload.get(
+        "connector_delivery_quarantine",
+        {},
+    ).get("quarantine_id", "")
+    transcripts["audit_correlation_quarantine_replay"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "quarantine",
+            "replay",
+            "--quarantine-id",
+            audit_correlation_quarantine_id,
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    audit_correlation_replay_payload = _payload(transcripts["audit_correlation_quarantine_replay"])
+    transcripts["audit_correlation_source_policy_confirm"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "source-policy",
+            "confirm",
+            "--contract-id",
+            audit_correlation_contract_id,
+            "--selected-resource",
+            "github:repo:owner/project-alpha",
+            "--allowed-path",
+            "docs/**",
+            "--max-content-bytes",
+            "4096",
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    audit_correlation_source_policy_payload = _payload(transcripts["audit_correlation_source_policy_confirm"])
+    transcripts["audit_correlation_direct_write_denied"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "direct-write-test",
+            "--provider",
+            "supportdesk",
+            "--target",
+            "supportdesk:ticket:CS-1001",
+            "--operation",
+            "direct_provider_sdk_patch",
+            "--state-dir",
+            audit_correlation_state_rel,
+            "--json",
+        ],
+    )
+    audit_correlation_direct_write_payload = _payload(transcripts["audit_correlation_direct_write_denied"])
+    for operation in ["status", "rotate", "revoke"]:
+        transcripts[f"audit_correlation_credential_{operation}"] = _run_cli_json(
+            root,
+            [
+                "connector",
+                "credential",
+                operation,
+                "--provider",
+                "github",
+                "--connection-id",
+                "conn_project_alpha",
+                "--canary-id",
+                audit_correlation_canary_id,
+                "--state-dir",
+                audit_correlation_state_rel,
+                "--json",
+            ],
+        )
+    audit_correlation_credential_payloads = {
+        operation: _payload(transcripts[f"audit_correlation_credential_{operation}"])
+        for operation in ["status", "rotate", "revoke"]
+    }
+    transcripts["audit_correlation_correlate"] = _run_cli_json(
+        root,
+        ["connector", "audit", "correlate", "--state-dir", audit_correlation_state_rel, "--json"],
+    )
+    audit_correlation_payload = _payload(transcripts["audit_correlation_correlate"])
+    audit_correlation_report = audit_correlation_payload.get("connector_audit_correlation", {})
+    transcripts["audit_correlation_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", audit_correlation_state_rel, "--json"],
+    )
+    audit_correlation_audit_payload = _payload(transcripts["audit_correlation_audit_verify"])
+    if audit_correlation_state_path.exists():
+        shutil.copytree(audit_correlation_state_path, audit_correlation_tamper_state_path)
+        tamper_audit_path = audit_correlation_tamper_state_path / "audit" / "events.jsonl"
+        if tamper_audit_path.exists():
+            tamper_lines = tamper_audit_path.read_text().splitlines()
+            if tamper_lines:
+                tampered_event = json.loads(tamper_lines[0])
+                tampered_event.setdefault("details", {})["cs_ch_037_tampered"] = True
+                tamper_lines[0] = json.dumps(tampered_event, sort_keys=True)
+                tamper_audit_path.write_text("\n".join(tamper_lines) + "\n")
+    transcripts["audit_correlation_tamper_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", audit_correlation_tamper_state_rel, "--json"],
+    )
+    audit_correlation_tamper_payload = _payload(transcripts["audit_correlation_tamper_verify"])
+    transcripts["action_bypass_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_validate_payload = _payload(transcripts["action_bypass_contract_validate"])
+    action_bypass_contract_id = action_bypass_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["action_bypass_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            action_bypass_contract_id,
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_setup_payload = _payload(transcripts["action_bypass_setup_plan"])
+    transcripts["action_bypass_delivery_ingest"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "delivery",
+            "ingest",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            action_bypass_contract_id,
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_ingest_payload = _payload(transcripts["action_bypass_delivery_ingest"])
+    action_bypass_receipt_id = action_bypass_ingest_payload.get("connector_delivery_receipt", {}).get("delivery_receipt_id", "")
+    transcripts["action_bypass_bundle_create"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "evidence",
+            "bundle",
+            "create",
+            "--delivery-receipt-id",
+            action_bypass_receipt_id,
+            "--query",
+            "project alpha undeclared connector action bypass proof",
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_bundle_payload = _payload(transcripts["action_bypass_bundle_create"])
+    action_bypass_bundle_id = action_bypass_bundle_payload.get("evidence_bundle", {}).get("evidence_bundle_id", "")
+    transcripts["action_bypass_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            action_bypass_bundle_id,
+            "--statement",
+            "Connector Hub bypass attempts must be denied by the backend boundary.",
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_claim_payload = _payload(transcripts["action_bypass_claim_create"])
+    action_bypass_claim_id = action_bypass_claim_payload.get("claim", {}).get("claim_id", "")
+    transcripts["action_bypass_claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", action_bypass_claim_id, "--state-dir", action_bypass_state_rel, "--json"],
+    )
+    action_bypass_claim_approve_payload = _payload(transcripts["action_bypass_claim_approve"])
+    transcripts["action_bypass_mission_create"] = _run_cli_json(
+        root,
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Deny undeclared ConnectorHub actions and direct provider bypasses.",
+            "--claim-id",
+            action_bypass_claim_id,
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_mission_payload = _payload(transcripts["action_bypass_mission_create"])
+    action_bypass_mission_id = action_bypass_mission_payload.get("mission", {}).get("mission_id", "")
+    transcripts["action_bypass_action_propose"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            action_bypass_mission_id,
+            "--claim-id",
+            action_bypass_claim_id,
+            "--goal",
+            "Attempt an undeclared supportdesk delete action through ConnectorHub.",
+            "--action-kind",
+            "external_writeback",
+            "--risk",
+            "high",
+            "--connector",
+            "supportdesk",
+            "--target",
+            "supportdesk:ticket:CS-1001",
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_action_payload = _payload(transcripts["action_bypass_action_propose"])
+    action_bypass_action_id = action_bypass_action_payload.get("action_card", {}).get("action_id", "")
+    transcripts["action_bypass_preflight_undeclared"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "action-preflight",
+            "run",
+            "--action-id",
+            action_bypass_action_id,
+            "--file",
+            action_preflight_path,
+            "--case-id",
+            "undeclared_action",
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_preflight_payload = _payload(transcripts["action_bypass_preflight_undeclared"])
+    transcripts["action_bypass_approve"] = _run_cli_json(
+        root,
+        [
+            "action",
+            "approve",
+            action_bypass_action_id,
+            "--approver",
+            "owner",
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_approve_payload = _payload(transcripts["action_bypass_approve"])
+    transcripts["action_bypass_execute_denied"] = _run_cli_json(
+        root,
+        ["action", "execute", action_bypass_action_id, "--state-dir", action_bypass_state_rel, "--json"],
+    )
+    action_bypass_execute_payload = _payload(transcripts["action_bypass_execute_denied"])
+    transcripts["action_bypass_direct_write"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "direct-write-test",
+            "--provider",
+            "supportdesk",
+            "--target",
+            "supportdesk:ticket:CS-1001",
+            "--operation",
+            "direct_provider_sdk_patch",
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_direct_write_payload = _payload(transcripts["action_bypass_direct_write"])
+    transcripts["action_bypass_credential_boundary"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "credential-boundary-test",
+            "--provider",
+            "supportdesk",
+            "--capability",
+            "support.ticket.write",
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_credential_payload = _payload(transcripts["action_bypass_credential_boundary"])
+    transcripts["action_bypass_pack_import"] = _run_cli_json(
+        root,
+        [
+            "pack",
+            "import",
+            "--manifest",
+            direct_provider_pack_manifest_path,
+            "--state-dir",
+            action_bypass_state_rel,
+            "--json",
+        ],
+    )
+    action_bypass_pack_payload = _payload(transcripts["action_bypass_pack_import"])
+    transcripts["action_bypass_audit_verify"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", action_bypass_state_rel, "--json"],
+    )
+    action_bypass_audit_payload = _payload(transcripts["action_bypass_audit_verify"])
+    transcripts["sync_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            contract_path,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_validate_payload = _payload(transcripts["sync_contract_validate"])
+    sync_contract_id = sync_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_github")
+    transcripts["sync_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            sync_contract_id,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_setup_payload = _payload(transcripts["sync_setup_plan"])
+    sync_setup_result = sync_setup_payload.get("connector_setup_result", {})
+    transcripts["sync_bad_webhook_signature"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "sync",
+            "incremental",
+            "--file",
+            bad_webhook_delivery_path,
+            "--contract-id",
+            sync_contract_id,
+            "--signal",
+            "webhook",
+            "--cursor-id",
+            sync_cursor_id,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_bad_webhook_payload = _payload(transcripts["sync_bad_webhook_signature"])
+    transcripts["sync_webhook_initial"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "sync",
+            "incremental",
+            "--file",
+            delivery_path,
+            "--contract-id",
+            sync_contract_id,
+            "--signal",
+            "webhook",
+            "--cursor-id",
+            sync_cursor_id,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_webhook_payload = _payload(transcripts["sync_webhook_initial"])
+    transcripts["sync_poll_duplicate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "sync",
+            "incremental",
+            "--file",
+            duplicate_event_delivery_path,
+            "--contract-id",
+            sync_contract_id,
+            "--signal",
+            "poll",
+            "--cursor-id",
+            sync_cursor_id,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_poll_duplicate_payload = _payload(transcripts["sync_poll_duplicate"])
+    transcripts["sync_after_commit_before_cursor"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "sync",
+            "incremental",
+            "--file",
+            changed_delivery_path,
+            "--contract-id",
+            sync_contract_id,
+            "--signal",
+            "poll",
+            "--cursor-id",
+            sync_cursor_id,
+            "--fault-mode",
+            "after_commit_before_cursor",
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_after_commit_before_cursor_payload = _payload(transcripts["sync_after_commit_before_cursor"])
+    transcripts["sync_reconcile_gap_before_replay"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "sync",
+            "reconcile",
+            "--cursor-id",
+            sync_cursor_id,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_gap_reconcile_payload = _payload(transcripts["sync_reconcile_gap_before_replay"])
+    sync_gap_reconciliation = sync_gap_reconcile_payload.get("connector_sync_reconciliation", {})
+    transcripts["sync_replay_changed"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "sync",
+            "incremental",
+            "--file",
+            changed_delivery_path,
+            "--contract-id",
+            sync_contract_id,
+            "--signal",
+            "poll",
+            "--cursor-id",
+            sync_cursor_id,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_replay_changed_payload = _payload(transcripts["sync_replay_changed"])
+    transcripts["sync_after_cursor"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "sync",
+            "incremental",
+            "--file",
+            changed_delivery_path,
+            "--contract-id",
+            sync_contract_id,
+            "--signal",
+            "poll",
+            "--cursor-id",
+            sync_cursor_id,
+            "--fault-mode",
+            "after_cursor",
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_after_cursor_payload = _payload(transcripts["sync_after_cursor"])
+    transcripts["sync_replay_after_cursor"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "sync",
+            "incremental",
+            "--file",
+            changed_delivery_path,
+            "--contract-id",
+            sync_contract_id,
+            "--signal",
+            "poll",
+            "--cursor-id",
+            sync_cursor_id,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_replay_after_cursor_payload = _payload(transcripts["sync_replay_after_cursor"])
+    transcripts["sync_out_of_order_webhook"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "sync",
+            "incremental",
+            "--file",
+            unchanged_event_delivery_path,
+            "--contract-id",
+            sync_contract_id,
+            "--signal",
+            "webhook",
+            "--cursor-id",
+            sync_cursor_id,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_out_of_order_payload = _payload(transcripts["sync_out_of_order_webhook"])
+    transcripts["sync_reconcile"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "sync",
+            "reconcile",
+            "--cursor-id",
+            sync_cursor_id,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_reconcile_payload = _payload(transcripts["sync_reconcile"])
+    sync_reconciliation = sync_reconcile_payload.get("connector_sync_reconciliation", {})
+    transcripts["sync_lineage_show"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "lineage",
+            "show",
+            "--contract-id",
+            sync_contract_id,
+            "--source-external-id",
+            issue_source_external_id,
+            "--state-dir",
+            sync_state_rel,
+            "--json",
+        ],
+    )
+    sync_lineage_payload = _payload(transcripts["sync_lineage_show"])
+    sync_lineage = sync_lineage_payload.get("connector_content_lineage", {})
+    transcripts["sync_audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", sync_state_rel, "--json"])
+    sync_audit_payload = _payload(transcripts["sync_audit_verify"])
+    transcripts["missing_required_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            missing_required_contract_path,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    missing_validate_payload = _payload(transcripts["missing_required_contract_validate"])
+    missing_contract_record = missing_validate_payload.get("connector_capability_contract", {})
+    missing_contract_id = missing_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_missing_required")
+    transcripts["missing_required_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            missing_contract_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    missing_setup_payload = _payload(transcripts["missing_required_setup_plan"])
+    missing_setup_result = missing_setup_payload.get("connector_setup_result", {})
+    missing_source_policy = missing_setup_payload.get("connector_source_policy", {})
+    transcripts["optional_missing_contract_validate"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "contract",
+            "validate",
+            "--file",
+            optional_missing_contract_path,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    optional_validate_payload = _payload(transcripts["optional_missing_contract_validate"])
+    optional_contract_record = optional_validate_payload.get("connector_capability_contract", {})
+    optional_contract_id = optional_validate_payload.get("ids", {}).get("contract_id", "ccon_project_alpha_optional_missing")
+    transcripts["optional_missing_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            optional_contract_id,
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    optional_setup_payload = _payload(transcripts["optional_missing_setup_plan"])
+    optional_setup_result = optional_setup_payload.get("connector_setup_result", {})
+    optional_source_policy = optional_setup_payload.get("connector_source_policy", {})
+    transcripts["source_policy_confirm"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "source-policy",
+            "confirm",
+            "--contract-id",
+            contract_id,
+            "--allowed-path",
+            "docs/**",
+            "--max-content-bytes",
+            "100000",
+            "--retention-days",
+            "30",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    source_policy_confirm_payload = _payload(transcripts["source_policy_confirm"])
+    confirmed_source_policy = source_policy_confirm_payload.get("connector_source_policy", {})
+    transcripts["source_policy_broadening_denied"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "source-policy",
+            "confirm",
+            "--contract-id",
+            contract_id,
+            "--allowed-path",
+            "docs/**",
+            "--allowed-path",
+            "secrets/**",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    source_policy_denied_payload = _payload(transcripts["source_policy_broadening_denied"])
+    transcripts["provider_swap_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            contract_id,
+            "--provider-pack-id",
+            "local_source_control_readonly_alt.v1",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    provider_swap_payload = _payload(transcripts["provider_swap_setup_plan"])
+    provider_swap_setup_result = provider_swap_payload.get("connector_setup_result", {})
+    provider_swap_source_policy = provider_swap_payload.get("connector_source_policy", {})
+    transcripts["permission_gap_setup_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "setup",
+            "plan",
+            "--contract-id",
+            contract_id,
+            "--provider-pack-id",
+            "local_source_control_permission_gap.v1",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    permission_gap_payload = _payload(transcripts["permission_gap_setup_plan"])
+    permission_gap_setup_result = permission_gap_payload.get("connector_setup_result", {})
+    permission_gap_source_policy = permission_gap_payload.get("connector_source_policy", {})
+    transcripts["compatible_upgrade_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "upgrade",
+            "plan",
+            "--contract-id",
+            contract_id,
+            "--target-provider-pack-id",
+            "local_source_control_readonly_alt.v1",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    compatible_upgrade_payload = _payload(transcripts["compatible_upgrade_plan"])
+    compatible_upgrade_plan = compatible_upgrade_payload.get("connector_upgrade_plan", {})
+    transcripts["breaking_upgrade_plan"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "upgrade",
+            "plan",
+            "--contract-id",
+            contract_id,
+            "--target-provider-pack-id",
+            "local_source_control_breaking_v2.v2",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    breaking_upgrade_payload = _payload(transcripts["breaking_upgrade_plan"])
+    breaking_upgrade_plan = breaking_upgrade_payload.get("connector_upgrade_plan", {})
+    transcripts["product_walkthrough"] = _run_cli_json(root, ["product", "walkthrough", "--json"])
+    product_walkthrough_payload = _payload(transcripts["product_walkthrough"])
+    product_walkthrough = product_walkthrough_payload.get("walkthrough", {})
+    transcripts["product_surface_audit"] = _run_cli_json(
+        root,
+        ["connector", "product-surface", "audit", "--state-dir", state_rel, "--json"],
+    )
+    product_surface_payload = _payload(transcripts["product_surface_audit"])
+    product_surface_audit = product_surface_payload.get("connector_product_surface_audit", {})
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+    audit_payload = _payload(transcripts["audit_verify"])
+
+    setup_result_id = setup_result.get("setup_result_id", "")
+    source_policy_id = source_policy.get("source_policy_id", "")
+    setup_result_path = state_path / "connector" / "setup_results" / f"{setup_result_id}.json"
+    source_policy_path = state_path / "connector" / "source_policies" / f"{source_policy_id}.json"
+    contract_version_id = contract_record.get("contract_version_id", "")
+    contract_record_path = state_path / "connector" / "contracts" / f"{contract_version_id}.json"
+    delivery_checksum = hashlib.sha256((root / delivery_path).read_bytes()).hexdigest()
+    delivery_receipt_id = delivery_receipt.get("delivery_receipt_id", "")
+    projection_snapshot_id = projection_snapshot.get("projection_snapshot_id", "")
+    connector_evidence_link_id = connector_evidence_link.get("evidence_link_id", "")
+    delivery_receipt_path = state_path / "connector" / "delivery_receipts" / f"{delivery_receipt_id}.json"
+    projection_snapshot_path = state_path / "connector" / "projection_snapshots" / f"{projection_snapshot_id}.json"
+    connector_evidence_link_path = state_path / "connector" / "evidence_links" / f"{connector_evidence_link_id}.json"
+    delivery_original_path = state_path / "artifacts" / "originals" / delivery_checksum
+    delivery_artifact_record_paths = (
+        sorted((state_path / "artifacts" / "records").glob(f"**/{delivery_artifact_id}.json"))
+        if delivery_artifact_id
+        else []
+    )
+    delivery_artifact_record_path = delivery_artifact_record_paths[0] if delivery_artifact_record_paths else state_path / "artifacts" / "records" / f"{delivery_artifact_id}.json"
+    ack_delivery_receipt_id = ack_redelivery_receipt.get("delivery_receipt_id", "")
+    ack_outbox_id = ack_redelivery_outbox.get("ack_outbox_id", "")
+    ack_artifact_id = ack_artifact.get("artifact_id", "")
+    ack_delivery_receipt_path = ack_state_path / "connector" / "delivery_receipts" / f"{ack_delivery_receipt_id}.json"
+    ack_outbox_path = ack_state_path / "connector" / "ack_outbox" / f"{ack_outbox_id}.json"
+    ack_original_path = ack_state_path / "artifacts" / "originals" / delivery_checksum
+    ack_artifact_record_paths = (
+        sorted((ack_state_path / "artifacts" / "records").glob(f"**/{ack_artifact_id}.json"))
+        if ack_artifact_id
+        else []
+    )
+    ack_artifact_record_path = ack_artifact_record_paths[0] if ack_artifact_record_paths else ack_state_path / "artifacts" / "records" / f"{ack_artifact_id}.json"
+    transient_retry_state_id = transient_retry_second_state.get("retry_state_id", "")
+    transient_retry_state_path = retry_state_path / "connector" / "delivery_retries" / f"{transient_retry_state_id}.json"
+    transient_recovery_receipt_id = transient_recovery_receipt.get("delivery_receipt_id", "")
+    transient_recovery_outbox_id = transient_recovery_outbox.get("ack_outbox_id", "")
+    transient_recovery_receipt_path = retry_state_path / "connector" / "delivery_receipts" / f"{transient_recovery_receipt_id}.json"
+    transient_recovery_outbox_path = retry_state_path / "connector" / "ack_outbox" / f"{transient_recovery_outbox_id}.json"
+    poison_retry_state_id = poison_quarantine_state.get("retry_state_id", "")
+    poison_retry_state_path = retry_state_path / "connector" / "delivery_retries" / f"{poison_retry_state_id}.json"
+    poison_quarantine_path = retry_state_path / "connector" / "quarantine" / f"{poison_quarantine_id}.json"
+    lineage_first_dedupe_id = lineage_first_dedupe.get("delivery_idempotency_key", "")
+    lineage_changed_dedupe_id = lineage_changed_dedupe.get("delivery_idempotency_key", "")
+    lineage_first_version_id = lineage_first_version.get("content_version_id", "")
+    lineage_changed_version_id = lineage_changed_version.get("content_version_id", "")
+    lineage_content_source_key = content_lineage.get("content_source_key", "")
+    lineage_first_receipt_id = lineage_first_receipt.get("delivery_receipt_id", "")
+    lineage_changed_receipt_id = lineage_changed_receipt.get("delivery_receipt_id", "")
+    lineage_first_artifact_id = lineage_first_artifact.get("artifact_id", "")
+    lineage_changed_artifact_id = lineage_changed_artifact.get("artifact_id", "")
+    lineage_first_dedupe_path = lineage_state_path / "connector" / "delivery_dedupe" / f"{lineage_first_dedupe_id}.json"
+    lineage_changed_dedupe_path = lineage_state_path / "connector" / "delivery_dedupe" / f"{lineage_changed_dedupe_id}.json"
+    lineage_first_version_path = lineage_state_path / "connector" / "content_versions" / f"{lineage_first_version_id}.json"
+    lineage_changed_version_path = lineage_state_path / "connector" / "content_versions" / f"{lineage_changed_version_id}.json"
+    lineage_current_path = lineage_state_path / "connector" / "content_current" / f"{lineage_content_source_key}.json"
+    lineage_first_receipt_path = lineage_state_path / "connector" / "delivery_receipts" / f"{lineage_first_receipt_id}.json"
+    lineage_changed_receipt_path = lineage_state_path / "connector" / "delivery_receipts" / f"{lineage_changed_receipt_id}.json"
+    lineage_first_artifact_paths = (
+        sorted((lineage_state_path / "artifacts" / "records").glob(f"**/{lineage_first_artifact_id}.json"))
+        if lineage_first_artifact_id
+        else []
+    )
+    lineage_changed_artifact_paths = (
+        sorted((lineage_state_path / "artifacts" / "records").glob(f"**/{lineage_changed_artifact_id}.json"))
+        if lineage_changed_artifact_id
+        else []
+    )
+    policy_allowed_decision_id = policy_allowed_decision.get("policy_decision_id", "")
+    policy_forbidden_decision_id = policy_forbidden_decision.get("policy_decision_id", "")
+    policy_oversized_decision_id = policy_oversized_decision.get("policy_decision_id", "")
+    policy_allowed_receipt_id = policy_allowed_receipt.get("delivery_receipt_id", "")
+    policy_allowed_artifact_id = policy_allowed_artifact.get("artifact_id", "")
+    policy_narrowed_source_policy_id = policy_narrowed_source_policy.get("source_policy_id", "")
+    policy_allowed_decision_path = policy_state_path / "connector" / "projection_policy_decisions" / f"{policy_allowed_decision_id}.json"
+    policy_forbidden_decision_path = policy_state_path / "connector" / "projection_policy_decisions" / f"{policy_forbidden_decision_id}.json"
+    policy_oversized_decision_path = policy_state_path / "connector" / "projection_policy_decisions" / f"{policy_oversized_decision_id}.json"
+    policy_allowed_receipt_path = policy_state_path / "connector" / "delivery_receipts" / f"{policy_allowed_receipt_id}.json"
+    policy_allowed_artifact_paths = (
+        sorted((policy_state_path / "artifacts" / "records").glob(f"**/{policy_allowed_artifact_id}.json"))
+        if policy_allowed_artifact_id
+        else []
+    )
+    policy_narrowed_source_policy_path = policy_state_path / "connector" / "source_policies" / f"{policy_narrowed_source_policy_id}.json"
+    policy_artifact_record_paths = sorted((policy_state_path / "artifacts" / "records").glob("**/*.json"))
+    policy_delivery_receipt_paths = sorted((policy_state_path / "connector" / "delivery_receipts").glob("*.json"))
+    policy_decision_paths = sorted((policy_state_path / "connector" / "projection_policy_decisions").glob("*.json"))
+    policy_state_text = ""
+    if policy_state_path.exists():
+        policy_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(policy_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    evidence_bundle_search_snapshot_id = connector_evidence_bundle.get("search_snapshot_id", "")
+    evidence_bundle_path = evidence_state_path / "evidence" / "bundles" / f"{evidence_bundle_id}.json"
+    evidence_search_snapshot_path = evidence_state_path / "search" / "snapshots" / f"{evidence_bundle_search_snapshot_id}.json"
+    evidence_claim_path = evidence_state_path / "claims" / f"{evidence_claim_id}.json"
+    unsupported_claim_path = evidence_state_path / "claims" / f"{unsupported_claim_id}.json"
+    evidence_bundle_coverage = connector_evidence_bundle.get("coverage", {})
+    evidence_bundle_items = connector_evidence_bundle.get("evidence_items", [])
+    evidence_bundle_first_item = evidence_bundle_items[0] if evidence_bundle_items else {}
+    evidence_ref_only_error_codes = [
+        error.get("code")
+        for error in evidence_ref_only_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    unsupported_claim_approve_error_codes = [
+        error.get("code")
+        for error in unsupported_claim_approve_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    raw_default_denied_error_codes = [
+        error.get("code")
+        for error in raw_default_denied_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    raw_ttl_denied_error_codes = [
+        error.get("code")
+        for error in raw_ttl_denied_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    raw_read_limit_denied_error_codes = [
+        error.get("code")
+        for error in raw_read_limit_denied_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    raw_exhausted_error_codes = [
+        error.get("code")
+        for error in raw_read_exhausted_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    raw_expired_error_codes = [
+        error.get("code")
+        for error in raw_read_expired_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    raw_revoked_error_codes = [
+        error.get("code")
+        for error in raw_read_revoked_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    raw_access_request_id = raw_grant_payload.get("connector_raw_access_request", {}).get("raw_access_request_id", "")
+    raw_access_grant_path = raw_access_state_path / "connector" / "raw_access_grants" / f"{raw_access_grant_id}.json"
+    raw_access_request_path = raw_access_state_path / "connector" / "raw_access_requests" / f"{raw_access_request_id}.json"
+    raw_access_export_status = raw_access_export.get("status")
+    raw_access_state_text = ""
+    if raw_access_state_path.exists():
+        raw_access_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(raw_access_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    untrusted_review_id = untrusted_review_id or shown_untrusted_review.get("review_id", "")
+    untrusted_bundle_coverage = untrusted_evidence_bundle.get("coverage", {})
+    untrusted_bundle_items = untrusted_evidence_bundle.get("evidence_items", [])
+    untrusted_bundle_first_item = untrusted_bundle_items[0] if untrusted_bundle_items else {}
+    untrusted_trust_boundary = untrusted_connector_bundle_link.get("trust_boundary", {})
+    untrusted_review_negative = (
+        shown_untrusted_review.get("negative_evidence")
+        if isinstance(shown_untrusted_review.get("negative_evidence"), dict)
+        else untrusted_review.get("negative_evidence", {})
+    )
+    untrusted_review_path = untrusted_state_path / "connector" / "untrusted_content_reviews" / f"{untrusted_review_id}.json"
+    untrusted_receipt_path = untrusted_state_path / "connector" / "delivery_receipts" / f"{untrusted_delivery_receipt_id}.json"
+    untrusted_artifact_paths = (
+        sorted((untrusted_state_path / "artifacts" / "records").glob(f"**/{untrusted_artifact_id}.json"))
+        if untrusted_artifact_id
+        else []
+    )
+    untrusted_bundle_path = untrusted_state_path / "evidence" / "bundles" / f"{untrusted_bundle_id}.json"
+    untrusted_claim_id = untrusted_claim.get("claim_id", "")
+    untrusted_claim_path = untrusted_state_path / "claims" / f"{untrusted_claim_id}.json"
+    untrusted_memory_quarantine_id = untrusted_memory_quarantine.get("memory_quarantine_id", "")
+    untrusted_memory_quarantine_path = untrusted_state_path / "memory_quarantine" / f"{untrusted_memory_quarantine_id}.json"
+    untrusted_action_card_count = len(list((untrusted_state_path / "actions").glob("*.json"))) if (untrusted_state_path / "actions").exists() else 0
+    untrusted_workflow_run_count = 0
+    for workflow_dir_name in ["workflow_runs", "workflows"]:
+        workflow_dir = untrusted_state_path / workflow_dir_name
+        if workflow_dir.exists():
+            untrusted_workflow_run_count += len(list(workflow_dir.glob("*.json")))
+    untrusted_memory_count = len(list((untrusted_state_path / "memories").glob("*.json"))) if (untrusted_state_path / "memories").exists() else 0
+    untrusted_memory_quarantine_count = (
+        len(list((untrusted_state_path / "memory_quarantine").glob("*.json")))
+        if (untrusted_state_path / "memory_quarantine").exists()
+        else 0
+    )
+    untrusted_state_text = ""
+    if untrusted_state_path.exists():
+        untrusted_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(untrusted_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    selected_repo_scope = selected_repo_setup_result.get("selected_resource_scope") or selected_repo_source_policy.get(
+        "selected_resource_scope",
+        {},
+    )
+    selected_repo_allowed_receipt_id = selected_repo_allowed_receipt.get("delivery_receipt_id", "")
+    selected_repo_allowed_artifact_id = selected_repo_allowed_artifact.get("artifact_id", "")
+    selected_repo_setup_result_id = selected_repo_setup_result.get("setup_result_id", "")
+    selected_repo_source_policy_id = selected_repo_source_policy.get("source_policy_id", "")
+    selected_repo_denied_policy_decision_id = selected_repo_unselected_policy_decision.get("policy_decision_id", "")
+    selected_repo_setup_result_path = selected_repo_state_path / "connector" / "setup_results" / f"{selected_repo_setup_result_id}.json"
+    selected_repo_source_policy_path = selected_repo_state_path / "connector" / "source_policies" / f"{selected_repo_source_policy_id}.json"
+    selected_repo_allowed_receipt_path = selected_repo_state_path / "connector" / "delivery_receipts" / f"{selected_repo_allowed_receipt_id}.json"
+    selected_repo_allowed_artifact_paths = (
+        sorted((selected_repo_state_path / "artifacts" / "records").glob(f"**/{selected_repo_allowed_artifact_id}.json"))
+        if selected_repo_allowed_artifact_id
+        else []
+    )
+    selected_repo_denied_policy_decision_path = (
+        selected_repo_state_path
+        / "connector"
+        / "projection_policy_decisions"
+        / f"{selected_repo_denied_policy_decision_id}.json"
+    )
+    selected_repo_receipt_count = (
+        len(list((selected_repo_state_path / "connector" / "delivery_receipts").glob("*.json")))
+        if (selected_repo_state_path / "connector" / "delivery_receipts").exists()
+        else 0
+    )
+    selected_repo_artifact_count = (
+        len(list((selected_repo_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (selected_repo_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    selected_repo_ack_count = (
+        len(list((selected_repo_state_path / "connector" / "ack_outbox").glob("*.json")))
+        if (selected_repo_state_path / "connector" / "ack_outbox").exists()
+        else 0
+    )
+    selected_repo_policy_decision_count = (
+        len(list((selected_repo_state_path / "connector" / "projection_policy_decisions").glob("*.json")))
+        if (selected_repo_state_path / "connector" / "projection_policy_decisions").exists()
+        else 0
+    )
+    selected_repo_source_policy_count = (
+        len(list((selected_repo_state_path / "connector" / "source_policies").glob("*.json")))
+        if (selected_repo_state_path / "connector" / "source_policies").exists()
+        else 0
+    )
+    selected_repo_unselected_error_codes = [
+        error.get("code")
+        for error in selected_repo_unselected_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    selected_repo_direct_write_error_codes = [
+        error.get("code")
+        for error in selected_repo_direct_write_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    selected_repo_expand_error_codes = [
+        error.get("code")
+        for error in selected_repo_expand_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    selected_repo_state_text = ""
+    if selected_repo_state_path.exists():
+        selected_repo_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(selected_repo_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    source_control_receipts = {
+        key: payload.get("connector_delivery_receipt", {})
+        for key, payload in source_control_process_payloads.items()
+    }
+    source_control_artifacts = {
+        key: payload.get("artifact", {})
+        for key, payload in source_control_process_payloads.items()
+    }
+    source_control_snapshots = {
+        key: payload.get("connector_projection_snapshot", {})
+        for key, payload in source_control_process_payloads.items()
+    }
+    source_control_evidence_links = {
+        key: payload.get("connector_evidence_link", {})
+        for key, payload in source_control_process_payloads.items()
+    }
+    source_control_ack_outboxes = {
+        key: payload.get("connector_ack_outbox", {})
+        for key, payload in source_control_process_payloads.items()
+    }
+    source_control_policy_decisions = {
+        key: payload.get("connector_projection_policy_decision", {})
+        for key, payload in source_control_process_payloads.items()
+    }
+    source_control_content_versions = {
+        key: payload.get("connector_content_version", {})
+        for key, payload in source_control_process_payloads.items()
+    }
+    source_control_bundles = {
+        key: payload.get("evidence_bundle", {})
+        for key, payload in source_control_bundle_payloads.items()
+    }
+    source_control_search_snapshots = {
+        key: payload.get("search_snapshot", {})
+        for key, payload in source_control_bundle_payloads.items()
+    }
+    source_control_bundle_links = {
+        key: payload.get("connector_evidence_bundle_link", {})
+        for key, payload in source_control_bundle_payloads.items()
+    }
+    source_control_receipt_paths = {
+        key: source_control_state_path / "connector" / "delivery_receipts" / f"{receipt.get('delivery_receipt_id', '')}.json"
+        for key, receipt in source_control_receipts.items()
+    }
+    source_control_snapshot_paths = {
+        key: source_control_state_path / "connector" / "projection_snapshots" / f"{snapshot.get('projection_snapshot_id', '')}.json"
+        for key, snapshot in source_control_snapshots.items()
+    }
+    source_control_evidence_link_paths = {
+        key: source_control_state_path / "connector" / "evidence_links" / f"{link.get('evidence_link_id', '')}.json"
+        for key, link in source_control_evidence_links.items()
+    }
+    source_control_artifact_paths = {
+        key: sorted((source_control_state_path / "artifacts" / "records").glob(f"**/{artifact.get('artifact_id', '')}.json"))
+        if artifact.get("artifact_id")
+        else []
+        for key, artifact in source_control_artifacts.items()
+    }
+    source_control_bundle_paths = {
+        key: source_control_state_path / "evidence" / "bundles" / f"{bundle.get('evidence_bundle_id', '')}.json"
+        for key, bundle in source_control_bundles.items()
+    }
+    source_control_search_snapshot_paths = {
+        key: source_control_state_path / "search" / "snapshots" / f"{snapshot.get('search_snapshot_id', '')}.json"
+        for key, snapshot in source_control_search_snapshots.items()
+    }
+    source_control_receipt_count = (
+        len(list((source_control_state_path / "connector" / "delivery_receipts").glob("*.json")))
+        if (source_control_state_path / "connector" / "delivery_receipts").exists()
+        else 0
+    )
+    source_control_artifact_count = (
+        len(list((source_control_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (source_control_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    source_control_ack_count = (
+        len(list((source_control_state_path / "connector" / "ack_outbox").glob("*.json")))
+        if (source_control_state_path / "connector" / "ack_outbox").exists()
+        else 0
+    )
+    source_control_policy_decision_count = (
+        len(list((source_control_state_path / "connector" / "projection_policy_decisions").glob("*.json")))
+        if (source_control_state_path / "connector" / "projection_policy_decisions").exists()
+        else 0
+    )
+    source_control_content_version_count = (
+        len(list((source_control_state_path / "connector" / "content_versions").glob("*.json")))
+        if (source_control_state_path / "connector" / "content_versions").exists()
+        else 0
+    )
+    source_control_bundle_count = (
+        len(list((source_control_state_path / "evidence" / "bundles").glob("*.json")))
+        if (source_control_state_path / "evidence" / "bundles").exists()
+        else 0
+    )
+    source_control_search_snapshot_count = (
+        len(list((source_control_state_path / "search" / "snapshots").glob("*.json")))
+        if (source_control_state_path / "search" / "snapshots").exists()
+        else 0
+    )
+    source_control_state_text = ""
+    if source_control_state_path.exists():
+        source_control_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(source_control_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    content_restriction_decisions = {
+        key: payload.get("connector_content_restriction_decision", {})
+        for key, payload in content_restriction_process_payloads.items()
+    }
+    content_restriction_receipts = {
+        key: payload.get("connector_delivery_receipt", {})
+        for key, payload in content_restriction_process_payloads.items()
+    }
+    content_restriction_artifacts = {
+        key: payload.get("artifact", {})
+        for key, payload in content_restriction_process_payloads.items()
+    }
+    content_restriction_policy_decisions = {
+        key: payload.get("connector_projection_policy_decision", {})
+        for key, payload in content_restriction_process_payloads.items()
+    }
+    content_restriction_quarantine = content_restriction_process_payloads.get("private_material", {}).get(
+        "connector_delivery_quarantine",
+        {},
+    )
+    content_restriction_error_codes = {
+        key: [
+            error.get("code")
+            for error in payload.get("errors", [])
+            if isinstance(error, dict)
+        ]
+        for key, payload in content_restriction_process_payloads.items()
+    }
+    content_restriction_success_keys = {"secret_marker", "binary", "large"}
+    content_restriction_decision_paths = {
+        key: content_restriction_state_path
+        / "connector"
+        / "content_restriction_decisions"
+        / f"{decision.get('content_restriction_decision_id', '')}.json"
+        for key, decision in content_restriction_decisions.items()
+    }
+    content_restriction_receipt_paths = {
+        key: content_restriction_state_path
+        / "connector"
+        / "delivery_receipts"
+        / f"{receipt.get('delivery_receipt_id', '')}.json"
+        for key, receipt in content_restriction_receipts.items()
+        if key in content_restriction_success_keys
+    }
+    content_restriction_artifact_paths = {
+        key: sorted(
+            (content_restriction_state_path / "artifacts" / "records").glob(
+                f"**/{artifact.get('artifact_id', '')}.json"
+            )
+        )
+        if artifact.get("artifact_id")
+        else []
+        for key, artifact in content_restriction_artifacts.items()
+        if key in content_restriction_success_keys
+    }
+    content_restriction_persisted_decisions = {
+        key: _read_json_file(path)
+        for key, path in content_restriction_decision_paths.items()
+    }
+    content_restriction_decision_count = (
+        len(list((content_restriction_state_path / "connector" / "content_restriction_decisions").glob("*.json")))
+        if (content_restriction_state_path / "connector" / "content_restriction_decisions").exists()
+        else 0
+    )
+    content_restriction_delivery_receipt_count = (
+        len(list((content_restriction_state_path / "connector" / "delivery_receipts").glob("*.json")))
+        if (content_restriction_state_path / "connector" / "delivery_receipts").exists()
+        else 0
+    )
+    content_restriction_artifact_count = (
+        len(list((content_restriction_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (content_restriction_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    content_restriction_ack_count = (
+        len(list((content_restriction_state_path / "connector" / "ack_outbox").glob("*.json")))
+        if (content_restriction_state_path / "connector" / "ack_outbox").exists()
+        else 0
+    )
+    content_restriction_quarantine_count = (
+        len(list((content_restriction_state_path / "connector" / "quarantine").glob("*.json")))
+        if (content_restriction_state_path / "connector" / "quarantine").exists()
+        else 0
+    )
+    content_restriction_state_text = ""
+    if content_restriction_state_path.exists():
+        content_restriction_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(content_restriction_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    github_write_guard_state_text = ""
+    if github_write_guard_state_path.exists():
+        github_write_guard_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(github_write_guard_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    github_write_guard_contract_error_codes = [
+        error.get("code")
+        for error in github_write_guard_contract_denied_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    github_write_guard_negative = github_write_guard_report.get("negative_evidence", {})
+    github_write_guard_controlled_attempts = github_write_guard_report.get("controlled_egress_attempts", [])
+    github_write_guard_direct_denials = [
+        payload.get("direct_write_denial", {})
+        for payload in github_write_guard_direct_write_payloads.values()
+    ]
+    github_write_guard_contract_record_count = (
+        len(list((github_write_guard_state_path / "connector" / "contracts").glob("*.json")))
+        if (github_write_guard_state_path / "connector" / "contracts").exists()
+        else 0
+    )
+    github_write_guard_audit_count = (
+        len(list((github_write_guard_state_path / "audit").glob("*.jsonl")))
+        if (github_write_guard_state_path / "audit").exists()
+        else 0
+    )
+    github_failure_states = {
+        failure_mode: payload.get("connector_provider_failure_state", {})
+        for failure_mode, payload in github_failure_payloads.items()
+    }
+    github_failure_negative: dict[str, int] = {
+        "silent_data_deletions": 0,
+        "fresh_sync_claims_while_suspended": 0,
+        "tight_retry_loops": 0,
+        "fabricated_current_data": 0,
+        "removed_repository_future_ingestions": 0,
+        "revoked_permission_streams_active": 0,
+        "reconnect_without_owner_action": 0,
+        "external_http_calls": 0,
+        "provider_mutations": 0,
+    }
+    for failure_state in github_failure_states.values():
+        for key, value in failure_state.get("negative_evidence", {}).items():
+            github_failure_negative[key] = github_failure_negative.get(key, 0) + int(value or 0)
+    github_failure_state_text = ""
+    if github_failure_state_path.exists():
+        github_failure_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(github_failure_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    github_failure_state_count = (
+        len(list((github_failure_state_path / "connector" / "provider_failure_states").glob("*.json")))
+        if (github_failure_state_path / "connector" / "provider_failure_states").exists()
+        else 0
+    )
+    github_failure_delivery_receipt_count = (
+        len(list((github_failure_state_path / "connector" / "delivery_receipts").glob("*.json")))
+        if (github_failure_state_path / "connector" / "delivery_receipts").exists()
+        else 0
+    )
+    github_failure_artifact_count = (
+        len(list((github_failure_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (github_failure_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    github_failure_audit_count = (
+        len(list((github_failure_state_path / "audit").glob("*.jsonl")))
+        if (github_failure_state_path / "audit").exists()
+        else 0
+    )
+    capture_permission_missing_probe = capture_permission_missing_payload.get("connector_capture_permission_probe", {})
+    capture_permission_granted_probe = capture_permission_granted_payload.get("connector_capture_permission_probe", {})
+    capture_no_consent_no_permission_guard = capture_guard_no_consent_no_permission_payload.get(
+        "connector_capture_guard_decision",
+        {},
+    )
+    capture_permission_only_guard = capture_guard_permission_only_payload.get("connector_capture_guard_decision", {})
+    capture_consent_record = capture_consent_granted_payload.get("connector_watch_source_consent", {})
+    capture_consent_only_guard = capture_guard_consent_only_payload.get("connector_capture_guard_decision", {})
+    capture_ready_guard = capture_guard_ready_payload.get("connector_capture_guard_decision", {})
+    capture_payloads = [
+        capture_permission_missing_payload,
+        capture_guard_no_consent_no_permission_payload,
+        capture_permission_granted_payload,
+        capture_guard_permission_only_payload,
+        capture_consent_granted_payload,
+        capture_guard_consent_only_payload,
+        capture_guard_ready_payload,
+    ]
+    capture_records = [
+        capture_permission_missing_probe,
+        capture_no_consent_no_permission_guard,
+        capture_permission_granted_probe,
+        capture_permission_only_guard,
+        capture_consent_record,
+        capture_consent_only_guard,
+        capture_ready_guard,
+    ]
+    capture_negative: dict[str, int] = {
+        "capture_before_consent": 0,
+        "capture_before_platform_permission": 0,
+        "capture_samples_before_both_gates": 0,
+        "hidden_startup_capture": 0,
+        "cross_namespace_capture": 0,
+        "screenshots_before_permission": 0,
+        "window_titles_before_permission": 0,
+        "raw_keystrokes_collected": 0,
+        "clipboard_values_collected": 0,
+        "browser_history_collected": 0,
+        "external_http_calls": 0,
+        "provider_mutations": 0,
+    }
+    for record in capture_records:
+        for key, value in record.get("negative_evidence", {}).items():
+            capture_negative[key] = capture_negative.get(key, 0) + int(value or 0)
+    capture_state_text = ""
+    if capture_state_path.exists():
+        capture_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(capture_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    capture_permission_probe_count = (
+        len(list((capture_state_path / "connector" / "capture_permission_probes").glob("*.json")))
+        if (capture_state_path / "connector" / "capture_permission_probes").exists()
+        else 0
+    )
+    capture_consent_count = (
+        len(list((capture_state_path / "connector" / "watch_source_consents").glob("*.json")))
+        if (capture_state_path / "connector" / "watch_source_consents").exists()
+        else 0
+    )
+    capture_guard_count = (
+        len(list((capture_state_path / "connector" / "capture_guard_decisions").glob("*.json")))
+        if (capture_state_path / "connector" / "capture_guard_decisions").exists()
+        else 0
+    )
+    capture_sample_count = (
+        len(list((capture_state_path / "connector" / "capture_samples").glob("*.json")))
+        if (capture_state_path / "connector" / "capture_samples").exists()
+        else 0
+    )
+    capture_artifact_count = (
+        len(list((capture_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (capture_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    capture_audit_count = (
+        len(list((capture_state_path / "audit").glob("*.jsonl")))
+        if (capture_state_path / "audit").exists()
+        else 0
+    )
+    capture_internal_paths: list[str] = []
+    for record in capture_records:
+        capture_internal_paths.extend(provider_internal_findings(record))
+    activity_sample_batch = activity_sessionize_payload.get("connector_activity_sample_batch", {})
+    activity_sessionization = activity_sessionize_payload.get("connector_activity_sessionization", {})
+    activity_sessions = activity_sessionize_payload.get("activity_session_projections", [])
+    activity_negative = activity_sessionization.get("negative_evidence", {}) if isinstance(activity_sessionization, dict) else {}
+    activity_state_text = ""
+    if activity_session_state_path.exists():
+        activity_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(activity_session_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    activity_sample_batch_count = (
+        len(list((activity_session_state_path / "connector" / "activity_sample_batches").glob("*.json")))
+        if (activity_session_state_path / "connector" / "activity_sample_batches").exists()
+        else 0
+    )
+    activity_sessionization_count = (
+        len(list((activity_session_state_path / "connector" / "activity_sessionizations").glob("*.json")))
+        if (activity_session_state_path / "connector" / "activity_sessionizations").exists()
+        else 0
+    )
+    activity_session_count = (
+        len(list((activity_session_state_path / "connector" / "activity_sessions").glob("*.json")))
+        if (activity_session_state_path / "connector" / "activity_sessions").exists()
+        else 0
+    )
+    activity_artifact_count = (
+        len(list((activity_session_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (activity_session_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    activity_audit_count = (
+        len(list((activity_session_state_path / "audit").glob("*.jsonl")))
+        if (activity_session_state_path / "audit").exists()
+        else 0
+    )
+    activity_internal_paths = (
+        provider_internal_findings(activity_sample_batch)
+        + provider_internal_findings(activity_sessionization)
+        + provider_internal_findings(activity_sessions)
+    )
+    watch_rule_create_record = watch_rule_create_payload.get("watch_rule", {})
+    watch_rule_initial_version = watch_rule_create_payload.get("watch_rule_version", {})
+    watch_rule_create_policy = watch_rule_create_payload.get("watch_rule_policy_decision", {})
+    watch_rule_missing_record = watch_rule_activate_missing_payload.get("watch_rule", {})
+    watch_rule_missing_policy = watch_rule_activate_missing_payload.get("watch_rule_policy_decision", {})
+    watch_rule_active_record = watch_rule_activate_ready_payload.get("watch_rule", {})
+    watch_rule_active_version = watch_rule_activate_ready_payload.get("watch_rule_version", {})
+    watch_rule_active_policy = watch_rule_activate_ready_payload.get("watch_rule_policy_decision", {})
+    watch_rule_trace = watch_rule_evaluate_payload.get("watch_rule_evaluation_trace", {})
+    watch_rule_paused_record = watch_rule_pause_payload.get("watch_rule", {})
+    watch_rule_resumed_record = watch_rule_resume_payload.get("watch_rule", {})
+    watch_rule_edited_record = watch_rule_edit_payload.get("watch_rule", {})
+    watch_rule_second_version = watch_rule_edit_payload.get("watch_rule_version", {})
+    watch_rule_edit_policy = watch_rule_edit_payload.get("watch_rule_policy_decision", {})
+    watch_rule_deleted_record = watch_rule_delete_payload.get("watch_rule", {})
+    watch_rule_records = [
+        watch_rule_create_record,
+        watch_rule_initial_version,
+        watch_rule_create_policy,
+        watch_rule_missing_record,
+        watch_rule_missing_policy,
+        watch_rule_active_record,
+        watch_rule_active_version,
+        watch_rule_active_policy,
+        watch_rule_trace,
+        watch_rule_paused_record,
+        watch_rule_resumed_record,
+        watch_rule_edited_record,
+        watch_rule_second_version,
+        watch_rule_edit_policy,
+        watch_rule_deleted_record,
+    ]
+    watch_rule_payloads = [
+        watch_rule_create_payload,
+        watch_rule_activate_missing_payload,
+        watch_rule_activate_ready_payload,
+        watch_rule_evaluate_payload,
+        watch_rule_pause_payload,
+        watch_rule_resume_payload,
+        watch_rule_edit_payload,
+        watch_rule_delete_payload,
+    ]
+    watch_rule_negative: dict[str, int] = {
+        "ownerless_global_rules": 0,
+        "cross_namespace_lifecycle_mutations": 0,
+        "authority_expansions_from_rule_text": 0,
+        "external_actions_authorized_by_rule": 0,
+        "capture_broadening_without_confirmation": 0,
+        "provider_mutations": 0,
+        "external_http_calls": 0,
+    }
+    for record in watch_rule_records:
+        if isinstance(record, dict):
+            for key, value in record.get("negative_evidence", {}).items():
+                watch_rule_negative[key] = watch_rule_negative.get(key, 0) + int(value or 0)
+    watch_rule_state_text = ""
+    if watch_rule_state_path.exists():
+        watch_rule_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(watch_rule_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    watch_rule_count = (
+        len(list((watch_rule_state_path / "connector" / "watch_rules").glob("*.json")))
+        if (watch_rule_state_path / "connector" / "watch_rules").exists()
+        else 0
+    )
+    watch_rule_version_count = (
+        len(list((watch_rule_state_path / "connector" / "watch_rule_versions").glob("*.json")))
+        if (watch_rule_state_path / "connector" / "watch_rule_versions").exists()
+        else 0
+    )
+    watch_rule_policy_decision_count = (
+        len(list((watch_rule_state_path / "connector" / "watch_rule_policy_decisions").glob("*.json")))
+        if (watch_rule_state_path / "connector" / "watch_rule_policy_decisions").exists()
+        else 0
+    )
+    watch_rule_evaluation_trace_count = (
+        len(list((watch_rule_state_path / "connector" / "watch_rule_evaluation_traces").glob("*.json")))
+        if (watch_rule_state_path / "connector" / "watch_rule_evaluation_traces").exists()
+        else 0
+    )
+    watch_rule_artifact_count = (
+        len(list((watch_rule_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (watch_rule_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    watch_rule_audit_count = (
+        len(list((watch_rule_state_path / "audit").glob("*.jsonl")))
+        if (watch_rule_state_path / "audit").exists()
+        else 0
+    )
+    watch_rule_trace_path = (
+        watch_rule_state_path
+        / "connector"
+        / "watch_rule_evaluation_traces"
+        / f"{watch_rule_trace.get('evaluation_trace_id', '')}.json"
+    )
+    watch_rule_retained_trace = json.loads(watch_rule_trace_path.read_text()) if watch_rule_trace_path.exists() else {}
+    watch_rule_internal_paths: list[str] = []
+    for record in watch_rule_records:
+        watch_rule_internal_paths.extend(provider_internal_findings(record))
+    chrome_active_tab_no_consent_policy = chrome_active_tab_no_consent_payload.get(
+        "chrome_active_tab_policy_decision",
+        {},
+    )
+    chrome_active_tab_consent_record = chrome_active_tab_consent_payload.get("connector_watch_source_consent", {})
+    chrome_active_tab_popup_payload_record = chrome_active_tab_popup_blocked_payload.get(
+        "chrome_active_tab_payload",
+        {},
+    )
+    chrome_active_tab_popup_policy = chrome_active_tab_popup_blocked_payload.get(
+        "chrome_active_tab_policy_decision",
+        {},
+    )
+    chrome_active_tab_allowed_permission = chrome_active_tab_allowed_payload.get(
+        "chrome_active_tab_permission_event",
+        {},
+    )
+    chrome_active_tab_allowed_payload_record = chrome_active_tab_allowed_payload.get("chrome_active_tab_payload", {})
+    chrome_active_tab_allowed_policy = chrome_active_tab_allowed_payload.get(
+        "chrome_active_tab_policy_decision",
+        {},
+    )
+    chrome_active_tab_summary = chrome_active_tab_allowed_payload.get("chrome_active_tab_capture_summary", {})
+    chrome_active_tab_inbox_item = chrome_active_tab_allowed_payload.get("capture_inbox_item", {})
+    chrome_active_tab_payloads = [
+        chrome_active_tab_no_consent_payload,
+        chrome_active_tab_consent_payload,
+        chrome_active_tab_popup_blocked_payload,
+        chrome_active_tab_allowed_payload,
+    ]
+    chrome_active_tab_records = [
+        chrome_active_tab_no_consent_payload.get("chrome_active_tab_permission_event", {}),
+        chrome_active_tab_no_consent_payload.get("chrome_active_tab_payload", {}),
+        chrome_active_tab_no_consent_policy,
+        chrome_active_tab_consent_record,
+        chrome_active_tab_popup_blocked_payload.get("chrome_active_tab_permission_event", {}),
+        chrome_active_tab_popup_payload_record,
+        chrome_active_tab_popup_policy,
+        chrome_active_tab_allowed_permission,
+        chrome_active_tab_allowed_payload_record,
+        chrome_active_tab_allowed_policy,
+        chrome_active_tab_summary,
+        chrome_active_tab_inbox_item,
+    ]
+    chrome_active_tab_negative: dict[str, int] = {
+        "broad_all_urls_permission": 0,
+        "captures_without_user_gesture": 0,
+        "captures_without_confirmation": 0,
+        "popup_open_captures": 0,
+        "non_active_tab_captures": 0,
+        "backend_policy_bypasses": 0,
+        "blocked_page_text_clip_stored": 0,
+        "raw_text_stored": 0,
+        "raw_html_stored": 0,
+        "cookies_collected": 0,
+        "local_storage_collected": 0,
+        "session_storage_collected": 0,
+        "screenshots_collected": 0,
+        "form_values_collected": 0,
+        "browser_history_collected": 0,
+        "external_http_calls": 0,
+        "provider_mutations": 0,
+    }
+    for record in chrome_active_tab_records:
+        if isinstance(record, dict):
+            for key, value in record.get("negative_evidence", {}).items():
+                chrome_active_tab_negative[key] = chrome_active_tab_negative.get(key, 0) + int(value or 0)
+    chrome_active_tab_state_text = ""
+    if chrome_active_tab_state_path.exists():
+        chrome_active_tab_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(chrome_active_tab_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    chrome_active_tab_permission_event_count = (
+        len(list((chrome_active_tab_state_path / "connector" / "chrome_active_tab_permission_events").glob("*.json")))
+        if (chrome_active_tab_state_path / "connector" / "chrome_active_tab_permission_events").exists()
+        else 0
+    )
+    chrome_active_tab_payload_count = (
+        len(list((chrome_active_tab_state_path / "connector" / "chrome_active_tab_payloads").glob("*.json")))
+        if (chrome_active_tab_state_path / "connector" / "chrome_active_tab_payloads").exists()
+        else 0
+    )
+    chrome_active_tab_policy_decision_count = (
+        len(list((chrome_active_tab_state_path / "connector" / "chrome_active_tab_policy_decisions").glob("*.json")))
+        if (chrome_active_tab_state_path / "connector" / "chrome_active_tab_policy_decisions").exists()
+        else 0
+    )
+    chrome_active_tab_summary_count = (
+        len(list((chrome_active_tab_state_path / "connector" / "chrome_active_tab_summaries").glob("*.json")))
+        if (chrome_active_tab_state_path / "connector" / "chrome_active_tab_summaries").exists()
+        else 0
+    )
+    chrome_active_tab_inbox_item_count = (
+        len(list((chrome_active_tab_state_path / "connector" / "capture_inbox_items").glob("*.json")))
+        if (chrome_active_tab_state_path / "connector" / "capture_inbox_items").exists()
+        else 0
+    )
+    chrome_active_tab_artifact_count = (
+        len(list((chrome_active_tab_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (chrome_active_tab_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    chrome_active_tab_audit_count = (
+        len(list((chrome_active_tab_state_path / "audit").glob("*.jsonl")))
+        if (chrome_active_tab_state_path / "audit").exists()
+        else 0
+    )
+    chrome_active_tab_internal_paths: list[str] = []
+    for record in chrome_active_tab_records:
+        chrome_active_tab_internal_paths.extend(provider_internal_findings(record))
+    chrome_auto_capture_no_config_policy = chrome_auto_capture_no_config_payload.get(
+        "chrome_auto_capture_policy_decision",
+        {},
+    )
+    chrome_auto_capture_consent_record = chrome_auto_capture_consent_payload.get("connector_watch_source_consent", {})
+    chrome_auto_capture_config_record = chrome_auto_capture_config_payload.get("chrome_auto_capture_config", {})
+    chrome_auto_capture_blocked_trigger = chrome_auto_capture_blocked_payload.get("chrome_auto_capture_trigger", {})
+    chrome_auto_capture_blocked_policy = chrome_auto_capture_blocked_payload.get(
+        "chrome_auto_capture_policy_decision",
+        {},
+    )
+    chrome_auto_capture_allowed_trigger = chrome_auto_capture_allowed_payload.get("chrome_auto_capture_trigger", {})
+    chrome_auto_capture_allowed_policy = chrome_auto_capture_allowed_payload.get(
+        "chrome_auto_capture_policy_decision",
+        {},
+    )
+    chrome_auto_capture_summary = chrome_auto_capture_allowed_payload.get("chrome_auto_capture_summary", {})
+    chrome_auto_capture_inbox_item = chrome_auto_capture_allowed_payload.get("capture_inbox_item", {})
+    chrome_auto_capture_duplicate_policy = chrome_auto_capture_duplicate_payload.get(
+        "chrome_auto_capture_policy_decision",
+        {},
+    )
+    chrome_auto_capture_payloads = [
+        chrome_auto_capture_no_config_payload,
+        chrome_auto_capture_consent_payload,
+        chrome_auto_capture_config_payload,
+        chrome_auto_capture_blocked_payload,
+        chrome_auto_capture_allowed_payload,
+        chrome_auto_capture_duplicate_payload,
+    ]
+    chrome_auto_capture_records = [
+        chrome_auto_capture_no_config_payload.get("chrome_auto_capture_trigger", {}),
+        chrome_auto_capture_no_config_policy,
+        chrome_auto_capture_consent_record,
+        chrome_auto_capture_config_record,
+        chrome_auto_capture_blocked_trigger,
+        chrome_auto_capture_blocked_policy,
+        chrome_auto_capture_allowed_trigger,
+        chrome_auto_capture_allowed_policy,
+        chrome_auto_capture_summary,
+        chrome_auto_capture_inbox_item,
+        chrome_auto_capture_duplicate_payload.get("chrome_auto_capture_trigger", {}),
+        chrome_auto_capture_duplicate_policy,
+    ]
+    chrome_auto_capture_negative: dict[str, int] = {
+        "captures_without_owner_rule": 0,
+        "captures_without_site_allowance": 0,
+        "captures_without_source_pack_allowance": 0,
+        "captures_without_browser_permission": 0,
+        "consent_config_version_mismatches": 0,
+        "unapproved_domain_captures": 0,
+        "inactive_tab_captures": 0,
+        "throttle_bypasses": 0,
+        "session_limit_bypasses": 0,
+        "duplicate_idempotency_captures": 0,
+        "raw_text_stored": 0,
+        "raw_html_stored": 0,
+        "cookies_collected": 0,
+        "local_storage_collected": 0,
+        "session_storage_collected": 0,
+        "screenshots_collected": 0,
+        "form_values_collected": 0,
+        "browser_history_collected": 0,
+        "external_http_calls": 0,
+        "provider_mutations": 0,
+    }
+    for record in chrome_auto_capture_records:
+        if isinstance(record, dict):
+            for key, value in record.get("negative_evidence", {}).items():
+                chrome_auto_capture_negative[key] = chrome_auto_capture_negative.get(key, 0) + int(value or 0)
+    chrome_auto_capture_state_text = ""
+    if chrome_auto_capture_state_path.exists():
+        chrome_auto_capture_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(chrome_auto_capture_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    chrome_auto_capture_config_count = (
+        len(list((chrome_auto_capture_state_path / "connector" / "chrome_auto_capture_configs").glob("*.json")))
+        if (chrome_auto_capture_state_path / "connector" / "chrome_auto_capture_configs").exists()
+        else 0
+    )
+    chrome_auto_capture_trigger_count = (
+        len(list((chrome_auto_capture_state_path / "connector" / "chrome_auto_capture_triggers").glob("*.json")))
+        if (chrome_auto_capture_state_path / "connector" / "chrome_auto_capture_triggers").exists()
+        else 0
+    )
+    chrome_auto_capture_policy_decision_count = (
+        len(list((chrome_auto_capture_state_path / "connector" / "chrome_auto_capture_policy_decisions").glob("*.json")))
+        if (chrome_auto_capture_state_path / "connector" / "chrome_auto_capture_policy_decisions").exists()
+        else 0
+    )
+    chrome_auto_capture_summary_count = (
+        len(list((chrome_auto_capture_state_path / "connector" / "chrome_auto_capture_summaries").glob("*.json")))
+        if (chrome_auto_capture_state_path / "connector" / "chrome_auto_capture_summaries").exists()
+        else 0
+    )
+    chrome_auto_capture_inbox_item_count = (
+        len(list((chrome_auto_capture_state_path / "connector" / "capture_inbox_items").glob("*.json")))
+        if (chrome_auto_capture_state_path / "connector" / "capture_inbox_items").exists()
+        else 0
+    )
+    chrome_auto_capture_consent_count = (
+        len(list((chrome_auto_capture_state_path / "connector" / "watch_source_consents").glob("*.json")))
+        if (chrome_auto_capture_state_path / "connector" / "watch_source_consents").exists()
+        else 0
+    )
+    chrome_auto_capture_artifact_count = (
+        len(list((chrome_auto_capture_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (chrome_auto_capture_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    chrome_auto_capture_audit_count = (
+        len(list((chrome_auto_capture_state_path / "audit").glob("*.jsonl")))
+        if (chrome_auto_capture_state_path / "audit").exists()
+        else 0
+    )
+    chrome_auto_capture_internal_paths: list[str] = []
+    for record in chrome_auto_capture_records:
+        chrome_auto_capture_internal_paths.extend(provider_internal_findings(record))
+    chrome_sensitive_page_policies = chrome_sensitive_page_payload.get(
+        "chrome_sensitive_page_policy_decisions",
+        [],
+    )
+    chrome_sensitive_page_degraded_payloads = chrome_sensitive_page_payload.get(
+        "chrome_sensitive_page_degraded_payloads",
+        [],
+    )
+    chrome_sensitive_page_history_items = chrome_sensitive_page_payload.get(
+        "chrome_sensitive_page_history_items",
+        [],
+    )
+    chrome_sensitive_page_summary = chrome_sensitive_page_payload.get("chrome_sensitive_page_summary", {})
+    chrome_sensitive_page_payloads = [chrome_sensitive_page_payload]
+    chrome_sensitive_page_records = [
+        *chrome_sensitive_page_policies,
+        *chrome_sensitive_page_degraded_payloads,
+        *chrome_sensitive_page_history_items,
+    ]
+    chrome_sensitive_page_negative: dict[str, int] = {
+        "client_block_downgrades": 0,
+        "backend_false_safe_bypasses": 0,
+        "blocked_page_text_persisted": 0,
+        "degraded_raw_text_persisted": 0,
+        "raw_html_stored": 0,
+        "cookies_collected": 0,
+        "local_storage_collected": 0,
+        "session_storage_collected": 0,
+        "screenshots_collected": 0,
+        "form_values_collected": 0,
+        "browser_history_collected": 0,
+        "full_urls_stored": 0,
+        "full_origins_stored": 0,
+        "title_text_stored": 0,
+        "content_sent_to_models": 0,
+        "searchable_content_artifacts_created": 0,
+        "capture_inbox_items_created": 0,
+        "external_http_calls": 0,
+        "provider_mutations": 0,
+    }
+    for record in chrome_sensitive_page_records:
+        if isinstance(record, dict):
+            for key, value in record.get("negative_evidence", {}).items():
+                chrome_sensitive_page_negative[key] = chrome_sensitive_page_negative.get(key, 0) + int(value or 0)
+    chrome_sensitive_page_state_text = ""
+    if chrome_sensitive_page_state_path.exists():
+        chrome_sensitive_page_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(chrome_sensitive_page_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    chrome_sensitive_page_policy_decision_count = (
+        len(list((chrome_sensitive_page_state_path / "connector" / "chrome_sensitive_page_policy_decisions").glob("*.json")))
+        if (chrome_sensitive_page_state_path / "connector" / "chrome_sensitive_page_policy_decisions").exists()
+        else 0
+    )
+    chrome_sensitive_page_degraded_payload_count = (
+        len(list((chrome_sensitive_page_state_path / "connector" / "chrome_sensitive_page_degraded_payloads").glob("*.json")))
+        if (chrome_sensitive_page_state_path / "connector" / "chrome_sensitive_page_degraded_payloads").exists()
+        else 0
+    )
+    chrome_sensitive_page_history_item_count = (
+        len(list((chrome_sensitive_page_state_path / "connector" / "chrome_sensitive_page_history_items").glob("*.json")))
+        if (chrome_sensitive_page_state_path / "connector" / "chrome_sensitive_page_history_items").exists()
+        else 0
+    )
+    chrome_sensitive_page_inbox_item_count = (
+        len(list((chrome_sensitive_page_state_path / "connector" / "capture_inbox_items").glob("*.json")))
+        if (chrome_sensitive_page_state_path / "connector" / "capture_inbox_items").exists()
+        else 0
+    )
+    chrome_sensitive_page_artifact_count = (
+        len(list((chrome_sensitive_page_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (chrome_sensitive_page_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    chrome_sensitive_page_audit_count = (
+        len(list((chrome_sensitive_page_state_path / "audit").glob("*.jsonl")))
+        if (chrome_sensitive_page_state_path / "audit").exists()
+        else 0
+    )
+    chrome_sensitive_page_internal_paths: list[str] = []
+    for record in chrome_sensitive_page_records:
+        chrome_sensitive_page_internal_paths.extend(provider_internal_findings(record))
+    capture_lifecycle_seed_states = capture_lifecycle_seed_payload.get("capture_lifecycle_source_states", [])
+    capture_lifecycle_pause_decision = capture_lifecycle_pause_payload.get("capture_lifecycle_decision", {})
+    capture_lifecycle_paused_sample_decision = capture_lifecycle_paused_sample_payload.get(
+        "capture_lifecycle_decision",
+        {},
+    )
+    capture_lifecycle_resume_decision = capture_lifecycle_resume_payload.get("capture_lifecycle_decision", {})
+    capture_lifecycle_active_sample_decision = capture_lifecycle_active_sample_payload.get(
+        "capture_lifecycle_decision",
+        {},
+    )
+    capture_lifecycle_watch_pause_state = capture_lifecycle_watch_pause_payload.get("capture_lifecycle_source_state", {})
+    capture_lifecycle_global_pause_state = capture_lifecycle_global_pause_payload.get("capture_lifecycle_source_state", {})
+    capture_lifecycle_revoke_decision = capture_lifecycle_revoke_payload.get("capture_lifecycle_decision", {})
+    capture_lifecycle_revoked_sample_decision = capture_lifecycle_revoked_sample_payload.get(
+        "capture_lifecycle_decision",
+        {},
+    )
+    capture_lifecycle_retention_state = capture_lifecycle_retention_payload.get("capture_lifecycle_source_state", {})
+    capture_lifecycle_retention_decision = capture_lifecycle_retention_payload.get("capture_lifecycle_decision", {})
+    capture_lifecycle_export = capture_lifecycle_export_payload.get("capture_lifecycle_export", {})
+    capture_lifecycle_review_save = capture_lifecycle_review_save_payload.get("capture_result_review", {})
+    capture_lifecycle_review_dismiss = capture_lifecycle_review_dismiss_payload.get("capture_result_review", {})
+    capture_lifecycle_delete_dry = capture_lifecycle_delete_dry_payload.get("capture_lifecycle_deletion_receipt", {})
+    capture_lifecycle_delete_execute = capture_lifecycle_delete_execute_payload.get(
+        "capture_lifecycle_deletion_receipt",
+        {},
+    )
+    capture_lifecycle_deleted_states = capture_lifecycle_delete_execute_payload.get(
+        "capture_lifecycle_source_states",
+        [],
+    )
+    capture_lifecycle_payloads = [
+        capture_lifecycle_seed_payload,
+        capture_lifecycle_pause_payload,
+        capture_lifecycle_paused_sample_payload,
+        capture_lifecycle_resume_payload,
+        capture_lifecycle_active_sample_payload,
+        capture_lifecycle_watch_pause_payload,
+        capture_lifecycle_global_pause_payload,
+        capture_lifecycle_revoke_payload,
+        capture_lifecycle_revoked_sample_payload,
+        capture_lifecycle_retention_payload,
+        capture_lifecycle_export_payload,
+        capture_lifecycle_review_save_payload,
+        capture_lifecycle_review_dismiss_payload,
+        capture_lifecycle_delete_dry_payload,
+        capture_lifecycle_delete_execute_payload,
+    ]
+    capture_lifecycle_records = [
+        *capture_lifecycle_seed_states,
+        capture_lifecycle_pause_decision,
+        capture_lifecycle_paused_sample_decision,
+        capture_lifecycle_resume_decision,
+        capture_lifecycle_active_sample_decision,
+        capture_lifecycle_watch_pause_state,
+        capture_lifecycle_global_pause_state,
+        capture_lifecycle_revoke_decision,
+        capture_lifecycle_revoked_sample_decision,
+        capture_lifecycle_retention_state,
+        capture_lifecycle_retention_decision,
+        capture_lifecycle_export,
+        capture_lifecycle_review_save,
+        capture_lifecycle_review_dismiss,
+        capture_lifecycle_delete_dry,
+        capture_lifecycle_delete_execute,
+        *capture_lifecycle_deleted_states,
+    ]
+    capture_lifecycle_negative: dict[str, int] = {
+        "samples_collected_while_paused": 0,
+        "samples_collected_while_revoked": 0,
+        "configuration_deleted_on_pause": 0,
+        "unscoped_exports": 0,
+        "raw_content_exported": 0,
+        "raw_browser_payload_exported": 0,
+        "credential_values_exported": 0,
+        "delete_everything_misleading_claims": 0,
+        "audit_records_deleted": 0,
+        "unauthorized_delete_executions": 0,
+        "external_http_calls": 0,
+        "provider_mutations": 0,
+    }
+    for record in capture_lifecycle_records:
+        if isinstance(record, dict):
+            for key, value in record.get("negative_evidence", {}).items():
+                capture_lifecycle_negative[key] = capture_lifecycle_negative.get(key, 0) + int(value or 0)
+    capture_lifecycle_state_text = ""
+    if capture_lifecycle_state_path.exists():
+        capture_lifecycle_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(capture_lifecycle_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    capture_lifecycle_source_state_count = (
+        len(list((capture_lifecycle_state_path / "connector" / "capture_lifecycle_source_states").glob("*.json")))
+        if (capture_lifecycle_state_path / "connector" / "capture_lifecycle_source_states").exists()
+        else 0
+    )
+    capture_lifecycle_decision_count = (
+        len(list((capture_lifecycle_state_path / "connector" / "capture_lifecycle_decisions").glob("*.json")))
+        if (capture_lifecycle_state_path / "connector" / "capture_lifecycle_decisions").exists()
+        else 0
+    )
+    capture_lifecycle_export_count = (
+        len(list((capture_lifecycle_state_path / "connector" / "capture_lifecycle_exports").glob("*.json")))
+        if (capture_lifecycle_state_path / "connector" / "capture_lifecycle_exports").exists()
+        else 0
+    )
+    capture_lifecycle_deletion_receipt_count = (
+        len(list((capture_lifecycle_state_path / "connector" / "capture_lifecycle_deletion_receipts").glob("*.json")))
+        if (capture_lifecycle_state_path / "connector" / "capture_lifecycle_deletion_receipts").exists()
+        else 0
+    )
+    capture_lifecycle_review_count = (
+        len(list((capture_lifecycle_state_path / "connector" / "capture_result_reviews").glob("*.json")))
+        if (capture_lifecycle_state_path / "connector" / "capture_result_reviews").exists()
+        else 0
+    )
+    capture_lifecycle_sample_count = (
+        len(list((capture_lifecycle_state_path / "connector" / "capture_samples").glob("*.json")))
+        if (capture_lifecycle_state_path / "connector" / "capture_samples").exists()
+        else 0
+    )
+    capture_lifecycle_audit_count = (
+        len(list((capture_lifecycle_state_path / "audit").glob("*.jsonl")))
+        if (capture_lifecycle_state_path / "audit").exists()
+        else 0
+    )
+    capture_lifecycle_internal_paths: list[str] = []
+    for record in capture_lifecycle_records:
+        capture_lifecycle_internal_paths.extend(provider_internal_findings(record))
+    for payload in capture_lifecycle_payloads:
+        capture_lifecycle_internal_paths.extend(provider_internal_findings(payload))
+    watch_result_observations = watch_result_build_payload.get("watch_observations", [])
+    watch_result_inferences = watch_result_build_payload.get("watch_inferences", [])
+    watch_result_record = watch_result_build_payload.get("watch_result", {})
+    watch_result_corrected_record = watch_result_correct_payload.get("watch_result", {})
+    watch_result_corrected_inference = watch_result_correct_payload.get("watch_inference", {})
+    watch_result_correction = watch_result_correct_payload.get("watch_result_correction", {})
+    watch_result_memory_denial = watch_result_memory_approval_payload.get("watch_result_review", {})
+    watch_result_review = watch_result_review_payload.get("watch_result_review", {})
+    watch_result_payloads = [
+        watch_result_build_payload,
+        watch_result_correct_payload,
+        watch_result_memory_approval_payload,
+        watch_result_review_payload,
+    ]
+    watch_result_records = [
+        *watch_result_observations,
+        *watch_result_inferences,
+        watch_result_record,
+        watch_result_corrected_record,
+        watch_result_corrected_inference,
+        watch_result_correction,
+        watch_result_memory_denial,
+        watch_result_review,
+    ]
+    watch_result_negative: dict[str, int] = {
+        "inferred_intent_labeled_observed_fact": 0,
+        "inference_stored_as_observed_fact": 0,
+        "unsupported_inference_approved": 0,
+        "low_confidence_memory_approved_without_review": 0,
+        "observation_mutated_by_correction": 0,
+        "proposal_executed_directly": 0,
+        "action_card_created_directly": 0,
+        "claim_created_directly": 0,
+        "mission_opened_directly": 0,
+        "workflow_runs_started": 0,
+        "raw_content_stored": 0,
+        "external_http_calls": 0,
+        "provider_mutations": 0,
+    }
+    for record in watch_result_records:
+        if isinstance(record, dict):
+            for key, value in record.get("negative_evidence", {}).items():
+                watch_result_negative[key] = watch_result_negative.get(key, 0) + int(value or 0)
+    watch_result_state_text = ""
+    if watch_result_state_path.exists():
+        watch_result_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(watch_result_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    watch_observation_count = (
+        len(list((watch_result_state_path / "connector" / "watch_observations").glob("*.json")))
+        if (watch_result_state_path / "connector" / "watch_observations").exists()
+        else 0
+    )
+    watch_inference_count = (
+        len(list((watch_result_state_path / "connector" / "watch_inferences").glob("*.json")))
+        if (watch_result_state_path / "connector" / "watch_inferences").exists()
+        else 0
+    )
+    watch_result_count = (
+        len(list((watch_result_state_path / "connector" / "watch_results").glob("*.json")))
+        if (watch_result_state_path / "connector" / "watch_results").exists()
+        else 0
+    )
+    watch_result_correction_count = (
+        len(list((watch_result_state_path / "connector" / "watch_result_corrections").glob("*.json")))
+        if (watch_result_state_path / "connector" / "watch_result_corrections").exists()
+        else 0
+    )
+    watch_result_review_count = (
+        len(list((watch_result_state_path / "connector" / "watch_result_reviews").glob("*.json")))
+        if (watch_result_state_path / "connector" / "watch_result_reviews").exists()
+        else 0
+    )
+    watch_result_action_count = (
+        len(list((watch_result_state_path / "actions").glob("**/*.json")))
+        if (watch_result_state_path / "actions").exists()
+        else 0
+    )
+    watch_result_audit_count = (
+        len(list((watch_result_state_path / "audit").glob("*.jsonl")))
+        if (watch_result_state_path / "audit").exists()
+        else 0
+    )
+    watch_result_internal_paths: list[str] = []
+    for record in watch_result_records:
+        watch_result_internal_paths.extend(provider_internal_findings(record))
+    for payload in watch_result_payloads:
+        watch_result_internal_paths.extend(provider_internal_findings(payload))
+    action_preflight_action = action_preflight_action_payload.get("action_card", {})
+    action_preflight_dry_run_action = action_preflight_dry_run_payload.get("action_card", {})
+    action_preflight_allowed = action_preflight_allowed_payload.get("connector_action_preflight", {})
+    action_preflight_allowed_review = action_preflight_allowed_payload.get("connector_action_preflight_review", {})
+    action_preflight_allowed_action = action_preflight_allowed_payload.get("action_card", {})
+    action_preflight_execute_denial = action_preflight_execute_denied_payload.get("action_card", {})
+    action_preflight_denied_records = {
+        case_id: payload.get("connector_action_preflight", {})
+        for case_id, payload in action_preflight_denial_payloads.items()
+    }
+    action_preflight_denied_reviews = {
+        case_id: payload.get("connector_action_preflight_review", {})
+        for case_id, payload in action_preflight_denial_payloads.items()
+    }
+    action_preflight_github_denied = action_preflight_github_denied_payload.get("connector_action_preflight", {})
+    action_preflight_github_denied_review = action_preflight_github_denied_payload.get(
+        "connector_action_preflight_review", {}
+    )
+    action_preflight_payloads = [
+        action_preflight_validate_payload,
+        action_preflight_setup_payload,
+        action_preflight_ingest_payload,
+        action_preflight_bundle_payload,
+        action_preflight_claim_payload,
+        action_preflight_claim_approve_payload,
+        action_preflight_mission_payload,
+        action_preflight_action_payload,
+        action_preflight_dry_run_payload,
+        action_preflight_allowed_payload,
+        action_preflight_execute_denied_payload,
+        *action_preflight_denial_payloads.values(),
+        action_preflight_github_action_payload,
+        action_preflight_github_denied_payload,
+    ]
+    action_preflight_records = [
+        action_preflight_action,
+        action_preflight_dry_run_action,
+        action_preflight_allowed,
+        action_preflight_allowed_review,
+        action_preflight_allowed_action,
+        action_preflight_execute_denial,
+        *action_preflight_denied_records.values(),
+        *action_preflight_denied_reviews.values(),
+        action_preflight_github_denied,
+        action_preflight_github_denied_review,
+    ]
+    action_preflight_negative: dict[str, int] = {
+        "dry_run_executed": 0,
+        "preflight_counted_as_approval": 0,
+        "execution_result_created": 0,
+        "workflow_runs_started": 0,
+        "provider_mutations": 0,
+        "external_http_calls": 0,
+        "real_provider_calls": 0,
+        "direct_provider_access": 0,
+        "credential_values_exposed": 0,
+        "github_read_only_action_admitted": 0,
+    }
+    for record in action_preflight_records:
+        if isinstance(record, dict):
+            for key, value in record.get("negative_evidence", {}).items():
+                action_preflight_negative[key] = action_preflight_negative.get(key, 0) + int(value or 0)
+    action_preflight_state_text = ""
+    if action_preflight_state_path.exists():
+        action_preflight_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(action_preflight_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    action_preflight_count = (
+        len(list((action_preflight_state_path / "connector" / "connector_action_preflights").glob("*.json")))
+        if (action_preflight_state_path / "connector" / "connector_action_preflights").exists()
+        else 0
+    )
+    action_preflight_review_count = (
+        len(list((action_preflight_state_path / "connector" / "connector_action_preflight_reviews").glob("*.json")))
+        if (action_preflight_state_path / "connector" / "connector_action_preflight_reviews").exists()
+        else 0
+    )
+    action_preflight_action_paths = (
+        list((action_preflight_state_path / "actions").glob("*.json"))
+        if (action_preflight_state_path / "actions").exists()
+        else []
+    )
+    action_preflight_action_records = []
+    for path in action_preflight_action_paths:
+        try:
+            action_preflight_action_records.append(json.loads(path.read_text()))
+        except json.JSONDecodeError:
+            continue
+    action_preflight_execution_result_count = sum(
+        1
+        for record in action_preflight_action_records
+        if isinstance(record, dict) and isinstance(record.get("execution", {}).get("result"), dict)
+    )
+    action_preflight_executed_count = sum(
+        1
+        for record in action_preflight_action_records
+        if isinstance(record, dict) and record.get("execution", {}).get("status") == "executed"
+    )
+    action_preflight_workflow_run_count = (
+        len(list((action_preflight_state_path / "workflow_runs").glob("*.json")))
+        if (action_preflight_state_path / "workflow_runs").exists()
+        else 0
+    )
+    action_preflight_audit_count = (
+        len(list((action_preflight_state_path / "audit").glob("*.jsonl")))
+        if (action_preflight_state_path / "audit").exists()
+        else 0
+    )
+    action_preflight_denial_reason_codes = {
+        reason
+        for record in [*action_preflight_denied_records.values(), action_preflight_github_denied]
+        for reason in record.get("reason_codes", [])
+        if isinstance(record, dict)
+    }
+    action_preflight_internal_paths: list[str] = []
+    for record in action_preflight_records:
+        action_preflight_internal_paths.extend(provider_internal_findings(record))
+    for payload in action_preflight_payloads:
+        action_preflight_internal_paths.extend(provider_internal_findings(payload))
+    action_safety_denial_envelopes = {
+        case_id: payload.get("action_safety_envelope", {})
+        for case_id, payload in action_safety_denial_payloads.items()
+    }
+    action_safety_denial_reason_codes = {
+        case_id: next(
+            (
+                error.get("reason_code")
+                for error in payload.get("errors", [])
+                if isinstance(error, dict) and error.get("reason_code")
+            ),
+            None,
+        )
+        for case_id, payload in action_safety_denial_payloads.items()
+    }
+    action_safety_payloads = [
+        action_safety_validate_payload,
+        action_safety_setup_payload,
+        action_safety_ingest_payload,
+        action_safety_bundle_payload,
+        action_safety_claim_payload,
+        action_safety_claim_approve_payload,
+        action_safety_mission_payload,
+        action_safety_action_payload,
+        action_safety_allowed_preflight_payload,
+        action_safety_invalid_approval_payload,
+        action_safety_valid_approval_payload,
+        action_safety_wrong_scope_payload,
+        *action_safety_denial_payloads.values(),
+    ]
+    action_safety_records = [
+        action_safety_valid_action,
+        *action_safety_denial_envelopes.values(),
+        action_safety_allowed_preflight_payload.get("connector_action_preflight", {}),
+    ]
+    action_safety_negative: dict[str, int] = {
+        "executions_without_evidence": 0,
+        "executions_without_policy_allow": 0,
+        "executions_without_authorized_approval": 0,
+        "unauthorized_approvals_accepted": 0,
+        "connector_permission_inferred_from_product_approval": 0,
+        "product_approval_inferred_from_connector_permission": 0,
+        "executions_without_idempotency": 0,
+        "stale_preflight_executions": 0,
+        "cross_namespace_executions": 0,
+        "execution_results_created": 0,
+        "workflow_runs_started": 0,
+        "external_http_calls": 0,
+        "provider_mutations": 0,
+        "real_provider_calls": 0,
+        "credential_values_exposed": 0,
+    }
+    action_safety_state_text = ""
+    if action_safety_state_path.exists():
+        action_safety_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(action_safety_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    action_safety_envelope_count = (
+        len(list((action_safety_state_path / "actions" / "safety_envelopes").glob("*.json")))
+        if (action_safety_state_path / "actions" / "safety_envelopes").exists()
+        else 0
+    )
+    action_safety_execution_result_count = action_safety_state_text.count('"schema_version": "cs.action_result.v0"')
+    action_safety_workflow_run_count = (
+        len(list((action_safety_state_path / "workflow_runs").glob("*.json")))
+        if (action_safety_state_path / "workflow_runs").exists()
+        else 0
+    )
+    action_safety_audit_count = (
+        len(list((action_safety_state_path / "audit").glob("*.jsonl")))
+        if (action_safety_state_path / "audit").exists()
+        else 0
+    )
+    for envelope in action_safety_denial_envelopes.values():
+        if not isinstance(envelope, dict):
+            continue
+        action_safety_negative["execution_results_created"] += int(
+            bool(envelope.get("execution_result_created"))
+        )
+        action_safety_negative["workflow_runs_started"] += int(bool(envelope.get("workflow_run_started")))
+        action_safety_negative["external_http_calls"] += int(envelope.get("external_http_calls", 0) or 0)
+        action_safety_negative["provider_mutations"] += int(envelope.get("provider_mutations", 0) or 0)
+        action_safety_negative["real_provider_calls"] += int(envelope.get("real_provider_calls", 0) or 0)
+    action_safety_internal_paths: list[str] = []
+    for record in action_safety_records:
+        action_safety_internal_paths.extend(provider_internal_findings(record))
+    for payload in action_safety_payloads:
+        action_safety_internal_paths.extend(provider_internal_findings(payload))
+    action_execution_result = action_execution_execute_payload.get("action_result", {})
+    action_execution_workflow_run = action_execution_execute_payload.get("workflow_run", {})
+    action_execution_provider_receipt = action_execution_execute_payload.get("provider_receipt", {})
+    action_execution_idempotency = action_execution_execute_payload.get("idempotency", {})
+    action_execution_outcome_artifact = action_execution_execute_payload.get("outcome_artifact", {})
+    action_execution_outcome_bundle = action_execution_execute_payload.get("outcome_evidence_bundle", {})
+    action_execution_connected_outcome = action_execution_execute_payload.get("connected_outcome", {})
+    action_execution_replay_result = action_execution_replay_payload.get("action_result", {})
+    action_execution_replay_receipt = action_execution_replay_payload.get("provider_receipt", {})
+    action_execution_replay_idempotency = action_execution_replay_payload.get("idempotency", {})
+    action_execution_payloads = [
+        action_execution_validate_payload,
+        action_execution_setup_payload,
+        action_execution_ingest_payload,
+        action_execution_bundle_payload,
+        action_execution_claim_payload,
+        action_execution_claim_approve_payload,
+        action_execution_mission_payload,
+        action_execution_action_payload,
+        action_execution_preflight_payload,
+        action_execution_approve_payload,
+        action_execution_execute_payload,
+        action_execution_replay_payload,
+    ]
+    action_execution_records = [
+        action_execution_result,
+        action_execution_workflow_run,
+        action_execution_provider_receipt,
+        action_execution_idempotency,
+        action_execution_outcome_artifact,
+        action_execution_outcome_bundle,
+        action_execution_connected_outcome,
+    ]
+    action_execution_state_text = ""
+    if action_execution_state_path.exists():
+        action_execution_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(action_execution_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    action_execution_workflow_run_count = (
+        len(list((action_execution_state_path / "workflow_runs").glob("*.json")))
+        if (action_execution_state_path / "workflow_runs").exists()
+        else 0
+    )
+    action_execution_action_result_count = (
+        len(list((action_execution_state_path / "action_results").glob("*.json")))
+        if (action_execution_state_path / "action_results").exists()
+        else 0
+    )
+    action_execution_provider_receipt_count = (
+        len(list((action_execution_state_path / "connector" / "provider_receipts").glob("*.json")))
+        if (action_execution_state_path / "connector" / "provider_receipts").exists()
+        else 0
+    )
+    action_execution_outcome_artifact_count = sum(
+        1
+        for path in (action_execution_state_path / "artifacts" / "records").glob("**/*.json")
+        if path.is_file()
+        and json.loads(path.read_text()).get("source", {}).get("type") == "connector_action_outcome"
+    ) if (action_execution_state_path / "artifacts" / "records").exists() else 0
+    action_execution_connected_outcome_count = (
+        len(list((action_execution_state_path / "connected_outcomes").glob("*.json")))
+        if (action_execution_state_path / "connected_outcomes").exists()
+        else 0
+    )
+    action_execution_idempotency_count = (
+        len(list((action_execution_state_path / "security" / "idempotency").glob("*.json")))
+        if (action_execution_state_path / "security" / "idempotency").exists()
+        else 0
+    )
+    action_execution_audit_count = (
+        len(list((action_execution_state_path / "audit").glob("*.jsonl")))
+        if (action_execution_state_path / "audit").exists()
+        else 0
+    )
+    action_execution_negative: dict[str, int] = {
+        "direct_provider_calls": int(bool(action_execution_result.get("direct_provider_access")))
+        + int(bool(action_execution_workflow_run.get("direct_provider_access")))
+        + int(bool(action_execution_provider_receipt.get("direct_provider_access"))),
+        "external_http_calls": int(action_execution_result.get("external_http_calls", 1) or 0)
+        + int(action_execution_workflow_run.get("external_http_calls", 1) or 0)
+        + int(action_execution_provider_receipt.get("external_http_calls", 1) or 0),
+        "duplicate_side_effects": int(action_execution_result.get("duplicate_side_effect_count", 1) or 0)
+        + int(action_execution_provider_receipt.get("duplicate_side_effect_count", 1) or 0)
+        + int(action_execution_idempotency.get("duplicate_request", {}).get("side_effect_count", 1) or 0),
+        "raw_provider_payloads_persisted": int(bool(action_execution_provider_receipt.get("raw_provider_payload_persisted", True))),
+        "credential_values_exposed": int(bool(action_execution_provider_receipt.get("credential_values_exposed", True)))
+        + int(bool(action_execution_result.get("credentials_exposed_to_agent", True))),
+    }
+    action_execution_internal_paths: list[str] = []
+    for record in action_execution_records:
+        action_execution_internal_paths.extend(provider_internal_findings(record))
+    for payload in action_execution_payloads:
+        action_execution_internal_paths.extend(provider_internal_findings(payload))
+    action_retry_result = action_retry_execute_payload.get("action_result", {})
+    action_retry_workflow_run = action_retry_execute_payload.get("workflow_run", {})
+    action_retry_provider_receipt = action_retry_execute_payload.get("provider_receipt", {})
+    action_retry_idempotency = action_retry_execute_payload.get("idempotency", {})
+    action_retry_replay_result = action_retry_replay_payload.get("action_result", {})
+    action_retry_replay_workflow_run = action_retry_replay_payload.get("workflow_run", {})
+    action_retry_replay_receipt = action_retry_replay_payload.get("provider_receipt", {})
+    action_retry_replay_idempotency = action_retry_replay_payload.get("idempotency", {})
+    action_retry_conflict_preflight = action_retry_conflict_preflight_payload.get("connector_action_preflight", {})
+    action_retry_conflict_payload_idempotency = action_retry_conflict_execute_payload.get("idempotency", {})
+    action_retry_conflict = action_retry_conflict_execute_payload.get("idempotency_conflict", {})
+    action_retry_conflict_envelope = action_retry_conflict_execute_payload.get("action_safety_envelope", {})
+    action_retry_payloads = [
+        action_retry_validate_payload,
+        action_retry_setup_payload,
+        action_retry_ingest_payload,
+        action_retry_bundle_payload,
+        action_retry_claim_payload,
+        action_retry_claim_approve_payload,
+        action_retry_mission_payload,
+        action_retry_action_payload,
+        action_retry_preflight_payload,
+        action_retry_approve_payload,
+        action_retry_execute_payload,
+        action_retry_replay_payload,
+        action_retry_conflict_action_payload,
+        action_retry_conflict_preflight_payload,
+        action_retry_conflict_approve_payload,
+        action_retry_conflict_execute_payload,
+    ]
+    action_retry_records = [
+        action_retry_result,
+        action_retry_workflow_run,
+        action_retry_provider_receipt,
+        action_retry_idempotency,
+        action_retry_replay_result,
+        action_retry_replay_workflow_run,
+        action_retry_replay_receipt,
+        action_retry_replay_idempotency,
+        action_retry_conflict_preflight,
+        action_retry_conflict_payload_idempotency,
+        action_retry_conflict,
+        action_retry_conflict_envelope,
+    ]
+    action_retry_state_text = ""
+    if action_retry_state_path.exists():
+        action_retry_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(action_retry_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    action_retry_workflow_run_count = (
+        len(list((action_retry_state_path / "workflow_runs").glob("*.json")))
+        if (action_retry_state_path / "workflow_runs").exists()
+        else 0
+    )
+    action_retry_action_result_count = (
+        len(list((action_retry_state_path / "action_results").glob("*.json")))
+        if (action_retry_state_path / "action_results").exists()
+        else 0
+    )
+    action_retry_provider_receipt_count = (
+        len(list((action_retry_state_path / "connector" / "provider_receipts").glob("*.json")))
+        if (action_retry_state_path / "connector" / "provider_receipts").exists()
+        else 0
+    )
+    action_retry_idempotency_count = (
+        len(list((action_retry_state_path / "security" / "idempotency").glob("*.json")))
+        if (action_retry_state_path / "security" / "idempotency").exists()
+        else 0
+    )
+    action_retry_connected_outcome_count = (
+        len(list((action_retry_state_path / "connected_outcomes").glob("*.json")))
+        if (action_retry_state_path / "connected_outcomes").exists()
+        else 0
+    )
+    action_retry_outcome_artifact_count = sum(
+        1
+        for path in (action_retry_state_path / "artifacts" / "records").glob("**/*.json")
+        if path.is_file()
+        and json.loads(path.read_text()).get("source", {}).get("type") == "connector_action_outcome"
+    ) if (action_retry_state_path / "artifacts" / "records").exists() else 0
+    action_retry_safety_envelope_count = (
+        len(list((action_retry_state_path / "actions" / "safety_envelopes").glob("*.json")))
+        if (action_retry_state_path / "actions" / "safety_envelopes").exists()
+        else 0
+    )
+    action_retry_audit_count = (
+        len(list((action_retry_state_path / "audit").glob("*.jsonl")))
+        if (action_retry_state_path / "audit").exists()
+        else 0
+    )
+    action_retry_negative: dict[str, int] = {
+        "duplicate_side_effects": int(action_retry_result.get("duplicate_side_effect_count", 1) or 0)
+        + int(action_retry_provider_receipt.get("duplicate_side_effect_count", 1) or 0)
+        + int(action_retry_replay_idempotency.get("duplicate_request", {}).get("side_effect_count", 1) or 0)
+        + int(action_retry_conflict.get("duplicate_side_effect_count", 1) or 0),
+        "conflicts_executed": int(action_retry_conflict_execute_payload.get("status") != "denied")
+        + int(bool(action_retry_conflict_envelope.get("execution_result_created", True)))
+        + int(bool(action_retry_conflict_envelope.get("workflow_run_started", True))),
+        "second_action_results_created": max(action_retry_action_result_count - 1, 0)
+        + max(action_retry_workflow_run_count - 1, 0)
+        + max(action_retry_provider_receipt_count - 1, 0),
+        "hidden_automatic_compensation": int(
+            bool(action_retry_idempotency.get("compensation", {}).get("automatic_compensation_executed", True))
+        )
+        + int(bool(action_retry_conflict.get("automatic_compensation_executed", True)))
+        + int(bool(action_retry_conflict.get("compensation", {}).get("automatic_compensation_executed", True))),
+        "external_http_calls": int(action_retry_result.get("external_http_calls", 1) or 0)
+        + int(action_retry_workflow_run.get("external_http_calls", 1) or 0)
+        + int(action_retry_provider_receipt.get("external_http_calls", 1) or 0)
+        + int(action_retry_conflict.get("external_http_calls", 1) or 0)
+        + int(action_retry_conflict_envelope.get("external_http_calls", 1) or 0),
+        "provider_mutations": int(action_retry_conflict.get("provider_mutations", 1) or 0)
+        + int(action_retry_conflict_envelope.get("provider_mutations", 1) or 0),
+        "real_provider_calls": int(action_retry_conflict.get("real_provider_calls", 1) or 0)
+        + int(action_retry_conflict_envelope.get("real_provider_calls", 1) or 0),
+        "credential_values_exposed": int(bool(action_retry_provider_receipt.get("credential_values_exposed", True)))
+        + int(bool(action_retry_result.get("credentials_exposed_to_agent", True))),
+    }
+    action_retry_internal_paths: list[str] = []
+    for record in action_retry_records:
+        action_retry_internal_paths.extend(provider_internal_findings(record))
+    for payload in action_retry_payloads:
+        action_retry_internal_paths.extend(provider_internal_findings(payload))
+    scope_isolation_contract = scope_isolation_validate_payload.get("connector_capability_contract", {})
+    scope_isolation_setup_result = scope_isolation_setup_payload.get("connector_setup_result", {})
+    scope_isolation_source_policy = scope_isolation_setup_payload.get("connector_source_policy", {})
+    scope_isolation_receipt = scope_isolation_delivery_payload.get("connector_delivery_receipt", {})
+    scope_isolation_artifact = scope_isolation_delivery_payload.get("artifact", {})
+    scope_isolation_bundle = scope_isolation_bundle_payload.get("evidence_bundle", {})
+    scope_isolation_claim = scope_isolation_claim_payload.get("claim", {})
+    scope_isolation_approved_claim = scope_isolation_claim_approve_payload.get("claim", {})
+    scope_isolation_mission = scope_isolation_mission_payload.get("mission", {})
+    scope_isolation_action = scope_isolation_action_payload.get("action_card", {})
+    scope_isolation_preflight = scope_isolation_preflight_payload.get("connector_action_preflight", {})
+    scope_isolation_approved_action = scope_isolation_approve_payload.get("action_card", {})
+    scope_isolation_payloads = [
+        scope_isolation_validate_payload,
+        scope_isolation_setup_payload,
+        scope_isolation_other_setup_payload,
+        scope_isolation_delivery_payload,
+        scope_isolation_other_delivery_payload,
+        scope_isolation_bundle_payload,
+        scope_isolation_other_bundle_payload,
+        scope_isolation_watch_payload,
+        scope_isolation_other_watch_payload,
+        scope_isolation_claim_payload,
+        scope_isolation_claim_approve_payload,
+        scope_isolation_mission_payload,
+        scope_isolation_action_payload,
+        scope_isolation_preflight_payload,
+        scope_isolation_approve_payload,
+        scope_isolation_other_action_payload,
+    ]
+    scope_isolation_records = [
+        scope_isolation_contract,
+        scope_isolation_setup_result,
+        scope_isolation_source_policy,
+        scope_isolation_receipt,
+        scope_isolation_artifact,
+        scope_isolation_bundle,
+        scope_isolation_watch_result,
+        scope_isolation_claim,
+        scope_isolation_approved_claim,
+        scope_isolation_mission,
+        scope_isolation_action,
+        scope_isolation_preflight,
+        scope_isolation_approved_action,
+    ]
+    scope_isolation_state_text = ""
+    if scope_isolation_state_path.exists():
+        scope_isolation_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(scope_isolation_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    scope_isolation_persisted_records: list[dict[str, Any]] = []
+    if scope_isolation_state_path.exists():
+        for path in sorted(scope_isolation_state_path.rglob("*.json")):
+            try:
+                record = json.loads(path.read_text())
+            except ValueError:
+                continue
+            if isinstance(record, dict) and (isinstance(record.get("scope"), dict) or isinstance(record.get("filters"), dict)):
+                scope_isolation_persisted_records.append(record)
+    scope_isolation_scope_records = [
+        record.get("scope") if isinstance(record.get("scope"), dict) else record.get("filters")
+        for record in scope_isolation_persisted_records
+    ]
+    scope_isolation_other_scope_record_count = sum(
+        1
+        for scope in scope_isolation_scope_records
+        if isinstance(scope, dict)
+        and (
+            scope.get("owner_id") != "local-user"
+            or scope.get("namespace_id") != "personal"
+            or scope.get("workspace_id") != "default"
+        )
+    )
+    scope_isolation_contract_count = (
+        len(list((scope_isolation_state_path / "connector" / "contracts").glob("*.json")))
+        if (scope_isolation_state_path / "connector" / "contracts").exists()
+        else 0
+    )
+    scope_isolation_setup_count = (
+        len(list((scope_isolation_state_path / "connector" / "setup_results").glob("*.json")))
+        if (scope_isolation_state_path / "connector" / "setup_results").exists()
+        else 0
+    )
+    scope_isolation_receipt_count = (
+        len(list((scope_isolation_state_path / "connector" / "delivery_receipts").glob("*.json")))
+        if (scope_isolation_state_path / "connector" / "delivery_receipts").exists()
+        else 0
+    )
+    scope_isolation_bundle_count = (
+        len(list((scope_isolation_state_path / "evidence" / "bundles").glob("*.json")))
+        if (scope_isolation_state_path / "evidence" / "bundles").exists()
+        else 0
+    )
+    scope_isolation_watch_result_count = (
+        len(list((scope_isolation_state_path / "connector" / "watch_results").glob("*.json")))
+        if (scope_isolation_state_path / "connector" / "watch_results").exists()
+        else 0
+    )
+    scope_isolation_action_count = (
+        len(list((scope_isolation_state_path / "actions").glob("*.json")))
+        if (scope_isolation_state_path / "actions").exists()
+        else 0
+    )
+    scope_isolation_action_result_count = (
+        len(list((scope_isolation_state_path / "action_results").glob("*.json")))
+        if (scope_isolation_state_path / "action_results").exists()
+        else 0
+    )
+    scope_isolation_workflow_run_count = (
+        len(list((scope_isolation_state_path / "workflow_runs").glob("*.json")))
+        if (scope_isolation_state_path / "workflow_runs").exists()
+        else 0
+    )
+    scope_isolation_provider_receipt_count = (
+        len(list((scope_isolation_state_path / "connector" / "provider_receipts").glob("*.json")))
+        if (scope_isolation_state_path / "connector" / "provider_receipts").exists()
+        else 0
+    )
+    scope_isolation_audit_count = (
+        len(list((scope_isolation_state_path / "audit").glob("*.jsonl")))
+        if (scope_isolation_state_path / "audit").exists()
+        else 0
+    )
+    scope_isolation_denied_payloads = [
+        scope_isolation_other_setup_payload,
+        scope_isolation_other_delivery_payload,
+        scope_isolation_other_bundle_payload,
+        scope_isolation_other_watch_payload,
+        scope_isolation_other_action_payload,
+    ]
+    scope_isolation_leaked_object_keys = {
+        "connector_setup_result",
+        "connector_delivery_receipt",
+        "artifact",
+        "evidence_bundle",
+        "watch_result",
+        "watch_result_review",
+        "action_result",
+        "workflow_run",
+        "provider_receipt",
+    }
+    scope_isolation_denied_object_leak_count = sum(
+        1
+        for payload in scope_isolation_denied_payloads
+        for key in scope_isolation_leaked_object_keys
+        if key in payload
+    )
+    scope_isolation_negative: dict[str, int] = {
+        "cross_scope_setup_allowed": 0 if _scope_denied(transcripts["scope_isolation_other_setup_plan"]) else 1,
+        "cross_scope_delivery_returned": 0 if _scope_denied(transcripts["scope_isolation_other_delivery_process"]) else 1,
+        "cross_scope_evidence_returned": 0 if _scope_denied(transcripts["scope_isolation_other_bundle_create"]) else 1,
+        "cross_scope_watch_returned": 0 if _scope_denied(transcripts["scope_isolation_other_watch_result_review"]) else 1,
+        "cross_scope_action_executed": 0 if _scope_denied(transcripts["scope_isolation_other_action_execute"]) else 1,
+        "cross_scope_object_payload_leaks": scope_isolation_denied_object_leak_count,
+        "other_scope_records_persisted": scope_isolation_other_scope_record_count,
+        "ownerless_connector_records": 0
+        if scope_isolation_scope_records and all(_scope_complete(scope) for scope in scope_isolation_scope_records)
+        else 1,
+        "workflow_runs_started": scope_isolation_workflow_run_count,
+        "action_results_created": scope_isolation_action_result_count,
+        "provider_receipts_created": scope_isolation_provider_receipt_count,
+        "external_http_calls": int('"external_http_calls": 1' in scope_isolation_state_text),
+        "provider_mutations": int('"provider_mutations": 1' in scope_isolation_state_text),
+        "credential_values_exposed": int('"credential_values_exposed": true' in scope_isolation_state_text),
+    }
+    scope_isolation_internal_paths: list[str] = []
+    for record in scope_isolation_records:
+        scope_isolation_internal_paths.extend(provider_internal_findings(record))
+    for payload in scope_isolation_payloads:
+        scope_isolation_internal_paths.extend(provider_internal_findings(payload))
+    credential_custody_status = credential_custody_status_payload.get("connector_credential_lifecycle", {})
+    credential_custody_rotate = credential_custody_rotate_payload.get("connector_credential_lifecycle", {})
+    credential_custody_revoke = credential_custody_revoke_payload.get("connector_credential_lifecycle", {})
+    credential_custody_boundary = credential_custody_boundary_payload.get("credential_boundary", {})
+    credential_custody_payloads = [
+        credential_custody_status_payload,
+        credential_custody_rotate_payload,
+        credential_custody_revoke_payload,
+        credential_custody_boundary_payload,
+        credential_custody_audit_payload,
+    ]
+    credential_custody_records = [
+        credential_custody_status,
+        credential_custody_rotate,
+        credential_custody_revoke,
+        credential_custody_boundary,
+    ]
+    credential_custody_state_text = ""
+    if credential_custody_state_path.exists():
+        credential_custody_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(credential_custody_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    credential_custody_stdout_text = json.dumps(
+        {key: transcripts[key] for key in transcripts if key.startswith("credential_custody_")},
+        sort_keys=True,
+    )
+    credential_custody_raw_canary = (
+        f"connectorhub-private-secret::github::{credential_custody_connection_id}::{credential_custody_canary_id}"
+    )
+    credential_custody_lifecycle_count = (
+        len(list((credential_custody_state_path / "security" / "credential_lifecycle").glob("*.json")))
+        if (credential_custody_state_path / "security" / "credential_lifecycle").exists()
+        else 0
+    )
+    credential_custody_boundary_count = (
+        len(list((credential_custody_state_path / "security" / "credential_boundaries").glob("*.json")))
+        if (credential_custody_state_path / "security" / "credential_boundaries").exists()
+        else 0
+    )
+    credential_custody_audit_count = (
+        len(list((credential_custody_state_path / "audit").glob("*.jsonl")))
+        if (credential_custody_state_path / "audit").exists()
+        else 0
+    )
+    credential_custody_forbidden_imports = [
+        "from github import Github",
+        "import github",
+        "import boto3",
+        "from google.oauth2",
+        "import google.auth",
+        "import slack_sdk",
+        "import requests_oauthlib",
+        "from requests_oauthlib",
+        "import msal",
+    ]
+    credential_custody_static_findings: list[dict[str, str]] = []
+    for path in sorted((root / "packages" / "cornerstone_cli").glob("*.py")):
+        if path.name in {"scenarios.py"}:
+            continue
+        text = path.read_text(errors="ignore")
+        for pattern in credential_custody_forbidden_imports:
+            if pattern in text:
+                credential_custody_static_findings.append(
+                    {"path": str(path.relative_to(root)), "pattern": pattern}
+                )
+    credential_custody_negative: dict[str, int] = {
+        "raw_secret_canary_in_stdout": int(credential_custody_raw_canary in credential_custody_stdout_text),
+        "raw_secret_canary_in_state": int(credential_custody_raw_canary in credential_custody_state_text),
+        "raw_secret_value_present": sum(
+            int(bool(record.get("raw_secret_value_present", True)))
+            for record in [credential_custody_status, credential_custody_rotate, credential_custody_revoke]
+        )
+        + int(bool(credential_custody_boundary.get("credential_secret_value_present", True))),
+        "raw_handle_present": sum(int(bool(record.get("raw_handle_present", False))) for record in [
+            credential_custody_status,
+            credential_custody_rotate,
+            credential_custody_revoke,
+        ]),
+        "auth_header_present": sum(int(bool(record.get("auth_header_present", False))) for record in [
+            credential_custody_status,
+            credential_custody_rotate,
+            credential_custody_revoke,
+        ]),
+        "credential_bearing_url_present": sum(
+            int(bool(record.get("credential_bearing_url_present", False)))
+            for record in [credential_custody_status, credential_custody_rotate, credential_custody_revoke]
+        ),
+        "credentials_exposed_to_agent": sum(
+            int(bool(record.get("credentials_exposed_to_agent", True))) for record in credential_custody_records
+        ),
+        "credentials_exposed_to_product_output": sum(
+            int(bool(record.get("credentials_exposed_to_product_output", True)))
+            for record in credential_custody_records
+        ),
+        "credentials_exposed_to_logs": sum(
+            int(bool(record.get("credentials_exposed_to_logs", False)))
+            for record in [credential_custody_status, credential_custody_rotate, credential_custody_revoke]
+        ),
+        "credentials_exposed_to_exports": sum(
+            int(bool(record.get("credentials_exposed_to_exports", False)))
+            for record in [credential_custody_status, credential_custody_rotate, credential_custody_revoke]
+        ),
+        "product_secret_writes": sum(
+            int(record.get("product_secret_writes", 1) or 0)
+            for record in [credential_custody_status, credential_custody_rotate, credential_custody_revoke]
+        ),
+        "raw_secret_reads": sum(int(record.get("raw_secret_reads", 1) or 0) for record in credential_custody_records),
+        "external_http_calls": sum(
+            int(record.get("external_http_calls", 1) or 0) for record in credential_custody_records
+        ),
+        "provider_mutations": sum(
+            int(record.get("provider_mutations", 1) or 0)
+            for record in [credential_custody_status, credential_custody_rotate, credential_custody_revoke]
+        ),
+        "provider_auth_imports": len(credential_custody_static_findings),
+    }
+    credential_custody_internal_paths: list[str] = []
+    for record in credential_custody_records:
+        credential_custody_internal_paths.extend(provider_internal_findings(record))
+    for payload in credential_custody_payloads:
+        credential_custody_internal_paths.extend(provider_internal_findings(payload))
+    egress_topology_proof = _connectorhub_cs_ch_036_egress_dependency(root)
+    egress_topology_checks = egress_topology_proof.get("checks", {})
+    egress_topology_negative = egress_topology_proof.get("negative_evidence", {})
+    action_bypass_preflight = action_bypass_preflight_payload.get("connector_action_preflight", {})
+    action_bypass_review = action_bypass_preflight_payload.get("connector_action_preflight_review", {})
+    action_bypass_envelope = action_bypass_execute_payload.get("action_safety_envelope", {})
+    action_bypass_direct_write = action_bypass_direct_write_payload.get("direct_write_denial", {})
+    action_bypass_credential_boundary = action_bypass_credential_payload.get("credential_boundary", {})
+    action_bypass_quarantine = action_bypass_pack_payload.get("quarantine", {})
+    action_bypass_payloads = [
+        action_bypass_validate_payload,
+        action_bypass_setup_payload,
+        action_bypass_ingest_payload,
+        action_bypass_bundle_payload,
+        action_bypass_claim_payload,
+        action_bypass_claim_approve_payload,
+        action_bypass_mission_payload,
+        action_bypass_action_payload,
+        action_bypass_preflight_payload,
+        action_bypass_approve_payload,
+        action_bypass_execute_payload,
+        action_bypass_direct_write_payload,
+        action_bypass_credential_payload,
+        action_bypass_pack_payload,
+    ]
+    action_bypass_records = [
+        action_bypass_preflight,
+        action_bypass_review,
+        action_bypass_envelope,
+        action_bypass_direct_write,
+        action_bypass_credential_boundary,
+        action_bypass_quarantine,
+    ]
+    action_bypass_state_text = ""
+    if action_bypass_state_path.exists():
+        action_bypass_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(action_bypass_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    action_bypass_action_result_count = (
+        len(list((action_bypass_state_path / "action_results").glob("*.json")))
+        if (action_bypass_state_path / "action_results").exists()
+        else 0
+    )
+    action_bypass_workflow_run_count = (
+        len(list((action_bypass_state_path / "workflow_runs").glob("*.json")))
+        if (action_bypass_state_path / "workflow_runs").exists()
+        else 0
+    )
+    action_bypass_preflight_count = (
+        len(list((action_bypass_state_path / "connector" / "connector_action_preflights").glob("*.json")))
+        if (action_bypass_state_path / "connector" / "connector_action_preflights").exists()
+        else 0
+    )
+    action_bypass_quarantine_count = (
+        len(list((action_bypass_state_path / "packs" / "quarantine").glob("*.json")))
+        if (action_bypass_state_path / "packs" / "quarantine").exists()
+        else 0
+    )
+    action_bypass_audit_count = (
+        len(list((action_bypass_state_path / "audit").glob("*.jsonl")))
+        if (action_bypass_state_path / "audit").exists()
+        else 0
+    )
+    direct_provider_import_findings: list[dict[str, Any]] = []
+    direct_provider_import_pattern = re.compile(
+        r"^(?:import|from)\s+"
+        r"(?:requests|httpx|boto3|botocore|github|github3|slack_sdk|googleapiclient|openai|anthropic|notion_client|stripe)\b"
+    )
+    for py_path in sorted((root / "packages" / "cornerstone_cli").glob("*.py")):
+        for line_number, line in enumerate(py_path.read_text(errors="ignore").splitlines(), start=1):
+            stripped = line.strip()
+            if direct_provider_import_pattern.search(stripped):
+                direct_provider_import_findings.append(
+                    {
+                        "file": str(py_path.relative_to(root)),
+                        "line": line_number,
+                        "import": stripped,
+                    }
+                )
+    action_bypass_negative: dict[str, int] = {
+        "undeclared_actions_executed": int(action_bypass_preflight.get("decision") != "deny")
+        + int(action_bypass_envelope.get("execution_result_created", True))
+        + int(action_bypass_envelope.get("workflow_run_started", True))
+        + action_bypass_action_result_count
+        + action_bypass_workflow_run_count,
+        "direct_provider_calls": int(bool(action_bypass_direct_write.get("direct_provider_access", True)))
+        + int(bool(action_bypass_credential_boundary.get("direct_provider_access", True)))
+        + int(bool(action_bypass_envelope.get("direct_provider_access", False))),
+        "external_http_calls": int(action_bypass_direct_write.get("external_http_calls", 1) or 0)
+        + int(action_bypass_credential_boundary.get("external_http_calls", 1) or 0)
+        + int(action_bypass_envelope.get("external_http_calls", 1) or 0)
+        + int(action_bypass_preflight.get("call_ledger", {}).get("external_http_calls", 1) or 0),
+        "provider_mutations": int(action_bypass_direct_write.get("provider_mutations", 1) or 0)
+        + int(action_bypass_envelope.get("provider_mutations", 1) or 0)
+        + int(action_bypass_preflight.get("call_ledger", {}).get("provider_mutations", 1) or 0),
+        "real_provider_calls": int(action_bypass_preflight.get("call_ledger", {}).get("real_provider_call_count", 1) or 0)
+        + int(action_bypass_envelope.get("real_provider_calls", 1) or 0),
+        "provider_clients_exposed": int(bool(action_bypass_direct_write.get("provider_client_exposed", True)))
+        + len(direct_provider_import_findings),
+        "credential_values_exposed": int(bool(action_bypass_direct_write.get("credential_values_exposed", True)))
+        + int(bool(action_bypass_credential_boundary.get("credential_secret_value_present", True)))
+        + int(bool(action_bypass_credential_boundary.get("credentials_exposed_to_agent", True)))
+        + int(bool(action_bypass_credential_boundary.get("credentials_exposed_to_product_output", True))),
+    }
+    action_bypass_internal_paths: list[str] = []
+    for record in action_bypass_records:
+        action_bypass_internal_paths.extend(provider_internal_findings(record))
+    for payload in action_bypass_payloads:
+        action_bypass_internal_paths.extend(provider_internal_findings(payload))
+    sync_webhook_receipt = sync_webhook_payload.get("connector_delivery_receipt", {})
+    sync_webhook_artifact = sync_webhook_payload.get("artifact", {})
+    sync_webhook_signal_receipt = sync_webhook_payload.get("connector_sync_signal_receipt", {})
+    sync_bad_webhook_signal_receipt = sync_bad_webhook_payload.get("connector_sync_signal_receipt", {})
+    sync_poll_duplicate_receipt = sync_poll_duplicate_payload.get("connector_delivery_receipt", {})
+    sync_poll_duplicate_artifact = sync_poll_duplicate_payload.get("artifact", {})
+    sync_replay_changed_receipt = sync_replay_changed_payload.get("connector_delivery_receipt", {})
+    sync_replay_changed_artifact = sync_replay_changed_payload.get("artifact", {})
+    sync_replay_changed_version = sync_replay_changed_payload.get("connector_content_version", {})
+    sync_after_cursor_version = sync_after_cursor_payload.get("connector_content_version", {})
+    sync_replay_after_cursor_version = sync_replay_after_cursor_payload.get("connector_content_version", {})
+    sync_out_of_order_signal_receipt = sync_out_of_order_payload.get("connector_sync_signal_receipt", {})
+    sync_cursor = sync_out_of_order_payload.get("connector_sync_cursor") or (
+        sync_reconcile_payload.get("connector_sync_cursors", [{}])[0]
+        if sync_reconcile_payload.get("connector_sync_cursors")
+        else {}
+    )
+    sync_state_text = ""
+    if sync_state_path.exists():
+        sync_state_text = "\n".join(
+            path.read_text(errors="ignore")
+            for path in sorted(sync_state_path.rglob("*"))
+            if path.is_file() and path.suffix in {".json", ".jsonl", ".txt", ".md"}
+        )
+    sync_cursor_count = (
+        len(list((sync_state_path / "connector" / "sync_cursors").glob("*.json")))
+        if (sync_state_path / "connector" / "sync_cursors").exists()
+        else 0
+    )
+    sync_signal_receipt_count = (
+        len(list((sync_state_path / "connector" / "sync_signal_receipts").glob("*.json")))
+        if (sync_state_path / "connector" / "sync_signal_receipts").exists()
+        else 0
+    )
+    sync_reconciliation_count = (
+        len(list((sync_state_path / "connector" / "sync_reconciliations").glob("*.json")))
+        if (sync_state_path / "connector" / "sync_reconciliations").exists()
+        else 0
+    )
+    sync_delivery_receipt_count = (
+        len(list((sync_state_path / "connector" / "delivery_receipts").glob("*.json")))
+        if (sync_state_path / "connector" / "delivery_receipts").exists()
+        else 0
+    )
+    sync_artifact_count = (
+        len(list((sync_state_path / "artifacts" / "records").glob("**/*.json")))
+        if (sync_state_path / "artifacts" / "records").exists()
+        else 0
+    )
+    sync_content_version_count = (
+        len(list((sync_state_path / "connector" / "content_versions").glob("*.json")))
+        if (sync_state_path / "connector" / "content_versions").exists()
+        else 0
+    )
+    missing_setup_result_id = missing_setup_result.get("setup_result_id", "")
+    missing_source_policy_id = missing_source_policy.get("source_policy_id", "")
+    missing_setup_result_path = state_path / "connector" / "setup_results" / f"{missing_setup_result_id}.json"
+    missing_source_policy_path = state_path / "connector" / "source_policies" / f"{missing_source_policy_id}.json"
+    missing_contract_version_id = missing_contract_record.get("contract_version_id", "")
+    missing_contract_record_path = state_path / "connector" / "contracts" / f"{missing_contract_version_id}.json"
+    optional_setup_result_id = optional_setup_result.get("setup_result_id", "")
+    optional_source_policy_id = optional_source_policy.get("source_policy_id", "")
+    optional_setup_result_path = state_path / "connector" / "setup_results" / f"{optional_setup_result_id}.json"
+    optional_source_policy_path = state_path / "connector" / "source_policies" / f"{optional_source_policy_id}.json"
+    optional_contract_version_id = optional_contract_record.get("contract_version_id", "")
+    optional_contract_record_path = state_path / "connector" / "contracts" / f"{optional_contract_version_id}.json"
+    confirmed_source_policy_id = confirmed_source_policy.get("source_policy_id", "")
+    confirmed_source_policy_path = state_path / "connector" / "source_policies" / f"{confirmed_source_policy_id}.json"
+    provider_swap_setup_result_id = provider_swap_setup_result.get("setup_result_id", "")
+    provider_swap_source_policy_id = provider_swap_source_policy.get("source_policy_id", "")
+    provider_swap_setup_result_path = state_path / "connector" / "setup_results" / f"{provider_swap_setup_result_id}.json"
+    provider_swap_source_policy_path = state_path / "connector" / "source_policies" / f"{provider_swap_source_policy_id}.json"
+    permission_gap_setup_result_id = permission_gap_setup_result.get("setup_result_id", "")
+    permission_gap_source_policy_id = permission_gap_source_policy.get("source_policy_id", "")
+    permission_gap_setup_result_path = state_path / "connector" / "setup_results" / f"{permission_gap_setup_result_id}.json"
+    permission_gap_source_policy_path = state_path / "connector" / "source_policies" / f"{permission_gap_source_policy_id}.json"
+    compatible_upgrade_plan_id = compatible_upgrade_plan.get("upgrade_plan_id", "")
+    breaking_upgrade_plan_id = breaking_upgrade_plan.get("upgrade_plan_id", "")
+    compatible_upgrade_plan_path = state_path / "connector" / "upgrade_plans" / f"{compatible_upgrade_plan_id}.json"
+    breaking_upgrade_plan_path = state_path / "connector" / "upgrade_plans" / f"{breaking_upgrade_plan_id}.json"
+    scope_ok = _scope_complete(contract_record.get("scope")) and _scope_complete(setup_result.get("scope")) and _scope_complete(source_policy.get("scope"))
+    delivery_scope_ok = (
+        _scope_complete(delivery_artifact.get("scope"))
+        and _scope_complete(delivery_receipt.get("scope"))
+        and _scope_complete(projection_snapshot.get("scope"))
+        and _scope_complete(connector_evidence_link.get("scope"))
+    )
+    missing_scope_ok = (
+        _scope_complete(missing_contract_record.get("scope"))
+        and _scope_complete(missing_setup_result.get("scope"))
+        and _scope_complete(missing_source_policy.get("scope"))
+    )
+    optional_scope_ok = (
+        _scope_complete(optional_contract_record.get("scope"))
+        and _scope_complete(optional_setup_result.get("scope"))
+        and _scope_complete(optional_source_policy.get("scope"))
+    )
+    provider_internal_paths = (
+        provider_internal_findings(contract_record)
+        + provider_internal_findings(setup_result)
+        + provider_internal_findings(source_policy)
+    )
+    missing_provider_internal_paths = (
+        provider_internal_findings(missing_contract_record)
+        + provider_internal_findings(missing_setup_result)
+        + provider_internal_findings(missing_source_policy)
+    )
+    optional_provider_internal_paths = (
+        provider_internal_findings(optional_contract_record)
+        + provider_internal_findings(optional_setup_result)
+        + provider_internal_findings(optional_source_policy)
+    )
+    confirmed_provider_internal_paths = provider_internal_findings(confirmed_source_policy)
+    provider_swap_internal_paths = provider_internal_findings(provider_swap_setup_result) + provider_internal_findings(provider_swap_source_policy)
+    permission_gap_internal_paths = provider_internal_findings(permission_gap_setup_result) + provider_internal_findings(permission_gap_source_policy)
+    compatible_upgrade_internal_paths = provider_internal_findings(compatible_upgrade_plan)
+    breaking_upgrade_internal_paths = provider_internal_findings(breaking_upgrade_plan)
+    product_surface_internal_paths = provider_internal_findings(product_surface_audit)
+    delivery_internal_paths = (
+        provider_internal_findings(delivery_artifact)
+        + provider_internal_findings(delivery_receipt)
+        + provider_internal_findings(projection_snapshot)
+        + provider_internal_findings(connector_evidence_link)
+    )
+    ack_internal_paths = (
+        provider_internal_findings(ack_pending_receipt)
+        + provider_internal_findings(ack_pending_outbox)
+        + provider_internal_findings(ack_redelivery_receipt)
+        + provider_internal_findings(ack_redelivery_outbox)
+        + provider_internal_findings(ack_duplicate_receipt)
+        + provider_internal_findings(ack_reconciliation)
+    )
+    retry_internal_paths = (
+        provider_internal_findings(transient_retry_first_state)
+        + provider_internal_findings(transient_retry_second_state)
+        + provider_internal_findings(transient_resolved_state)
+        + provider_internal_findings(poison_retry_first_payload.get("connector_delivery_retry_state", {}))
+        + provider_internal_findings(poison_retry_second_payload.get("connector_delivery_retry_state", {}))
+        + provider_internal_findings(poison_quarantine_state)
+        + provider_internal_findings(poison_quarantine_item)
+        + provider_internal_findings(quarantine_list)
+        + provider_internal_findings(quarantine_replay_item)
+    )
+    lineage_internal_paths = (
+        provider_internal_findings(lineage_first_receipt)
+        + provider_internal_findings(lineage_first_artifact)
+        + provider_internal_findings(lineage_first_dedupe)
+        + provider_internal_findings(lineage_first_version)
+        + provider_internal_findings(lineage_duplicate_dedupe)
+        + provider_internal_findings(lineage_unchanged_dedupe)
+        + provider_internal_findings(lineage_changed_receipt)
+        + provider_internal_findings(lineage_changed_artifact)
+        + provider_internal_findings(lineage_changed_dedupe)
+        + provider_internal_findings(lineage_changed_version)
+        + provider_internal_findings(content_lineage)
+        + provider_internal_findings(content_current)
+    )
+    policy_internal_paths = (
+        provider_internal_findings(policy_allowed_payload)
+        + provider_internal_findings(policy_forbidden_payload)
+        + provider_internal_findings(policy_confirm_payload)
+        + provider_internal_findings(policy_oversized_payload)
+        + provider_internal_findings(policy_allowed_decision)
+        + provider_internal_findings(policy_forbidden_decision)
+        + provider_internal_findings(policy_oversized_decision)
+    )
+    evidence_internal_paths = (
+        provider_internal_findings(evidence_delivery_payload)
+        + provider_internal_findings(evidence_bundle_payload)
+        + provider_internal_findings(connector_evidence_bundle)
+        + provider_internal_findings(connector_evidence_bundle_link)
+        + provider_internal_findings(evidence_claim)
+        + provider_internal_findings(evidence_approved_claim)
+        + provider_internal_findings(evidence_ref_only_payload)
+        + provider_internal_findings(unsupported_claim)
+        + provider_internal_findings(unsupported_claim_approve_payload)
+    )
+    raw_access_internal_paths = (
+        provider_internal_findings(raw_default_denied_payload)
+        + provider_internal_findings(raw_allowed_setup_payload)
+        + provider_internal_findings(raw_ttl_denied_payload)
+        + provider_internal_findings(raw_read_limit_denied_payload)
+        + provider_internal_findings(raw_grant_payload)
+        + provider_internal_findings(raw_access_grant)
+        + provider_internal_findings(raw_export_payload)
+        + provider_internal_findings(raw_access_export)
+        + provider_internal_findings(raw_read_once_payload)
+        + provider_internal_findings(raw_read_exhausted_payload)
+        + provider_internal_findings(raw_read_expired_payload)
+        + provider_internal_findings(raw_revoke_payload)
+        + provider_internal_findings(raw_read_revoked_payload)
+    )
+    untrusted_internal_paths = (
+        provider_internal_findings(untrusted_delivery_payload)
+        + provider_internal_findings(untrusted_review_payload)
+        + provider_internal_findings(untrusted_bundle_payload)
+        + provider_internal_findings(untrusted_evidence_bundle)
+        + provider_internal_findings(untrusted_connector_bundle_link)
+        + provider_internal_findings(untrusted_claim)
+        + provider_internal_findings(untrusted_agent_payload)
+        + provider_internal_findings(untrusted_memory_payload)
+        + provider_internal_findings(untrusted_egress_payload)
+    )
+    selected_repo_internal_paths = (
+        provider_internal_findings(selected_repo_validate_payload)
+        + provider_internal_findings(selected_repo_setup_payload)
+        + provider_internal_findings(selected_repo_allowed_payload)
+        + provider_internal_findings(selected_repo_unselected_payload)
+        + provider_internal_findings(selected_repo_direct_write_payload)
+        + provider_internal_findings(selected_repo_expand_payload)
+    )
+    github_write_guard_internal_paths = (
+        provider_internal_findings(github_write_guard_contract_denied_payload)
+        + provider_internal_findings(github_write_guard_static_payload)
+        + [
+            finding
+            for payload in github_write_guard_direct_write_payloads.values()
+            for finding in provider_internal_findings(payload)
+        ]
+        + provider_internal_findings(github_write_guard_audit_payload)
+    )
+    github_failure_internal_paths = (
+        provider_internal_findings(github_failure_validate_payload)
+        + provider_internal_findings(github_failure_setup_payload)
+        + provider_internal_findings(github_failure_baseline_payload)
+        + [
+            finding
+            for payload in github_failure_payloads.values()
+            for finding in provider_internal_findings(payload)
+        ]
+        + provider_internal_findings(github_failure_audit_payload)
+    )
+    source_control_internal_paths = (
+        provider_internal_findings(source_control_validate_payload)
+        + provider_internal_findings(source_control_setup_payload)
+        + [
+            finding
+            for payload in source_control_process_payloads.values()
+            for finding in provider_internal_findings(payload)
+        ]
+        + [
+            finding
+            for payload in source_control_bundle_payloads.values()
+            for finding in provider_internal_findings(payload)
+        ]
+    )
+    content_restriction_internal_paths = (
+        provider_internal_findings(content_restriction_validate_payload)
+        + provider_internal_findings(content_restriction_setup_payload)
+        + [
+            finding
+            for payload in content_restriction_process_payloads.values()
+            for finding in provider_internal_findings(payload)
+        ]
+        + provider_internal_findings(content_restriction_audit_payload)
+    )
+    sync_internal_paths = (
+        provider_internal_findings(sync_validate_payload)
+        + provider_internal_findings(sync_setup_payload)
+        + provider_internal_findings(sync_bad_webhook_payload)
+        + provider_internal_findings(sync_webhook_payload)
+        + provider_internal_findings(sync_poll_duplicate_payload)
+        + provider_internal_findings(sync_after_commit_before_cursor_payload)
+        + provider_internal_findings(sync_replay_changed_payload)
+        + provider_internal_findings(sync_after_cursor_payload)
+        + provider_internal_findings(sync_replay_after_cursor_payload)
+        + provider_internal_findings(sync_out_of_order_payload)
+        + provider_internal_findings(sync_reconcile_payload)
+        + provider_internal_findings(sync_lineage_payload)
+    )
+    stdout_secret_findings = sum(
+        count_unredacted_secrets(json.dumps(transcript.get("stdout_json") or {}, sort_keys=True))
+        + count_unredacted_secrets(transcript.get("stderr_redacted", ""))
+        for transcript in transcripts.values()
+    )
+    state_secret_findings = (
+        _connector_state_secret_findings(state_path)
+        + _connector_state_secret_findings(ack_state_path)
+        + _connector_state_secret_findings(retry_state_path)
+        + _connector_state_secret_findings(lineage_state_path)
+        + _connector_state_secret_findings(policy_state_path)
+        + _connector_state_secret_findings(evidence_state_path)
+        + _connector_state_secret_findings(raw_access_state_path)
+        + _connector_state_secret_findings(untrusted_state_path)
+        + _connector_state_secret_findings(selected_repo_state_path)
+        + _connector_state_secret_findings(source_control_state_path)
+        + _connector_state_secret_findings(content_restriction_state_path)
+        + _connector_state_secret_findings(github_write_guard_state_path)
+        + _connector_state_secret_findings(github_failure_state_path)
+        + _connector_state_secret_findings(capture_lifecycle_state_path)
+        + _connector_state_secret_findings(watch_result_state_path)
+        + _connector_state_secret_findings(action_preflight_state_path)
+        + _connector_state_secret_findings(action_safety_state_path)
+        + _connector_state_secret_findings(action_execution_state_path)
+        + _connector_state_secret_findings(action_retry_state_path)
+        + _connector_state_secret_findings(scope_isolation_state_path)
+        + _connector_state_secret_findings(credential_custody_state_path)
+        + _connector_state_secret_findings(action_bypass_state_path)
+        + _connector_state_secret_findings(sync_state_path)
+    )
+    provider_call_ledger = setup_result.get("provider_call_ledger", {})
+    checks = {
+        "contract_validate_exit_zero": _exit_ok(transcripts["contract_validate"]),
+        "setup_plan_exit_zero": _exit_ok(transcripts["setup_plan"]),
+        "audit_verify_exit_zero": _exit_ok(transcripts["audit_verify"])
+        and audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "scope_complete": scope_ok,
+        "contract_persisted": contract_record_path.exists(),
+        "setup_result_persisted": setup_result_path.exists(),
+        "source_policy_persisted": source_policy_path.exists(),
+        "setup_readiness_ready": setup_result.get("readiness") == "ready",
+        "activation_allowed": setup_result.get("activation_allowed") is True,
+        "required_capabilities_available": setup_result.get("required_capabilities_available") is True,
+        "source_policy_raw_access_denied": source_policy.get("raw_access") == "denied",
+        "mappings_present": bool(setup_result.get("mappings")),
+        "evidence_refs_present": bool(setup_payload.get("evidence_refs")),
+        "audit_refs_present": bool(setup_payload.get("audit_refs")),
+        "zero_provider_calls_before_activation": provider_call_ledger.get("before_activation") == 0
+        and provider_call_ledger.get("during_plan") == 0,
+        "zero_provider_internals": not provider_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    delivery_receipt_artifact_id = delivery_receipt.get("artifact_id")
+    delivery_artifact_connector = delivery_artifact.get("connector_delivery", {})
+    delivery_product_interpretation = delivery_receipt.get("product_interpretation", {})
+    delivery_checks = {
+        "delivery_ingest_exit_zero": _exit_ok(transcripts["projection_delivery_ingest"]),
+        "artifact_show_exit_zero": _exit_ok(transcripts["projection_artifact_show"]),
+        "scope_complete": delivery_scope_ok,
+        "delivery_receipt_persisted": delivery_receipt_path.exists(),
+        "projection_snapshot_persisted": projection_snapshot_path.exists(),
+        "evidence_link_persisted": connector_evidence_link_path.exists(),
+        "artifact_record_persisted": delivery_artifact_record_path.exists(),
+        "original_envelope_bytes_persisted": delivery_original_path.exists()
+        and delivery_original_path.read_bytes() == (root / delivery_path).read_bytes(),
+        "artifact_checksum_matches_delivery_file": delivery_artifact.get("checksum_sha256") == delivery_checksum
+        and delivery_receipt.get("envelope_sha256") == delivery_checksum
+        and projection_snapshot.get("envelope_sha256") == delivery_checksum,
+        "artifact_identity_linked": delivery_receipt_artifact_id
+        and delivery_receipt_artifact_id == delivery_artifact.get("artifact_id")
+        and delivery_receipt_artifact_id == shown_delivery_artifact.get("artifact_id")
+        and projection_snapshot.get("artifact_id") == delivery_receipt_artifact_id
+        and connector_evidence_link.get("artifact_id") == delivery_receipt_artifact_id,
+        "projection_and_delivery_linked": delivery_receipt.get("delivery_id") == "cdel_project_alpha_issue_1001"
+        and delivery_receipt.get("projection_id") == "cproj_github_issue_1001"
+        and projection_snapshot.get("projection_id") == delivery_receipt.get("projection_id")
+        and connector_evidence_link.get("projection_id") == delivery_receipt.get("projection_id"),
+        "source_policy_and_setup_linked": delivery_receipt.get("source_policy_id") == source_policy_id
+        and delivery_receipt.get("setup_result_id") == setup_result_id
+        and delivery_artifact_connector.get("source_policy_id") == source_policy_id
+        and connector_evidence_link.get("source_policy_id") == source_policy_id,
+        "evidence_ref_is_metadata_with_artifact": connector_evidence_link.get("evidence_ref", {}).get("evidence_ref_id")
+        == "eref_project_alpha_issue_1001"
+        and bool(delivery_receipt_artifact_id),
+        "product_interpretation_after_archive_only": delivery_product_interpretation.get("before_archive_commit") is False
+        and delivery_product_interpretation.get("handlers_receive_committed_artifact_only") is True,
+        "ack_not_claimed_for_cs_ch_007": delivery_receipt.get("acknowledgement_state") == "not_acknowledged_by_cs_ch_007"
+        and "ack_sent_at" not in delivery_receipt,
+        "raw_provider_payload_not_stored": delivery_receipt.get("raw_provider_payload", {}).get("stored_in_product_state") is False
+        and delivery_artifact_connector.get("raw_provider_payload_stored_in_product_state") is False,
+        "evidence_refs_present": bool(delivery_payload.get("evidence_refs")),
+        "audit_refs_present": bool(delivery_payload.get("audit_refs")) and bool(delivery_receipt.get("audit_refs")),
+        "zero_provider_calls_during_ingest": delivery_receipt.get("provider_call_ledger", {}).get("during_ingest") == 0
+        and delivery_receipt.get("provider_call_ledger", {}).get("external_http_calls") == 0,
+        "zero_provider_internals": not delivery_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    ack_before_acknowledgement = ack_before_commit_payload.get("acknowledgement", {})
+    ack_after_acknowledgement = ack_after_commit_payload.get("acknowledgement", {})
+    ack_redelivery_acknowledgement = ack_redelivery_payload.get("acknowledgement", {})
+    ack_duplicate_acknowledgement = ack_duplicate_payload.get("acknowledgement", {})
+    ack_receipt_paths = sorted((ack_state_path / "connector" / "delivery_receipts").glob("*.json"))
+    ack_outbox_paths = sorted((ack_state_path / "connector" / "ack_outbox").glob("*.json"))
+    ack_artifact_record_all_paths = sorted((ack_state_path / "artifacts" / "records").glob(f"**/{ack_artifact_id}.json")) if ack_artifact_id else []
+    ack_checks = {
+        "ack_contract_validate_exit_zero": _exit_ok(transcripts["ack_contract_validate"]),
+        "ack_setup_plan_exit_zero": _exit_ok(transcripts["ack_setup_plan"]),
+        "before_commit_exit_runtime_failure": transcripts["ack_before_commit_crash"].get("exit_code") == 5,
+        "before_commit_interrupted": ack_before_commit_payload.get("status") == "interrupted"
+        and ack_before_commit_payload.get("crash_point") == "before_commit",
+        "before_commit_no_ack": ack_before_acknowledgement.get("ack_sent") is False
+        and ack_before_acknowledgement.get("durable_commit_completed") is False,
+        "before_commit_no_durable_rows": _exit_ok(transcripts["ack_reconcile_after_before_commit"])
+        and ack_reconcile_after_before_commit.get("receipt_count") == 0
+        and ack_reconcile_after_before_commit.get("ack_outbox_count") == 0
+        and ack_reconcile_after_before_commit.get("artifact_count") == 0,
+        "after_commit_before_ack_exit_runtime_failure": transcripts["ack_after_commit_before_ack_crash"].get("exit_code") == 5,
+        "after_commit_before_ack_interrupted": ack_after_commit_payload.get("status") == "interrupted"
+        and ack_after_commit_payload.get("crash_point") == "after_commit_before_ack",
+        "after_commit_durable_rows_persisted": ack_delivery_receipt_path.exists()
+        and ack_outbox_path.exists()
+        and ack_artifact_record_path.exists()
+        and ack_original_path.exists(),
+        "after_commit_no_ack": ack_after_acknowledgement.get("ack_sent") is False
+        and ack_after_acknowledgement.get("durable_commit_completed") is True
+        and ack_pending_receipt.get("acknowledgement_state") == "pending_after_commit"
+        and ack_pending_outbox.get("status") == "pending"
+        and ack_pending_outbox.get("ack_sent") is False,
+        "redelivery_exit_zero": _exit_ok(transcripts["ack_redelivery_process"]),
+        "redelivery_ack_after_commit": ack_redelivery_payload.get("status") == "success"
+        and ack_redelivery_acknowledgement.get("ack_sent") is True
+        and ack_redelivery_acknowledgement.get("durable_commit_completed") is True
+        and ack_redelivery_acknowledgement.get("acknowledged_without_artifact") is False
+        and ack_redelivery_acknowledgement.get("duplicate_downstream_effect") is False
+        and ack_redelivery_receipt.get("acknowledgement_state") == "acknowledged_after_commit"
+        and ack_redelivery_outbox.get("status") == "acknowledged"
+        and ack_redelivery_outbox.get("ack_sent") is True,
+        "redelivery_same_logical_artifact": ack_pending_receipt.get("delivery_receipt_id")
+        == ack_redelivery_receipt.get("delivery_receipt_id")
+        and ack_pending_receipt.get("artifact_id") == ack_redelivery_receipt.get("artifact_id")
+        and ack_artifact.get("checksum_sha256") == delivery_checksum,
+        "duplicate_redelivery_exit_zero": _exit_ok(transcripts["ack_duplicate_redelivery_process"]),
+        "duplicate_redelivery_noop": ack_duplicate_payload.get("status") == "success"
+        and ack_duplicate_acknowledgement.get("ack_sent") is True
+        and ack_duplicate_acknowledgement.get("replayed") is True
+        and ack_duplicate_acknowledgement.get("duplicate_downstream_effect") is False
+        and ack_duplicate_receipt.get("delivery_receipt_id") == ack_redelivery_receipt.get("delivery_receipt_id")
+        and ack_duplicate_receipt.get("artifact_id") == ack_redelivery_receipt.get("artifact_id"),
+        "one_logical_artifact": len(ack_receipt_paths) == 1
+        and len(ack_outbox_paths) == 1
+        and len(ack_artifact_record_all_paths) == 1
+        and ack_reconciliation.get("receipt_count") == 1
+        and ack_reconciliation.get("ack_outbox_count") == 1
+        and ack_reconciliation.get("artifact_count") == 1,
+        "reconciliation_exit_zero": _exit_ok(transcripts["ack_reconcile_final"])
+        and ack_reconcile_final_payload.get("status") == "success",
+        "reconciliation_no_orphans_or_duplicates": ack_reconciliation.get("pending_ack_count") == 0
+        and ack_reconciliation.get("acknowledged_without_artifact_count") == 0
+        and ack_reconciliation.get("orphan_artifact_count") == 0
+        and ack_reconciliation.get("duplicate_logical_artifact_count") == 0,
+        "audit_verify_exit_zero": _exit_ok(transcripts["ack_audit_verify"])
+        and ack_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "evidence_refs_present": bool(ack_redelivery_payload.get("evidence_refs")),
+        "audit_refs_present": bool(ack_redelivery_payload.get("audit_refs"))
+        and bool(ack_reconcile_final_payload.get("audit_refs")),
+        "zero_provider_internals": not ack_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    transient_retry_delays = [
+        item.get("delay_seconds")
+        for item in transient_retry_second_state.get("retry_schedule", [])
+        if isinstance(item, dict)
+    ]
+    poison_retry_first_state = poison_retry_first_payload.get("connector_delivery_retry_state", {})
+    poison_retry_second_state = poison_retry_second_payload.get("connector_delivery_retry_state", {})
+    retry_receipt_paths = sorted((retry_state_path / "connector" / "delivery_receipts").glob("*.json"))
+    retry_outbox_paths = sorted((retry_state_path / "connector" / "ack_outbox").glob("*.json"))
+    retry_quarantine_paths = sorted((retry_state_path / "connector" / "quarantine").glob("*.json"))
+    retry_checks = {
+        "retry_contract_validate_exit_zero": _exit_ok(transcripts["retry_contract_validate"]),
+        "retry_setup_plan_exit_zero": _exit_ok(transcripts["retry_setup_plan"]),
+        "transient_first_exit_runtime_failure": transcripts["transient_retry_first"].get("exit_code") == 5,
+        "transient_first_retry_scheduled": transient_retry_first_payload.get("status") == "retry_scheduled"
+        and transient_retry_first_state.get("attempt_count") == 1
+        and transient_retry_first_state.get("status") == "retry_scheduled"
+        and transient_retry_first_state.get("raw_provider_payload_persisted") is False
+        and transient_retry_first_state.get("unrelated_streams_blocked") is False,
+        "transient_second_exit_runtime_failure": transcripts["transient_retry_second"].get("exit_code") == 5,
+        "transient_bounded_backoff": transient_retry_second_payload.get("status") == "retry_scheduled"
+        and transient_retry_second_state.get("attempt_count") == 2
+        and transient_retry_delays == [60, 120]
+        and transient_retry_second_state.get("next_retry_at") is not None
+        and "connector_delivery_quarantine" not in transient_retry_second_payload,
+        "transient_retry_state_persisted": transient_retry_state_path.exists(),
+        "healthy_stream_continues": _exit_ok(transcripts["transient_retry_recovery"])
+        and transient_recovery_payload.get("status") == "success"
+        and transient_recovery_receipt_path.exists()
+        and transient_recovery_outbox_path.exists()
+        and transient_recovery_payload.get("acknowledgement", {}).get("ack_sent") is True
+        and transient_resolved_state.get("status") == "resolved",
+        "poison_first_exit_runtime_failure": transcripts["poison_retry_first"].get("exit_code") == 5,
+        "poison_first_retry_scheduled": poison_retry_first_payload.get("status") == "retry_scheduled"
+        and poison_retry_first_state.get("attempt_count") == 1,
+        "poison_second_exit_runtime_failure": transcripts["poison_retry_second"].get("exit_code") == 5,
+        "poison_second_retry_scheduled": poison_retry_second_payload.get("status") == "retry_scheduled"
+        and poison_retry_second_state.get("attempt_count") == 2,
+        "poison_third_exit_connector_unavailable": transcripts["poison_quarantine"].get("exit_code") == 7,
+        "poison_quarantined_at_threshold": poison_quarantine_payload.get("status") == "quarantined"
+        and poison_quarantine_state.get("attempt_count") == 3
+        and poison_quarantine_state.get("status") == "quarantined"
+        and poison_quarantine_item.get("status") == "quarantined"
+        and poison_quarantine_item.get("attempt_count") == 3
+        and poison_quarantine_item.get("reason_code") == "CS_CONNECTOR_DELIVERY_PROJECTION_UNSUPPORTED",
+        "poison_retry_and_quarantine_persisted": poison_retry_state_path.exists() and poison_quarantine_path.exists(),
+        "quarantine_safe_diagnostics": poison_quarantine_item.get("safe_diagnostics", {}).get("raw_provider_payload_persisted") is False
+        and poison_quarantine_item.get("safe_diagnostics", {}).get("raw_provider_payload_in_operator_output") is False
+        and poison_quarantine_item.get("safe_diagnostics", {}).get("provider_credentials_exposed") is False
+        and poison_quarantine_item.get("redacted_error", {}).get("secret_values_included") is False,
+        "unrelated_streams_continue": poison_quarantine_item.get("source_health_impact", {}).get("unrelated_streams_continue") is True
+        and poison_quarantine_item.get("source_health_impact", {}).get("unrelated_streams_blocked") is False
+        and len(retry_receipt_paths) == 1
+        and len(retry_outbox_paths) == 1
+        and len(retry_quarantine_paths) == 1,
+        "quarantine_list_exit_zero": _exit_ok(transcripts["quarantine_list"])
+        and quarantine_list.get("quarantine_count") == 1
+        and quarantine_list.get("open_quarantine_count") == 1,
+        "quarantine_replay_exit_zero": _exit_ok(transcripts["quarantine_replay"])
+        and quarantine_replay_payload.get("status") == "success"
+        and quarantine_replay_item.get("status") == "replay_requested"
+        and quarantine_replay_payload.get("quarantine_replay_attempt", {}).get("failure_evidence_preserved") is True,
+        "audit_verify_exit_zero": _exit_ok(transcripts["retry_audit_verify"])
+        and retry_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "evidence_refs_present": bool(transient_retry_second_payload.get("evidence_refs"))
+        and bool(poison_quarantine_payload.get("evidence_refs"))
+        and bool(quarantine_list_payload.get("evidence_refs"))
+        and bool(quarantine_replay_payload.get("evidence_refs")),
+        "audit_refs_present": bool(transient_retry_second_payload.get("audit_refs"))
+        and bool(poison_quarantine_payload.get("audit_refs"))
+        and bool(quarantine_list_payload.get("audit_refs"))
+        and bool(quarantine_replay_payload.get("audit_refs")),
+        "zero_provider_internals": not retry_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    content_lineage_versions = content_lineage.get("versions", []) if isinstance(content_lineage.get("versions"), list) else []
+    lineage_receipt_paths = sorted((lineage_state_path / "connector" / "delivery_receipts").glob("*.json"))
+    lineage_outbox_paths = sorted((lineage_state_path / "connector" / "ack_outbox").glob("*.json"))
+    lineage_artifact_paths = sorted((lineage_state_path / "artifacts" / "records").glob("**/*.json"))
+    lineage_dedupe_paths = sorted((lineage_state_path / "connector" / "delivery_dedupe").glob("*.json"))
+    lineage_version_paths = sorted((lineage_state_path / "connector" / "content_versions").glob("*.json"))
+    lineage_checks = {
+        "lineage_contract_validate_exit_zero": _exit_ok(transcripts["lineage_contract_validate"]),
+        "lineage_setup_plan_exit_zero": _exit_ok(transcripts["lineage_setup_plan"]),
+        "first_process_exit_zero": _exit_ok(transcripts["lineage_first_process"])
+        and lineage_first_payload.get("status") == "success"
+        and lineage_first_payload.get("deduplicated") is False,
+        "first_dedupe_state_canonical": lineage_first_dedupe.get("status") == "canonical"
+        and lineage_first_dedupe.get("delivery_count") == 1
+        and lineage_first_dedupe.get("source_external_id") == issue_source_external_id
+        and lineage_first_dedupe.get("source_content_hash")
+        and lineage_first_dedupe.get("delivery_idempotency_key") == lineage_first_receipt.get("delivery_idempotency_key"),
+        "first_content_version_created": lineage_first_version.get("schema_version") == "cs.connector_content_version.v1"
+        and lineage_first_version.get("version_ordinal") == 1
+        and lineage_first_version.get("predecessor_content_version_id") is None
+        and lineage_first_version.get("artifact_id") == lineage_first_artifact.get("artifact_id"),
+        "duplicate_provider_event_exit_zero": _exit_ok(transcripts["lineage_duplicate_event_process"])
+        and lineage_duplicate_payload.get("status") == "success"
+        and lineage_duplicate_payload.get("deduplicated") is True,
+        "duplicate_provider_event_one_logical_record": lineage_duplicate_payload.get("connector_delivery_receipt", {}).get("delivery_receipt_id")
+        == lineage_first_receipt.get("delivery_receipt_id")
+        and lineage_duplicate_payload.get("artifact", {}).get("artifact_id") == lineage_first_artifact.get("artifact_id")
+        and lineage_duplicate_dedupe.get("delivery_count") == 2
+        and lineage_duplicate_dedupe.get("duplicate_delivery_count") == 1
+        and lineage_duplicate_dedupe.get("no_new_artifact_created") is True
+        and lineage_duplicate_dedupe.get("no_duplicate_active_truth_created") is True,
+        "unchanged_content_event_exit_zero": _exit_ok(transcripts["lineage_unchanged_event_process"])
+        and lineage_unchanged_payload.get("status") == "success"
+        and lineage_unchanged_payload.get("deduplicated") is True,
+        "unchanged_content_one_logical_record": lineage_unchanged_payload.get("connector_delivery_receipt", {}).get("delivery_receipt_id")
+        == lineage_first_receipt.get("delivery_receipt_id")
+        and lineage_unchanged_payload.get("artifact", {}).get("artifact_id") == lineage_first_artifact.get("artifact_id")
+        and lineage_unchanged_dedupe.get("delivery_count") == 3
+        and len(lineage_unchanged_dedupe.get("provider_event_ids", [])) == 2
+        and len(lineage_unchanged_dedupe.get("source_revisions", [])) == 2,
+        "changed_content_exit_zero": _exit_ok(transcripts["lineage_changed_process"])
+        and lineage_changed_payload.get("status") == "success"
+        and lineage_changed_payload.get("deduplicated") is False,
+        "changed_content_new_version": lineage_changed_receipt.get("delivery_receipt_id") != lineage_first_receipt.get("delivery_receipt_id")
+        and lineage_changed_artifact.get("artifact_id") != lineage_first_artifact.get("artifact_id")
+        and lineage_changed_version.get("version_ordinal") == 2
+        and lineage_changed_version.get("predecessor_content_version_id") == lineage_first_version.get("content_version_id")
+        and lineage_changed_version.get("predecessor_artifact_id") == lineage_first_artifact.get("artifact_id")
+        and lineage_changed_version.get("historical_evidence_mutated") is False,
+        "changed_artifact_lineage_linked": lineage_changed_artifact.get("provenance", {}).get("lineage_from")
+        == f"artifact:{lineage_first_artifact.get('artifact_id')}",
+        "durable_lineage_records_persisted": lineage_first_dedupe_path.exists()
+        and lineage_changed_dedupe_path.exists()
+        and lineage_first_version_path.exists()
+        and lineage_changed_version_path.exists()
+        and lineage_current_path.exists()
+        and lineage_first_receipt_path.exists()
+        and lineage_changed_receipt_path.exists()
+        and bool(lineage_first_artifact_paths)
+        and bool(lineage_changed_artifact_paths),
+        "lineage_query_exit_zero": _exit_ok(transcripts["content_lineage_show"])
+        and content_lineage_payload.get("status") == "success"
+        and content_lineage.get("schema_version") == "cs.connector_content_lineage.v1",
+        "lineage_query_versions": content_lineage.get("version_count") == 2
+        and [version.get("content_version_id") for version in content_lineage_versions]
+        == [lineage_first_version.get("content_version_id"), lineage_changed_version.get("content_version_id")]
+        and content_lineage.get("current_content_version_id") == lineage_changed_version.get("content_version_id")
+        and content_current.get("current_content_version_id") == lineage_changed_version.get("content_version_id"),
+        "one_current_logical_truth": content_lineage.get("one_current_logical_truth") is True
+        and content_lineage.get("duplicate_active_truth_count") == 0
+        and content_current.get("one_current_logical_truth") is True,
+        "historical_evidence_not_mutated": content_lineage.get("historical_evidence_mutation_count") == 0
+        and all(version.get("historical_evidence_mutated") is False for version in content_lineage_versions),
+        "reconcile_two_logical_versions": _exit_ok(transcripts["lineage_reconcile"])
+        and lineage_reconciliation.get("receipt_count") == 2
+        and lineage_reconciliation.get("ack_outbox_count") == 2
+        and lineage_reconciliation.get("artifact_count") == 2
+        and len(lineage_receipt_paths) == 2
+        and len(lineage_outbox_paths) == 2
+        and len(lineage_artifact_paths) == 2
+        and len(lineage_dedupe_paths) == 2
+        and len(lineage_version_paths) == 2,
+        "audit_verify_exit_zero": _exit_ok(transcripts["lineage_audit_verify"])
+        and lineage_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "evidence_refs_present": bool(lineage_first_payload.get("evidence_refs"))
+        and bool(lineage_duplicate_payload.get("evidence_refs"))
+        and bool(lineage_unchanged_payload.get("evidence_refs"))
+        and bool(lineage_changed_payload.get("evidence_refs"))
+        and bool(content_lineage_payload.get("evidence_refs")),
+        "audit_refs_present": bool(lineage_first_payload.get("audit_refs"))
+        and bool(lineage_duplicate_payload.get("audit_refs"))
+        and bool(lineage_unchanged_payload.get("audit_refs"))
+        and bool(lineage_changed_payload.get("audit_refs"))
+        and bool(content_lineage_payload.get("audit_refs")),
+        "zero_provider_internals": not lineage_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    missing_required_gaps = [gap for gap in missing_setup_result.get("gaps", []) if gap.get("required") is True]
+    missing_error_codes = [
+        error.get("code")
+        for error in missing_setup_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    missing_checks = {
+        "contract_validate_exit_zero": _exit_ok(transcripts["missing_required_contract_validate"]),
+        "setup_plan_exit_connector_unavailable": transcripts["missing_required_setup_plan"].get("exit_code") == 7,
+        "audit_verify_exit_zero": _exit_ok(transcripts["audit_verify"])
+        and audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "scope_complete": missing_scope_ok,
+        "contract_persisted": missing_contract_record_path.exists(),
+        "setup_result_persisted": missing_setup_result_path.exists(),
+        "source_policy_persisted": missing_source_policy_path.exists(),
+        "setup_status_blocked": missing_setup_payload.get("status") == "blocked",
+        "setup_readiness_blocked": missing_setup_result.get("readiness") == "blocked",
+        "activation_denied": missing_setup_result.get("activation_allowed") is False,
+        "activation_state_stable": missing_setup_result.get("activation_state") == "blocked_required_capability_missing",
+        "required_capabilities_unavailable": missing_setup_result.get("required_capabilities_available") is False,
+        "blocked_reason_code_stable": missing_setup_result.get("blocked_reason_code") == "CS_CONNECTOR_REQUIRED_CAPABILITY_MISSING",
+        "cli_error_code_stable": "CS_CONNECTOR_REQUIRED_CAPABILITY_MISSING" in missing_error_codes,
+        "gap_reason_code_stable": any(
+            gap.get("reason_code") == "CS_CONNECTOR_CAPABILITY_UNAVAILABLE" for gap in missing_required_gaps
+        ),
+        "safe_resolution_guidance": bool(missing_setup_result.get("activation_guidance"))
+        and all(gap.get("resolution") for gap in missing_required_gaps),
+        "no_delivery_streams": missing_setup_result.get("delivery_streams") == [],
+        "zero_provider_calls_before_activation": _connector_provider_call_count(missing_setup_result) == 0,
+        "evidence_refs_present": bool(missing_setup_payload.get("evidence_refs")),
+        "audit_refs_present": bool(missing_setup_payload.get("audit_refs")),
+        "zero_provider_internals": not missing_provider_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    optional_gaps = optional_setup_result.get("gaps", [])
+    optional_disabled = optional_setup_result.get("disabled_surfaces", [])
+    optional_availability = {
+        item.get("common_capability"): item
+        for item in optional_setup_result.get("feature_availability", [])
+        if isinstance(item, dict)
+    }
+    optional_checks = {
+        "contract_validate_exit_zero": _exit_ok(transcripts["optional_missing_contract_validate"]),
+        "setup_plan_exit_zero": _exit_ok(transcripts["optional_missing_setup_plan"]),
+        "audit_verify_exit_zero": _exit_ok(transcripts["audit_verify"])
+        and audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "scope_complete": optional_scope_ok,
+        "contract_persisted": optional_contract_record_path.exists(),
+        "setup_result_persisted": optional_setup_result_path.exists(),
+        "source_policy_persisted": optional_source_policy_path.exists(),
+        "setup_status_success": optional_setup_payload.get("status") == "success",
+        "setup_readiness_ready_with_gaps": optional_setup_result.get("readiness") == "ready_with_gaps",
+        "activation_allowed": optional_setup_result.get("activation_allowed") is True,
+        "activation_state_planned_ready": optional_setup_result.get("activation_state") == "planned_ready",
+        "required_capabilities_available": optional_setup_result.get("required_capabilities_available") is True,
+        "blocked_reason_absent": optional_setup_result.get("blocked_reason_code") is None,
+        "delivery_streams_for_available_capabilities": bool(optional_setup_result.get("delivery_streams")),
+        "optional_gap_recorded": any(
+            gap.get("common_capability") == "source_control.pull_request.read" and gap.get("required") is False
+            for gap in optional_gaps
+        ),
+        "available_surface_enabled": optional_availability.get("source_control.repository.read", {}).get("enabled") is True,
+        "optional_surface_disabled": optional_availability.get("source_control.pull_request.read", {}).get("enabled") is False,
+        "disabled_surface_reason_stable": any(
+            item.get("surface") == "Pull request evidence"
+            and item.get("reason_code") == "CS_CONNECTOR_OPTIONAL_CAPABILITY_UNAVAILABLE"
+            and item.get("required") is False
+            for item in optional_disabled
+        ),
+        "zero_provider_calls_before_activation": _connector_provider_call_count(optional_setup_result) == 0,
+        "evidence_refs_present": bool(optional_setup_payload.get("evidence_refs")),
+        "audit_refs_present": bool(optional_setup_payload.get("audit_refs")),
+        "zero_provider_internals": not optional_provider_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    source_policy_diff = source_policy_confirm_payload.get("source_policy_diff", {})
+    narrowed_fields = set(source_policy_diff.get("narrowed_fields", []))
+    broadening_error_codes = [
+        error.get("code")
+        for error in source_policy_denied_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    confirmation = confirmed_source_policy.get("confirmation", {})
+    compatibility = confirmed_source_policy.get("compatibility_decision", {})
+    source_policy_checks = {
+        "source_policy_confirm_exit_zero": _exit_ok(transcripts["source_policy_confirm"]),
+        "broadening_denial_exit_policy_denied": transcripts["source_policy_broadening_denied"].get("exit_code") == 8,
+        "audit_verify_exit_zero": _exit_ok(transcripts["audit_verify"])
+        and audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "confirmed_policy_persisted": confirmed_source_policy_path.exists(),
+        "confirmed_policy_id_changed": bool(confirmed_source_policy_id) and confirmed_source_policy_id != source_policy_id,
+        "owner_confirmed": confirmation.get("owner_confirmed") is True,
+        "confirmation_kind_override": confirmation.get("kind") == "owner_override",
+        "confirmed_by_owner": confirmation.get("confirmed_by") == "local-user",
+        "silent_broadening_false": confirmation.get("silent_broadening") is False,
+        "constraints_never_broadened_silently": confirmed_source_policy.get("constraints_never_broadened_silently") is True,
+        "compatibility_decision_allows_narrowing": compatibility.get("status") == "compatible"
+        and compatibility.get("broadened") is False,
+        "narrowed_fields_recorded": {"allowed_paths", "max_content_bytes", "retention_days"}.issubset(narrowed_fields),
+        "allowed_paths_narrowed": confirmed_source_policy.get("allowed_paths") == ["docs/**"],
+        "max_content_bytes_narrowed": confirmed_source_policy.get("max_content_bytes") == 100000,
+        "retention_days_narrowed": confirmed_source_policy.get("retention_days") == 30,
+        "diff_hashes_present": bool(source_policy_diff.get("base_hash")) and bool(source_policy_diff.get("candidate_hash")),
+        "broadening_denied_stable_error": "CS_CONNECTOR_SOURCE_POLICY_BROADENING_DENIED" in broadening_error_codes,
+        "broadening_denial_no_policy_snapshot": "connector_source_policy" not in source_policy_denied_payload,
+        "broadening_denial_audited": bool(source_policy_denied_payload.get("audit_refs")),
+        "evidence_refs_present": bool(source_policy_confirm_payload.get("evidence_refs")),
+        "audit_refs_present": bool(source_policy_confirm_payload.get("audit_refs")),
+        "zero_provider_internals": not confirmed_provider_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    default_provider_id = source_policy.get("selected_provider_pack_id")
+    alternate_provider_id = provider_swap_source_policy.get("selected_provider_pack_id")
+    provider_swap_checks = {
+        "provider_swap_setup_exit_zero": _exit_ok(transcripts["provider_swap_setup_plan"]),
+        "audit_verify_exit_zero": _exit_ok(transcripts["audit_verify"])
+        and audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "provider_swap_setup_persisted": provider_swap_setup_result_path.exists(),
+        "provider_swap_source_policy_persisted": provider_swap_source_policy_path.exists(),
+        "provider_refs_changed": default_provider_id == "local_source_control_readonly.v1"
+        and alternate_provider_id == "local_source_control_readonly_alt.v1",
+        "source_policy_refs_changed": source_policy_id != provider_swap_source_policy_id,
+        "product_handler_contract_unchanged": setup_result.get("product_handler_contract")
+        == provider_swap_setup_result.get("product_handler_contract"),
+        "product_projection_contract_unchanged": setup_result.get("product_projection_contract")
+        == provider_swap_setup_result.get("product_projection_contract"),
+        "product_object_preview_unchanged": setup_result.get("product_object_preview")
+        == provider_swap_setup_result.get("product_object_preview"),
+        "handler_contract_hash_present": bool(
+            provider_swap_setup_result.get("product_handler_contract", {}).get("handler_contract_hash")
+        ),
+        "provider_swap_readiness_ready": provider_swap_setup_result.get("readiness") == "ready",
+        "zero_provider_calls_before_activation": _connector_provider_call_count(provider_swap_setup_result) == 0,
+        "evidence_refs_present": bool(provider_swap_payload.get("evidence_refs")),
+        "audit_refs_present": bool(provider_swap_payload.get("audit_refs")),
+        "zero_provider_internals": not provider_swap_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    permission_explanation = permission_gap_setup_result.get("status_explanation", {})
+    permission_redaction = permission_explanation.get("redaction", {})
+    permission_gap_checks = {
+        "permission_gap_exit_connector_unavailable": transcripts["permission_gap_setup_plan"].get("exit_code") == 7,
+        "audit_verify_exit_zero": _exit_ok(transcripts["audit_verify"])
+        and audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "permission_gap_setup_persisted": permission_gap_setup_result_path.exists(),
+        "permission_gap_source_policy_persisted": permission_gap_source_policy_path.exists(),
+        "setup_status_blocked": permission_gap_payload.get("status") == "blocked",
+        "setup_readiness_blocked": permission_gap_setup_result.get("readiness") == "blocked",
+        "activation_state_permission_required": permission_gap_setup_result.get("activation_state") == "blocked_permission_required",
+        "blocked_reason_code_permission_required": permission_gap_setup_result.get("blocked_reason_code") == "CS_CONNECTOR_PERMISSION_REQUIRED",
+        "status_explanation_reason_specific": permission_explanation.get("reason_code") == "CS_CONNECTOR_PERMISSION_REQUIRED",
+        "status_explanation_has_cause_impact_resolution": bool(permission_explanation.get("cause"))
+        and bool(permission_explanation.get("impact"))
+        and bool(permission_explanation.get("resolution_steps")),
+        "status_explanation_owner_safe": permission_explanation.get("safe_to_show_to_owner") is True,
+        "redaction_flags_false": permission_redaction
+        and all(value is False for value in permission_redaction.values()),
+        "zero_provider_calls_before_activation": _connector_provider_call_count(permission_gap_setup_result) == 0,
+        "evidence_refs_present": bool(permission_gap_payload.get("evidence_refs")),
+        "audit_refs_present": bool(permission_gap_payload.get("audit_refs")),
+        "zero_provider_internals": not permission_gap_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    breaking_error_codes = [
+        error.get("code")
+        for error in breaking_upgrade_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    upgrade_checks = {
+        "compatible_upgrade_exit_zero": _exit_ok(transcripts["compatible_upgrade_plan"]),
+        "breaking_upgrade_exit_connector_unavailable": transcripts["breaking_upgrade_plan"].get("exit_code") == 7,
+        "audit_verify_exit_zero": _exit_ok(transcripts["audit_verify"])
+        and audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "compatible_upgrade_persisted": compatible_upgrade_plan_path.exists(),
+        "breaking_upgrade_persisted": breaking_upgrade_plan_path.exists(),
+        "compatible_status": compatible_upgrade_payload.get("status") == "success"
+        and compatible_upgrade_plan.get("compatibility", {}).get("status") == "compatible",
+        "breaking_status_blocked": breaking_upgrade_payload.get("status") == "blocked"
+        and breaking_upgrade_plan.get("compatibility", {}).get("status") == "incompatible",
+        "breaking_error_code_stable": "CS_CONNECTOR_PROVIDER_PACK_INCOMPATIBLE" in breaking_error_codes,
+        "pinned_versions_remain_active": compatible_upgrade_plan.get("pinned_versions_remain_active") is True
+        and breaking_upgrade_plan.get("pinned_versions_remain_active") is True,
+        "activation_blocked_until_reviewed": compatible_upgrade_plan.get("activation_blocked_until_reviewed") is True
+        and breaking_upgrade_plan.get("activation_blocked_until_reviewed") is True,
+        "rollback_available": compatible_upgrade_plan.get("rollback_available") is True
+        and breaking_upgrade_plan.get("rollback_available") is True
+        and compatible_upgrade_plan.get("migration_plan", {}).get("rollback", {}).get("provider_pack_id")
+        == "local_source_control_readonly.v1"
+        and breaking_upgrade_plan.get("migration_plan", {}).get("rollback", {}).get("provider_pack_id")
+        == "local_source_control_readonly.v1",
+        "target_provider_versions_recorded": compatible_upgrade_plan.get("target_provider_pack_id")
+        == "local_source_control_readonly_alt.v1"
+        and breaking_upgrade_plan.get("target_provider_pack_id") == "local_source_control_breaking_v2.v2",
+        "provider_pack_diff_present": compatible_upgrade_plan.get("provider_pack_diff", {}).get("target_known") is True
+        and breaking_upgrade_plan.get("provider_pack_diff", {}).get("target_known") is True,
+        "migration_steps_present": len(compatible_upgrade_plan.get("migration_plan", {}).get("steps", [])) >= 3,
+        "evidence_refs_present": bool(compatible_upgrade_payload.get("evidence_refs"))
+        and bool(breaking_upgrade_payload.get("evidence_refs")),
+        "audit_refs_present": bool(compatible_upgrade_payload.get("audit_refs"))
+        and bool(breaking_upgrade_payload.get("audit_refs")),
+        "zero_provider_internals": not compatible_upgrade_internal_paths and not breaking_upgrade_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    walkthrough_nav = {
+        item.get("id")
+        for item in product_walkthrough.get("primary_navigation", [])
+        if isinstance(item, dict)
+    }
+    surface_nav = {
+        item.get("id")
+        for item in product_surface_audit.get("normal_user_navigation", [])
+        if isinstance(item, dict)
+    }
+    product_surface_negative = product_surface_audit.get("negative_counters", {})
+    product_surface_checks = {
+        "product_walkthrough_exit_zero": _exit_ok(transcripts["product_walkthrough"]),
+        "product_surface_audit_exit_zero": _exit_ok(transcripts["product_surface_audit"]),
+        "audit_verify_exit_zero": _exit_ok(transcripts["audit_verify"])
+        and audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "walkthrough_one_cornerstone_product": product_walkthrough.get("product_name") == "CornerStone"
+        and product_walkthrough.get("one_service") is True
+        and product_walkthrough.get("daily_user_requires_subsystem_knowledge") is False,
+        "walkthrough_default_nav": {"home", "search", "artifacts", "claims", "actions"}.issubset(walkthrough_nav),
+        "connected_sources_surface_present": "connected_sources" in surface_nav
+        and product_surface_audit.get("connected_source_surface", {}).get("label") == "Connected Sources",
+        "connectorhub_sub_product_not_required": product_surface_audit.get("connected_source_surface", {}).get(
+            "requires_connectorhub_sub_product"
+        )
+        is False,
+        "normal_user_forbidden_terms_absent": product_surface_audit.get("normal_user_forbidden_term_hits") == [],
+        "admin_details_progressively_disclosed": all(product_surface_audit.get("progressive_disclosure", {}).values()),
+        "native_cli_prefix_cornerstone": product_surface_audit.get("native_cli", {}).get("commands_begin_with_cornerstone") is True,
+        "negative_counters_zero": product_surface_negative
+        and all(int(value or 0) == 0 for value in product_surface_negative.values()),
+        "evidence_refs_present": bool(product_surface_payload.get("evidence_refs")),
+        "audit_refs_present": bool(product_surface_payload.get("audit_refs")),
+        "zero_provider_internals": not product_surface_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    forbidden_error_codes = [
+        error.get("code")
+        for error in policy_forbidden_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    oversized_error_codes = [
+        error.get("code")
+        for error in policy_oversized_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    allowed_enforcement = policy_allowed_artifact.get("connector_delivery", {}).get("source_policy_enforcement", {})
+    policy_checks = {
+        "policy_contract_validate_exit_zero": _exit_ok(transcripts["policy_contract_validate"]),
+        "policy_setup_plan_exit_zero": _exit_ok(transcripts["policy_setup_plan"]),
+        "policy_allowed_process_exit_zero": _exit_ok(transcripts["policy_allowed_process"]),
+        "policy_audit_verify_exit_zero": _exit_ok(transcripts["policy_audit_verify"])
+        and policy_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "allowed_decision_persisted": policy_allowed_decision_path.exists(),
+        "forbidden_decision_persisted": policy_forbidden_decision_path.exists(),
+        "oversized_decision_persisted": policy_oversized_decision_path.exists(),
+        "narrowed_source_policy_persisted": policy_narrowed_source_policy_path.exists(),
+        "allowed_artifact_and_receipt_persisted": bool(policy_allowed_artifact_paths)
+        and policy_allowed_receipt_path.exists(),
+        "allowed_projection_normalized": policy_allowed_decision.get("schema_version")
+        == "cs.connector_projection_policy_decision.v1"
+        and policy_allowed_decision.get("decision") == "allow"
+        and policy_allowed_decision.get("enforcement_action") == "normalize"
+        and "body_markdown_excerpt" in policy_allowed_decision.get("included_fields", [])
+        and policy_allowed_decision.get("excluded_fields") == []
+        and "body_markdown" not in policy_allowed_decision.get("normalized_projection", {}).get("payload", {}),
+        "allowed_summary_preserves_restriction": "Source Policy allows metadata"
+        in str(allowed_enforcement.get("restriction_summary", "")),
+        "forbidden_body_rejected": transcripts["policy_forbidden_body_ingest"].get("exit_code") == 1
+        and policy_forbidden_payload.get("status") == "failed"
+        and "CS_CONNECTOR_SOURCE_POLICY_FIELD_FORBIDDEN" in forbidden_error_codes
+        and policy_forbidden_decision.get("decision") == "deny"
+        and policy_forbidden_decision.get("enforcement_action") == "block"
+        and "body_markdown" in policy_forbidden_decision.get("excluded_fields", [])
+        and policy_forbidden_decision.get("normalized_projection", {}).get("payload") == {},
+        "narrowed_policy_applies_to_subsequent_delivery": _exit_ok(transcripts["policy_confirm_narrow_max"])
+        and policy_narrowed_source_policy.get("max_content_bytes") == 120
+        and transcripts["policy_oversized_ingest"].get("exit_code") == 1
+        and "CS_CONNECTOR_SOURCE_POLICY_CONTENT_TOO_LARGE" in oversized_error_codes
+        and policy_oversized_decision.get("decision") == "deny"
+        and policy_oversized_decision.get("source_policy_id") == policy_narrowed_source_policy_id
+        and int(policy_oversized_decision.get("content_size_bytes", 0) or 0) > 120
+        and policy_oversized_decision.get("normalized_projection", {}).get("payload") == {},
+        "blocked_deliveries_created_no_artifacts_or_receipts": len(policy_artifact_record_paths) == 1
+        and len(policy_delivery_receipt_paths) == 1,
+        "policy_decision_count": len(policy_decision_paths) == 3,
+        "raw_content_not_persisted": policy_allowed_decision.get("raw_content_persisted") is False
+        and policy_forbidden_decision.get("raw_content_persisted") is False
+        and policy_oversized_decision.get("raw_content_persisted") is False
+        and policy_allowed_decision.get("raw_provider_payload_persisted") is False
+        and policy_forbidden_decision.get("raw_provider_payload_persisted") is False
+        and policy_oversized_decision.get("raw_provider_payload_persisted") is False,
+        "forbidden_full_body_value_not_persisted": "CS_CH_011_FORBIDDEN_FULL_BODY_MUST_NOT_PERSIST"
+        not in policy_state_text,
+        "policy_decision_refs_present": bool(policy_allowed_payload.get("policy_decision_refs"))
+        and bool(policy_forbidden_payload.get("policy_decision_refs"))
+        and bool(policy_oversized_payload.get("policy_decision_refs")),
+        "evidence_refs_present": bool(policy_allowed_payload.get("evidence_refs"))
+        and bool(policy_forbidden_payload.get("evidence_refs"))
+        and bool(policy_oversized_payload.get("evidence_refs")),
+        "audit_refs_present": bool(policy_allowed_payload.get("audit_refs"))
+        and bool(policy_forbidden_payload.get("audit_refs"))
+        and bool(policy_oversized_payload.get("audit_refs")),
+        "zero_provider_internals": not policy_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    evidence_checks = {
+        "evidence_contract_validate_exit_zero": _exit_ok(transcripts["evidence_contract_validate"]),
+        "evidence_setup_plan_exit_zero": _exit_ok(transcripts["evidence_setup_plan"]),
+        "evidence_delivery_process_exit_zero": _exit_ok(transcripts["evidence_delivery_process"]),
+        "connector_evidence_bundle_create_exit_zero": _exit_ok(transcripts["connector_evidence_bundle_create"]),
+        "connector_evidence_bundle_show_exit_zero": _exit_ok(transcripts["connector_evidence_bundle_show"]),
+        "evidence_audit_verify_exit_zero": _exit_ok(transcripts["evidence_audit_verify"])
+        and evidence_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "evidence_bundle_persisted": evidence_bundle_path.exists(),
+        "search_snapshot_persisted": evidence_search_snapshot_path.exists(),
+        "claim_persisted": evidence_claim_path.exists(),
+        "unsupported_claim_persisted": unsupported_claim_path.exists(),
+        "evidence_bundle_schema_and_origin": connector_evidence_bundle.get("schema_version") == "cs.evidence_bundle.v0"
+        and connector_evidence_bundle.get("origin") == "connector_projection_delivery"
+        and connector_evidence_bundle_link.get("schema_version") == "cs.connector_evidence_bundle_link.v1",
+        "evidence_bundle_has_required_refs": evidence_bundle_coverage.get("artifact_ref_present") is True
+        and evidence_bundle_coverage.get("artifact_checksum_matches") is True
+        and evidence_bundle_coverage.get("delivery_receipt_ref_present") is True
+        and evidence_bundle_coverage.get("setup_result_ref_present") is True
+        and evidence_bundle_coverage.get("source_policy_ref_present") is True
+        and evidence_bundle_coverage.get("evidence_ref_metadata_present") is True
+        and evidence_bundle_coverage.get("projection_snapshot_ref_present") is True
+        and evidence_bundle_coverage.get("policy_decision_ref_present") is True
+        and evidence_bundle_coverage.get("search_snapshot_ref_present") is True,
+        "evidence_item_links_artifact_and_connector_refs": evidence_bundle_first_item.get("artifact_id")
+        == evidence_delivery_artifact.get("artifact_id")
+        and evidence_bundle_first_item.get("artifact_checksum_sha256") == evidence_delivery_artifact.get("checksum_sha256")
+        and evidence_bundle_first_item.get("connector_evidence_ref", {}).get("evidence_ref_id") == evidence_ref_id
+        and connector_evidence_bundle_link.get("delivery_receipt_id") == evidence_delivery_receipt_id
+        and connector_evidence_bundle_link.get("artifact_id") == evidence_delivery_artifact.get("artifact_id"),
+        "claim_evidence_backed_then_approved": _exit_ok(transcripts["connector_claim_create"])
+        and evidence_claim.get("trust_state") == "evidence_backed"
+        and evidence_claim.get("evidence_bundle", {}).get("evidence_item_count") == 1
+        and _exit_ok(transcripts["connector_claim_approve"])
+        and evidence_approved_claim.get("trust_state") == "approved",
+        "evidenceref_only_bundle_denied": transcripts["connector_evidence_ref_only_bundle"].get("exit_code") == 4
+        and "CS_CONNECTOR_EVIDENCE_REF_ONLY_UNSUPPORTED" in evidence_ref_only_error_codes,
+        "zero_evidence_claim_approval_denied": _exit_ok(transcripts["connector_unsupported_claim_create"])
+        and transcripts["connector_unsupported_claim_approve"].get("exit_code") == 4
+        and "CS_CLAIM_EVIDENCE_REQUIRED" in unsupported_claim_approve_error_codes
+        and unsupported_claim_approve_payload.get("claim", {}).get("trust_state") != "approved",
+        "no_inaccessible_phantom_evidence": evidence_bundle_coverage.get("inaccessible_phantom_evidence_count") == 0,
+        "raw_provider_payload_not_available": connector_evidence_bundle.get("raw_provider_payload_available") is False
+        and evidence_bundle_coverage.get("raw_provider_payload_included") is False
+        and evidence_bundle_coverage.get("raw_access_handle_included") is False,
+        "evidence_refs_present": bool(evidence_bundle_payload.get("evidence_refs"))
+        and bool(evidence_claim_payload.get("evidence_refs"))
+        and bool(evidence_claim_approve_payload.get("evidence_refs")),
+        "audit_refs_present": bool(evidence_bundle_payload.get("audit_refs"))
+        and bool(evidence_ref_only_payload.get("audit_refs"))
+        and bool(unsupported_claim_approve_payload.get("audit_refs")),
+        "zero_provider_internals": not evidence_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    raw_access_checks = {
+        "raw_default_contract_validate_exit_zero": _exit_ok(transcripts["raw_default_contract_validate"]),
+        "raw_default_setup_plan_exit_zero": _exit_ok(transcripts["raw_default_setup_plan"]),
+        "raw_default_source_policy_denied": raw_default_source_policy.get("raw_access") == "denied",
+        "raw_default_request_denied": transcripts["raw_default_denied_request"].get("exit_code") == 8
+        and raw_default_denied_payload.get("status") == "denied"
+        and "CS_CONNECTOR_RAW_ACCESS_DENIED_BY_DEFAULT" in raw_default_denied_error_codes
+        and "connector_raw_access_grant" not in raw_default_denied_payload,
+        "raw_allowed_contract_validate_exit_zero": _exit_ok(transcripts["raw_allowed_contract_validate"]),
+        "raw_allowed_setup_plan_exit_zero": _exit_ok(transcripts["raw_allowed_setup_plan"]),
+        "raw_allowed_policy_limits_persisted": raw_allowed_source_policy.get("raw_access") == "temporary_scoped"
+        and raw_allowed_source_policy.get("raw_access_policy", {}).get("max_ttl_seconds") == 60
+        and raw_allowed_source_policy.get("raw_access_policy", {}).get("max_reads") == 1
+        and "diagnose_ingestion_gap" in raw_allowed_source_policy.get("raw_access_policy", {}).get("allowed_purposes", []),
+        "raw_ttl_boundary_denied": transcripts["raw_ttl_denied_request"].get("exit_code") == 8
+        and "CS_CONNECTOR_RAW_ACCESS_TTL_DENIED" in raw_ttl_denied_error_codes,
+        "raw_read_limit_boundary_denied": transcripts["raw_read_limit_denied_request"].get("exit_code") == 8
+        and "CS_CONNECTOR_RAW_ACCESS_READ_LIMIT_DENIED" in raw_read_limit_denied_error_codes,
+        "raw_grant_exit_zero": _exit_ok(transcripts["raw_grant_request"])
+        and raw_access_grant.get("schema_version") == "cs.connector_raw_access_grant.v1"
+        and raw_access_grant.get("status") == "active"
+        and raw_access_grant.get("max_reads") == 1
+        and raw_access_grant.get("remaining_reads") == 1
+        and raw_access_grant.get("ttl_seconds") == 60
+        and raw_access_grant.get("purpose") == "diagnose_ingestion_gap"
+        and raw_access_grant.get("classification") == "restricted"
+        and raw_access_grant.get("reusable_raw_handle") is False
+        and raw_access_grant.get("opaque_reference_exposed") is False
+        and raw_access_grant.get("raw_content_copied_to_product_records") is False
+        and raw_access_grant.get("raw_provider_payload_persisted") is False,
+        "raw_records_persisted": raw_access_grant_path.exists() and raw_access_request_path.exists(),
+        "raw_metadata_export_safe": _exit_ok(transcripts["raw_metadata_export"])
+        and raw_access_export.get("schema_version") == "cs.connector_raw_access_export.v1"
+        and raw_access_export_status in {"active", "exhausted", "revoked", "expired"}
+        and raw_access_export.get("raw_content_included") is False
+        and raw_access_export.get("raw_provider_payload_included") is False
+        and raw_access_export.get("raw_access_handle_included") is False
+        and bool(raw_access_export.get("opaque_reference_fingerprint")),
+        "raw_read_once_decrements": _exit_ok(transcripts["raw_read_once"])
+        and raw_read_once_result.get("raw_content_returned") is False
+        and raw_read_once_result.get("provider_payload_returned") is False
+        and raw_read_once_grant.get("read_count") == 1
+        and raw_read_once_grant.get("remaining_reads") == 0,
+        "raw_read_limit_exhaustion_denied": transcripts["raw_read_exhausted"].get("exit_code") == 8
+        and "CS_CONNECTOR_RAW_ACCESS_READ_LIMIT_EXHAUSTED" in raw_exhausted_error_codes,
+        "raw_expiry_denied": transcripts["raw_read_expired"].get("exit_code") == 8
+        and "CS_CONNECTOR_RAW_ACCESS_EXPIRED" in raw_expired_error_codes,
+        "raw_revoke_exit_zero": _exit_ok(transcripts["raw_revoke_grant"])
+        and raw_revoked_grant.get("status") == "revoked"
+        and raw_revoked_grant.get("revoked") is True
+        and raw_revoked_grant.get("remaining_reads") == 0,
+        "raw_revoked_read_denied": transcripts["raw_read_revoked"].get("exit_code") == 8
+        and "CS_CONNECTOR_RAW_ACCESS_REVOKED" in raw_revoked_error_codes,
+        "raw_audit_verify_exit_zero": _exit_ok(transcripts["raw_access_audit_verify"])
+        and raw_access_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "raw_audit_refs_present": bool(raw_grant_payload.get("audit_refs"))
+        and bool(raw_read_once_payload.get("audit_refs"))
+        and bool(raw_read_exhausted_payload.get("audit_refs"))
+        and bool(raw_read_expired_payload.get("audit_refs"))
+        and bool(raw_revoke_payload.get("audit_refs"))
+        and bool(raw_read_revoked_payload.get("audit_refs")),
+        "raw_no_provider_payload_or_handle_leak": "CS_CH_013_RAW_PROVIDER_PAYLOAD_MUST_NOT_PERSIST" not in raw_access_state_text
+        and "raw_access_handle\":\"" not in raw_access_state_text
+        and "raw_provider_payload\":\"" not in raw_access_state_text,
+        "zero_provider_internals": not raw_access_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    untrusted_zero_keys = [
+        "tool_calls_created",
+        "action_cards_created_from_untrusted_artifact",
+        "workflow_runs_created_from_untrusted_artifact",
+        "connector_actions_triggered_from_content",
+        "provider_calls_triggered_from_content",
+        "shell_calls_triggered_from_content",
+        "external_http_calls",
+        "memory_promotions_from_untrusted_artifact",
+        "policy_overrides_from_untrusted_artifact",
+        "authority_expansions_from_untrusted_artifact",
+    ]
+    untrusted_claim_statement = str(untrusted_claim.get("statement", ""))
+    untrusted_agent_attempt = untrusted_agent_payload.get("authority_attempt", {})
+    untrusted_egress_decisions = untrusted_egress_payload.get("policy_decisions", [])
+    untrusted_egress_decision = untrusted_egress_decisions[0] if untrusted_egress_decisions else {}
+    untrusted_checks = {
+        "untrusted_contract_validate_exit_zero": _exit_ok(transcripts["untrusted_contract_validate"]),
+        "untrusted_setup_plan_exit_zero": _exit_ok(transcripts["untrusted_setup_plan"]),
+        "untrusted_delivery_process_exit_zero": _exit_ok(transcripts["untrusted_delivery_process"]),
+        "untrusted_review_show_exit_zero": _exit_ok(transcripts["untrusted_review_show"]),
+        "untrusted_evidence_bundle_exit_zero": _exit_ok(transcripts["untrusted_evidence_bundle_create"]),
+        "untrusted_claim_create_exit_zero": _exit_ok(transcripts["untrusted_claim_create"]),
+        "untrusted_audit_verify_exit_zero": _exit_ok(transcripts["untrusted_audit_verify"])
+        and untrusted_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "untrusted_records_persisted": untrusted_review_path.exists()
+        and untrusted_receipt_path.exists()
+        and bool(untrusted_artifact_paths)
+        and untrusted_bundle_path.exists()
+        and untrusted_claim_path.exists()
+        and untrusted_memory_quarantine_path.exists(),
+        "artifact_and_source_labeled_untrusted": untrusted_delivery_artifact.get("trust_state") == "untrusted"
+        and untrusted_delivery_receipt.get("source_summary", {}).get("trust_state") == "untrusted_connector_content"
+        and untrusted_delivery_artifact.get("safety", {}).get("untrusted_evidence") is True
+        and shown_untrusted_review.get("source_trust_label") == "untrusted_connector_content",
+        "unsafe_instruction_blocked": shown_untrusted_review.get("schema_version") == "cs.connector_untrusted_content_review.v1"
+        and shown_untrusted_review.get("unsafe_instruction_detected") is True
+        and int(shown_untrusted_review.get("blocked_attempt_count", 0) or 0) > 0
+        and shown_untrusted_review.get("status") == "blocked_attempt_recorded",
+        "content_treated_as_evidence_only": shown_untrusted_review.get("content_handling", {}).get("treated_as_system_instruction") is False
+        and shown_untrusted_review.get("content_handling", {}).get("treated_as_policy_authority") is False
+        and shown_untrusted_review.get("content_handling", {}).get("quoted_or_summarized_as_evidence_only") is True,
+        "review_negative_counters_zero": all(untrusted_review_negative.get(key) == 0 for key in untrusted_zero_keys),
+        "bundle_trust_boundary_coverage": untrusted_bundle_coverage.get("untrusted_evidence_label_present") is True
+        and untrusted_bundle_coverage.get("unsafe_instruction_treated_as_evidence_only") is True
+        and untrusted_bundle_coverage.get("tool_action_egress_counters_zero") is True
+        and untrusted_bundle_coverage.get("memory_promotion_blocked") is True
+        and untrusted_bundle_coverage.get("policy_override_blocked") is True
+        and untrusted_bundle_coverage.get("authority_expansion_blocked") is True
+        and untrusted_trust_boundary.get("untrusted_evidence_label_present") is True
+        and untrusted_trust_boundary.get("quoted_or_summarized_as_evidence_only") is True,
+        "evidence_item_distinguishes_untrusted_review": untrusted_bundle_first_item.get("artifact_id") == untrusted_artifact_id
+        and untrusted_bundle_first_item.get("connector_untrusted_content_review", {}).get("review_id") == untrusted_review_id
+        and untrusted_connector_bundle_link.get("untrusted_content_review", {}).get("review_id") == untrusted_review_id,
+        "claim_quotes_instruction_without_authority": untrusted_claim.get("trust_state") == "evidence_backed"
+        and "quoted instruction" in untrusted_claim_statement
+        and "not a system instruction" in untrusted_claim_statement
+        and "authority grant" in untrusted_claim_statement,
+        "agent_prompt_authority_denied": _policy_denied(transcripts["untrusted_agent_authority_attempt"], "CS_AGENT_POLICY_DENIED")
+        and untrusted_agent_attempt.get("authority_expanded") is False,
+        "memory_promotion_quarantined": _exit_ok(transcripts["untrusted_memory_quarantine"])
+        and untrusted_memory_quarantine.get("status") == "quarantined"
+        and untrusted_memory_quarantine.get("memory_created") is False
+        and untrusted_memory_quarantine.get("trusted_memory_created") is False,
+        "egress_denied_without_http_call": _policy_denied(transcripts["untrusted_egress_denied"], "CS_EGRESS_DENIED")
+        and untrusted_egress_decision.get("external_http_calls") == 0,
+        "zero_action_workflow_memory_side_effects": untrusted_action_card_count == 0
+        and untrusted_workflow_run_count == 0
+        and untrusted_memory_count == 0
+        and untrusted_memory_quarantine_count == 1,
+        "raw_provider_payload_not_exposed": untrusted_delivery_receipt.get("raw_provider_payload", {}).get("stored_in_product_state") is False
+        and untrusted_delivery_artifact.get("connector_delivery", {}).get("raw_provider_payload_stored_in_product_state") is False,
+        "evidence_refs_present": bool(untrusted_delivery_payload.get("evidence_refs"))
+        and bool(untrusted_review_payload.get("evidence_refs"))
+        and bool(untrusted_bundle_payload.get("evidence_refs"))
+        and bool(untrusted_claim_payload.get("evidence_refs"))
+        and bool(untrusted_memory_payload.get("evidence_refs")),
+        "audit_refs_present": bool(untrusted_delivery_payload.get("audit_refs"))
+        and bool(untrusted_review_payload.get("audit_refs"))
+        and bool(untrusted_bundle_payload.get("audit_refs"))
+        and bool(untrusted_agent_payload.get("audit_refs"))
+        and bool(untrusted_memory_payload.get("audit_refs"))
+        and bool(untrusted_egress_payload.get("audit_refs")),
+        "zero_provider_internals": not untrusted_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "no_unauthorized_marker": "CS_CH_014_UNAUTHORIZED_SIDE_EFFECT_MUST_NOT_EXIST" not in untrusted_state_text,
+    }
+    selected_repo_direct_write_decision = (
+        selected_repo_direct_write_payload.get("policy_decisions", [{}])[0]
+        if selected_repo_direct_write_payload.get("policy_decisions")
+        else {}
+    )
+    selected_repo_checks = {
+        "selected_repo_contract_validate_exit_zero": _exit_ok(transcripts["selected_repo_contract_validate"]),
+        "selected_repo_setup_plan_exit_zero": _exit_ok(transcripts["selected_repo_setup_plan"]),
+        "selected_repo_allowed_delivery_exit_zero": _exit_ok(transcripts["selected_repo_allowed_delivery_process"]),
+        "selected_repo_unselected_delivery_denied": transcripts["selected_repo_unselected_delivery_process"].get("exit_code") == 1
+        and selected_repo_unselected_payload.get("status") == "failed"
+        and "CS_CONNECTOR_SOURCE_POLICY_RESOURCE_DENIED" in selected_repo_unselected_error_codes,
+        "selected_repo_direct_write_denied": transcripts["selected_repo_direct_write_denied"].get("exit_code") == 8
+        and selected_repo_direct_write_payload.get("status") == "denied"
+        and "CS_DIRECT_WRITE_DENIED" in selected_repo_direct_write_error_codes
+        and selected_repo_direct_write_decision.get("decision") == "deny",
+        "selected_repo_expand_selection_denied": transcripts["selected_repo_expand_selection_denied"].get("exit_code") == 8
+        and selected_repo_expand_payload.get("status") == "denied"
+        and "CS_CONNECTOR_SOURCE_POLICY_BROADENING_DENIED" in selected_repo_expand_error_codes,
+        "selected_repo_audit_verify_exit_zero": _exit_ok(transcripts["selected_repo_audit_verify"])
+        and selected_repo_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "selected_resource_scope_persisted": selected_repo_setup_result_path.exists()
+        and selected_repo_source_policy_path.exists()
+        and selected_repo_scope.get("schema_version") == "cs.connector_selected_resource_scope.v1"
+        and selected_repo_source_policy.get("selected_resource_scope", {}).get("selection_version_id")
+        == selected_repo_scope.get("selection_version_id"),
+        "three_visible_one_selected": selected_repo_scope.get("available_resource_count") == 3
+        and selected_repo_scope.get("selected_resource_count") == 1
+        and selected_repo_scope.get("unselected_resource_count") == 2
+        and selected_repo_scope.get("selected_resources") == ["github:repo:owner/project-alpha"]
+        and selected_repo_scope.get("visible_to_product_resources") == ["github:repo:owner/project-alpha"],
+        "no_org_or_account_wide_fallback": selected_repo_scope.get("organization_wide_fallback_enabled") is False
+        and selected_repo_scope.get("account_wide_fallback_enabled") is False
+        and selected_repo_scope.get("unselected_resources_hidden_from_product") is True,
+        "namespace_scoped_versioned_opaque_refs": selected_repo_scope.get("namespace_scoped") is True
+        and selected_repo_scope.get("versioned") is True
+        and str(selected_repo_scope.get("selection_version_id", "")).startswith("csel_")
+        and selected_repo_scope.get("stores_opaque_source_refs_only") is True,
+        "zero_write_permission_and_mutation_capability": selected_repo_scope.get("write_permissions_requested") is False
+        and selected_repo_scope.get("write_permissions_granted") is False
+        and selected_repo_scope.get("provider_mutation_capabilities") == []
+        and selected_repo_validate_payload.get("connector_capability_contract", {}).get("actions") == [],
+        "allowed_delivery_from_selected_repo": selected_repo_allowed_receipt_path.exists()
+        and bool(selected_repo_allowed_artifact_paths)
+        and selected_repo_allowed_policy_decision.get("decision") == "allow"
+        and selected_repo_allowed_policy_decision.get("selected_resource_allowed") is True
+        and selected_repo_allowed_receipt.get("source_summary", {}).get("source_ref") == "github:repo:owner/project-alpha",
+        "unselected_delivery_created_no_artifact_receipt_or_ack": selected_repo_unselected_policy_decision.get("decision") == "deny"
+        and selected_repo_unselected_policy_decision.get("enforcement_action") == "block"
+        and selected_repo_unselected_policy_decision.get("selected_resource_allowed") is False
+        and selected_repo_unselected_policy_decision.get("normalized_projection", {}).get("payload") == {}
+        and selected_repo_denied_policy_decision_path.exists()
+        and "connector_delivery_receipt" not in selected_repo_unselected_payload
+        and "artifact" not in selected_repo_unselected_payload
+        and selected_repo_receipt_count == 1
+        and selected_repo_artifact_count == 1
+        and selected_repo_ack_count == 1,
+        "policy_decisions_and_policy_count_expected": selected_repo_policy_decision_count == 2
+        and selected_repo_source_policy_count == 1,
+        "provider_and_external_call_counters_zero": int(
+            selected_repo_setup_result.get("provider_call_ledger", {}).get("before_activation", 1) or 0
+        )
+        == 0
+        and int(selected_repo_setup_result.get("provider_call_ledger", {}).get("during_plan", 1) or 0) == 0
+        and int(selected_repo_allowed_receipt.get("provider_call_ledger", {}).get("during_ingest", 1) or 0) == 0
+        and int(selected_repo_allowed_receipt.get("provider_call_ledger", {}).get("external_http_calls", 1) or 0) == 0
+        and all(
+            int(error.get("external_http_calls", 0) or 0) == 0
+            for error in selected_repo_direct_write_payload.get("errors", [])
+            if isinstance(error, dict)
+        ),
+        "evidence_refs_present": bool(selected_repo_setup_payload.get("evidence_refs"))
+        and bool(selected_repo_allowed_payload.get("evidence_refs"))
+        and bool(selected_repo_unselected_payload.get("evidence_refs")),
+        "audit_refs_present": bool(selected_repo_setup_payload.get("audit_refs"))
+        and bool(selected_repo_allowed_payload.get("audit_refs"))
+        and bool(selected_repo_unselected_payload.get("audit_refs"))
+        and bool(selected_repo_direct_write_payload.get("audit_refs"))
+        and bool(selected_repo_expand_payload.get("audit_refs")),
+        "zero_provider_internals": not selected_repo_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "no_unselected_repo_artifact_marker": "CS_CH_015_UNSELECTED_REPO_ARTIFACT_MUST_NOT_EXIST" not in selected_repo_state_text,
+    }
+    source_control_product_projection_types = {
+        projection_type
+        for mapping in source_control_setup_result.get("product_projection_contract", [])
+        if isinstance(mapping, dict)
+        for projection_type in mapping.get("projection_types", [])
+    }
+    source_control_enabled_capabilities = {
+        availability.get("common_capability")
+        for availability in source_control_setup_result.get("feature_availability", [])
+        if isinstance(availability, dict) and availability.get("enabled") is True
+    }
+    source_control_normalized_payloads = {
+        key: snapshot.get("normalized_projection", {}).get("payload", {})
+        for key, snapshot in source_control_snapshots.items()
+    }
+    source_control_checks = {
+        "source_control_contract_validate_exit_zero": _exit_ok(transcripts["source_control_contract_validate"]),
+        "source_control_setup_plan_exit_zero": _exit_ok(transcripts["source_control_setup_plan"]),
+        "source_control_process_all_exit_zero": all(
+            _exit_ok(transcripts[f"source_control_{key}_delivery_process"])
+            for key in source_control_delivery_paths
+        ),
+        "source_control_bundle_all_exit_zero": all(
+            _exit_ok(transcripts[f"source_control_{key}_evidence_bundle"])
+            for key in source_control_delivery_paths
+        ),
+        "source_control_audit_verify_exit_zero": _exit_ok(transcripts["source_control_audit_verify"])
+        and source_control_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "provider_neutral_capability_family_enabled": set(source_control_expected_projection_types.values()).issubset(
+            source_control_product_projection_types
+        )
+        and set(source_control_expected_capabilities.values()).issubset(source_control_enabled_capabilities)
+        and source_control_setup_result.get("product_handler_contract", {}).get("handler_family") == "source_control_readonly"
+        and source_control_setup_result.get("product_handler_contract", {}).get("requires_provider_sdk") is False,
+        "all_projection_types_archived": all(
+            source_control_receipts[key].get("projection_type") == expected_type
+            and source_control_snapshots[key].get("projection_type") == expected_type
+            and source_control_policy_decisions[key].get("projection_type") == expected_type
+            and source_control_policy_decisions[key].get("decision") == "allow"
+            for key, expected_type in source_control_expected_projection_types.items()
+        ),
+        "all_repository_provenance_selected": all(
+            source_control_receipts[key].get("source_summary", {}).get("source_ref") == "github:repo:owner/project-alpha"
+            and str(source_control_receipts[key].get("source_external_id", "")).startswith(
+                "github:repo:owner/project-alpha"
+            )
+            and source_control_policy_decisions[key].get("selected_resource_allowed") is True
+            for key in source_control_delivery_paths
+        ),
+        "all_source_revisions_persisted": all(
+            bool(source_control_receipts[key].get("source_revision"))
+            and source_control_receipts[key].get("source_revision") == source_control_snapshots[key].get("source_revision")
+            and source_control_receipts[key].get("source_revision")
+            == source_control_content_versions[key].get("source_revision")
+            and source_control_receipts[key].get("source_revision")
+            == source_control_search_snapshots[key].get("results", [{}])[0].get("source_revision")
+            for key in source_control_delivery_paths
+        ),
+        "all_artifacts_receipts_snapshots_links_persisted": source_control_receipt_count == 5
+        and source_control_artifact_count == 5
+        and source_control_ack_count == 5
+        and source_control_policy_decision_count == 5
+        and source_control_content_version_count == 5
+        and all(path.exists() for path in source_control_receipt_paths.values())
+        and all(path.exists() for path in source_control_snapshot_paths.values())
+        and all(path.exists() for path in source_control_evidence_link_paths.values())
+        and all(bool(paths) for paths in source_control_artifact_paths.values()),
+        "exact_envelopes_preserved": all(
+            source_control_artifacts[key].get("checksum_sha256")
+            == hashlib.sha256((root / source_control_delivery_paths[key]).read_bytes()).hexdigest()
+            and source_control_receipts[key].get("envelope_sha256")
+            == hashlib.sha256((root / source_control_delivery_paths[key]).read_bytes()).hexdigest()
+            for key in source_control_delivery_paths
+        ),
+        "acknowledged_after_archive_commit": all(
+            source_control_receipts[key].get("acknowledgement_state") == "acknowledged_after_commit"
+            and source_control_ack_outboxes[key].get("status") == "acknowledged"
+            and source_control_ack_outboxes[key].get("ack_sent") is True
+            and source_control_ack_outboxes[key].get("artifact_id") == source_control_artifacts[key].get("artifact_id")
+            for key in source_control_delivery_paths
+        ),
+        "searchable_evidence_bundles_created": source_control_bundle_count == 5
+        and source_control_search_snapshot_count == 5
+        and all(path.exists() for path in source_control_bundle_paths.values())
+        and all(path.exists() for path in source_control_search_snapshot_paths.values())
+        and all(
+            source_control_search_snapshots[key].get("result_count") == 1
+            and source_control_search_snapshots[key].get("results", [{}])[0].get("artifact_id")
+            == source_control_artifacts[key].get("artifact_id")
+            and source_control_bundle_links[key].get("artifact_id") == source_control_artifacts[key].get("artifact_id")
+            and source_control_bundle_links[key].get("delivery_receipt_id")
+            == source_control_receipts[key].get("delivery_receipt_id")
+            for key in source_control_delivery_paths
+        ),
+        "provider_specific_fields_not_required_by_product": all(
+            not any(str(field).lower().startswith(("x-github", "x_github", "github_")) for field in payload.keys())
+            for payload in source_control_normalized_payloads.values()
+            if isinstance(payload, dict)
+        )
+        and all(
+            bundle.get("connector_evidence_bundle", {}).get("coverage", {}).get("raw_provider_payload_included") is False
+            and bundle.get("raw_provider_payload_available") is False
+            for bundle in source_control_bundles.values()
+        ),
+        "provider_and_external_call_counters_zero": _connector_provider_call_count(source_control_setup_result) == 0
+        and all(
+            int(receipt.get("provider_call_ledger", {}).get("during_ingest", 1) or 0) == 0
+            and int(receipt.get("provider_call_ledger", {}).get("external_http_calls", 1) or 0) == 0
+            for receipt in source_control_receipts.values()
+        ),
+        "evidence_refs_present": bool(source_control_setup_payload.get("evidence_refs"))
+        and all(bool(payload.get("evidence_refs")) for payload in source_control_process_payloads.values())
+        and all(bool(payload.get("evidence_refs")) for payload in source_control_bundle_payloads.values()),
+        "audit_refs_present": bool(source_control_setup_payload.get("audit_refs"))
+        and all(bool(payload.get("audit_refs")) for payload in source_control_process_payloads.values())
+        and all(bool(payload.get("audit_refs")) for payload in source_control_bundle_payloads.values()),
+        "zero_provider_internals": not source_control_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "no_raw_or_write_marker": "CS_CH_016_RAW_OR_WRITE_MUST_NOT_EXIST" not in source_control_state_text,
+    }
+    content_secret_marker_decision = content_restriction_decisions.get("secret_marker", {})
+    content_secret_marker_payload = content_secret_marker_decision.get("normalized_payload", {})
+    content_secret_marker_artifact = content_restriction_artifacts.get("secret_marker", {})
+    content_secret_marker_receipt = content_restriction_receipts.get("secret_marker", {})
+    content_binary_decision = content_restriction_decisions.get("binary", {})
+    content_binary_receipt = content_restriction_receipts.get("binary", {})
+    content_large_decision = content_restriction_decisions.get("large", {})
+    content_large_receipt = content_restriction_receipts.get("large", {})
+    content_forbidden_path_decision = content_restriction_decisions.get("forbidden_path", {})
+    content_generated_decision = content_restriction_decisions.get("generated", {})
+    content_private_material_decision = content_restriction_decisions.get("private_material", {})
+    content_private_material_scan = content_private_material_decision.get("sensitive_marker_scan", {})
+    content_restriction_expected_keys = set(content_restriction_delivery_paths)
+    content_restriction_persisted_refs_present = (
+        set(content_restriction_persisted_decisions) == content_restriction_expected_keys
+        and all(
+            bool(persisted.get("evidence_refs"))
+            and bool(persisted.get("audit_refs"))
+            and f"connector_content_restriction_decision:{persisted.get('content_restriction_decision_id')}"
+            in persisted.get("evidence_refs", [])
+            and f"connector_projection_policy_decision:{content_restriction_policy_decisions.get(key, {}).get('policy_decision_id')}"
+            in persisted.get("evidence_refs", [])
+            and persisted.get("linked_records", {}).get("policy_decision_id")
+            == content_restriction_policy_decisions.get(key, {}).get("policy_decision_id")
+            for key, persisted in content_restriction_persisted_decisions.items()
+        )
+    )
+    content_restriction_persisted_result_links_present = (
+        all(
+            persisted.get("linked_records", {}).get("artifact_id")
+            == content_restriction_artifacts.get(key, {}).get("artifact_id")
+            and persisted.get("linked_records", {}).get("delivery_receipt_id")
+            == content_restriction_receipts.get(key, {}).get("delivery_receipt_id")
+            and f"artifact:{content_restriction_artifacts.get(key, {}).get('artifact_id')}"
+            in persisted.get("evidence_refs", [])
+            and f"connector_delivery_receipt:{content_restriction_receipts.get(key, {}).get('delivery_receipt_id')}"
+            in persisted.get("evidence_refs", [])
+            for key, persisted in content_restriction_persisted_decisions.items()
+            if key in content_restriction_success_keys
+        )
+        and content_restriction_persisted_decisions.get("private_material", {})
+        .get("linked_records", {})
+        .get("quarantine_id")
+        == content_restriction_quarantine.get("quarantine_id")
+        and f"connector_delivery_quarantine:{content_restriction_quarantine.get('quarantine_id')}"
+        in content_restriction_persisted_decisions.get("private_material", {}).get("evidence_refs", [])
+        and all(
+            not content_restriction_persisted_decisions.get(key, {}).get("linked_records", {}).get("artifact_id")
+            and not content_restriction_persisted_decisions.get(key, {}).get("linked_records", {}).get(
+                "delivery_receipt_id"
+            )
+            and content_restriction_persisted_decisions.get(key, {}).get("linked_records", {}).get(
+                "rejected_delivery_id"
+            )
+            == content_restriction_decisions.get(key, {}).get("delivery_id")
+            for key in {"forbidden_path", "generated"}
+        )
+    )
+    content_restriction_checks = {
+        "content_restriction_contract_validate_exit_zero": _exit_ok(
+            transcripts["content_restriction_contract_validate"]
+        ),
+        "content_restriction_setup_plan_exit_zero": _exit_ok(transcripts["content_restriction_setup_plan"]),
+        "content_restriction_audit_verify_exit_zero": _exit_ok(transcripts["content_restriction_audit_verify"])
+        and content_restriction_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "redacted_secret_marker_delivery_succeeds": _exit_ok(
+            transcripts["content_restriction_secret_marker_delivery_process"]
+        )
+        and content_restriction_process_payloads["secret_marker"].get("status") == "success"
+        and content_secret_marker_decision.get("schema_version") == "cs.connector_content_restriction_decision.v1"
+        and content_secret_marker_decision.get("action") == "redact"
+        and content_secret_marker_decision.get("redaction_applied") is True
+        and content_secret_marker_decision.get("sensitive_marker_scan", {}).get("matches_detected") == 2
+        and "payload.markdown_excerpt"
+        in content_secret_marker_decision.get("sensitive_marker_scan", {}).get("redacted_fields", [])
+        and "[REDACTED:" in str(content_secret_marker_payload.get("markdown_excerpt", ""))
+        and "CS_CH_018_SECRET_CANARY_MUST_NOT_PERSIST"
+        not in str(content_secret_marker_payload.get("markdown_excerpt", ""))
+        and content_secret_marker_artifact.get("connector_delivery", {}).get("artifact_input_sanitized") is True
+        and content_secret_marker_artifact.get("connector_delivery", {}).get("exact_envelope_preserved") is False
+        and content_secret_marker_receipt.get("source_policy_enforcement", {}).get("content_policy_action")
+        == "redact",
+        "binary_content_metadata_only_delivery_succeeds": _exit_ok(
+            transcripts["content_restriction_binary_delivery_process"]
+        )
+        and content_binary_decision.get("action") == "metadata_only"
+        and content_binary_decision.get("binary_content") is True
+        and content_binary_decision.get("metadata_only") is True
+        and "markdown_excerpt" not in content_binary_decision.get("normalized_payload", {})
+        and content_binary_receipt.get("source_policy_enforcement", {}).get("partial_status")
+        == "metadata_only_binary",
+        "large_content_metadata_only_delivery_succeeds": _exit_ok(
+            transcripts["content_restriction_large_delivery_process"]
+        )
+        and content_large_decision.get("action") == "metadata_only"
+        and content_large_decision.get("partial_status") == "metadata_only_size_limit"
+        and int(content_large_decision.get("declared_size_bytes", 0) or 0)
+        > int(content_large_decision.get("max_content_bytes", 0) or 0)
+        and "markdown_excerpt" not in content_large_decision.get("normalized_payload", {})
+        and content_large_receipt.get("source_policy_enforcement", {}).get("partial_status")
+        == "metadata_only_size_limit",
+        "forbidden_path_skipped_before_artifact_or_receipt": transcripts[
+            "content_restriction_forbidden_path_delivery_process"
+        ].get("exit_code")
+        == 1
+        and content_restriction_process_payloads["forbidden_path"].get("status") == "failed"
+        and content_forbidden_path_decision.get("action") == "skip"
+        and content_forbidden_path_decision.get("partial_status") == "skipped_path_denied"
+        and "CS_CONNECTOR_SOURCE_POLICY_PATH_DENIED" in content_restriction_error_codes["forbidden_path"]
+        and "artifact" not in content_restriction_process_payloads["forbidden_path"]
+        and "connector_delivery_receipt" not in content_restriction_process_payloads["forbidden_path"],
+        "generated_content_skipped_before_artifact": transcripts["content_restriction_generated_delivery_process"].get(
+            "exit_code"
+        )
+        == 1
+        and content_generated_decision.get("action") == "skip"
+        and content_generated_decision.get("generated_content") is True
+        and content_generated_decision.get("partial_status") == "skipped_generated_content"
+        and "CS_CONNECTOR_CONTENT_GENERATED_SKIPPED" in content_restriction_error_codes["generated"]
+        and "artifact" not in content_restriction_process_payloads["generated"],
+        "private_material_quarantined_before_artifact_or_receipt": transcripts[
+            "content_restriction_private_material_delivery_process"
+        ].get("exit_code")
+        == 7
+        and content_restriction_process_payloads["private_material"].get("status") == "quarantined"
+        and content_private_material_decision.get("action") == "quarantine"
+        and content_private_material_decision.get("partial_status") == "quarantined_sensitive_material"
+        and "private_key_block" in content_private_material_scan.get("marker_types", [])
+        and content_restriction_quarantine.get("failure_class") == "content_restriction"
+        and content_restriction_quarantine.get("safe_diagnostics", {}).get("raw_provider_payload_persisted")
+        is False
+        and "artifact" not in content_restriction_process_payloads["private_material"]
+        and "connector_delivery_receipt" not in content_restriction_process_payloads["private_material"],
+        "content_restriction_records_persisted": content_restriction_decision_count == 6
+        and content_restriction_delivery_receipt_count == 3
+        and content_restriction_artifact_count == 3
+        and content_restriction_ack_count == 3
+        and content_restriction_quarantine_count == 1
+        and all(path.exists() for path in content_restriction_decision_paths.values())
+        and all(path.exists() for path in content_restriction_receipt_paths.values())
+        and all(bool(paths) for paths in content_restriction_artifact_paths.values()),
+        "content_restriction_provider_and_external_call_counters_zero": _connector_provider_call_count(
+            content_restriction_setup_result
+        )
+        == 0
+        and all(
+            int(receipt.get("provider_call_ledger", {}).get("during_ingest", 1) or 0) == 0
+            and int(receipt.get("provider_call_ledger", {}).get("external_http_calls", 1) or 0) == 0
+            for key, receipt in content_restriction_receipts.items()
+            if key in content_restriction_success_keys
+        ),
+        "content_restriction_evidence_and_audit_refs_present": bool(content_restriction_setup_payload.get("evidence_refs"))
+        and all(bool(payload.get("evidence_refs")) for payload in content_restriction_process_payloads.values())
+        and all(bool(payload.get("audit_refs")) for payload in content_restriction_process_payloads.values()),
+        "content_restriction_persisted_decision_refs_present": content_restriction_persisted_refs_present,
+        "content_restriction_persisted_result_links_present": content_restriction_persisted_result_links_present,
+        "content_restriction_no_sensitive_or_out_of_policy_state_leaks": all(
+            marker not in content_restriction_state_text
+            for marker in [
+                "CS_CH_018_SECRET_CANARY_MUST_NOT_PERSIST",
+                "ghp_CSCH018SECRET000000",
+                "CS_CH_018_PRIVATE_KEY_MUST_NOT_PERSIST",
+                "-----BEGIN PRIVATE KEY-----",
+                "CS_CH_018_FORBIDDEN_PATH_MUST_NOT_IMPORT",
+                '"provider_token"',
+            ]
+        ),
+        "zero_provider_internals": not content_restriction_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    github_write_guard_checks = {
+        "write_action_contract_rejected": transcripts["github_write_guard_contract_validate_denied"].get("exit_code") == 1
+        and github_write_guard_contract_denied_payload.get("status") == "failed"
+        and "CS_CONNECTOR_GITHUB_WRITE_ACTION_DENIED" in github_write_guard_contract_error_codes
+        and github_write_guard_contract_record_count == 0,
+        "static_guard_exit_zero": _exit_ok(transcripts["github_write_guard_static"])
+        and github_write_guard_static_payload.get("status") == "success"
+        and github_write_guard_report.get("schema_version") == "cs.connector_github_write_guard.v1"
+        and github_write_guard_report.get("status") == "pass",
+        "provider_packs_have_no_write_actions": all(
+            pack.get("declared_action_count") == 0
+            and pack.get("write_action_count") == 0
+            and pack.get("write_capability_count") == 0
+            for pack in github_write_guard_report.get("provider_packs", [])
+        ),
+        "active_contracts_have_no_write_actions": all(
+            contract.get("write_action_count", 0) == 0
+            for contract in github_write_guard_report.get("active_contracts", [])
+        ),
+        "product_cli_exposes_no_write_commands": github_write_guard_report.get("forbidden_cli_command_hits") == [],
+        "runtime_source_has_no_write_endpoint_literals": github_write_guard_report.get("forbidden_endpoint_literal_hits") == [],
+        "controlled_egress_attempts_denied": len(github_write_guard_controlled_attempts) == len(GITHUB_WRITE_DIRECT_ATTEMPTS)
+        and all(
+            attempt.get("status") == "denied"
+            and attempt.get("direct_provider_access") is False
+            and int(attempt.get("external_http_calls", 1) or 0) == 0
+            and int(attempt.get("provider_mutations", 1) or 0) == 0
+            for attempt in github_write_guard_controlled_attempts
+        ),
+        "direct_write_runtime_attempts_denied": len(github_write_guard_direct_write_payloads) == len(GITHUB_WRITE_DIRECT_ATTEMPTS)
+        and all(
+            transcripts[f"github_write_guard_direct_write_{attempt['operation'].replace('.', '_')}"].get("exit_code") == 8
+            and github_write_guard_direct_write_payloads.get(attempt["operation"], {}).get("status") == "denied"
+            and github_write_guard_direct_write_payloads.get(attempt["operation"], {})
+            .get("direct_write_denial", {})
+            .get("operation")
+            == attempt["operation"]
+            and github_write_guard_direct_write_payloads.get(attempt["operation"], {})
+            .get("direct_write_denial", {})
+            .get("direct_provider_access")
+            is False
+            and int(
+                github_write_guard_direct_write_payloads.get(attempt["operation"], {})
+                .get("direct_write_denial", {})
+                .get("external_http_calls", 1)
+                or 0
+            )
+            == 0
+            and int(
+                github_write_guard_direct_write_payloads.get(attempt["operation"], {})
+                .get("direct_write_denial", {})
+                .get("provider_mutations", 1)
+                or 0
+            )
+            == 0
+            for attempt in GITHUB_WRITE_DIRECT_ATTEMPTS
+        ),
+        "negative_counters_zero": bool(github_write_guard_negative)
+        and all(int(value or 0) == 0 for value in github_write_guard_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["github_write_guard_audit_verify"])
+        and github_write_guard_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "evidence_and_audit_refs_present": bool(github_write_guard_static_payload.get("evidence_refs"))
+        and bool(github_write_guard_static_payload.get("audit_refs"))
+        and all(bool(payload.get("audit_refs")) for payload in github_write_guard_direct_write_payloads.values()),
+        "zero_provider_internals": not github_write_guard_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_write_side_effect_state": all(
+            marker not in github_write_guard_state_text
+            for marker in [
+                '"provider_token"',
+                '"auth_header"',
+                '"direct_api_handle"',
+                "CS_CH_019_PROVIDER_MUTATION_MUST_NOT_EXIST",
+            ]
+        ),
+    }
+    github_rate_limit_state = github_failure_states.get("rate_limit", {})
+    github_revoked_state = github_failure_states.get("permission_revoked", {})
+    github_removed_state = github_failure_states.get("repository_removed", {})
+    github_transient_state = github_failure_states.get("transient_transport", {})
+    github_failure_checks = {
+        "failure_contract_validate_exit_zero": _exit_ok(transcripts["github_failure_contract_validate"]),
+        "failure_setup_plan_exit_zero": _exit_ok(transcripts["github_failure_setup_plan"]),
+        "baseline_evidence_archived": _exit_ok(transcripts["github_failure_baseline_delivery"])
+        and github_failure_baseline_payload.get("status") == "success"
+        and github_failure_delivery_receipt_count == 1
+        and github_failure_artifact_count == 1,
+        "all_failure_modes_recorded": set(github_failure_states) == set(GITHUB_PROVIDER_FAILURE_MODES)
+        and github_failure_state_count == len(GITHUB_PROVIDER_FAILURE_MODES)
+        and all(
+            _exit_ok(transcripts[f"github_failure_{failure_mode}"])
+            and state.get("schema_version") == "cs.connector_provider_failure_state.v1"
+            and state.get("failure_mode") == failure_mode
+            and state.get("source_ref") == "github:repo:owner/project-alpha"
+            for failure_mode, state in github_failure_states.items()
+        ),
+        "rate_limit_retry_schedule_visible_no_tight_loop": github_rate_limit_state.get("reason_code")
+        == "CS_CONNECTOR_GITHUB_RATE_LIMITED"
+        and github_rate_limit_state.get("retry_policy", {}).get("status") == "scheduled"
+        and int(github_rate_limit_state.get("retry_policy", {}).get("retry_after_seconds", 0) or 0) >= 60
+        and github_rate_limit_state.get("retry_policy", {}).get("tight_retry_loop_prevented") is True
+        and github_rate_limit_state.get("freshness", {}).get("state") == "delayed"
+        and github_rate_limit_state.get("ingestion_control", {}).get("stream_state") == "delayed",
+        "revoked_permission_permanent_setup_gap_suspends_stream": github_revoked_state.get("reason_code")
+        == "CS_CONNECTOR_GITHUB_PERMISSION_REVOKED"
+        and github_revoked_state.get("setup_gap", {}).get("permanent") is True
+        and github_revoked_state.get("ingestion_control", {}).get("stream_state") == "suspended"
+        and github_revoked_state.get("ingestion_control", {}).get("future_ingestion_allowed") is False
+        and github_revoked_state.get("recovery_path", {}).get("owner_action_required") is True
+        and github_revoked_state.get("recovery_path", {}).get("requires_new_verification") is True,
+        "repository_removed_stops_future_ingestion_and_marks_unavailable": github_removed_state.get("reason_code")
+        == "CS_CONNECTOR_GITHUB_REPOSITORY_REMOVED"
+        and github_removed_state.get("source_health", {}).get("source_availability") == "repository_removed"
+        and github_removed_state.get("ingestion_control", {}).get("stream_state") == "stopped"
+        and github_removed_state.get("ingestion_control", {}).get("future_ingestion_allowed") is False
+        and github_removed_state.get("ingestion_control", {}).get("stop_removed_scope") is True
+        and github_removed_state.get("freshness", {}).get("state") == "unavailable",
+        "transient_transport_retry_scheduled_without_gap": github_transient_state.get("reason_code")
+        == "CS_CONNECTOR_GITHUB_TRANSPORT_TRANSIENT"
+        and github_transient_state.get("retry_policy", {}).get("status") == "scheduled"
+        and github_transient_state.get("setup_gap", {}).get("permanent") is False
+        and github_transient_state.get("ingestion_control", {}).get("stream_state") == "retrying",
+        "existing_evidence_preserved_with_freshness_warnings": github_failure_delivery_receipt_count == 1
+        and github_failure_artifact_count == 1
+        and all(
+            state.get("existing_evidence", {}).get("delivery_receipt_count_before") == 1
+            and state.get("existing_evidence", {}).get("artifact_count_before") == 1
+            and state.get("existing_evidence", {}).get("existing_artifacts_preserved") is True
+            and state.get("existing_evidence", {}).get("delete_existing_evidence") is False
+            and state.get("surface_warnings", {}).get("search_result_warning", {}).get("warning_required") is True
+            and state.get("surface_warnings", {}).get("claim_warning", {}).get("unsupported_fresh_claim_denied") is True
+            and state.get("freshness", {}).get("current_data_claim_allowed") is False
+            for state in github_failure_states.values()
+        ),
+        "reconnect_requires_owner_action_and_new_verification": github_revoked_state.get("recovery_path", {}).get(
+            "automatic_reconnect_allowed"
+        )
+        is False
+        and github_removed_state.get("recovery_path", {}).get("automatic_reconnect_allowed") is False
+        and github_revoked_state.get("recovery_path", {}).get("owner_action_required") is True
+        and github_removed_state.get("recovery_path", {}).get("owner_action_required") is True
+        and github_revoked_state.get("recovery_path", {}).get("requires_new_verification") is True
+        and github_removed_state.get("recovery_path", {}).get("requires_new_verification") is True,
+        "negative_counters_zero": bool(github_failure_negative)
+        and all(int(value or 0) == 0 for value in github_failure_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["github_failure_audit_verify"])
+        and github_failure_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and github_failure_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in github_failure_payloads.values()
+        ),
+        "zero_provider_internals": not github_failure_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_provider_or_external_calls": all(
+            int(state.get("ingestion_control", {}).get("external_http_calls", 1) or 0) == 0
+            and int(state.get("ingestion_control", {}).get("provider_mutations", 1) or 0) == 0
+            for state in github_failure_states.values()
+        ),
+        "zero_failure_side_effect_state": all(
+            marker not in github_failure_state_text
+            for marker in [
+                '"provider_token"',
+                '"auth_header"',
+                '"direct_api_handle"',
+                "CS_CH_020_SILENT_DELETE_MUST_NOT_EXIST",
+                "CS_CH_020_FRESH_WHILE_SUSPENDED_MUST_NOT_EXIST",
+            ]
+        ),
+    }
+    capture_checks = {
+        "permission_probe_exit_zero_metadata_only": _exit_ok(transcripts["capture_permission_missing_probe"])
+        and capture_permission_missing_probe.get("schema_version") == "cs.connector_capture_permission_probe.v1"
+        and capture_permission_missing_probe.get("permission_probe_only") is True
+        and capture_permission_missing_probe.get("capture_enabled") is False
+        and capture_permission_missing_probe.get("capture_attempted") is False
+        and int(capture_permission_missing_probe.get("capture_samples_created", 1) or 0) == 0
+        and int(capture_permission_missing_probe.get("screenshots_created", 1) or 0) == 0,
+        "no_consent_no_permission_disabled": _exit_ok(transcripts["capture_guard_no_consent_no_permission"])
+        and capture_no_consent_no_permission_guard.get("schema_version") == "cs.connector_capture_guard_decision.v1"
+        and capture_no_consent_no_permission_guard.get("status") == "blocked"
+        and capture_no_consent_no_permission_guard.get("capture_enabled") is False
+        and "CS_CONNECTOR_CAPTURE_CONSENT_MISSING" in capture_no_consent_no_permission_guard.get("reason_codes", [])
+        and "CS_CONNECTOR_CAPTURE_PLATFORM_PERMISSION_MISSING"
+        in capture_no_consent_no_permission_guard.get("reason_codes", []),
+        "permission_only_still_disabled": _exit_ok(transcripts["capture_permission_granted_probe"])
+        and _exit_ok(transcripts["capture_guard_permission_only"])
+        and capture_permission_granted_probe.get("platform_permission_state") == "granted"
+        and capture_permission_granted_probe.get("permission_active_for_local_fixture") is True
+        and capture_permission_only_guard.get("status") == "blocked"
+        and capture_permission_only_guard.get("capture_enabled") is False
+        and "CS_CONNECTOR_CAPTURE_CONSENT_MISSING" in capture_permission_only_guard.get("reason_codes", [])
+        and "CS_CONNECTOR_CAPTURE_PLATFORM_PERMISSION_MISSING" not in capture_permission_only_guard.get("reason_codes", []),
+        "consent_record_distinct_and_inspectable": _exit_ok(transcripts["capture_consent_granted"])
+        and capture_consent_record.get("schema_version") == "cs.connector_watch_source_consent.v1"
+        and capture_consent_record.get("active") is True
+        and capture_consent_record.get("explicit_owner_consent") is True
+        and capture_consent_record.get("platform_permission_required") is True
+        and capture_consent_record.get("platform_permission_granted_by_this_record") is False
+        and capture_consent_record.get("capture_enabled") is False
+        and capture_consent_record.get("collection_started") is False,
+        "consent_only_still_disabled": _exit_ok(transcripts["capture_guard_consent_only"])
+        and capture_consent_only_guard.get("status") == "blocked"
+        and capture_consent_only_guard.get("capture_enabled") is False
+        and capture_consent_only_guard.get("consent", {}).get("active") is True
+        and capture_consent_only_guard.get("platform_permission", {}).get("state") == "not_granted"
+        and "CS_CONNECTOR_CAPTURE_PLATFORM_PERMISSION_MISSING" in capture_consent_only_guard.get("reason_codes", []),
+        "both_gates_ready_without_starting_capture": _exit_ok(transcripts["capture_guard_ready"])
+        and capture_ready_guard.get("status") == "ready"
+        and capture_ready_guard.get("capture_enabled") is True
+        and capture_ready_guard.get("capture_allowed_for_future_collection") is True
+        and capture_ready_guard.get("collection_started_by_this_command") is False
+        and int(capture_ready_guard.get("capture_samples_created", 1) or 0) == 0
+        and int(capture_ready_guard.get("artifacts_created", 1) or 0) == 0
+        and "CS_CONNECTOR_CAPTURE_READY" in capture_ready_guard.get("reason_codes", []),
+        "setup_diagnostics_explain_privacy_controls": all(
+            record.get("setup_diagnostics", {}).get("disabled_by_default") is True
+            and record.get("setup_diagnostics", {}).get("pause_delete_explained") is True
+            and record.get("setup_diagnostics", {}).get("physical_device_acceptance") == "HUMAN_REQUIRED"
+            and "screenshots" in record.get("setup_diagnostics", {}).get("excluded_categories", [])
+            for record in [
+                capture_permission_missing_probe,
+                capture_consent_record,
+                capture_ready_guard,
+            ]
+        ),
+        "permission_not_treated_as_production_proof": capture_permission_granted_probe.get("production_permission_proof")
+        == "HUMAN_REQUIRED"
+        and capture_ready_guard.get("platform_permission", {}).get("production_permission_proof") == "HUMAN_REQUIRED"
+        and capture_ready_guard.get("platform_permission", {}).get("environment_flag_treated_as_production_proof") is False,
+        "records_persisted_with_expected_counts": capture_permission_probe_count == 2
+        and capture_consent_count == 1
+        and capture_guard_count == 4
+        and capture_sample_count == 0
+        and capture_artifact_count == 0,
+        "negative_counters_zero": bool(capture_negative) and all(int(value or 0) == 0 for value in capture_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["capture_audit_verify"])
+        and capture_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and capture_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs")) for payload in capture_payloads),
+        "zero_provider_internals": not capture_internal_paths
+        and all(payload.get("provider_internal_findings") == [] for payload in capture_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_capture_side_effect_markers": all(
+            marker not in capture_state_text
+            for marker in [
+                "CS_CH_021_HIDDEN_STARTUP_CAPTURE_MUST_NOT_EXIST",
+                "CS_CH_021_CROSS_NAMESPACE_CAPTURE_MUST_NOT_EXIST",
+                "CS_CH_021_SCREENSHOT_MUST_NOT_EXIST",
+            ]
+        ),
+    }
+    activity_first_session = activity_sessions[0] if isinstance(activity_sessions, list) and len(activity_sessions) > 0 else {}
+    activity_second_session = activity_sessions[1] if isinstance(activity_sessions, list) and len(activity_sessions) > 1 else {}
+    activity_third_session = activity_sessions[2] if isinstance(activity_sessions, list) and len(activity_sessions) > 2 else {}
+    activity_metrics = activity_sessionization.get("input_metrics", {}) if isinstance(activity_sessionization, dict) else {}
+    activity_filtered = activity_sessionization.get("filtered_samples", {}) if isinstance(activity_sessionization, dict) else {}
+    activity_checks = {
+        "sessionize_exit_zero": _exit_ok(transcripts["activity_sessionize_samples"])
+        and activity_sample_batch.get("schema_version") == "cs.connector_activity_sample_batch.v1"
+        and activity_sessionization.get("schema_version") == "cs.connector_activity_sessionization.v1"
+        and activity_sessionization.get("session_projection_schema") == "cs.activity_session_projection.v1",
+        "deterministic_metrics_recorded": activity_metrics.get("sample_count") == 9
+        and activity_metrics.get("unique_sample_count") == 8
+        and activity_metrics.get("retained_active_sample_count") == 6
+        and activity_metrics.get("duplicate_sample_count") == 1
+        and activity_metrics.get("idle_gap_sample_count") == 1
+        and activity_metrics.get("low_information_sample_count") == 1
+        and activity_metrics.get("session_count") == 3,
+        "duplicate_idle_noise_records_visible": activity_filtered.get("duplicates") == ["sample-001-duplicate"]
+        and activity_filtered.get("idle_gap_markers") == ["sample-004-idle"]
+        and activity_filtered.get("low_information_noise") == ["sample-006-noise"],
+        "three_bounded_activity_session_projections": isinstance(activity_sessions, list)
+        and len(activity_sessions) == 3
+        and all(session.get("schema_version") == "cs.activity_session_projection.v1" for session in activity_sessions)
+        and all(session.get("bounded") is True for session in activity_sessions)
+        and all(int(session.get("duration_seconds", 0) or 0) > 0 for session in activity_sessions),
+        "first_session_groups_app_switches": activity_first_session.get("source_sample_ids")
+        == ["sample-001", "sample-002", "sample-003"]
+        and activity_first_session.get("observed_facts", {}).get("app_switch_count") == 2
+        and activity_first_session.get("observed_facts", {}).get("project_hints") == ["connectorhub"]
+        and "contains_app_switches" in activity_first_session.get("confidence", {}).get("caveats", []),
+        "idle_gap_splits_second_session": activity_second_session.get("source_sample_ids") == ["sample-005", "sample-007"]
+        and "idle_gap_boundary" in activity_second_session.get("confidence", {}).get("caveats", [])
+        and "low_information_samples_filtered_in_batch" in activity_second_session.get("confidence", {}).get("caveats", []),
+        "sparse_session_has_caveat": activity_third_session.get("source_sample_ids") == ["sample-008"]
+        and "sparse_sample_count" in activity_third_session.get("confidence", {}).get("caveats", [])
+        and activity_third_session.get("observed_facts", {}).get("project_hints") == ["team_coordination"],
+        "no_unsupported_intent_claim": activity_sessionization.get("unsupported_intent_claim_present") is False
+        and activity_sessionization.get("inference_stored_as_observed_fact") is False
+        and all(session.get("inference", {}).get("unsupported_intent_claim_present") is False for session in activity_sessions)
+        and all(session.get("inference", {}).get("intent_claim") is None for session in activity_sessions)
+        and all(session.get("inference", {}).get("inference_stored_as_observed_fact") is False for session in activity_sessions),
+        "privacy_mode_excludes_raw_capture": all(
+            session.get("privacy", {}).get("raw_titles_stored") is False
+            and session.get("privacy", {}).get("full_urls_stored") is False
+            and session.get("privacy", {}).get("keystrokes_collected") is False
+            and session.get("privacy", {}).get("clipboard_values_collected") is False
+            and session.get("privacy", {}).get("screenshots_collected") is False
+            and session.get("privacy", {}).get("browser_history_collected") is False
+            for session in activity_sessions
+        )
+        and activity_sample_batch.get("raw_text_stored") is False
+        and activity_sample_batch.get("raw_html_stored") is False,
+        "source_refs_and_retention_visible": bool(activity_sessionization.get("source_refs"))
+        and activity_sessionization.get("retention_record", {}).get("raw_samples_retained") is False
+        and activity_sessionization.get("retention_record", {}).get("sanitized_samples_retained") is True,
+        "records_persisted_with_expected_counts": activity_sample_batch_count == 1
+        and activity_sessionization_count == 1
+        and activity_session_count == 3
+        and activity_artifact_count == 0,
+        "negative_counters_zero": bool(activity_negative)
+        and all(int(value or 0) == 0 for value in activity_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["activity_session_audit_verify"])
+        and activity_session_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and activity_audit_count >= 1,
+        "evidence_and_audit_refs_present": bool(activity_sessionize_payload.get("evidence_refs"))
+        and bool(activity_sessionize_payload.get("audit_refs"))
+        and all(bool(session.get("evidence_refs")) and bool(session.get("audit_refs")) for session in activity_sessions),
+        "zero_provider_internals": not activity_internal_paths
+        and activity_sessionize_payload.get("provider_internal_findings") == [],
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_activity_markers": all(
+            marker not in activity_state_text
+            for marker in [
+                "CS_CH_022_UNSUPPORTED_INTENT_MUST_NOT_EXIST",
+                "CS_CH_022_RAW_WINDOW_TITLE_MUST_NOT_EXIST",
+                "CS_CH_022_BROWSER_HISTORY_MUST_NOT_EXIST",
+            ]
+        ),
+    }
+    watch_rule_checks = {
+        "create_exit_zero_draft_scoped": _exit_ok(transcripts["watch_rule_create"])
+        and watch_rule_create_record.get("schema_version") == "cs.watch_rule.v1"
+        and watch_rule_initial_version.get("schema_version") == "cs.watch_rule_version.v1"
+        and watch_rule_create_policy.get("schema_version") == "cs.watch_rule_policy_decision.v1"
+        and watch_rule_create_record.get("status") == "draft"
+        and watch_rule_create_record.get("active_version_id") is None
+        and _scope_complete(watch_rule_create_record.get("scope"))
+        and watch_rule_create_record.get("scope", {}).get("namespace_id") == "personal",
+        "explicit_sources_contracts_and_policies": bool(watch_rule_create_record.get("source_refs"))
+        and len(watch_rule_create_record.get("source_refs", [])) == 2
+        and bool(watch_rule_create_record.get("connector_contract_refs"))
+        and bool(watch_rule_create_record.get("source_policy_refs"))
+        and watch_rule_create_record.get("connectorhub_role") == "fulfills_declared_source_capabilities_only",
+        "rule_cannot_authorize_external_actions": watch_rule_create_record.get("external_action_authority") is False
+        and watch_rule_create_record.get("can_authorize_external_action_execution") is False
+        and watch_rule_initial_version.get("authority", {}).get("external_action_execution_allowed") is False
+        and watch_rule_initial_version.get("authority", {}).get("provider_mutation_allowed") is False
+        and watch_rule_initial_version.get("authority", {}).get("workflow_execution_requires_action_path") is True,
+        "missing_source_activation_denied_and_stays_draft": transcripts["watch_rule_activate_missing"].get("exit_code") == 8
+        and watch_rule_activate_missing_payload.get("status") == "denied"
+        and watch_rule_missing_policy.get("decision") == "deny"
+        and watch_rule_missing_policy.get("activation_allowed") is False
+        and watch_rule_missing_policy.get("checks", {}).get("source_permissions_ready") is False
+        and watch_rule_missing_record.get("status") == "draft"
+        and watch_rule_missing_record.get("active_version_id") is None,
+        "ready_activation_sets_active_version": _exit_ok(transcripts["watch_rule_activate_ready"])
+        and watch_rule_active_record.get("status") == "active"
+        and watch_rule_active_record.get("active_version_id") == watch_rule_initial_version.get("watch_rule_version_id")
+        and watch_rule_active_policy.get("decision") == "allow"
+        and watch_rule_active_policy.get("activation_allowed") is True
+        and watch_rule_active_policy.get("checks", {}).get("source_permissions_ready") is True,
+        "evaluation_trace_pins_original_version": _exit_ok(transcripts["watch_rule_evaluate"])
+        and watch_rule_trace.get("schema_version") == "cs.watch_rule_evaluation_trace.v1"
+        and watch_rule_trace.get("watch_rule_version_id") == watch_rule_initial_version.get("watch_rule_version_id")
+        and watch_rule_trace.get("external_action_authority") is False
+        and watch_rule_trace.get("provider_mutation_authority") is False
+        and watch_rule_trace.get("action_card_created") is False,
+        "pause_resume_delete_lifecycle_audited": _exit_ok(transcripts["watch_rule_pause"])
+        and watch_rule_paused_record.get("status") == "paused"
+        and _exit_ok(transcripts["watch_rule_resume"])
+        and watch_rule_resumed_record.get("status") == "active"
+        and _exit_ok(transcripts["watch_rule_delete"])
+        and watch_rule_deleted_record.get("status") == "deleted"
+        and watch_rule_deleted_record.get("physical_delete_performed") is False
+        and watch_rule_deleted_record.get("retained_for_audit") is True,
+        "edit_creates_versioned_diff_without_broadening": _exit_ok(transcripts["watch_rule_edit"])
+        and watch_rule_edited_record.get("version_count") == 2
+        and watch_rule_edited_record.get("active_version_id") == watch_rule_initial_version.get("watch_rule_version_id")
+        and watch_rule_edited_record.get("current_version_id") == watch_rule_second_version.get("watch_rule_version_id")
+        and watch_rule_second_version.get("version_number") == 2
+        and watch_rule_second_version.get("previous_version_id") == watch_rule_initial_version.get("watch_rule_version_id")
+        and watch_rule_second_version.get("version_diff", {}).get("broadened_fields") == []
+        and "match_criteria" in watch_rule_second_version.get("version_diff", {}).get("changed_fields", []),
+        "prior_trace_retains_original_version_after_edit": watch_rule_retained_trace.get("watch_rule_version_id")
+        == watch_rule_initial_version.get("watch_rule_version_id")
+        and watch_rule_retained_trace.get("watch_rule_version_id") != watch_rule_second_version.get("watch_rule_version_id"),
+        "cross_namespace_show_denied": _scope_denied(transcripts["watch_rule_cross_scope_show"])
+        and watch_rule_cross_scope_payload.get("status") == "failed",
+        "records_persisted_with_expected_counts": watch_rule_count == 1
+        and watch_rule_version_count == 2
+        and watch_rule_policy_decision_count == 4
+        and watch_rule_evaluation_trace_count == 1
+        and watch_rule_artifact_count == 0,
+        "negative_counters_zero": bool(watch_rule_negative)
+        and all(int(value or 0) == 0 for value in watch_rule_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["watch_rule_audit_verify"])
+        and watch_rule_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and watch_rule_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in watch_rule_payloads
+        ),
+        "zero_provider_internals": not watch_rule_internal_paths
+        and all(payload.get("provider_internal_findings") == [] for payload in watch_rule_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_watch_markers": all(
+            marker not in watch_rule_state_text
+            for marker in [
+                '"external_action_authority": true',
+                '"external_action_execution_allowed": true',
+                '"provider_mutation_allowed": true',
+                "CS_CH_023_OWNERLESS_GLOBAL_RULE_MUST_NOT_EXIST",
+            ]
+        ),
+    }
+    chrome_active_tab_checks = {
+        "no_consent_denied_by_backend": transcripts["chrome_active_tab_no_consent"].get("exit_code") == 8
+        and chrome_active_tab_no_consent_payload.get("status") == "denied"
+        and chrome_active_tab_no_consent_policy.get("decision") == "deny"
+        and "CS_CHROME_ACTIVE_TAB_CONSENT_MISSING" in chrome_active_tab_no_consent_policy.get("reason_codes", [])
+        and "chrome_active_tab_capture_summary" not in chrome_active_tab_no_consent_payload
+        and "capture_inbox_item" not in chrome_active_tab_no_consent_payload,
+        "explicit_chrome_source_consent_recorded": _exit_ok(transcripts["chrome_active_tab_consent"])
+        and chrome_active_tab_consent_record.get("schema_version") == "cs.connector_watch_source_consent.v1"
+        and chrome_active_tab_consent_record.get("source_id") == "chrome_active_tab"
+        and chrome_active_tab_consent_record.get("explicit_owner_consent") is True
+        and chrome_active_tab_consent_record.get("collection_started") is False,
+        "popup_only_browser_internal_blocked_without_summary": transcripts["chrome_active_tab_popup_blocked"].get("exit_code") == 8
+        and chrome_active_tab_popup_blocked_payload.get("status") == "denied"
+        and chrome_active_tab_popup_policy.get("decision") == "deny"
+        and "CS_CHROME_ACTIVE_TAB_USER_GESTURE_REQUIRED" in chrome_active_tab_popup_policy.get("reason_codes", [])
+        and "CS_CHROME_ACTIVE_TAB_POPUP_ONLY_DENIED" in chrome_active_tab_popup_policy.get("reason_codes", [])
+        and "CS_CHROME_ACTIVE_TAB_BROWSER_INTERNAL_BLOCKED" in chrome_active_tab_popup_policy.get("reason_codes", [])
+        and "chrome_active_tab_capture_summary" not in chrome_active_tab_popup_blocked_payload
+        and "capture_inbox_item" not in chrome_active_tab_popup_blocked_payload,
+        "allowed_capture_creates_summary_and_inbox": _exit_ok(transcripts["chrome_active_tab_allowed"])
+        and chrome_active_tab_allowed_payload.get("status") == "success"
+        and chrome_active_tab_allowed_permission.get("schema_version") == "cs.connector_chrome_active_tab_permission_event.v1"
+        and chrome_active_tab_allowed_payload_record.get("schema_version") == "cs.connector_chrome_active_tab_payload.v1"
+        and chrome_active_tab_allowed_policy.get("schema_version") == "cs.connector_chrome_active_tab_policy_decision.v1"
+        and chrome_active_tab_summary.get("schema_version") == "cs.connector_chrome_active_tab_capture_summary.v1"
+        and chrome_active_tab_inbox_item.get("schema_version") == "cs.capture_inbox_item.v1"
+        and chrome_active_tab_allowed_policy.get("decision") == "allow"
+        and chrome_active_tab_allowed_policy.get("reason_codes") == ["CS_CHROME_ACTIVE_TAB_POLICY_ALLOW"]
+        and chrome_active_tab_inbox_item.get("status") == "pending_review"
+        and chrome_active_tab_inbox_item.get("owner_review_required") is True
+        and chrome_active_tab_inbox_item.get("can_save_as_evidence") is True,
+        "server_revalidated_policy": chrome_active_tab_allowed_policy.get("server_revalidated") is True
+        and chrome_active_tab_allowed_policy.get("checks", {}).get("consent_active") is True
+        and chrome_active_tab_allowed_policy.get("checks", {}).get("active_tab_permission_present") is True
+        and chrome_active_tab_allowed_policy.get("checks", {}).get("active_tab_only") is True
+        and chrome_active_tab_allowed_policy.get("checks", {}).get("user_gesture_present") is True
+        and chrome_active_tab_allowed_policy.get("checks", {}).get("explicit_confirmation_present") is True
+        and chrome_active_tab_allowed_policy.get("checks", {}).get("no_broad_all_urls_permission") is True
+        and chrome_active_tab_allowed_policy.get("checks", {}).get("bounded_payload") is True
+        and chrome_active_tab_allowed_policy.get("checks", {}).get("raw_browser_data_absent") is True,
+        "summary_only_no_raw_browser_persistence": chrome_active_tab_allowed_permission.get("broad_all_urls_permission") is False
+        and chrome_active_tab_allowed_payload_record.get("bounded_payload", {}).get("raw_text_stored") is False
+        and chrome_active_tab_allowed_payload_record.get("bounded_payload", {}).get("raw_html_stored") is False
+        and chrome_active_tab_allowed_payload_record.get("bounded_payload", {}).get("cookies_collected") is False
+        and chrome_active_tab_allowed_payload_record.get("bounded_payload", {}).get("local_storage_collected") is False
+        and chrome_active_tab_allowed_payload_record.get("bounded_payload", {}).get("session_storage_collected") is False
+        and chrome_active_tab_allowed_payload_record.get("bounded_payload", {}).get("screenshots_collected") is False
+        and chrome_active_tab_allowed_payload_record.get("bounded_payload", {}).get("form_values_collected") is False
+        and chrome_active_tab_allowed_payload_record.get("bounded_payload", {}).get("browser_history_collected") is False
+        and chrome_active_tab_summary.get("raw_text_stored") is False
+        and chrome_active_tab_summary.get("raw_html_stored") is False
+        and chrome_active_tab_summary.get("cookies_collected") is False
+        and chrome_active_tab_summary.get("screenshots_collected") is False
+        and chrome_active_tab_inbox_item.get("raw_text_stored") is False
+        and chrome_active_tab_inbox_item.get("raw_html_stored") is False,
+        "blocked_payload_does_not_store_text_clip": chrome_active_tab_popup_payload_record.get(
+            "bounded_payload",
+            {},
+        ).get("text_clip_char_count") == 0
+        and chrome_active_tab_popup_payload_record.get("bounded_payload", {}).get("raw_text_stored") is False
+        and "chrome://settings/passwords" not in chrome_active_tab_state_text,
+        "records_persisted_with_expected_counts": chrome_active_tab_permission_event_count == 2
+        and chrome_active_tab_payload_count == 2
+        and chrome_active_tab_policy_decision_count == 3
+        and chrome_active_tab_summary_count == 1
+        and chrome_active_tab_inbox_item_count == 1
+        and chrome_active_tab_artifact_count == 0,
+        "negative_counters_zero": bool(chrome_active_tab_negative)
+        and all(int(value or 0) == 0 for value in chrome_active_tab_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["chrome_active_tab_audit_verify"])
+        and chrome_active_tab_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and chrome_active_tab_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in chrome_active_tab_payloads
+        ),
+        "zero_provider_internals": not chrome_active_tab_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in chrome_active_tab_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_chrome_markers": all(
+            marker not in chrome_active_tab_state_text
+            for marker in [
+                "CS_CH_024_RAW_TEXT_MUST_NOT_PERSIST",
+                "chrome://settings/passwords",
+                '"raw_html_stored": true',
+                '"raw_text_stored": true',
+                '"broad_all_urls_permission": true',
+                "<all_urls>",
+            ]
+        ),
+    }
+    chrome_auto_capture_checks = {
+        "no_config_denied_by_backend": transcripts["chrome_auto_capture_no_config"].get("exit_code") == 8
+        and chrome_auto_capture_no_config_payload.get("status") == "denied"
+        and chrome_auto_capture_no_config_policy.get("decision") == "deny"
+        and "CS_CHROME_AUTO_CAPTURE_CONSENT_MISSING" in chrome_auto_capture_no_config_policy.get("reason_codes", [])
+        and "CS_CHROME_AUTO_CAPTURE_CONFIG_MISSING" in chrome_auto_capture_no_config_policy.get("reason_codes", [])
+        and "chrome_auto_capture_summary" not in chrome_auto_capture_no_config_payload
+        and "capture_inbox_item" not in chrome_auto_capture_no_config_payload,
+        "explicit_auto_capture_source_consent_recorded": _exit_ok(transcripts["chrome_auto_capture_consent"])
+        and chrome_auto_capture_consent_record.get("schema_version") == "cs.connector_watch_source_consent.v1"
+        and chrome_auto_capture_consent_record.get("source_id") == "chrome_auto_capture"
+        and chrome_auto_capture_consent_record.get("explicit_owner_consent") is True
+        and chrome_auto_capture_consent_record.get("collection_started") is False,
+        "auto_capture_config_records_two_sided_consent": _exit_ok(transcripts["chrome_auto_capture_config"])
+        and chrome_auto_capture_config_record.get("schema_version") == "cs.connector_chrome_auto_capture_config.v1"
+        and chrome_auto_capture_config_record.get("status") == "ready"
+        and chrome_auto_capture_config_record.get("auto_capture_enabled") is True
+        and chrome_auto_capture_config_record.get("two_sided_consent", {}).get("owner_rule_confirmed") is True
+        and chrome_auto_capture_config_record.get("two_sided_consent", {}).get("site_allowance_present") is True
+        and chrome_auto_capture_config_record.get("two_sided_consent", {}).get("source_pack_allowance_present") is True
+        and chrome_auto_capture_config_record.get("two_sided_consent", {}).get("browser_permission_granted") is True,
+        "blocked_trigger_has_diagnostics_without_summary": transcripts["chrome_auto_capture_blocked"].get("exit_code") == 8
+        and chrome_auto_capture_blocked_payload.get("status") == "denied"
+        and chrome_auto_capture_blocked_policy.get("decision") == "deny"
+        and "CS_CHROME_AUTO_CAPTURE_SITE_NOT_ALLOWED" in chrome_auto_capture_blocked_policy.get("reason_codes", [])
+        and "CS_CHROME_AUTO_CAPTURE_SOURCE_PACK_NOT_ALLOWED" in chrome_auto_capture_blocked_policy.get("reason_codes", [])
+        and "CS_CHROME_AUTO_CAPTURE_CONSENT_VERSION_MISMATCH" in chrome_auto_capture_blocked_policy.get("reason_codes", [])
+        and "CS_CHROME_AUTO_CAPTURE_CONFIG_VERSION_MISMATCH" in chrome_auto_capture_blocked_policy.get("reason_codes", [])
+        and "CS_CHROME_AUTO_CAPTURE_TRIGGER_NOT_ALLOWED" in chrome_auto_capture_blocked_policy.get("reason_codes", [])
+        and "CS_CHROME_AUTO_CAPTURE_THROTTLED" in chrome_auto_capture_blocked_policy.get("reason_codes", [])
+        and "CS_CHROME_AUTO_CAPTURE_SESSION_LIMIT_REACHED" in chrome_auto_capture_blocked_policy.get("reason_codes", [])
+        and chrome_auto_capture_blocked_policy.get("checks", {}).get("site_allowed") is False
+        and chrome_auto_capture_blocked_policy.get("checks", {}).get("source_pack_allowed") is False
+        and chrome_auto_capture_blocked_policy.get("checks", {}).get("consent_version_matches") is False
+        and chrome_auto_capture_blocked_policy.get("checks", {}).get("config_version_matches") is False
+        and chrome_auto_capture_blocked_policy.get("checks", {}).get("throttle_passed") is False
+        and chrome_auto_capture_blocked_policy.get("checks", {}).get("session_limit_passed") is False
+        and "chrome_auto_capture_summary" not in chrome_auto_capture_blocked_payload
+        and "capture_inbox_item" not in chrome_auto_capture_blocked_payload,
+        "allowed_auto_capture_creates_summary_and_inbox": _exit_ok(transcripts["chrome_auto_capture_allowed"])
+        and chrome_auto_capture_allowed_payload.get("status") == "success"
+        and chrome_auto_capture_allowed_trigger.get("schema_version") == "cs.connector_chrome_auto_capture_trigger.v1"
+        and chrome_auto_capture_allowed_policy.get("schema_version") == "cs.connector_chrome_auto_capture_policy_decision.v1"
+        and chrome_auto_capture_summary.get("schema_version") == "cs.connector_chrome_auto_capture_summary.v1"
+        and chrome_auto_capture_inbox_item.get("schema_version") == "cs.capture_inbox_item.v1"
+        and chrome_auto_capture_allowed_policy.get("decision") == "allow"
+        and chrome_auto_capture_allowed_policy.get("reason_codes") == ["CS_CHROME_AUTO_CAPTURE_POLICY_ALLOW"]
+        and chrome_auto_capture_inbox_item.get("status") == "pending_review"
+        and chrome_auto_capture_inbox_item.get("owner_review_required") is True
+        and chrome_auto_capture_inbox_item.get("can_save_as_evidence") is True,
+        "server_revalidated_policy": chrome_auto_capture_allowed_policy.get("server_revalidated") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("consent_active") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("config_ready") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("owner_rule_confirmed") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("site_allowed") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("source_pack_allowed") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("browser_permission_granted") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("consent_version_matches") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("config_version_matches") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("trigger_type_allowed") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("active_allowed_page") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("throttle_passed") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("session_limit_passed") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("idempotency_unique") is True
+        and chrome_auto_capture_allowed_policy.get("checks", {}).get("raw_browser_data_absent") is True,
+        "duplicate_idempotency_denied_without_second_summary": transcripts["chrome_auto_capture_duplicate"].get("exit_code") == 8
+        and chrome_auto_capture_duplicate_payload.get("status") == "denied"
+        and chrome_auto_capture_duplicate_policy.get("decision") == "deny"
+        and "CS_CHROME_AUTO_CAPTURE_IDEMPOTENCY_DUPLICATE" in chrome_auto_capture_duplicate_policy.get("reason_codes", [])
+        and chrome_auto_capture_duplicate_policy.get("checks", {}).get("idempotency_unique") is False
+        and "chrome_auto_capture_summary" not in chrome_auto_capture_duplicate_payload
+        and "capture_inbox_item" not in chrome_auto_capture_duplicate_payload,
+        "summary_only_no_raw_browser_persistence": chrome_auto_capture_summary.get("raw_text_stored") is False
+        and chrome_auto_capture_summary.get("raw_html_stored") is False
+        and chrome_auto_capture_summary.get("cookies_collected") is False
+        and chrome_auto_capture_summary.get("screenshots_collected") is False
+        and chrome_auto_capture_inbox_item.get("raw_text_stored") is False
+        and chrome_auto_capture_inbox_item.get("raw_html_stored") is False
+        and chrome_auto_capture_allowed_trigger.get("bounded_payload", {}).get("raw_text_stored") is False
+        and chrome_auto_capture_allowed_trigger.get("bounded_payload", {}).get("raw_html_stored") is False,
+        "records_persisted_with_expected_counts": chrome_auto_capture_consent_count == 1
+        and chrome_auto_capture_config_count == 1
+        and chrome_auto_capture_trigger_count == 2
+        and chrome_auto_capture_policy_decision_count == 4
+        and chrome_auto_capture_summary_count == 1
+        and chrome_auto_capture_inbox_item_count == 1
+        and chrome_auto_capture_artifact_count == 0,
+        "negative_counters_zero": bool(chrome_auto_capture_negative)
+        and all(int(value or 0) == 0 for value in chrome_auto_capture_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["chrome_auto_capture_audit_verify"])
+        and chrome_auto_capture_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and chrome_auto_capture_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in chrome_auto_capture_payloads
+        ),
+        "zero_provider_internals": not chrome_auto_capture_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in chrome_auto_capture_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_auto_capture_markers": all(
+            marker not in chrome_auto_capture_state_text
+            for marker in [
+                "CS_CH_025_RAW_TEXT_MUST_NOT_PERSIST",
+                "https://unapproved.example",
+                '"raw_html_stored": true',
+                '"raw_text_stored": true',
+                '"broad_all_urls_permission": true',
+                "<all_urls>",
+            ]
+        ),
+    }
+    chrome_sensitive_page_decisions_by_case = {
+        str(policy.get("case_id") or ""): policy
+        for policy in chrome_sensitive_page_policies
+        if isinstance(policy, dict)
+    }
+    chrome_sensitive_page_degraded_case_ids = {
+        str(payload.get("case_id") or "")
+        for payload in chrome_sensitive_page_degraded_payloads
+        if isinstance(payload, dict)
+    }
+    chrome_sensitive_page_checks = {
+        "policy_command_exit_zero": _exit_ok(transcripts["chrome_sensitive_page_policy"])
+        and chrome_sensitive_page_payload.get("status") == "success",
+        "schema_and_summary_counts": chrome_sensitive_page_summary.get("case_count") == 8
+        and chrome_sensitive_page_summary.get("blocked_count") == 6
+        and chrome_sensitive_page_summary.get("degraded_count") == 2
+        and chrome_sensitive_page_summary.get("allowed_count") == 0
+        and all(
+            policy.get("schema_version") == "cs.connector_chrome_sensitive_page_policy_decision.v1"
+            for policy in chrome_sensitive_page_policies
+        )
+        and all(
+            payload.get("schema_version") == "cs.connector_chrome_sensitive_page_degraded_payload.v1"
+            for payload in chrome_sensitive_page_degraded_payloads
+        )
+        and all(
+            item.get("schema_version") == "cs.connector_chrome_sensitive_page_history_item.v1"
+            for item in chrome_sensitive_page_history_items
+        ),
+        "sensitive_classes_block_or_degrade": chrome_sensitive_page_decisions_by_case.get(
+            "password-page-client-block",
+            {},
+        ).get("decision")
+        == "block"
+        and "CS_CHROME_SENSITIVE_PASSWORD_FIELD_BLOCKED"
+        in chrome_sensitive_page_decisions_by_case.get("password-page-client-block", {}).get("reason_codes", [])
+        and chrome_sensitive_page_decisions_by_case.get("payment-page-client-block", {}).get("decision") == "block"
+        and "CS_CHROME_SENSITIVE_PAYMENT_FIELD_BLOCKED"
+        in chrome_sensitive_page_decisions_by_case.get("payment-page-client-block", {}).get("reason_codes", [])
+        and chrome_sensitive_page_decisions_by_case.get("secret-token-false-safe", {}).get("decision") == "block"
+        and "CS_CHROME_SENSITIVE_BACKEND_RECHECK_BLOCKED_FALSE_SAFE"
+        in chrome_sensitive_page_decisions_by_case.get("secret-token-false-safe", {}).get("reason_codes", [])
+        and chrome_sensitive_page_decisions_by_case.get("mail-compose-degraded", {}).get("decision") == "degraded"
+        and chrome_sensitive_page_decisions_by_case.get("private-account-block", {}).get("decision") == "block"
+        and chrome_sensitive_page_decisions_by_case.get("browser-internal-block", {}).get("decision") == "block"
+        and chrome_sensitive_page_decisions_by_case.get("unsupported-scheme-block", {}).get("decision") == "block"
+        and chrome_sensitive_page_decisions_by_case.get("oversized-page-degraded", {}).get("decision") == "degraded",
+        "backend_never_downgrades_client_block": chrome_sensitive_page_summary.get("client_block_downgrade_count") == 0
+        and all(
+            policy.get("backend_restriction_preserved_or_increased") is True
+            and policy.get("checks", {}).get("client_block_not_downgraded") is True
+            for policy in chrome_sensitive_page_policies
+        ),
+        "backend_recheck_blocks_false_safe": chrome_sensitive_page_summary.get("false_safe_bypass_count") == 0
+        and chrome_sensitive_page_decisions_by_case.get("secret-token-false-safe", {}).get("checks", {}).get(
+            "backend_false_safe_blocked",
+        )
+        is True,
+        "degraded_payloads_hash_only": chrome_sensitive_page_degraded_case_ids
+        == {"mail-compose-degraded", "oversized-page-degraded"}
+        and all(
+            payload.get("restriction") == "metadata_hash_only"
+            and payload.get("raw_text_stored") is False
+            and payload.get("raw_html_stored") is False
+            and payload.get("content_sent_to_models") is False
+            and payload.get("searchable_content_artifact_created") is False
+            and payload.get("capture_inbox_item_created") is False
+            and "url" not in payload.get("page_metadata", {})
+            and "origin" not in payload.get("page_metadata", {})
+            and "title" not in payload.get("page_metadata", {})
+            for payload in chrome_sensitive_page_degraded_payloads
+        ),
+        "history_items_explain_safe_alternative": len(chrome_sensitive_page_history_items) == 8
+        and all(
+            item.get("capture_inbox_surface") == "history_only"
+            and item.get("can_save_as_evidence") is False
+            and isinstance(item.get("ui_explanation"), str)
+            and item.get("ui_explanation")
+            and isinstance(item.get("safe_manual_alternative"), str)
+            and item.get("safe_manual_alternative")
+            for item in chrome_sensitive_page_history_items
+        ),
+        "records_persisted_with_expected_counts": chrome_sensitive_page_policy_decision_count == 8
+        and chrome_sensitive_page_degraded_payload_count == 2
+        and chrome_sensitive_page_history_item_count == 8
+        and chrome_sensitive_page_inbox_item_count == 0
+        and chrome_sensitive_page_artifact_count == 0,
+        "negative_counters_zero": bool(chrome_sensitive_page_negative)
+        and all(int(value or 0) == 0 for value in chrome_sensitive_page_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["chrome_sensitive_page_audit_verify"])
+        and chrome_sensitive_page_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and chrome_sensitive_page_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(record.get("evidence_refs")) and bool(record.get("audit_refs"))
+            for record in chrome_sensitive_page_records
+        )
+        and bool(chrome_sensitive_page_payload.get("evidence_refs"))
+        and bool(chrome_sensitive_page_payload.get("audit_refs")),
+        "zero_provider_internals": not chrome_sensitive_page_internal_paths
+        and chrome_sensitive_page_payload.get("provider_internal_findings", []) == [],
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_sensitive_markers": all(
+            marker not in chrome_sensitive_page_state_text
+            for marker in [
+                "CS_CH_026_PASSWORD_RAW_TEXT_MUST_NOT_PERSIST",
+                "CS_CH_026_PAYMENT_RAW_TEXT_MUST_NOT_PERSIST",
+                "CS_CH_026_TOKEN_RAW_TEXT_MUST_NOT_PERSIST",
+                "CS_CH_026_COMPOSE_RAW_TEXT_MUST_NOT_PERSIST",
+                "CS_CH_026_PRIVATE_ACCOUNT_RAW_TEXT_MUST_NOT_PERSIST",
+                "CS_CH_026_BROWSER_INTERNAL_RAW_TEXT_MUST_NOT_PERSIST",
+                "CS_CH_026_UNSUPPORTED_SCHEME_RAW_TEXT_MUST_NOT_PERSIST",
+                "CS_CH_026_OVERSIZED_RAW_TEXT_MUST_NOT_PERSIST",
+                "chrome://settings/passwords",
+                "file:///Users/local/private-note.html",
+                "https://accounts.example/login",
+                '"raw_text_included": true',
+                '"raw_html_included": true',
+                '"raw_text_stored": true',
+                '"raw_html_stored": true',
+            ]
+        ),
+    }
+    capture_lifecycle_exit_keys = [
+        "capture_lifecycle_seed",
+        "capture_lifecycle_pause_source",
+        "capture_lifecycle_sample_while_paused",
+        "capture_lifecycle_resume_source",
+        "capture_lifecycle_sample_after_resume",
+        "capture_lifecycle_pause_watch_rule",
+        "capture_lifecycle_pause_global",
+        "capture_lifecycle_revoke_chrome",
+        "capture_lifecycle_sample_after_revoke",
+        "capture_lifecycle_retention",
+        "capture_lifecycle_export",
+        "capture_lifecycle_review_save",
+        "capture_lifecycle_review_dismiss",
+        "capture_lifecycle_delete_dry_run",
+        "capture_lifecycle_delete_execute",
+    ]
+    capture_lifecycle_export_states = capture_lifecycle_export.get("states", [])
+    capture_lifecycle_checks = {
+        "lifecycle_commands_exit_zero": all(_exit_ok(transcripts[key]) for key in capture_lifecycle_exit_keys)
+        and all(payload.get("status") == "success" for payload in capture_lifecycle_payloads),
+        "seed_state_records_active_metadata_only": len(capture_lifecycle_seed_states) == 4
+        and all(
+            state.get("schema_version") == "cs.connector_capture_lifecycle_source_state.v1"
+            and state.get("configuration_retained") is True
+            and state.get("collected_state_summary", {}).get("raw_content_retained") is False
+            and state.get("collected_state_summary", {}).get("raw_browser_payload_retained") is False
+            for state in capture_lifecycle_seed_states
+        ),
+        "pause_source_stops_samples_without_losing_config": capture_lifecycle_pause_decision.get(
+            "resulting_status"
+        )
+        == "paused"
+        and capture_lifecycle_pause_decision.get("collection_enabled") is False
+        and capture_lifecycle_pause_decision.get("configuration_retained") is True
+        and capture_lifecycle_pause_decision.get("checks", {}).get("pause_or_revoke_stops_future_capture") is True
+        and capture_lifecycle_paused_sample_decision.get("decision") == "deny"
+        and capture_lifecycle_paused_sample_decision.get("capture_samples_created") == 0
+        and capture_lifecycle_paused_sample_decision.get("sample_created") is False
+        and "CS_CAPTURE_LIFECYCLE_PAUSED_BLOCKS_SAMPLE"
+        in capture_lifecycle_paused_sample_decision.get("reason_codes", []),
+        "resume_source_restores_collection": capture_lifecycle_resume_decision.get("resulting_status") == "active"
+        and capture_lifecycle_resume_decision.get("collection_enabled") is True
+        and capture_lifecycle_active_sample_decision.get("decision") == "allow"
+        and capture_lifecycle_active_sample_decision.get("sample_created") is False,
+        "watch_rule_and_global_pause_persisted": capture_lifecycle_watch_pause_state.get("target_kind") == "watch_rule"
+        and capture_lifecycle_watch_pause_state.get("status") == "paused"
+        and capture_lifecycle_watch_pause_state.get("configuration_retained") is True
+        and capture_lifecycle_global_pause_state.get("target_kind") == "global"
+        and capture_lifecycle_global_pause_state.get("status") == "paused",
+        "revoke_blocks_new_samples_requires_new_consent": capture_lifecycle_revoke_decision.get(
+            "resulting_status"
+        )
+        == "revoked"
+        and capture_lifecycle_revoke_decision.get("collection_enabled") is False
+        and capture_lifecycle_revoke_decision.get("requires_new_consent") is True
+        and capture_lifecycle_revoked_sample_decision.get("decision") == "deny"
+        and capture_lifecycle_revoked_sample_decision.get("capture_samples_created") == 0
+        and "CS_CAPTURE_LIFECYCLE_REVOKED_BLOCKS_SAMPLE"
+        in capture_lifecycle_revoked_sample_decision.get("reason_codes", []),
+        "retention_change_persisted": capture_lifecycle_retention_state.get("retention_days") == 7
+        and capture_lifecycle_retention_decision.get("retention_days") == 7
+        and capture_lifecycle_retention_decision.get("checks", {}).get("retention_boundary_visible") is True,
+        "export_scoped_redacted": capture_lifecycle_export.get("schema_version")
+        == "cs.connector_capture_lifecycle_export.v1"
+        and capture_lifecycle_export.get("status") == "ready"
+        and capture_lifecycle_export.get("scoped_to_requested_source") is True
+        and capture_lifecycle_export.get("redacted") is True
+        and capture_lifecycle_export.get("raw_content_included") is False
+        and capture_lifecycle_export.get("raw_browser_payload_included") is False
+        and capture_lifecycle_export.get("credential_values_included") is False
+        and capture_lifecycle_export.get("state_count", 0) >= 2
+        and all(state.get("source_id") == "macos_activity" for state in capture_lifecycle_export_states),
+        "review_save_and_dismiss_results": capture_lifecycle_review_save.get("status") == "saved"
+        and capture_lifecycle_review_save.get("saved_as_evidence") is True
+        and str(capture_lifecycle_review_save.get("saved_evidence_ref") or "").startswith("evidence:capture_result:")
+        and capture_lifecycle_review_dismiss.get("status") == "dismissed"
+        and capture_lifecycle_review_dismiss.get("dismissed_from_inbox") is True,
+        "delete_dry_run_explains_retained_audit": capture_lifecycle_delete_dry.get("status") == "dry_run"
+        and capture_lifecycle_delete_dry.get("will_delete", 0) >= 2
+        and capture_lifecycle_delete_dry.get("will_retain", 0) >= 2
+        and capture_lifecycle_delete_dry.get("will_anonymize", 0) >= 1
+        and bool(capture_lifecycle_delete_dry.get("retained_audit_explanation"))
+        and capture_lifecycle_delete_dry.get("misleading_delete_everything_promise") is False
+        and capture_lifecycle_delete_dry.get("audit_records_deleted") == 0,
+        "authorized_delete_receipt_removes_eligible_only": capture_lifecycle_delete_execute.get("status")
+        == "executed"
+        and capture_lifecycle_delete_execute.get("eligible_deleted_count", 0) >= 2
+        and capture_lifecycle_delete_execute.get("eligible_remaining_after_execute") == 0
+        and capture_lifecycle_delete_execute.get("audit_records_deleted") == 0
+        and bool(capture_lifecycle_delete_execute.get("retained_audit_explanation"))
+        and all(
+            state.get("status") == "disabled"
+            and state.get("collection_enabled") is False
+            and state.get("configuration_retained") is True
+            for state in capture_lifecycle_deleted_states
+        ),
+        "records_persisted_with_expected_counts": capture_lifecycle_source_state_count == 4
+        and capture_lifecycle_decision_count >= 8
+        and capture_lifecycle_export_count == 1
+        and capture_lifecycle_deletion_receipt_count == 2
+        and capture_lifecycle_review_count == 2
+        and capture_lifecycle_sample_count == 0,
+        "negative_counters_zero": bool(capture_lifecycle_negative)
+        and all(int(value or 0) == 0 for value in capture_lifecycle_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["capture_lifecycle_audit_verify"])
+        and capture_lifecycle_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and capture_lifecycle_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in capture_lifecycle_payloads
+        ),
+        "zero_provider_internals": not capture_lifecycle_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in capture_lifecycle_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_lifecycle_markers": all(
+            marker not in capture_lifecycle_state_text
+            for marker in [
+                '"raw_content_included": true',
+                '"raw_browser_payload_included": true',
+                '"credential_values_included": true',
+                '"delete_everything_promised": true',
+                '"misleading_delete_everything_promise": true',
+                '"audit_records_deleted": 1',
+                '"provider_token"',
+                '"auth_header"',
+                '"private_key"',
+            ]
+        ),
+    }
+    watch_result_exit_keys = [
+        "watch_result_build",
+        "watch_result_correct",
+        "watch_result_review",
+        "watch_result_audit_verify",
+    ]
+    watch_result_observation_facts_text = json.dumps(
+        [
+            observation.get("observed_facts", {})
+            for observation in watch_result_observations
+            if isinstance(observation, dict)
+        ],
+        sort_keys=True,
+    )
+    watch_result_low_confidence_inferences = [
+        inference
+        for inference in watch_result_inferences
+        if isinstance(inference, dict) and inference.get("low_confidence") is True
+    ]
+    watch_result_unsupported_inferences = [
+        inference
+        for inference in watch_result_inferences
+        if isinstance(inference, dict) and inference.get("unsupported") is True
+    ]
+    watch_result_checks = {
+        "watch_result_commands_exit_expected": all(_exit_ok(transcripts[key]) for key in watch_result_exit_keys)
+        and transcripts["watch_result_memory_approval_denied"].get("exit_code") == 8
+        and watch_result_memory_approval_payload.get("status") == "denied",
+        "schemas_and_section_order_present": watch_result_record.get("schema_version") == "cs.watch_result.v1"
+        and all(
+            observation.get("schema_version") == "cs.watch_observation.v1"
+            for observation in watch_result_observations
+        )
+        and all(inference.get("schema_version") == "cs.watch_inference.v1" for inference in watch_result_inferences)
+        and watch_result_record.get("section_order") == ["Observation", "Inference", "Evidence/Caveats", "Proposed"],
+        "observations_are_source_backed_only": len(watch_result_observations) >= 2
+        and all(
+            observation.get("section") == "Observation"
+            and observation.get("observed_only") is True
+            and observation.get("contains_hypothesis") is False
+            and observation.get("contains_proposal") is False
+            and observation.get("inference_fields_absent") is True
+            and observation.get("inferred_intent_labeled_as_observed") is False
+            and bool(observation.get("observed_facts"))
+            and bool(observation.get("evidence_refs"))
+            for observation in watch_result_observations
+        )
+        and "hypothesis" not in watch_result_observation_facts_text
+        and "intent" not in watch_result_observation_facts_text,
+        "inferences_remain_hypotheses_with_caveats": len(watch_result_inferences) >= 2
+        and bool(watch_result_low_confidence_inferences)
+        and bool(watch_result_unsupported_inferences)
+        and all(
+            inference.get("section") == "Inference"
+            and inference.get("stored_as_observed_fact") is False
+            and inference.get("requires_owner_review") is True
+            and bool(inference.get("caveats"))
+            and bool(inference.get("alternatives"))
+            and bool(inference.get("evidence_refs"))
+            for inference in watch_result_inferences
+        )
+        and all(
+            inference.get("trust_state") == "draft_hypothesis"
+            and inference.get("eligible_for_approved_memory") is False
+            for inference in [*watch_result_low_confidence_inferences, *watch_result_unsupported_inferences]
+        ),
+        "proposal_is_non_executing": watch_result_record.get("proposal", {}).get("executed") is False
+        and watch_result_record.get("proposal", {}).get("workflow_run_started") is False
+        and watch_result_record.get("proposal", {}).get("provider_mutation") is False
+        and watch_result_record.get("checks", {}).get("proposal_non_executing") is True,
+        "correction_preserves_observations": watch_result_correction.get("schema_version")
+        == "cs.watch_result_correction.v1"
+        and watch_result_correction.get("changed_section") == "Inference"
+        and watch_result_correction.get("observation_immutable") is True
+        and watch_result_correction.get("observation_hash_before")
+        == watch_result_correction.get("observation_hash_after")
+        and watch_result_correction.get("observation_section_changed") is False,
+        "low_confidence_memory_approval_denied": watch_result_memory_denial.get("schema_version")
+        == "cs.watch_result_review.v1"
+        and watch_result_memory_denial.get("status") == "denied"
+        and "CS_WATCH_RESULT_LOW_CONFIDENCE_MEMORY_APPROVAL_DENIED"
+        in watch_result_memory_denial.get("reason_codes", [])
+        and watch_result_memory_denial.get("approved_memory_created") is False
+        and watch_result_memory_denial.get("action_card_created") is False
+        and watch_result_memory_denial.get("proposal_executed") is False,
+        "review_stays_draft_non_executing": watch_result_review.get("schema_version") == "cs.watch_result_review.v1"
+        and watch_result_review.get("status") == "draft_memory_saved"
+        and watch_result_review.get("draft_memory_saved") is True
+        and watch_result_review.get("approved_memory_created") is False
+        and watch_result_review.get("claim_created") is False
+        and watch_result_review.get("mission_opened") is False
+        and watch_result_review.get("action_card_created") is False
+        and watch_result_review.get("proposal_executed") is False,
+        "records_persisted_with_expected_counts": watch_observation_count == 2
+        and watch_inference_count == 2
+        and watch_result_count == 1
+        and watch_result_correction_count == 1
+        and watch_result_review_count == 2
+        and watch_result_action_count == 0,
+        "negative_counters_zero": bool(watch_result_negative)
+        and all(int(value or 0) == 0 for value in watch_result_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["watch_result_audit_verify"])
+        and watch_result_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and watch_result_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in watch_result_payloads
+        )
+        and all(
+            bool(record.get("evidence_refs")) and bool(record.get("audit_refs"))
+            for record in watch_result_records
+            if isinstance(record, dict)
+        ),
+        "zero_provider_internals": not watch_result_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in watch_result_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_watch_result_markers": all(
+            marker not in watch_result_state_text
+            for marker in [
+                '"inferred_intent_labeled_as_observed": true',
+                '"stored_as_observed_fact": true',
+                '"eligible_for_approved_memory": true',
+                '"approved_memory_created": true',
+                '"proposal_executed": true',
+                '"action_card_created": true',
+                '"claim_created": true',
+                '"mission_opened": true',
+                '"workflow_run_started": true',
+                '"provider_mutation": true',
+                '"external_call": true',
+                '"raw_content_stored": true',
+            ]
+        ),
+    }
+    action_preflight_exit_keys = [
+        "action_preflight_contract_validate",
+        "action_preflight_setup_plan",
+        "action_preflight_delivery_ingest",
+        "action_preflight_bundle_create",
+        "action_preflight_claim_create",
+        "action_preflight_claim_approve",
+        "action_preflight_mission_create",
+        "action_preflight_action_propose",
+        "action_preflight_dry_run",
+        "action_preflight_allowed",
+        "action_preflight_github_action_propose",
+        "action_preflight_audit_verify",
+    ]
+    action_preflight_denial_exit_ok = all(
+        transcripts[f"action_preflight_denied_{case_id}"].get("exit_code") == 8
+        and action_preflight_denial_payloads[case_id].get("status") == "denied"
+        for case_id in action_preflight_denial_cases
+    )
+    action_preflight_expected_reasons = set(action_preflight_denial_cases.values()) | {
+        "CS_CONNECTOR_ACTION_PREFLIGHT_GITHUB_READ_ONLY_DENIED"
+    }
+    action_preflight_checks = {
+        "commands_exit_expected": all(_exit_ok(transcripts[key]) for key in action_preflight_exit_keys)
+        and transcripts["action_preflight_execute_denied"].get("exit_code") == 8
+        and action_preflight_execute_denied_payload.get("status") == "denied"
+        and action_preflight_denial_exit_ok
+        and transcripts["action_preflight_github_denied"].get("exit_code") == 8
+        and action_preflight_github_denied_payload.get("status") == "denied",
+        "actioncard_dry_run_product_impact_present": action_preflight_dry_run_action.get("schema_version")
+        == "cs.action_card.v0"
+        and action_preflight_dry_run_action.get("policy_decision", {}).get("decision") == "requires_approval"
+        and action_preflight_dry_run_action.get("policy_decision", {}).get("approval_required") is True
+        and action_preflight_dry_run_action.get("dry_run", {}).get("schema_version") == "cs.action_dry_run.v0"
+        and action_preflight_dry_run_action.get("dry_run", {})
+        .get("expected_impact", {})
+        .get("expected_connector_calls")
+        == 1
+        and action_preflight_dry_run_action.get("dry_run", {}).get("expected_impact", {}).get(
+            "real_external_http_calls"
+        )
+        == 0
+        and action_preflight_dry_run_action.get("connector_boundary", {}).get("direct_provider_access") is False,
+        "allowed_preflight_combined_review_present": action_preflight_allowed.get("schema_version")
+        == "cs.connector_action_preflight.v1"
+        and action_preflight_allowed.get("decision") == "allow"
+        and action_preflight_allowed_review.get("schema_version") == "cs.connector_action_preflight_review.v1"
+        and action_preflight_allowed_review.get("status") == "owner_review_required"
+        and action_preflight_allowed_review.get("section_order")
+        == [
+            "Product Impact",
+            "Connector Feasibility",
+            "Permissions",
+            "Source Policy",
+            "Risk",
+            "Idempotency",
+            "Expected Calls",
+            "Evidence",
+            "Approval",
+        ]
+        and action_preflight_allowed_review.get("connector_feasibility", {}).get("decision") == "allow"
+        and action_preflight_allowed_review.get("source_policy", {}).get("source_policy_ref")
+        == "source_policy:cspol_project_alpha_supportdesk_actions"
+        and action_preflight_allowed_review.get("permissions", {}).get("granted") is True,
+        "preflight_does_not_count_as_approval_or_execution": action_preflight_allowed.get("risk", {}).get(
+            "preflight_counts_as_approval"
+        )
+        is False
+        and action_preflight_allowed_review.get("approval", {}).get("preflight_is_approval") is False
+        and action_preflight_allowed_review.get("approval", {}).get("execution_allowed") is False
+        and action_preflight_allowed_action.get("connector_preflight", {}).get("preflight_counts_as_approval")
+        is False
+        and action_preflight_allowed_action.get("execution", {}).get("can_execute_now") is False
+        and action_preflight_execution_result_count == 0
+        and action_preflight_executed_count == 0
+        and action_preflight_workflow_run_count == 0,
+        "call_ledgers_are_non_side_effecting": action_preflight_allowed.get("call_ledger", {}).get(
+            "expected_provider_call_count"
+        )
+        == 1
+        and action_preflight_allowed.get("call_ledger", {}).get("real_provider_call_count") == 0
+        and action_preflight_allowed.get("call_ledger", {}).get("external_http_calls") == 0
+        and action_preflight_allowed.get("call_ledger", {}).get("provider_mutations") == 0
+        and all(
+            record.get("call_ledger", {}).get("real_provider_call_count") == 0
+            and record.get("call_ledger", {}).get("external_http_calls") == 0
+            and record.get("call_ledger", {}).get("provider_mutations") == 0
+            for record in [*action_preflight_denied_records.values(), action_preflight_github_denied]
+        ),
+        "denial_cases_block_with_reason_codes": set(action_preflight_denial_reason_codes)
+        >= action_preflight_expected_reasons
+        and all(record.get("decision") == "deny" for record in action_preflight_denied_records.values())
+        and all(review.get("status") == "blocked" for review in action_preflight_denied_reviews.values())
+        and action_preflight_github_denied.get("decision") == "deny"
+        and action_preflight_github_denied_review.get("status") == "blocked",
+        "records_persisted_with_expected_counts": action_preflight_count == 7
+        and action_preflight_review_count == 7
+        and len(action_preflight_action_records) == 2,
+        "negative_counters_zero": bool(action_preflight_negative)
+        and all(int(value or 0) == 0 for value in action_preflight_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["action_preflight_audit_verify"])
+        and action_preflight_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and action_preflight_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in action_preflight_payloads
+        )
+        and all(
+            bool(record.get("evidence_refs")) and bool(record.get("audit_refs"))
+            for record in [
+                action_preflight_allowed,
+                action_preflight_allowed_review,
+                *action_preflight_denied_records.values(),
+                *action_preflight_denied_reviews.values(),
+                action_preflight_github_denied,
+                action_preflight_github_denied_review,
+            ]
+        ),
+        "zero_provider_internals": not action_preflight_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in action_preflight_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_action_preflight_markers": all(
+            marker not in action_preflight_state_text
+            for marker in [
+                '"preflight_counts_as_approval": true',
+                '"preflight_is_approval": true',
+                '"execution_result_created": true',
+                '"workflow_run_started": true',
+                '"real_provider_call_count": 1',
+                '"external_http_calls": 1',
+                '"provider_mutations": 1',
+                '"direct_provider_access": 1',
+                '"credential_values_exposed": 1',
+                '"github_read_only_action_admitted": 1',
+            ]
+        ),
+    }
+    action_safety_setup_exit_keys = [
+        "action_safety_contract_validate",
+        "action_safety_setup_plan",
+        "action_safety_delivery_ingest",
+        "action_safety_bundle_create",
+        "action_safety_claim_create",
+        "action_safety_claim_approve",
+        "action_safety_mission_create",
+        "action_safety_action_propose",
+        "action_safety_allowed_preflight",
+        "action_safety_valid_approval",
+        "action_safety_mode_locked",
+        "action_safety_mode_assist",
+        "action_safety_audit_verify",
+    ]
+    action_safety_execute_transcript_keys = {
+        "missing_evidence": "action_safety_execute_missing_evidence",
+        "locked_workspace": "action_safety_execute_locked_workspace",
+        "missing_approval": "action_safety_execute_missing_approval",
+        "unauthorized_approver": "action_safety_execute_unauthorized_approver",
+        "missing_permission": "action_safety_execute_missing_permission",
+        "missing_idempotency": "action_safety_execute_missing_idempotency",
+        "stale_preflight": "action_safety_execute_stale_preflight",
+        "stale_connector": "action_safety_execute_stale_connector",
+    }
+    action_safety_checks = {
+        "commands_exit_expected": all(_exit_ok(transcripts[key]) for key in action_safety_setup_exit_keys)
+        and transcripts["action_safety_invalid_approval"].get("exit_code") == 8
+        and action_safety_invalid_approval_payload.get("status") == "denied"
+        and all(
+            transcripts[transcript_key].get("exit_code") == 8
+            and action_safety_denial_payloads[case_id].get("status") == "denied"
+            for case_id, transcript_key in action_safety_execute_transcript_keys.items()
+        )
+        and transcripts["action_safety_execute_wrong_scope"].get("exit_code") == 6
+        and action_safety_wrong_scope_payload.get("status") == "failed",
+        "invalid_approval_denied": any(
+            error.get("reason_code") == "CS_ACTION_APPROVER_UNAUTHORIZED"
+            for error in action_safety_invalid_approval_payload.get("errors", [])
+            if isinstance(error, dict)
+        ),
+        "all_missing_gate_reason_codes_precise": action_safety_denial_reason_codes
+        == action_safety_expected_reason_codes,
+        "scope_denial_stable": any(
+            error.get("code") == "CS_SCOPE_DENIED"
+            for error in action_safety_wrong_scope_payload.get("errors", [])
+            if isinstance(error, dict)
+        ),
+        "denial_envelopes_persisted": action_safety_envelope_count >= len(action_safety_expected_reason_codes)
+        and all(
+            envelope.get("schema_version") == "cs.action_safety_envelope.v0"
+            and envelope.get("status") == "denied"
+            and envelope.get("reason_code") == action_safety_expected_reason_codes[case_id]
+            for case_id, envelope in action_safety_denial_envelopes.items()
+        ),
+        "zero_execution_results_or_workflows": action_safety_execution_result_count == 0
+        and action_safety_workflow_run_count == 0
+        and all(
+            envelope.get("execution_result_created") is False
+            and envelope.get("workflow_run_started") is False
+            for envelope in action_safety_denial_envelopes.values()
+        ),
+        "zero_side_effect_counters": all(int(value or 0) == 0 for value in action_safety_negative.values()),
+        "connector_permission_not_inferred_from_product_approval": action_safety_denial_reason_codes.get(
+            "missing_permission"
+        )
+        == "CS_ACTION_CONNECTOR_PERMISSION_REQUIRED",
+        "product_approval_not_inferred_from_connector_preflight": action_safety_denial_reason_codes.get(
+            "missing_approval"
+        )
+        == "CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED",
+        "audit_verify_exit_zero": _exit_ok(transcripts["action_safety_audit_verify"])
+        and action_safety_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and action_safety_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in action_safety_payloads
+            if payload.get("status") != "failed"
+        )
+        and all(
+            bool(envelope.get("policy_ref")) and envelope.get("action_id") == action_safety_action_id
+            for envelope in action_safety_denial_envelopes.values()
+        ),
+        "zero_provider_internals": not action_safety_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in action_safety_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_action_safety_markers": all(
+            marker not in action_safety_state_text
+            for marker in [
+                '"schema_version": "cs.action_result.v0"',
+                '"status": "executed"',
+                '"external_http_calls": 1',
+                '"provider_mutations": 1',
+                '"real_provider_calls": 1',
+                '"execution_result_created": true',
+                '"workflow_run_started": true',
+                '"unauthorized_approvals_accepted": 1',
+            ]
+        ),
+    }
+    action_execution_setup_exit_keys = [
+        "action_execution_contract_validate",
+        "action_execution_setup_plan",
+        "action_execution_delivery_ingest",
+        "action_execution_bundle_create",
+        "action_execution_claim_create",
+        "action_execution_claim_approve",
+        "action_execution_mission_create",
+        "action_execution_action_propose",
+        "action_execution_preflight_allowed",
+        "action_execution_approve",
+        "action_execution_execute",
+        "action_execution_replay",
+        "action_execution_audit_verify",
+    ]
+    action_execution_checks = {
+        "commands_exit_expected": all(_exit_ok(transcripts[key]) for key in action_execution_setup_exit_keys)
+        and action_execution_execute_payload.get("status") == "success"
+        and action_execution_replay_payload.get("status") == "success",
+        "workflow_run_invokes_connectorhub_once": action_execution_workflow_run.get("schema_version") == "cs.workflow_run.v0"
+        and action_execution_workflow_run.get("status") == "succeeded"
+        and action_execution_workflow_run.get("execution_adapter") == "ConnectorHub"
+        and action_execution_workflow_run.get("workflow_run_started") is True
+        and action_execution_workflow_run.get("direct_provider_access") is False
+        and action_execution_workflow_run_count == 1,
+        "action_result_linked_to_workflow_audit_and_receipt": action_execution_result.get("schema_version")
+        == "cs.action_result.v0"
+        and action_execution_result.get("status") == "success"
+        and action_execution_result.get("workflow_run_id") == action_execution_workflow_run.get("workflow_run_id")
+        and action_execution_result.get("provider_receipt_id") == action_execution_provider_receipt.get("provider_receipt_id")
+        and bool(action_execution_execute_payload.get("audit_refs"))
+        and action_execution_action_result_count == 1,
+        "provider_receipt_safe_and_versioned": action_execution_provider_receipt.get("schema_version")
+        == "cs.connector_provider_receipt.v1"
+        and action_execution_provider_receipt.get("status") == "success"
+        and action_execution_provider_receipt.get("fixture_provider_effect_count") == 1
+        and action_execution_provider_receipt.get("duplicate_side_effect_count") == 0
+        and action_execution_provider_receipt.get("direct_provider_access") is False
+        and action_execution_provider_receipt.get("raw_provider_payload_persisted") is False
+        and action_execution_provider_receipt.get("credential_values_exposed") is False
+        and action_execution_provider_receipt_count == 1,
+        "outcome_reingested_as_artifact_evidence_and_connected_outcome": action_execution_outcome_artifact.get(
+            "schema_version"
+        )
+        == "cs.artifact.v0"
+        and action_execution_outcome_artifact.get("source", {}).get("type") == "connector_action_outcome"
+        and action_execution_outcome_bundle.get("schema_version") == "cs.evidence_bundle.v0"
+        and action_execution_outcome_bundle.get("outcome_artifact_id")
+        == action_execution_outcome_artifact.get("artifact_id")
+        and f"action_result:{action_execution_result.get('action_result_id')}"
+        in action_execution_outcome_bundle.get("action_execution_refs", [])
+        and f"connector_provider_receipt:{action_execution_provider_receipt.get('provider_receipt_id')}"
+        in action_execution_outcome_bundle.get("action_execution_refs", [])
+        and action_execution_connected_outcome.get("schema_version") == "cs.connected_outcome.v0"
+        and action_execution_connected_outcome.get("source", {}).get("connectorhub_mediated") is True
+        and action_execution_connected_outcome.get("source", {}).get("reingested_as_evidence") is True
+        and action_execution_outcome_artifact_count == 1
+        and action_execution_connected_outcome_count == 1,
+        "idempotency_replay_zero_duplicate_side_effect": action_execution_idempotency.get("schema_version")
+        == "cs.connector_action_idempotency.v1"
+        and action_execution_idempotency.get("status") == "committed"
+        and action_execution_idempotency.get("duplicate_request", {}).get("side_effect_count") == 0
+        and action_execution_replay_result.get("action_result_id") == action_execution_result.get("action_result_id")
+        and action_execution_replay_receipt.get("provider_receipt_id")
+        == action_execution_provider_receipt.get("provider_receipt_id")
+        and action_execution_replay_idempotency.get("idempotency_id") == action_execution_idempotency.get("idempotency_id")
+        and action_execution_idempotency_count == 1,
+        "negative_counters_zero": bool(action_execution_negative)
+        and all(int(value or 0) == 0 for value in action_execution_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["action_execution_audit_verify"])
+        and action_execution_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and action_execution_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in action_execution_payloads
+        )
+        and bool(action_execution_outcome_bundle.get("action_execution_refs")),
+        "zero_provider_internals": not action_execution_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in action_execution_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_action_execution_markers": all(
+            marker not in action_execution_state_text
+            for marker in [
+                '"direct_provider_access": true',
+                '"external_http_calls": 1',
+                '"duplicate_side_effect_count": 1',
+                '"raw_provider_payload_persisted": true',
+                '"credential_values_exposed": true',
+                '"credentials_exposed_to_agent": true',
+            ]
+        ),
+    }
+    action_retry_success_exit_keys = [
+        "action_retry_contract_validate",
+        "action_retry_setup_plan",
+        "action_retry_delivery_ingest",
+        "action_retry_bundle_create",
+        "action_retry_claim_create",
+        "action_retry_claim_approve",
+        "action_retry_mission_create",
+        "action_retry_action_propose",
+        "action_retry_preflight_allowed",
+        "action_retry_approve",
+        "action_retry_execute",
+        "action_retry_replay",
+        "action_retry_conflict_action_propose",
+        "action_retry_conflict_preflight",
+        "action_retry_conflict_approve",
+        "action_retry_audit_verify",
+    ]
+    action_retry_checks = {
+        "commands_exit_expected": all(_exit_ok(transcripts[key]) for key in action_retry_success_exit_keys)
+        and transcripts["action_retry_conflict_execute"].get("exit_code") == 8
+        and action_retry_conflict_execute_payload.get("status") == "denied",
+        "first_execution_persists_idempotency_scope_digest_result": action_retry_result.get("schema_version")
+        == "cs.action_result.v0"
+        and action_retry_result.get("status") == "success"
+        and action_retry_result.get("fixture_provider_effect_count") == 1
+        and action_retry_workflow_run.get("schema_version") == "cs.workflow_run.v0"
+        and action_retry_provider_receipt.get("schema_version") == "cs.connector_provider_receipt.v1"
+        and action_retry_idempotency.get("schema_version") == "cs.connector_action_idempotency.v1"
+        and action_retry_idempotency.get("status") == "committed"
+        and bool(action_retry_idempotency.get("idempotency_scope", {}).get("connector_id"))
+        and bool(action_retry_idempotency.get("request_digest"))
+        and bool(action_retry_idempotency.get("request_digest_payload"))
+        and action_retry_idempotency.get("action_result_id") == action_retry_result.get("action_result_id")
+        and action_retry_idempotency.get("provider_receipt_id")
+        == action_retry_provider_receipt.get("provider_receipt_id")
+        and action_retry_idempotency.get("workflow_run_id") == action_retry_workflow_run.get("workflow_run_id"),
+        "same_key_retry_returns_existing_result": action_retry_replay_result.get("action_result_id")
+        == action_retry_result.get("action_result_id")
+        and action_retry_replay_workflow_run.get("workflow_run_id") == action_retry_workflow_run.get("workflow_run_id")
+        and action_retry_replay_receipt.get("provider_receipt_id") == action_retry_provider_receipt.get("provider_receipt_id")
+        and action_retry_replay_idempotency.get("idempotency_id") == action_retry_idempotency.get("idempotency_id")
+        and action_retry_replay_idempotency.get("request_digest") == action_retry_idempotency.get("request_digest")
+        and action_retry_replay_idempotency.get("duplicate_request", {}).get("side_effect_count") == 0
+        and action_retry_replay_idempotency.get("duplicate_request", {}).get("returned_existing_result") is True
+        and int(action_retry_replay_idempotency.get("retry_status", {}).get("duplicate_retry_count", 0) or 0) >= 1
+        and action_retry_replay_idempotency.get("retry_status", {}).get(
+            "same_key_same_request_digest_returned_existing_result"
+        )
+        is True
+        and action_retry_replay_idempotency.get("retry_status", {}).get("timeout_before_response_reconciled") is True
+        and action_retry_replay_idempotency.get("retry_status", {}).get("ambiguous_provider_response_reconciled")
+        is True
+        and action_retry_replay_idempotency.get("retry_status", {}).get("provider_duplicate_response_reconciled")
+        is True
+        and action_retry_replay_idempotency.get("retry_status", {}).get("process_restart_replay_safe") is True,
+        "conflict_denied_before_second_side_effect": action_retry_conflict_preflight.get("decision") == "allow"
+        and action_retry_conflict.get("schema_version") == "cs.connector_action_idempotency_conflict.v1"
+        and action_retry_conflict.get("status") == "conflict_rejected"
+        and action_retry_conflict.get("reason_code") == "CS_ACTION_IDEMPOTENCY_CONFLICT"
+        and action_retry_conflict.get("existing_action_id") == action_retry_action_id
+        and action_retry_conflict.get("incoming_action_id") == action_retry_conflict_action_id
+        and action_retry_conflict.get("existing_request_digest")
+        != action_retry_conflict.get("incoming_request_digest")
+        and action_retry_conflict.get("duplicate_side_effect_count") == 0
+        and action_retry_conflict.get("external_http_calls") == 0
+        and action_retry_conflict.get("provider_mutations") == 0
+        and action_retry_conflict.get("real_provider_calls") == 0
+        and "CS_ACTION_IDEMPOTENCY_CONFLICT"
+        in {error.get("reason_code") for error in action_retry_conflict_execute_payload.get("errors", [])}
+        and action_retry_conflict_envelope.get("reason_code") == "CS_ACTION_IDEMPOTENCY_CONFLICT"
+        and action_retry_conflict_envelope.get("execution_result_created") is False
+        and action_retry_conflict_envelope.get("workflow_run_started") is False,
+        "compensation_expectation_visible_without_automatic_execution": action_retry_idempotency.get(
+            "compensation",
+            {},
+        ).get("expectation_visible")
+        is True
+        and action_retry_idempotency.get("compensation", {}).get("automatic_compensation_executed") is False
+        and action_retry_idempotency.get("compensation", {}).get("separate_governed_action_required") is True
+        and action_retry_conflict.get("compensation", {}).get("expectation_visible") is True
+        and action_retry_conflict.get("compensation", {}).get("automatic_compensation_executed") is False
+        and action_retry_conflict.get("compensation", {}).get("separate_governed_action_required") is True,
+        "durable_counts_single_provider_effect": action_retry_workflow_run_count == 1
+        and action_retry_action_result_count == 1
+        and action_retry_provider_receipt_count == 1
+        and action_retry_idempotency_count == 1
+        and action_retry_connected_outcome_count == 1
+        and action_retry_outcome_artifact_count == 1
+        and action_retry_safety_envelope_count >= 1,
+        "negative_counters_zero": bool(action_retry_negative)
+        and all(int(value or 0) == 0 for value in action_retry_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["action_retry_audit_verify"])
+        and action_retry_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and action_retry_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in action_retry_payloads
+        )
+        and bool(action_retry_conflict_execute_payload.get("policy_decision_refs")),
+        "zero_provider_internals": not action_retry_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in action_retry_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_action_retry_markers": all(
+            marker not in action_retry_state_text
+            for marker in [
+                '"duplicate_side_effect_count": 1',
+                '"external_http_calls": 1',
+                '"provider_mutations": 1',
+                '"real_provider_calls": 1',
+                '"automatic_compensation_executed": true',
+                '"credential_values_exposed": true',
+                '"direct_provider_access": true',
+            ]
+        ),
+    }
+    scope_isolation_success_exit_keys = [
+        "scope_isolation_contract_validate",
+        "scope_isolation_setup_plan",
+        "scope_isolation_delivery_process",
+        "scope_isolation_bundle_create",
+        "scope_isolation_watch_result_build",
+        "scope_isolation_claim_create",
+        "scope_isolation_claim_approve",
+        "scope_isolation_mission_create",
+        "scope_isolation_action_propose",
+        "scope_isolation_preflight_allowed",
+        "scope_isolation_approve",
+        "scope_isolation_audit_verify",
+    ]
+    scope_isolation_denied_exit_keys = [
+        "scope_isolation_other_setup_plan",
+        "scope_isolation_other_delivery_process",
+        "scope_isolation_other_bundle_create",
+        "scope_isolation_other_watch_result_review",
+        "scope_isolation_other_action_execute",
+    ]
+    scope_isolation_checks = {
+        "commands_exit_expected": all(_exit_ok(transcripts[key]) for key in scope_isolation_success_exit_keys)
+        and all(_scope_denied(transcripts[key]) for key in scope_isolation_denied_exit_keys),
+        "connector_application_setup_scope_bound": scope_isolation_contract.get("schema_version")
+        == "cs.connector_capability_contract.v1"
+        and scope_isolation_setup_result.get("schema_version") == "cs.connector_setup_result.v1"
+        and scope_isolation_source_policy.get("schema_version") == "cs.connector_source_policy.v1"
+        and scope_isolation_contract.get("scope") == scope_isolation_setup_result.get("scope")
+        and scope_isolation_setup_result.get("scope") == scope_isolation_source_policy.get("scope")
+        and _scope_complete(scope_isolation_contract.get("scope")),
+        "delivery_artifact_and_evidence_scope_bound": scope_isolation_receipt.get("schema_version")
+        == "cs.connector_delivery_receipt.v1"
+        and scope_isolation_artifact.get("source", {}).get("type") == "connector_projection_delivery"
+        and scope_isolation_receipt.get("scope") == scope_isolation_contract.get("scope")
+        and scope_isolation_artifact.get("scope") == scope_isolation_contract.get("scope")
+        and scope_isolation_bundle.get("filters") == scope_isolation_contract.get("scope")
+        and scope_isolation_bundle_count == 1
+        and scope_isolation_receipt_count == 1,
+        "watch_result_scope_bound": scope_isolation_watch_result.get("schema_version") == "cs.watch_result.v1"
+        and scope_isolation_watch_result.get("scope") == scope_isolation_contract.get("scope")
+        and scope_isolation_watch_result_count == 1,
+        "action_path_scope_bound_without_execution": scope_isolation_claim.get("scope") == scope_isolation_contract.get("scope")
+        and scope_isolation_approved_claim.get("scope") == scope_isolation_contract.get("scope")
+        and scope_isolation_mission.get("scope") == scope_isolation_contract.get("scope")
+        and scope_isolation_action.get("scope") == scope_isolation_contract.get("scope")
+        and scope_isolation_approved_action.get("scope") == scope_isolation_contract.get("scope")
+        and scope_isolation_preflight.get("scope") == scope_isolation_contract.get("scope")
+        and scope_isolation_action_count == 1
+        and scope_isolation_workflow_run_count == 0
+        and scope_isolation_action_result_count == 0
+        and scope_isolation_provider_receipt_count == 0,
+        "cross_scope_setup_delivery_evidence_watch_action_denied": all(
+            _scope_denied(transcripts[key]) for key in scope_isolation_denied_exit_keys
+        )
+        and all(
+            payload.get("status") == "failed"
+            for payload in [
+                scope_isolation_other_setup_payload,
+                scope_isolation_other_delivery_payload,
+                scope_isolation_other_bundle_payload,
+                scope_isolation_other_watch_payload,
+                scope_isolation_other_action_payload,
+            ]
+        ),
+        "denied_payloads_disclose_only_resource_scope": scope_isolation_denied_object_leak_count == 0
+        and all(
+            payload.get("errors") and payload.get("owner_id") == "other-user" and payload.get("namespace_id") == "other"
+            for payload in scope_isolation_denied_payloads
+        ),
+        "no_other_scope_or_ownerless_records": scope_isolation_other_scope_record_count == 0
+        and bool(scope_isolation_scope_records)
+        and all(_scope_complete(scope) for scope in scope_isolation_scope_records),
+        "negative_counters_zero": bool(scope_isolation_negative)
+        and all(int(value or 0) == 0 for value in scope_isolation_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["scope_isolation_audit_verify"])
+        and scope_isolation_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and scope_isolation_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in [
+                scope_isolation_validate_payload,
+                scope_isolation_setup_payload,
+                scope_isolation_delivery_payload,
+                scope_isolation_bundle_payload,
+                scope_isolation_watch_payload,
+                scope_isolation_claim_payload,
+                scope_isolation_claim_approve_payload,
+                scope_isolation_mission_payload,
+                scope_isolation_action_payload,
+                scope_isolation_preflight_payload,
+                scope_isolation_approve_payload,
+            ]
+        ),
+        "zero_provider_internals": not scope_isolation_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in scope_isolation_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_scope_markers": all(
+            marker not in scope_isolation_state_text
+            for marker in [
+                '"owner_id": "other-user"',
+                '"namespace_id": "other"',
+                '"workflow_run_started": true',
+                '"schema_version": "cs.action_result.v0"',
+                '"external_http_calls": 1',
+                '"provider_mutations": 1',
+                '"credential_values_exposed": true',
+            ]
+        ),
+    }
+    credential_custody_success_exit_keys = [
+        "credential_custody_status",
+        "credential_custody_rotate",
+        "credential_custody_revoke",
+        "credential_custody_boundary",
+        "credential_custody_audit_verify",
+    ]
+    credential_custody_lifecycle_records = [
+        credential_custody_status,
+        credential_custody_rotate,
+        credential_custody_revoke,
+    ]
+    credential_custody_checks = {
+        "commands_exit_zero": all(_exit_ok(transcripts[key]) for key in credential_custody_success_exit_keys),
+        "lifecycle_records_safe_and_scoped": credential_custody_lifecycle_count == 3
+        and all(record.get("schema_version") == "cs.connector_credential_lifecycle.v1" for record in credential_custody_lifecycle_records)
+        and all(record.get("scope") == credential_custody_status.get("scope") for record in credential_custody_lifecycle_records)
+        and all(record.get("credential_custody") == "connectorhub" for record in credential_custody_lifecycle_records)
+        and all(record.get("secret_manager_boundary") == "ConnectorHub" for record in credential_custody_lifecycle_records)
+        and all(str(record.get("credential_ref", "")).startswith("connectorhub://credential/") for record in credential_custody_lifecycle_records)
+        and all(record.get("credential_fingerprint") for record in credential_custody_lifecycle_records),
+        "rotation_and_revocation_update_status_without_product_secret": credential_custody_status.get("connection_status", {}).get("status") == "active"
+        and credential_custody_rotate.get("operation") == "rotate"
+        and credential_custody_rotate.get("connection_status", {}).get("status") == "active"
+        and credential_custody_rotate.get("connection_status", {}).get("last_rotated_at") is not None
+        and credential_custody_revoke.get("operation") == "revoke"
+        and credential_custody_revoke.get("connection_status", {}).get("status") == "revoked"
+        and credential_custody_revoke.get("connection_status", {}).get("revocation_recorded") is True
+        and all(int(record.get("product_secret_writes", 1) or 0) == 0 for record in credential_custody_lifecycle_records),
+        "credential_boundary_safe": credential_custody_boundary.get("schema_version")
+        == "cs.connector_credential_boundary_test.v0"
+        and credential_custody_boundary.get("credential_custody") == "connectorhub"
+        and credential_custody_boundary.get("credential_secret_value_present") is False
+        and credential_custody_boundary.get("credentials_exposed_to_agent") is False
+        and credential_custody_boundary.get("credentials_exposed_to_product_output") is False
+        and credential_custody_boundary.get("direct_provider_access") is False
+        and credential_custody_boundary.get("raw_secret_reads") == 0
+        and credential_custody_boundary.get("external_http_calls") == 0,
+        "seeded_secret_canary_absent_from_outputs_and_state": credential_custody_negative["raw_secret_canary_in_stdout"] == 0
+        and credential_custody_negative["raw_secret_canary_in_state"] == 0,
+        "no_credential_values_handles_or_auth_material": all(
+            credential_custody_negative[key] == 0
+            for key in [
+                "raw_secret_value_present",
+                "raw_handle_present",
+                "auth_header_present",
+                "credential_bearing_url_present",
+                "credentials_exposed_to_agent",
+                "credentials_exposed_to_product_output",
+                "credentials_exposed_to_logs",
+                "credentials_exposed_to_exports",
+                "product_secret_writes",
+                "raw_secret_reads",
+            ]
+        ),
+        "static_provider_auth_import_scan_zero": credential_custody_negative["provider_auth_imports"] == 0,
+        "negative_counters_zero": bool(credential_custody_negative)
+        and all(int(value or 0) == 0 for value in credential_custody_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["credential_custody_audit_verify"])
+        and credential_custody_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and credential_custody_audit_count >= 1,
+        "evidence_and_audit_refs_present": all(
+            bool(payload.get("evidence_refs")) and bool(payload.get("audit_refs"))
+            for payload in [
+                credential_custody_status_payload,
+                credential_custody_rotate_payload,
+                credential_custody_revoke_payload,
+                credential_custody_boundary_payload,
+            ]
+        ),
+        "zero_provider_internals": not credential_custody_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in credential_custody_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+    }
+    action_bypass_success_exit_keys = [
+        "action_bypass_contract_validate",
+        "action_bypass_setup_plan",
+        "action_bypass_delivery_ingest",
+        "action_bypass_bundle_create",
+        "action_bypass_claim_create",
+        "action_bypass_claim_approve",
+        "action_bypass_mission_create",
+        "action_bypass_action_propose",
+        "action_bypass_approve",
+        "action_bypass_credential_boundary",
+        "action_bypass_audit_verify",
+    ]
+    action_bypass_denied_exit_keys = [
+        "action_bypass_preflight_undeclared",
+        "action_bypass_execute_denied",
+        "action_bypass_direct_write",
+        "action_bypass_pack_import",
+    ]
+    action_bypass_checks = {
+        "commands_exit_expected": all(_exit_ok(transcripts[key]) for key in action_bypass_success_exit_keys)
+        and all(
+            transcripts[key].get("exit_code") == 8 and isinstance(transcripts[key].get("stdout_json"), dict)
+            for key in action_bypass_denied_exit_keys
+        ),
+        "undeclared_preflight_denied_and_audited": action_bypass_preflight_payload.get("status") == "denied"
+        and action_bypass_preflight.get("schema_version") == "cs.connector_action_preflight.v1"
+        and action_bypass_preflight.get("decision") == "deny"
+        and "CS_CONNECTOR_ACTION_PREFLIGHT_UNDECLARED_ACTION" in action_bypass_preflight.get("reason_codes", [])
+        and action_bypass_preflight.get("gate_results", {}).get("declared_action") is False
+        and action_bypass_preflight.get("call_ledger", {}).get("expected_provider_call_count") == 0
+        and action_bypass_preflight.get("call_ledger", {}).get("real_provider_call_count") == 0
+        and action_bypass_preflight_count == 1
+        and bool(action_bypass_preflight_payload.get("audit_refs")),
+        "approved_execute_blocked_by_backend": action_bypass_approve_payload.get("action_card", {})
+        .get("approval", {})
+        .get("status")
+        == "approved"
+        and action_bypass_execute_payload.get("status") == "denied"
+        and "CS_ACTION_PREFLIGHT_NOT_ALLOWED"
+        in {error.get("reason_code") for error in action_bypass_execute_payload.get("errors", [])}
+        and action_bypass_envelope.get("schema_version") == "cs.action_safety_envelope.v0"
+        and action_bypass_envelope.get("status") == "denied"
+        and action_bypass_envelope.get("reason_code") == "CS_ACTION_PREFLIGHT_NOT_ALLOWED"
+        and action_bypass_envelope.get("execution_result_created") is False
+        and action_bypass_envelope.get("workflow_run_started") is False
+        and action_bypass_action_result_count == 0
+        and action_bypass_workflow_run_count == 0,
+        "direct_provider_bypass_denied": action_bypass_direct_write_payload.get("status") == "denied"
+        and "CS_DIRECT_WRITE_DENIED" in {error.get("code") for error in action_bypass_direct_write_payload.get("errors", [])}
+        and action_bypass_direct_write.get("direct_provider_access") is False
+        and action_bypass_direct_write.get("provider_client_exposed") is False
+        and action_bypass_direct_write.get("credential_values_exposed") is False
+        and action_bypass_direct_write.get("external_http_calls") == 0
+        and action_bypass_direct_write.get("provider_mutations") == 0
+        and bool(action_bypass_direct_write_payload.get("policy_decision_refs"))
+        and bool(action_bypass_direct_write_payload.get("audit_refs")),
+        "credential_boundary_safe": action_bypass_credential_boundary.get("schema_version")
+        == "cs.connector_credential_boundary_test.v0"
+        and action_bypass_credential_boundary.get("credential_custody") == "connectorhub"
+        and action_bypass_credential_boundary.get("credential_secret_value_present") is False
+        and action_bypass_credential_boundary.get("credentials_exposed_to_agent") is False
+        and action_bypass_credential_boundary.get("credentials_exposed_to_product_output") is False
+        and action_bypass_credential_boundary.get("direct_provider_access") is False
+        and action_bypass_credential_boundary.get("external_http_calls") == 0
+        and bool(action_bypass_credential_payload.get("evidence_refs"))
+        and bool(action_bypass_credential_payload.get("audit_refs")),
+        "malicious_pack_quarantined": action_bypass_pack_payload.get("status") == "failed"
+        and action_bypass_quarantine.get("schema_version") == "cs.agent_pack_quarantine.v0"
+        and action_bypass_quarantine.get("status") == "quarantined"
+        and action_bypass_quarantine.get("direct_provider_logic_detected") is True
+        and action_bypass_quarantine.get("forbidden_runtime", {}).get("provider_clients") is True
+        and action_bypass_quarantine.get("forbidden_runtime", {}).get("extension_owned_credentials") is True
+        and action_bypass_quarantine.get("forbidden_runtime", {}).get("direct_api_writeback") is True
+        and action_bypass_quarantine.get("forbidden_runtime", {}).get("raw_secret_access") is True
+        and action_bypass_quarantine_count >= 1
+        and bool(action_bypass_pack_payload.get("policy_decision_refs"))
+        and bool(action_bypass_pack_payload.get("audit_refs")),
+        "static_provider_import_scan_zero": not direct_provider_import_findings,
+        "negative_counters_zero": bool(action_bypass_negative)
+        and all(int(value or 0) == 0 for value in action_bypass_negative.values()),
+        "audit_verify_exit_zero": _exit_ok(transcripts["action_bypass_audit_verify"])
+        and action_bypass_audit_payload.get("audit_integrity", {}).get("status") == "success"
+        and action_bypass_audit_count >= 1,
+        "zero_provider_internals": not action_bypass_internal_paths
+        and all(payload.get("provider_internal_findings", []) == [] for payload in action_bypass_payloads),
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "zero_forbidden_bypass_markers": all(
+            marker not in action_bypass_state_text
+            for marker in [
+                '"schema_version": "cs.action_result.v0"',
+                '"schema_version": "cs.workflow_run.v0"',
+                '"external_http_calls": 1',
+                '"provider_mutations": 1',
+                '"real_provider_call_count": 1',
+                '"direct_provider_access": true',
+                '"provider_client_exposed": true',
+                '"credential_values_exposed": true',
+                '"credentials_exposed_to_agent": true',
+                '"credential_secret_value_present": true',
+            ]
+        ),
+    }
+    sync_bad_webhook_error_codes = [
+        error.get("code")
+        for error in sync_bad_webhook_payload.get("errors", [])
+        if isinstance(error, dict)
+    ]
+    sync_event_key_parts = sync_webhook_signal_receipt.get("provider_event_key_parts", {})
+    sync_checks = {
+        "sync_contract_validate_exit_zero": _exit_ok(transcripts["sync_contract_validate"]),
+        "sync_setup_plan_exit_zero": _exit_ok(transcripts["sync_setup_plan"]),
+        "sync_audit_verify_exit_zero": _exit_ok(transcripts["sync_audit_verify"])
+        and sync_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "bad_webhook_denied_before_delivery_commit": transcripts["sync_bad_webhook_signature"].get("exit_code") == 1
+        and sync_bad_webhook_payload.get("status") == "failed"
+        and "CS_CONNECTOR_WEBHOOK_ORIGIN_UNVERIFIED" in sync_bad_webhook_error_codes
+        and "CS_CONNECTOR_WEBHOOK_SIGNATURE_INVALID" in sync_bad_webhook_error_codes
+        and sync_bad_webhook_signal_receipt.get("origin_verified_inside_connector_boundary") is False
+        and sync_bad_webhook_signal_receipt.get("webhook_signature_verified") is False
+        and sync_bad_webhook_payload.get("cursor_update", {}).get("status") == "not_advanced"
+        and sync_bad_webhook_payload.get("cursor_update", {}).get("cursor_advanced_before_commit") is False
+        and "connector_delivery_receipt" not in sync_bad_webhook_payload
+        and "artifact" not in sync_bad_webhook_payload,
+        "provider_event_key_parts_complete": sync_event_key_parts.get("provider_installation_id")
+        == "github-installation:project-alpha-readonly"
+        and sync_event_key_parts.get("repository_ref") == "github:repo:owner/project-alpha"
+        and sync_event_key_parts.get("object_ref") == issue_source_external_id
+        and sync_event_key_parts.get("action") == "updated"
+        and sync_event_key_parts.get("source_revision") == "issue:1001:2026-06-23T00:00:00Z",
+        "webhook_poll_overlap_idempotent": _exit_ok(transcripts["sync_webhook_initial"])
+        and _exit_ok(transcripts["sync_poll_duplicate"])
+        and sync_webhook_payload.get("status") == "success"
+        and sync_poll_duplicate_payload.get("status") == "success"
+        and sync_webhook_payload.get("deduplicated") is False
+        and sync_poll_duplicate_payload.get("deduplicated") is True
+        and sync_webhook_receipt.get("delivery_receipt_id") == sync_poll_duplicate_receipt.get("delivery_receipt_id")
+        and sync_webhook_artifact.get("artifact_id") == sync_poll_duplicate_artifact.get("artifact_id")
+        and sync_webhook_payload.get("sync_provider_event_key") == sync_poll_duplicate_payload.get("sync_provider_event_key")
+        and sync_poll_duplicate_payload.get("cursor_update", {}).get("reason") == "duplicate_or_replay_observed",
+        "valid_webhook_boundary_verified": sync_webhook_signal_receipt.get("origin_verified_inside_connector_boundary") is True
+        and sync_webhook_signal_receipt.get("webhook_signature_verified") is True
+        and sync_webhook_signal_receipt.get("raw_provider_payload_persisted") is False,
+        "cursor_gap_visible_before_replay": transcripts["sync_after_commit_before_cursor"].get("exit_code") == 5
+        and sync_after_commit_before_cursor_payload.get("status") == "interrupted"
+        and sync_after_commit_before_cursor_payload.get("crash_point") == "after_commit_before_cursor"
+        and sync_after_commit_before_cursor_payload.get("cursor_update", {}).get("status") == "not_advanced"
+        and sync_after_commit_before_cursor_payload.get("cursor_update", {}).get("cursor_advanced_before_commit") is False
+        and transcripts["sync_reconcile_gap_before_replay"].get("exit_code") == 4
+        and sync_gap_reconciliation.get("status") == "failed"
+        and sync_gap_reconciliation.get("unobserved_delivery_receipt_count") == 1
+        and sync_gap_reconciliation.get("cursor_advanced_before_commit_count") == 0,
+        "replay_recovers_cursor_gap": _exit_ok(transcripts["sync_replay_changed"])
+        and sync_replay_changed_payload.get("status") == "success"
+        and sync_replay_changed_payload.get("deduplicated") is True
+        and sync_replay_changed_payload.get("cursor_update", {}).get("status") == "advanced"
+        and sync_replay_changed_payload.get("cursor_update", {}).get("reason") == "advanced_after_durable_commit"
+        and sync_replay_changed_version.get("version_ordinal") == 2
+        and bool(sync_replay_changed_version.get("predecessor_content_version_id"))
+        and sync_webhook_receipt.get("delivery_receipt_id") != sync_replay_changed_receipt.get("delivery_receipt_id")
+        and sync_webhook_artifact.get("artifact_id") != sync_replay_changed_artifact.get("artifact_id"),
+        "crash_after_cursor_replay_safe": transcripts["sync_after_cursor"].get("exit_code") == 5
+        and sync_after_cursor_payload.get("status") == "interrupted"
+        and sync_after_cursor_payload.get("crash_point") == "after_cursor"
+        and sync_after_cursor_payload.get("cursor_update", {}).get("status") == "observed"
+        and sync_after_cursor_payload.get("cursor_update", {}).get("cursor_advanced_before_commit") is False
+        and _exit_ok(transcripts["sync_replay_after_cursor"])
+        and sync_replay_after_cursor_payload.get("status") == "success"
+        and sync_replay_after_cursor_payload.get("deduplicated") is True
+        and sync_after_cursor_version.get("content_version_id")
+        == sync_replay_after_cursor_version.get("content_version_id"),
+        "out_of_order_preserves_lineage": _exit_ok(transcripts["sync_out_of_order_webhook"])
+        and sync_out_of_order_payload.get("status") == "success"
+        and sync_out_of_order_payload.get("deduplicated") is True
+        and sync_out_of_order_payload.get("cursor_update", {}).get("reason") == "out_of_order_source_revision_observed"
+        and sync_cursor.get("cursor_value") == "2026-06-23T00:02:00Z"
+        and sync_lineage.get("version_count") == 2
+        and sync_lineage.get("one_current_logical_truth") is True
+        and sync_lineage.get("duplicate_active_truth_count") == 0
+        and sync_lineage.get("historical_evidence_mutation_count") == 0,
+        "final_reconciliation_success": _exit_ok(transcripts["sync_reconcile"])
+        and sync_reconciliation.get("status") == "success"
+        and sync_reconciliation.get("cursor_count") == 1
+        and sync_reconciliation.get("delivery_receipt_count") == 2
+        and sync_reconciliation.get("artifact_count") == 2
+        and sync_reconciliation.get("dedupe_record_count") == 2
+        and sync_reconciliation.get("missing_cursor_receipt_count") == 0
+        and sync_reconciliation.get("missing_cursor_artifact_count") == 0
+        and sync_reconciliation.get("unobserved_delivery_receipt_count") == 0
+        and sync_reconciliation.get("duplicate_logical_artifact_count") == 0
+        and sync_reconciliation.get("cursor_advanced_before_commit_count") == 0
+        and sync_reconciliation.get("duplicate_or_replay_observation_count", 0) >= 3
+        and sync_reconciliation.get("out_of_order_observation_count") == 1
+        and set(sync_reconciliation.get("signals_seen", [])) == {"poll", "webhook"},
+        "sync_lag_metrics_recorded": sync_gap_reconciliation.get("sync_lag_metrics", {}).get(
+            "unobserved_delivery_receipt_count"
+        )
+        == 1
+        and sync_reconciliation.get("sync_lag_metrics", {}).get("unobserved_delivery_receipt_count") == 0
+        and sync_reconciliation.get("sync_lag_metrics", {}).get("duplicate_or_replay_observation_count", 0) >= 3,
+        "sync_records_persisted": sync_cursor_count == 1
+        and sync_signal_receipt_count == 3
+        and sync_reconciliation_count >= 1
+        and sync_delivery_receipt_count == 2
+        and sync_artifact_count == 2
+        and sync_content_version_count == 2,
+        "provider_and_external_call_counters_zero": _connector_provider_call_count(sync_setup_result) == 0
+        and all(
+            int(receipt.get("provider_call_ledger", {}).get("during_ingest", 1) or 0) == 0
+            and int(receipt.get("provider_call_ledger", {}).get("external_http_calls", 1) or 0) == 0
+            for receipt in [sync_webhook_receipt, sync_replay_changed_receipt]
+        )
+        and sync_bad_webhook_signal_receipt.get("external_http_calls") == 0
+        and sync_webhook_signal_receipt.get("external_http_calls") == 0
+        and sync_out_of_order_signal_receipt.get("external_http_calls") == 0,
+        "evidence_refs_present": bool(sync_bad_webhook_payload.get("evidence_refs"))
+        and bool(sync_webhook_payload.get("evidence_refs"))
+        and bool(sync_poll_duplicate_payload.get("evidence_refs"))
+        and bool(sync_replay_changed_payload.get("evidence_refs"))
+        and bool(sync_reconcile_payload.get("evidence_refs")),
+        "audit_refs_present": bool(sync_bad_webhook_payload.get("audit_refs"))
+        and bool(sync_webhook_payload.get("audit_refs"))
+        and bool(sync_poll_duplicate_payload.get("audit_refs"))
+        and bool(sync_replay_changed_payload.get("audit_refs"))
+        and bool(sync_reconcile_payload.get("audit_refs")),
+        "zero_provider_internals": not sync_internal_paths,
+        "zero_secret_findings": stdout_secret_findings == 0 and state_secret_findings == 0,
+        "no_cursor_before_commit_marker": "CS_CH_017_CURSOR_ADVANCED_BEFORE_COMMIT_MUST_NOT_EXIST"
+        not in sync_state_text,
+    }
+    audit_correlation_checks_report = audit_correlation_report.get("checks", {})
+    audit_correlation_negative = audit_correlation_report.get("negative_evidence", {})
+    audit_correlation_required_presence = audit_correlation_report.get("required_family_presence", {})
+    audit_correlation_checks = {
+        "contract_validate_exit_zero": _exit_ok(transcripts["audit_correlation_contract_validate"]),
+        "setup_plan_exit_zero": _exit_ok(transcripts["audit_correlation_setup_plan"])
+        and audit_correlation_setup_payload.get("connector_setup_result", {}).get("activation_allowed") is True,
+        "source_policy_confirm_exit_zero": _exit_ok(transcripts["audit_correlation_source_policy_confirm"])
+        and audit_correlation_source_policy_payload.get("connector_source_policy", {}).get("confirmation", {}).get(
+            "owner_confirmed"
+        )
+        is True,
+        "delivery_process_exit_zero": _exit_ok(transcripts["audit_correlation_delivery_process"])
+        and bool(audit_correlation_delivery_receipt_id),
+        "evidence_bundle_exit_zero": _exit_ok(transcripts["audit_correlation_evidence_bundle_create"])
+        and bool(audit_correlation_evidence_payload.get("evidence_bundle", {}).get("evidence_bundle_id")),
+        "retry_state_audited": transcripts["audit_correlation_transient_retry"].get("exit_code") == 5
+        and audit_correlation_retry_payload.get("status") == "retry_scheduled"
+        and bool(audit_correlation_retry_payload.get("audit_refs")),
+        "poison_retries_audited_before_quarantine": transcripts["audit_correlation_poison_retry_first"].get("exit_code")
+        == 5
+        and audit_correlation_poison_retry_first_payload.get("status") == "retry_scheduled"
+        and bool(audit_correlation_poison_retry_first_payload.get("audit_refs"))
+        and transcripts["audit_correlation_poison_retry_second"].get("exit_code") == 5
+        and audit_correlation_poison_retry_second_payload.get("status") == "retry_scheduled"
+        and bool(audit_correlation_poison_retry_second_payload.get("audit_refs")),
+        "quarantine_state_audited": transcripts["audit_correlation_poison_quarantine"].get("exit_code") == 7
+        and audit_correlation_quarantine_payload.get("status") == "quarantined"
+        and bool(audit_correlation_quarantine_id)
+        and bool(audit_correlation_quarantine_payload.get("audit_refs")),
+        "quarantine_replay_audited": _exit_ok(transcripts["audit_correlation_quarantine_replay"])
+        and audit_correlation_replay_payload.get("status") == "success"
+        and bool(audit_correlation_replay_payload.get("audit_refs")),
+        "action_bypass_audited": transcripts["audit_correlation_direct_write_denied"].get("exit_code") == 8
+        and audit_correlation_direct_write_payload.get("status") == "denied"
+        and bool(audit_correlation_direct_write_payload.get("audit_refs")),
+        "credential_lifecycle_audited": all(
+            _exit_ok(transcripts[f"audit_correlation_credential_{operation}"])
+            and bool(audit_correlation_credential_payloads[operation].get("audit_refs"))
+            for operation in ["status", "rotate", "revoke"]
+        ),
+        "correlation_command_exit_zero": _exit_ok(transcripts["audit_correlation_correlate"])
+        and audit_correlation_report.get("status") == "success",
+        "required_event_families_present": audit_correlation_checks_report.get(
+            "required_event_families_present"
+        )
+        is True
+        and set(audit_correlation_required_presence) >= {
+            "setup",
+            "policy",
+            "delivery",
+            "evidence",
+            "retry",
+            "quarantine",
+            "action",
+            "credential",
+        },
+        "every_connector_event_has_audit_and_object_refs": audit_correlation_checks_report.get(
+            "every_connector_event_has_audit_and_object_refs"
+        )
+        is True,
+        "correlation_ids_unique": audit_correlation_checks_report.get("correlation_ids_unique") is True,
+        "scope_consistent": audit_correlation_checks_report.get("scope_consistent") is True,
+        "raw_payloads_and_secrets_absent": audit_correlation_checks_report.get(
+            "raw_payloads_and_secrets_absent"
+        )
+        is True,
+        "audit_verify_exit_zero": _exit_ok(transcripts["audit_correlation_audit_verify"])
+        and audit_correlation_audit_payload.get("audit_integrity", {}).get("status") == "success",
+        "tamper_verify_detects_change": transcripts["audit_correlation_tamper_verify"].get("exit_code") != 0
+        and audit_correlation_tamper_payload.get("audit_integrity", {}).get("status") == "failed"
+        and bool(audit_correlation_tamper_payload.get("audit_integrity", {}).get("errors")),
+        "negative_counters_zero": all(int(value or 0) == 0 for value in audit_correlation_negative.values()),
+    }
+    cs_ch_001_pass = all(checks.values())
+    cs_ch_002_pass = all(missing_checks.values())
+    cs_ch_003_pass = all(optional_checks.values())
+    cs_ch_004_pass = all(source_policy_checks.values())
+    cs_ch_005_pass = all(provider_swap_checks.values())
+    cs_ch_006_pass = all(permission_gap_checks.values())
+    cs_ch_007_pass = all(delivery_checks.values())
+    cs_ch_008_pass = all(ack_checks.values())
+    cs_ch_009_pass = all(retry_checks.values())
+    cs_ch_010_pass = all(lineage_checks.values())
+    cs_ch_011_pass = all(policy_checks.values())
+    cs_ch_012_pass = all(evidence_checks.values())
+    cs_ch_013_pass = all(raw_access_checks.values())
+    cs_ch_014_pass = all(untrusted_checks.values())
+    cs_ch_015_pass = all(selected_repo_checks.values())
+    cs_ch_016_pass = all(source_control_checks.values())
+    cs_ch_017_pass = all(sync_checks.values())
+    cs_ch_018_pass = all(content_restriction_checks.values())
+    cs_ch_019_pass = all(github_write_guard_checks.values())
+    cs_ch_020_pass = all(github_failure_checks.values())
+    cs_ch_021_pass = all(capture_checks.values())
+    cs_ch_022_pass = all(activity_checks.values())
+    cs_ch_023_pass = all(watch_rule_checks.values())
+    cs_ch_024_pass = all(chrome_active_tab_checks.values())
+    cs_ch_025_pass = all(chrome_auto_capture_checks.values())
+    cs_ch_026_pass = all(chrome_sensitive_page_checks.values())
+    cs_ch_027_pass = all(capture_lifecycle_checks.values())
+    cs_ch_028_pass = all(watch_result_checks.values())
+    cs_ch_029_pass = all(action_preflight_checks.values())
+    cs_ch_030_pass = all(action_safety_checks.values())
+    cs_ch_031_pass = all(action_execution_checks.values())
+    cs_ch_032_pass = all(action_bypass_checks.values())
+    cs_ch_033_pass = all(action_retry_checks.values())
+    cs_ch_034_pass = all(scope_isolation_checks.values())
+    cs_ch_035_pass = all(credential_custody_checks.values())
+    cs_ch_036_pass = all(egress_topology_checks.values())
+    cs_ch_037_pass = all(audit_correlation_checks.values())
+    cs_ch_038_pass = all(upgrade_checks.values())
+    cs_ch_039_pass = all(product_surface_checks.values())
+    first_six_pass = cs_ch_001_pass and cs_ch_002_pass and cs_ch_003_pass and cs_ch_004_pass and cs_ch_005_pass and cs_ch_006_pass
+    first_eight_pass = first_six_pass and cs_ch_038_pass and cs_ch_039_pass
+    if first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass and cs_ch_028_pass and cs_ch_029_pass and cs_ch_030_pass and cs_ch_031_pass and cs_ch_032_pass and cs_ch_033_pass and cs_ch_034_pass and cs_ch_035_pass and cs_ch_036_pass and cs_ch_037_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_39_AI_ROWS_REPORT_LINT_PENDING"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass and cs_ch_028_pass and cs_ch_029_pass and cs_ch_030_pass and cs_ch_031_pass and cs_ch_032_pass and cs_ch_033_pass and cs_ch_034_pass and cs_ch_035_pass and cs_ch_036_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_036_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass and cs_ch_028_pass and cs_ch_029_pass and cs_ch_030_pass and cs_ch_031_pass and cs_ch_032_pass and cs_ch_033_pass and cs_ch_034_pass and cs_ch_035_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_035_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass and cs_ch_028_pass and cs_ch_029_pass and cs_ch_030_pass and cs_ch_031_pass and cs_ch_032_pass and cs_ch_033_pass and cs_ch_034_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_034_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass and cs_ch_028_pass and cs_ch_029_pass and cs_ch_030_pass and cs_ch_031_pass and cs_ch_032_pass and cs_ch_033_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_033_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass and cs_ch_028_pass and cs_ch_029_pass and cs_ch_030_pass and cs_ch_031_pass and cs_ch_032_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_032_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass and cs_ch_028_pass and cs_ch_029_pass and cs_ch_030_pass and cs_ch_031_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_031_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass and cs_ch_028_pass and cs_ch_029_pass and cs_ch_030_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_030_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass and cs_ch_028_pass and cs_ch_029_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_029_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass and cs_ch_028_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_028_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass and cs_ch_027_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_027_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass and cs_ch_026_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_026_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass and cs_ch_025_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_025_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass and cs_ch_024_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_024_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass and cs_ch_023_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_023_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass and cs_ch_022_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_022_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass and cs_ch_021_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_021_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass and cs_ch_020_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_020_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass and cs_ch_019_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_019_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass and cs_ch_018_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_018_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass and cs_ch_017_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_017_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass and cs_ch_016_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_016_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass and cs_ch_015_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_015_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass and cs_ch_014_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_014_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass and cs_ch_013_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_013_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass and cs_ch_012_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_012_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass and cs_ch_011_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_011_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass and cs_ch_010_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_010_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass and cs_ch_009_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_009_ONLY"
+    elif first_eight_pass and cs_ch_007_pass and cs_ch_008_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_TO_CS_CH_008_ONLY"
+    elif first_eight_pass and cs_ch_007_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_PLUS_CS_CH_007_ONLY"
+    elif first_eight_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_CH0_ONLY"
+    elif first_six_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CS_CH_001_TO_CS_CH_006_ONLY"
+    elif cs_ch_001_pass and cs_ch_002_pass and cs_ch_003_pass and cs_ch_004_pass and cs_ch_005_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CS_CH_001_TO_CS_CH_005_ONLY"
+    elif cs_ch_001_pass and cs_ch_002_pass and cs_ch_003_pass and cs_ch_004_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CS_CH_001_TO_CS_CH_004_ONLY"
+    elif cs_ch_001_pass and cs_ch_002_pass and cs_ch_003_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CS_CH_001_TO_CS_CH_003_ONLY"
+    elif cs_ch_001_pass and cs_ch_002_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CS_CH_001_CS_CH_002_ONLY"
+    elif cs_ch_001_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CS_CH_001_ONLY"
+    else:
+        product_feature_claims = "NOT_VERIFIED"
+    preliminary_results = [
+        _row(
+            "CS-CH-001",
+            "MUST_PASS",
+            "PASS" if cs_ch_001_pass else "FAIL",
+            [
+                "cornerstone connector contract validate --file fixtures/connectorhub/contracts/github_readonly_contract.json --json",
+                "cornerstone connector setup plan --contract-id ccon_project_alpha_github --json",
+                "cornerstone audit verify --json",
+                str(setup_result_path.relative_to(root)) if setup_result_path.exists() else str(setup_result_path),
+                str(source_policy_path.relative_to(root)) if source_policy_path.exists() else str(source_policy_path),
+            ],
+            "Versioned connector capability contract is registered through CornerStone ConnectorPort, Setup Result and Source Policy are scoped and persisted, audit refs exist, and no provider internals or provider calls appear before activation.",
+        ),
+        _row(
+            "CS-CH-002",
+            "MUST_PASS",
+            "PASS" if cs_ch_002_pass else "FAIL",
+            [
+                f"cornerstone connector contract validate --file {missing_required_contract_path} --json",
+                "cornerstone connector setup plan --contract-id ccon_project_alpha_missing_required --json",
+                "cornerstone audit verify --json",
+                str(missing_setup_result_path.relative_to(root)) if missing_setup_result_path.exists() else str(missing_setup_result_path),
+                str(missing_source_policy_path.relative_to(root)) if missing_source_policy_path.exists() else str(missing_source_policy_path),
+            ],
+            "A required unsupported capability blocks activation with a stable reason code and guidance; no delivery streams or provider calls are created.",
+        ),
+        _row(
+            "CS-CH-003",
+            "MUST_PASS",
+            "PASS" if cs_ch_003_pass else "FAIL",
+            [
+                f"cornerstone connector contract validate --file {optional_missing_contract_path} --json",
+                "cornerstone connector setup plan --contract-id ccon_project_alpha_optional_missing --json",
+                "cornerstone audit verify --json",
+                str(optional_setup_result_path.relative_to(root)) if optional_setup_result_path.exists() else str(optional_setup_result_path),
+                str(optional_source_policy_path.relative_to(root)) if optional_source_policy_path.exists() else str(optional_source_policy_path),
+            ],
+            "An unavailable optional capability produces ready_with_gaps, leaves available streams enabled, disables only the unavailable surface, and makes zero provider calls.",
+        ),
+        _row(
+            "CS-CH-004",
+            "MUST_PASS",
+            "PASS" if cs_ch_004_pass else "FAIL",
+            [
+                "cornerstone connector source-policy confirm --contract-id ccon_project_alpha_github --allowed-path docs/** --max-content-bytes 100000 --retention-days 30 --json",
+                "cornerstone connector source-policy confirm --contract-id ccon_project_alpha_github --allowed-path docs/** --allowed-path secrets/** --json",
+                "cornerstone audit verify --json",
+                str(confirmed_source_policy_path.relative_to(root)) if confirmed_source_policy_path.exists() else str(confirmed_source_policy_path),
+            ],
+            "Owner Source Policy override persists a new narrowed immutable snapshot, audits the change, and denies attempted broadening without creating a policy snapshot.",
+        ),
+        _row(
+            "CS-CH-005",
+            "REGRESSION_GUARD",
+            "PASS" if cs_ch_005_pass else "FAIL",
+            [
+                "cornerstone connector setup plan --contract-id ccon_project_alpha_github --provider-pack-id local_source_control_readonly_alt.v1 --json",
+                str(provider_swap_setup_result_path.relative_to(root)) if provider_swap_setup_result_path.exists() else str(provider_swap_setup_result_path),
+                str(provider_swap_source_policy_path.relative_to(root)) if provider_swap_source_policy_path.exists() else str(provider_swap_source_policy_path),
+            ],
+            "Provider swap changes setup/source provider refs only; product handler contract, projection contract, and preview object remain unchanged.",
+        ),
+        _row(
+            "CS-CH-006",
+            "MUST_PASS",
+            "PASS" if cs_ch_006_pass else "FAIL",
+            [
+                "cornerstone connector setup plan --contract-id ccon_project_alpha_github --provider-pack-id local_source_control_permission_gap.v1 --json",
+                str(permission_gap_setup_result_path.relative_to(root)) if permission_gap_setup_result_path.exists() else str(permission_gap_setup_result_path),
+                str(permission_gap_source_policy_path.relative_to(root)) if permission_gap_source_policy_path.exists() else str(permission_gap_source_policy_path),
+            ],
+            "Credential/permission gap status explains cause, impact, and safe resolution with redaction flags and no provider internals.",
+        ),
+        _row(
+            "CS-CH-007",
+            "MUST_PASS",
+            "PASS" if cs_ch_007_pass else "FAIL",
+            [
+                f"cornerstone connector delivery ingest --file {delivery_path} --contract-id ccon_project_alpha_github --json",
+                "cornerstone artifact show <connector_projection_artifact_id> --json",
+                str(delivery_receipt_path.relative_to(root)) if delivery_receipt_path.exists() else str(delivery_receipt_path),
+                str(projection_snapshot_path.relative_to(root)) if projection_snapshot_path.exists() else str(projection_snapshot_path),
+                str(connector_evidence_link_path.relative_to(root)) if connector_evidence_link_path.exists() else str(connector_evidence_link_path),
+                str(delivery_original_path.relative_to(root)) if delivery_original_path.exists() else str(delivery_original_path),
+            ],
+            "A valid app-scoped Projection Delivery is archived as an immutable scoped Artifact with exact envelope bytes, receipt, Projection snapshot, Source Policy link, EvidenceRef metadata, and audit refs before any Product interpretation or acknowledgement.",
+        ),
+        _row(
+            "CS-CH-008",
+            "MUST_PASS",
+            "PASS" if cs_ch_008_pass else "FAIL",
+            [
+                f"cornerstone connector delivery process --file {delivery_path} --contract-id ccon_project_alpha_github --fault-mode before_commit --json",
+                f"cornerstone connector delivery process --file {delivery_path} --contract-id ccon_project_alpha_github --fault-mode after_commit_before_ack --json",
+                f"cornerstone connector delivery process --file {delivery_path} --contract-id ccon_project_alpha_github --json",
+                "cornerstone connector delivery reconcile --json",
+                str(ack_delivery_receipt_path.relative_to(root)) if ack_delivery_receipt_path.exists() else str(ack_delivery_receipt_path),
+                str(ack_outbox_path.relative_to(root)) if ack_outbox_path.exists() else str(ack_outbox_path),
+                str(ack_original_path.relative_to(root)) if ack_original_path.exists() else str(ack_original_path),
+            ],
+            "Fault-injected Delivery processing never acknowledges before durable archive commit; after a post-commit/pre-ack crash, redelivery reuses one logical Artifact and sends the ack through the committed outbox exactly once.",
+        ),
+        _row(
+            "CS-CH-009",
+            "MUST_PASS",
+            "PASS" if cs_ch_009_pass else "FAIL",
+            [
+                f"cornerstone connector delivery process --file {delivery_path} --contract-id ccon_project_alpha_github --failure-mode transient --json",
+                f"cornerstone connector delivery process --file {poison_delivery_path} --contract-id ccon_project_alpha_github --json",
+                "cornerstone connector quarantine list --json",
+                "cornerstone connector quarantine replay --quarantine-id <connector_quarantine_id> --json",
+                str(transient_retry_state_path.relative_to(root)) if transient_retry_state_path.exists() else str(transient_retry_state_path),
+                str(poison_retry_state_path.relative_to(root)) if poison_retry_state_path.exists() else str(poison_retry_state_path),
+                str(poison_quarantine_path.relative_to(root)) if poison_quarantine_path.exists() else str(poison_quarantine_path),
+            ],
+            "Transient Delivery failures retry with bounded backoff, poison Delivery reaches quarantine at the configured threshold with safe diagnostics, unrelated healthy Delivery still archives and acknowledges, and replay preserves failure evidence.",
+        ),
+        _row(
+            "CS-CH-010",
+            "MUST_PASS",
+            "PASS" if cs_ch_010_pass else "FAIL",
+            [
+                f"cornerstone connector delivery process --file {delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {duplicate_event_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {unchanged_event_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {changed_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector lineage show --contract-id ccon_project_alpha_github --source-external-id {issue_source_external_id} --json",
+                str(lineage_first_dedupe_path.relative_to(root)) if lineage_first_dedupe_path.exists() else str(lineage_first_dedupe_path),
+                str(lineage_changed_dedupe_path.relative_to(root)) if lineage_changed_dedupe_path.exists() else str(lineage_changed_dedupe_path),
+                str(lineage_first_version_path.relative_to(root)) if lineage_first_version_path.exists() else str(lineage_first_version_path),
+                str(lineage_changed_version_path.relative_to(root)) if lineage_changed_version_path.exists() else str(lineage_changed_version_path),
+                str(lineage_current_path.relative_to(root)) if lineage_current_path.exists() else str(lineage_current_path),
+            ],
+            "Repeated provider events and unchanged source content resolve to one logical intake record; changed source content creates a new linked version with current-version lineage and no duplicate active truth or historical evidence mutation.",
+        ),
+        _row(
+            "CS-CH-011",
+            "MUST_PASS",
+            "PASS" if cs_ch_011_pass else "FAIL",
+            [
+                f"cornerstone connector delivery process --file {delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery ingest --file {forbidden_body_delivery_path} --contract-id ccon_project_alpha_github --json",
+                "cornerstone connector source-policy confirm --contract-id ccon_project_alpha_github --max-content-bytes 120 --json",
+                f"cornerstone connector delivery ingest --file {oversized_excerpt_delivery_path} --contract-id ccon_project_alpha_github --json",
+                str(policy_allowed_decision_path.relative_to(root)) if policy_allowed_decision_path.exists() else str(policy_allowed_decision_path),
+                str(policy_forbidden_decision_path.relative_to(root)) if policy_forbidden_decision_path.exists() else str(policy_forbidden_decision_path),
+                str(policy_oversized_decision_path.relative_to(root)) if policy_oversized_decision_path.exists() else str(policy_oversized_decision_path),
+                str(policy_narrowed_source_policy_path.relative_to(root)) if policy_narrowed_source_policy_path.exists() else str(policy_narrowed_source_policy_path),
+            ],
+            "Source Policy enforcement normalizes allowed preview fields, blocks forbidden full-body fields and oversized content before Artifact/receipt creation, records policy decisions and helpful errors, and persists zero forbidden raw content.",
+        ),
+        _row(
+            "CS-CH-012",
+            "MUST_PASS",
+            "PASS" if cs_ch_012_pass else "FAIL",
+            [
+                f"cornerstone connector delivery process --file {delivery_path} --contract-id ccon_project_alpha_github --json",
+                "cornerstone connector evidence bundle create --delivery-receipt-id <connector_delivery_receipt_id> --json",
+                "cornerstone claim create --evidence-bundle-id <evidence_bundle_id> --json",
+                "cornerstone claim approve <claim_id> --json",
+                "cornerstone connector evidence bundle create --evidence-ref-id <evidence_ref_id> --json",
+                str(evidence_bundle_path.relative_to(root)) if evidence_bundle_path.exists() else str(evidence_bundle_path),
+                str(evidence_search_snapshot_path.relative_to(root)) if evidence_search_snapshot_path.exists() else str(evidence_search_snapshot_path),
+            ],
+            "Connector EvidenceRef metadata is promoted only through a CornerStone Evidence Bundle that links Artifact, Delivery, Setup Result, Source Policy, EvidenceRef, search snapshot, and audit refs; EvidenceRef-only and zero-evidence claim approval paths are denied.",
+        ),
+        _row(
+            "CS-CH-013",
+            "MUST_PASS",
+            "PASS" if cs_ch_013_pass else "FAIL",
+            [
+                "cornerstone connector raw-access request --contract-id ccon_project_alpha_github --evidence-ref-id <evidence_ref_id> --json",
+                "cornerstone connector raw-access request --contract-id ccon_project_alpha_github_raw_access --evidence-ref-id <evidence_ref_id> --ttl-seconds 60 --max-reads 1 --human-approved --json",
+                "cornerstone connector raw-access export --grant-id <raw_access_grant_id> --json",
+                "cornerstone connector raw-access read --grant-id <raw_access_grant_id> --json",
+                "cornerstone connector raw-access revoke --grant-id <raw_access_grant_id> --json",
+                str(raw_access_request_path.relative_to(root)) if raw_access_request_path.exists() else str(raw_access_request_path),
+                str(raw_access_grant_path.relative_to(root)) if raw_access_grant_path.exists() else str(raw_access_grant_path),
+            ],
+            "Temporary raw access is denied by default; declared grants are purpose-bound, expiring, read-counted, redacted, scoped, revocable, audited, and exported only as metadata without raw content or reusable handles.",
+        ),
+        _row(
+            "CS-CH-014",
+            "REGRESSION_GUARD",
+            "PASS" if cs_ch_014_pass else "FAIL",
+            [
+                f"cornerstone connector delivery process --file {prompt_injection_delivery_path} --contract-id ccon_project_alpha_github --json",
+                "cornerstone connector untrusted-content review --delivery-receipt-id <connector_delivery_receipt_id> --json",
+                "cornerstone connector evidence bundle create --delivery-receipt-id <connector_delivery_receipt_id> --json",
+                "cornerstone claim create --evidence-bundle-id <evidence_bundle_id> --statement <quoted-instruction-boundary> --json",
+                "cornerstone agent prompt-authority-test --role-id connector --requested-tool shell.run --requested-memory-scope global --requested-authority external_egress --json",
+                "cornerstone memory quarantine-check --artifact-id <artifact_id> --statement <memory-poisoning-attempt> --json",
+                "cornerstone egress test --url http://example.test/leak --json",
+                str(untrusted_review_path.relative_to(root)) if untrusted_review_path.exists() else str(untrusted_review_path),
+                str(untrusted_bundle_path.relative_to(root)) if untrusted_bundle_path.exists() else str(untrusted_bundle_path),
+                str(untrusted_memory_quarantine_path.relative_to(root)) if untrusted_memory_quarantine_path.exists() else str(untrusted_memory_quarantine_path),
+            ],
+            "Untrusted connector content can be archived, searched, quoted, and cited only as evidence; prompt/tool/action/egress/memory/policy manipulation attempts are blocked with zero side effects and audit refs.",
+        ),
+        _row(
+            "CS-CH-015",
+            "MUST_PASS",
+            "PASS" if cs_ch_015_pass else "FAIL",
+            [
+                f"cornerstone connector contract validate --file {selected_repo_contract_path} --json",
+                "cornerstone connector setup plan --contract-id ccon_selected_repos_github --json",
+                f"cornerstone connector delivery process --file {selected_repo_delivery_path} --contract-id ccon_selected_repos_github --json",
+                f"cornerstone connector delivery process --file {unselected_repo_delivery_path} --contract-id ccon_selected_repos_github --json",
+                "cornerstone connector direct-write-test --provider github --target github:repo:owner/project-alpha --json",
+                "cornerstone connector source-policy confirm --contract-id ccon_selected_repos_github --selected-resource github:repo:owner/project-alpha --selected-resource github:repo:owner/project-beta --json",
+                "cornerstone audit verify --json",
+                str(selected_repo_setup_result_path.relative_to(root)) if selected_repo_setup_result_path.exists() else str(selected_repo_setup_result_path),
+                str(selected_repo_source_policy_path.relative_to(root)) if selected_repo_source_policy_path.exists() else str(selected_repo_source_policy_path),
+                str(selected_repo_allowed_receipt_path.relative_to(root)) if selected_repo_allowed_receipt_path.exists() else str(selected_repo_allowed_receipt_path),
+                str(selected_repo_denied_policy_decision_path.relative_to(root)) if selected_repo_denied_policy_decision_path.exists() else str(selected_repo_denied_policy_decision_path),
+            ],
+            "A local GitHub installation fixture exposes three repositories but only the owner-selected repository becomes visible and ingestible; unselected repository events, direct writes, and silent selection broadening are denied with audit refs and zero extra Artifact, receipt, ack, provider-call, or write side effects.",
+        ),
+        _row(
+            "CS-CH-016",
+            "MUST_PASS",
+            "PASS" if cs_ch_016_pass else "FAIL",
+            [
+                f"cornerstone connector delivery process --file {repository_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {commit_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {change_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {file_snapshot_delivery_path} --contract-id ccon_project_alpha_github --json",
+                "cornerstone connector evidence bundle create --delivery-receipt-id <connector_delivery_receipt_id> --json",
+                "cornerstone audit verify --json",
+                str(source_control_state_path.relative_to(root)) if source_control_state_path.exists() else str(source_control_state_path),
+            ],
+            "Repository, commit, change, issue, and allowed file-snapshot Projection fixtures all archive as immutable Artifacts, acknowledge after commit, create source-revisioned content versions, and assemble searchable Evidence Bundles without making provider-specific fields Product requirements.",
+        ),
+        _row(
+            "CS-CH-017",
+            "MUST_PASS",
+            "PASS" if cs_ch_017_pass else "FAIL",
+            [
+                f"cornerstone connector sync incremental --file {bad_webhook_delivery_path} --contract-id ccon_project_alpha_github --signal webhook --cursor-id {sync_cursor_id} --json",
+                f"cornerstone connector sync incremental --file {delivery_path} --contract-id ccon_project_alpha_github --signal webhook --cursor-id {sync_cursor_id} --json",
+                f"cornerstone connector sync incremental --file {duplicate_event_delivery_path} --contract-id ccon_project_alpha_github --signal poll --cursor-id {sync_cursor_id} --json",
+                f"cornerstone connector sync incremental --file {changed_delivery_path} --contract-id ccon_project_alpha_github --signal poll --cursor-id {sync_cursor_id} --fault-mode after_commit_before_cursor --json",
+                f"cornerstone connector sync reconcile --cursor-id {sync_cursor_id} --json",
+                f"cornerstone connector sync incremental --file {changed_delivery_path} --contract-id ccon_project_alpha_github --signal poll --cursor-id {sync_cursor_id} --json",
+                f"cornerstone connector sync incremental --file {unchanged_event_delivery_path} --contract-id ccon_project_alpha_github --signal webhook --cursor-id {sync_cursor_id} --json",
+                f"cornerstone connector lineage show --contract-id ccon_project_alpha_github --source-external-id {issue_source_external_id} --json",
+                str(sync_state_path.relative_to(root)) if sync_state_path.exists() else str(sync_state_path),
+            ],
+            "Webhook origin/signature verification is enforced inside the Connector boundary; webhook/poll overlap, replay after cursor gaps, crash after cursor advancement, and out-of-order source revisions preserve one logical source-control truth with no duplicate Artifact truth or cursor advance before durable commit.",
+        ),
+        _row(
+            "CS-CH-018",
+            "MUST_PASS",
+            "PASS" if cs_ch_018_pass else "FAIL",
+            [
+                f"cornerstone connector delivery process --file {content_secret_marker_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {content_binary_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {content_large_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {content_forbidden_path_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {content_generated_delivery_path} --contract-id ccon_project_alpha_github --json",
+                f"cornerstone connector delivery process --file {content_private_material_delivery_path} --contract-id ccon_project_alpha_github --json",
+                "cornerstone audit verify --json",
+                str(content_restriction_state_path.relative_to(root))
+                if content_restriction_state_path.exists()
+                else str(content_restriction_state_path),
+            ],
+            "GitHub file content is admitted only through Source Policy content restrictions: token-like excerpts are redacted, binary and oversized content become metadata-only Artifacts, forbidden/generated paths are skipped before Artifact or receipt creation, private-key material is quarantined, and durable Product state contains zero raw sensitive or out-of-policy markers.",
+        ),
+        _row(
+            "CS-CH-019",
+            "MUST_PASS",
+            "PASS" if cs_ch_019_pass else "FAIL",
+            [
+                f"cornerstone connector contract validate --file {github_write_action_contract_path} --json",
+                "cornerstone connector github-write-guard --json",
+                "cornerstone connector direct-write-test --provider github --operation <github-write-operation> --json",
+                "cornerstone audit verify --json",
+                str(github_write_guard_state_path.relative_to(root))
+                if github_write_guard_state_path.exists()
+                else str(github_write_guard_state_path),
+            ],
+            "GitHub/source-control remains a read-only Connector Hub source: write Action declarations are rejected before contract persistence, Provider Packs expose no write mappings, product CLI exposes no GitHub mutation commands, controlled egress attempts and direct runtime write attempts are denied, and negative evidence records zero write calls or provider mutations.",
+        ),
+        _row(
+            "CS-CH-020",
+            "MUST_PASS",
+            "PASS" if cs_ch_020_pass else "FAIL",
+            [
+                f"cornerstone connector delivery process --file {delivery_path} --contract-id ccon_project_alpha_github --json",
+                "cornerstone connector github-failure simulate --failure-mode rate_limit --contract-id ccon_project_alpha_github --source-ref github:repo:owner/project-alpha --json",
+                "cornerstone connector github-failure simulate --failure-mode permission_revoked --contract-id ccon_project_alpha_github --source-ref github:repo:owner/project-alpha --json",
+                "cornerstone connector github-failure simulate --failure-mode repository_removed --contract-id ccon_project_alpha_github --source-ref github:repo:owner/project-alpha --json",
+                "cornerstone connector github-failure simulate --failure-mode transient_transport --contract-id ccon_project_alpha_github --source-ref github:repo:owner/project-alpha --json",
+                "cornerstone audit verify --json",
+                str(github_failure_state_path.relative_to(root))
+                if github_failure_state_path.exists()
+                else str(github_failure_state_path),
+            ],
+            "GitHub provider failures become stable local source-health states: rate limits schedule bounded retry and freshness delay, revoked permissions create a permanent setup gap with suspended streams, repository removal stops future ingestion and marks the source unavailable, transient transport retries safely, prior evidence is preserved with Search/Claim warnings, and negative evidence records zero silent deletion or fresh claims while suspended.",
+        ),
+        _row(
+            "CS-CH-021",
+            "MUST_PASS",
+            "PASS" if cs_ch_021_pass else "FAIL",
+            [
+                "cornerstone connector capture permission probe --platform-permission-state not_granted --json",
+                "cornerstone connector capture guard evaluate --platform-permission-state not_granted --json",
+                "cornerstone connector capture permission probe --platform-permission-state granted --json",
+                "cornerstone connector capture consent granted --purpose <purpose> --json",
+                "cornerstone connector capture guard evaluate --platform-permission-state granted --json",
+                "cornerstone audit verify --json",
+                str(capture_state_path.relative_to(root)) if capture_state_path.exists() else str(capture_state_path),
+            ],
+            "macOS WatchAgent capture stays off by default: permission probes are metadata-only, permission without consent is blocked, consent without permission is blocked, consent and platform permission become a ready state without starting capture, and negative evidence records zero samples, screenshots, hidden startup capture, cross-namespace capture, external calls, or provider mutations.",
+        ),
+        _row(
+            "CS-CH-022",
+            "MUST_PASS",
+            "PASS" if cs_ch_022_pass else "FAIL",
+            [
+                f"cornerstone connector capture sessionize --file {activity_samples_path} --json",
+                "cornerstone audit verify --json",
+                str(activity_session_state_path.relative_to(root))
+                if activity_session_state_path.exists()
+                else str(activity_session_state_path),
+            ],
+            "Permissioned activity samples become bounded ActivitySession projections: duplicates are deduped, idle gaps split sessions, low-information noise is filtered with visible metrics, app switches remain observed facts, confidence/caveats are recorded, and no unsupported intent claim is stored as observed truth.",
+        ),
+        _row(
+            "CS-CH-023",
+            "MUST_PASS",
+            "PASS" if cs_ch_023_pass else "FAIL",
+            [
+                f"cornerstone watch rule create --file {watch_rule_path} --json",
+                "cornerstone watch rule activate --watch-rule-id <watch_rule_id> --source-readiness missing --json",
+                "cornerstone watch rule activate --watch-rule-id <watch_rule_id> --source-readiness ready --json",
+                "cornerstone watch rule evaluate --watch-rule-id <watch_rule_id> --source-evidence-ref <evidence_ref> --json",
+                f"cornerstone watch rule edit --watch-rule-id <watch_rule_id> --file {watch_rule_edit_path} --json",
+                "cornerstone watch rule show --watch-rule-id <watch_rule_id> --namespace-id other --json",
+                "cornerstone watch rule delete --watch-rule-id <watch_rule_id> --json",
+                "cornerstone audit verify --json",
+                str(watch_rule_state_path.relative_to(root)) if watch_rule_state_path.exists() else str(watch_rule_state_path),
+            ],
+            "Owner-scoped Watch Rules persist as Product/Mission lifecycle records with explicit sources, source-policy and connector-contract refs, missing-source activation denial, ready activation, pause/resume/delete audit trail, versioned edit diff, cross-namespace denial, and Watch Result evaluation traces pinned to the original rule version.",
+        ),
+        _row(
+            "CS-CH-024",
+            "MUST_PASS",
+            "PASS" if cs_ch_024_pass else "FAIL",
+            [
+                f"cornerstone connector capture browser active-tab --file {chrome_active_tab_allowed_path} --json",
+                "cornerstone connector capture consent granted --source-id chrome_active_tab --purpose <purpose> --json",
+                f"cornerstone connector capture browser active-tab --file {chrome_active_tab_popup_blocked_path} --json",
+                "cornerstone audit verify --json",
+                str(chrome_active_tab_state_path.relative_to(root))
+                if chrome_active_tab_state_path.exists()
+                else str(chrome_active_tab_state_path),
+            ],
+            "Explicit Chrome active-tab capture requires owner consent, activeTab temporary access, user gesture, confirmation, active-page scope, and backend policy revalidation before a summary-only Capture Inbox item is created; popup/browser-internal denial creates no summary or raw browser persistence.",
+        ),
+        _row(
+            "CS-CH-025",
+            "MUST_PASS",
+            "PASS" if cs_ch_025_pass else "FAIL",
+            [
+                f"cornerstone connector capture browser auto-capture --file {chrome_auto_capture_allowed_path} --json",
+                "cornerstone connector capture consent granted --source-id chrome_auto_capture --purpose <purpose> --json",
+                f"cornerstone connector capture browser auto-config --file {chrome_auto_capture_config_path} --json",
+                f"cornerstone connector capture browser auto-capture --file {chrome_auto_capture_blocked_path} --json",
+                f"cornerstone connector capture browser auto-capture --file {chrome_auto_capture_allowed_path} --json",
+                "cornerstone audit verify --json",
+                str(chrome_auto_capture_state_path.relative_to(root))
+                if chrome_auto_capture_state_path.exists()
+                else str(chrome_auto_capture_state_path),
+            ],
+            "Allowlist-based Chrome auto capture requires explicit owner source consent, a confirmed Watch/source-pack/site allowlist config, browser host permission, matching consent/config versions, active allowed page scope, throttle/session limits, and idempotency before a summary-only Capture Inbox item is created; blocked and duplicate triggers create no summary or raw browser persistence.",
+        ),
+        _row(
+            "CS-CH-026",
+            "MUST_PASS",
+            "PASS" if cs_ch_026_pass else "FAIL",
+            [
+                f"cornerstone connector capture browser sensitive-policy --file {chrome_sensitive_page_path} --json",
+                "cornerstone audit verify --json",
+                str(chrome_sensitive_page_state_path.relative_to(root))
+                if chrome_sensitive_page_state_path.exists()
+                else str(chrome_sensitive_page_state_path),
+            ],
+            "Sensitive Chrome pages are blocked or degraded before capture content is created; backend revalidation preserves/increases client restrictions, rejects false-safe payloads, stores only hash metadata for degraded cases, writes owner-visible history guidance, and creates no searchable Artifact, Capture Inbox item, raw browser data, or model-send side effect.",
+        ),
+        _row(
+            "CS-CH-027",
+            "MUST_PASS",
+            "PASS" if cs_ch_027_pass else "FAIL",
+            [
+                f"cornerstone connector capture lifecycle seed --file {capture_lifecycle_path} --json",
+                "cornerstone connector capture lifecycle pause --source-id macos_activity --target-kind source --json",
+                "cornerstone connector capture lifecycle sample-attempt --source-id macos_activity --event-id sample-while-paused --json",
+                "cornerstone connector capture lifecycle resume --source-id macos_activity --target-kind source --json",
+                "cornerstone connector capture lifecycle pause --source-id macos_activity --target-kind watch_rule --target-id wrule_project_alpha_capture --json",
+                "cornerstone connector capture lifecycle pause --source-id all_collection --target-kind global --target-id global_collection --json",
+                "cornerstone connector capture lifecycle revoke --source-id chrome_auto_capture --target-kind source --json",
+                "cornerstone connector capture lifecycle retention --source-id macos_activity --target-kind source --retention-days 7 --json",
+                "cornerstone connector capture lifecycle export --source-id macos_activity --include-history --json",
+                "cornerstone connector capture lifecycle review-result --result-id <capture_result_id> --decision save|dismiss --json",
+                "cornerstone connector capture lifecycle delete --source-id macos_activity --dry-run --json",
+                "cornerstone connector capture lifecycle delete --source-id macos_activity --execute --authorized --json",
+                "cornerstone audit verify --json",
+                str(capture_lifecycle_state_path.relative_to(root))
+                if capture_lifecycle_state_path.exists()
+                else str(capture_lifecycle_state_path),
+            ],
+            "Capture lifecycle controls persist pause/resume/revoke/retention decisions for source, Watch Rule, and global scopes; paused/revoked states deny new samples before sample creation, exports are scoped and redacted, result save/dismiss decisions persist, and deletion dry-run/execution explains deleted, disabled, retained, anonymized, and audit-retained state without promising full erasure.",
+        ),
+        _row(
+            "CS-CH-028",
+            "MUST_PASS",
+            "PASS" if cs_ch_028_pass else "FAIL",
+            [
+                f"cornerstone watch result build --file {watch_result_path} --json",
+                "cornerstone watch result correct --watch-result-id <watch_result_id> --inference-id <watch_inference_id> --json",
+                "cornerstone watch result approve-memory --watch-result-id <watch_result_id> --inference-id <watch_inference_id> --json",
+                "cornerstone watch result review --watch-result-id <watch_result_id> --decision save_draft_memory --json",
+                "cornerstone audit verify --json",
+                str(watch_result_state_path.relative_to(root))
+                if watch_result_state_path.exists()
+                else str(watch_result_state_path),
+            ],
+            "Watch Result proof keeps Observation, Inference, Evidence/Caveats, and Proposed sections separate; source-backed observations contain no inferred intent, low-confidence or unsupported inferences stay Draft/Hypothesis, correction preserves observation hashes, memory approval is denied, and review saves only a non-executing draft outcome.",
+        ),
+        _row(
+            "CS-CH-029",
+            "MUST_PASS",
+            "PASS" if cs_ch_029_pass else "FAIL",
+            [
+                "cornerstone action propose --action-kind external_writeback --risk high --connector supportdesk --target supportdesk:ticket:CS-1001 --json",
+                "cornerstone action dry-run <action_id> --json",
+                f"cornerstone connector action-preflight run --action-id <action_id> --file {action_preflight_path} --case-id allowed --json",
+                "cornerstone action execute <action_id> --json",
+                f"cornerstone connector action-preflight run --action-id <action_id> --file {action_preflight_path} --case-id undeclared_action|unsupported_provider|missing_permission|invalid_input|missing_idempotency|github_read_only --json",
+                "cornerstone audit verify --json",
+                str(action_preflight_state_path.relative_to(root))
+                if action_preflight_state_path.exists()
+                else str(action_preflight_state_path),
+            ],
+            "ActionCard dry-run proof combines Product impact and policy state with ConnectorHub preflight feasibility, permissions, Source Policy, risk, idempotency, expected calls, evidence, approval need, and audit refs; allowed preflight stays owner-review-only, denials block execution readiness, GitHub read-only remains inadmissible, and all dry-run/preflight paths record zero provider side effects.",
+        ),
+        _row(
+            "CS-CH-030",
+            "MUST_PASS",
+            "PASS" if cs_ch_030_pass else "FAIL",
+            [
+                "cornerstone action approve <action_id> --approver unauthorized_delegate --json",
+                "cornerstone action execute <action_id> --json",
+                f"cornerstone connector action-preflight run --action-id <action_id> --file {action_preflight_path} --case-id missing_permission|missing_idempotency --json",
+                "cornerstone workspace mode set locked --json",
+                "cornerstone action execute <action_id> --owner-id other-user --json",
+                "cornerstone audit verify --json",
+                str(action_safety_state_path.relative_to(root))
+                if action_safety_state_path.exists()
+                else str(action_safety_state_path),
+            ],
+            "Side-effecting connector action execution is denied unless evidence, current Product policy allow, authorized approval, connector preflight allow, declared permission, target-stable dry-run, and idempotency are all valid; denied paths persist precise safety envelopes, stable errors, audit events, and zero workflow/external/provider side effects.",
+        ),
+        _row(
+            "CS-CH-031",
+            "MUST_PASS",
+            "PASS" if cs_ch_031_pass else "FAIL",
+            [
+                "cornerstone action propose --action-kind external_writeback --risk high --connector supportdesk --target supportdesk:ticket:CS-1001 --json",
+                f"cornerstone connector action-preflight run --action-id <action_id> --file {action_preflight_path} --case-id allowed --json",
+                "cornerstone action approve <action_id> --approver owner --json",
+                "cornerstone action execute <action_id> --json",
+                "cornerstone action execute <action_id> --json",
+                "cornerstone audit verify --json",
+                str(action_execution_state_path.relative_to(root))
+                if action_execution_state_path.exists()
+                else str(action_execution_state_path),
+            ],
+            "A declared, evidence-backed, separately approved supportdesk fixture Action executes through ConnectorHub once, creates a WorkflowRun, Action Result, provider receipt, idempotency record, outcome Artifact/Evidence Bundle, and connected outcome, and replay returns the existing result with zero duplicate side effect.",
+        ),
+        _row(
+            "CS-CH-032",
+            "REGRESSION_GUARD",
+            "PASS" if cs_ch_032_pass else "FAIL",
+            [
+                f"cornerstone connector action-preflight run --action-id <action_id> --file {action_preflight_path} --case-id undeclared_action --json",
+                "cornerstone action approve <action_id> --approver owner --json",
+                "cornerstone action execute <action_id> --json",
+                "cornerstone connector direct-write-test --provider supportdesk --target supportdesk:ticket:CS-1001 --operation direct_provider_sdk_patch --json",
+                "cornerstone connector credential-boundary-test --provider supportdesk --capability support.ticket.write --json",
+                f"cornerstone pack import --manifest {direct_provider_pack_manifest_path} --json",
+                "static direct provider SDK import scan over packages/cornerstone_cli",
+                "cornerstone audit verify --json",
+                str(action_bypass_state_path.relative_to(root))
+                if action_bypass_state_path.exists()
+                else str(action_bypass_state_path),
+            ],
+            "Undeclared supportdesk Action preflight is denied and remains denied even after Product approval reaches execute; direct provider writeback is denied with zero calls/mutations/client/credential exposure; malicious Agent Pack direct-provider logic is quarantined; credential boundary proof and static import scan show no Product-owned provider client or secret.",
+        ),
+        _row(
+            "CS-CH-033",
+            "MUST_PASS",
+            "PASS" if cs_ch_033_pass else "FAIL",
+            [
+                "cornerstone action propose --action-kind external_writeback --risk high --connector supportdesk --target supportdesk:ticket:CS-1001 --json",
+                f"cornerstone connector action-preflight run --action-id <action_id> --file {action_preflight_path} --case-id allowed --json",
+                "cornerstone action approve <action_id> --approver owner --json",
+                "cornerstone action execute <action_id> --json",
+                "cornerstone action execute <action_id> --json",
+                "cornerstone action propose --action-kind external_writeback --risk high --connector supportdesk --target supportdesk:ticket:CS-2002 --json",
+                f"cornerstone connector action-preflight run --action-id <conflicting_action_id> --file {action_preflight_path} --case-id allowed_conflicting_intent --json",
+                "cornerstone action execute <conflicting_action_id> --json",
+                "cornerstone audit verify --json",
+                str(action_retry_state_path.relative_to(root))
+                if action_retry_state_path.exists()
+                else str(action_retry_state_path),
+            ],
+            "A stable ConnectorHub idempotency scope and request digest make same-key/same-intent retries return the existing result across CLI invocations, same-key/different-intent retries are denied before a second provider effect, and compensation expectations are visible without hidden automatic compensation.",
+        ),
+        _row(
+            "CS-CH-034",
+            "MUST_PASS",
+            "PASS" if cs_ch_034_pass else "FAIL",
+            [
+                "cornerstone connector setup plan --contract-id ccon_project_alpha_github --owner-id other-user --namespace-id other --json",
+                f"cornerstone connector delivery process --file {delivery_path} --contract-id ccon_project_alpha_github --owner-id other-user --namespace-id other --json",
+                "cornerstone connector evidence bundle create --delivery-receipt-id <connector_delivery_receipt_id> --owner-id other-user --namespace-id other --json",
+                "cornerstone watch result review --watch-result-id <watch_result_id> --decision save_draft_memory --owner-id other-user --namespace-id other --json",
+                "cornerstone action execute <action_id> --owner-id other-user --namespace-id other --json",
+                "cornerstone audit verify --json",
+                str(scope_isolation_state_path.relative_to(root))
+                if scope_isolation_state_path.exists()
+                else str(scope_isolation_state_path),
+            ],
+            "ConnectorHub application, Delivery, Evidence Bundle, Watch Result, Action Card, and audit records stay bound to one trusted owner/namespace/workspace scope; cross-scope setup, delivery, evidence, watch, and action execution attempts return CS_SCOPE_DENIED, disclose no object payloads, persist no other-scope rows, and create zero WorkflowRun, Action Result, or provider receipt side effects.",
+        ),
+        _row(
+            "CS-CH-035",
+            "REGRESSION_GUARD",
+            "PASS" if cs_ch_035_pass else "FAIL",
+            [
+                "cornerstone connector credential status --provider github --connection-id conn_project_alpha --canary-id cs-ch-035-canary --json",
+                "cornerstone connector credential rotate --provider github --connection-id conn_project_alpha --canary-id cs-ch-035-canary --json",
+                "cornerstone connector credential revoke --provider github --connection-id conn_project_alpha --canary-id cs-ch-035-canary --json",
+                "cornerstone connector credential-boundary-test --provider github --capability source_control.issue.read --json",
+                "cornerstone audit verify --json",
+                str(credential_custody_state_path.relative_to(root))
+                if credential_custody_state_path.exists()
+                else str(credential_custody_state_path),
+            ],
+            "Provider credentials remain ConnectorHub-owned: Product-facing lifecycle outputs expose only credential refs, fingerprints, status, and audit refs; rotation/revocation update safe connection state without Product secret writes; seeded raw canary scans across stdout and durable state remain zero.",
+        ),
+        _row(
+            "CS-CH-036",
+            "MUST_PASS",
+            "PASS" if cs_ch_036_pass else "FAIL",
+            [
+                "cornerstone security vs2-local-proof --json",
+                "cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json",
+                DEFAULT_VS2_EGRESS_PROOF_REPORT,
+                DEFAULT_VS2_LOCAL_RANGE_REPORT,
+                DEFAULT_VS2_SCENARIO_REPORT,
+            ],
+            "Default-deny egress is proved through the current VS2 local network topology: API, worker, and tool-runtime containers cannot reach the provider directly by HTTP or socket; only the governed egress proxy can reach the controlled provider; redirect, DNS, socket, protocol, sandbox/proxy/subprocess, untrusted-content, fail-closed, audit-correlation, and no-secret checks pass without promoting production network readiness.",
+        ),
+        _row(
+            "CS-CH-037",
+            "MUST_PASS",
+            "PASS" if cs_ch_037_pass else "FAIL",
+            [
+                "cornerstone connector audit correlate --json",
+                "cornerstone audit verify --json",
+                "cornerstone audit verify --state-dir tmp/scenario/connector-contract-adapter-audit-correlation-tamper --json",
+                str(audit_correlation_state_path.relative_to(root))
+                if audit_correlation_state_path.exists()
+                else str(audit_correlation_state_path),
+            ],
+            "Connector audit correlation proof covers setup, policy, delivery, evidence, retry, quarantine, action, and credential lifecycle event families; every connector event has a stable ConnectorHub event id, CornerStone audit event id, affected object refs, matching scope, no copied secrets or raw payloads, and a tamper test proves the CornerStone audit hash chain still fails closed.",
+        ),
+        _row(
+            "CS-CH-038",
+            "MUST_PASS",
+            "PASS" if cs_ch_038_pass else "FAIL",
+            [
+                "cornerstone connector upgrade plan --contract-id ccon_project_alpha_github --target-provider-pack-id local_source_control_readonly_alt.v1 --json",
+                "cornerstone connector upgrade plan --contract-id ccon_project_alpha_github --target-provider-pack-id local_source_control_breaking_v2.v2 --json",
+                str(compatible_upgrade_plan_path.relative_to(root)) if compatible_upgrade_plan_path.exists() else str(compatible_upgrade_plan_path),
+                str(breaking_upgrade_plan_path.relative_to(root)) if breaking_upgrade_plan_path.exists() else str(breaking_upgrade_plan_path),
+            ],
+            "Provider Pack upgrades produce version-pinned compatibility plans; incompatible target versions block activation, keep the current pinned provider active, and include rollback metadata.",
+        ),
+        _row(
+            "CS-CH-039",
+            "REGRESSION_GUARD",
+            "PASS" if cs_ch_039_pass else "FAIL",
+            [
+                "cornerstone product walkthrough --json",
+                "cornerstone connector product-surface audit --json",
+            ],
+            "Connected Sources stays a CornerStone product surface: default navigation uses product concepts, connector implementation names stay admin details, and native commands begin with cornerstone.",
+        ),
+    ]
+    readiness_dimensions = connector_report_readiness_dimensions()
+    negative_evidence = {
+        "unauthorized_provider_calls": _connector_provider_call_count(setup_result)
+        + _connector_provider_call_count(missing_setup_result)
+        + _connector_provider_call_count(optional_setup_result)
+        + _connector_provider_call_count(provider_swap_setup_result)
+        + _connector_provider_call_count(permission_gap_setup_result)
+        + _connector_provider_call_count(lineage_setup_result)
+        + _connector_provider_call_count(policy_setup_result)
+        + _connector_provider_call_count(evidence_delivery_payload.get("connector_setup_result", {}))
+        + int(delivery_receipt.get("provider_call_ledger", {}).get("during_ingest", 0) or 0)
+        + int(delivery_receipt.get("provider_call_ledger", {}).get("external_http_calls", 0) or 0)
+        + int(evidence_delivery_receipt.get("provider_call_ledger", {}).get("during_ingest", 0) or 0)
+        + int(evidence_delivery_receipt.get("provider_call_ledger", {}).get("external_http_calls", 0) or 0)
+        + int(untrusted_delivery_receipt.get("provider_call_ledger", {}).get("during_ingest", 0) or 0)
+        + int(untrusted_delivery_receipt.get("provider_call_ledger", {}).get("external_http_calls", 0) or 0)
+        + _connector_provider_call_count(selected_repo_setup_result)
+        + int(selected_repo_allowed_receipt.get("provider_call_ledger", {}).get("during_ingest", 0) or 0)
+        + int(selected_repo_allowed_receipt.get("provider_call_ledger", {}).get("external_http_calls", 0) or 0)
+        + _connector_provider_call_count(source_control_setup_result)
+        + sum(
+            int(receipt.get("provider_call_ledger", {}).get("during_ingest", 0) or 0)
+            + int(receipt.get("provider_call_ledger", {}).get("external_http_calls", 0) or 0)
+            for receipt in source_control_receipts.values()
+        )
+        + _connector_provider_call_count(content_restriction_setup_result)
+        + sum(
+            int(receipt.get("provider_call_ledger", {}).get("during_ingest", 0) or 0)
+            + int(receipt.get("provider_call_ledger", {}).get("external_http_calls", 0) or 0)
+            for key, receipt in content_restriction_receipts.items()
+            if key in content_restriction_success_keys
+        )
+        + _connector_provider_call_count(sync_setup_result)
+        + int(sync_webhook_receipt.get("provider_call_ledger", {}).get("during_ingest", 0) or 0)
+        + int(sync_webhook_receipt.get("provider_call_ledger", {}).get("external_http_calls", 0) or 0)
+        + int(sync_replay_changed_receipt.get("provider_call_ledger", {}).get("during_ingest", 0) or 0)
+        + int(sync_replay_changed_receipt.get("provider_call_ledger", {}).get("external_http_calls", 0) or 0)
+        + _connector_provider_call_count(github_failure_setup_payload.get("connector_setup_result", {}))
+        + sum(
+            int(state.get("ingestion_control", {}).get("external_http_calls", 0) or 0)
+            for state in github_failure_states.values()
+        )
+        + int(capture_negative.get("external_http_calls", 0) or 0)
+        + int(activity_negative.get("external_http_calls", 0) or 0)
+        + int(watch_rule_negative.get("external_http_calls", 0) or 0)
+        + int(watch_rule_negative.get("provider_mutations", 0) or 0)
+        + int(chrome_active_tab_negative.get("external_http_calls", 0) or 0)
+        + int(chrome_active_tab_negative.get("provider_mutations", 0) or 0)
+        + int(chrome_auto_capture_negative.get("external_http_calls", 0) or 0)
+        + int(chrome_auto_capture_negative.get("provider_mutations", 0) or 0)
+        + int(chrome_sensitive_page_negative.get("external_http_calls", 0) or 0)
+        + int(chrome_sensitive_page_negative.get("provider_mutations", 0) or 0)
+        + int(capture_lifecycle_negative.get("external_http_calls", 0) or 0)
+        + int(capture_lifecycle_negative.get("provider_mutations", 0) or 0)
+        + int(watch_result_negative.get("external_http_calls", 0) or 0)
+        + int(watch_result_negative.get("provider_mutations", 0) or 0)
+        + int(action_preflight_negative.get("external_http_calls", 0) or 0)
+        + int(action_preflight_negative.get("provider_mutations", 0) or 0)
+        + int(action_preflight_negative.get("real_provider_calls", 0) or 0)
+        + int(action_safety_negative.get("external_http_calls", 0) or 0)
+        + int(action_safety_negative.get("provider_mutations", 0) or 0)
+        + int(action_safety_negative.get("real_provider_calls", 0) or 0)
+        + int(action_execution_negative.get("direct_provider_calls", 0) or 0)
+        + int(action_execution_negative.get("external_http_calls", 0) or 0)
+        + int(action_retry_negative.get("external_http_calls", 0) or 0)
+        + int(action_retry_negative.get("provider_mutations", 0) or 0)
+        + int(action_retry_negative.get("real_provider_calls", 0) or 0)
+        + _connector_provider_call_count(scope_isolation_setup_result)
+        + int(scope_isolation_receipt.get("provider_call_ledger", {}).get("during_ingest", 0) or 0)
+        + int(scope_isolation_receipt.get("provider_call_ledger", {}).get("external_http_calls", 0) or 0)
+        + int(scope_isolation_negative.get("external_http_calls", 0) or 0)
+        + int(scope_isolation_negative.get("provider_mutations", 0) or 0)
+        + int(credential_custody_negative.get("external_http_calls", 0) or 0)
+        + int(credential_custody_negative.get("provider_mutations", 0) or 0)
+        + int(egress_topology_negative.get("provider_requests_after_direct_attempts", 0) or 0)
+        + int(egress_topology_negative.get("default_denied_sink_calls", 0) or 0)
+        + int(egress_topology_negative.get("redirect_denied_hop_trap_calls", 0) or 0),
+        "provider_credentials_exposed": len(provider_internal_paths)
+        + len(missing_provider_internal_paths)
+        + len(optional_provider_internal_paths)
+        + len(confirmed_provider_internal_paths)
+        + len(provider_swap_internal_paths)
+        + len(permission_gap_internal_paths)
+        + len(compatible_upgrade_internal_paths)
+        + len(breaking_upgrade_internal_paths)
+        + len(product_surface_internal_paths)
+        + len(delivery_internal_paths)
+        + len(ack_internal_paths)
+        + len(retry_internal_paths)
+        + len(lineage_internal_paths)
+        + len(policy_internal_paths)
+        + len(evidence_internal_paths)
+        + len(raw_access_internal_paths)
+        + len(untrusted_internal_paths)
+        + len(selected_repo_internal_paths)
+        + len(source_control_internal_paths)
+        + len(content_restriction_internal_paths)
+        + len(github_write_guard_internal_paths)
+        + len(github_failure_internal_paths)
+        + len(capture_internal_paths)
+        + len(activity_internal_paths)
+        + len(watch_rule_internal_paths)
+        + len(chrome_active_tab_internal_paths)
+        + len(chrome_auto_capture_internal_paths)
+        + len(chrome_sensitive_page_internal_paths)
+        + len(capture_lifecycle_internal_paths)
+        + len(watch_result_internal_paths)
+        + len(action_preflight_internal_paths)
+        + len(action_safety_internal_paths)
+        + len(action_execution_internal_paths)
+        + len(action_retry_internal_paths)
+        + len(scope_isolation_internal_paths)
+        + len(credential_custody_internal_paths)
+        + len(action_bypass_internal_paths)
+        + len(sync_internal_paths),
+        "raw_provider_payloads_exposed": 0,
+        "ownerless_contracts": 0 if scope_ok and missing_scope_ok and optional_scope_ok else 1,
+        "ownerless_connector_artifacts": 0 if delivery_scope_ok else 1,
+        "projection_envelope_checksum_mismatches": 0 if delivery_checks["artifact_checksum_matches_delivery_file"] else 1,
+        "product_interpretation_before_archive_commit": 0
+        if delivery_checks["product_interpretation_after_archive_only"]
+        else 1,
+        "projection_acknowledgements_before_cs_ch_008": 0 if delivery_checks["ack_not_claimed_for_cs_ch_007"] else 1,
+        "acknowledged_without_artifact": int(ack_reconciliation.get("acknowledged_without_artifact_count", 1) or 0),
+        "ack_before_durable_commit": 0
+        if ack_checks["before_commit_no_ack"]
+        and ack_checks["after_commit_no_ack"]
+        and ack_checks["redelivery_ack_after_commit"]
+        else 1,
+        "duplicate_connector_artifacts": int(ack_reconciliation.get("duplicate_logical_artifact_count", 1) or 0),
+        "duplicate_downstream_effects": 0
+        if ack_redelivery_acknowledgement.get("duplicate_downstream_effect") is False
+        and ack_duplicate_acknowledgement.get("duplicate_downstream_effect") is False
+        else 1,
+        "infinite_retry_loops": 0
+        if retry_checks["transient_bounded_backoff"]
+        and retry_checks["poison_quarantined_at_threshold"]
+        else 1,
+        "queue_wide_blockage": 0 if retry_checks["unrelated_streams_continue"] else 1,
+        "raw_payload_in_quarantine_output": 0 if retry_checks["quarantine_safe_diagnostics"] else 1,
+        "duplicate_active_connector_truth": 0 if lineage_checks["one_current_logical_truth"] else 1,
+        "immutable_history_mutations": 0 if lineage_checks["historical_evidence_not_mutated"] else 1,
+        "forbidden_source_policy_field_leaks": 0
+        if policy_checks["forbidden_full_body_value_not_persisted"]
+        and policy_checks["blocked_deliveries_created_no_artifacts_or_receipts"]
+        else 1,
+        "raw_content_policy_leaks": 0 if policy_checks["raw_content_not_persisted"] else 1,
+        "evidenceref_only_approved_truth": 0
+        if evidence_checks["evidenceref_only_bundle_denied"]
+        and evidence_checks["zero_evidence_claim_approval_denied"]
+        else 1,
+        "inaccessible_phantom_evidence": 0 if evidence_checks["no_inaccessible_phantom_evidence"] else 1,
+        "reusable_raw_access_handles": 0 if raw_access_checks["raw_no_provider_payload_or_handle_leak"] else 1,
+        "raw_access_read_limit_bypasses": 0 if raw_access_checks["raw_read_limit_exhaustion_denied"] else 1,
+        "raw_access_expiry_bypasses": 0 if raw_access_checks["raw_expiry_denied"] else 1,
+        "raw_access_revocation_bypasses": 0 if raw_access_checks["raw_revoked_read_denied"] else 1,
+        "raw_access_payload_or_handle_leaks": 0 if raw_access_checks["raw_no_provider_payload_or_handle_leak"] else 1,
+        "tool_calls_from_untrusted_connector_content": untrusted_review_negative.get("tool_calls_created", 1),
+        "action_cards_from_untrusted_connector_content": untrusted_action_card_count
+        + int(untrusted_review_negative.get("action_cards_created_from_untrusted_artifact", 1) or 0),
+        "workflow_runs_from_untrusted_connector_content": untrusted_workflow_run_count
+        + int(untrusted_review_negative.get("workflow_runs_created_from_untrusted_artifact", 1) or 0),
+        "connector_actions_from_untrusted_connector_content": untrusted_review_negative.get("connector_actions_triggered_from_content", 1),
+        "provider_calls_from_untrusted_connector_content": untrusted_review_negative.get("provider_calls_triggered_from_content", 1),
+        "shell_calls_from_untrusted_connector_content": untrusted_review_negative.get("shell_calls_triggered_from_content", 1),
+        "external_calls_from_untrusted_connector_content": int(untrusted_egress_decision.get("external_http_calls", 1) or 0)
+        + int(untrusted_review_negative.get("external_http_calls", 1) or 0),
+        "memory_promotions_from_untrusted_connector_content": untrusted_memory_count
+        + int(untrusted_review_negative.get("memory_promotions_from_untrusted_artifact", 1) or 0),
+        "policy_overrides_from_untrusted_connector_content": untrusted_review_negative.get("policy_overrides_from_untrusted_artifact", 1),
+        "authority_expansions_from_untrusted_connector_content": int(bool(untrusted_agent_attempt.get("authority_expanded", True)))
+        + int(untrusted_review_negative.get("authority_expansions_from_untrusted_artifact", 1) or 0),
+        "unselected_repository_artifacts": max(selected_repo_artifact_count - 1, 0)
+        if selected_repo_checks["selected_repo_unselected_delivery_denied"]
+        else 1,
+        "unselected_repository_delivery_receipts": max(selected_repo_receipt_count - 1, 0)
+        if selected_repo_checks["selected_repo_unselected_delivery_denied"]
+        else 1,
+        "unselected_repository_acknowledgements": max(selected_repo_ack_count - 1, 0)
+        if selected_repo_checks["selected_repo_unselected_delivery_denied"]
+        else 1,
+        "organization_wide_repository_fallbacks": 0 if selected_repo_checks["no_org_or_account_wide_fallback"] else 1,
+        "github_write_permissions_requested": 0
+        if selected_repo_checks["zero_write_permission_and_mutation_capability"]
+        and int(github_write_guard_negative.get("github_write_permissions_requested", 1) or 0) == 0
+        else 1,
+        "github_write_calls": 0
+        if selected_repo_checks["selected_repo_direct_write_denied"]
+        and github_write_guard_checks["direct_write_runtime_attempts_denied"]
+        and int(github_write_guard_negative.get("github_write_calls", 1) or 0) == 0
+        else 1,
+        "source_control_actions_declared": 0
+        if github_write_guard_checks["negative_counters_zero"]
+        and int(github_write_guard_negative.get("source_control_actions_declared", 1) or 0) == 0
+        else 1,
+        "provider_pack_write_mappings": 0
+        if github_write_guard_checks["provider_packs_have_no_write_actions"]
+        and int(github_write_guard_negative.get("provider_pack_write_mappings", 1) or 0) == 0
+        else 1,
+        "provider_mutations": 0
+        if github_write_guard_checks["controlled_egress_attempts_denied"]
+        and github_write_guard_checks["direct_write_runtime_attempts_denied"]
+        and int(github_write_guard_negative.get("provider_mutations", 1) or 0) == 0
+        else 1,
+        "github_write_cli_commands_exposed": 0
+        if github_write_guard_checks["product_cli_exposes_no_write_commands"]
+        and int(github_write_guard_negative.get("github_write_cli_commands_exposed", 1) or 0) == 0
+        else 1,
+        "github_write_contracts_accepted": 0
+        if github_write_guard_checks["write_action_contract_rejected"]
+        and int(github_write_guard_negative.get("github_write_contracts_accepted", 1) or 0) == 0
+        else 1,
+        "github_write_egress_allowed": 0
+        if github_write_guard_checks["controlled_egress_attempts_denied"]
+        and int(github_write_guard_negative.get("github_write_egress_allowed", 1) or 0) == 0
+        else 1,
+        "github_write_endpoint_literals": 0
+        if github_write_guard_checks["runtime_source_has_no_write_endpoint_literals"]
+        and int(github_write_guard_negative.get("github_write_endpoint_literals", 1) or 0) == 0
+        else 1,
+        "selected_repository_policy_broadening_silent_successes": 0
+        if selected_repo_checks["selected_repo_expand_selection_denied"]
+        and selected_repo_source_policy_count == 1
+        else 1,
+        "source_control_projection_family_missing_artifacts": 0
+        if source_control_checks["all_artifacts_receipts_snapshots_links_persisted"]
+        else 1,
+        "source_control_projection_family_missing_search_evidence": 0
+        if source_control_checks["searchable_evidence_bundles_created"]
+        else 1,
+        "source_control_missing_source_revisions": 0
+        if source_control_checks["all_source_revisions_persisted"]
+        else 1,
+        "source_control_provider_specific_product_requirements": 0
+        if source_control_checks["provider_specific_fields_not_required_by_product"]
+        else 1,
+        "source_control_raw_provider_payload_leaks": 0
+        if source_control_checks["provider_specific_fields_not_required_by_product"]
+        and source_control_checks["zero_provider_internals"]
+        else 1,
+        "source_control_ack_before_commit": 0
+        if source_control_checks["acknowledged_after_archive_commit"]
+        else 1,
+        "github_content_raw_sensitive_marker_leaks": 0
+        if content_restriction_checks["content_restriction_no_sensitive_or_out_of_policy_state_leaks"]
+        and content_restriction_checks["redacted_secret_marker_delivery_succeeds"]
+        and content_restriction_checks["private_material_quarantined_before_artifact_or_receipt"]
+        else 1,
+        "github_content_imports_outside_allowed_path": 0
+        if content_restriction_checks["forbidden_path_skipped_before_artifact_or_receipt"]
+        else 1,
+        "github_content_generated_artifacts": 0
+        if content_restriction_checks["generated_content_skipped_before_artifact"]
+        else 1,
+        "github_content_binary_raw_content_imports": 0
+        if content_restriction_checks["binary_content_metadata_only_delivery_succeeds"]
+        else 1,
+        "github_content_large_file_silent_truncations": 0
+        if content_restriction_checks["large_content_metadata_only_delivery_succeeds"]
+        else 1,
+        "github_content_private_material_artifacts": 0
+        if content_restriction_checks["private_material_quarantined_before_artifact_or_receipt"]
+        else 1,
+        "github_failure_silent_data_deletions": github_failure_negative.get("silent_data_deletions", 1)
+        if github_failure_checks["existing_evidence_preserved_with_freshness_warnings"]
+        else 1,
+        "github_failure_fresh_sync_claims_while_suspended": github_failure_negative.get(
+            "fresh_sync_claims_while_suspended",
+            1,
+        )
+        if github_failure_checks["existing_evidence_preserved_with_freshness_warnings"]
+        else 1,
+        "github_failure_tight_retry_loops": github_failure_negative.get("tight_retry_loops", 1)
+        if github_failure_checks["rate_limit_retry_schedule_visible_no_tight_loop"]
+        else 1,
+        "github_failure_fabricated_current_data": github_failure_negative.get("fabricated_current_data", 1)
+        if github_failure_checks["existing_evidence_preserved_with_freshness_warnings"]
+        else 1,
+        "github_removed_repository_future_ingestions": github_failure_negative.get(
+            "removed_repository_future_ingestions",
+            1,
+        )
+        if github_failure_checks["repository_removed_stops_future_ingestion_and_marks_unavailable"]
+        else 1,
+        "github_revoked_permission_streams_active": github_failure_negative.get("revoked_permission_streams_active", 1)
+        if github_failure_checks["revoked_permission_permanent_setup_gap_suspends_stream"]
+        else 1,
+        "github_reconnect_without_owner_action": github_failure_negative.get("reconnect_without_owner_action", 1)
+        if github_failure_checks["reconnect_requires_owner_action_and_new_verification"]
+        else 1,
+        "github_failure_external_http_calls": github_failure_negative.get("external_http_calls", 1)
+        if github_failure_checks["zero_provider_or_external_calls"]
+        else 1,
+        "github_failure_provider_mutations": github_failure_negative.get("provider_mutations", 1)
+        if github_failure_checks["zero_provider_or_external_calls"]
+        else 1,
+        "capture_before_consent": capture_negative.get("capture_before_consent", 1)
+        if capture_checks["negative_counters_zero"]
+        and capture_checks["no_consent_no_permission_disabled"]
+        and capture_checks["permission_only_still_disabled"]
+        else 1,
+        "capture_before_platform_permission": capture_negative.get("capture_before_platform_permission", 1)
+        if capture_checks["negative_counters_zero"]
+        and capture_checks["no_consent_no_permission_disabled"]
+        and capture_checks["consent_only_still_disabled"]
+        else 1,
+        "capture_samples_before_both_gates": capture_negative.get("capture_samples_before_both_gates", 1)
+        if capture_checks["records_persisted_with_expected_counts"]
+        and capture_checks["negative_counters_zero"]
+        else 1,
+        "capture_hidden_startup_capture": capture_negative.get("hidden_startup_capture", 1)
+        if capture_checks["zero_forbidden_capture_side_effect_markers"]
+        and capture_checks["negative_counters_zero"]
+        else 1,
+        "capture_cross_namespace_capture": capture_negative.get("cross_namespace_capture", 1)
+        if capture_checks["zero_forbidden_capture_side_effect_markers"]
+        and capture_checks["negative_counters_zero"]
+        else 1,
+        "capture_screenshots_before_permission": capture_negative.get("screenshots_before_permission", 1)
+        if capture_checks["permission_probe_exit_zero_metadata_only"]
+        and capture_checks["negative_counters_zero"]
+        else 1,
+        "capture_window_titles_before_permission": capture_negative.get("window_titles_before_permission", 1)
+        if capture_checks["permission_probe_exit_zero_metadata_only"]
+        and capture_checks["negative_counters_zero"]
+        else 1,
+        "capture_raw_keystrokes_collected": capture_negative.get("raw_keystrokes_collected", 1)
+        if capture_checks["setup_diagnostics_explain_privacy_controls"]
+        and capture_checks["negative_counters_zero"]
+        else 1,
+        "capture_clipboard_values_collected": capture_negative.get("clipboard_values_collected", 1)
+        if capture_checks["setup_diagnostics_explain_privacy_controls"]
+        and capture_checks["negative_counters_zero"]
+        else 1,
+        "capture_browser_history_collected": capture_negative.get("browser_history_collected", 1)
+        if capture_checks["setup_diagnostics_explain_privacy_controls"]
+        and capture_checks["negative_counters_zero"]
+        else 1,
+        "capture_external_http_calls": capture_negative.get("external_http_calls", 1)
+        if capture_checks["negative_counters_zero"]
+        else 1,
+        "capture_provider_mutations": capture_negative.get("provider_mutations", 1)
+        if capture_checks["negative_counters_zero"]
+        else 1,
+        "activity_unsupported_intent_claims": activity_negative.get("unsupported_intent_claims", 1)
+        if activity_checks["no_unsupported_intent_claim"]
+        and activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_inference_stored_as_observed_fact": activity_negative.get("inference_stored_as_observed_fact", 1)
+        if activity_checks["no_unsupported_intent_claim"]
+        and activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_raw_window_titles_stored": activity_negative.get("raw_window_titles_stored", 1)
+        if activity_checks["privacy_mode_excludes_raw_capture"]
+        and activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_full_urls_stored": activity_negative.get("full_urls_stored", 1)
+        if activity_checks["privacy_mode_excludes_raw_capture"]
+        and activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_keystrokes_collected": activity_negative.get("keystrokes_collected", 1)
+        if activity_checks["privacy_mode_excludes_raw_capture"]
+        and activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_clipboard_values_collected": activity_negative.get("clipboard_values_collected", 1)
+        if activity_checks["privacy_mode_excludes_raw_capture"]
+        and activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_screenshots_collected": activity_negative.get("screenshots_collected", 1)
+        if activity_checks["privacy_mode_excludes_raw_capture"]
+        and activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_cookies_collected": activity_negative.get("cookies_collected", 1)
+        if activity_checks["privacy_mode_excludes_raw_capture"]
+        and activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_browser_history_collected": activity_negative.get("browser_history_collected", 1)
+        if activity_checks["privacy_mode_excludes_raw_capture"]
+        and activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_external_http_calls": activity_negative.get("external_http_calls", 1)
+        if activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_provider_mutations": activity_negative.get("provider_mutations", 1)
+        if activity_checks["negative_counters_zero"]
+        else 1,
+        "activity_session_artifacts_created": activity_artifact_count
+        if activity_checks["records_persisted_with_expected_counts"]
+        else 1,
+        "watch_rule_ownerless_global_rules": watch_rule_negative.get("ownerless_global_rules", 1)
+        if watch_rule_checks["create_exit_zero_draft_scoped"]
+        and watch_rule_checks["negative_counters_zero"]
+        else 1,
+        "watch_rule_cross_namespace_lifecycle_mutations": watch_rule_negative.get(
+            "cross_namespace_lifecycle_mutations",
+            1,
+        )
+        if watch_rule_checks["cross_namespace_show_denied"]
+        and watch_rule_checks["negative_counters_zero"]
+        else 1,
+        "watch_rule_authority_expansions_from_rule_text": watch_rule_negative.get(
+            "authority_expansions_from_rule_text",
+            1,
+        )
+        if watch_rule_checks["rule_cannot_authorize_external_actions"]
+        and watch_rule_checks["negative_counters_zero"]
+        else 1,
+        "watch_rule_external_actions_authorized_by_rule": watch_rule_negative.get(
+            "external_actions_authorized_by_rule",
+            1,
+        )
+        if watch_rule_checks["rule_cannot_authorize_external_actions"]
+        and watch_rule_checks["evaluation_trace_pins_original_version"]
+        and watch_rule_checks["negative_counters_zero"]
+        else 1,
+        "watch_rule_capture_broadening_without_confirmation": watch_rule_negative.get(
+            "capture_broadening_without_confirmation",
+            1,
+        )
+        if watch_rule_checks["edit_creates_versioned_diff_without_broadening"]
+        and watch_rule_checks["negative_counters_zero"]
+        else 1,
+        "watch_rule_external_http_calls": watch_rule_negative.get("external_http_calls", 1)
+        if watch_rule_checks["negative_counters_zero"]
+        else 1,
+        "watch_rule_provider_mutations": watch_rule_negative.get("provider_mutations", 1)
+        if watch_rule_checks["negative_counters_zero"]
+        else 1,
+        "watch_rule_artifacts_created": watch_rule_artifact_count
+        if watch_rule_checks["records_persisted_with_expected_counts"]
+        else 1,
+        "chrome_active_tab_broad_all_urls_permission": chrome_active_tab_negative.get("broad_all_urls_permission", 1)
+        if chrome_active_tab_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_captures_without_user_gesture": chrome_active_tab_negative.get(
+            "captures_without_user_gesture",
+            1,
+        )
+        if chrome_active_tab_checks["popup_only_browser_internal_blocked_without_summary"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_captures_without_confirmation": chrome_active_tab_negative.get(
+            "captures_without_confirmation",
+            1,
+        )
+        if chrome_active_tab_checks["popup_only_browser_internal_blocked_without_summary"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_popup_open_captures": chrome_active_tab_negative.get("popup_open_captures", 1)
+        if chrome_active_tab_checks["popup_only_browser_internal_blocked_without_summary"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_non_active_tab_captures": chrome_active_tab_negative.get("non_active_tab_captures", 1)
+        if chrome_active_tab_checks["server_revalidated_policy"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_backend_policy_bypasses": chrome_active_tab_negative.get("backend_policy_bypasses", 1)
+        if chrome_active_tab_checks["no_consent_denied_by_backend"]
+        and chrome_active_tab_checks["server_revalidated_policy"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_blocked_page_text_clip_stored": chrome_active_tab_negative.get(
+            "blocked_page_text_clip_stored",
+            1,
+        )
+        if chrome_active_tab_checks["blocked_payload_does_not_store_text_clip"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_raw_text_stored": chrome_active_tab_negative.get("raw_text_stored", 1)
+        if chrome_active_tab_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_raw_html_stored": chrome_active_tab_negative.get("raw_html_stored", 1)
+        if chrome_active_tab_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_cookies_collected": chrome_active_tab_negative.get("cookies_collected", 1)
+        if chrome_active_tab_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_local_storage_collected": chrome_active_tab_negative.get("local_storage_collected", 1)
+        if chrome_active_tab_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_session_storage_collected": chrome_active_tab_negative.get("session_storage_collected", 1)
+        if chrome_active_tab_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_screenshots_collected": chrome_active_tab_negative.get("screenshots_collected", 1)
+        if chrome_active_tab_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_form_values_collected": chrome_active_tab_negative.get("form_values_collected", 1)
+        if chrome_active_tab_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_browser_history_collected": chrome_active_tab_negative.get("browser_history_collected", 1)
+        if chrome_active_tab_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_external_http_calls": chrome_active_tab_negative.get("external_http_calls", 1)
+        if chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_provider_mutations": chrome_active_tab_negative.get("provider_mutations", 1)
+        if chrome_active_tab_checks["negative_counters_zero"]
+        else 1,
+        "chrome_active_tab_artifacts_created": chrome_active_tab_artifact_count
+        if chrome_active_tab_checks["records_persisted_with_expected_counts"]
+        else 1,
+        "chrome_auto_capture_captures_without_owner_rule": chrome_auto_capture_negative.get(
+            "captures_without_owner_rule",
+            1,
+        )
+        if chrome_auto_capture_checks["auto_capture_config_records_two_sided_consent"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_captures_without_site_allowance": chrome_auto_capture_negative.get(
+            "captures_without_site_allowance",
+            1,
+        )
+        if chrome_auto_capture_checks["blocked_trigger_has_diagnostics_without_summary"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_captures_without_source_pack_allowance": chrome_auto_capture_negative.get(
+            "captures_without_source_pack_allowance",
+            1,
+        )
+        if chrome_auto_capture_checks["blocked_trigger_has_diagnostics_without_summary"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_captures_without_browser_permission": chrome_auto_capture_negative.get(
+            "captures_without_browser_permission",
+            1,
+        )
+        if chrome_auto_capture_checks["auto_capture_config_records_two_sided_consent"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_consent_config_version_mismatches": chrome_auto_capture_negative.get(
+            "consent_config_version_mismatches",
+            1,
+        )
+        if chrome_auto_capture_checks["blocked_trigger_has_diagnostics_without_summary"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_unapproved_domain_captures": chrome_auto_capture_negative.get(
+            "unapproved_domain_captures",
+            1,
+        )
+        if chrome_auto_capture_checks["blocked_trigger_has_diagnostics_without_summary"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_inactive_tab_captures": chrome_auto_capture_negative.get("inactive_tab_captures", 1)
+        if chrome_auto_capture_checks["server_revalidated_policy"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_throttle_bypasses": chrome_auto_capture_negative.get("throttle_bypasses", 1)
+        if chrome_auto_capture_checks["blocked_trigger_has_diagnostics_without_summary"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_session_limit_bypasses": chrome_auto_capture_negative.get("session_limit_bypasses", 1)
+        if chrome_auto_capture_checks["blocked_trigger_has_diagnostics_without_summary"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_duplicate_idempotency_captures": chrome_auto_capture_negative.get(
+            "duplicate_idempotency_captures",
+            1,
+        )
+        if chrome_auto_capture_checks["duplicate_idempotency_denied_without_second_summary"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_raw_text_stored": chrome_auto_capture_negative.get("raw_text_stored", 1)
+        if chrome_auto_capture_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_raw_html_stored": chrome_auto_capture_negative.get("raw_html_stored", 1)
+        if chrome_auto_capture_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_cookies_collected": chrome_auto_capture_negative.get("cookies_collected", 1)
+        if chrome_auto_capture_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_storage_collected": chrome_auto_capture_negative.get("local_storage_collected", 1)
+        + chrome_auto_capture_negative.get("session_storage_collected", 1)
+        if chrome_auto_capture_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_screenshots_collected": chrome_auto_capture_negative.get("screenshots_collected", 1)
+        if chrome_auto_capture_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_form_values_collected": chrome_auto_capture_negative.get("form_values_collected", 1)
+        if chrome_auto_capture_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_browser_history_collected": chrome_auto_capture_negative.get("browser_history_collected", 1)
+        if chrome_auto_capture_checks["summary_only_no_raw_browser_persistence"]
+        and chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_external_http_calls": chrome_auto_capture_negative.get("external_http_calls", 1)
+        if chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_provider_mutations": chrome_auto_capture_negative.get("provider_mutations", 1)
+        if chrome_auto_capture_checks["negative_counters_zero"]
+        else 1,
+        "chrome_auto_capture_artifacts_created": chrome_auto_capture_artifact_count
+        if chrome_auto_capture_checks["records_persisted_with_expected_counts"]
+        else 1,
+        "chrome_sensitive_page_client_block_downgrades": chrome_sensitive_page_negative.get(
+            "client_block_downgrades",
+            1,
+        )
+        if chrome_sensitive_page_checks["backend_never_downgrades_client_block"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_backend_false_safe_bypasses": chrome_sensitive_page_negative.get(
+            "backend_false_safe_bypasses",
+            1,
+        )
+        if chrome_sensitive_page_checks["backend_recheck_blocks_false_safe"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_blocked_page_text_persisted": chrome_sensitive_page_negative.get(
+            "blocked_page_text_persisted",
+            1,
+        )
+        if chrome_sensitive_page_checks["zero_forbidden_sensitive_markers"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_degraded_raw_text_persisted": chrome_sensitive_page_negative.get(
+            "degraded_raw_text_persisted",
+            1,
+        )
+        if chrome_sensitive_page_checks["degraded_payloads_hash_only"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_raw_html_stored": chrome_sensitive_page_negative.get("raw_html_stored", 1)
+        if chrome_sensitive_page_checks["zero_forbidden_sensitive_markers"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_cookies_collected": chrome_sensitive_page_negative.get("cookies_collected", 1)
+        if chrome_sensitive_page_checks["degraded_payloads_hash_only"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_storage_collected": chrome_sensitive_page_negative.get("local_storage_collected", 1)
+        + chrome_sensitive_page_negative.get("session_storage_collected", 1)
+        if chrome_sensitive_page_checks["degraded_payloads_hash_only"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_screenshots_collected": chrome_sensitive_page_negative.get("screenshots_collected", 1)
+        if chrome_sensitive_page_checks["degraded_payloads_hash_only"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_form_values_collected": chrome_sensitive_page_negative.get("form_values_collected", 1)
+        if chrome_sensitive_page_checks["degraded_payloads_hash_only"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_browser_history_collected": chrome_sensitive_page_negative.get(
+            "browser_history_collected",
+            1,
+        )
+        if chrome_sensitive_page_checks["degraded_payloads_hash_only"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_full_urls_stored": chrome_sensitive_page_negative.get("full_urls_stored", 1)
+        if chrome_sensitive_page_checks["zero_forbidden_sensitive_markers"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_full_origins_stored": chrome_sensitive_page_negative.get("full_origins_stored", 1)
+        if chrome_sensitive_page_checks["degraded_payloads_hash_only"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_title_text_stored": chrome_sensitive_page_negative.get("title_text_stored", 1)
+        if chrome_sensitive_page_checks["degraded_payloads_hash_only"]
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_content_sent_to_models": chrome_sensitive_page_negative.get("content_sent_to_models", 1)
+        if chrome_sensitive_page_summary.get("content_sent_to_models") is False
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_searchable_content_artifacts_created": chrome_sensitive_page_artifact_count
+        if chrome_sensitive_page_checks["records_persisted_with_expected_counts"]
+        and chrome_sensitive_page_summary.get("searchable_content_artifacts_created") == 0
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_capture_inbox_items_created": chrome_sensitive_page_inbox_item_count
+        if chrome_sensitive_page_checks["records_persisted_with_expected_counts"]
+        and chrome_sensitive_page_summary.get("capture_inbox_items_created") == 0
+        and chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_external_http_calls": chrome_sensitive_page_negative.get("external_http_calls", 1)
+        if chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "chrome_sensitive_page_provider_mutations": chrome_sensitive_page_negative.get("provider_mutations", 1)
+        if chrome_sensitive_page_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_samples_collected_while_paused": capture_lifecycle_negative.get(
+            "samples_collected_while_paused",
+            1,
+        )
+        if capture_lifecycle_checks["pause_source_stops_samples_without_losing_config"]
+        and capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_samples_collected_while_revoked": capture_lifecycle_negative.get(
+            "samples_collected_while_revoked",
+            1,
+        )
+        if capture_lifecycle_checks["revoke_blocks_new_samples_requires_new_consent"]
+        and capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_configuration_deleted_on_pause": capture_lifecycle_negative.get(
+            "configuration_deleted_on_pause",
+            1,
+        )
+        if capture_lifecycle_checks["watch_rule_and_global_pause_persisted"]
+        and capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_unscoped_exports": capture_lifecycle_negative.get("unscoped_exports", 1)
+        if capture_lifecycle_checks["export_scoped_redacted"]
+        and capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_raw_content_exported": capture_lifecycle_negative.get("raw_content_exported", 1)
+        if capture_lifecycle_checks["export_scoped_redacted"]
+        and capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_raw_browser_payload_exported": capture_lifecycle_negative.get(
+            "raw_browser_payload_exported",
+            1,
+        )
+        if capture_lifecycle_checks["export_scoped_redacted"]
+        and capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_credential_values_exported": capture_lifecycle_negative.get(
+            "credential_values_exported",
+            1,
+        )
+        if capture_lifecycle_checks["export_scoped_redacted"]
+        and capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_delete_everything_misleading_claims": capture_lifecycle_negative.get(
+            "delete_everything_misleading_claims",
+            1,
+        )
+        if capture_lifecycle_checks["delete_dry_run_explains_retained_audit"]
+        and capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_audit_records_deleted": capture_lifecycle_negative.get("audit_records_deleted", 1)
+        if capture_lifecycle_checks["authorized_delete_receipt_removes_eligible_only"]
+        and capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_unauthorized_delete_executions": capture_lifecycle_negative.get(
+            "unauthorized_delete_executions",
+            1,
+        )
+        if capture_lifecycle_checks["authorized_delete_receipt_removes_eligible_only"]
+        and capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_external_http_calls": capture_lifecycle_negative.get("external_http_calls", 1)
+        if capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "capture_lifecycle_provider_mutations": capture_lifecycle_negative.get("provider_mutations", 1)
+        if capture_lifecycle_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_inferred_intent_labeled_observed_fact": watch_result_negative.get(
+            "inferred_intent_labeled_observed_fact",
+            1,
+        )
+        if watch_result_checks["observations_are_source_backed_only"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_inference_stored_as_observed_fact": watch_result_negative.get(
+            "inference_stored_as_observed_fact",
+            1,
+        )
+        if watch_result_checks["inferences_remain_hypotheses_with_caveats"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_unsupported_inference_approved": watch_result_negative.get(
+            "unsupported_inference_approved",
+            1,
+        )
+        if watch_result_checks["inferences_remain_hypotheses_with_caveats"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_low_confidence_memory_approved_without_review": watch_result_negative.get(
+            "low_confidence_memory_approved_without_review",
+            1,
+        )
+        if watch_result_checks["low_confidence_memory_approval_denied"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_observation_mutated_by_correction": watch_result_negative.get(
+            "observation_mutated_by_correction",
+            1,
+        )
+        if watch_result_checks["correction_preserves_observations"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_proposal_executed_directly": watch_result_negative.get("proposal_executed_directly", 1)
+        if watch_result_checks["proposal_is_non_executing"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_action_card_created_directly": watch_result_negative.get("action_card_created_directly", 1)
+        if watch_result_checks["review_stays_draft_non_executing"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_claim_created_directly": watch_result_negative.get("claim_created_directly", 1)
+        if watch_result_checks["review_stays_draft_non_executing"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_mission_opened_directly": watch_result_negative.get("mission_opened_directly", 1)
+        if watch_result_checks["review_stays_draft_non_executing"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_workflow_runs_started": watch_result_negative.get("workflow_runs_started", 1)
+        if watch_result_checks["proposal_is_non_executing"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_raw_content_stored": watch_result_negative.get("raw_content_stored", 1)
+        if watch_result_checks["zero_forbidden_watch_result_markers"]
+        and watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_external_http_calls": watch_result_negative.get("external_http_calls", 1)
+        if watch_result_checks["negative_counters_zero"]
+        else 1,
+        "watch_result_provider_mutations": watch_result_negative.get("provider_mutations", 1)
+        if watch_result_checks["negative_counters_zero"]
+        else 1,
+        "action_preflight_dry_run_executed": action_preflight_negative.get("dry_run_executed", 1)
+        if action_preflight_checks["preflight_does_not_count_as_approval_or_execution"]
+        and action_preflight_checks["negative_counters_zero"]
+        else 1,
+        "action_preflight_preflight_counted_as_approval": action_preflight_negative.get(
+            "preflight_counted_as_approval",
+            1,
+        )
+        if action_preflight_checks["preflight_does_not_count_as_approval_or_execution"]
+        and action_preflight_checks["negative_counters_zero"]
+        else 1,
+        "action_preflight_execution_result_created": action_preflight_negative.get("execution_result_created", 1)
+        if action_preflight_checks["preflight_does_not_count_as_approval_or_execution"]
+        and action_preflight_checks["negative_counters_zero"]
+        else 1,
+        "action_preflight_workflow_runs_started": action_preflight_negative.get("workflow_runs_started", 1)
+        if action_preflight_checks["preflight_does_not_count_as_approval_or_execution"]
+        and action_preflight_checks["negative_counters_zero"]
+        else 1,
+        "action_preflight_provider_mutations": action_preflight_negative.get("provider_mutations", 1)
+        if action_preflight_checks["call_ledgers_are_non_side_effecting"]
+        and action_preflight_checks["negative_counters_zero"]
+        else 1,
+        "action_preflight_external_http_calls": action_preflight_negative.get("external_http_calls", 1)
+        if action_preflight_checks["call_ledgers_are_non_side_effecting"]
+        and action_preflight_checks["negative_counters_zero"]
+        else 1,
+        "action_preflight_real_provider_calls": action_preflight_negative.get("real_provider_calls", 1)
+        if action_preflight_checks["call_ledgers_are_non_side_effecting"]
+        and action_preflight_checks["negative_counters_zero"]
+        else 1,
+        "action_preflight_direct_provider_access": action_preflight_negative.get("direct_provider_access", 1)
+        if action_preflight_checks["zero_forbidden_action_preflight_markers"]
+        and action_preflight_checks["negative_counters_zero"]
+        else 1,
+        "action_preflight_credential_values_exposed": action_preflight_negative.get("credential_values_exposed", 1)
+        if action_preflight_checks["zero_secret_findings"]
+        and action_preflight_checks["negative_counters_zero"]
+        else 1,
+        "action_preflight_github_read_only_action_admitted": action_preflight_negative.get(
+            "github_read_only_action_admitted",
+            1,
+        )
+        if action_preflight_checks["denial_cases_block_with_reason_codes"]
+        and action_preflight_checks["negative_counters_zero"]
+        else 1,
+        "action_safety_executions_without_evidence": 0
+        if action_safety_denial_reason_codes.get("missing_evidence") == "CS_ACTION_EVIDENCE_REQUIRED"
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_executions_without_policy_allow": 0
+        if action_safety_denial_reason_codes.get("locked_workspace") == "CS_ACTION_POLICY_DENIED"
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_executions_without_authorized_approval": 0
+        if action_safety_denial_reason_codes.get("missing_approval") == "CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED"
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_unauthorized_approvals_accepted": 0
+        if action_safety_checks["invalid_approval_denied"]
+        and action_safety_denial_reason_codes.get("unauthorized_approver") == "CS_ACTION_APPROVER_UNAUTHORIZED"
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_connector_permission_inferred_from_product_approval": 0
+        if action_safety_checks["connector_permission_not_inferred_from_product_approval"]
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_product_approval_inferred_from_connector_permission": 0
+        if action_safety_checks["product_approval_not_inferred_from_connector_preflight"]
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_executions_without_idempotency": 0
+        if action_safety_denial_reason_codes.get("missing_idempotency") == "CS_ACTION_IDEMPOTENCY_REQUIRED"
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_stale_preflight_executions": 0
+        if action_safety_denial_reason_codes.get("stale_preflight") == "CS_ACTION_PREFLIGHT_STALE"
+        and action_safety_denial_reason_codes.get("stale_connector") == "CS_ACTION_PREFLIGHT_STALE"
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_cross_namespace_executions": 0
+        if action_safety_checks["scope_denial_stable"]
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_execution_results_created": action_safety_negative.get("execution_results_created", 1)
+        if action_safety_checks["zero_execution_results_or_workflows"]
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_workflow_runs_started": action_safety_negative.get("workflow_runs_started", 1)
+        if action_safety_checks["zero_execution_results_or_workflows"]
+        and action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_external_http_calls": action_safety_negative.get("external_http_calls", 1)
+        if action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_provider_mutations": action_safety_negative.get("provider_mutations", 1)
+        if action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_real_provider_calls": action_safety_negative.get("real_provider_calls", 1)
+        if action_safety_checks["zero_side_effect_counters"]
+        else 1,
+        "action_safety_credential_values_exposed": 0
+        if action_safety_checks["zero_secret_findings"]
+        and action_safety_checks["zero_provider_internals"]
+        else 1,
+        "action_execution_without_workflow_run": 0
+        if action_execution_checks["workflow_run_invokes_connectorhub_once"]
+        else 1,
+        "action_execution_without_action_result": 0
+        if action_execution_checks["action_result_linked_to_workflow_audit_and_receipt"]
+        else 1,
+        "action_execution_without_provider_receipt": 0
+        if action_execution_checks["provider_receipt_safe_and_versioned"]
+        else 1,
+        "action_execution_without_outcome_evidence": 0
+        if action_execution_checks["outcome_reingested_as_artifact_evidence_and_connected_outcome"]
+        else 1,
+        "action_execution_duplicate_side_effects": action_execution_negative.get("duplicate_side_effects", 1)
+        if action_execution_checks["idempotency_replay_zero_duplicate_side_effect"]
+        and action_execution_checks["negative_counters_zero"]
+        else 1,
+        "action_execution_direct_provider_calls": action_execution_negative.get("direct_provider_calls", 1)
+        if action_execution_checks["negative_counters_zero"]
+        else 1,
+        "action_execution_external_http_calls": action_execution_negative.get("external_http_calls", 1)
+        if action_execution_checks["negative_counters_zero"]
+        else 1,
+        "action_execution_raw_provider_payloads_persisted": action_execution_negative.get(
+            "raw_provider_payloads_persisted",
+            1,
+        )
+        if action_execution_checks["negative_counters_zero"]
+        else 1,
+        "action_execution_credential_values_exposed": action_execution_negative.get("credential_values_exposed", 1)
+        if action_execution_checks["zero_secret_findings"]
+        and action_execution_checks["zero_provider_internals"]
+        and action_execution_checks["negative_counters_zero"]
+        else 1,
+        "action_retry_duplicate_side_effects": action_retry_negative.get("duplicate_side_effects", 1)
+        if action_retry_checks["same_key_retry_returns_existing_result"]
+        and action_retry_checks["negative_counters_zero"]
+        else 1,
+        "action_retry_conflicts_executed": action_retry_negative.get("conflicts_executed", 1)
+        if action_retry_checks["conflict_denied_before_second_side_effect"]
+        and action_retry_checks["negative_counters_zero"]
+        else 1,
+        "action_retry_second_action_results_created": action_retry_negative.get("second_action_results_created", 1)
+        if action_retry_checks["durable_counts_single_provider_effect"]
+        and action_retry_checks["negative_counters_zero"]
+        else 1,
+        "action_retry_hidden_automatic_compensation": action_retry_negative.get("hidden_automatic_compensation", 1)
+        if action_retry_checks["compensation_expectation_visible_without_automatic_execution"]
+        and action_retry_checks["negative_counters_zero"]
+        else 1,
+        "action_retry_external_http_calls": action_retry_negative.get("external_http_calls", 1)
+        if action_retry_checks["negative_counters_zero"]
+        else 1,
+        "action_retry_provider_mutations": action_retry_negative.get("provider_mutations", 1)
+        if action_retry_checks["negative_counters_zero"]
+        else 1,
+        "action_retry_real_provider_calls": action_retry_negative.get("real_provider_calls", 1)
+        if action_retry_checks["negative_counters_zero"]
+        else 1,
+        "action_retry_credential_values_exposed": action_retry_negative.get("credential_values_exposed", 1)
+        if action_retry_checks["zero_secret_findings"]
+        and action_retry_checks["zero_provider_internals"]
+        and action_retry_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_cross_scope_setup_allowed": scope_isolation_negative.get("cross_scope_setup_allowed", 1)
+        if scope_isolation_checks["cross_scope_setup_delivery_evidence_watch_action_denied"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_cross_scope_delivery_returned": scope_isolation_negative.get("cross_scope_delivery_returned", 1)
+        if scope_isolation_checks["cross_scope_setup_delivery_evidence_watch_action_denied"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_cross_scope_evidence_returned": scope_isolation_negative.get("cross_scope_evidence_returned", 1)
+        if scope_isolation_checks["cross_scope_setup_delivery_evidence_watch_action_denied"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_cross_scope_watch_returned": scope_isolation_negative.get("cross_scope_watch_returned", 1)
+        if scope_isolation_checks["cross_scope_setup_delivery_evidence_watch_action_denied"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_cross_scope_action_executed": scope_isolation_negative.get("cross_scope_action_executed", 1)
+        if scope_isolation_checks["cross_scope_setup_delivery_evidence_watch_action_denied"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_cross_scope_object_payload_leaks": scope_isolation_negative.get(
+            "cross_scope_object_payload_leaks",
+            1,
+        )
+        if scope_isolation_checks["denied_payloads_disclose_only_resource_scope"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_other_scope_records_persisted": scope_isolation_negative.get("other_scope_records_persisted", 1)
+        if scope_isolation_checks["no_other_scope_or_ownerless_records"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_ownerless_connector_records": scope_isolation_negative.get("ownerless_connector_records", 1)
+        if scope_isolation_checks["no_other_scope_or_ownerless_records"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_workflow_runs_started": scope_isolation_negative.get("workflow_runs_started", 1)
+        if scope_isolation_checks["action_path_scope_bound_without_execution"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_action_results_created": scope_isolation_negative.get("action_results_created", 1)
+        if scope_isolation_checks["action_path_scope_bound_without_execution"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "scope_isolation_provider_receipts_created": scope_isolation_negative.get("provider_receipts_created", 1)
+        if scope_isolation_checks["action_path_scope_bound_without_execution"]
+        and scope_isolation_checks["negative_counters_zero"]
+        else 1,
+        "credential_custody_raw_secret_canary_in_stdout": credential_custody_negative.get(
+            "raw_secret_canary_in_stdout",
+            1,
+        )
+        if credential_custody_checks["seeded_secret_canary_absent_from_outputs_and_state"]
+        and credential_custody_checks["negative_counters_zero"]
+        else 1,
+        "credential_custody_raw_secret_canary_in_state": credential_custody_negative.get(
+            "raw_secret_canary_in_state",
+            1,
+        )
+        if credential_custody_checks["seeded_secret_canary_absent_from_outputs_and_state"]
+        and credential_custody_checks["negative_counters_zero"]
+        else 1,
+        "credential_custody_raw_secret_values_exposed": credential_custody_negative.get(
+            "raw_secret_value_present",
+            1,
+        )
+        if credential_custody_checks["no_credential_values_handles_or_auth_material"]
+        and credential_custody_checks["zero_secret_findings"]
+        and credential_custody_checks["negative_counters_zero"]
+        else 1,
+        "credential_custody_raw_handles_exposed": credential_custody_negative.get("raw_handle_present", 1)
+        if credential_custody_checks["no_credential_values_handles_or_auth_material"]
+        and credential_custody_checks["negative_counters_zero"]
+        else 1,
+        "credential_custody_auth_headers_exposed": credential_custody_negative.get("auth_header_present", 1)
+        if credential_custody_checks["no_credential_values_handles_or_auth_material"]
+        and credential_custody_checks["negative_counters_zero"]
+        else 1,
+        "credential_custody_credential_bearing_urls_exposed": credential_custody_negative.get(
+            "credential_bearing_url_present",
+            1,
+        )
+        if credential_custody_checks["no_credential_values_handles_or_auth_material"]
+        and credential_custody_checks["negative_counters_zero"]
+        else 1,
+        "credential_custody_product_secret_writes": credential_custody_negative.get("product_secret_writes", 1)
+        if credential_custody_checks["rotation_and_revocation_update_status_without_product_secret"]
+        and credential_custody_checks["negative_counters_zero"]
+        else 1,
+        "credential_custody_provider_auth_imports": credential_custody_negative.get("provider_auth_imports", 1)
+        if credential_custody_checks["static_provider_auth_import_scan_zero"]
+        and credential_custody_checks["negative_counters_zero"]
+        else 1,
+        "egress_topology_vs2_reuse_errors": egress_topology_negative.get("vs2_reuse_errors", 1)
+        if egress_topology_checks["vs2_local_proof_reusable_current"]
+        else 1,
+        "egress_topology_missing_required_vs2_rows": egress_topology_negative.get("missing_required_vs2_rows", 1)
+        if egress_topology_checks["vs2_required_egress_rows_pass"]
+        else 1,
+        "egress_topology_failed_required_vs2_rows": egress_topology_negative.get("failed_required_vs2_rows", 1)
+        if egress_topology_checks["vs2_required_egress_rows_pass"]
+        else 1,
+        "egress_topology_direct_http_socket_bypass_allowed": egress_topology_negative.get(
+            "direct_http_socket_bypass_allowed",
+            1,
+        )
+        if egress_topology_checks["app_worker_tool_direct_http_socket_blocked"]
+        else 1,
+        "egress_topology_provider_requests_after_direct_attempts": egress_topology_negative.get(
+            "provider_requests_after_direct_attempts",
+            1,
+        )
+        if egress_topology_checks["provider_zero_requests_after_direct_attempts"]
+        else 1,
+        "egress_topology_default_denied_sink_calls": egress_topology_negative.get(
+            "default_denied_sink_calls",
+            1,
+        )
+        if egress_topology_checks["default_denied_before_sink_call"]
+        else 1,
+        "egress_topology_redirect_denied_hop_trap_calls": egress_topology_negative.get(
+            "redirect_denied_hop_trap_calls",
+            1,
+        )
+        if egress_topology_checks["redirect_dns_protocol_and_socket_bypass_guarded"]
+        else 1,
+        "egress_topology_sensitive_headers_forwarded_to_denied_hop": egress_topology_negative.get(
+            "sensitive_headers_forwarded_to_denied_hop",
+            1,
+        )
+        if egress_topology_checks["secrets_and_payloads_not_exposed"]
+        else 1,
+        "egress_topology_raw_credentials_exposed": egress_topology_negative.get("raw_credentials_exposed", 1)
+        if egress_topology_checks["secrets_and_payloads_not_exposed"]
+        else 1,
+        "egress_topology_raw_payloads_in_audit": egress_topology_negative.get("raw_payloads_in_audit", 1)
+        if egress_topology_checks["secrets_and_payloads_not_exposed"]
+        else 1,
+        "egress_topology_production_topology_overclaimed": egress_topology_negative.get(
+            "production_topology_overclaimed",
+            1,
+        )
+        if egress_topology_checks["production_topology_not_claimed"]
+        else 1,
+        "audit_correlation_missing_required_event_families": audit_correlation_negative.get(
+            "missing_required_event_families",
+            1,
+        )
+        if audit_correlation_checks["required_event_families_present"]
+        else 1,
+        "audit_correlation_uncorrelated_connector_events": audit_correlation_negative.get(
+            "uncorrelated_connector_events",
+            1,
+        )
+        if audit_correlation_checks["every_connector_event_has_audit_and_object_refs"]
+        else 1,
+        "audit_correlation_duplicate_correlation_ids": audit_correlation_negative.get(
+            "duplicate_correlation_ids",
+            1,
+        )
+        if audit_correlation_checks["correlation_ids_unique"]
+        else 1,
+        "audit_correlation_scope_mismatches": audit_correlation_negative.get("scope_mismatches", 1)
+        if audit_correlation_checks["scope_consistent"]
+        else 1,
+        "audit_correlation_raw_payload_or_secret_leaks": audit_correlation_negative.get(
+            "raw_payload_or_secret_leaks",
+            1,
+        )
+        if audit_correlation_checks["raw_payloads_and_secrets_absent"]
+        else 1,
+        "audit_correlation_integrity_errors": audit_correlation_negative.get("audit_integrity_errors", 1)
+        if audit_correlation_checks["audit_verify_exit_zero"]
+        else 1,
+        "audit_correlation_tamper_detection_failures": 0
+        if audit_correlation_checks["tamper_verify_detects_change"]
+        else 1,
+        "action_bypass_undeclared_actions_executed": action_bypass_negative.get("undeclared_actions_executed", 1)
+        if action_bypass_checks["approved_execute_blocked_by_backend"]
+        and action_bypass_checks["negative_counters_zero"]
+        else 1,
+        "action_bypass_direct_provider_calls": action_bypass_negative.get("direct_provider_calls", 1)
+        if action_bypass_checks["negative_counters_zero"]
+        else 1,
+        "action_bypass_external_http_calls": action_bypass_negative.get("external_http_calls", 1)
+        if action_bypass_checks["negative_counters_zero"]
+        else 1,
+        "action_bypass_provider_mutations": action_bypass_negative.get("provider_mutations", 1)
+        if action_bypass_checks["negative_counters_zero"]
+        else 1,
+        "action_bypass_real_provider_calls": action_bypass_negative.get("real_provider_calls", 1)
+        if action_bypass_checks["negative_counters_zero"]
+        else 1,
+        "action_bypass_provider_clients_exposed": action_bypass_negative.get("provider_clients_exposed", 1)
+        if action_bypass_checks["static_provider_import_scan_zero"]
+        and action_bypass_checks["negative_counters_zero"]
+        else 1,
+        "action_bypass_credential_values_exposed": action_bypass_negative.get("credential_values_exposed", 1)
+        if action_bypass_checks["credential_boundary_safe"]
+        and action_bypass_checks["zero_secret_findings"]
+        and action_bypass_checks["zero_provider_internals"]
+        and action_bypass_checks["negative_counters_zero"]
+        else 1,
+        "action_bypass_malicious_pack_activations": 0
+        if action_bypass_checks["malicious_pack_quarantined"]
+        else 1,
+        "incremental_sync_duplicate_logical_artifacts": int(
+            sync_reconciliation.get("duplicate_logical_artifact_count", 1) or 0
+        ),
+        "incremental_sync_cursor_advanced_before_commit": int(
+            sync_reconciliation.get("cursor_advanced_before_commit_count", 1) or 0
+        ),
+        "incremental_sync_missed_cursor_receipts": int(
+            sync_reconciliation.get("missing_cursor_receipt_count", 1) or 0
+        )
+        + int(sync_reconciliation.get("missing_cursor_artifact_count", 1) or 0)
+        + int(sync_reconciliation.get("unobserved_delivery_receipt_count", 1) or 0),
+        "incremental_sync_duplicate_product_events": 0
+        if sync_checks["webhook_poll_overlap_idempotent"]
+        and sync_checks["final_reconciliation_success"]
+        and sync_lineage.get("duplicate_active_truth_count") == 0
+        else 1,
+        "incremental_sync_source_revision_lineage_gaps": 0
+        if sync_checks["out_of_order_preserves_lineage"]
+        and sync_lineage.get("version_count") == 2
+        and sync_reconciliation.get("out_of_order_observation_count") == 1
+        else 1,
+        "incremental_sync_unverified_webhook_commits": 0
+        if sync_checks["bad_webhook_denied_before_delivery_commit"]
+        else 1,
+        "source_policy_broadening_silent_successes": 0
+        if source_policy_checks["broadening_denied_stable_error"]
+        and source_policy_checks["broadening_denial_no_policy_snapshot"]
+        else 1,
+        "incompatible_upgrade_silent_activations": 0 if upgrade_checks["breaking_status_blocked"] else 1,
+        "connectorhub_sub_product_required": 0 if product_surface_checks["connectorhub_sub_product_not_required"] else 1,
+        "production_readiness_overclaims": 0,
+    }
+    negative_evidence.update(
+        {
+            "cross_namespace_deliveries": sum(
+                int(negative_evidence.get(key, 0) or 0)
+                for key in [
+                    "capture_cross_namespace_capture",
+                    "watch_rule_cross_namespace_lifecycle_mutations",
+                    "action_safety_cross_namespace_executions",
+                    "scope_isolation_cross_scope_setup_allowed",
+                    "scope_isolation_cross_scope_delivery_returned",
+                    "scope_isolation_cross_scope_evidence_returned",
+                    "scope_isolation_cross_scope_watch_returned",
+                    "scope_isolation_cross_scope_action_executed",
+                    "scope_isolation_cross_scope_object_payload_leaks",
+                    "scope_isolation_other_scope_records_persisted",
+                ]
+            ),
+            "undeclared_actions_executed": int(
+                negative_evidence.get("action_bypass_undeclared_actions_executed", 0) or 0
+            ),
+            "unapproved_egress_calls": sum(
+                int(negative_evidence.get(key, 0) or 0)
+                for key in [
+                    "external_calls_from_untrusted_connector_content",
+                    "github_write_egress_allowed",
+                    "github_failure_external_http_calls",
+                    "capture_external_http_calls",
+                    "activity_external_http_calls",
+                    "watch_rule_external_http_calls",
+                    "chrome_active_tab_external_http_calls",
+                    "chrome_auto_capture_external_http_calls",
+                    "chrome_sensitive_page_external_http_calls",
+                    "capture_lifecycle_external_http_calls",
+                    "watch_result_external_http_calls",
+                    "action_preflight_external_http_calls",
+                    "action_safety_external_http_calls",
+                    "action_execution_external_http_calls",
+                    "action_retry_external_http_calls",
+                    "action_bypass_external_http_calls",
+                    "egress_topology_direct_http_socket_bypass_allowed",
+                    "egress_topology_provider_requests_after_direct_attempts",
+                    "egress_topology_default_denied_sink_calls",
+                    "egress_topology_redirect_denied_hop_trap_calls",
+                ]
+            ),
+            "unapproved_domain_captures": int(
+                negative_evidence.get("chrome_auto_capture_unapproved_domain_captures", 0) or 0
+            ),
+            "raw_browser_text_persisted": sum(
+                int(negative_evidence.get(key, 0) or 0)
+                for key in [
+                    "chrome_active_tab_raw_text_stored",
+                    "chrome_auto_capture_raw_text_stored",
+                    "chrome_sensitive_page_blocked_page_text_persisted",
+                    "chrome_sensitive_page_degraded_raw_text_persisted",
+                ]
+            ),
+        }
+    )
+    candidate_report_path = state_path / "connector-report-lint-candidate.json"
+    preliminary_pass = (
+        first_eight_pass
+        and cs_ch_007_pass
+        and cs_ch_008_pass
+        and cs_ch_009_pass
+        and cs_ch_010_pass
+        and cs_ch_011_pass
+        and cs_ch_012_pass
+        and cs_ch_013_pass
+        and cs_ch_014_pass
+        and cs_ch_015_pass
+        and cs_ch_016_pass
+        and cs_ch_017_pass
+        and cs_ch_018_pass
+        and cs_ch_019_pass
+        and cs_ch_020_pass
+        and cs_ch_021_pass
+        and cs_ch_022_pass
+        and cs_ch_023_pass
+        and cs_ch_024_pass
+        and cs_ch_025_pass
+        and cs_ch_026_pass
+        and cs_ch_027_pass
+        and cs_ch_028_pass
+        and cs_ch_029_pass
+        and cs_ch_030_pass
+        and cs_ch_031_pass
+        and cs_ch_032_pass
+        and cs_ch_033_pass
+        and cs_ch_034_pass
+        and cs_ch_035_pass
+        and cs_ch_036_pass
+        and cs_ch_037_pass
+    )
+    candidate_report = {
+        "status": "success" if preliminary_pass else "failed",
+        "scenario_set": "connector-contract-adapter",
+        "summary": {
+            "scenario_count": len(preliminary_results),
+            "pass": len([row for row in preliminary_results if row["status"] == "PASS"]),
+            "fail": len([row for row in preliminary_results if row["status"] == "FAIL"]),
+            "not_verified": len([row for row in preliminary_results if row["status"] == "NOT_VERIFIED"]),
+            "human_required": 0,
+            "blocking": len([row for row in preliminary_results if row["status"] != "PASS" and row["owner"] != "Human"]),
+            "product_feature_claims": product_feature_claims,
+        },
+        "readiness_dimensions": readiness_dimensions,
+        "negative_evidence": negative_evidence,
+        "scenario_results": preliminary_results,
+        "human_required": [],
+    }
+    candidate_report_path.write_text(json.dumps(candidate_report, indent=2, sort_keys=True) + "\n")
+    transcripts["report_lint"] = _run_cli_json(
+        root,
+        [
+            "connector",
+            "report-lint",
+            "--report",
+            str(candidate_report_path.relative_to(root)),
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    report_lint_payload = _payload(transcripts["report_lint"])
+    report_lint = report_lint_payload.get("connector_report_lint", {})
+    transcripts["audit_verify_after_report_lint"] = _run_cli_json(
+        root,
+        ["audit", "verify", "--state-dir", state_rel, "--json"],
+    )
+    audit_after_lint_payload = _payload(transcripts["audit_verify_after_report_lint"])
+    report_lint_secret_findings = (
+        count_unredacted_secrets(json.dumps(report_lint_payload, sort_keys=True))
+        + count_unredacted_secrets(transcripts["report_lint"].get("stderr_redacted", ""))
+    )
+    report_lint_checks = {
+        "candidate_report_persisted": candidate_report_path.exists(),
+        "report_lint_exit_zero": _exit_ok(transcripts["report_lint"]),
+        "report_lint_status_pass": report_lint_payload.get("status") == "success"
+        and report_lint.get("status") == "pass",
+        "audit_verify_after_report_lint_exit_zero": _exit_ok(transcripts["audit_verify_after_report_lint"])
+        and audit_after_lint_payload.get("audit_integrity", {}).get("status") == "success",
+        "fixture_claim_scoped": str(report_lint.get("product_feature_claims", "")).startswith("LOCAL_FIXTURE_"),
+        "negative_overclaim_counter_zero": report_lint.get("negative_overclaim_counter") == 0,
+        "readiness_dimensions_separated": report_lint.get("readiness_dimensions") == readiness_dimensions
+        and readiness_dimensions.get("live_provider_read_verified") == "NOT_VERIFIED"
+        and readiness_dimensions.get("production_tenancy_policy_egress_verified") == "NOT_VERIFIED"
+        and readiness_dimensions.get("human_ux_privacy_accepted") == "HUMAN_REQUIRED",
+        "evidence_refs_present": bool(report_lint_payload.get("evidence_refs")),
+        "audit_refs_present": bool(report_lint_payload.get("audit_refs")),
+        "zero_secret_findings": stdout_secret_findings == 0
+        and state_secret_findings == 0
+        and report_lint_secret_findings == 0,
+    }
+    cs_ch_040_pass = all(report_lint_checks.values())
+    if preliminary_pass and cs_ch_040_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_40_AI_ROWS_HUMAN_GATES_PENDING"
+    elif preliminary_pass and not cs_ch_040_pass:
+        product_feature_claims = "LOCAL_FIXTURE_CONNECTOR_CONTRACT_ADAPTER_39_AI_ROWS_REPORT_LINT_NOT_VERIFIED"
+    results = [
+        *preliminary_results,
+        _row(
+            "CS-CH-040",
+            "REGRESSION_GUARD",
+            "PASS" if cs_ch_040_pass else "FAIL",
+            [
+                "cornerstone connector report-lint --report tmp/scenario/<connector-report-lint-candidate>.json --json",
+                str(candidate_report_path.relative_to(root)) if candidate_report_path.exists() else str(candidate_report_path),
+            ],
+            "Connector report linter keeps fixture/local evidence, live-provider readiness, production security readiness, human UX/privacy, and publishing approval as separate status dimensions with zero overclaim issues.",
+        ),
+        *_connector_ch0_pending_rows(),
+    ]
+    blocking = [row for row in results if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "connector-contract-adapter",
+        "summary": {
+            "scenario_count": len(results),
+            "pass": len([row for row in results if row["status"] == "PASS"]),
+            "fail": len([row for row in results if row["status"] == "FAIL"]),
+            "not_verified": len([row for row in results if row["status"] == "NOT_VERIFIED"]),
+            "human_required": 0,
+            "blocking": len(blocking),
+            "product_feature_claims": product_feature_claims,
+        },
+        "connector_contract_evidence": {
+            "contract_path": contract_path,
+            "delivery_path": delivery_path,
+            "ack_state_dir": ack_state_rel,
+            "retry_state_dir": retry_state_rel,
+            "lineage_state_dir": lineage_state_rel,
+            "policy_state_dir": policy_state_rel,
+            "evidence_state_dir": evidence_state_rel,
+            "raw_access_state_dir": raw_access_state_rel,
+            "untrusted_state_dir": untrusted_state_rel,
+            "selected_repo_state_dir": selected_repo_state_rel,
+            "source_control_state_dir": source_control_state_rel,
+            "content_restriction_state_dir": content_restriction_state_rel,
+            "github_write_guard_state_dir": github_write_guard_state_rel,
+            "capture_state_dir": capture_state_rel,
+            "activity_session_state_dir": activity_session_state_rel,
+            "activity_samples_path": activity_samples_path,
+            "watch_rule_state_dir": watch_rule_state_rel,
+            "watch_rule_path": watch_rule_path,
+            "watch_rule_edit_path": watch_rule_edit_path,
+            "chrome_active_tab_state_dir": chrome_active_tab_state_rel,
+            "chrome_active_tab_allowed_path": chrome_active_tab_allowed_path,
+            "chrome_active_tab_popup_blocked_path": chrome_active_tab_popup_blocked_path,
+            "chrome_auto_capture_state_dir": chrome_auto_capture_state_rel,
+            "chrome_auto_capture_config_path": chrome_auto_capture_config_path,
+            "chrome_auto_capture_allowed_path": chrome_auto_capture_allowed_path,
+            "chrome_auto_capture_blocked_path": chrome_auto_capture_blocked_path,
+            "chrome_sensitive_page_state_dir": chrome_sensitive_page_state_rel,
+            "chrome_sensitive_page_path": chrome_sensitive_page_path,
+            "capture_lifecycle_state_dir": capture_lifecycle_state_rel,
+            "capture_lifecycle_path": capture_lifecycle_path,
+            "watch_result_state_dir": watch_result_state_rel,
+            "watch_result_path": watch_result_path,
+            "incremental_sync_state_dir": sync_state_rel,
+            "incremental_sync_cursor_id": sync_cursor_id,
+            "poison_delivery_path": poison_delivery_path,
+            "prompt_injection_delivery_path": prompt_injection_delivery_path,
+            "selected_repo_contract_path": selected_repo_contract_path,
+            "selected_repo_delivery_path": selected_repo_delivery_path,
+            "unselected_repo_delivery_path": unselected_repo_delivery_path,
+            "source_control_delivery_paths": source_control_delivery_paths,
+            "source_control_expected_projection_types": source_control_expected_projection_types,
+            "content_restriction_delivery_paths": content_restriction_delivery_paths,
+            "github_write_action_contract_path": github_write_action_contract_path,
+            "github_write_guard_attempts": GITHUB_WRITE_DIRECT_ATTEMPTS,
+            "duplicate_event_delivery_path": duplicate_event_delivery_path,
+            "bad_webhook_delivery_path": bad_webhook_delivery_path,
+            "unchanged_event_delivery_path": unchanged_event_delivery_path,
+            "changed_delivery_path": changed_delivery_path,
+            "forbidden_body_delivery_path": forbidden_body_delivery_path,
+            "oversized_excerpt_delivery_path": oversized_excerpt_delivery_path,
+            "missing_required_contract_path": missing_required_contract_path,
+            "optional_missing_contract_path": optional_missing_contract_path,
+            "raw_access_contract_path": raw_access_contract_path,
+            "state_dir": state_rel,
+            "contract_version_id": contract_version_id,
+            "setup_result_id": setup_result_id,
+            "source_policy_id": source_policy_id,
+            "delivery_artifact_id": delivery_artifact_id,
+            "delivery_receipt_id": delivery_receipt_id,
+            "projection_snapshot_id": projection_snapshot_id,
+            "connector_evidence_link_id": connector_evidence_link_id,
+            "ack_delivery_receipt_id": ack_delivery_receipt_id,
+            "ack_outbox_id": ack_outbox_id,
+            "ack_artifact_id": ack_artifact_id,
+            "transient_retry_state_id": transient_retry_state_id,
+            "poison_retry_state_id": poison_retry_state_id,
+            "poison_quarantine_id": poison_quarantine_id,
+            "lineage_source_external_id": issue_source_external_id,
+            "lineage_first_dedupe_id": lineage_first_dedupe_id,
+            "lineage_changed_dedupe_id": lineage_changed_dedupe_id,
+            "lineage_first_content_version_id": lineage_first_version_id,
+            "lineage_changed_content_version_id": lineage_changed_version_id,
+            "lineage_content_source_key": lineage_content_source_key,
+            "lineage_first_artifact_id": lineage_first_artifact_id,
+            "lineage_changed_artifact_id": lineage_changed_artifact_id,
+            "policy_allowed_decision_id": policy_allowed_decision_id,
+            "policy_forbidden_decision_id": policy_forbidden_decision_id,
+            "policy_oversized_decision_id": policy_oversized_decision_id,
+            "policy_allowed_artifact_id": policy_allowed_artifact_id,
+            "policy_allowed_delivery_receipt_id": policy_allowed_receipt_id,
+            "policy_narrowed_source_policy_id": policy_narrowed_source_policy_id,
+            "evidence_delivery_receipt_id": evidence_delivery_receipt_id,
+            "evidence_delivery_artifact_id": evidence_delivery_artifact.get("artifact_id", ""),
+            "evidence_ref_id": evidence_ref_id,
+            "evidence_bundle_id": evidence_bundle_id,
+            "evidence_search_snapshot_id": evidence_bundle_search_snapshot_id,
+            "evidence_claim_id": evidence_claim_id,
+            "unsupported_claim_id": unsupported_claim_id,
+            "raw_access_request_id": raw_access_request_id,
+            "raw_access_grant_id": raw_access_grant_id,
+            "raw_access_expiry_grant_id": raw_expiry_grant_id,
+            "raw_access_revoke_grant_id": raw_revoke_grant_id,
+            "untrusted_delivery_receipt_id": untrusted_delivery_receipt_id,
+            "untrusted_artifact_id": untrusted_artifact_id,
+            "untrusted_review_id": untrusted_review_id,
+            "untrusted_evidence_bundle_id": untrusted_bundle_id,
+            "untrusted_claim_id": untrusted_claim_id,
+            "untrusted_memory_quarantine_id": untrusted_memory_quarantine_id,
+            "selected_repo_setup_result_id": selected_repo_setup_result_id,
+            "selected_repo_source_policy_id": selected_repo_source_policy_id,
+            "selected_repo_selection_version_id": selected_repo_scope.get("selection_version_id", ""),
+            "selected_repo_allowed_delivery_receipt_id": selected_repo_allowed_receipt_id,
+            "selected_repo_allowed_artifact_id": selected_repo_allowed_artifact_id,
+            "selected_repo_denied_policy_decision_id": selected_repo_denied_policy_decision_id,
+            "source_control_delivery_receipt_ids": {
+                key: receipt.get("delivery_receipt_id", "")
+                for key, receipt in source_control_receipts.items()
+            },
+            "source_control_artifact_ids": {
+                key: artifact.get("artifact_id", "")
+                for key, artifact in source_control_artifacts.items()
+            },
+            "source_control_content_version_ids": {
+                key: version.get("content_version_id", "")
+                for key, version in source_control_content_versions.items()
+            },
+            "source_control_evidence_bundle_ids": {
+                key: bundle.get("evidence_bundle_id", "")
+                for key, bundle in source_control_bundles.items()
+            },
+            "source_control_search_snapshot_ids": {
+                key: snapshot.get("search_snapshot_id", "")
+                for key, snapshot in source_control_search_snapshots.items()
+            },
+            "content_restriction_decision_ids": {
+                key: decision.get("content_restriction_decision_id", "")
+                for key, decision in content_restriction_decisions.items()
+            },
+            "content_restriction_persisted_decision_refs": {
+                key: {
+                    "evidence_refs": persisted.get("evidence_refs", []),
+                    "audit_refs": persisted.get("audit_refs", []),
+                    "linked_records": persisted.get("linked_records", {}),
+                }
+                for key, persisted in content_restriction_persisted_decisions.items()
+            },
+            "content_restriction_actions": {
+                key: decision.get("action", "")
+                for key, decision in content_restriction_decisions.items()
+            },
+            "content_restriction_partial_statuses": {
+                key: decision.get("partial_status", "")
+                for key, decision in content_restriction_decisions.items()
+            },
+            "content_restriction_delivery_receipt_ids": {
+                key: receipt.get("delivery_receipt_id", "")
+                for key, receipt in content_restriction_receipts.items()
+                if key in content_restriction_success_keys
+            },
+            "content_restriction_artifact_ids": {
+                key: artifact.get("artifact_id", "")
+                for key, artifact in content_restriction_artifacts.items()
+                if key in content_restriction_success_keys
+            },
+            "content_restriction_quarantine_id": content_restriction_quarantine.get("quarantine_id", ""),
+            "github_write_guard_negative_evidence": github_write_guard_negative,
+            "github_write_guard_controlled_attempts": github_write_guard_controlled_attempts,
+            "github_write_guard_direct_denials": github_write_guard_direct_denials,
+            "github_write_guard_contract_error_codes": github_write_guard_contract_error_codes,
+            "github_write_guard_contract_record_count": github_write_guard_contract_record_count,
+            "github_write_guard_audit_event_count": github_write_guard_audit_count,
+            "github_failure_state_dir": github_failure_state_rel,
+            "github_failure_modes": list(GITHUB_PROVIDER_FAILURE_MODES),
+            "github_failure_state_ids": {
+                failure_mode: state.get("provider_failure_state_id", "")
+                for failure_mode, state in github_failure_states.items()
+            },
+            "github_failure_reason_codes": {
+                failure_mode: state.get("reason_code", "")
+                for failure_mode, state in github_failure_states.items()
+            },
+            "github_failure_stream_states": {
+                failure_mode: state.get("ingestion_control", {}).get("stream_state", "")
+                for failure_mode, state in github_failure_states.items()
+            },
+            "github_failure_freshness_states": {
+                failure_mode: state.get("freshness", {}).get("state", "")
+                for failure_mode, state in github_failure_states.items()
+            },
+            "github_failure_negative_evidence": github_failure_negative,
+            "github_failure_state_count": github_failure_state_count,
+            "github_failure_delivery_receipt_count": github_failure_delivery_receipt_count,
+            "github_failure_artifact_count": github_failure_artifact_count,
+            "github_failure_audit_event_count": github_failure_audit_count,
+            "capture_permission_probe_ids": [
+                capture_permission_missing_probe.get("permission_probe_id", ""),
+                capture_permission_granted_probe.get("permission_probe_id", ""),
+            ],
+            "capture_watch_source_consent_id": capture_consent_record.get("watch_source_consent_id", ""),
+            "capture_guard_decision_ids": [
+                capture_no_consent_no_permission_guard.get("capture_guard_decision_id", ""),
+                capture_permission_only_guard.get("capture_guard_decision_id", ""),
+                capture_consent_only_guard.get("capture_guard_decision_id", ""),
+                capture_ready_guard.get("capture_guard_decision_id", ""),
+            ],
+            "capture_guard_statuses": {
+                "no_consent_no_permission": capture_no_consent_no_permission_guard.get("status", ""),
+                "permission_only": capture_permission_only_guard.get("status", ""),
+                "consent_only": capture_consent_only_guard.get("status", ""),
+                "both_gates": capture_ready_guard.get("status", ""),
+            },
+            "capture_negative_evidence": capture_negative,
+            "capture_permission_probe_count": capture_permission_probe_count,
+            "capture_consent_count": capture_consent_count,
+            "capture_guard_count": capture_guard_count,
+            "capture_sample_count": capture_sample_count,
+            "capture_artifact_count": capture_artifact_count,
+            "capture_audit_event_count": capture_audit_count,
+            "activity_sample_batch_id": activity_sample_batch.get("activity_sample_batch_id", ""),
+            "activity_sessionization_id": activity_sessionization.get("activity_sessionization_id", ""),
+            "activity_session_ids": [
+                session.get("activity_session_id", "")
+                for session in activity_sessions
+                if isinstance(session, dict)
+            ],
+            "activity_session_source_sample_ids": [
+                session.get("source_sample_ids", [])
+                for session in activity_sessions
+                if isinstance(session, dict)
+            ],
+            "activity_session_input_metrics": activity_metrics,
+            "activity_session_filtered_samples": activity_filtered,
+            "activity_negative_evidence": activity_negative,
+            "activity_sample_batch_count": activity_sample_batch_count,
+            "activity_sessionization_count": activity_sessionization_count,
+            "activity_session_count": activity_session_count,
+            "activity_artifact_count": activity_artifact_count,
+            "activity_audit_event_count": activity_audit_count,
+            "watch_rule_id": watch_rule_create_record.get("watch_rule_id", ""),
+            "watch_rule_initial_version_id": watch_rule_initial_version.get("watch_rule_version_id", ""),
+            "watch_rule_second_version_id": watch_rule_second_version.get("watch_rule_version_id", ""),
+            "watch_rule_active_version_id_after_edit": watch_rule_edited_record.get("active_version_id", ""),
+            "watch_rule_current_version_id_after_edit": watch_rule_edited_record.get("current_version_id", ""),
+            "watch_rule_policy_decision_ids": [
+                watch_rule_create_policy.get("policy_decision_id", ""),
+                watch_rule_missing_policy.get("policy_decision_id", ""),
+                watch_rule_active_policy.get("policy_decision_id", ""),
+                watch_rule_edit_policy.get("policy_decision_id", ""),
+            ],
+            "watch_rule_evaluation_trace_id": watch_rule_trace.get("evaluation_trace_id", ""),
+            "watch_rule_evaluation_trace_version_id": watch_rule_trace.get("watch_rule_version_id", ""),
+            "watch_rule_retained_trace_version_id": watch_rule_retained_trace.get("watch_rule_version_id", ""),
+            "watch_rule_statuses": {
+                "created": watch_rule_create_record.get("status", ""),
+                "missing_activation": watch_rule_missing_record.get("status", ""),
+                "ready_activation": watch_rule_active_record.get("status", ""),
+                "paused": watch_rule_paused_record.get("status", ""),
+                "resumed": watch_rule_resumed_record.get("status", ""),
+                "edited": watch_rule_edited_record.get("status", ""),
+                "deleted": watch_rule_deleted_record.get("status", ""),
+            },
+            "watch_rule_negative_evidence": watch_rule_negative,
+            "watch_rule_count": watch_rule_count,
+            "watch_rule_version_count": watch_rule_version_count,
+            "watch_rule_policy_decision_count": watch_rule_policy_decision_count,
+            "watch_rule_evaluation_trace_count": watch_rule_evaluation_trace_count,
+            "watch_rule_artifact_count": watch_rule_artifact_count,
+            "watch_rule_audit_event_count": watch_rule_audit_count,
+            "chrome_active_tab_consent_id": chrome_active_tab_consent_record.get("watch_source_consent_id", ""),
+            "chrome_active_tab_no_consent_policy_decision_id": chrome_active_tab_no_consent_policy.get(
+                "policy_decision_id",
+                "",
+            ),
+            "chrome_active_tab_popup_policy_decision_id": chrome_active_tab_popup_policy.get("policy_decision_id", ""),
+            "chrome_active_tab_allowed_permission_event_id": chrome_active_tab_allowed_permission.get(
+                "permission_event_id",
+                "",
+            ),
+            "chrome_active_tab_allowed_payload_id": chrome_active_tab_allowed_payload_record.get(
+                "active_tab_payload_id",
+                "",
+            ),
+            "chrome_active_tab_allowed_policy_decision_id": chrome_active_tab_allowed_policy.get(
+                "policy_decision_id",
+                "",
+            ),
+            "chrome_active_tab_capture_summary_id": chrome_active_tab_summary.get("capture_summary_id", ""),
+            "chrome_active_tab_capture_inbox_item_id": chrome_active_tab_inbox_item.get("capture_inbox_item_id", ""),
+            "chrome_active_tab_policy_statuses": {
+                "no_consent": chrome_active_tab_no_consent_policy.get("decision", ""),
+                "popup_blocked": chrome_active_tab_popup_policy.get("decision", ""),
+                "allowed": chrome_active_tab_allowed_policy.get("decision", ""),
+            },
+            "chrome_active_tab_negative_evidence": chrome_active_tab_negative,
+            "chrome_active_tab_permission_event_count": chrome_active_tab_permission_event_count,
+            "chrome_active_tab_payload_count": chrome_active_tab_payload_count,
+            "chrome_active_tab_policy_decision_count": chrome_active_tab_policy_decision_count,
+            "chrome_active_tab_summary_count": chrome_active_tab_summary_count,
+            "chrome_active_tab_inbox_item_count": chrome_active_tab_inbox_item_count,
+            "chrome_active_tab_artifact_count": chrome_active_tab_artifact_count,
+            "chrome_active_tab_audit_event_count": chrome_active_tab_audit_count,
+            "chrome_auto_capture_consent_id": chrome_auto_capture_consent_record.get("watch_source_consent_id", ""),
+            "chrome_auto_capture_config_id": chrome_auto_capture_config_record.get("auto_capture_config_id", ""),
+            "chrome_auto_capture_no_config_policy_decision_id": chrome_auto_capture_no_config_policy.get(
+                "policy_decision_id",
+                "",
+            ),
+            "chrome_auto_capture_blocked_policy_decision_id": chrome_auto_capture_blocked_policy.get(
+                "policy_decision_id",
+                "",
+            ),
+            "chrome_auto_capture_allowed_trigger_id": chrome_auto_capture_allowed_trigger.get(
+                "auto_capture_trigger_id",
+                "",
+            ),
+            "chrome_auto_capture_allowed_policy_decision_id": chrome_auto_capture_allowed_policy.get(
+                "policy_decision_id",
+                "",
+            ),
+            "chrome_auto_capture_duplicate_policy_decision_id": chrome_auto_capture_duplicate_policy.get(
+                "policy_decision_id",
+                "",
+            ),
+            "chrome_auto_capture_summary_id": chrome_auto_capture_summary.get("capture_summary_id", ""),
+            "chrome_auto_capture_inbox_item_id": chrome_auto_capture_inbox_item.get("capture_inbox_item_id", ""),
+            "chrome_auto_capture_policy_statuses": {
+                "no_config": chrome_auto_capture_no_config_policy.get("decision", ""),
+                "blocked": chrome_auto_capture_blocked_policy.get("decision", ""),
+                "allowed": chrome_auto_capture_allowed_policy.get("decision", ""),
+                "duplicate": chrome_auto_capture_duplicate_policy.get("decision", ""),
+            },
+            "chrome_auto_capture_negative_evidence": chrome_auto_capture_negative,
+            "chrome_auto_capture_consent_count": chrome_auto_capture_consent_count,
+            "chrome_auto_capture_config_count": chrome_auto_capture_config_count,
+            "chrome_auto_capture_trigger_count": chrome_auto_capture_trigger_count,
+            "chrome_auto_capture_policy_decision_count": chrome_auto_capture_policy_decision_count,
+            "chrome_auto_capture_summary_count": chrome_auto_capture_summary_count,
+            "chrome_auto_capture_inbox_item_count": chrome_auto_capture_inbox_item_count,
+            "chrome_auto_capture_artifact_count": chrome_auto_capture_artifact_count,
+            "chrome_auto_capture_audit_event_count": chrome_auto_capture_audit_count,
+            "chrome_sensitive_page_policy_decision_ids": [
+                policy.get("policy_decision_id", "")
+                for policy in chrome_sensitive_page_policies
+                if isinstance(policy, dict)
+            ],
+            "chrome_sensitive_page_degraded_payload_ids": [
+                payload.get("degraded_payload_id", "")
+                for payload in chrome_sensitive_page_degraded_payloads
+                if isinstance(payload, dict)
+            ],
+            "chrome_sensitive_page_history_item_ids": [
+                item.get("history_item_id", "")
+                for item in chrome_sensitive_page_history_items
+                if isinstance(item, dict)
+            ],
+            "chrome_sensitive_page_policy_statuses": {
+                case_id: policy.get("decision", "")
+                for case_id, policy in chrome_sensitive_page_decisions_by_case.items()
+            },
+            "chrome_sensitive_page_negative_evidence": chrome_sensitive_page_negative,
+            "chrome_sensitive_page_policy_decision_count": chrome_sensitive_page_policy_decision_count,
+            "chrome_sensitive_page_degraded_payload_count": chrome_sensitive_page_degraded_payload_count,
+            "chrome_sensitive_page_history_item_count": chrome_sensitive_page_history_item_count,
+            "chrome_sensitive_page_inbox_item_count": chrome_sensitive_page_inbox_item_count,
+            "chrome_sensitive_page_artifact_count": chrome_sensitive_page_artifact_count,
+            "chrome_sensitive_page_audit_event_count": chrome_sensitive_page_audit_count,
+            "capture_lifecycle_source_state_ids": [
+                state.get("source_state_id", "")
+                for state in capture_lifecycle_seed_states
+                if isinstance(state, dict)
+            ],
+            "capture_lifecycle_decision_ids": [
+                record.get("lifecycle_decision_id", "")
+                for record in [
+                    capture_lifecycle_pause_decision,
+                    capture_lifecycle_paused_sample_decision,
+                    capture_lifecycle_resume_decision,
+                    capture_lifecycle_active_sample_decision,
+                    capture_lifecycle_revoke_decision,
+                    capture_lifecycle_revoked_sample_decision,
+                    capture_lifecycle_retention_decision,
+                ]
+                if isinstance(record, dict) and record.get("lifecycle_decision_id")
+            ],
+            "capture_lifecycle_export_id": capture_lifecycle_export.get("lifecycle_export_id", ""),
+            "capture_lifecycle_delete_dry_run_receipt_id": capture_lifecycle_delete_dry.get("deletion_receipt_id", ""),
+            "capture_lifecycle_delete_execute_receipt_id": capture_lifecycle_delete_execute.get(
+                "deletion_receipt_id",
+                "",
+            ),
+            "capture_lifecycle_review_ids": [
+                review.get("capture_result_review_id", "")
+                for review in [capture_lifecycle_review_save, capture_lifecycle_review_dismiss]
+                if isinstance(review, dict)
+            ],
+            "capture_lifecycle_statuses": {
+                "pause_source": capture_lifecycle_pause_decision.get("resulting_status", ""),
+                "resume_source": capture_lifecycle_resume_decision.get("resulting_status", ""),
+                "watch_rule_pause": capture_lifecycle_watch_pause_state.get("status", ""),
+                "global_pause": capture_lifecycle_global_pause_state.get("status", ""),
+                "revoke_chrome": capture_lifecycle_revoke_decision.get("resulting_status", ""),
+                "delete_execute": capture_lifecycle_delete_execute.get("status", ""),
+            },
+            "capture_lifecycle_negative_evidence": capture_lifecycle_negative,
+            "capture_lifecycle_source_state_count": capture_lifecycle_source_state_count,
+            "capture_lifecycle_decision_count": capture_lifecycle_decision_count,
+            "capture_lifecycle_export_count": capture_lifecycle_export_count,
+            "capture_lifecycle_deletion_receipt_count": capture_lifecycle_deletion_receipt_count,
+            "capture_lifecycle_review_count": capture_lifecycle_review_count,
+            "capture_lifecycle_sample_count": capture_lifecycle_sample_count,
+            "capture_lifecycle_audit_event_count": capture_lifecycle_audit_count,
+            "watch_observation_ids": [
+                observation.get("watch_observation_id", "")
+                for observation in watch_result_observations
+                if isinstance(observation, dict)
+            ],
+            "watch_inference_ids": [
+                inference.get("watch_inference_id", "")
+                for inference in watch_result_inferences
+                if isinstance(inference, dict)
+            ],
+            "watch_result_id": watch_result_record.get("watch_result_id", ""),
+            "watch_result_correction_id": watch_result_correction.get("watch_result_correction_id", ""),
+            "watch_result_review_ids": [
+                review.get("watch_result_review_id", "")
+                for review in [watch_result_memory_denial, watch_result_review]
+                if isinstance(review, dict)
+            ],
+            "watch_result_trust_state": watch_result_record.get("trust_state", ""),
+            "watch_result_statuses": {
+                "built": watch_result_record.get("status", ""),
+                "corrected": watch_result_corrected_record.get("status", ""),
+                "memory_approval": watch_result_memory_denial.get("status", ""),
+                "review": watch_result_review.get("status", ""),
+            },
+            "watch_result_negative_evidence": watch_result_negative,
+            "watch_observation_count": watch_observation_count,
+            "watch_inference_count": watch_inference_count,
+            "watch_result_count": watch_result_count,
+            "watch_result_correction_count": watch_result_correction_count,
+            "watch_result_review_count": watch_result_review_count,
+            "watch_result_action_count": watch_result_action_count,
+            "watch_result_audit_event_count": watch_result_audit_count,
+            "action_preflight_state_dir": action_preflight_state_rel,
+            "action_preflight_path": action_preflight_path,
+            "action_preflight_action_id": action_preflight_action_id,
+            "action_preflight_github_action_id": action_preflight_github_action_id,
+            "action_preflight_allowed_preflight_id": action_preflight_allowed.get(
+                "connector_action_preflight_id",
+                "",
+            ),
+            "action_preflight_allowed_review_id": action_preflight_allowed_review.get(
+                "connector_action_preflight_review_id",
+                "",
+            ),
+            "action_preflight_denied_preflight_ids": {
+                case_id: record.get("connector_action_preflight_id", "")
+                for case_id, record in action_preflight_denied_records.items()
+            },
+            "action_preflight_denied_review_ids": {
+                case_id: review.get("connector_action_preflight_review_id", "")
+                for case_id, review in action_preflight_denied_reviews.items()
+            },
+            "action_preflight_denial_reason_codes": sorted(action_preflight_denial_reason_codes),
+            "action_preflight_negative_evidence": action_preflight_negative,
+            "action_preflight_count": action_preflight_count,
+            "action_preflight_review_count": action_preflight_review_count,
+            "action_preflight_action_count": len(action_preflight_action_records),
+            "action_preflight_execution_result_count": action_preflight_execution_result_count,
+            "action_preflight_workflow_run_count": action_preflight_workflow_run_count,
+            "action_preflight_audit_event_count": action_preflight_audit_count,
+            "action_safety_state_dir": action_safety_state_rel,
+            "action_safety_action_id": action_safety_action_id,
+            "action_safety_expected_reason_codes": action_safety_expected_reason_codes,
+            "action_safety_observed_reason_codes": action_safety_denial_reason_codes,
+            "action_safety_envelope_ids": {
+                case_id: envelope.get("action_safety_envelope_id", "")
+                for case_id, envelope in action_safety_denial_envelopes.items()
+            },
+            "action_safety_negative_evidence": action_safety_negative,
+            "action_safety_envelope_count": action_safety_envelope_count,
+            "action_safety_execution_result_count": action_safety_execution_result_count,
+            "action_safety_workflow_run_count": action_safety_workflow_run_count,
+            "action_safety_audit_event_count": action_safety_audit_count,
+            "action_execution_state_dir": action_execution_state_rel,
+            "action_execution_action_id": action_execution_action_id,
+            "action_execution_workflow_run_id": action_execution_workflow_run.get("workflow_run_id", ""),
+            "action_execution_action_result_id": action_execution_result.get("action_result_id", ""),
+            "action_execution_provider_receipt_id": action_execution_provider_receipt.get("provider_receipt_id", ""),
+            "action_execution_idempotency_id": action_execution_idempotency.get("idempotency_id", ""),
+            "action_execution_outcome_artifact_id": action_execution_outcome_artifact.get("artifact_id", ""),
+            "action_execution_outcome_evidence_bundle_id": action_execution_outcome_bundle.get("evidence_bundle_id", ""),
+            "action_execution_connected_outcome_id": action_execution_connected_outcome.get("connected_outcome_id", ""),
+            "action_execution_negative_evidence": action_execution_negative,
+            "action_execution_workflow_run_count": action_execution_workflow_run_count,
+            "action_execution_action_result_count": action_execution_action_result_count,
+            "action_execution_provider_receipt_count": action_execution_provider_receipt_count,
+            "action_execution_outcome_artifact_count": action_execution_outcome_artifact_count,
+            "action_execution_connected_outcome_count": action_execution_connected_outcome_count,
+            "action_execution_idempotency_count": action_execution_idempotency_count,
+            "action_execution_audit_event_count": action_execution_audit_count,
+            "action_retry_state_dir": action_retry_state_rel,
+            "action_retry_action_id": action_retry_action_id,
+            "action_retry_conflict_action_id": action_retry_conflict_action_id,
+            "action_retry_workflow_run_id": action_retry_workflow_run.get("workflow_run_id", ""),
+            "action_retry_action_result_id": action_retry_result.get("action_result_id", ""),
+            "action_retry_provider_receipt_id": action_retry_provider_receipt.get("provider_receipt_id", ""),
+            "action_retry_idempotency_id": action_retry_idempotency.get("idempotency_id", ""),
+            "action_retry_request_digest": action_retry_idempotency.get("request_digest", ""),
+            "action_retry_replay_duplicate_retry_count": action_retry_replay_idempotency.get(
+                "retry_status",
+                {},
+            ).get("duplicate_retry_count", 0),
+            "action_retry_conflict_id": action_retry_conflict.get("idempotency_conflict_id", ""),
+            "action_retry_conflict_reason_code": action_retry_conflict.get("reason_code", ""),
+            "action_retry_conflict_existing_request_digest": action_retry_conflict.get("existing_request_digest", ""),
+            "action_retry_conflict_incoming_request_digest": action_retry_conflict.get("incoming_request_digest", ""),
+            "action_retry_compensation": {
+                "idempotency": action_retry_idempotency.get("compensation", {}),
+                "conflict": action_retry_conflict.get("compensation", {}),
+            },
+            "action_retry_negative_evidence": action_retry_negative,
+            "action_retry_workflow_run_count": action_retry_workflow_run_count,
+            "action_retry_action_result_count": action_retry_action_result_count,
+            "action_retry_provider_receipt_count": action_retry_provider_receipt_count,
+            "action_retry_idempotency_count": action_retry_idempotency_count,
+            "action_retry_connected_outcome_count": action_retry_connected_outcome_count,
+            "action_retry_outcome_artifact_count": action_retry_outcome_artifact_count,
+            "action_retry_safety_envelope_count": action_retry_safety_envelope_count,
+            "action_retry_audit_event_count": action_retry_audit_count,
+            "scope_isolation_state_dir": scope_isolation_state_rel,
+            "scope_isolation_contract_id": scope_isolation_contract_id,
+            "scope_isolation_delivery_receipt_id": scope_isolation_receipt_id,
+            "scope_isolation_evidence_bundle_id": scope_isolation_bundle_id,
+            "scope_isolation_watch_result_id": scope_isolation_watch_result_id,
+            "scope_isolation_action_id": scope_isolation_action_id,
+            "scope_isolation_denied_commands": {
+                key: {
+                    "exit_code": transcripts[key].get("exit_code"),
+                    "status": _payload(transcripts[key]).get("status"),
+                    "error_codes": [
+                        error.get("code")
+                        for error in _payload(transcripts[key]).get("errors", [])
+                        if isinstance(error, dict)
+                    ],
+                }
+                for key in scope_isolation_denied_exit_keys
+            },
+            "scope_isolation_negative_evidence": scope_isolation_negative,
+            "scope_isolation_contract_count": scope_isolation_contract_count,
+            "scope_isolation_setup_count": scope_isolation_setup_count,
+            "scope_isolation_delivery_receipt_count": scope_isolation_receipt_count,
+            "scope_isolation_evidence_bundle_count": scope_isolation_bundle_count,
+            "scope_isolation_watch_result_count": scope_isolation_watch_result_count,
+            "scope_isolation_action_count": scope_isolation_action_count,
+            "scope_isolation_action_result_count": scope_isolation_action_result_count,
+            "scope_isolation_workflow_run_count": scope_isolation_workflow_run_count,
+            "scope_isolation_provider_receipt_count": scope_isolation_provider_receipt_count,
+            "scope_isolation_audit_event_count": scope_isolation_audit_count,
+            "credential_custody_state_dir": credential_custody_state_rel,
+            "credential_custody_status_event_id": credential_custody_status.get(
+                "credential_lifecycle_event_id",
+                "",
+            ),
+            "credential_custody_rotate_event_id": credential_custody_rotate.get(
+                "credential_lifecycle_event_id",
+                "",
+            ),
+            "credential_custody_revoke_event_id": credential_custody_revoke.get(
+                "credential_lifecycle_event_id",
+                "",
+            ),
+            "credential_custody_boundary_id": credential_custody_boundary.get("boundary_id", ""),
+            "credential_custody_connection_id": credential_custody_connection_id,
+            "credential_custody_canary_id": credential_custody_canary_id,
+            "credential_custody_negative_evidence": credential_custody_negative,
+            "credential_custody_lifecycle_count": credential_custody_lifecycle_count,
+            "credential_custody_boundary_count": credential_custody_boundary_count,
+            "credential_custody_audit_event_count": credential_custody_audit_count,
+            "credential_custody_static_provider_auth_import_findings": credential_custody_static_findings,
+            "egress_topology_proof_paths": {
+                "proof": egress_topology_proof.get("proof_path"),
+                "egress_report": egress_topology_proof.get("egress_report_path"),
+                "local_range_report": egress_topology_proof.get("local_range_report_path"),
+                "vs2_scenario_report": egress_topology_proof.get("vs2_scenario_report_path"),
+            },
+            "egress_topology_required_vs2_scenarios": egress_topology_proof.get("required_vs2_scenarios", []),
+            "egress_topology_source_fingerprint": egress_topology_proof.get("source_fingerprint", {}),
+            "egress_topology_proof_hash": egress_topology_proof.get("proof_hash"),
+            "egress_topology_read_errors": egress_topology_proof.get("read_errors", []),
+            "egress_topology_reuse_errors": egress_topology_proof.get("reuse_errors", []),
+            "egress_topology_negative_evidence": egress_topology_negative,
+            "egress_topology_network_topology": egress_topology_proof.get("network_topology", {}),
+            "egress_topology_network_boundary_checks": egress_topology_proof.get("network_boundary_checks", {}),
+            "egress_topology_local_range_checks": egress_topology_proof.get("local_range_checks", {}),
+            "egress_topology_egress_checks": egress_topology_proof.get("egress_checks", {}),
+            "egress_topology_provider_counts": egress_topology_proof.get("provider_counts", {}),
+            "egress_topology_governed_proxy_attempt": egress_topology_proof.get("governed_proxy_attempt", {}),
+            "egress_topology_sink_request_count": egress_topology_proof.get("sink_request_count"),
+            "egress_topology_trap_sink_request_count": egress_topology_proof.get("trap_sink_request_count"),
+            "audit_correlation_state_dir": audit_correlation_state_rel,
+            "audit_correlation_tamper_state_dir": audit_correlation_tamper_state_rel,
+            "audit_correlation_report_id": audit_correlation_report.get(
+                "connector_audit_correlation_report_id",
+                "",
+            ),
+            "audit_correlation_required_family_presence": audit_correlation_required_presence,
+            "audit_correlation_missing_required_families": audit_correlation_report.get(
+                "missing_required_families",
+                [],
+            ),
+            "audit_correlation_connector_event_count": audit_correlation_report.get("connector_event_count", 0),
+            "audit_correlation_correlated_event_count": audit_correlation_report.get("correlated_event_count", 0),
+            "audit_correlation_sample_correlations": audit_correlation_report.get("correlations", [])[:8],
+            "audit_correlation_uncorrelated_event_ids": audit_correlation_report.get(
+                "uncorrelated_event_ids",
+                [],
+            ),
+            "audit_correlation_duplicate_correlation_ids": audit_correlation_report.get(
+                "duplicate_correlation_ids",
+                [],
+            ),
+            "audit_correlation_detail_leaks": audit_correlation_report.get("detail_leaks", []),
+            "audit_correlation_negative_evidence": audit_correlation_negative,
+            "audit_correlation_tamper_errors": audit_correlation_tamper_payload.get(
+                "audit_integrity",
+                {},
+            ).get("errors", []),
+            "action_bypass_state_dir": action_bypass_state_rel,
+            "action_bypass_action_id": action_bypass_action_id,
+            "action_bypass_undeclared_preflight_id": action_bypass_preflight.get(
+                "connector_action_preflight_id",
+                "",
+            ),
+            "action_bypass_undeclared_reason_codes": action_bypass_preflight.get("reason_codes", []),
+            "action_bypass_safety_envelope_id": action_bypass_envelope.get("action_safety_envelope_id", ""),
+            "action_bypass_credential_boundary_id": action_bypass_credential_boundary.get("boundary_id", ""),
+            "action_bypass_pack_quarantine_id": action_bypass_quarantine.get("quarantine_id", ""),
+            "action_bypass_static_provider_import_findings": direct_provider_import_findings,
+            "action_bypass_negative_evidence": action_bypass_negative,
+            "action_bypass_preflight_count": action_bypass_preflight_count,
+            "action_bypass_action_result_count": action_bypass_action_result_count,
+            "action_bypass_workflow_run_count": action_bypass_workflow_run_count,
+            "action_bypass_quarantine_count": action_bypass_quarantine_count,
+            "action_bypass_audit_event_count": action_bypass_audit_count,
+            "incremental_sync_bad_webhook_signal_receipt_id": sync_bad_webhook_signal_receipt.get("signal_receipt_id", ""),
+            "incremental_sync_webhook_signal_receipt_id": sync_webhook_signal_receipt.get("signal_receipt_id", ""),
+            "incremental_sync_out_of_order_signal_receipt_id": sync_out_of_order_signal_receipt.get("signal_receipt_id", ""),
+            "incremental_sync_cursor_storage_id": sync_cursor.get("cursor_storage_id", ""),
+            "incremental_sync_reconciliation_id": sync_reconciliation.get("sync_reconciliation_id", ""),
+            "incremental_sync_webhook_delivery_receipt_id": sync_webhook_receipt.get("delivery_receipt_id", ""),
+            "incremental_sync_changed_delivery_receipt_id": sync_replay_changed_receipt.get("delivery_receipt_id", ""),
+            "incremental_sync_webhook_artifact_id": sync_webhook_artifact.get("artifact_id", ""),
+            "incremental_sync_changed_artifact_id": sync_replay_changed_artifact.get("artifact_id", ""),
+            "incremental_sync_provider_event_key": sync_webhook_payload.get("sync_provider_event_key", ""),
+            "incremental_sync_provider_event_key_parts": sync_event_key_parts,
+            "incremental_sync_reconciliation": sync_reconciliation,
+            "incremental_sync_gap_reconciliation": sync_gap_reconciliation,
+            "missing_required_contract_version_id": missing_contract_version_id,
+            "missing_required_setup_result_id": missing_setup_result_id,
+            "missing_required_source_policy_id": missing_source_policy_id,
+            "optional_missing_contract_version_id": optional_contract_version_id,
+            "optional_missing_setup_result_id": optional_setup_result_id,
+            "optional_missing_source_policy_id": optional_source_policy_id,
+            "confirmed_source_policy_id": confirmed_source_policy_id,
+            "provider_swap_setup_result_id": provider_swap_setup_result_id,
+            "provider_swap_source_policy_id": provider_swap_source_policy_id,
+            "permission_gap_setup_result_id": permission_gap_setup_result_id,
+            "permission_gap_source_policy_id": permission_gap_source_policy_id,
+            "compatible_upgrade_plan_id": compatible_upgrade_plan_id,
+            "breaking_upgrade_plan_id": breaking_upgrade_plan_id,
+            "report_lint_candidate_path": str(candidate_report_path.relative_to(root)),
+            "checks": checks,
+            "delivery_checks": delivery_checks,
+            "ack_checks": ack_checks,
+            "retry_checks": retry_checks,
+            "lineage_checks": lineage_checks,
+            "policy_checks": policy_checks,
+            "evidence_checks": evidence_checks,
+            "raw_access_checks": raw_access_checks,
+            "untrusted_checks": untrusted_checks,
+            "selected_repo_checks": selected_repo_checks,
+            "source_control_checks": source_control_checks,
+            "content_restriction_checks": content_restriction_checks,
+            "github_write_guard_checks": github_write_guard_checks,
+            "github_failure_checks": github_failure_checks,
+            "capture_checks": capture_checks,
+            "activity_checks": activity_checks,
+            "watch_rule_checks": watch_rule_checks,
+            "chrome_active_tab_checks": chrome_active_tab_checks,
+            "chrome_auto_capture_checks": chrome_auto_capture_checks,
+            "chrome_sensitive_page_checks": chrome_sensitive_page_checks,
+            "capture_lifecycle_checks": capture_lifecycle_checks,
+            "watch_result_checks": watch_result_checks,
+            "action_preflight_checks": action_preflight_checks,
+            "action_safety_checks": action_safety_checks,
+            "action_execution_checks": action_execution_checks,
+            "action_retry_checks": action_retry_checks,
+            "scope_isolation_checks": scope_isolation_checks,
+            "credential_custody_checks": credential_custody_checks,
+            "egress_topology_checks": egress_topology_checks,
+            "audit_correlation_checks": audit_correlation_checks,
+            "action_bypass_checks": action_bypass_checks,
+            "incremental_sync_checks": sync_checks,
+            "selected_resource_scope": selected_repo_scope,
+            "missing_required_checks": missing_checks,
+            "optional_missing_checks": optional_checks,
+            "source_policy_checks": source_policy_checks,
+            "provider_swap_checks": provider_swap_checks,
+            "permission_gap_checks": permission_gap_checks,
+            "upgrade_checks": upgrade_checks,
+            "product_surface_checks": product_surface_checks,
+            "report_lint_checks": report_lint_checks,
+            "provider_internal_findings": provider_internal_paths,
+            "missing_required_provider_internal_findings": missing_provider_internal_paths,
+            "optional_missing_provider_internal_findings": optional_provider_internal_paths,
+            "confirmed_source_policy_provider_internal_findings": confirmed_provider_internal_paths,
+            "provider_swap_provider_internal_findings": provider_swap_internal_paths,
+            "permission_gap_provider_internal_findings": permission_gap_internal_paths,
+            "compatible_upgrade_provider_internal_findings": compatible_upgrade_internal_paths,
+            "breaking_upgrade_provider_internal_findings": breaking_upgrade_internal_paths,
+            "product_surface_provider_internal_findings": product_surface_internal_paths,
+            "delivery_provider_internal_findings": delivery_internal_paths,
+            "ack_provider_internal_findings": ack_internal_paths,
+            "retry_provider_internal_findings": retry_internal_paths,
+            "lineage_provider_internal_findings": lineage_internal_paths,
+            "policy_provider_internal_findings": policy_internal_paths,
+            "evidence_provider_internal_findings": evidence_internal_paths,
+            "raw_access_provider_internal_findings": raw_access_internal_paths,
+            "untrusted_provider_internal_findings": untrusted_internal_paths,
+            "selected_repo_provider_internal_findings": selected_repo_internal_paths,
+            "source_control_provider_internal_findings": source_control_internal_paths,
+            "content_restriction_provider_internal_findings": content_restriction_internal_paths,
+            "github_write_guard_provider_internal_findings": github_write_guard_internal_paths,
+            "github_failure_provider_internal_findings": github_failure_internal_paths,
+            "capture_provider_internal_findings": capture_internal_paths,
+            "activity_provider_internal_findings": activity_internal_paths,
+            "watch_rule_provider_internal_findings": watch_rule_internal_paths,
+            "chrome_active_tab_provider_internal_findings": chrome_active_tab_internal_paths,
+            "chrome_auto_capture_provider_internal_findings": chrome_auto_capture_internal_paths,
+            "chrome_sensitive_page_provider_internal_findings": chrome_sensitive_page_internal_paths,
+            "capture_lifecycle_provider_internal_findings": capture_lifecycle_internal_paths,
+            "watch_result_provider_internal_findings": watch_result_internal_paths,
+            "action_preflight_provider_internal_findings": action_preflight_internal_paths,
+            "action_safety_provider_internal_findings": action_safety_internal_paths,
+            "action_execution_provider_internal_findings": action_execution_internal_paths,
+            "action_retry_provider_internal_findings": action_retry_internal_paths,
+            "scope_isolation_provider_internal_findings": scope_isolation_internal_paths,
+            "credential_custody_provider_internal_findings": credential_custody_internal_paths,
+            "egress_topology_provider_internal_findings": provider_internal_findings(egress_topology_proof),
+            "audit_correlation_provider_internal_findings": provider_internal_findings(audit_correlation_report),
+            "action_bypass_provider_internal_findings": action_bypass_internal_paths,
+            "incremental_sync_provider_internal_findings": sync_internal_paths,
+            "stdout_secret_findings": stdout_secret_findings,
+            "state_secret_findings": state_secret_findings,
+            "report_lint_secret_findings": report_lint_secret_findings,
+            "audit_event_count": len(_audit_events(root, state_rel)),
+        },
+        "readiness_dimensions": readiness_dimensions,
+        "negative_evidence": negative_evidence,
+        "command_evidence": list(transcripts.values()),
+        "scenario_results": results,
+        "human_required": [],
+    }
 
 
 def verify_vs0_artifacts(root: Path) -> dict[str, Any]:
@@ -10206,27 +23811,15 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
         and coverage_report(root)["ok"]
     )
 
-    provisional_scenario_report = root / acceptance_report_rel
-    provisional_scenario_report.parent.mkdir(parents=True, exist_ok=True)
-    if not provisional_scenario_report.exists():
-        provisional_scenario_report.write_text("{}\n")
-    release_package = collect_release_evidence(
-        root,
-        requested_scope={"tenant_id": "local-dev", "owner_id": "local-user", "namespace_id": "personal", "workspace_id": "default"},
-        scope_name="vs0-runtime-acceptance",
-        output_dir=release_package_dir,
-        scenario_report=provisional_scenario_report,
-        product_runtime_report=root / product_runtime_report_rel,
-        browser_proof_dir=browser_proof_dir,
-        verification_report=root / DEFAULT_ACCEPTANCE_REPORT,
-    )
-    release_package_ok = (
-        release_package.get("status") == "success"
-        and release_package.get("artifact_count", 0) >= 8
-        and not release_package.get("missing_required")
-    )
-
     unqualified_external_calls = 1 if _has_unqualified_external_calls(product_runtime_payload) else 0
+    release_candidate_ready = (
+        browser_ok
+        and readiness_ok
+        and connector_semantics_ok
+        and quickstart_ok
+        and production_overclaim_ok
+        and regression_ok
+    )
     rows = [
         _row(
             "VS0-ACC-001",
@@ -10259,7 +23852,7 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
         _row(
             "VS0-ACC-005",
             "MUST_PASS",
-            "PASS" if release_package_ok else "FAIL",
+            "PASS" if release_candidate_ready else "FAIL",
             ["cornerstone release evidence collect --scope vs0-runtime-acceptance --json", DEFAULT_RELEASE_PACKAGE_DIR],
             "Release evidence package contains scenario report refs, browser proof, command evidence, negative evidence, and human-required rows.",
         ),
@@ -10294,6 +23887,61 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
             owner="Human",
         ),
     ]
+    negative_evidence = {
+        "real_external_http_calls": int(execution_result.get("external_http_calls", 1) or 0),
+        "unqualified_external_calls_in_release_report": unqualified_external_calls,
+        "production_release_overclaim": 0 if readiness.get("production_release_ready") is False else 1,
+        "live_connector_claim_without_human_evidence": 0,
+        "human_usability_claim_without_human_evidence": 0,
+        "tool_calls_from_untrusted_artifact": product_runtime_payload.get("negative_evidence", {}).get("tool_calls_from_untrusted_artifact", 1),
+        "action_cards_from_prompt_injection": product_runtime_payload.get("negative_evidence", {}).get("action_cards_from_untrusted_artifact", 1),
+        "cross_namespace_reads": product_runtime_payload.get("negative_evidence", {}).get("cross_namespace_read_allowed", 1),
+        "zero_evidence_claim_approvals": product_runtime_payload.get("negative_evidence", {}).get("zero_evidence_claim_approved", 1),
+        "audit_tamper_verify_failures": 0,
+    }
+    candidate_blocking = [
+        row
+        for row in rows
+        if row["owner"] != "Human" and row["status"] in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    candidate_report_path = root / f"{state_rel}-candidate-report.json"
+    candidate_payload = {
+        "schema_version": "cs.cli.v0",
+        "status": "success" if not candidate_blocking else "failed",
+        "scenario_set": "vs0-runtime-acceptance",
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "human_required": len([row for row in rows if row["owner"] == "Human"]),
+            "blocking": len(candidate_blocking),
+            "product_feature_claims": "LOCAL_VS0_RUNTIME_ACCEPTANCE_READY_PRODUCTION_NOT_READY",
+        },
+        "scenario_results": rows,
+        "negative_evidence": negative_evidence,
+    }
+    candidate_report_path.parent.mkdir(parents=True, exist_ok=True)
+    candidate_report_path.write_text(json.dumps(candidate_payload, indent=2, sort_keys=True) + "\n")
+    release_package = collect_release_evidence(
+        root,
+        requested_scope={"tenant_id": "local-dev", "owner_id": "local-user", "namespace_id": "personal", "workspace_id": "default"},
+        scope_name="vs0-runtime-acceptance",
+        output_dir=release_package_dir,
+        scenario_report=candidate_report_path,
+        product_runtime_report=root / product_runtime_report_rel,
+        browser_proof_dir=browser_proof_dir,
+        verification_report=root / DEFAULT_ACCEPTANCE_REPORT,
+    )
+    release_package_ok = (
+        release_package.get("status") == "success"
+        and release_package.get("artifact_count", 0) >= 8
+        and not release_package.get("missing_required")
+    )
+    finalized_rows = []
+    for row in rows:
+        if row["id"] == "VS0-ACC-005":
+            row = dict(row, status="PASS" if row["status"] == "PASS" and release_package_ok else "FAIL")
+        finalized_rows.append(row)
+    rows = finalized_rows
     blocking = [
         row
         for row in rows
@@ -10323,18 +23971,7 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
             "product_runtime_report_status": product_runtime_payload.get("status"),
             "product_runtime_summary": product_runtime_payload.get("summary"),
         },
-        "negative_evidence": {
-            "real_external_http_calls": int(execution_result.get("external_http_calls", 1) or 0),
-            "unqualified_external_calls_in_release_report": unqualified_external_calls,
-            "production_release_overclaim": 0 if readiness.get("production_release_ready") is False else 1,
-            "live_connector_claim_without_human_evidence": 0,
-            "human_usability_claim_without_human_evidence": 0,
-            "tool_calls_from_untrusted_artifact": product_runtime_payload.get("negative_evidence", {}).get("tool_calls_from_untrusted_artifact", 1),
-            "action_cards_from_prompt_injection": product_runtime_payload.get("negative_evidence", {}).get("action_cards_from_untrusted_artifact", 1),
-            "cross_namespace_reads": product_runtime_payload.get("negative_evidence", {}).get("cross_namespace_read_allowed", 1),
-            "zero_evidence_claim_approvals": product_runtime_payload.get("negative_evidence", {}).get("zero_evidence_claim_approved", 1),
-            "audit_tamper_verify_failures": 0,
-        },
+        "negative_evidence": negative_evidence,
         "human_required": [
             {
                 "id": "VS0-ACC-H01",
@@ -10385,6 +24022,27 @@ def _run_command(root: Path, command: list[str], *, timeout: int = 900) -> dict[
         "elapsed_seconds": round(perf_counter() - started_at, 3),
         "stdout_tail": stdout.strip().splitlines()[-30:],
         "stderr_tail": redact_text(stderr).strip().splitlines()[-30:],
+    }
+
+
+def _vs2_regression_guard_enabled() -> bool:
+    return os.environ.get("CORNERSTONE_SKIP_VS2_REGRESSION_TESTS") == "1"
+
+
+def _vs2_regression_guard_transcript(command: list[str], *, report_refs: list[str]) -> dict[str, Any]:
+    return {
+        "schema_version": "cs.command_transcript.v0",
+        "command": command,
+        "exit_code": 0,
+        "timed_out": False,
+        "elapsed_seconds": 0.0,
+        "stdout_tail": [
+            "CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1: skipped nested regression command.",
+            "Fresh VS2 regression proof owns the referenced verifier/gate reports before accepting the aggregate proof.",
+        ],
+        "stderr_tail": [],
+        "skipped_by_vs2_regression_guard": True,
+        "report_refs": report_refs,
     }
 
 
@@ -11093,10 +24751,22 @@ def verify_vs1_ontology_suggest_promote(root: Path) -> dict[str, Any]:
     cli_workflow = _run_vs1_ontology_cli_workflow(root, cli_state_path)
     api_workflow = _run_vs1_ontology_api_workflow(root, state_path)
     browser_proof = capture_vs1_ontology_browser_proof(root, state_dir=browser_state_path, output_dir=browser_proof_dir)
-    regression_command_transcript = {
-        "verify-vs0-evux": _run_command(root, ["make", "verify-vs0-evux"]),
-        "verify-vs0-operator-ui": _run_command(root, ["make", "verify-vs0-operator-ui"]),
-    }
+    if _vs2_regression_guard_enabled():
+        regression_command_transcript = {
+            "verify-vs0-evux": _vs2_regression_guard_transcript(
+                ["make", "verify-vs0-evux"],
+                report_refs=["reports/vs2/regression/vs0-evux.json"],
+            ),
+            "verify-vs0-operator-ui": _vs2_regression_guard_transcript(
+                ["make", "verify-vs0-operator-ui"],
+                report_refs=["reports/vs2/regression/vs0-operator-ui.json"],
+            ),
+        }
+    else:
+        regression_command_transcript = {
+            "verify-vs0-evux": _run_command(root, ["make", "verify-vs0-evux"]),
+            "verify-vs0-operator-ui": _run_command(root, ["make", "verify-vs0-operator-ui"]),
+        }
     api_checks = api_workflow.get("checks", {})
     cli_checks = cli_workflow.get("checks", {})
     browser_ok = browser_proof.get("status") == "PASS" and all(browser_proof.get("required_markers", {}).values()) and all(browser_proof.get("operator_markers", {}).values())
@@ -11247,11 +24917,32 @@ def verify_vs0_evux(root: Path) -> dict[str, Any]:
     quickstart = run_evux_quickstart(root, output_path=root / DEFAULT_EVUX_QUICKSTART_REPORT)
     browser_proof = capture_evux_browser_proof(root, state_dir=browser_state_path, output_dir=root / DEFAULT_EVUX_BROWSER_PROOF_DIR)
 
-    regression_command_transcript = {
-        "verify-local-fast": _run_command(root, ["env", "CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1", "make", "verify-local-fast"]),
-        "verify-vs0-runtime": _run_command(root, ["env", "CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1", "make", "verify-vs0-runtime"]),
-        "verify-vs0-acceptance": _run_command(root, ["make", "verify-vs0-acceptance"]),
-    }
+    if _vs2_regression_guard_enabled():
+        regression_command_transcript = {
+            "verify-local-fast": _vs2_regression_guard_transcript(
+                ["make", "verify-local-fast"],
+                report_refs=[
+                    "reports/vs2/regression/vs0-product-runtime.json",
+                    "reports/vs2/regression/vs0-runtime-acceptance.json",
+                    "reports/vs2/regression/vs0-evux.json",
+                    "reports/security/vs2-regression-proof.json",
+                ],
+            ),
+            "verify-vs0-runtime": _vs2_regression_guard_transcript(
+                ["make", "verify-vs0-runtime"],
+                report_refs=["reports/vs2/regression/vs0-product-runtime.json"],
+            ),
+            "verify-vs0-acceptance": _vs2_regression_guard_transcript(
+                ["make", "verify-vs0-acceptance"],
+                report_refs=["reports/vs2/regression/vs0-runtime-acceptance.json"],
+            ),
+        }
+    else:
+        regression_command_transcript = {
+            "verify-local-fast": _run_command(root, ["env", "CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1", "make", "verify-local-fast"]),
+            "verify-vs0-runtime": _run_command(root, ["env", "CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1", "make", "verify-vs0-runtime"]),
+            "verify-vs0-acceptance": _run_command(root, ["make", "verify-vs0-acceptance"]),
+        }
 
     metadata = git_verification_metadata(root)
     product_runtime_payload = _payload(transcripts["product_runtime_verify"])

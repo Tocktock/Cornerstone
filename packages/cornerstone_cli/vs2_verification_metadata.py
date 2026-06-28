@@ -95,6 +95,9 @@ LOCAL_PROOF_INPUT_PATTERNS = [
     for pattern in DEPENDENCY_FAMILIES[family]
 ]
 
+FINGERPRINT_EXCLUDED_PATH_PARTS = {"__pycache__"}
+FINGERPRINT_EXCLUDED_SUFFIXES = {".pyc", ".pyo"}
+
 
 def _git_value(root: Path, args: list[str]) -> str | None:
     result = subprocess.run(
@@ -135,12 +138,21 @@ def _matching_files(root: Path, patterns: list[str]) -> list[Path]:
     paths: set[Path] = set()
     for pattern in patterns:
         if any(char in pattern for char in "*?["):
-            paths.update(path for path in root.glob(pattern) if path.is_file() and ".git" not in path.parts)
+            paths.update(path for path in root.glob(pattern) if _is_fingerprint_input(path))
             continue
         path = root / pattern
-        if path.is_file():
+        if _is_fingerprint_input(path):
             paths.add(path)
     return sorted(paths, key=lambda path: path.relative_to(root).as_posix())
+
+
+def _is_fingerprint_input(path: Path) -> bool:
+    return (
+        path.is_file()
+        and ".git" not in path.parts
+        and not (FINGERPRINT_EXCLUDED_PATH_PARTS & set(path.parts))
+        and path.suffix not in FINGERPRINT_EXCLUDED_SUFFIXES
+    )
 
 
 def _patterns_for_family(family: str) -> list[str]:

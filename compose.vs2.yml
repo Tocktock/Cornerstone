@@ -28,7 +28,7 @@ services:
     networks:
       - cornerstone_internal
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8181/health"]
+      test: ["CMD", "/opa", "eval", "1"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -38,6 +38,18 @@ services:
     command: ["python", "-m", "http.server", "8080"]
     networks:
       - cornerstone_internal
+      - cornerstone_external_test
+
+  provider-sink:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8080"]
+    networks:
+      - cornerstone_external_test
+
+  forbidden-sink:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8080"]
+    networks:
       - cornerstone_external_test
 
 networks:

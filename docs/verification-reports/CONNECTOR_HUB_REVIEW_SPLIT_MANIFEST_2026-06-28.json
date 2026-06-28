@@ -1,0 +1,307 @@
+{
+  "claim_boundary": "split_manifest_is_review_planning_not_merge_or_implementation_completion",
+  "generated_for_pr": 20,
+  "local_verification_command": "python3 scripts/verify_connectorhub_review_split.py",
+  "notes": [
+    "This manifest makes the PR #20 split recommendation locally checkable.",
+    "It does not claim the branch has already been split.",
+    "It does not claim connector.py or test_connectorhub_cli.py refactoring is complete.",
+    "It does not require or add GitHub Actions workflows."
+  ],
+  "schema_version": "cs.connectorhub.review_split_manifest.v1",
+  "slices": [
+    {
+      "claim_boundary": "contract_only_no_generated_pass_claims",
+      "local_commands": [
+        "scripts/verify_sot_docs.sh",
+        "python3 scripts/verify_connectorhub_review_split.py"
+      ],
+      "required_paths": [
+        "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md",
+        "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_MATRIX.csv"
+      ],
+      "scenario_ids": [
+        "CS-CH-001",
+        "CS-CH-002",
+        "CS-CH-003",
+        "CS-CH-004",
+        "CS-CH-005",
+        "CS-CH-006",
+        "CS-CH-007",
+        "CS-CH-008",
+        "CS-CH-009",
+        "CS-CH-010",
+        "CS-CH-011",
+        "CS-CH-012",
+        "CS-CH-013",
+        "CS-CH-014",
+        "CS-CH-015",
+        "CS-CH-016",
+        "CS-CH-017",
+        "CS-CH-018",
+        "CS-CH-019",
+        "CS-CH-020",
+        "CS-CH-021",
+        "CS-CH-022",
+        "CS-CH-023",
+        "CS-CH-024",
+        "CS-CH-025",
+        "CS-CH-026",
+        "CS-CH-027",
+        "CS-CH-028",
+        "CS-CH-029",
+        "CS-CH-030",
+        "CS-CH-031",
+        "CS-CH-032",
+        "CS-CH-033",
+        "CS-CH-034",
+        "CS-CH-035",
+        "CS-CH-036",
+        "CS-CH-037",
+        "CS-CH-038",
+        "CS-CH-039",
+        "CS-CH-040",
+        "CS-CH-H01",
+        "CS-CH-H02",
+        "CS-CH-H03",
+        "CS-CH-H04",
+        "CS-CH-H05",
+        "CS-CH-H06",
+        "CS-CH-H07"
+      ],
+      "slice_id": "PR20-A",
+      "title": "Contract and matrix only"
+    },
+    {
+      "claim_boundary": "compact_evidence_review_support_only",
+      "local_commands": [
+        "python3 scripts/verify_connectorhub_engineering_trail.py",
+        "python3 -m unittest tests.scenario.test_connectorhub_compact_reports"
+      ],
+      "required_paths": [
+        "reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json",
+        "reports/scenario/connector-contract-adapter/manifest-2026-06-23.json",
+        "reports/scenario/connector-contract-adapter/shared-evidence-index-2026-06-23.json",
+        "reports/scenario/connector-contract-adapter/objects/sha256",
+        "scripts/compact_connectorhub_reports.py",
+        "tests/scenario/test_connectorhub_compact_reports.py"
+      ],
+      "scenario_ids": [
+        "CS-CH-001",
+        "CS-CH-002",
+        "CS-CH-003",
+        "CS-CH-004",
+        "CS-CH-005",
+        "CS-CH-006",
+        "CS-CH-007",
+        "CS-CH-008",
+        "CS-CH-009",
+        "CS-CH-010",
+        "CS-CH-011",
+        "CS-CH-012",
+        "CS-CH-013",
+        "CS-CH-014",
+        "CS-CH-015",
+        "CS-CH-016",
+        "CS-CH-017",
+        "CS-CH-018",
+        "CS-CH-019",
+        "CS-CH-020",
+        "CS-CH-021",
+        "CS-CH-022",
+        "CS-CH-023",
+        "CS-CH-024",
+        "CS-CH-025",
+        "CS-CH-026",
+        "CS-CH-027",
+        "CS-CH-028",
+        "CS-CH-029",
+        "CS-CH-030",
+        "CS-CH-031",
+        "CS-CH-032",
+        "CS-CH-033",
+        "CS-CH-034",
+        "CS-CH-035",
+        "CS-CH-036",
+        "CS-CH-037",
+        "CS-CH-038",
+        "CS-CH-039",
+        "CS-CH-040"
+      ],
+      "slice_id": "PR20-B",
+      "title": "Compact evidence layout and verifier support"
+    },
+    {
+      "claim_boundary": "local_fixture_connectorport_core_only",
+      "local_commands": [
+        "PATH=\"$PWD:$PATH\" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-001 --json",
+        "PATH=\"$PWD:$PATH\" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-014 --json"
+      ],
+      "required_paths": [
+        "packages/cornerstone_cli/connector.py",
+        "tests/scenario/test_connectorhub_cli.py",
+        "fixtures/connectorhub/contracts/github_readonly_contract.json",
+        "fixtures/connectorhub/deliveries/github_issue_projection_delivery.json"
+      ],
+      "scenario_ids": [
+        "CS-CH-001",
+        "CS-CH-002",
+        "CS-CH-003",
+        "CS-CH-004",
+        "CS-CH-005",
+        "CS-CH-006",
+        "CS-CH-007",
+        "CS-CH-008",
+        "CS-CH-009",
+        "CS-CH-010",
+        "CS-CH-011",
+        "CS-CH-012",
+        "CS-CH-013",
+        "CS-CH-014"
+      ],
+      "slice_id": "PR20-C",
+      "title": "ConnectorPort setup and delivery core"
+    },
+    {
+      "claim_boundary": "local_fixture_github_readonly_only",
+      "local_commands": [
+        "PATH=\"$PWD:$PATH\" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-015 --json",
+        "PATH=\"$PWD:$PATH\" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-020 --json"
+      ],
+      "required_paths": [
+        "packages/cornerstone_cli/connector.py",
+        "tests/scenario/test_connectorhub_cli.py",
+        "fixtures/connectorhub/contracts/github_selected_repositories_contract.json",
+        "fixtures/connectorhub/deliveries/github_selected_repo_issue_projection_delivery.json",
+        "fixtures/connectorhub/deliveries/github_unselected_repo_issue_projection_delivery.json"
+      ],
+      "scenario_ids": [
+        "CS-CH-015",
+        "CS-CH-016",
+        "CS-CH-017",
+        "CS-CH-018",
+        "CS-CH-019",
+        "CS-CH-020"
+      ],
+      "slice_id": "PR20-D",
+      "title": "GitHub selected-repository read-only lane"
+    },
+    {
+      "claim_boundary": "local_fixture_capture_watch_only",
+      "local_commands": [
+        "PATH=\"$PWD:$PATH\" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-021 --json",
+        "PATH=\"$PWD:$PATH\" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-028 --json"
+      ],
+      "required_paths": [
+        "packages/cornerstone_cli/connector.py",
+        "tests/scenario/test_connectorhub_cli.py",
+        "fixtures/connectorhub/activity_samples/macos_activity_samples_cs_ch_022.json",
+        "fixtures/connectorhub/chrome/active_tab_capture_allowed_cs_ch_024.json",
+        "fixtures/connectorhub/watch_results/project_alpha_watch_result_cs_ch_028.json",
+        "fixtures/connectorhub/watch_rules/project_alpha_watch_rule_cs_ch_023.json"
+      ],
+      "scenario_ids": [
+        "CS-CH-021",
+        "CS-CH-022",
+        "CS-CH-023",
+        "CS-CH-024",
+        "CS-CH-025",
+        "CS-CH-026",
+        "CS-CH-027",
+        "CS-CH-028"
+      ],
+      "slice_id": "PR20-E",
+      "title": "macOS, Chrome, Watch Rule, and Watch Result lane"
+    },
+    {
+      "claim_boundary": "local_fixture_action_lane_no_live_side_effects",
+      "local_commands": [
+        "PATH=\"$PWD:$PATH\" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-029 --json",
+        "PATH=\"$PWD:$PATH\" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-033 --json"
+      ],
+      "required_paths": [
+        "packages/cornerstone_cli/connector.py",
+        "tests/scenario/test_connectorhub_cli.py",
+        "fixtures/connectorhub/actions/non_github_action_preflight_cs_ch_029.json"
+      ],
+      "scenario_ids": [
+        "CS-CH-029",
+        "CS-CH-030",
+        "CS-CH-031",
+        "CS-CH-032",
+        "CS-CH-033"
+      ],
+      "slice_id": "PR20-F",
+      "title": "Local fixture Action lane"
+    },
+    {
+      "claim_boundary": "local_fixture_scope_credential_egress_audit_only",
+      "local_commands": [
+        "PATH=\"$PWD:$PATH\" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-034 --json",
+        "PATH=\"$PWD:$PATH\" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-040 --json"
+      ],
+      "required_paths": [
+        "packages/cornerstone_cli/connector.py",
+        "tests/scenario/test_connectorhub_cli.py",
+        "reports/security/vs2-local-security-proof.json",
+        "reports/security/vs2-scenario-specific-evidence.json"
+      ],
+      "scenario_ids": [
+        "CS-CH-034",
+        "CS-CH-035",
+        "CS-CH-036",
+        "CS-CH-037",
+        "CS-CH-038",
+        "CS-CH-039",
+        "CS-CH-040"
+      ],
+      "slice_id": "PR20-G",
+      "title": "Scope, credential custody, egress, audit, and product-surface guards"
+    },
+    {
+      "claim_boundary": "local_manual_vs2_rehearsal_only_not_production_readiness",
+      "local_commands": [
+        "make verify-vs2-production-like"
+      ],
+      "required_paths": [
+        "compose.vs2.yml",
+        "packages/cornerstone_cli/vs2_production_like.py",
+        "packages/cornerstone_cli/vs2_local_range.py",
+        "packages/cornerstone_cli/vs2_security.py",
+        "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md"
+      ],
+      "scenario_ids": [],
+      "slice_id": "PR20-H",
+      "title": "VS2 production-like local rehearsal"
+    }
+  ],
+  "status": "draft_review_split",
+  "target_module_map": [
+    "packages/cornerstone_cli/connector/__init__.py",
+    "packages/cornerstone_cli/connector/contracts.py",
+    "packages/cornerstone_cli/connector/setup.py",
+    "packages/cornerstone_cli/connector/delivery.py",
+    "packages/cornerstone_cli/connector/evidence.py",
+    "packages/cornerstone_cli/connector/raw_access.py",
+    "packages/cornerstone_cli/connector/github_readonly.py",
+    "packages/cornerstone_cli/connector/capture_macos.py",
+    "packages/cornerstone_cli/connector/capture_chrome.py",
+    "packages/cornerstone_cli/connector/watch_rules.py",
+    "packages/cornerstone_cli/connector/watch_results.py",
+    "packages/cornerstone_cli/connector/action_preflight.py",
+    "packages/cornerstone_cli/connector/audit_bridge.py",
+    "packages/cornerstone_cli/connector/human_gates.py",
+    "packages/cornerstone_cli/connector/validation.py"
+  ],
+  "target_test_map": [
+    "tests/scenario/connectorhub/test_setup_delivery.py",
+    "tests/scenario/connectorhub/test_evidence_raw_access.py",
+    "tests/scenario/connectorhub/test_github_readonly.py",
+    "tests/scenario/connectorhub/test_capture_watch.py",
+    "tests/scenario/connectorhub/test_action_lane.py",
+    "tests/scenario/connectorhub/test_scope_credential_egress_audit.py",
+    "tests/scenario/connectorhub/test_human_gates.py",
+    "tests/scenario/connectorhub/test_compact_reports.py"
+  ],
+  "verdict": "needs_follow_up"
+}

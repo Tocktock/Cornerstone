@@ -1,0 +1,48 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_alpha_issue_poison_1002",
+  "projection_id": "cproj_github_issue_poison_1002",
+  "contract_id": "ccon_project_alpha_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-alpha:issue:1002:malformed:2026-06-23T00:00:00Z",
+  "common_capability": "source_control.issue.read",
+  "projection_type": "source_control.issue.v9",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha:issue:1002",
+    "title": "Malformed Connector Hub projection",
+    "classification": "metadata_and_markdown_excerpt",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_alpha_issue_poison_1002",
+    "kind": "connectorhub_projection_evidence",
+    "source_policy_id": "cspol_f652156613a8173a",
+    "provider_event_id": "github:repo:owner/project-alpha:issue:1002:malformed:2026-06-23T00:00:00Z",
+    "permitted_fields": [
+      "issue_number",
+      "title",
+      "state",
+      "labels",
+      "body_markdown_excerpt"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "issue_number": 1002,
+    "title": "Malformed Connector Hub projection",
+    "state": "open",
+    "labels": [
+      "connectorhub",
+      "poison"
+    ],
+    "body_markdown_excerpt": "This fixture uses an unsupported projection_type so retry/quarantine behavior can be verified without storing raw provider payload.",
+    "updated_at": "2026-06-23T00:00:00Z"
+  }
+}

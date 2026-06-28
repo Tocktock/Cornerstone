@@ -1,0 +1,1422 @@
+{
+  "audit": {
+    "checks": {
+      "audit_events_linked": true,
+      "audit_events_visible_in_scope": true,
+      "audit_hash_chain_valid": true,
+      "controlled_tamper_detected_before_rollback": true
+    },
+    "event_count": 2,
+    "status": "passed"
+  },
+  "audit_refs": [],
+  "backup_restore": {
+    "backup_bytes": 64691,
+    "backup_path": "tmp/vs2-production-like/20260628T060401Z_53455/backup.dump",
+    "backup_sha256": "77b33478836fa9ee7e89d6ec877f944736f219f7762240f7244fe87752b2010d",
+    "checks": {
+      "audit_rechecked_after_restore": true,
+      "pg_dump_succeeded": true,
+      "pg_restore_succeeded": true,
+      "rls_rechecked_after_restore": true,
+      "tenant_counts_match_after_restore": true
+    },
+    "restore_database": "cornerstone_plike_20260628t060401z_53455_restore",
+    "status": "passed",
+    "transcript": [
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "pg_dump",
+          "-U",
+          "postgres",
+          "-Fc",
+          "cornerstone_plike_20260628t060401z_53455"
+        ],
+        "elapsed_seconds": 3.401,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [
+          "<64691 bytes>"
+        ],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "postgres",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.238,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "pg_restore",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455_restore",
+          "--no-owner"
+        ],
+        "elapsed_seconds": 3.417,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [
+          "<0 bytes>"
+        ],
+        "timed_out": false
+      }
+    ]
+  },
+  "claim_boundary": "Local production-like Docker integration rehearsal only. This is not production readiness, live connector readiness, penetration-test completion, or human acceptance.",
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone security vs2-production-like-integration",
+  "compose_file": "compose.vs2.yml",
+  "compose_up": {
+    "command": [
+      "docker",
+      "compose",
+      "-f",
+      "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+      "up",
+      "-d"
+    ],
+    "elapsed_seconds": 0.309,
+    "exit_code": 0,
+    "stderr_tail": [
+      " Container cornerstone-forbidden-sink-1 Creating ",
+      " Container cornerstone-provider-sink-1 Creating ",
+      " Container cornerstone-forbidden-sink-1 Created ",
+      " Container cornerstone-provider-sink-1 Created ",
+      " Container cornerstone-provider-sink-1 Starting ",
+      " Container cornerstone-forbidden-sink-1 Starting ",
+      " Container cornerstone-forbidden-sink-1 Started ",
+      " Container cornerstone-provider-sink-1 Started "
+    ],
+    "stdout_tail": [],
+    "timed_out": false
+  },
+  "controlled_sink_egress": {
+    "checks": {
+      "forbidden_sink_denied_by_policy": true,
+      "forbidden_sink_not_contacted": true,
+      "opa_allow_decision_recorded": true,
+      "provider_sink_service_reached_once": true
+    },
+    "log_evidence": {
+      "forbidden_sink_log_tail": [],
+      "forbidden_sink_token": "forbidden_denied_20260628T060401Z_53455",
+      "forbidden_sink_token_count": 0,
+      "provider_sink_log_tail": [
+        "provider-sink-1  | 172.19.0.2 - - [28/Jun/2026 06:05:26] \"GET /?probe=provider_allowed_20260628T060401Z_53455 HTTP/1.1\" 200 -"
+      ],
+      "provider_sink_token": "provider_allowed_20260628T060401Z_53455",
+      "provider_sink_token_count": 1
+    },
+    "probe": {
+      "allow_decision": {
+        "http_status": 200,
+        "result": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "policy_path": "cornerstone.vs2/allow",
+          "reason_codes": []
+        }
+      },
+      "forbidden_decision": {
+        "http_status": 200,
+        "result": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "cross_tenant_scope"
+          ]
+        }
+      },
+      "forbidden_error": null,
+      "forbidden_request_sent": false,
+      "forbidden_status": null,
+      "forbidden_url": "http://forbidden-sink:8080/?probe=forbidden_denied_20260628T060401Z_53455",
+      "provider_error": null,
+      "provider_request_sent": true,
+      "provider_status": 200,
+      "provider_url": "http://provider-sink:8080/?probe=provider_allowed_20260628T060401Z_53455"
+    },
+    "status": "passed",
+    "transcripts": {
+      "forbidden_logs": {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "logs",
+          "--no-color",
+          "forbidden-sink"
+        ],
+        "elapsed_seconds": 0.063,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      "probe": {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "egress-gateway",
+          "python",
+          "-"
+        ],
+        "elapsed_seconds": 0.314,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [
+          "{\"allow_decision\": {\"http_status\": 200, \"result\": {\"bundle_revision\": \"vs2-rego-local-v1\", \"decision\": \"allow\", \"policy_path\": \"cornerstone.vs2/allow\", \"reason_codes\": []}}, \"forbidden_decision\": {\"http_status\": 200, \"result\": {\"bundle_revision\": \"vs2-rego-local-v1\", \"decision\": \"deny\", \"policy_path\": \"cornerstone.vs2/deny\", \"reason_codes\": [\"cross_tenant_scope\"]}}, \"forbidden_error\": null, \"forbidden_request_sent\": false, \"forbidden_status\": null, \"forbidden_url\": \"http://forbidden-sink:8080/?probe=forbidden_denied_20260628T060401Z_53455\", \"provider_error\": null, \"provider_request_sent\": true, \"provider_status\": 200, \"provider_url\": \"http://provider-sink:8080/?probe=provider_allowed_20260628T060401Z_53455\"}"
+        ],
+        "timed_out": false
+      },
+      "provider_logs": {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "logs",
+          "--no-color",
+          "provider-sink"
+        ],
+        "elapsed_seconds": 0.083,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [
+          "provider-sink-1  | 172.19.0.2 - - [28/Jun/2026 06:05:26] \"GET /?probe=provider_allowed_20260628T060401Z_53455 HTTP/1.1\" 200 -"
+        ],
+        "timed_out": false
+      }
+    }
+  },
+  "database": "cornerstone_plike_20260628t060401z_53455",
+  "elapsed_seconds": 140.38,
+  "errors": [],
+  "evidence_refs": [
+    "report:reports/security/vs2-production-like-integration-2026-06-27.json"
+  ],
+  "finished_at": "2026-06-28T06:06:22.004816+00:00",
+  "ids": {
+    "git_commit": "b82f98a"
+  },
+  "migrations": {
+    "database": "cornerstone_plike_20260628t060401z_53455",
+    "status": "passed",
+    "transcript": [
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "postgres",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.206,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "postgres",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.658,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.192,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.231,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.212,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.225,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.298,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.149,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.265,
+        "exit_code": 0,
+        "stderr_tail": [
+          "NOTICE:  policy \"operator_metrics_tenant_scope\" for relation \"cs.operator_metrics\" does not exist, skipping",
+          "NOTICE:  policy \"status_records_tenant_scope\" for relation \"cs.status_records\" does not exist, skipping",
+          "NOTICE:  policy \"tenant_exports_tenant_scope\" for relation \"cs.tenant_exports\" does not exist, skipping"
+        ],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.169,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      }
+    ]
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "network": {
+    "checks": {
+      "controlled_gateway_reachable_from_internal_probe": true,
+      "direct_external_from_internal_probe_denied": true,
+      "egress_gateway_bridges_internal_to_external_test": true,
+      "forbidden_sink_external_only": true,
+      "internal_network_exists": true,
+      "internal_network_is_docker_internal": true,
+      "opa_not_published_to_host": true,
+      "postgres_and_opa_only_internal": true,
+      "postgres_host_bound_to_loopback": true,
+      "provider_sink_external_only": true
+    },
+    "containers": {
+      "egress-gateway": "e2a440020c8483da5d580f1885e5c4174ec8a97e437a3ec44533962544d07f5e",
+      "forbidden-sink": "0aaa97804e6a0595e5dfbc66b39d82d4037ab653d04e8e7e0be9c933e1f372ce",
+      "opa": "a335666fea6b6ca1dd6068e9d7b8cc4bbd495a332b80aea3acb82168c5115e15",
+      "postgres": "768a025a9b43428946d6572a3cbcf33ca9b317508504aed6ca2bfa2f8edb47f4",
+      "provider-sink": "dda1b7953525c8e7ba4023a8d4cf8910ee59cc3c962e321bd0b4b52f1e68a382"
+    },
+    "external_networks": [
+      "cornerstone_cornerstone_external_test"
+    ],
+    "internal_network": "cornerstone_cornerstone_internal",
+    "networks_by_service": {
+      "egress-gateway": [
+        "cornerstone_cornerstone_external_test",
+        "cornerstone_cornerstone_internal"
+      ],
+      "forbidden-sink": [
+        "cornerstone_cornerstone_external_test"
+      ],
+      "opa": [
+        "cornerstone_cornerstone_internal"
+      ],
+      "postgres": [
+        "cornerstone_cornerstone_internal"
+      ],
+      "provider-sink": [
+        "cornerstone_cornerstone_external_test"
+      ]
+    },
+    "postgres_port_bindings": {
+      "5432/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "55432"
+        }
+      ]
+    },
+    "probe": {
+      "controlled_gateway_reachable": true,
+      "controlled_gateway_status": 200,
+      "external_direct_error_class": "URLError",
+      "external_direct_reachable": false,
+      "gateway_url": "http://172.29.0.4:8080"
+    },
+    "probe_transcript": {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--network",
+        "cornerstone_cornerstone_internal",
+        "python:3.12-alpine",
+        "python",
+        "-"
+      ],
+      "elapsed_seconds": 6.49,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "{\"controlled_gateway_reachable\": true, \"controlled_gateway_status\": 200, \"external_direct_error_class\": \"URLError\", \"external_direct_reachable\": false, \"gateway_url\": \"http://172.29.0.4:8080\"}"
+      ],
+      "timed_out": false
+    },
+    "status": "passed"
+  },
+  "opa": {
+    "cases": [
+      {
+        "case": "allow",
+        "http_status": 200,
+        "result": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "allow",
+          "policy_path": "cornerstone.vs2/allow",
+          "reason_codes": []
+        }
+      },
+      {
+        "case": "cross_tenant",
+        "http_status": 200,
+        "result": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "cross_tenant_scope"
+          ]
+        }
+      },
+      {
+        "case": "invalid",
+        "http_status": 200,
+        "result": {
+          "bundle_revision": "vs2-rego-local-v1",
+          "decision": "deny",
+          "policy_path": "cornerstone.vs2/deny",
+          "reason_codes": [
+            "invalid_schema"
+          ]
+        }
+      }
+    ],
+    "checks": {
+      "allow_case_allowed": true,
+      "cross_tenant_case_denied": true,
+      "invalid_schema_denied": true,
+      "opa_http_decision_api_reachable_inside_stack": true
+    },
+    "status": "passed",
+    "transcript": {
+      "command": [
+        "docker",
+        "compose",
+        "-f",
+        "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+        "exec",
+        "-T",
+        "egress-gateway",
+        "python",
+        "-"
+      ],
+      "elapsed_seconds": 0.374,
+      "exit_code": 0,
+      "stderr_tail": [],
+      "stdout_tail": [
+        "{\"cases\": [{\"case\": \"allow\", \"http_status\": 200, \"result\": {\"bundle_revision\": \"vs2-rego-local-v1\", \"decision\": \"allow\", \"policy_path\": \"cornerstone.vs2/allow\", \"reason_codes\": []}}, {\"case\": \"cross_tenant\", \"http_status\": 200, \"result\": {\"bundle_revision\": \"vs2-rego-local-v1\", \"decision\": \"deny\", \"policy_path\": \"cornerstone.vs2/deny\", \"reason_codes\": [\"cross_tenant_scope\"]}}, {\"case\": \"invalid\", \"http_status\": 200, \"result\": {\"bundle_revision\": \"vs2-rego-local-v1\", \"decision\": \"deny\", \"policy_path\": \"cornerstone.vs2/deny\", \"reason_codes\": [\"invalid_schema\"]}}]}"
+      ],
+      "timed_out": false
+    }
+  },
+  "overclaim": {
+    "checks": {
+      "external_provider_mutation": false,
+      "human_security_acceptance": false,
+      "live_connector_ready": false,
+      "local_production_like_only": true,
+      "production_release_ready": false
+    },
+    "claim_boundary": "Local production-like Docker integration rehearsal only. This is not production readiness, live connector readiness, penetration-test completion, or human acceptance.",
+    "human_required": [
+      {
+        "expected_evidence": "Reviewed topology, policy decision logs, network-control transcript, backup/restore drill, audit proof, and sign-off.",
+        "id": "VS2-SEC-H04",
+        "release_impact": "Blocks production PASS, but not this local production-like rehearsal.",
+        "required_human_action": "Run or approve the production/network security review and attach redacted evidence.",
+        "why_ai_cannot_verify": "Real production topology, network policy ownership, and independent security review require human or external evidence."
+      }
+    ],
+    "status": "passed"
+  },
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "report_path": "reports/security/vs2-production-like-integration-2026-06-27.json",
+  "report_payload_sha256_without_hash": "f0e38f8f8f516c333886c2913c53aed3b074c4415e057273b15513c026914704",
+  "restore_database": "cornerstone_plike_20260628t060401z_53455_restore",
+  "rls": {
+    "checks": {
+      "app_role_cannot_bypass_rls": true,
+      "cross_tenant_delete_zero": true,
+      "forged_cross_tenant_insert_denied": true,
+      "forged_cross_tenant_update_denied": true,
+      "membership_resolved_by_security_definer": true,
+      "policy_inventory_present": true,
+      "rls_enabled_and_forced": true,
+      "safe_view_is_rls_bound": true,
+      "security_invoker_function_is_rls_bound": true,
+      "tenant_a_rows_visible": true,
+      "tenant_b_rows_hidden": true,
+      "unsafe_function_not_public": true,
+      "unsafe_security_definer_execute_denied": true
+    },
+    "cross_delete": {
+      "deleted_count": 0
+    },
+    "inventory": {
+      "policy_count": 20,
+      "rls_tables": [
+        {
+          "relation": "action_cards",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "artifact_references",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "artifacts",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "audit_events",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "claims",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "derived_representations",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "egress_grants",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "evidence_bundles",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "idempotency_keys",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "jobs",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "memberships",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "migration_quarantine",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "ontology_links",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "ontology_objects",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "operator_metrics",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "policy_decisions",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "search_snapshots",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "status_records",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "tenant_exports",
+          "rls_enabled": true,
+          "rls_forced": true
+        },
+        {
+          "relation": "workflow_runs",
+          "rls_enabled": true,
+          "rls_forced": true
+        }
+      ],
+      "roles": [
+        {
+          "rolbypassrls": false,
+          "rolname": "cornerstone_app",
+          "rolsuper": false
+        },
+        {
+          "rolbypassrls": false,
+          "rolname": "cornerstone_auditor",
+          "rolsuper": false
+        },
+        {
+          "rolbypassrls": false,
+          "rolname": "cornerstone_identity",
+          "rolsuper": false
+        },
+        {
+          "rolbypassrls": false,
+          "rolname": "cornerstone_maintenance",
+          "rolsuper": false
+        },
+        {
+          "rolbypassrls": false,
+          "rolname": "cornerstone_migrator",
+          "rolsuper": false
+        },
+        {
+          "rolbypassrls": false,
+          "rolname": "cornerstone_schema_owner",
+          "rolsuper": false
+        }
+      ],
+      "unsafe_function_public_execute": false
+    },
+    "negative_transcript": [
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.204,
+        "exit_code": 3,
+        "stderr_tail": [
+          "ERROR:  new row violates row-level security policy for table \"artifacts\""
+        ],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.174,
+        "exit_code": 3,
+        "stderr_tail": [
+          "ERROR:  new row violates row-level security policy for table \"artifacts\""
+        ],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.226,
+        "exit_code": 3,
+        "stderr_tail": [
+          "ERROR:  permission denied for function unsafe_all_artifacts"
+        ],
+        "stdout_tail": [],
+        "timed_out": false
+      }
+    ],
+    "relation_counts": {
+      "relation_counts": [
+        {
+          "foreign_visible_count": 0,
+          "relation": "action_cards",
+          "visible_count": 1,
+          "visible_ids": [
+            "action_cards_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "artifact_references",
+          "visible_count": 1,
+          "visible_ids": [
+            "ref_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "artifacts",
+          "visible_count": 1,
+          "visible_ids": [
+            "artifacts_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "audit_events",
+          "visible_count": 2,
+          "visible_ids": [
+            "audit_20260628T060401Z_53455_001",
+            "audit_20260628T060401Z_53455_002"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "claims",
+          "visible_count": 1,
+          "visible_ids": [
+            "claims_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "derived_representations",
+          "visible_count": 1,
+          "visible_ids": [
+            "derived_representations_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "egress_grants",
+          "visible_count": 1,
+          "visible_ids": [
+            "egress_grants_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "evidence_bundles",
+          "visible_count": 1,
+          "visible_ids": [
+            "evidence_bundles_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "idempotency_keys",
+          "visible_count": 1,
+          "visible_ids": [
+            "idempotency_keys_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "jobs",
+          "visible_count": 1,
+          "visible_ids": [
+            "jobs_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "migration_quarantine",
+          "visible_count": 1,
+          "visible_ids": [
+            "migration_quarantine_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "ontology_links",
+          "visible_count": 1,
+          "visible_ids": [
+            "ontology_links_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "ontology_objects",
+          "visible_count": 1,
+          "visible_ids": [
+            "ontology_objects_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "operator_metrics",
+          "visible_count": 1,
+          "visible_ids": [
+            "metric_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "policy_decisions",
+          "visible_count": 1,
+          "visible_ids": [
+            "policy_decisions_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "search_snapshots",
+          "visible_count": 1,
+          "visible_ids": [
+            "search_snapshots_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "status_records",
+          "visible_count": 1,
+          "visible_ids": [
+            "status_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "tenant_exports",
+          "visible_count": 1,
+          "visible_ids": [
+            "export_a"
+          ]
+        },
+        {
+          "foreign_visible_count": 0,
+          "relation": "workflow_runs",
+          "visible_count": 1,
+          "visible_ids": [
+            "workflow_runs_a"
+          ]
+        }
+      ],
+      "resolved_membership_tenant": "tenant_a",
+      "safe_artifact_count_rows": 1,
+      "visible_artifact_function_ids": [
+        "artifacts_a"
+      ]
+    },
+    "status": "passed"
+  },
+  "run_id": "20260628T060401Z_53455",
+  "scenario_contract": [
+    {
+      "expected": "Production-like local stack starts with real Postgres, OPA, and egress gateway services.",
+      "id": "PLIKE-001",
+      "owner": "AI",
+      "type": "MUST_PASS",
+      "verification": "docker compose up, service readiness probes, Docker network inspection."
+    },
+    {
+      "expected": "Real VS2 migrations apply to a fresh Postgres database using hardened roles.",
+      "id": "PLIKE-002",
+      "owner": "AI",
+      "type": "MUST_PASS",
+      "verification": "psql migration transcript through compose Postgres."
+    },
+    {
+      "expected": "Postgres RLS hides tenant B and denies forged cross-tenant writes for cornerstone_app.",
+      "id": "PLIKE-003",
+      "owner": "AI",
+      "type": "MUST_PASS",
+      "verification": "SQL checks through SET LOCAL ROLE cornerstone_app and tenant session settings."
+    },
+    {
+      "expected": "OPA HTTP decision API allows valid owner input and denies cross-tenant and invalid-schema input.",
+      "id": "PLIKE-004",
+      "owner": "AI",
+      "type": "MUST_PASS",
+      "verification": "Internal stack HTTP POSTs from egress-gateway to opa:8181."
+    },
+    {
+      "expected": "Docker internal network blocks direct external egress while controlled egress gateway remains reachable.",
+      "id": "PLIKE-005",
+      "owner": "AI",
+      "type": "MUST_PASS",
+      "verification": "Ephemeral internal-network probe container attempts controlled gateway and external URL."
+    },
+    {
+      "expected": "Controlled local sink rehearsal proves egress-gateway can reach only the policy-allowed provider sink and does not contact the forbidden sink.",
+      "id": "PLIKE-006",
+      "owner": "AI",
+      "type": "MUST_PASS",
+      "verification": "OPA-mediated egress-gateway probe plus provider-sink and forbidden-sink Docker logs."
+    },
+    {
+      "expected": "pg_dump/pg_restore preserve tenant-scoped counts, RLS checks, and audit verification.",
+      "id": "PLIKE-007",
+      "owner": "AI",
+      "type": "MUST_PASS",
+      "verification": "Dump fresh database, restore into fresh database, rerun RLS and audit checks."
+    },
+    {
+      "expected": "Local rehearsal does not claim production readiness, live-provider readiness, or human acceptance.",
+      "id": "PLIKE-R01",
+      "owner": "AI",
+      "type": "REGRESSION_GUARD",
+      "verification": "Report claim-boundary fields and human-required row."
+    }
+  ],
+  "scenario_results": [
+    {
+      "evidence": [
+        "docker compose -f compose.vs2.yml up -d",
+        "docker inspect networks",
+        "internal OPA health probe"
+      ],
+      "id": "PLIKE-001",
+      "status": "PASS"
+    },
+    {
+      "evidence": [
+        "database:cornerstone_plike_20260628t060401z_53455",
+        "migrations/vs2/*.sql"
+      ],
+      "id": "PLIKE-002",
+      "status": "PASS"
+    },
+    {
+      "evidence": [
+        "SET LOCAL ROLE cornerstone_app SQL transcript",
+        "pg_policies inventory"
+      ],
+      "id": "PLIKE-003",
+      "status": "PASS"
+    },
+    {
+      "evidence": [
+        "POST /v1/data/cornerstone/vs2/decision from egress-gateway"
+      ],
+      "id": "PLIKE-004",
+      "status": "PASS"
+    },
+    {
+      "evidence": [
+        "Docker internal network inspect",
+        "ephemeral internal-network probe"
+      ],
+      "id": "PLIKE-005",
+      "status": "PASS"
+    },
+    {
+      "evidence": [
+        "egress-gateway OPA-mediated sink probe",
+        "provider-sink logs",
+        "forbidden-sink logs"
+      ],
+      "id": "PLIKE-006",
+      "status": "PASS"
+    },
+    {
+      "evidence": [
+        "tmp/vs2-production-like/20260628T060401Z_53455/backup.dump",
+        "restore_database:cornerstone_plike_20260628t060401z_53455_restore"
+      ],
+      "id": "PLIKE-007",
+      "status": "PASS"
+    },
+    {
+      "evidence": [
+        "claim_boundary",
+        "human_required"
+      ],
+      "id": "PLIKE-R01",
+      "status": "PASS"
+    }
+  ],
+  "schema_version": "cs.vs2.production_like_integration.v1",
+  "seed": {
+    "audit_events": [
+      {
+        "action": "artifact.ingest",
+        "actor": "principal_alice",
+        "decision_id": "decision_allow_artifact_read",
+        "event_hash": "57e339e903a329c7eb09f9e424fc1e38fd34aeb48255538f4ddbed3d761d4551",
+        "event_id": "audit_20260628T060401Z_53455_001",
+        "event_type": "artifact.ingested",
+        "evidence_refs": [
+          "artifact:artifacts_a"
+        ],
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_revision": "vs2-rego-local-v1",
+        "previous_hash": "GENESIS",
+        "subject": {
+          "artifact_id": "artifacts_a",
+          "source": "production_like_fixture"
+        },
+        "tenant_id": "tenant_a",
+        "trace_id": "trace_vs2_production_like",
+        "workspace_id": "default"
+      },
+      {
+        "action": "policy.evaluate",
+        "actor": "cornerstone_policy",
+        "decision_id": "decision_allow_artifact_read",
+        "event_hash": "e92dcefc5c131a915d6077f9c3fd3b1de2907d0c68c9108545c6d2ed45eb3ebe",
+        "event_id": "audit_20260628T060401Z_53455_002",
+        "event_type": "policy.decision",
+        "evidence_refs": [
+          "policy:decision_allow_artifact_read"
+        ],
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "policy_revision": "vs2-rego-local-v1",
+        "previous_hash": "57e339e903a329c7eb09f9e424fc1e38fd34aeb48255538f4ddbed3d761d4551",
+        "subject": {
+          "decision": "allow",
+          "resource_id": "artifact_a"
+        },
+        "tenant_id": "tenant_a",
+        "trace_id": "trace_vs2_production_like",
+        "workspace_id": "default"
+      }
+    ],
+    "status": "passed",
+    "transcript": [
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.211,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.192,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "psql",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone_plike_20260628t060401z_53455",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-X",
+          "-q",
+          "-t",
+          "-A"
+        ],
+        "elapsed_seconds": 3.229,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [],
+        "timed_out": false
+      }
+    ]
+  },
+  "stack": {
+    "opa_http_ready_inside_stack": true,
+    "postgres_ready": true,
+    "transcript": [
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "postgres",
+          "pg_isready",
+          "-U",
+          "postgres",
+          "-d",
+          "cornerstone"
+        ],
+        "elapsed_seconds": 3.124,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [
+          "/var/run/postgresql:5432 - accepting connections"
+        ],
+        "timed_out": false
+      },
+      {
+        "command": [
+          "docker",
+          "compose",
+          "-f",
+          "/Users/jiyong/playground/Cornerstone/compose.vs2.yml",
+          "exec",
+          "-T",
+          "egress-gateway",
+          "python",
+          "-"
+        ],
+        "elapsed_seconds": 0.186,
+        "exit_code": 0,
+        "stderr_tail": [],
+        "stdout_tail": [
+          "{\"health_status\": 200, \"body\": \"{}\\n\"}"
+        ],
+        "timed_out": false
+      }
+    ]
+  },
+  "stack_left_running": true,
+  "started_at": "2026-06-28T06:04:01.624870+00:00",
+  "status": "passed",
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

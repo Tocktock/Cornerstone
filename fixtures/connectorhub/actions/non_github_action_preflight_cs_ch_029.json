@@ -1,0 +1,197 @@
+{
+  "schema_version": "cs.connector_action_preflight_fixture.v1",
+  "fixture_id": "non_github_action_preflight_cs_ch_029",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "connector": {
+    "connector_id": "ccon_project_alpha_supportdesk",
+    "provider_kind": "supportdesk",
+    "provider_pack_id": "local_supportdesk_actions.v1",
+    "source_policy_id": "cspol_project_alpha_supportdesk_actions",
+    "source_policy_ref": "source_policy:cspol_project_alpha_supportdesk_actions",
+    "selected_resources": [
+      "supportdesk:workspace:project-alpha"
+    ],
+    "raw_access": "denied"
+  },
+  "action_declaration": {
+    "action_type": "support.ticket.update",
+    "capability": "support.ticket.write",
+    "target_kind": "support_ticket",
+    "provider_mutation_type": "ticket_status_update",
+    "declared": true,
+    "provider_supported": true,
+    "required_permission": "support.ticket.write",
+    "required_input_fields": [
+      "ticket_id",
+      "new_status",
+      "reason"
+    ],
+    "required_idempotency": true,
+    "risk": "high",
+    "expected_calls": [
+      {
+        "method": "PATCH",
+        "endpoint_template": "/tickets/{ticket_id}",
+        "provider_kind": "supportdesk",
+        "mutation": "ticket_status_update"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "case_id": "allowed",
+      "description": "Declared non-GitHub action has provider support, Source Policy allow, permission, valid input, and idempotency.",
+      "provider_kind": "supportdesk",
+      "action_type": "support.ticket.update",
+      "target": "supportdesk:ticket:CS-1001",
+      "declared_action": true,
+      "provider_supported": true,
+      "source_policy_allows": true,
+      "permission_granted": true,
+      "input_schema_valid": true,
+      "idempotency_key": "idem-cs-ch-029-ticket-1001-close",
+      "expected_decision": "allow",
+      "input": {
+        "ticket_id": "CS-1001",
+        "new_status": "waiting_on_customer",
+        "reason": "Evidence-backed claim requests a follow-up update."
+      }
+    },
+    {
+      "case_id": "undeclared_action",
+      "description": "Action type is not declared by the connector contract.",
+      "provider_kind": "supportdesk",
+      "action_type": "support.ticket.delete",
+      "target": "supportdesk:ticket:CS-1001",
+      "declared_action": false,
+      "provider_supported": true,
+      "source_policy_allows": true,
+      "permission_granted": true,
+      "input_schema_valid": true,
+      "idempotency_key": "idem-cs-ch-029-undeclared",
+      "expected_decision": "deny",
+      "input": {
+        "ticket_id": "CS-1001",
+        "reason": "Delete the ticket"
+      }
+    },
+    {
+      "case_id": "allowed_conflicting_intent",
+      "description": "Declared action reuses a previously committed idempotency key for a different target and input digest.",
+      "provider_kind": "supportdesk",
+      "action_type": "support.ticket.update",
+      "target": "supportdesk:ticket:CS-2002",
+      "declared_action": true,
+      "provider_supported": true,
+      "source_policy_allows": true,
+      "permission_granted": true,
+      "input_schema_valid": true,
+      "idempotency_key": "idem-cs-ch-029-ticket-1001-close",
+      "expected_decision": "allow",
+      "input": {
+        "ticket_id": "CS-2002",
+        "new_status": "closed",
+        "reason": "Conflicting retry attempts a different support ticket outcome with the same key."
+      }
+    },
+    {
+      "case_id": "unsupported_provider",
+      "description": "Provider pack cannot support the requested action.",
+      "provider_kind": "supportdesk",
+      "action_type": "support.ticket.update",
+      "target": "supportdesk:ticket:CS-1001",
+      "declared_action": true,
+      "provider_supported": false,
+      "source_policy_allows": true,
+      "permission_granted": true,
+      "input_schema_valid": true,
+      "idempotency_key": "idem-cs-ch-029-unsupported",
+      "expected_decision": "deny",
+      "input": {
+        "ticket_id": "CS-1001",
+        "new_status": "waiting_on_customer",
+        "reason": "Provider pack lacks write adapter"
+      }
+    },
+    {
+      "case_id": "missing_permission",
+      "description": "Connector account lacks the required provider permission.",
+      "provider_kind": "supportdesk",
+      "action_type": "support.ticket.update",
+      "target": "supportdesk:ticket:CS-1001",
+      "declared_action": true,
+      "provider_supported": true,
+      "source_policy_allows": true,
+      "permission_granted": false,
+      "input_schema_valid": true,
+      "idempotency_key": "idem-cs-ch-029-missing-permission",
+      "expected_decision": "deny",
+      "input": {
+        "ticket_id": "CS-1001",
+        "new_status": "waiting_on_customer",
+        "reason": "Permission must be granted first"
+      }
+    },
+    {
+      "case_id": "invalid_input",
+      "description": "Action input fails connector schema validation.",
+      "provider_kind": "supportdesk",
+      "action_type": "support.ticket.update",
+      "target": "supportdesk:ticket:CS-1001",
+      "declared_action": true,
+      "provider_supported": true,
+      "source_policy_allows": true,
+      "permission_granted": true,
+      "input_schema_valid": false,
+      "idempotency_key": "idem-cs-ch-029-invalid-input",
+      "expected_decision": "deny",
+      "input": {
+        "ticket_id": "CS-1001",
+        "new_status": "",
+        "reason": ""
+      }
+    },
+    {
+      "case_id": "missing_idempotency",
+      "description": "Side-effecting action lacks an idempotency key.",
+      "provider_kind": "supportdesk",
+      "action_type": "support.ticket.update",
+      "target": "supportdesk:ticket:CS-1001",
+      "declared_action": true,
+      "provider_supported": true,
+      "source_policy_allows": true,
+      "permission_granted": true,
+      "input_schema_valid": true,
+      "idempotency_key": "",
+      "expected_decision": "deny",
+      "input": {
+        "ticket_id": "CS-1001",
+        "new_status": "waiting_on_customer",
+        "reason": "Missing idempotency should block dry-run promotion"
+      }
+    },
+    {
+      "case_id": "github_read_only",
+      "description": "GitHub/source-control remains read-only and is not admitted to action preflight.",
+      "provider_kind": "github",
+      "action_type": "issue.comment",
+      "target": "github:repo:owner/project-alpha:issue:1001",
+      "declared_action": false,
+      "provider_supported": false,
+      "source_policy_allows": false,
+      "permission_granted": false,
+      "input_schema_valid": true,
+      "idempotency_key": "idem-cs-ch-029-github-readonly",
+      "expected_decision": "deny",
+      "input": {
+        "issue_id": "1001",
+        "comment": "GitHub writeback must remain denied."
+      }
+    }
+  ]
+}

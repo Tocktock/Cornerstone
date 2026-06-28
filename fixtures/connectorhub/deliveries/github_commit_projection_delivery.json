@@ -1,0 +1,52 @@
+{
+  "schema_version": "cornerstone.connector_projection_delivery.v1",
+  "delivery_id": "cdel_project_alpha_commit_8f3ad2c1",
+  "projection_id": "cproj_github_commit_8f3ad2c1",
+  "contract_id": "ccon_project_alpha_github",
+  "scope": {
+    "tenant_id": "local-dev",
+    "owner_id": "local-user",
+    "namespace_id": "personal",
+    "workspace_id": "default"
+  },
+  "provider_pack_id": "local_source_control_readonly.v1",
+  "provider_event_id": "github:repo:owner/project-alpha:commit:8f3ad2c1",
+  "common_capability": "source_control.change.read",
+  "projection_type": "source_control.commit.v1",
+  "source_summary": {
+    "source_ref": "github:repo:owner/project-alpha",
+    "object_ref": "github:repo:owner/project-alpha:commit:8f3ad2c1",
+    "title": "8f3ad2c1 Harden connector evidence path",
+    "classification": "metadata_and_markdown_excerpt",
+    "trust_state": "untrusted_connector_content"
+  },
+  "evidence_ref": {
+    "evidence_ref_id": "eref_project_alpha_commit_8f3ad2c1",
+    "kind": "connectorhub_projection_evidence",
+    "provider_event_id": "github:repo:owner/project-alpha:commit:8f3ad2c1",
+    "permitted_fields": [
+      "commit_sha",
+      "parents",
+      "author_name",
+      "author_date",
+      "message_excerpt",
+      "changed_paths"
+    ],
+    "raw_provider_payload_available_to_product": false
+  },
+  "payload": {
+    "commit_sha": "8f3ad2c1",
+    "parents": [
+      "4d2b9a00"
+    ],
+    "author_name": "Local Fixture Author",
+    "author_date": "2026-06-23T00:05:00Z",
+    "message_excerpt": "Harden connector evidence path",
+    "changed_paths": [
+      "README.md",
+      "docs/architecture.md"
+    ],
+    "source_revision": "commit:8f3ad2c1",
+    "updated_at": "2026-06-23T00:05:00Z"
+  }
+}
