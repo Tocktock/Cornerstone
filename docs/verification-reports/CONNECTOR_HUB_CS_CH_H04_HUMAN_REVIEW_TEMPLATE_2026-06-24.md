@@ -234,11 +234,11 @@ Current local baseline reports:
 
 | Report | Status | Scenario count | SHA-256 | Review input | Acceptance sufficient | Product claim | PASS claim | Claim boundary |
 |---|---|---:|---|---|---|---|---|---|
-| `reports/security/vs2-local-security-proof.json` | `success` | 93 | `841b4ed7ec0cdafa6ec6f395a131e484690beb31508af98a30ddeb64f182c3a9` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
-| `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json` | `success` | 93 | `976e21f4f0142d788e06885a32d57a3fbb0e1672dc3b4dd7759afd57148a994b` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
+| `reports/security/vs2-local-security-proof.json` | `success` | 93 | `4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
+| `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json` | `success` | 93 | `ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 | `reports/network/vs2-egress-proof.json` | `passed` | n/a | `26505a8b3db9d44ad99657a35cf38e4cc4bcd8dffd3e145fcb6b49a29fdde9ec` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 | `reports/security/vs2-local-range.json` | `passed` | n/a | `e6257b6076598b1376573c649d2b8c59b205ae2b99787cc44c368431675c9eff` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
-| `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` | `success` | 1 | `0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
+| `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` | `success` | 1 | `515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 
 Required human delta:
 

@@ -61,6 +61,21 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _load_content_object(ref: dict[str, Any]) -> Any:
+    path_value = ref.get("path")
+    expected_sha = ref.get("sha256")
+    if not isinstance(path_value, str) or not path_value:
+        raise ValueError("content object ref missing path")
+    if not isinstance(expected_sha, str) or not expected_sha:
+        raise ValueError(f"content object ref missing sha256: {path_value}")
+    object_path = ROOT / path_value
+    payload = json.loads(object_path.read_text())
+    actual_sha = _sha256_payload(payload)
+    if actual_sha != expected_sha:
+        raise ValueError(f"content object sha256 mismatch for {path_value}: {actual_sha} != {expected_sha}")
+    return payload
+
+
 def _focused_report_scenario_id(path: Path) -> str:
     match = re.fullmatch(
         r"connector-contract-adapter-cs-ch-(?P<number>\d{3})-\d{4}-\d{2}-\d{2}\.json",
@@ -159,25 +174,19 @@ def _content_object_ref(output_dir: Path, payload: Any) -> dict[str, Any]:
 
 
 def _section_object_refs(output_dir: Path, section_name: str, payload: Any) -> dict[str, Any]:
+    object_ref = _content_object_ref(output_dir, payload)
     section_ref: dict[str, Any] = {
         "sha256": _sha256_payload(payload),
         "size_bytes": len(_canonical_bytes(payload)),
+        "object": object_ref,
     }
     if isinstance(payload, list):
         section_ref["type"] = "list"
         section_ref["count"] = len(payload)
-        section_ref["items"] = [
-            {"index": index, **_content_object_ref(output_dir, item)}
-            for index, item in enumerate(payload)
-        ]
         return section_ref
     if isinstance(payload, dict):
         section_ref["type"] = "dict"
         section_ref["count"] = len(payload)
-        section_ref["entries"] = [
-            {"key": key, **_content_object_ref(output_dir, payload[key])}
-            for key in sorted(payload)
-        ]
         return section_ref
     raise ValueError(f"shared section {section_name} must be a JSON list or object")
 
@@ -194,6 +203,49 @@ def _shared_evidence_summary(section_index: dict[str, Any]) -> dict[str, dict[st
     return summaries
 
 
+def _expand_shared_evidence_index(shared_index: dict[str, Any]) -> dict[str, Any]:
+    sections = shared_index.get("sections")
+    if not isinstance(sections, dict):
+        raise ValueError("shared evidence index missing sections")
+    expanded: dict[str, Any] = {}
+    for section_name, section_ref in sections.items():
+        if not isinstance(section_ref, dict):
+            raise ValueError(f"shared evidence section ref must be an object: {section_name}")
+        section_type = section_ref.get("type")
+        section_object = section_ref.get("object")
+        if isinstance(section_object, dict):
+            payload = _load_content_object(section_object)
+            if section_type == "list" and not isinstance(payload, list):
+                raise ValueError(f"shared evidence section expected list: {section_name}")
+            if section_type == "dict" and not isinstance(payload, dict):
+                raise ValueError(f"shared evidence section expected dict: {section_name}")
+            expanded[section_name] = payload
+        elif section_type == "list":
+            items = section_ref.get("items")
+            if not isinstance(items, list):
+                raise ValueError(f"shared evidence list section missing items: {section_name}")
+            expanded[section_name] = [
+                _load_content_object(item)
+                for item in sorted(items, key=lambda item: item.get("index") if isinstance(item, dict) else -1)
+            ]
+        elif section_type == "dict":
+            entries = section_ref.get("entries")
+            if not isinstance(entries, list):
+                raise ValueError(f"shared evidence dict section missing entries: {section_name}")
+            expanded[section_name] = {
+                entry["key"]: _load_content_object(entry)
+                for entry in entries
+                if isinstance(entry, dict) and isinstance(entry.get("key"), str)
+            }
+        else:
+            raise ValueError(f"unsupported shared evidence section type: {section_name}={section_type}")
+        actual_sha = _sha256_payload(expanded[section_name])
+        expected_sha = section_ref.get("sha256")
+        if actual_sha != expected_sha:
+            raise ValueError(f"shared evidence section sha256 mismatch for {section_name}: {actual_sha} != {expected_sha}")
+    return expanded
+
+
 def _write_shared_evidence_index(
     *,
     output_dir: Path,
@@ -208,9 +260,9 @@ def _write_shared_evidence_index(
         for section_name, payload in shared_sections.items()
     }
     object_paths = {
-        item["path"]
+        section_ref["object"]["path"]
         for section_ref in section_index.values()
-        for item in [*section_ref.get("items", []), *section_ref.get("entries", [])]
+        if isinstance(section_ref.get("object"), dict)
     }
     index_payload = {
         "schema_version": SHARED_EVIDENCE_INDEX_SCHEMA,
@@ -232,9 +284,7 @@ def _write_shared_evidence_index(
         "summary": {
             "section_count": len(section_index),
             "object_count": len(object_paths),
-            "deduplicated_object_ref_count": sum(
-                section_ref.get("count", 0) for section_ref in section_index.values()
-            ),
+            "deduplicated_object_ref_count": len(object_paths),
         },
         "sections": section_index,
     }
@@ -439,11 +489,11 @@ def compact_reports(
             "source_total_size_bytes": aggregate_path.stat().st_size
             + sum(path.stat().st_size for path, _, _ in focused_reports),
             "compact_total_size_bytes": shared_index_path.stat().st_size
-            + sum((ROOT / object_path).stat().st_size for object_path in {
-                item["path"]
+            + sum(
+                (ROOT / section_ref["object"]["path"]).stat().st_size
                 for section_ref in shared_index_payload["sections"].values()
-                for item in [*section_ref.get("items", []), *section_ref.get("entries", [])]
-            })
+                if isinstance(section_ref.get("object"), dict)
+            )
             + aggregate_output_path.stat().st_size
             + sum((output_dir / "scenarios" / f"{entry['scenario_id']}.json").stat().st_size for entry in scenario_entries),
         },
@@ -480,6 +530,76 @@ def compact_reports(
     return manifest
 
 
+def rewrite_existing_compact_layout(
+    *,
+    output_dir: Path = DEFAULT_OUTPUT_DIR,
+    report_date: str = DEFAULT_REPORT_DATE,
+) -> dict[str, Any]:
+    output_dir = output_dir.resolve()
+    manifest_path = output_dir / f"manifest-{report_date}.json"
+    manifest = _load_json(manifest_path)
+    shared_ref = manifest.get("shared_evidence")
+    if not isinstance(shared_ref, dict) or not isinstance(shared_ref.get("path"), str):
+        raise ValueError("compact manifest missing shared_evidence.path")
+    shared_index = _load_json(ROOT / shared_ref["path"])
+    shared_sections = _expand_shared_evidence_index(shared_index)
+    shared_index_path, shared_index_payload, shared_section_summaries = _write_shared_evidence_index(
+        output_dir=output_dir,
+        shared_sections=shared_sections,
+        report_date=report_date,
+    )
+    shared_index_sha256 = _sha256_file(shared_index_path)
+    shared_evidence_ref = {
+        "path": _relative(shared_index_path),
+        "sha256": shared_index_sha256,
+        "layout": COMPACT_EVIDENCE_LAYOUT,
+        "object_root": _relative(output_dir / "objects" / "sha256"),
+        "sections": shared_section_summaries,
+    }
+
+    aggregate_report = manifest.get("aggregate_report")
+    if not isinstance(aggregate_report, dict) or not isinstance(aggregate_report.get("path"), str):
+        raise ValueError("compact manifest missing aggregate_report.path")
+    aggregate_path = ROOT / aggregate_report["path"]
+    aggregate_payload = _load_json(aggregate_path)
+    aggregate_payload["shared_evidence_ref"] = shared_evidence_ref
+    _write_json(aggregate_path, aggregate_payload)
+    aggregate_report["sha256"] = _sha256_file(aggregate_path)
+
+    scenario_reports = manifest.get("scenario_reports")
+    if not isinstance(scenario_reports, list):
+        raise ValueError("compact manifest scenario_reports must be a list")
+    for entry in scenario_reports:
+        if not isinstance(entry, dict) or not isinstance(entry.get("path"), str):
+            raise ValueError("compact manifest scenario report entry missing path")
+        report_path = ROOT / entry["path"]
+        report_payload = _load_json(report_path)
+        report_payload["shared_evidence_ref"] = shared_evidence_ref
+        _write_json(report_path, report_payload)
+        entry["sha256"] = _sha256_file(report_path)
+
+    manifest["shared_evidence"] = shared_evidence_ref
+    manifest["aggregate_report"] = aggregate_report
+    manifest["scenario_reports"] = scenario_reports
+    summary = dict(manifest.get("summary") or {})
+    object_paths = {
+        section_ref["object"]["path"]
+        for section_ref in shared_index_payload["sections"].values()
+        if isinstance(section_ref.get("object"), dict)
+    }
+    summary["shared_object_count"] = shared_index_payload["summary"]["object_count"]
+    summary["compact_total_size_bytes"] = (
+        shared_index_path.stat().st_size
+        + sum((ROOT / object_path).stat().st_size for object_path in object_paths)
+        + aggregate_path.stat().st_size
+        + sum((ROOT / entry["path"]).stat().st_size for entry in scenario_reports)
+    )
+    manifest["summary"] = summary
+    summary["compact_total_size_bytes"] += len(_canonical_bytes(manifest)) + 1
+    _write_json(manifest_path, manifest)
+    return manifest
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Compact ConnectorHub connector-contract-adapter scenario reports."
@@ -489,14 +609,25 @@ def main() -> int:
     parser.add_argument("--report-date", default=DEFAULT_REPORT_DATE)
     parser.add_argument("--expected-focused-count", type=int, default=40)
     parser.add_argument("--delete-sources", action="store_true")
-    args = parser.parse_args()
-    manifest = compact_reports(
-        source_dir=Path(args.source_dir),
-        output_dir=Path(args.output_dir),
-        report_date=args.report_date,
-        expected_focused_count=args.expected_focused_count,
-        delete_sources=args.delete_sources,
+    parser.add_argument(
+        "--rewrite-existing-compact-layout",
+        action="store_true",
+        help="Rewrite an existing compact layout without regenerating source reports.",
     )
+    args = parser.parse_args()
+    if args.rewrite_existing_compact_layout:
+        manifest = rewrite_existing_compact_layout(
+            output_dir=Path(args.output_dir),
+            report_date=args.report_date,
+        )
+    else:
+        manifest = compact_reports(
+            source_dir=Path(args.source_dir),
+            output_dir=Path(args.output_dir),
+            report_date=args.report_date,
+            expected_focused_count=args.expected_focused_count,
+            delete_sources=args.delete_sources,
+        )
     print(json.dumps(manifest["summary"], sort_keys=True))
     return 0
 

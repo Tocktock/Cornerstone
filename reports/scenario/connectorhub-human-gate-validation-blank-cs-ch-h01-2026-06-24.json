@@ -1,6 +1,6 @@
 {
   "audit_refs": [
-    "audit:audit_32ab51357be6ecec"
+    "audit:audit_bf0fb9cf589b69bd"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate validate-record",
@@ -15,7 +15,7 @@
       "no_sensitive_material"
     ],
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-28T02:50:26.782923Z",
+    "created_at": "2026-06-28T07:42:02.938451Z",
     "decision_allowed": false,
     "decision_present": false,
     "decision_recorded_by_validator": false,
@@ -398,7 +398,7 @@
     },
     "title": "Human GitHub read-only rehearsal",
     "valid_dependency_human_gate_refs": [],
-    "validation_id": "cshval_fb8aa0107dc17e46",
+    "validation_id": "cshval_e40f672c44fd7046",
     "validation_scope": "structure_and_safety_only",
     "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
   },
@@ -445,12 +445,12 @@
     }
   ],
   "evidence_refs": [
-    "connector_human_gate_record_validation:cshval_fb8aa0107dc17e46"
+    "connector_human_gate_record_validation:cshval_e40f672c44fd7046"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_record_validation_id": "cshval_fb8aa0107dc17e46",
-    "git_commit": "da85c05"
+    "connector_human_gate_record_validation_id": "cshval_e40f672c44fd7046",
+    "git_commit": "7415792"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -479,7 +479,7 @@
     "senior_review_perspective_findings_complete": false,
     "status": "record_structurally_invalid",
     "structurally_valid": false,
-    "validation_id": "cshval_fb8aa0107dc17e46",
+    "validation_id": "cshval_e40f672c44fd7046",
     "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
   },
   "tenant_id": "local-dev",

@@ -622,11 +622,11 @@ Summary counters: `h04_local_baseline_snapshot_audit_guarded=true`, `h04_local_b
 
 | Report path | Status | Schema | Scenario count | Package SHA-256 | File hash matches | Expected facts match | Template row present | Trace ready | Claim boundary |
 |---|---|---|---:|---|---|---|---|---|---|
-| `reports/security/vs2-local-security-proof.json` | `success` | `cs.vs2_local_security_proof.v0` | `93` | `841b4ed7ec0cdafa6ec6f395a131e484690beb31508af98a30ddeb64f182c3a9` | `True` | `True` | `True` | `True` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
-| `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json` | `success` | `cs.cli.v0` | `93` | `976e21f4f0142d788e06885a32d57a3fbb0e1672dc3b4dd7759afd57148a994b` | `True` | `True` | `True` | `True` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
+| `reports/security/vs2-local-security-proof.json` | `success` | `cs.vs2_local_security_proof.v0` | `93` | `4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff` | `True` | `True` | `True` | `True` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
+| `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json` | `success` | `cs.cli.v0` | `93` | `ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276` | `True` | `True` | `True` | `True` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 | `reports/network/vs2-egress-proof.json` | `passed` | `n/a` | `n/a` | `26505a8b3db9d44ad99657a35cf38e4cc4bcd8dffd3e145fcb6b49a29fdde9ec` | `True` | `True` | `True` | `True` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 | `reports/security/vs2-local-range.json` | `passed` | `cs.vs2_local_range.v1` | `n/a` | `e6257b6076598b1376573c649d2b8c59b205ae2b99787cc44c368431675c9eff` | `True` | `True` | `True` | `True` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
-| `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` | `success` | `cs.cli.v0` | `1` | `0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60` | `True` | `True` | `True` | `True` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
+| `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` | `success` | `cs.cli.v0` | `1` | `515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f` | `True` | `True` | `True` | `True` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 
 ## H04 Operator Handoff Audit
 
@@ -2273,7 +2273,7 @@ This addendum records current verifier-derived rows after replacing flat `connec
 | `CS-CH-038` | `441` | `True` | `True` | `True` | `True` | `True` | `refactor_hardening_text_trace_local_result_doc_only` |
 | `CS-CH-039` | `441` | `True` | `True` | `True` | `True` | `True` | `refactor_hardening_text_trace_local_result_doc_only` |
 | `CS-CH-040` | `441` | `True` | `True` | `True` | `True` | `True` | `refactor_hardening_text_trace_local_result_doc_only` |
-| `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` | `success` | `cs.cli.v0` | `1` | `0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60` | `True` | `True` | `True` | `True` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
+| `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` | `success` | `cs.cli.v0` | `1` | `515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f` | `True` | `True` | `True` | `True` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 | `1` | `unauthorized_provider_calls` | `0` | CS-CH-002, CS-CH-029, CS-CH-032, CS-CH-036 | CS-CH-H04, CS-CH-H05 | `3` | `3` | `0` | `0` | `40` | `False` | `False` | `True` | `application_guide_negative_evidence_trace_is_counter_guard_not_live_or_production_proof` |
 | `2` | `provider_credentials_exposed` | `0` | CS-CH-001, CS-CH-006, CS-CH-035 | CS-CH-H01, CS-CH-H04 | `3` | `3` | `0` | `0` | `40` | `False` | `False` | `True` | `application_guide_negative_evidence_trace_is_counter_guard_not_live_or_production_proof` |
 | `3` | `raw_provider_payloads_exposed` | `0` | CS-CH-006, CS-CH-011, CS-CH-013, CS-CH-035, CS-CH-037 | CS-CH-H04 | `3` | `3` | `0` | `0` | `40` | `False` | `False` | `True` | `application_guide_negative_evidence_trace_is_counter_guard_not_live_or_production_proof` |

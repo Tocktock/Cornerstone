@@ -19,6 +19,10 @@ LOCAL_GATE = ROOT / "scripts/verify_connectorhub_local_evidence.sh"
 SPLIT_MANIFEST = ROOT / "docs/verification-reports/CONNECTOR_HUB_REVIEW_SPLIT_MANIFEST_2026-06-28.json"
 COMPACT_MANIFEST = ROOT / "reports/scenario/connector-contract-adapter/manifest-2026-06-23.json"
 VS2_REHEARSAL_REPORT = ROOT / "reports/security/vs2-production-like-integration-2026-06-27.json"
+VS2_CURRENT_REPORT = ROOT / "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md"
+VS2_SCENARIO_REPORT = ROOT / "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+VS2_SCENARIO_SPECIFIC_EVIDENCE = ROOT / "reports/security/vs2-scenario-specific-evidence.json"
+VS2_EVIDENCE_MANIFEST = ROOT / "reports/security/vs2/evidence-manifest.json"
 
 
 def _relative(path: Path) -> str:
@@ -136,7 +140,7 @@ def _verify_compact_evidence(errors: list[str]) -> None:
         "source_full_report_count": 41,
         "compact_report_count": 41,
         "focused_scenario_count": 40,
-        "shared_object_count": 676,
+        "shared_object_count": 5,
     }
     for key, expected in expected_summary.items():
         if summary.get(key) != expected:
@@ -175,8 +179,20 @@ def _verify_compact_evidence(errors: list[str]) -> None:
         refs = []
         for section in (shared_index.get("sections") or {}).values():
             if isinstance(section, dict):
+                if isinstance(section.get("object"), dict):
+                    refs.append(section["object"])
                 refs.extend(section.get("items", []))
                 refs.extend(section.get("entries", []))
+        unique_ref_paths = {
+            ref.get("path")
+            for ref in refs
+            if isinstance(ref, dict) and isinstance(ref.get("path"), str)
+        }
+        if len(unique_ref_paths) != summary.get("shared_object_count"):
+            errors.append(
+                "shared evidence object ref count expected "
+                f"{summary.get('shared_object_count')}, found {len(unique_ref_paths)}"
+            )
         for ref in refs:
             if not isinstance(ref, dict):
                 errors.append("shared evidence object ref must be an object")
@@ -219,6 +235,152 @@ def _verify_vs2_rehearsal(errors: list[str]) -> None:
         errors.append("controlled sink provider_sink_token_count must be 1")
     if evidence.get("forbidden_sink_token_count") != 0:
         errors.append("controlled sink forbidden_sink_token_count must be 0")
+
+
+def _verify_vs2_status_reconciliation(errors: list[str], readme: str) -> None:
+    report_text = _read(VS2_CURRENT_REPORT, errors)
+    for token in [
+        "Current local deterministic VS2 verification report.",
+        "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+        "VS2_POLICY_TENANCY_EGRESS_SCENARIO_SPECIFIC_REMEDIATION_REPORT_2026-06-19.md",
+        "prior remediation/baseline document, not the current generated-status authority",
+        "The earlier remediation status represented a gap-oriented state",
+        "Human-owned H rows remain unchanged as `HUMAN_REQUIRED`",
+        "This command is the generated-status authority.",
+    ]:
+        _require_text(errors, "VS2 current verification report", report_text, token)
+    for token in [
+        "| Scenario rows | 93 |",
+        "| PASS | 86 |",
+        "| HUMAN_REQUIRED | 7 |",
+        "| NOT_VERIFIED | 0 |",
+        "| FAIL | 0 |",
+        "| `MUST_PASS` | 70 | 0 | 0 | 0 |",
+        "| `REGRESSION` | 16 | 0 | 0 | 0 |",
+    ]:
+        _require_text(errors, "VS2 current verification report", report_text, token)
+    _require_text(errors, "README", readme, _relative(VS2_CURRENT_REPORT))
+
+    scenario_report = _load_json(VS2_SCENARIO_REPORT, errors)
+    scenario_specific = _load_json(VS2_SCENARIO_SPECIFIC_EVIDENCE, errors)
+    evidence_manifest = _load_json(VS2_EVIDENCE_MANIFEST, errors)
+    if not scenario_report or not scenario_specific or not evidence_manifest:
+        return
+
+    rows = scenario_report.get("scenario_results")
+    if not isinstance(rows, list):
+        errors.append("VS2 scenario report scenario_results must be a list")
+        return
+    if len(rows) != 93:
+        errors.append(f"VS2 scenario report expected 93 rows, found {len(rows)}")
+
+    status_counts: dict[str, int] = {}
+    type_status_counts: dict[tuple[str, str], int] = {}
+    owner_counts: dict[str, int] = {}
+    seen_ids: set[str] = set()
+    ai_ids: set[str] = set()
+    human_ids: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            errors.append("VS2 scenario row must be an object")
+            continue
+        scenario_id = str(row.get("scenario_id") or row.get("id") or "")
+        status = str(row.get("status") or "")
+        scenario_type = str(row.get("type") or "")
+        owner = str(row.get("owner") or "")
+        if not scenario_id:
+            errors.append("VS2 scenario row missing scenario_id")
+            continue
+        if scenario_id in seen_ids:
+            errors.append(f"duplicate VS2 scenario row: {scenario_id}")
+        seen_ids.add(scenario_id)
+        status_counts[status] = status_counts.get(status, 0) + 1
+        type_status_counts[(scenario_type, status)] = type_status_counts.get((scenario_type, status), 0) + 1
+        owner_counts[owner] = owner_counts.get(owner, 0) + 1
+
+        evidence_paths = row.get("evidence_paths", [])
+        evidence_hashes = row.get("evidence_hashes", [])
+        if owner == "AI":
+            ai_ids.add(scenario_id)
+            if status != "PASS":
+                errors.append(f"AI-owned VS2 row must be PASS: {scenario_id} -> {status}")
+            if not isinstance(evidence_paths, list) or not evidence_paths:
+                errors.append(f"AI-owned VS2 row missing evidence_paths: {scenario_id}")
+                continue
+            if not isinstance(evidence_hashes, list) or len(evidence_hashes) != len(evidence_paths):
+                errors.append(f"AI-owned VS2 row evidence_hashes length mismatch: {scenario_id}")
+            expected_paths = {
+                f"reports/security/vs2/evidence/{scenario_id}.json",
+                "reports/security/vs2/evidence-manifest.json",
+                "reports/security/vs2/post-commit-rollup.json",
+                "reports/security/vs2-scenario-specific-evidence.json",
+            }
+            missing_paths = expected_paths.difference(str(path) for path in evidence_paths)
+            if missing_paths:
+                errors.append(f"AI-owned VS2 row missing required evidence paths {sorted(missing_paths)}: {scenario_id}")
+            for path_value, hash_value in zip(evidence_paths, evidence_hashes):
+                evidence_path = ROOT / str(path_value)
+                if not evidence_path.exists():
+                    errors.append(f"VS2 evidence path missing for {scenario_id}: {path_value}")
+                elif _file_sha256(evidence_path) != hash_value:
+                    errors.append(f"VS2 evidence hash mismatch for {scenario_id}: {path_value}")
+        elif owner == "Human":
+            human_ids.add(scenario_id)
+            if status != "HUMAN_REQUIRED":
+                errors.append(f"human-owned VS2 row must remain HUMAN_REQUIRED: {scenario_id} -> {status}")
+            if scenario_type != "HUMAN_REQUIRED":
+                errors.append(f"human-owned VS2 row type must be HUMAN_REQUIRED: {scenario_id} -> {scenario_type}")
+        else:
+            errors.append(f"VS2 row owner must be AI or Human: {scenario_id} -> {owner}")
+
+    expected_status_counts = {"PASS": 86, "HUMAN_REQUIRED": 7}
+    if status_counts != expected_status_counts:
+        errors.append(f"VS2 status counts expected {expected_status_counts}, found {status_counts}")
+    expected_owner_counts = {"AI": 86, "Human": 7}
+    if owner_counts != expected_owner_counts:
+        errors.append(f"VS2 owner counts expected {expected_owner_counts}, found {owner_counts}")
+    expected_type_status_counts = {
+        ("MUST_PASS", "PASS"): 70,
+        ("REGRESSION", "PASS"): 16,
+        ("HUMAN_REQUIRED", "HUMAN_REQUIRED"): 7,
+    }
+    if type_status_counts != expected_type_status_counts:
+        errors.append(f"VS2 type/status counts expected {expected_type_status_counts}, found {type_status_counts}")
+
+    registry = scenario_specific.get("scenario_check_registry")
+    if not isinstance(registry, list):
+        errors.append("VS2 scenario-specific evidence registry must be a list")
+    elif set(registry) != ai_ids:
+        errors.append("VS2 scenario-specific evidence registry must exactly match the 86 AI-owned scenario ids")
+    scenario_evidence = scenario_specific.get("scenario_evidence")
+    if not isinstance(scenario_evidence, dict):
+        errors.append("VS2 scenario-specific evidence must contain a scenario_evidence object")
+    elif set(scenario_evidence) != ai_ids:
+        errors.append("VS2 scenario-specific evidence keys must exactly match the 86 AI-owned scenario ids")
+    if scenario_specific.get("evidence_manifest") != _relative(VS2_EVIDENCE_MANIFEST):
+        errors.append("VS2 scenario-specific evidence must point to the committed evidence manifest")
+    elif scenario_specific.get("evidence_manifest_sha256") != _file_sha256(VS2_EVIDENCE_MANIFEST):
+        errors.append("VS2 scenario-specific evidence manifest sha256 mismatch")
+
+    if evidence_manifest.get("artifact_count") != 86:
+        errors.append(f"VS2 evidence manifest artifact_count expected 86, found {evidence_manifest.get('artifact_count')!r}")
+    raw_artifacts = evidence_manifest.get("raw_scenario_artifacts")
+    if not isinstance(raw_artifacts, list):
+        errors.append("VS2 evidence manifest raw_scenario_artifacts must be a list")
+    else:
+        raw_paths = {str(entry.get("path")) for entry in raw_artifacts if isinstance(entry, dict)}
+        expected_raw_paths = {f"reports/security/vs2/evidence/{scenario_id}.json" for scenario_id in ai_ids}
+        if raw_paths != expected_raw_paths:
+            errors.append("VS2 evidence manifest raw_scenario_artifacts must exactly match the 86 AI evidence files")
+        for entry in raw_artifacts:
+            if not isinstance(entry, dict):
+                errors.append("VS2 evidence manifest raw_scenario_artifact entries must be objects")
+                continue
+            artifact_path = ROOT / str(entry.get("path", ""))
+            if not artifact_path.exists():
+                errors.append(f"missing VS2 raw scenario artifact: {entry.get('path')}")
+            elif entry.get("sha256") != _file_sha256(artifact_path):
+                errors.append(f"VS2 raw scenario artifact sha256 mismatch: {entry.get('path')}")
 
 
 def _verify_reviewer_surfaces(errors: list[str], guide: str, split_manifest: dict[str, Any]) -> None:
@@ -290,6 +452,7 @@ def main() -> int:
     _verify_contract_and_readme(errors, contract, readme)
     _verify_compact_evidence(errors)
     _verify_vs2_rehearsal(errors)
+    _verify_vs2_status_reconciliation(errors, readme)
     _verify_reviewer_surfaces(errors, guide, split_manifest)
     _verify_trimmed_stdout_boundary(errors)
     _verify_path_portability(errors)
@@ -303,7 +466,8 @@ def main() -> int:
     print(
         "PASS: ConnectorHub PR20 feedback response verified "
         "(14 findings covered, local gate guarded, compact evidence hashed, "
-        "controlled sink proof present, unresolved split/monolith boundaries explicit)"
+        "VS2 status reconciled, controlled sink proof present, "
+        "unresolved split/monolith boundaries explicit)"
     )
     return 0
 

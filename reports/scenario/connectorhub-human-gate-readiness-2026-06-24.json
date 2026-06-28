@@ -1,12 +1,12 @@
 {
   "audit_refs": [
-    "audit:audit_e51f6857ff017312"
+    "audit:audit_192a3ff8dc4ceff2"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate report",
   "connector_human_gate_readiness_report": {
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-28T05:44:34.383260Z",
+    "created_at": "2026-06-28T07:42:02.468328Z",
     "evidence_packet_ready_count": 7,
     "execution_queue": [
       {
@@ -199,7 +199,7 @@
       "validation_count": 0
     },
     "reject_conditions_ready_count": 7,
-    "report_id": "cshuman_report_11f41c28845852d7",
+    "report_id": "cshuman_report_d9e1b55f8615d82c",
     "required_before_pass": [
       "Attach dated human records for H01 through H07 before changing any human row to PASS.",
       "Keep live-provider, physical-device, browser privacy, production-like VS2, live Action, UX/trust, and recovery evidence separate."
@@ -2978,7 +2978,7 @@
               "review_input_only": true,
               "scenario_count": 93,
               "schema_version": "cs.vs2_local_security_proof.v0",
-              "sha256": "841b4ed7ec0cdafa6ec6f395a131e484690beb31508af98a30ddeb64f182c3a9",
+              "sha256": "4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff",
               "status": "success"
             },
             {
@@ -2993,7 +2993,7 @@
               "review_input_only": true,
               "scenario_count": 93,
               "schema_version": "cs.cli.v0",
-              "sha256": "976e21f4f0142d788e06885a32d57a3fbb0e1672dc3b4dd7759afd57148a994b",
+              "sha256": "ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276",
               "status": "success"
             },
             {
@@ -3033,7 +3033,7 @@
               "review_input_only": true,
               "scenario_count": 1,
               "schema_version": "cs.cli.v0",
-              "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
+              "sha256": "515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f",
               "status": "success"
             }
           ],
@@ -3234,7 +3234,7 @@
                 "review_input_only": true,
                 "scenario_count": 93,
                 "schema_version": "cs.vs2_local_security_proof.v0",
-                "sha256": "841b4ed7ec0cdafa6ec6f395a131e484690beb31508af98a30ddeb64f182c3a9",
+                "sha256": "4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff",
                 "status": "success"
               },
               {
@@ -3249,7 +3249,7 @@
                 "review_input_only": true,
                 "scenario_count": 93,
                 "schema_version": "cs.cli.v0",
-                "sha256": "976e21f4f0142d788e06885a32d57a3fbb0e1672dc3b4dd7759afd57148a994b",
+                "sha256": "ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276",
                 "status": "success"
               },
               {
@@ -3289,7 +3289,7 @@
                 "review_input_only": true,
                 "scenario_count": 1,
                 "schema_version": "cs.cli.v0",
-                "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
+                "sha256": "515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f",
                 "status": "success"
               }
             ],
@@ -3461,11 +3461,11 @@
               "path": "reports/security/vs2-local-security-proof.json",
               "present": true,
               "product_claim_allowed": false,
-              "proof_hash": "3a688b168fd7315d142d45a2c1fce988631414267f7400cb1d2c35bbe278bf65",
+              "proof_hash": "103bd57c7eae7bd05839fcb66331f2641f7f3b26734ec1a8bd5f5fa7c5f2e412",
               "review_input_only": true,
               "scenario_count": 93,
               "schema_version": "cs.vs2_local_security_proof.v0",
-              "sha256": "841b4ed7ec0cdafa6ec6f395a131e484690beb31508af98a30ddeb64f182c3a9",
+              "sha256": "4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff",
               "status": "success",
               "summary": {
                 "blocking": 0,
@@ -3480,7 +3480,7 @@
             },
             {
               "acceptance_sufficient": false,
-              "bytes": 2051712,
+              "bytes": 2051784,
               "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
               "command": "cornerstone scenario verify vs2-policy-tenancy-egress",
               "json_valid": true,
@@ -3491,7 +3491,7 @@
               "review_input_only": true,
               "scenario_count": 93,
               "schema_version": "cs.cli.v0",
-              "sha256": "976e21f4f0142d788e06885a32d57a3fbb0e1672dc3b4dd7759afd57148a994b",
+              "sha256": "ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276",
               "status": "success",
               "summary": {
                 "blocking": 0,
@@ -3545,7 +3545,7 @@
               "review_input_only": true,
               "scenario_count": 1,
               "schema_version": "cs.cli.v0",
-              "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
+              "sha256": "515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f",
               "status": "success",
               "summary": {
                 "blocking": 0,
@@ -7336,16 +7336,16 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_readiness_report:cshuman_report_11f41c28845852d7"
+    "connector_human_gate_readiness_report:cshuman_report_d9e1b55f8615d82c"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_readiness_report_id": "cshuman_report_11f41c28845852d7",
-    "git_commit": "4b92d49"
+    "connector_human_gate_readiness_report_id": "cshuman_report_d9e1b55f8615d82c",
+    "git_commit": "7415792"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
-  "output_path": "/private/tmp/cornerstone-connectorhub-layout-narrow/reports/scenario/connectorhub-human-gate-readiness-2026-06-24.json",
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/connectorhub-human-gate-readiness-2026-06-24.json",
   "owner_id": "local-user",
   "policy_decision_refs": [],
   "product": "CornerStone",
@@ -7363,9 +7363,9 @@
     "pass_claims_allowed_by_validations": 0,
     "product_claims_allowed_by_validations": 0,
     "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",
-    "readiness_report_id": "cshuman_report_11f41c28845852d7",
+    "readiness_report_id": "cshuman_report_d9e1b55f8615d82c",
     "record_bodies_persisted_by_validations": 0,
-    "report_id": "cshuman_report_11f41c28845852d7",
+    "report_id": "cshuman_report_d9e1b55f8615d82c",
     "scenario_count": 7,
     "scenario_delivery_unit_plan_approvals_collected": 0,
     "scenario_delivery_unit_plan_dependency_unlock_allowed": 0,

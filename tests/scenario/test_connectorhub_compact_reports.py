@@ -123,7 +123,9 @@ class ConnectorHubCompactReportsTest(unittest.TestCase):
             self.assertEqual(focused_compact["shared_evidence_ref"]["path"], str(shared_index_path.relative_to(ROOT)))
             self.assertEqual(shared_index["layout"], "content_addressed_objects_v1")
             self.assertEqual(shared_index["summary"]["section_count"], 7)
-            self.assertGreater(shared_index["summary"]["object_count"], 0)
+            self.assertEqual(shared_index["summary"]["object_count"], 5)
+            self.assertEqual(shared_index["summary"]["deduplicated_object_ref_count"], 5)
+            self.assertEqual(len(shared_index["sections"]), 7)
             self.assertEqual(focused_compact["scenario_results"][0]["id"], "CS-CH-001")
             self.assertEqual(
                 focused_compact["path_portability"]["claim_boundary"],
@@ -149,10 +151,16 @@ class ConnectorHubCompactReportsTest(unittest.TestCase):
                 focused_compact["source_report"]["omitted_duplicate_section_refs"]["command_evidence"]["count"],
                 1,
             )
-            command_object_ref = shared_index["sections"]["command_evidence"]["items"][0]
+            command_section_ref = shared_index["sections"]["command_evidence"]
+            self.assertNotIn("items", command_section_ref)
+            command_object_ref = command_section_ref["object"]
             command_object_path = ROOT / command_object_ref["path"]
             self.assertTrue(command_object_path.exists())
-            self.assertEqual(command_object_path.read_text().strip(), json.dumps(sample_report(Path("x"))["command_evidence"][0], sort_keys=True, separators=(",", ":")))
+            self.assertEqual(command_object_ref["sha256"], command_section_ref["sha256"])
+            self.assertEqual(
+                command_object_path.read_text().strip(),
+                json.dumps(sample_report(Path("x"))["command_evidence"], sort_keys=True, separators=(",", ":")),
+            )
 
 
 if __name__ == "__main__":

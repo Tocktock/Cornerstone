@@ -22070,6 +22070,32 @@ def _expand_shared_evidence_index(
                 errors.append(f"{label} compact section ref must be an object: {section_name}")
             continue
         section_type = section_ref.get("type")
+        section_object = section_ref.get("object")
+        if isinstance(section_object, dict):
+            payload = _load_content_object(
+                section_object,
+                errors,
+                f"{label} {section_name}",
+            )
+            if section_type == "list" and isinstance(payload, list):
+                expanded[section_name] = payload
+            elif section_type == "dict" and isinstance(payload, dict):
+                expanded[section_name] = payload
+            else:
+                if errors is not None:
+                    errors.append(
+                        f"{label} compact section object type mismatch: "
+                        f"{section_name}={section_type}"
+                    )
+                continue
+            expected_section_sha = section_ref.get("sha256")
+            actual_section_sha = _canonical_json_sha256(expanded[section_name])
+            if expected_section_sha != actual_section_sha and errors is not None:
+                errors.append(
+                    f"{label} compact section {section_name} sha256 expected "
+                    f"{expected_section_sha}, found {actual_section_sha}"
+                )
+            continue
         if section_type == "list":
             items = section_ref.get("items")
             if not isinstance(items, list):

@@ -1,6 +1,6 @@
 {
   "audit_refs": [
-    "audit:audit_021f1f7c6eb4a4d1"
+    "audit:audit_d6c10abdaa5cdc02"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate validation-handoff",
@@ -15,7 +15,7 @@
     ],
     "completed_dependency_unlock_record_validation_scenarios": [],
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-28T05:44:34.569413Z",
+    "created_at": "2026-06-28T07:42:02.702089Z",
     "dependency_unlock_allowed_count": 0,
     "dependency_unlock_denied_count": 0,
     "execution_queue_scenario_order": [
@@ -30,7 +30,7 @@
     "final_verdict": "HUMAN_REQUIRED",
     "full_goal_completion_allowed": false,
     "goal_completion_claim_blocked": true,
-    "handoff_id": "cshandoff_f1cc4b23812f52be",
+    "handoff_id": "cshandoff_b385618f73dc2e1e",
     "human_required_count": 7,
     "negative_evidence": {
       "approvals_collected_by_handoff": 0,
@@ -55,8 +55,8 @@
     },
     "operator_rule": "Use the next_scenario_id row first, fill only redacted/public-safe reviewer records, run validate-record with --output, and treat validation refs as dependency-unlock inputs only when they are structurally valid ACCEPT records. This handoff cannot collect approval or promote HUMAN_REQUIRED rows.",
     "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",
-    "readiness_report_id": "cshuman_report_11f41c28845852d7",
-    "readiness_report_ref": "connector_human_gate_readiness_report:cshuman_report_11f41c28845852d7",
+    "readiness_report_id": "cshuman_report_d9e1b55f8615d82c",
+    "readiness_report_ref": "connector_human_gate_readiness_report:cshuman_report_d9e1b55f8615d82c",
     "ready_scenario_ids": [
       "CS-CH-H04"
     ],
@@ -179,7 +179,7 @@
               "review_input_only": true,
               "scenario_count": 93,
               "schema_version": "cs.vs2_local_security_proof.v0",
-              "sha256": "841b4ed7ec0cdafa6ec6f395a131e484690beb31508af98a30ddeb64f182c3a9",
+              "sha256": "4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff",
               "status": "success"
             },
             {
@@ -194,7 +194,7 @@
               "review_input_only": true,
               "scenario_count": 93,
               "schema_version": "cs.cli.v0",
-              "sha256": "976e21f4f0142d788e06885a32d57a3fbb0e1672dc3b4dd7759afd57148a994b",
+              "sha256": "ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276",
               "status": "success"
             },
             {
@@ -234,7 +234,7 @@
               "review_input_only": true,
               "scenario_count": 1,
               "schema_version": "cs.cli.v0",
-              "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
+              "sha256": "515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f",
               "status": "success"
             }
           ],
@@ -429,7 +429,7 @@
                 "review_input_only": true,
                 "scenario_count": 93,
                 "schema_version": "cs.vs2_local_security_proof.v0",
-                "sha256": "841b4ed7ec0cdafa6ec6f395a131e484690beb31508af98a30ddeb64f182c3a9",
+                "sha256": "4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff",
                 "status": "success"
               },
               {
@@ -444,7 +444,7 @@
                 "review_input_only": true,
                 "scenario_count": 93,
                 "schema_version": "cs.cli.v0",
-                "sha256": "976e21f4f0142d788e06885a32d57a3fbb0e1672dc3b4dd7759afd57148a994b",
+                "sha256": "ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276",
                 "status": "success"
               },
               {
@@ -484,7 +484,7 @@
                 "review_input_only": true,
                 "scenario_count": 1,
                 "schema_version": "cs.cli.v0",
-                "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
+                "sha256": "515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f",
                 "status": "success"
               }
             ],
@@ -663,7 +663,7 @@
               "review_input_only": true,
               "scenario_count": 93,
               "schema_version": "cs.vs2_local_security_proof.v0",
-              "sha256": "841b4ed7ec0cdafa6ec6f395a131e484690beb31508af98a30ddeb64f182c3a9",
+              "sha256": "4c3836c83e24b8a247487f33151b128f9aaea6c78a2a66e3edd46651c5e26dff",
               "status": "success",
               "summary": {
                 "blocking": 0,
@@ -686,7 +686,7 @@
               "review_input_only": true,
               "scenario_count": 93,
               "schema_version": "cs.cli.v0",
-              "sha256": "976e21f4f0142d788e06885a32d57a3fbb0e1672dc3b4dd7759afd57148a994b",
+              "sha256": "ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276",
               "status": "success",
               "summary": {
                 "blocking": 0,
@@ -730,7 +730,7 @@
               "review_input_only": true,
               "scenario_count": 1,
               "schema_version": "cs.cli.v0",
-              "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
+              "sha256": "515122cd4a3788c8feeb08c1826569088d6fe7899e36e053325ae8213f33669f",
               "status": "success",
               "summary": {
                 "blocking": 0,
@@ -2380,18 +2380,18 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_validation_handoff:cshandoff_f1cc4b23812f52be",
-    "connector_human_gate_readiness_report:cshuman_report_11f41c28845852d7"
+    "connector_human_gate_validation_handoff:cshandoff_b385618f73dc2e1e",
+    "connector_human_gate_readiness_report:cshuman_report_d9e1b55f8615d82c"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_readiness_report_id": "cshuman_report_11f41c28845852d7",
-    "connector_human_gate_validation_handoff_id": "cshandoff_f1cc4b23812f52be",
-    "git_commit": "4b92d49"
+    "connector_human_gate_readiness_report_id": "cshuman_report_d9e1b55f8615d82c",
+    "connector_human_gate_validation_handoff_id": "cshandoff_b385618f73dc2e1e",
+    "git_commit": "7415792"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
-  "output_path": "/private/tmp/cornerstone-connectorhub-layout-narrow/reports/scenario/connectorhub-human-gate-validation-handoff-2026-06-24.json",
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/connectorhub-human-gate-validation-handoff-2026-06-24.json",
   "owner_id": "local-user",
   "policy_decision_refs": [],
   "product": "CornerStone",
@@ -2407,7 +2407,7 @@
     "final_verdict": "HUMAN_REQUIRED",
     "full_goal_completion_allowed": false,
     "goal_completion_claim_blocked": true,
-    "handoff_id": "cshandoff_f1cc4b23812f52be",
+    "handoff_id": "cshandoff_b385618f73dc2e1e",
     "human_required_count": 7,
     "human_rows_marked_pass_by_handoff": 0,
     "next_allowed_redaction_statuses": [
@@ -2709,8 +2709,8 @@
     "pass_claims_allowed_by_handoff": 0,
     "product_claims_allowed_by_handoff": 0,
     "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",
-    "readiness_report_id": "cshuman_report_11f41c28845852d7",
-    "readiness_report_ref": "connector_human_gate_readiness_report:cshuman_report_11f41c28845852d7",
+    "readiness_report_id": "cshuman_report_d9e1b55f8615d82c",
+    "readiness_report_ref": "connector_human_gate_readiness_report:cshuman_report_d9e1b55f8615d82c",
     "ready_scenario_count": 1,
     "remaining_human_evidence_claim_boundary": "remaining_human_evidence_summary_is_operator_input_not_acceptance",
     "remaining_human_evidence_summary_count": 7,

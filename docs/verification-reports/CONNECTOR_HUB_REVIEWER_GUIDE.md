@@ -17,7 +17,7 @@ The 41 previous full `connector-contract-adapter*.json` reports are represented 
 - `reports/scenario/connector-contract-adapter/objects/sha256/`
 - `reports/scenario/connector-contract-adapter/manifest-2026-06-23.json`
 
-Each compact report keeps a repo-relative portable report path and a `path_portability` block. The shared evidence index points to SHA-256-addressed JSON objects so repeated command/evidence payloads are stored once and referenced by digest. Any remaining absolute `output_path` value is historical transcript metadata only. `tmp/scenario/...` refs are regenerable local transcript refs, not committed durable evidence.
+Each compact report keeps a repo-relative portable report path and a `path_portability` block. The shared evidence index points to section-level SHA-256-addressed JSON objects so repeated command/evidence payloads are stored once and referenced by digest. The current index has 7 shared section refs backed by 5 unique content objects. Any remaining absolute `output_path` value is historical transcript metadata only. `tmp/scenario/...` refs are regenerable local transcript refs, not committed durable evidence.
 
 The scenario delivery-unit manifest also carries a top-level `path_portability` block. Its `tmp/scenario/...` values are local replay transcript references only; reviewers should rely on the committed compact reports and manifest hashes for durable evidence.
 
@@ -35,7 +35,7 @@ For the feedback-response boundary specifically, run:
 python3 scripts/verify_connectorhub_pr20_feedback.py
 ```
 
-This validates the B1-B5, M1-M5, and N1-N4 response surfaces: local-gate behavior, status delegation, compact evidence hashes, controlled egress sink evidence, action-lane wording, path portability boundaries, and explicit remaining split/monolith blockers.
+This validates the B1-B5, M1-M5, and N1-N4 response surfaces: local-gate behavior, status delegation, VS2 current-report reconciliation, compact evidence hashes, controlled egress sink evidence, action-lane wording, path portability boundaries, and explicit remaining split/monolith blockers.
 
 For the review-split plan specifically, run:
 

@@ -1,1 +1,0 @@
-{"after_allowed":{"events":[{"client":"172.31.0.3","path":"/status","query":{"actor":["egress_proxy"],"path":["governed_proxy"]},"ts":1782566797.831}],"requests":1},"after_direct":{"events":[],"requests":0},"before_direct":{"events":[],"requests":0}}
