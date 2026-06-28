@@ -1,6 +1,6 @@
 {
   "audit_refs": [
-    "audit:audit_a901178b88608eef"
+    "audit:audit_75077286c19d81bf"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate validate-record",
@@ -15,7 +15,7 @@
       "no_sensitive_material"
     ],
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T14:04:19.526006Z",
+    "created_at": "2026-06-28T02:50:27.284043Z",
     "decision_allowed": false,
     "decision_present": false,
     "decision_recorded_by_validator": false,
@@ -404,7 +404,7 @@
     },
     "title": "Human Chrome privacy review",
     "valid_dependency_human_gate_refs": [],
-    "validation_id": "cshval_77eaa7ce02694f53",
+    "validation_id": "cshval_5ce50b0d3d69ee0e",
     "validation_scope": "structure_and_safety_only",
     "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
   },
@@ -451,12 +451,12 @@
     }
   ],
   "evidence_refs": [
-    "connector_human_gate_record_validation:cshval_77eaa7ce02694f53"
+    "connector_human_gate_record_validation:cshval_5ce50b0d3d69ee0e"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_record_validation_id": "cshval_77eaa7ce02694f53",
-    "git_commit": "97ba4ca"
+    "connector_human_gate_record_validation_id": "cshval_5ce50b0d3d69ee0e",
+    "git_commit": "da85c05"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -485,7 +485,7 @@
     "senior_review_perspective_findings_complete": false,
     "status": "record_structurally_invalid",
     "structurally_valid": false,
-    "validation_id": "cshval_77eaa7ce02694f53",
+    "validation_id": "cshval_5ce50b0d3d69ee0e",
     "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
   },
   "tenant_id": "local-dev",

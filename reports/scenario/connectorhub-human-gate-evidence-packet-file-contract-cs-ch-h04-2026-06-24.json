@@ -1,13 +1,13 @@
 {
   "audit_refs": [
-    "audit:audit_0da80bc54613e908"
+    "audit:audit_28309c9c70b674a7"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate evidence-packet-file-contract",
   "connector_human_gate_evidence_packet_file_contract_report": {
     "acceptance_sufficient": false,
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T14:04:16.643755Z",
+    "created_at": "2026-06-28T02:50:23.576067Z",
     "evidence_packet_file_contract": {
       "acceptance_sufficient": false,
       "invalid_value_report_shape": "packet_file_names_only",
@@ -243,7 +243,7 @@
       "status": "operator_preparation_only",
       "validation_scope": "acceptance_packet_file_shape_only"
     },
-    "evidence_packet_file_contract_report_id": "cshuman_evidencepacketfile_2a6eaa9d41583e09",
+    "evidence_packet_file_contract_report_id": "cshuman_evidencepacketfile_96247a2b5077fa8a",
     "evidence_packet_file_contract_schema_version": "cs.connector_human_gate_evidence_packet_file_contract.v1",
     "final_verdict": "HUMAN_REQUIRED",
     "full_goal_completion_allowed": false,
@@ -516,12 +516,12 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_evidence_packet_file_contract:cshuman_evidencepacketfile_2a6eaa9d41583e09"
+    "connector_human_gate_evidence_packet_file_contract:cshuman_evidencepacketfile_96247a2b5077fa8a"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_evidence_packet_file_contract_report_id": "cshuman_evidencepacketfile_2a6eaa9d41583e09",
-    "git_commit": "97ba4ca"
+    "connector_human_gate_evidence_packet_file_contract_report_id": "cshuman_evidencepacketfile_96247a2b5077fa8a",
+    "git_commit": "da85c05"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -535,7 +535,7 @@
     "acceptance_sufficient": false,
     "commands_executed_by_evidence_packet_file_contract": 0,
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "evidence_packet_file_contract_report_id": "cshuman_evidencepacketfile_2a6eaa9d41583e09",
+    "evidence_packet_file_contract_report_id": "cshuman_evidencepacketfile_96247a2b5077fa8a",
     "evidence_packet_file_contract_schema_version": "cs.connector_human_gate_evidence_packet_file_contract.v1",
     "external_mutations_executed_by_evidence_packet_file_contract": 0,
     "final_verdict": "HUMAN_REQUIRED",

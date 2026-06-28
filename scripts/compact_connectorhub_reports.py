@@ -25,6 +25,9 @@ SHARED_SECTION_KEYS = [
 COMPACT_REPORT_SCHEMA = "cs.connector_contract_adapter.compact_report.v1"
 COMPACT_MANIFEST_SCHEMA = "cs.connector_contract_adapter.compact_manifest.v1"
 SHARED_EVIDENCE_SCHEMA = "cs.connector_contract_adapter.shared_evidence.v1"
+PATH_PORTABILITY_CLAIM_BOUNDARY = (
+    "absolute_paths_are_historical_transcript_metadata_not_portable_evidence"
+)
 
 
 def _canonical_bytes(payload: Any) -> bytes:
@@ -105,6 +108,22 @@ def _source_report_ref(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _path_portability_ref(*, output_path: Path, source_path: Path) -> dict[str, Any]:
+    return {
+        "portable_report_path": _relative(output_path),
+        "portable_source_report_path": _relative(source_path),
+        "portable_evidence_root": "reports/scenario/connector-contract-adapter",
+        "historical_absolute_path_fields": [
+            "output_path",
+            "source_report.output_path",
+        ],
+        "regenerable_transcript_path_prefixes": [
+            "tmp/scenario/",
+        ],
+        "claim_boundary": PATH_PORTABILITY_CLAIM_BOUNDARY,
+    }
+
+
 def _shared_section_refs(shared_sections: dict[str, Any]) -> dict[str, dict[str, Any]]:
     refs: dict[str, dict[str, Any]] = {}
     for key, value in shared_sections.items():
@@ -179,6 +198,10 @@ def _compact_envelope(
     envelope["compact_schema_version"] = COMPACT_REPORT_SCHEMA
     envelope["compact_evidence_layout"] = "content_addressed_shared_v1"
     envelope["source_report"] = _source_report_ref(source_path, source_payload)
+    envelope["path_portability"] = _path_portability_ref(
+        output_path=output_path,
+        source_path=source_path,
+    )
     envelope["shared_evidence_ref"] = {
         "path": _relative(shared_path),
         "sha256": shared_sha256,
@@ -246,6 +269,20 @@ def compact_reports(
         "schema_version": SHARED_EVIDENCE_SCHEMA,
         "scenario_set": "connector-contract-adapter",
         "report_date": report_date,
+        "path_portability": {
+            "portable_evidence_root": "reports/scenario/connector-contract-adapter",
+            "historical_absolute_path_fields": [
+                "sections.command_evidence.[].stdout_json.artifact.source.path",
+                "sections.command_evidence.[].stdout_json.connector_capability_contract.source.path",
+                "sections.command_evidence.[].stdout_json.evidence_bundle.evidence_items.[].source.path",
+                "sections.command_evidence.[].stdout_json.evidence_refs.[]",
+                "sections.command_evidence.[].stdout_json.quarantine.manifest_path",
+            ],
+            "regenerable_transcript_path_prefixes": [
+                "tmp/scenario/",
+            ],
+            "claim_boundary": PATH_PORTABILITY_CLAIM_BOUNDARY,
+        },
         "sections": shared_sections,
         "section_refs": shared_section_refs,
     }
@@ -314,6 +351,14 @@ def compact_reports(
             "compact_total_size_bytes": shared_path.stat().st_size
             + aggregate_output_path.stat().st_size
             + sum((output_dir / "scenarios" / f"{entry['scenario_id']}.json").stat().st_size for entry in scenario_entries),
+        },
+        "path_portability": {
+            "portable_evidence_root": "reports/scenario/connector-contract-adapter",
+            "historical_absolute_path_fields": [
+                "aggregate_report.source_report.output_path",
+                "scenario_reports[].source_report.output_path",
+            ],
+            "claim_boundary": PATH_PORTABILITY_CLAIM_BOUNDARY,
         },
         "shared_evidence": {
             "path": _relative(shared_path),

@@ -1,6 +1,6 @@
 {
   "audit_refs": [
-    "audit:audit_a4383ffd09decdd3"
+    "audit:audit_3a61f02e3b08880b"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate next",
@@ -74,7 +74,7 @@
     "completed_human_gate_record_validation_count": 0,
     "completed_human_gate_record_validation_scenarios": [],
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T14:04:18.760395Z",
+    "created_at": "2026-06-28T02:50:26.388692Z",
     "dependency_unlock_allowed_count": 0,
     "dependency_unlock_denied_count": 0,
     "final_verdict": "HUMAN_REQUIRED",
@@ -94,7 +94,7 @@
     },
     "next_depends_on_human_gates": [],
     "next_gate_category": "production_like_security",
-    "next_id": "cshuman_next_435d0dff6b5f4625",
+    "next_id": "cshuman_next_8f10330793f027d2",
     "next_latest_record_validation_dependency_unlock_allowed": false,
     "next_latest_record_validation_issue_summary": null,
     "next_latest_record_validation_ref": null,
@@ -244,7 +244,7 @@
           "review_input_only": true,
           "scenario_count": 1,
           "schema_version": "cs.cli.v0",
-          "sha256": "8b91ccb9a307c8783ed28ca3182e80c0eab69b13e12d67c826523eec4f0d18a8",
+          "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
           "status": "success"
         }
       ],
@@ -500,7 +500,7 @@
             "review_input_only": true,
             "scenario_count": 1,
             "schema_version": "cs.cli.v0",
-            "sha256": "8b91ccb9a307c8783ed28ca3182e80c0eab69b13e12d67c826523eec4f0d18a8",
+            "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
             "status": "success"
           }
         ],
@@ -745,7 +745,7 @@
         },
         {
           "acceptance_sufficient": false,
-          "bytes": 4849,
+          "bytes": 5363,
           "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
           "command": "cornerstone scenario verify connector-contract-adapter",
           "json_valid": true,
@@ -756,7 +756,7 @@
           "review_input_only": true,
           "scenario_count": 1,
           "schema_version": "cs.cli.v0",
-          "sha256": "8b91ccb9a307c8783ed28ca3182e80c0eab69b13e12d67c826523eec4f0d18a8",
+          "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
           "status": "success",
           "summary": {
             "blocking": 0,
@@ -1853,8 +1853,8 @@
       "secret_material_read_by_next": false
     },
     "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",
-    "readiness_report_id": "cshuman_report_2c6e8f5c4e8c13a3",
-    "readiness_report_ref": "connector_human_gate_readiness_report:cshuman_report_2c6e8f5c4e8c13a3",
+    "readiness_report_id": "cshuman_report_01c47a65d56a0e10",
+    "readiness_report_ref": "connector_human_gate_readiness_report:cshuman_report_01c47a65d56a0e10",
     "ready_scenario_ids": [
       "CS-CH-H04"
     ],
@@ -1892,14 +1892,14 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_next:cshuman_next_435d0dff6b5f4625",
-    "connector_human_gate_readiness_report:cshuman_report_2c6e8f5c4e8c13a3"
+    "connector_human_gate_next:cshuman_next_8f10330793f027d2",
+    "connector_human_gate_readiness_report:cshuman_report_01c47a65d56a0e10"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_next_id": "cshuman_next_435d0dff6b5f4625",
-    "connector_human_gate_readiness_report_id": "cshuman_report_2c6e8f5c4e8c13a3",
-    "git_commit": "97ba4ca"
+    "connector_human_gate_next_id": "cshuman_next_8f10330793f027d2",
+    "connector_human_gate_readiness_report_id": "cshuman_report_01c47a65d56a0e10",
+    "git_commit": "da85c05"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -1937,7 +1937,7 @@
     "next_evidence_packet_workflow_schema_version": "cs.connector_human_gate_h04_evidence_packet_workflow.v1",
     "next_evidence_packet_workflow_status": "operator_preparation_only",
     "next_human_acceptance_collected_by_evidence_packet_workflow": false,
-    "next_id": "cshuman_next_435d0dff6b5f4625",
+    "next_id": "cshuman_next_8f10330793f027d2",
     "next_latest_record_validation_dependency_unlock_allowed": false,
     "next_latest_record_validation_issue_summary_present": false,
     "next_local_baseline_acceptance_sufficient": false,
@@ -2144,8 +2144,8 @@
     "next_stop_or_reject_when": "Any cross-namespace read, unexpected egress, missing audit ref, unredacted secret, or unverifiable restore appears.",
     "next_validate_record_output_command": "cornerstone connector human-gate validate-record --scenario CS-CH-H04 --record-file <json> --json --output <redacted-validation-envelope.json>",
     "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",
-    "readiness_report_id": "cshuman_report_2c6e8f5c4e8c13a3",
-    "readiness_report_ref": "connector_human_gate_readiness_report:cshuman_report_2c6e8f5c4e8c13a3",
+    "readiness_report_id": "cshuman_report_01c47a65d56a0e10",
+    "readiness_report_ref": "connector_human_gate_readiness_report:cshuman_report_01c47a65d56a0e10",
     "ready_scenario_count": 1,
     "scenario_count": 7,
     "source_requirement_claim_boundary": "human_gate_preparation_does_not_close_source_requirements",

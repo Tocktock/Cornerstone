@@ -1,12 +1,12 @@
 {
   "audit_refs": [
-    "audit:audit_4496d8b935fafbd2"
+    "audit:audit_e7e82b6da7bd8993"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate preflight-bundle",
   "connector_human_gate_preflight_bundle_report": {
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T14:04:18.523704Z",
+    "created_at": "2026-06-28T02:50:26.115300Z",
     "final_verdict": "HUMAN_REQUIRED",
     "full_goal_completion_allowed": false,
     "goal_completion_claim_blocked": true,
@@ -183,7 +183,7 @@
           "review_input_only": true,
           "scenario_count": 1,
           "schema_version": "cs.cli.v0",
-          "sha256": "8b91ccb9a307c8783ed28ca3182e80c0eab69b13e12d67c826523eec4f0d18a8",
+          "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
           "status": "success"
         }
       ],
@@ -284,7 +284,7 @@
       "schema_version": "cs.connector_human_gate_local_baseline_preflight_bundle.v1",
       "status": "operator_preparation_only"
     },
-    "preflight_bundle_report_id": "cshuman_preflight_d9aab04af291d13c",
+    "preflight_bundle_report_id": "cshuman_preflight_848b4a12f2289cc1",
     "product_feature_claims": "CONNECTOR_HUB_H04_PREFLIGHT_BUNDLE_PREPARED_HUMAN_EVIDENCE_REQUIRED",
     "recommended_preflight_command_plan": [
       {
@@ -364,12 +364,12 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_preflight_bundle:cshuman_preflight_d9aab04af291d13c"
+    "connector_human_gate_preflight_bundle:cshuman_preflight_848b4a12f2289cc1"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_preflight_bundle_report_id": "cshuman_preflight_d9aab04af291d13c",
-    "git_commit": "97ba4ca"
+    "connector_human_gate_preflight_bundle_report_id": "cshuman_preflight_848b4a12f2289cc1",
+    "git_commit": "da85c05"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -397,7 +397,7 @@
     "local_baseline_review_inputs_schema_version": "cs.connector_human_gate_local_baseline_review_inputs.v1",
     "operator_rule": "This report exposes H04 local comparison inputs only. Run the command plan, collect fresh production-like evidence, and validate a dated human reviewer record before claiming dependency unlock.",
     "pass_claim_allowed": false,
-    "preflight_bundle_report_id": "cshuman_preflight_d9aab04af291d13c",
+    "preflight_bundle_report_id": "cshuman_preflight_848b4a12f2289cc1",
     "preflight_bundle_schema_version": "cs.connector_human_gate_local_baseline_preflight_bundle.v1",
     "product_claim_allowed": false,
     "product_feature_claims": "CONNECTOR_HUB_H04_PREFLIGHT_BUNDLE_PREPARED_HUMAN_EVIDENCE_REQUIRED",

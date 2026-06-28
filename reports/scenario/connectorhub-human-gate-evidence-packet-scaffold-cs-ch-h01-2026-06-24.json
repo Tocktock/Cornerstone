@@ -1,13 +1,13 @@
 {
   "audit_refs": [
-    "audit:audit_e19c4289c17e8960"
+    "audit:audit_d408e48b1cbc37e3"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate evidence-packet-scaffold",
   "connector_human_gate_evidence_packet_scaffold_report": {
     "acceptance_sufficient": false,
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T14:04:15.300031Z",
+    "created_at": "2026-06-28T02:50:21.821589Z",
     "evidence_packet_scaffold": {
       "acceptance_sufficient": false,
       "evidence_packet_file_contract_schema_version": "cs.connector_human_gate_evidence_packet_file_contract.v1",
@@ -140,7 +140,7 @@
       "status": "operator_preparation_only",
       "template_contents_included_in_report": false
     },
-    "evidence_packet_scaffold_report_id": "cshuman_evidencepacketscaffold_9704ede62098c35c",
+    "evidence_packet_scaffold_report_id": "cshuman_evidencepacketscaffold_68743a22bf5bbd80",
     "evidence_packet_scaffold_schema_version": "cs.connector_human_gate_evidence_packet_scaffold.v1",
     "final_verdict": "HUMAN_REQUIRED",
     "full_goal_completion_allowed": false,
@@ -305,12 +305,12 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_evidence_packet_scaffold:cshuman_evidencepacketscaffold_9704ede62098c35c"
+    "connector_human_gate_evidence_packet_scaffold:cshuman_evidencepacketscaffold_68743a22bf5bbd80"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_evidence_packet_scaffold_report_id": "cshuman_evidencepacketscaffold_9704ede62098c35c",
-    "git_commit": "97ba4ca"
+    "connector_human_gate_evidence_packet_scaffold_report_id": "cshuman_evidencepacketscaffold_68743a22bf5bbd80",
+    "git_commit": "da85c05"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -324,7 +324,7 @@
     "acceptance_sufficient": false,
     "commands_executed_by_evidence_packet_scaffold": 0,
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "evidence_packet_scaffold_report_id": "cshuman_evidencepacketscaffold_9704ede62098c35c",
+    "evidence_packet_scaffold_report_id": "cshuman_evidencepacketscaffold_68743a22bf5bbd80",
     "evidence_packet_scaffold_schema_version": "cs.connector_human_gate_evidence_packet_scaffold.v1",
     "external_mutations_executed_by_evidence_packet_scaffold": 0,
     "final_verdict": "HUMAN_REQUIRED",

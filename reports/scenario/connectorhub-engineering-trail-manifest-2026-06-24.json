@@ -1,273 +1,263 @@
 {
-  "external_source_inputs": [
-    {
-      "claim_boundary": "source_reconciliation_only",
-      "label": "ConnectorHub application guide",
-      "line_count": 1784,
-      "path": "/Users/jiyong/Downloads/CornerStone_ConnectorHub_Application_Guide (1).md",
-      "role": "source_input_not_implementation_proof",
-      "sha256": "73d7c9d68f51c16c4361bb8d89045e1f99b06a00e0bc34eec716d5c8e79225b9",
-      "size_bytes": 115735
-    },
-    {
-      "claim_boundary": "source_reconciliation_only",
-      "label": "ConnectorHub test scenario implementation document",
-      "line_count": 482,
-      "path": "/Users/jiyong/Downloads/CornerStone_ConnectorHub_Test_Scenario_Implementation_Document.md",
-      "role": "source_input_not_implementation_proof",
-      "sha256": "336017aad7f14dbabf07b7a2a4d763ff2220e51a94c1ab19828dd4c9f403aa04",
-      "size_bytes": 63515
-    }
-  ],
   "files": [
     {
       "path": "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_MATRIX.csv",
-      "sha256": "504c516b676afaf9cdb1be601f5a68eebf038afbf2ee3b108fbb8929518fd1a9",
-      "size_bytes": 20840
+      "sha256": "d74d4afc66ab190d1735e50ac3e29c97928bd0e42950d2669eec9b4ed24854e8",
+      "size_bytes": 20899
     },
     {
       "path": "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md",
-      "sha256": "b4dc5ca8c92860fd16da1b6319ea0384d4b3af55478238c3d449a97edb04d5b9",
-      "size_bytes": 258258
+      "sha256": "3e179c7482b96037c8c1cbbd363d7e5bf382ae3d9bc919bff8789cd86ae4239f",
+      "size_bytes": 257255
     },
     {
       "path": "reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json",
-      "sha256": "d13bfca138b2ca13d9e003fc8d744baca5e32cce03ac38c96f9743d0f0659c48",
-      "size_bytes": 47704
+      "sha256": "6ce23155019a1e72ff85b710709f327c4c7b3afcec62b83497ede1c3a00aabe8",
+      "size_bytes": 48209
+    },
+    {
+      "path": "reports/scenario/connector-contract-adapter/manifest-2026-06-23.json",
+      "sha256": "d3b611293fc3733461e43a56d859f2d3e818e1c8f0efbb43e297a8b74613d8e8",
+      "size_bytes": 60162
+    },
+    {
+      "path": "reports/scenario/connector-contract-adapter/shared-evidence-2026-06-23.json",
+      "sha256": "9242c6f86766d65f56e57d175380def511135f19c2d00077189177c7fd83ff9b",
+      "size_bytes": 3487109
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-readiness-2026-06-24.json",
-      "sha256": "32b595393cdd3b834fd69fdb70e55be63da85d80975acc9387d1b5980f662ec8",
+      "sha256": "f47c91121a96a50c1a5e2cb28754eaf7e5b2af077cc532ad1f87bf33ef0d16d3",
       "size_bytes": 382905
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-next-2026-06-24.json",
-      "sha256": "6c4fbd08e66402aa799e6f7f6aac67b020c58531836c99b4952bc391435e450c",
+      "sha256": "4ef76143e4b3e55e4dba254cc12436581012d9e30701529d91ff9ca320b59fda",
       "size_bytes": 108781
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-validation-handoff-2026-06-24.json",
-      "sha256": "ccd4482f5fbb62d3fa235b694113ffb2950c85cc974d48afa20ec2208a68602d",
+      "sha256": "cd0019e2fa2311b8ab7583395b5a24e0a06f62173c3e8f38c3bb56ca8bb5fb25",
       "size_bytes": 167567
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-field-ref-contract-cs-ch-h04-2026-06-24.json",
-      "sha256": "cd26e92b13f144fe0710ff01e51dbc948ed52b5a79380a78c921f9cbb985fac1",
+      "sha256": "d0cab43d6c3fb28de3ab4b5c9005aadf548e41acc5602cd5167d5c5d1961c0c6",
       "size_bytes": 8717
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-preflight-bundle-cs-ch-h04-2026-06-24.json",
-      "sha256": "fc953db110e973b8b6c7622ee6f3483e2e9f9f7e05255cf8b3d98c7115264c4e",
+      "sha256": "34cc32aee4f776f7368041c8f6a624086392461f03cb1b61ecc6307eb403856e",
       "size_bytes": 25074
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h06-2026-06-24.json",
-      "sha256": "6fcf8982ba9188284b4c7467686b48fb3d09661344b7523cdafee7bd82c5207e",
+      "sha256": "f944b46a84d502b7be3af54e46c0ca94a6b5e33007792a9a90efa49962384b1a",
       "size_bytes": 8440
     },
     {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h03-2026-06-24.json",
-      "sha256": "e2e605996c5a4ce429b2aa7e8c977897d35b1bb0ffea912e98926b30f0d1dfbf",
-      "size_bytes": 8752
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h04-2026-06-24.json",
-      "sha256": "29f436575dee10bc5c7781cf987e6b9a714e01c975635ce0bb3292c8c4e2b340",
-      "size_bytes": 8532
-    },
-    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h02-2026-06-24.json",
-      "sha256": "00745032919fbb00019f7e2d013bf32f33ef6e011610993938a11ff4f77670d5",
+      "sha256": "08eb039fb0881a97b06f196b1b6366d68ad09c56ab38c4f3d6283a1b1cbb06ea",
       "size_bytes": 8632
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h05-2026-06-24.json",
-      "sha256": "6cd1ba140e48979591779c61aa3362cc9a2c47d6ee0cd0315ac30aac6e5e9a5f",
+      "sha256": "2a9cdc06482d55794bebe66660d34f6c3814d4f8746cf2fe057e2a6aac882356",
       "size_bytes": 8428
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h04-2026-06-24.json",
+      "sha256": "fc8480e3d8969d1c9130c6323e916e132ec4e969ab1557f563985658ed58c078",
+      "size_bytes": 8532
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h07-2026-06-24.json",
-      "sha256": "40299c050ab125f2af697b5a27ddabb9a42f03401c5d15352bb55177b6dfe9f3",
+      "sha256": "384088de9e0ac20de610ea6286ed0d3f7f060ee6dd53a3e1f7d399c945de698b",
       "size_bytes": 8376
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h01-2026-06-24.json",
-      "sha256": "004ac0e7cdba99fddd6e4c690a633b41cf5095ee26bb0d42cace5146f6fd552f",
+      "sha256": "7ca2cb500d6d109acff31a05a861959efb8271aff7b22a6fc96185c807631d43",
       "size_bytes": 9528
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h03-2026-06-24.json",
+      "sha256": "b9e1320c7629e56601ae1e98da5e4b4d511224147b92c2410e65fc5155a0e1a0",
+      "size_bytes": 8752
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h06-2026-06-24.json",
-      "sha256": "d21562578e9308be2cf1a596c63dedd98b7b8a2f2db62f43600036ac8ab97e25",
+      "sha256": "13cd769870e870f7e75346cf33e137139b7d2032851823aa867840282d993284",
       "size_bytes": 45069
     },
     {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h03-2026-06-24.json",
-      "sha256": "a7b71804aad461fa5a6763c9d9edfc699387e76425bc6bb0fc1e78ef57aa6cd5",
-      "size_bytes": 37517
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h04-2026-06-24.json",
-      "sha256": "cf0942a9e627239cc5bed78c59d2a98d2bc5b8feb3470c1b95729ebce1eb4a59",
-      "size_bytes": 29035
-    },
-    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h02-2026-06-24.json",
-      "sha256": "c009e5c7c120aaf03c67f1b9ea76baa28b02df1aa4bbeeef58c6380466dc191b",
+      "sha256": "863680417ab5074a509b4fb312fe73d139cff41bb611c684469c4e6908c3178a",
       "size_bytes": 31220
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h05-2026-06-24.json",
-      "sha256": "f80e4e1cfac2151ba563655cd62f8bdf882243144ad12edbd781794c9487ffd5",
+      "sha256": "7ee027b946e5cb4a03bf5d3336b6d205fa9ff044da5ba7e84d2dbf9c3967227e",
       "size_bytes": 37500
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h04-2026-06-24.json",
+      "sha256": "93d6ae5e277e1836ef8d2be3397f8438225e384be82c08b6357218f373ba5c99",
+      "size_bytes": 29035
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h07-2026-06-24.json",
-      "sha256": "5c576543d83ab9ec1f013f6827bba3d03a99d13f3e4d29b2165f4ee977893bd1",
+      "sha256": "8b39243d06542f8aa919ebc5f566229022f96ffe1261678049dac0e1aceac5c5",
       "size_bytes": 31224
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h01-2026-06-24.json",
-      "sha256": "65bc37b0c387cd2924840f857d2317626f0657631f3c84351ee629fb0733ea82",
+      "sha256": "0aee120d6eb2a225cc8addfb9411b0c94e478fd7fc9e1b7b8f34cc7fa4122bcc",
       "size_bytes": 29489
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h03-2026-06-24.json",
+      "sha256": "a28215be5cc564ca8bdd1810d1e19b5d29a65fb4c9f8839d1f54bf931f63e3cc",
+      "size_bytes": 37517
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h06-2026-06-24.json",
-      "sha256": "2d3fc52bed078538fefe4735c13533d00064fd6246c5ac448a0a619aa0c9e84f",
+      "sha256": "ef0575fde78c1b8bb725fc4a92c67459c6d29ef44f1cec8771ef98e5f7048870",
       "size_bytes": 29663
     },
     {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h03-2026-06-24.json",
-      "sha256": "ed324e4fe3f9f35e957e0ed7413f2710917bb4a3b0a4e426daa0de140fcdbef9",
-      "size_bytes": 24920
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h04-2026-06-24.json",
-      "sha256": "697d73c9c7e62779be78aa1d725d4334403ca5e4173c97eee19476fd8c704950",
-      "size_bytes": 19790
-    },
-    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h02-2026-06-24.json",
-      "sha256": "73dbf8d8aad6c290ee669a61981ac095445acd59d9bfd10e5964340f2adf47d5",
+      "sha256": "3b8da0103246a2d93d63156a1edb54e1fd42fb73a702ba70fbe7a921fc77cfa4",
       "size_bytes": 21039
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h05-2026-06-24.json",
-      "sha256": "1bfc3dedd7a809aabdfc2d003c1f6ec468b5c96756a8c112c0954712d1cc6239",
+      "sha256": "d4ec928c0a9b77e6c5ca738b7ebe6466fef3da3c8f9093d18270be863d7c9e9b",
       "size_bytes": 25038
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h04-2026-06-24.json",
+      "sha256": "b93773d244bd2cea3e77186ba8e6cf3518ec00bf15d403ef0ba7a3f5d2dbe62b",
+      "size_bytes": 19790
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h07-2026-06-24.json",
-      "sha256": "e4641aff38d1113584c77414d9c30e61ce8d4b983d8e53482b3d7eb48040c344",
+      "sha256": "3bd915a15f67c114472f7a6326d877221afd4a244e0047c4d41ff14f64d5d0b9",
       "size_bytes": 21336
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h01-2026-06-24.json",
-      "sha256": "a97dea0ff1b7dad2b23831f26295fed75ac64a7b6481d9d48235fda669488a22",
+      "sha256": "1a166e2d0c6f66d2d38a06b3ac259a85a05751fd23d33a29c4b61aaf5cde3428",
       "size_bytes": 19889
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h03-2026-06-24.json",
+      "sha256": "17a21b492005ed5a4efc934385279218025f3529bbb1022e031a8ae2940292cf",
+      "size_bytes": 24920
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h06-2026-06-24.json",
-      "sha256": "b86d654f247c7b0e11cb0b3923825b3860062d45743715a05daa55bd87620519",
+      "sha256": "a513d8215eb9e4a9c5ba9912e2848d73e89a1268540215192e0248900325a4c2",
       "size_bytes": 22295
     },
     {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h03-2026-06-24.json",
-      "sha256": "21cbe4d0fe79e1939350a512e2958d6d28c398f66afce622bdd0fcac1b2e043c",
-      "size_bytes": 19405
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h04-2026-06-24.json",
-      "sha256": "526d53c3abca79799706d97350935e9899c4ddd7a58b867a3b7cbc25c717dddf",
-      "size_bytes": 16293
-    },
-    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h02-2026-06-24.json",
-      "sha256": "db9cb0b3616c463147524053fabc5a1fbfa5c8235451c04ab035048da2a61603",
+      "sha256": "69782a438481bff0ab5ae696892a9ccb509df38f1756aeb82e1e494adbef61c7",
       "size_bytes": 17079
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h05-2026-06-24.json",
-      "sha256": "72a884216c6bf9904f61a2a6b4aa79dfa1ff47e932f911a15cda8dcf84ff2dc9",
+      "sha256": "bc9eab192a86bd4761405e05a7fb641e34951f0a1464ed27f09cff428197e01a",
       "size_bytes": 19450
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h04-2026-06-24.json",
+      "sha256": "64925551df7082b844ce69fc60ee387a417d06aaa83ea778841749477f90e3d7",
+      "size_bytes": 16293
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h07-2026-06-24.json",
-      "sha256": "2a582e9f88e3604ad56b04422440af9bdb4b3e9c7c1fdafc87b17fc71189873f",
+      "sha256": "2d68a757911d24e3b54007b4415f16350c098f58db6e4f36252335cc1678be1c",
       "size_bytes": 17156
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h01-2026-06-24.json",
-      "sha256": "17e76c937e8b5e7d43255b7ff16d7624dd6a3df8ccd4f828caf49ca2be09e92e",
+      "sha256": "f35e7d287674247e17f0b9cc054f6de651c1ba1748b33c339e702795d4cd8852",
       "size_bytes": 16290
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h03-2026-06-24.json",
+      "sha256": "79833ab00a0994f7acf9de5682403d844f11d15d0df09aa1f74916c74757a4fd",
+      "size_bytes": 19405
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h06-2026-06-24.json",
-      "sha256": "90be6ff7767d80919b602e7d3e46f323fe3b4ef7abe03e4728e876fd249dc79a",
+      "sha256": "2b9bb8ba272049550a80d64996aa90c0211565498fd0b0011f05430670bc7338",
       "size_bytes": 9485
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h03-2026-06-24.json",
-      "sha256": "53bfa1344ab877d44649fb8a9e6e0ffa5fb6355b5651f49bcfe32a9671b4fb18",
-      "size_bytes": 9485
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h04-2026-06-24.json",
-      "sha256": "c5c6dbfae41d0239fd8808930335acc5da6d23dc83ada787528430e4138c39c7",
-      "size_bytes": 9483
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h02-2026-06-24.json",
-      "sha256": "f0a2dfec3da40d9c4205428ff4219faa013e9630f69a02fe06d009f371e2077e",
+      "sha256": "788c9d39e4571e4cd199109c937f64e95da6100a1f65880c1a0f75773bfbe861",
       "size_bytes": 9483
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h05-2026-06-24.json",
-      "sha256": "dbe9a6af3320eac0d8cd11e00059c8ab634c41291dc7b25b3230d5a86832099e",
+      "sha256": "7bc3f54cc7c6bb0c8227141ba276ff6cd7ccfcfd9f1e84e4f2754157fa690738",
       "size_bytes": 9485
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h04-2026-06-24.json",
+      "sha256": "ba39838ebb807cf1151d740f6671aa5f554c78abc3721502be1c1b20489c31ed",
+      "size_bytes": 9483
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h07-2026-06-24.json",
-      "sha256": "3bc7dc199c835d4788c6c143e75ed068791e985118ecdbf37dbea0819b898d98",
+      "sha256": "316b8d53db9ce6eea3609938e8410cb0d803635194504be74c8aa541f9bbd6dc",
       "size_bytes": 9483
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h01-2026-06-24.json",
-      "sha256": "3e6861d470e50a79cead5e51d69c60bcb119da57310cbcf47533ab9dc253ad02",
+      "sha256": "1346da2d13aac5043c89b55e7d651a0e7b7ec53090231dc57bed166438c6b168",
       "size_bytes": 9483
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h03-2026-06-24.json",
+      "sha256": "807b72f3f5d157956e65500d370959ff90daf6810b14da1df5c46e42da42d7f2",
+      "size_bytes": 9485
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-package-cs-ch-h01-2026-06-24.json",
-      "sha256": "a2c46473ed2a7a27fca48d7f18dd96611a7e32e30768d8f74a633719a42f6bd9",
+      "sha256": "98803e59af711c33e5a9db460533fde866db403895058d2eed7034125e98ee5f",
       "size_bytes": 57836
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-package-cs-ch-h02-2026-06-24.json",
-      "sha256": "779934c42c0e575348c4015eec5f6b2fdc5bc31227c280a587e391219aa16796",
+      "sha256": "c8281aca6522813dff3a4bd69b5b48c534700ef4c997d2ca2c95b8ce3b2ecd74",
       "size_bytes": 55136
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-package-cs-ch-h03-2026-06-24.json",
-      "sha256": "c990eb4aac512282d1b480c540d6c2cd518a052af119f4b10425989e7639bdf8",
+      "sha256": "843fc97c762fcf87720987b640e14df2acaa4bd064f493a45a55d200d6e5bb42",
       "size_bytes": 56277
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-package-cs-ch-h04-2026-06-24.json",
-      "sha256": "2072f3a1c70f0651f086b73bcc0c8d995ecb2300aaedb037a534d62931f08cd1",
+      "sha256": "8ab4a31c02dac34fbd35a66bce3064dcd0d072a729cde3d38d22dc4ac328f6c1",
       "size_bytes": 100465
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-package-cs-ch-h05-2026-06-24.json",
-      "sha256": "3ecd34c29b80ed4b23d1c9183840aaf37bd2fb3fa8a55972c05357c83bb4ca64",
+      "sha256": "0ac96173599c7e240d984035118ba4dd0da175c3eef0fb8173e590764d0b7660",
       "size_bytes": 55489
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-package-cs-ch-h06-2026-06-24.json",
-      "sha256": "3766b650d63881092ccc772671385a0118131f3d5a4f91350af38a02a0db18f0",
+      "sha256": "f373e589589eebd55b9504641e4ebf230ee1540eb6baab17dd1fad6439a5cde3",
       "size_bytes": 56165
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-package-cs-ch-h07-2026-06-24.json",
-      "sha256": "5a5c046ea2ded470ff9ddb0f333dcfd5aae534f5dd3f24fc774deb881f1e5fcb",
+      "sha256": "54214a49fe17c4eeb90efbdafd3f1a7e5c5aa187b6742bd63e8425cfdea202aa",
       "size_bytes": 53350
     },
     {
@@ -307,37 +297,37 @@
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-validation-blank-cs-ch-h01-2026-06-24.json",
-      "sha256": "0faaf394118699a03c9f01f216ba9f19793b92046d182d20824665eb7de92946",
+      "sha256": "d4d6a921037f5d2cd60cd781a9877a59d6e95368fa3276ffa19956a25c38e198",
       "size_bytes": 19575
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-validation-blank-cs-ch-h02-2026-06-24.json",
-      "sha256": "3ae2e429f5ca3ef2c4ff85686563004b088f794f505639b7af8aaa0949c53e1a",
+      "sha256": "25d36e289cffc6fc4ba7f3cda157c7f65bf6bc323c2ee475682379a7a70a1cac",
       "size_bytes": 18949
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-validation-blank-cs-ch-h03-2026-06-24.json",
-      "sha256": "af66a80f8056070a794399db348ffb9d2c867de6cddbc425b8e3e9f1b8ba8138",
+      "sha256": "4df033e5028d120f125b2c44e6b2387bf679353599d704a4f0ed29b7d6063164",
       "size_bytes": 19694
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-validation-blank-cs-ch-h04-2026-06-24.json",
-      "sha256": "7713126d9ed6318f31620f4bf2f8067a50b854a99a2cc5c5c531b4cf391d6e4c",
+      "sha256": "4ea4c8c44e51ddfc729ca389a7139c12adc403694380adf3a412236ba7678302",
       "size_bytes": 24789
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-validation-blank-cs-ch-h05-2026-06-24.json",
-      "sha256": "13d63d7b08a302a836b3523c365ca033ca8410897dcedc000e9b57f9688a0eea",
+      "sha256": "9877bd0556e6315e8ed80631190578dc7360002a473c9132fa9bfdafe532feea",
       "size_bytes": 19126
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-validation-blank-cs-ch-h06-2026-06-24.json",
-      "sha256": "7102cabf904443689d04bb306cdf9d0595bc12b2f22ff6d58210a2c4c540aa05",
+      "sha256": "cdae1cd31e440cc1341fbbf7d8b22dd46902baa57dd7a054535881ce0790c7c6",
       "size_bytes": 19033
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-validation-blank-cs-ch-h07-2026-06-24.json",
-      "sha256": "51944aa733caa02c22fc182c38714c99ead33fff40ed081377ab335db0162577",
+      "sha256": "427ed3ab526024613d930379e226007cf669550f94f7491f9187fb41fa4c19bb",
       "size_bytes": 18338
     },
     {
@@ -347,23 +337,48 @@
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md",
-      "sha256": "8995035dd0095ad4ef47b31b68e28ea0cb6b260e835058aed2ada7c0c82a29e8",
-      "size_bytes": 639097
+      "sha256": "3a46766fdabb762d5cbcc003bf5ef129051cd5a0f43facbf781af470bd94ca5d",
+      "size_bytes": 639252
+    },
+    {
+      "path": "docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md",
+      "sha256": "b7f10588660f420e3f9a9301245eb3c88db2cbe14230ef098ba92793db91dbcd",
+      "size_bytes": 3450
+    },
+    {
+      "path": "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md",
+      "sha256": "a85eca60bc9a0edae5f35395235bf1a644c45bbf182a45cc5ca345c01100b22e",
+      "size_bytes": 66780
+    },
+    {
+      "path": "docs/adr/ADR-0007-connectorhub-h04-local-baseline-substitution.md",
+      "sha256": "058bc0cd48485973f16601cbd972ea965aad8692b2a454d6ba05a34616e753b8",
+      "size_bytes": 2199
     },
     {
       "path": "reports/scenario/connectorhub-scenario-delivery-unit-manifest-2026-06-24.json",
-      "sha256": "077075982d43127471257c0b25d8b2427429f88eb5812206ed05c92cdb027e16",
-      "size_bytes": 3114748
+      "sha256": "e2d8fa42c2ba5d6eefa738f26b09a74894613ba1dd98fa8b916afa01c76f59bd",
+      "size_bytes": 3115528
     },
     {
       "path": "scripts/verify_connectorhub_engineering_trail.py",
-      "sha256": "cf59c0e316acd3f82674dd2931bb8d75db28a2a6bbe05027cfbd28257f8edd14",
-      "size_bytes": 1659706
+      "sha256": "165e6d651c3da4c4b7cd9516cd82fc2e5e230e352760585ce6cdea05e564c37e",
+      "size_bytes": 1666568
     },
     {
       "path": "scripts/generate_connectorhub_engineering_trail_manifest.py",
-      "sha256": "1fbae881ef538c74bc324e26bc0577161426c828676d3a069664696e76f666e5",
-      "size_bytes": 3334
+      "sha256": "b02befabe378ddd75bfb7e20ed7b42c63d5f400b2f8b788eab73c8b027081a40",
+      "size_bytes": 3301
+    },
+    {
+      "path": "scripts/compact_connectorhub_reports.py",
+      "sha256": "abd306b66a8e570e7f5bb5895745596e13dbc484ca5fb603ebbeab9f7604bd8a",
+      "size_bytes": 15487
+    },
+    {
+      "path": "scripts/verify_connectorhub_local_evidence.sh",
+      "sha256": "710c4a68e23529af954fe90030e01e164516b8aa1a8c812dbdb1d07c7351baad",
+      "size_bytes": 869
     },
     {
       "path": "packages/cornerstone_cli/connector.py",
@@ -372,18 +387,23 @@
     },
     {
       "path": "packages/cornerstone_cli/main.py",
-      "sha256": "b0e1ed1001e1311425ad66e412652b86de1a1c9df9597c8e81a8b1f3c3b8067d",
-      "size_bytes": 630157
+      "sha256": "e5df6b6f3269d30e6dcec9945a62344004619312aa3f02f851eb582e2b124f52",
+      "size_bytes": 631093
     },
     {
       "path": "tests/scenario/test_connectorhub_cli.py",
-      "sha256": "9c9a448e4a4fbaa6fca4d68321642af749b531efcc56914e4d7238e5d09240c0",
-      "size_bytes": 740493
+      "sha256": "a81d9d333547f1553f81e509ffc98c3cdfa4f145fbbc8cee4d93b70d89f0abba",
+      "size_bytes": 741067
+    },
+    {
+      "path": "tests/scenario/test_connectorhub_compact_reports.py",
+      "sha256": "1198b9643d30ad0531cbe38170ee968f917c782ab0c7b29c3604ef8e14b98fe3",
+      "size_bytes": 6414
     },
     {
       "path": "README.md",
-      "sha256": "14c00a03a50950830dfd70704ea7175d8c94cf25a49b02d26d8b94beb3f1766b",
-      "size_bytes": 60295
+      "sha256": "b806708f15ebef240d7184f66810e407e71ffaa0bed3e9f44ef9c5edd0042e62",
+      "size_bytes": 60422
     },
     {
       "path": "Makefile",
@@ -402,8 +422,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-001.json",
-      "sha256": "849ea7b2951227d803fe6fdb6353a1c7ea6a4a4286182beb964133dbe19b6082",
-      "size_bytes": 4769
+      "sha256": "dbe74957483c4d495946eb95edf0ad80160a8964008f5ab0c5fa0fe2eddc6eaf",
+      "size_bytes": 5283
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_002_RESULT_2026-06-23.md",
@@ -412,8 +432,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-002.json",
-      "sha256": "7d056ba6c3abc9f69829867a9b0ce079e15f4a36bf3475db58e38c971b2689f0",
-      "size_bytes": 4696
+      "sha256": "d7bbe64a312a2ef3475e392b30775bffd8dd70b0dc1400d6c7a7c3fd1dd2c620",
+      "size_bytes": 5210
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_003_RESULT_2026-06-23.md",
@@ -422,8 +442,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-003.json",
-      "sha256": "458a0a91897222a51a5efe558dc8b37b94d250349d1bc1f6052411dffaf765c6",
-      "size_bytes": 4718
+      "sha256": "2cfc0105fcfb69b0e7465c158ce9b162bafc16c26eb1da0abebe68f944589de7",
+      "size_bytes": 5232
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_004_RESULT_2026-06-23.md",
@@ -432,8 +452,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-004.json",
-      "sha256": "1291a379735830a84363d92a01ef9d574f987f33367ac5d6595ec94c0fbf5937",
-      "size_bytes": 4699
+      "sha256": "43ff88951439ba9f9e3f53db6388d584a4ddb1c5ddfa287eda7643b36fd68782",
+      "size_bytes": 5213
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_005_RESULT_2026-06-23.md",
@@ -442,8 +462,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-005.json",
-      "sha256": "5e7857ae225696faee45645c2fafda54f39dca9134dbe2a43ca8ccc31f75479e",
-      "size_bytes": 4585
+      "sha256": "67014fbff42730be64e1b529b40cbe41c0344853a7ad38016c81c674e86e70fe",
+      "size_bytes": 5099
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_006_RESULT_2026-06-23.md",
@@ -452,8 +472,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-006.json",
-      "sha256": "bffd74c13689d8d003c07c3e8e14aaa318cdde61d1d4594e6fb18ad83bda6639",
-      "size_bytes": 4566
+      "sha256": "a6b1c17a82e856328d4920d25512818c46d2451e947e55c1da5d742b3072cf44",
+      "size_bytes": 5080
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_007_RESULT_2026-06-23.md",
@@ -462,8 +482,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-007.json",
-      "sha256": "03d3f9c75c2fa18845492521c65256889d9af187fb93b53a98024e8d214c2665",
-      "size_bytes": 5032
+      "sha256": "952b427b6bd2309bdd7fd8640bcce06429add7d3cdcf782a3a89ac06bef1a0ca",
+      "size_bytes": 5546
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_008_RESULT_2026-06-23.md",
@@ -472,8 +492,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-008.json",
-      "sha256": "cfd5cb32cd9467af91ff60e771038463dda915e4238906bfe5f3ae073883ffe8",
-      "size_bytes": 5271
+      "sha256": "c154db693f8424645cfaae0e883423a6a05a162b57f268241ecf26e7f782128f",
+      "size_bytes": 5785
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_009_RESULT_2026-06-23.md",
@@ -482,8 +502,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-009.json",
-      "sha256": "3b28ee78b5a5586dc01762f7891c881f3801ceb1a093febf611280a6dd26ddea",
-      "size_bytes": 5157
+      "sha256": "b267a11c813b85c0ac82433f10a840d9f877886c038901b4bd2e8d41ed9e6808",
+      "size_bytes": 5671
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_010_RESULT_2026-06-23.md",
@@ -492,8 +512,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-010.json",
-      "sha256": "4737c807e5d835aa2d775fbf3f9a6fa2c5a48e27e23dcb2bbec47a719e20f15c",
-      "size_bytes": 5732
+      "sha256": "645dbc8d3414fb9152baa98517b217dc041bc28d73205f4d4702c9a0ae40dc6b",
+      "size_bytes": 6246
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_011_RESULT_2026-06-23.md",
@@ -502,8 +522,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-011.json",
-      "sha256": "9c2c664250c7828c9e272f2b67b37dc7188b83e214fb3e64c02a1f8127aa5a96",
-      "size_bytes": 5449
+      "sha256": "b73780b4c061a241a9d63df0fbebd882ec3c26687f0ef552cdcd2a8154e490c2",
+      "size_bytes": 5963
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_012_RESULT_2026-06-23.md",
@@ -512,8 +532,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-012.json",
-      "sha256": "7cddf319b541e9209f9f1f32b187376e7b9b1591d95b082186723c1ffdb8ddc4",
-      "size_bytes": 5045
+      "sha256": "20a9c9d6a6bd17daddf5bc3237ad7d4e434ee18bf7fe2a47e0448cc974b72bb1",
+      "size_bytes": 5559
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_013_RESULT_2026-06-23.md",
@@ -522,8 +542,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-013.json",
-      "sha256": "b8e70cd0d45d32beddce9bd0ded87d4b6d5eab20fb4ff1fee2eed56c6eb55712",
-      "size_bytes": 5100
+      "sha256": "f4175121e28b014e641cef9b88f490817362f2d152e2942d8467b14cee6886f9",
+      "size_bytes": 5614
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_014_RESULT_2026-06-23.md",
@@ -532,8 +552,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-014.json",
-      "sha256": "c3f09e1b17cdbc884bf7d316687683a2fa4618477b74516aa5993607e5e23e0e",
-      "size_bytes": 5523
+      "sha256": "5723b548212483dd654ef6e454471513881276b35c6b85fc2dfe14d2b5cc67b4",
+      "size_bytes": 6037
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_015_RESULT_2026-06-23.md",
@@ -542,8 +562,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-015.json",
-      "sha256": "4dea59931e7e6aaae51308e1d197bb1864f9b38e580999a210233bbc1f86a4aa",
-      "size_bytes": 5813
+      "sha256": "bf9b28f082f486354e0155ed754a7795f5d722e7b1fc59bf2058a4f7c59af762",
+      "size_bytes": 6327
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_016_RESULT_2026-06-23.md",
@@ -552,8 +572,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-016.json",
-      "sha256": "07e00d5f81b1fc698b3fb3a6996fc4435787e1c44aca4cd42e314acaddd453ab",
-      "size_bytes": 5437
+      "sha256": "f9db908d26e891ef4161d6b6d294bd87924d68c207a1173e1754a7026e5b1e1e",
+      "size_bytes": 5951
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_017_RESULT_2026-06-23.md",
@@ -562,8 +582,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-017.json",
-      "sha256": "cede4c69e8b975ab6c3671f954c13730630769157822d0618a0cae92b53a6bad",
-      "size_bytes": 6224
+      "sha256": "8916c0221773977f5cf5a056e3c79706b992a7190836e83c07a86d75a9114679",
+      "size_bytes": 6738
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_018_RESULT_2026-06-23.md",
@@ -572,8 +592,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-018.json",
-      "sha256": "2f3ead7fd1d48bba0658baf221a82de696d6a9bc15a64fe46d24e3f2b9f26739",
-      "size_bytes": 5677
+      "sha256": "53540ca18388b153b88cd48d3990f08c366a7c37f039b03e4807d5d627af62c9",
+      "size_bytes": 6191
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_019_RESULT_2026-06-23.md",
@@ -582,8 +602,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-019.json",
-      "sha256": "c891d235d915add8a6c145964b086b032922a2a287786c069f8a3ddc343646e7",
-      "size_bytes": 4840
+      "sha256": "9bf5db74e1dbecdab3d333baac2744480b78b743288e3de8c132d0172228c6a5",
+      "size_bytes": 5354
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_020_RESULT_2026-06-23.md",
@@ -592,8 +612,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-020.json",
-      "sha256": "33638bd2589b8b728db978c1a0792350dcc9300ba95732a46dd087a907eafe05",
-      "size_bytes": 5505
+      "sha256": "695365d990111dba4330b6d88e5e521d9b4334001b32f2f14c0c0041933cd511",
+      "size_bytes": 6019
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_021_RESULT_2026-06-23.md",
@@ -602,8 +622,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-021.json",
-      "sha256": "8961eebdff011bb707f2dd13985493c1f1994ab94149318bb59f47abc2d87210",
-      "size_bytes": 5029
+      "sha256": "262da5027b5d8c16737a7e362eb5ef9c54ccd0f1a491bae51d8d8964c883db8f",
+      "size_bytes": 5543
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_022_RESULT_2026-06-23.md",
@@ -612,8 +632,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-022.json",
-      "sha256": "e7223771bd39cd6014e0ead827e359bb03ce62ed2d20cea20e269a4a7e89a90b",
-      "size_bytes": 4641
+      "sha256": "a0409e1f4362d98eb30d814aed49fc44a8d436abe21a13fa22185a92384ee576",
+      "size_bytes": 5155
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_023_RESULT_2026-06-23.md",
@@ -622,8 +642,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-023.json",
-      "sha256": "86ae8d583ab00a39d3ac4303f7025e072b1ebec6d0a99f7fc3ac3b6b8c5d985f",
-      "size_bytes": 5274
+      "sha256": "8092d6499270167dcd27c1883e3af6054530581ce41ac7e9623aa395fa735f01",
+      "size_bytes": 5788
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_024_RESULT_2026-06-23.md",
@@ -632,8 +652,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-024.json",
-      "sha256": "f226b96714414832fce51038f4f0fe8c46fed27352cf76292effe2ca1f6d46c0",
-      "size_bytes": 4877
+      "sha256": "0faef596e7048d3202badbf6b0022edb71bf9dad1f1d374dc2a0639367c95c64",
+      "size_bytes": 5391
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_025_RESULT_2026-06-23.md",
@@ -642,8 +662,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-025.json",
-      "sha256": "d3b41a08484d558ce8b23e4ab7ce14b828c4c58b16f3ca925d59a8c45c8ac7f9",
-      "size_bytes": 5218
+      "sha256": "abdad5d5beba1197d69125e305cfa55883a96e1e5d1b6c051764b53a80b89043",
+      "size_bytes": 5732
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_026_RESULT_2026-06-23.md",
@@ -652,8 +672,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-026.json",
-      "sha256": "0f5fa775438b3854dbb3b76bdcbfa374797ffd0c801325006db9b48db9555721",
-      "size_bytes": 4693
+      "sha256": "5691e915c9906f68428fbc3936e43c94a2d96339bd3fec112519b8e02e3a9417",
+      "size_bytes": 5207
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_027_RESULT_2026-06-23.md",
@@ -662,8 +682,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-027.json",
-      "sha256": "db45b805d0c68a0b1a9e11eda84105260d42e489d46d74dfd5bc38f8919d0cbe",
-      "size_bytes": 5974
+      "sha256": "7bf43ac0f47ab446d2cde435af59a0631b0e3aac8872c9c6c61fe7187af11496",
+      "size_bytes": 6488
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_028_RESULT_2026-06-23.md",
@@ -672,8 +692,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-028.json",
-      "sha256": "9fd578899f18f341509cf4c70715738fa7ae4de7e4fbb0851294268cec890d06",
-      "size_bytes": 4998
+      "sha256": "b5b305e1bf73e7a25d866824eabdb1a7709a5580bfb2c5191f376483bd437924",
+      "size_bytes": 5512
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_029_RESULT_2026-06-23.md",
@@ -682,8 +702,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-029.json",
-      "sha256": "39638bb2b5ecf18606dd37ae77c66ac360148df8928db3fdc0a0fbed356e86e7",
-      "size_bytes": 5278
+      "sha256": "f2dc81dbb1c804ab8ac8f0d6a26cd09e4072420b149c1f82cab399ab0353faa5",
+      "size_bytes": 5792
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_030_RESULT_2026-06-23.md",
@@ -692,18 +712,18 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-030.json",
-      "sha256": "269ff902ef40ca1b91cf20e77d940b681a90161d1e741be1b94856e12322d6f2",
-      "size_bytes": 4992
+      "sha256": "e8866c5ee5fb33352669bd9d65bbad4b89a84c08b611158f22c59543a0c582ad",
+      "size_bytes": 5506
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_031_RESULT_2026-06-23.md",
-      "sha256": "f14cfaed5e36e4d3fbc63990da6c03d5773b572a5de20e38fbb464b9f8bcf4b9",
-      "size_bytes": 6729
+      "sha256": "95f55ff553af11ab234ca2048bbab862a1c3f25ea83d013eb1dcc2ee89527b25",
+      "size_bytes": 6869
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-031.json",
-      "sha256": "03f33a9007af03ef526a9df6056f502868f75c3d3839e56d72809584d5a50cf4",
-      "size_bytes": 4990
+      "sha256": "b85d19e66fa4859a7dd084582168fe9a6bdb6974960870ac6653deb225a07e78",
+      "size_bytes": 5504
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_032_RESULT_2026-06-23.md",
@@ -712,8 +732,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-032.json",
-      "sha256": "48dbea85c44fb13c35985a886b53046b65dfaf33509f342764f59ff72b956661",
-      "size_bytes": 5316
+      "sha256": "cdc39529830213c0af1965da965eb900ffe30cd0b8e342223efdcc2894b78cd6",
+      "size_bytes": 5830
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_033_RESULT_2026-06-23.md",
@@ -722,8 +742,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-033.json",
-      "sha256": "101334f042e34ef5023da943d713f301ef37f04cb1233e2b3488a12db46110db",
-      "size_bytes": 5378
+      "sha256": "fdfcb90be8ef38f72324a824140fa62f0099e4fe89df01f5a92a3a9c3ab27569",
+      "size_bytes": 5892
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_034_RESULT_2026-06-23.md",
@@ -732,8 +752,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-034.json",
-      "sha256": "a3b01fb2d484433cd25486fb0ed38b177d29cfa88eeb4383aec04b851ea1ef6d",
-      "size_bytes": 5314
+      "sha256": "60bc30a65d1bc498906aedfad79d2fcb4565b54292c8b3ee4c1bded76d5bd464",
+      "size_bytes": 5828
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_035_RESULT_2026-06-23.md",
@@ -742,8 +762,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-035.json",
-      "sha256": "efc8776a58be5d07fe80a6d5c2f7fc0688b0f0a13e459745607775f4c866ebe8",
-      "size_bytes": 5009
+      "sha256": "e2e65ab6c89dc963b8e371fd220714f3df031ea1ba2d28dd6a62814cb86d6835",
+      "size_bytes": 5523
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_036_RESULT_2026-06-23.md",
@@ -752,8 +772,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json",
-      "sha256": "8b91ccb9a307c8783ed28ca3182e80c0eab69b13e12d67c826523eec4f0d18a8",
-      "size_bytes": 4849
+      "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
+      "size_bytes": 5363
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_037_RESULT_2026-06-23.md",
@@ -762,8 +782,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-037.json",
-      "sha256": "27155aa5e645b760e1804e249df9a704840d71fdb36638bc2de3a694752a3d57",
-      "size_bytes": 4737
+      "sha256": "8bb2f63ff63303f32a8a2e6d2358dfe2e7935c47e71043d1091ad0633796a30d",
+      "size_bytes": 5251
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_038_RESULT_2026-06-23.md",
@@ -772,8 +792,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-038.json",
-      "sha256": "dcbc5ce88473b3dd1b1212b22f71cc5db4c6183b233bf3ec8c0cfa2419415065",
-      "size_bytes": 4773
+      "sha256": "0f8f35efef4ed104e1d561eba28b1e7fcf66d48ae6ac1d65902730979f7e9344",
+      "size_bytes": 5287
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_039_RESULT_2026-06-23.md",
@@ -782,8 +802,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-039.json",
-      "sha256": "d06b4015e67ad2f97fffcd87676b4cd0bc5ba04138b8c53e8137a01b0351fe99",
-      "size_bytes": 4391
+      "sha256": "107aa8d19bb734b31243f7fb8d4e2fa1f8a7139b85dbfd2ece0d07d39225a279",
+      "size_bytes": 4905
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_040_RESULT_2026-06-23.md",
@@ -792,8 +812,8 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/scenarios/CS-CH-040.json",
-      "sha256": "5640e4eaa92ae2ce6e6c116a7aa317c0402998e21b19bb33aa193c61530d4174",
-      "size_bytes": 4504
+      "sha256": "1604785712f6f4a99f8150d9fe06469901cb0d3af2f4ac31b416982b04b324cd",
+      "size_bytes": 5018
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_H01_HUMAN_REVIEW_TEMPLATE_2026-06-24.md",
@@ -812,7 +832,7 @@
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_CS_CH_H04_HUMAN_REVIEW_TEMPLATE_2026-06-24.md",
-      "sha256": "135e45bcc99f29b1c20915cd5cd679ee1dae80ccd72929c893f9f7496c370d62",
+      "sha256": "0341ade2d5da376bc2dc74b56ceb6787969a689d6face93c1d7a92441a31f15d",
       "size_bytes": 37358
     },
     {
@@ -831,14 +851,34 @@
       "size_bytes": 14559
     }
   ],
-  "generated_at": "2026-06-27T14:18:41.039944+00:00",
+  "generated_at": "2026-06-28T03:21:07.061323+00:00",
   "manifest_schema": "cornerstone.connectorhub.engineering_trail_manifest.v1",
+  "source_inputs": [
+    {
+      "claim_boundary": "source_reconciliation_only",
+      "label": "ConnectorHub application guide",
+      "line_count": 1784,
+      "path": "docs/archive/research/CornerStone_ConnectorHub_Application_Guide_2026-06-22.md",
+      "role": "source_input_not_implementation_proof",
+      "sha256": "db8851518086c378fe8d5256b117516b336fcd9e096663b6d5e385942b0f24d1",
+      "size_bytes": 115495
+    },
+    {
+      "claim_boundary": "source_reconciliation_only",
+      "label": "ConnectorHub test scenario implementation document",
+      "line_count": 482,
+      "path": "docs/archive/research/CornerStone_ConnectorHub_Test_Scenario_Implementation_Document_2026-06-22.md",
+      "role": "source_input_not_implementation_proof",
+      "sha256": "98d85e135c6af748882ece38b31bb883246c8d0bbef516cd24f95de22ab41a63",
+      "size_bytes": 63507
+    }
+  ],
   "summary": {
     "ai_pass_rows": 40,
     "claim_boundary": "local_fixture_and_local_vs2_topology_only",
-    "external_source_input_count": 2,
-    "file_count": 162,
+    "file_count": 170,
     "human_required_rows": 7,
+    "source_input_count": 2,
     "source_requirements_covered": 27,
     "total_matrix_rows": 47,
     "verdict": "needs-follow-up"

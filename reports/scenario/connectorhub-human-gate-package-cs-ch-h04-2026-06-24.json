@@ -1,13 +1,13 @@
 {
   "audit_refs": [
-    "audit:audit_36f73b8ad5146540"
+    "audit:audit_c053db1da7a97b42"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate package",
   "connector_human_gate_package": {
     "approval_status": "pending",
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-27T14:04:14.632365Z",
+    "created_at": "2026-06-28T02:50:20.962571Z",
     "depends_on_human_gates": [],
     "execution_queue_item": {
       "depends_on": [],
@@ -167,7 +167,7 @@
           "review_input_only": true,
           "scenario_count": 1,
           "schema_version": "cs.cli.v0",
-          "sha256": "8b91ccb9a307c8783ed28ca3182e80c0eab69b13e12d67c826523eec4f0d18a8",
+          "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
           "status": "success"
         }
       ],
@@ -423,7 +423,7 @@
             "review_input_only": true,
             "scenario_count": 1,
             "schema_version": "cs.cli.v0",
-            "sha256": "8b91ccb9a307c8783ed28ca3182e80c0eab69b13e12d67c826523eec4f0d18a8",
+            "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
             "status": "success"
           }
         ],
@@ -668,7 +668,7 @@
         },
         {
           "acceptance_sufficient": false,
-          "bytes": 4849,
+          "bytes": 5363,
           "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
           "command": "cornerstone scenario verify connector-contract-adapter",
           "json_valid": true,
@@ -679,7 +679,7 @@
           "review_input_only": true,
           "scenario_count": 1,
           "schema_version": "cs.cli.v0",
-          "sha256": "8b91ccb9a307c8783ed28ca3182e80c0eab69b13e12d67c826523eec4f0d18a8",
+          "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
           "status": "success",
           "summary": {
             "blocking": 0,
@@ -710,7 +710,7 @@
       "provider_mutations_executed_by_package": 0,
       "secret_material_read_by_package": false
     },
-    "package_id": "cshuman_97e7e268518d7e1b",
+    "package_id": "cshuman_0c4e342098676313",
     "proof_boundary": {
       "local_fixture_rows_complete": true,
       "pass_claim_allowed_without_human_record": false,
@@ -1969,12 +1969,12 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_package:cshuman_97e7e268518d7e1b"
+    "connector_human_gate_package:cshuman_0c4e342098676313"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_package_id": "cshuman_97e7e268518d7e1b",
-    "git_commit": "97ba4ca"
+    "connector_human_gate_package_id": "cshuman_0c4e342098676313",
+    "git_commit": "da85c05"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -1999,7 +1999,7 @@
     "local_baseline_preflight_bundle_report_count": 5,
     "local_baseline_preflight_command_plan_count": 3,
     "local_baseline_review_input_report_count": 5,
-    "package_id": "cshuman_97e7e268518d7e1b",
+    "package_id": "cshuman_0c4e342098676313",
     "pass_claim_allowed_without_human_record": false,
     "product_claim_allowed": false,
     "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",

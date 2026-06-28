@@ -13625,6 +13625,10 @@ class ConnectorHubCliTests(unittest.TestCase):
         self.assertEqual(listed["count"], 47)
         self.assertIn("CS-CH-001", {row["id"] for row in listed["scenarios"]})
 
+        focused_output = ROOT / "tmp/scenario/test-connectorhub-filtered-stdout-cs-ch-001.json"
+        if focused_output.exists():
+            focused_output.unlink()
+
         result = run_cli(
             "scenario",
             "verify",
@@ -13632,6 +13636,8 @@ class ConnectorHubCliTests(unittest.TestCase):
             "--scenario",
             "CS-CH-001",
             "--json",
+            "--output",
+            str(focused_output.relative_to(ROOT)),
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
@@ -13647,6 +13653,14 @@ class ConnectorHubCliTests(unittest.TestCase):
         self.assertLess(len(payload["command_evidence"]), payload["command_evidence_filter"]["original_count"])
         self.assertEqual(payload["command_evidence_filter"]["focused_count"], len(payload["command_evidence"]))
         self.assertEqual(payload["command_evidence_filter"]["scenario_ids"], ["CS-CH-001"])
+        self.assertEqual(
+            payload["command_evidence_filter"]["full_report_path"],
+            str(focused_output.relative_to(ROOT)),
+        )
+        self.assertEqual(
+            payload["command_evidence_filter"]["full_report_sha256"],
+            hashlib.sha256(focused_output.read_bytes()).hexdigest(),
+        )
 
         result = run_cli(
             "scenario",

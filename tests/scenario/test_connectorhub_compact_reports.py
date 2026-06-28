@@ -116,9 +116,30 @@ class ConnectorHubCompactReportsTest(unittest.TestCase):
             self.assertTrue(focused_compact_path.exists())
 
             focused_compact = json.loads(focused_compact_path.read_text())
+            shared_compact = json.loads(shared_path.read_text())
             self.assertEqual(focused_compact["compact_evidence_layout"], "content_addressed_shared_v1")
             self.assertEqual(focused_compact["shared_evidence_ref"]["path"], str(shared_path.relative_to(ROOT)))
             self.assertEqual(focused_compact["scenario_results"][0]["id"], "CS-CH-001")
+            self.assertEqual(
+                focused_compact["path_portability"]["claim_boundary"],
+                "absolute_paths_are_historical_transcript_metadata_not_portable_evidence",
+            )
+            self.assertEqual(
+                focused_compact["path_portability"]["portable_report_path"],
+                str(focused_compact_path.relative_to(ROOT)),
+            )
+            self.assertEqual(
+                focused_compact["path_portability"]["historical_absolute_path_fields"],
+                ["output_path", "source_report.output_path"],
+            )
+            self.assertEqual(
+                shared_compact["path_portability"]["claim_boundary"],
+                "absolute_paths_are_historical_transcript_metadata_not_portable_evidence",
+            )
+            self.assertIn(
+                "sections.command_evidence.[].stdout_json.artifact.source.path",
+                shared_compact["path_portability"]["historical_absolute_path_fields"],
+            )
             self.assertEqual(
                 focused_compact["source_report"]["omitted_duplicate_section_refs"]["command_evidence"]["count"],
                 1,

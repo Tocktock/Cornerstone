@@ -35,13 +35,13 @@ def main() -> int:
             }
         )
 
-    external_source_inputs = []
+    source_inputs = []
     for source in verifier.SOURCE_INPUTS:
         path = source["path"]
-        external_source_inputs.append(
+        source_inputs.append(
             {
                 "label": source["label"],
-                "path": str(path),
+                "path": path.resolve().relative_to(root).as_posix(),
                 "sha256": verifier._sha256(path),
                 "line_count": verifier._line_count(path),
                 "size_bytes": path.stat().st_size,
@@ -68,12 +68,12 @@ def main() -> int:
             ),
             "source_requirements_covered": len(verifier.SOURCE_REQUIREMENTS),
             "file_count": len(files),
-            "external_source_input_count": len(external_source_inputs),
+            "source_input_count": len(source_inputs),
             "claim_boundary": "local_fixture_and_local_vs2_topology_only",
             "verdict": "needs-follow-up",
         },
         "files": files,
-        "external_source_inputs": external_source_inputs,
+        "source_inputs": source_inputs,
     }
 
     out = verifier.ENGINEERING_TRAIL_MANIFEST
@@ -81,7 +81,7 @@ def main() -> int:
     out.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     print(
         f"wrote {out.relative_to(verifier.ROOT)} "
-        f"({len(files)} repo files, {len(external_source_inputs)} external source inputs)"
+        f"({len(files)} repo files, {len(source_inputs)} repo source inputs)"
     )
     print(
         f"wrote {delivery_out.relative_to(verifier.ROOT)} "

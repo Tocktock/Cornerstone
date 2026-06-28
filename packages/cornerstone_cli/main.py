@@ -152,7 +152,12 @@ def _contains_subsequence(haystack: list[str], needle: list[str]) -> bool:
     return False
 
 
-def _trim_focused_command_evidence_for_stdout(payload: dict[str, Any]) -> None:
+def _trim_focused_command_evidence_for_stdout(
+    payload: dict[str, Any],
+    *,
+    full_report_path: str | None = None,
+    full_report_sha256: str | None = None,
+) -> None:
     command_evidence = payload.get("command_evidence")
     scenario_results = payload.get("scenario_results")
     if not isinstance(command_evidence, list) or not isinstance(scenario_results, list):
@@ -200,6 +205,10 @@ def _trim_focused_command_evidence_for_stdout(payload: dict[str, Any]) -> None:
         "selection_rule": "first matching transcript per concrete scenario evidence command",
         "claim_boundary": "aggregate command evidence is preserved by unfiltered verification and by --output reports written before stdout trimming",
     }
+    if full_report_path:
+        payload["command_evidence_filter"]["full_report_path"] = full_report_path
+    if full_report_sha256:
+        payload["command_evidence_filter"]["full_report_sha256"] = full_report_sha256
 
 
 def repo_root() -> Path:
@@ -10104,6 +10113,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         ],
         stderr_tail=[],
     )
+    full_report_path_for_stdout: str | None = None
+    full_report_sha256_for_stdout: str | None = None
     if output_arg:
         output_path = (root / output_arg).resolve()
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -10144,9 +10155,19 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                 verification_report=root / DEFAULT_EVUX_REPORT,
             )
             payload["release_evidence_package_final_report_bytes"] = release_result
+        if args.contract == "connector-contract-adapter" and args.scenario:
+            try:
+                full_report_path_for_stdout = output_path.relative_to(root).as_posix()
+            except ValueError:
+                full_report_path_for_stdout = str(output_path)
+            full_report_sha256_for_stdout = hashlib.sha256(output_path.read_bytes()).hexdigest()
 
     if args.contract == "connector-contract-adapter" and args.scenario:
-        _trim_focused_command_evidence_for_stdout(payload)
+        _trim_focused_command_evidence_for_stdout(
+            payload,
+            full_report_path=full_report_path_for_stdout,
+            full_report_sha256=full_report_sha256_for_stdout,
+        )
 
     print_payload(payload, args.json)
     return exit_code

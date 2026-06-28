@@ -34,12 +34,20 @@ HUMAN_GATE_FIELD_REF_CONTRACT_REPORT_PATH = (
 VERIFICATION_DIR = ROOT / "docs/verification-reports"
 HUMAN_PREPARATION_REPORT = VERIFICATION_DIR / "CONNECTOR_HUB_HUMAN_GATES_PREPARATION_REPORT_2026-06-24.md"
 ENGINEERING_TRAIL_INDEX = VERIFICATION_DIR / "CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md"
+CONNECTORHUB_REVIEWER_GUIDE = VERIFICATION_DIR / "CONNECTOR_HUB_REVIEWER_GUIDE.md"
+VS2_CURRENT_VERIFICATION_REPORT = (
+    VERIFICATION_DIR / "VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md"
+)
+CONNECTORHUB_H04_ADR = ROOT / "docs/adr/ADR-0007-connectorhub-h04-local-baseline-substitution.md"
 ENGINEERING_TRAIL_MANIFEST = ROOT / "reports/scenario/connectorhub-engineering-trail-manifest-2026-06-24.json"
 SCENARIO_DELIVERY_UNIT_MANIFEST = ROOT / "reports/scenario/connectorhub-scenario-delivery-unit-manifest-2026-06-24.json"
 ENGINEERING_TRAIL_MANIFEST_GENERATOR = ROOT / "scripts/generate_connectorhub_engineering_trail_manifest.py"
+COMPACT_REPORT_SCRIPT = ROOT / "scripts/compact_connectorhub_reports.py"
+CONNECTORHUB_LOCAL_GATE_SCRIPT = ROOT / "scripts/verify_connectorhub_local_evidence.sh"
 CONNECTOR_RUNTIME_PATH = ROOT / "packages/cornerstone_cli/connector.py"
 CONNECTOR_MAIN_PATH = ROOT / "packages/cornerstone_cli/main.py"
 CONNECTOR_CLI_TEST_PATH = ROOT / "tests/scenario/test_connectorhub_cli.py"
+CONNECTOR_COMPACT_TEST_PATH = ROOT / "tests/scenario/test_connectorhub_compact_reports.py"
 README_PATH = ROOT / "README.md"
 MAKEFILE_PATH = ROOT / "Makefile"
 CORNERSTONE_CLI_PATH = ROOT / "cornerstone"
@@ -324,9 +332,9 @@ EXPECTED_MATRIX_TEXT_BY_SCENARIO = {
         "verification_method": "Combinatorial negative tests",
     },
     "CS-CH-031": {
-        "title": "Execute a declared Action and re-ingest its outcome",
-        "expected_result": "Approved declared Action executes once and outcome is re-ingested as evidence",
-        "verification_method": "Fixture integration test and human live gate",
+        "title": "Execute a declared local fixture Action and re-ingest its fixture outcome",
+        "expected_result": "Approved declared local fixture Action executes once and fixture outcome is re-ingested as evidence",
+        "verification_method": "Local fixture integration test and separate human live gate",
     },
     "CS-CH-032": {
         "title": "Deny undeclared Actions and direct provider bypass",
@@ -1630,12 +1638,12 @@ PROOF_SURFACE_CLAIM_BOUNDARIES = {
 SOURCE_INPUTS = [
     {
         "label": "ConnectorHub application guide",
-        "path": Path("/Users/jiyong/Downloads/CornerStone_ConnectorHub_Application_Guide (1).md"),
-        "sha256": "73d7c9d68f51c16c4361bb8d89045e1f99b06a00e0bc34eec716d5c8e79225b9",
+        "path": ROOT / "docs/archive/research/CornerStone_ConnectorHub_Application_Guide_2026-06-22.md",
+        "sha256": "db8851518086c378fe8d5256b117516b336fcd9e096663b6d5e385942b0f24d1",
         "line_count": 1784,
         "index_tokens": [
-            "/Users/jiyong/Downloads/CornerStone_ConnectorHub_Application_Guide (1).md",
-            "73d7c9d68f51c16c4361bb8d89045e1f99b06a00e0bc34eec716d5c8e79225b9",
+            "docs/archive/research/CornerStone_ConnectorHub_Application_Guide_2026-06-22.md",
+            "db8851518086c378fe8d5256b117516b336fcd9e096663b6d5e385942b0f24d1",
             "| 1784 |",
             "Scenario detail, CS-CH-040 status dimensions, implementation batches, proposed contract examples, verification/evidence package, human-required gate list, frozen implementation decisions, source register, and glossary.",
             "Application guide lines 384-454 define the scenario summary matrix.",
@@ -1653,12 +1661,12 @@ SOURCE_INPUTS = [
     },
     {
         "label": "ConnectorHub test scenario implementation document",
-        "path": Path("/Users/jiyong/Downloads/CornerStone_ConnectorHub_Test_Scenario_Implementation_Document.md"),
-        "sha256": "336017aad7f14dbabf07b7a2a4d763ff2220e51a94c1ab19828dd4c9f403aa04",
+        "path": ROOT / "docs/archive/research/CornerStone_ConnectorHub_Test_Scenario_Implementation_Document_2026-06-22.md",
+        "sha256": "98d85e135c6af748882ece38b31bb883246c8d0bbef516cd24f95de22ab41a63",
         "line_count": 482,
         "index_tokens": [
-            "/Users/jiyong/Downloads/CornerStone_ConnectorHub_Test_Scenario_Implementation_Document.md",
-            "336017aad7f14dbabf07b7a2a4d763ff2220e51a94c1ab19828dd4c9f403aa04",
+            "docs/archive/research/CornerStone_ConnectorHub_Test_Scenario_Implementation_Document_2026-06-22.md",
+            "98d85e135c6af748882ece38b31bb883246c8d0bbef516cd24f95de22ab41a63",
             "| 482 |",
             "ER/IR requirement set, claim-risk boundary, initial scenario rows, assumptions, and scenario-first implementation batches.",
             "Implementation document lines 1-66 define source context, authority, frozen scope, problem framing, and claim-risk boundary.",
@@ -1679,11 +1687,11 @@ SOURCE_INPUTS = [
 
 SOURCE_RECONCILIATION_TOKENS = [
     "## Source Input Reconciliation",
-    "The Download files are source inputs for this repo contract, not implementation proof.",
+    "The archived source files are source inputs for this repo contract, not implementation proof.",
     "Source anchors checked in this pass:",
-    "If either Download file changes, rerun source reconciliation before changing the repo contract.",
-    "The engineering-trail manifest now records external source-input hashes, line counts, and sizes",
-    "The engineering-trail verifier pins the current Download-file SHA-256 values, line counts, sizes, and source-anchor statements",
+    "If either archived source file changes, rerun source reconciliation before changing the repo contract.",
+    "The engineering-trail manifest now records repo source-input hashes, line counts, and sizes",
+    "The engineering-trail verifier pins the current repo-archived source SHA-256 values, line counts, sizes, and source-anchor statements",
 ]
 
 SOURCE_INITIAL_SCENARIO_ROW_START = 120
@@ -4609,7 +4617,7 @@ APPLICATION_GUIDE_SCENARIO_DETAIL_SECTIONS = [
         "scenario_id": "CS-CH-031",
         "source_title": "Execute a declared Action and re-ingest its outcome",
         "source_ref": "Application guide lines 1282-1304",
-        "matrix_title": "Execute a declared Action and re-ingest its outcome",
+        "matrix_title": "Execute a declared local fixture Action and re-ingest its fixture outcome",
         "phase": "CH-4",
         "type": "MUST_PASS",
     },
@@ -4971,7 +4979,7 @@ ADOPTION_CONCEPT_BY_SCENARIO = {
     "CS-CH-028": "Watch Result observation inference caveat and proposal separation",
     "CS-CH-029": "ActionCard dry-run plus ConnectorHub preflight",
     "CS-CH-030": "evidence policy approval and idempotency action gate",
-    "CS-CH-031": "declared Action execution with outcome re-ingest",
+    "CS-CH-031": "declared local fixture Action execution with fixture outcome re-ingest",
     "CS-CH-032": "undeclared Action and direct-provider bypass denial",
     "CS-CH-033": "idempotent retries and compensation visibility",
     "CS-CH-034": "owner namespace and workspace scope isolation",
@@ -6422,7 +6430,7 @@ ENGINEERING_MANIFEST_SUMMARY_ROW_STATIC_TOKENS = [
 
 ENGINEERING_MANIFEST_SUMMARY_ROW_DYNAMIC_KEYS = [
     "file_count",
-    "external_source_input_count",
+    "source_input_count",
     "total_matrix_rows",
     "ai_pass_rows",
     "human_required_rows",
@@ -22053,11 +22061,131 @@ def _validate_source_inputs(errors: list[str], index_text: str) -> None:
                 errors.append(f"engineering trail index missing source input token for {label}: {token}")
 
 
+def _compact_report_paths() -> list[Path]:
+    return [
+        AGGREGATE_REPORT_PATH,
+        *[
+            CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR / "scenarios" / f"{scenario_id}.json"
+            for scenario_id in sorted(EXPECTED_AI_SCENARIO_IDS, key=_scenario_number)
+        ],
+    ]
+
+
+def _json_string_paths(value: object, path: tuple[str, ...] = ()) -> list[tuple[tuple[str, ...], str]]:
+    if isinstance(value, str):
+        return [(path, value)]
+    if isinstance(value, list):
+        rows: list[tuple[tuple[str, ...], str]] = []
+        for item in value:
+            rows.extend(_json_string_paths(item, (*path, "[]")))
+        return rows
+    if isinstance(value, dict):
+        rows = []
+        for key, item in value.items():
+            rows.extend(_json_string_paths(item, (*path, str(key))))
+        return rows
+    return []
+
+
+def _validate_path_portability(errors: list[str]) -> None:
+    repo_docs = [
+        README_PATH,
+        CONTRACT_PATH,
+        ENGINEERING_TRAIL_INDEX,
+        CONNECTORHUB_REVIEWER_GUIDE,
+        VS2_CURRENT_VERIFICATION_REPORT,
+        CONNECTORHUB_H04_ADR,
+        *[source["path"] for source in SOURCE_INPUTS],
+    ]
+    for path in repo_docs:
+        if not path.exists():
+            continue
+        if "/Users/" in path.read_text(encoding="utf-8", errors="replace"):
+            errors.append(
+                f"portable evidence path guard found unguarded /Users/ reference in {path.relative_to(ROOT)}"
+            )
+
+    expected_claim_boundary = "absolute_paths_are_historical_transcript_metadata_not_portable_evidence"
+    report_allowed_absolute_paths = {
+        ("output_path",),
+        ("source_report", "output_path"),
+    }
+    for report_path in _compact_report_paths():
+        if not report_path.exists():
+            continue
+        payload = json.loads(report_path.read_text())
+        portability = payload.get("path_portability")
+        if not isinstance(portability, dict):
+            errors.append(f"compact report missing path_portability: {report_path.relative_to(ROOT)}")
+            continue
+        if portability.get("claim_boundary") != expected_claim_boundary:
+            errors.append(f"compact report path_portability claim_boundary mismatch: {report_path.relative_to(ROOT)}")
+        if portability.get("portable_report_path") != report_path.relative_to(ROOT).as_posix():
+            errors.append(f"compact report portable_report_path mismatch: {report_path.relative_to(ROOT)}")
+        if "tmp/scenario/" in report_path.read_text(encoding="utf-8", errors="replace"):
+            prefixes = portability.get("regenerable_transcript_path_prefixes")
+            if not isinstance(prefixes, list) or "tmp/scenario/" not in prefixes:
+                errors.append(f"compact report tmp/scenario refs are not marked regenerable: {report_path.relative_to(ROOT)}")
+        for json_path, string_value in _json_string_paths(payload):
+            if "/Users/" in string_value and json_path not in report_allowed_absolute_paths:
+                errors.append(
+                    "compact report has unguarded absolute path at "
+                    f"{report_path.relative_to(ROOT)}:{'.'.join(json_path)}"
+                )
+
+    if COMPACT_SHARED_EVIDENCE_PATH.exists():
+        shared_payload = json.loads(COMPACT_SHARED_EVIDENCE_PATH.read_text())
+        portability = shared_payload.get("path_portability")
+        if not isinstance(portability, dict):
+            errors.append("compact shared evidence missing path_portability")
+        elif portability.get("claim_boundary") != expected_claim_boundary:
+            errors.append("compact shared evidence path_portability claim_boundary mismatch")
+        allowed_shared_absolute_paths = set()
+        if isinstance(portability, dict):
+            declared_fields = portability.get("historical_absolute_path_fields")
+            if isinstance(declared_fields, list):
+                allowed_shared_absolute_paths = {
+                    tuple(str(field).split("."))
+                    for field in declared_fields
+                    if isinstance(field, str)
+                }
+        if "tmp/scenario/" in COMPACT_SHARED_EVIDENCE_PATH.read_text(encoding="utf-8", errors="replace"):
+            prefixes = portability.get("regenerable_transcript_path_prefixes") if isinstance(portability, dict) else None
+            if not isinstance(prefixes, list) or "tmp/scenario/" not in prefixes:
+                errors.append("compact shared evidence tmp/scenario refs are not marked regenerable")
+        for json_path, string_value in _json_string_paths(shared_payload):
+            if "/Users/" in string_value and json_path not in allowed_shared_absolute_paths:
+                errors.append(
+                    "compact shared evidence has unguarded absolute path at "
+                    f"{'.'.join(json_path)}"
+                )
+
+    if COMPACT_REPORT_MANIFEST_PATH.exists():
+        manifest_payload = json.loads(COMPACT_REPORT_MANIFEST_PATH.read_text())
+        portability = manifest_payload.get("path_portability")
+        if not isinstance(portability, dict):
+            errors.append("compact manifest missing path_portability")
+        elif portability.get("claim_boundary") != expected_claim_boundary:
+            errors.append("compact manifest path_portability claim_boundary mismatch")
+        allowed_manifest_absolute_paths = {
+            ("aggregate_report", "source_report", "output_path"),
+            ("scenario_reports", "[]", "source_report", "output_path"),
+        }
+        for json_path, string_value in _json_string_paths(manifest_payload):
+            if "/Users/" in string_value and json_path not in allowed_manifest_absolute_paths:
+                errors.append(
+                    "compact manifest has unguarded absolute path at "
+                    f"{'.'.join(json_path)}"
+                )
+
+
 def _required_manifest_paths(matrix_rows: list[dict[str, str]]) -> list[Path]:
     paths = [
         MATRIX_PATH,
         ROOT / "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md",
         AGGREGATE_REPORT_PATH,
+        COMPACT_REPORT_MANIFEST_PATH,
+        COMPACT_SHARED_EVIDENCE_PATH,
         HUMAN_GATE_READINESS_REPORT_PATH,
         HUMAN_GATE_NEXT_REPORT_PATH,
         HUMAN_GATE_VALIDATION_HANDOFF_PATH,
@@ -22073,12 +22201,18 @@ def _required_manifest_paths(matrix_rows: list[dict[str, str]]) -> list[Path]:
         *[HUMAN_GATE_BLANK_VALIDATION_PATHS[scenario_id] for scenario_id in sorted(EXPECTED_HUMAN_SCENARIO_IDS)],
         HUMAN_PREPARATION_REPORT,
         ENGINEERING_TRAIL_INDEX,
+        CONNECTORHUB_REVIEWER_GUIDE,
+        VS2_CURRENT_VERIFICATION_REPORT,
+        CONNECTORHUB_H04_ADR,
         SCENARIO_DELIVERY_UNIT_MANIFEST,
         Path(__file__).resolve(),
         ENGINEERING_TRAIL_MANIFEST_GENERATOR,
+        COMPACT_REPORT_SCRIPT,
+        CONNECTORHUB_LOCAL_GATE_SCRIPT,
         CONNECTOR_RUNTIME_PATH,
         CONNECTOR_MAIN_PATH,
         CONNECTOR_CLI_TEST_PATH,
+        CONNECTOR_COMPACT_TEST_PATH,
         README_PATH,
         MAKEFILE_PATH,
         CORNERSTONE_CLI_PATH,
@@ -29780,8 +29914,8 @@ def _contract_matrix_state_source_token(
     human_rows: list[dict[str, str]],
 ) -> str:
     return (
-        f"current matrix state is {len(ai_pass_rows)} AI-owned PASS rows "
-        f"plus {len(human_rows)} explicit `HUMAN_REQUIRED` human/external gates"
+        "PASS and HUMAN_REQUIRED counts belong to generated reports, "
+        "not this frozen contract header."
     )
 
 
@@ -29790,10 +29924,8 @@ def _contract_matrix_state_index_token(
     human_rows: list[dict[str, str]],
 ) -> str:
     return (
-        "contract status header must preserve the current matrix state of "
-        f"{len(ai_pass_rows)} AI-owned PASS rows plus {len(human_rows)} "
-        "explicit `HUMAN_REQUIRED` human/external gates with no generic "
-        "status-neutral backlog rows"
+        "contract status header must keep generated PASS/HUMAN_REQUIRED counts "
+        "in reports, not in the frozen contract header"
     )
 
 
@@ -32212,6 +32344,7 @@ def main() -> int:
             ]:
                 if token and token not in index_text:
                     errors.append(f"engineering trail index missing {scenario_id} token: {token}")
+        _validate_path_portability(errors)
 
     manifest_paths = _required_manifest_paths(matrix_rows)
     manifest_relative_paths = {
@@ -32246,10 +32379,10 @@ def main() -> int:
                 f"engineering trail manifest file_count expected {len(manifest_relative_paths)}, "
                 f"found {manifest_summary.get('file_count')}"
             )
-        if manifest_summary.get("external_source_input_count") != len(SOURCE_INPUTS):
+        if manifest_summary.get("source_input_count") != len(SOURCE_INPUTS):
             errors.append(
-                "engineering trail manifest external_source_input_count expected "
-                f"{len(SOURCE_INPUTS)}, found {manifest_summary.get('external_source_input_count')}"
+                "engineering trail manifest source_input_count expected "
+                f"{len(SOURCE_INPUTS)}, found {manifest_summary.get('source_input_count')}"
             )
         if manifest_summary.get("verdict") != "needs-follow-up":
             errors.append("engineering trail manifest must keep verdict=needs-follow-up")
@@ -32281,19 +32414,23 @@ def main() -> int:
                 errors.append(f"engineering trail manifest size mismatch for {relative_path}")
         manifest_source_inputs = {
             item.get("path"): item
-            for item in manifest.get("external_source_inputs", [])
+            for item in manifest.get("source_inputs", [])
             if item.get("path")
         }
-        expected_source_paths = {str(source["path"]) for source in SOURCE_INPUTS}
+        expected_source_paths = {
+            source["path"].resolve().relative_to(ROOT.resolve()).as_posix()
+            for source in SOURCE_INPUTS
+        }
         missing_source_inputs = sorted(expected_source_paths - set(manifest_source_inputs))
         unexpected_source_inputs = sorted(set(manifest_source_inputs) - expected_source_paths)
         for path in missing_source_inputs:
-            errors.append(f"engineering trail manifest missing external source input: {path}")
+            errors.append(f"engineering trail manifest missing source input: {path}")
         for path in unexpected_source_inputs:
-            errors.append(f"engineering trail manifest has unexpected external source input: {path}")
+            errors.append(f"engineering trail manifest has unexpected source input: {path}")
         for source in SOURCE_INPUTS:
             path = source["path"]
-            item = manifest_source_inputs.get(str(path))
+            source_relative_path = path.resolve().relative_to(ROOT.resolve()).as_posix()
+            item = manifest_source_inputs.get(source_relative_path)
             if not item:
                 continue
             if item.get("label") != source["label"]:
@@ -32375,7 +32512,7 @@ def main() -> int:
         "README ConnectorHub entry point guarded, "
         "CLI scenario registry guarded, "
         "engineering trail index covered, "
-        f"manifest {len(manifest_relative_paths)} repo files hashed and {len(SOURCE_INPUTS)} external source inputs pinned, "
+        f"manifest {len(manifest_relative_paths)} repo files hashed and {len(SOURCE_INPUTS)} repo source inputs pinned, "
         "aggregate 40 PASS / 0 blocking)."
     )
     return 0
