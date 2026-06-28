@@ -239,6 +239,21 @@ vs2_policy_tenancy_egress:
   approval_gate: "VS2-SEC-H01 approved for local/new-application implementation by JiYong/Tars on 2026-06-19 KST; H02-H07 remain external/human gates"
   production_release_rule: "production security readiness remains false until applicable H01-H07 evidence and release decision exist"
 
+vs3_onprem_security_and_trusted_extension:
+  contract: "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md"
+  matrix: "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv"
+  expected_scenario_report: "reports/scenario/vs3-onprem-trusted-extension-YYYY-MM-DD.json"
+  authority: "task-scoped scenario contract for VS3 on-prem security closure and trusted extension/connector substrate"
+  scenario_count: 57
+  must_pass_count: 42
+  regression_count: 8
+  human_required_count: 7
+  status: "scenario contract frozen; AI-verifiable rows remain NOT_RUN until implementation evidence exists; human/on-prem rows remain HUMAN_REQUIRED"
+  verifier: "cornerstone scenario verify vs3-onprem-trusted-extension --json --output reports/scenario/vs3-onprem-trusted-extension-YYYY-MM-DD.json"
+  gate: "cornerstone scenario gate reports/scenario/vs3-onprem-trusted-extension-YYYY-MM-DD.json --json"
+  local_assurance_rule: "VS3-L requires all AI-owned MUST_PASS and REGRESSION rows to PASS with fresh local/dev evidence and no production/live overclaim"
+  production_release_rule: "VS3-P remains false until VS3-H01 through VS3-H07 have dated, redacted, signed human/on-prem evidence"
+
 agent_guidance:
   scenario_first_instruction: "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md"
   project_constitution: "docs/agent/PROJECT_OPERATING_CONSTITUTION.md"

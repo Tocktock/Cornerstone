@@ -28,9 +28,11 @@ Before non-trivial planning, architecture, migration, or implementation work, re
 18. `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REVIEW_2026-06-14.md` before claiming VS0 human operator UX acceptance or moving full VS-1 onto the main implementation track
 19. `docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md` before implementing VS2 policy, tenant isolation, default egress deny, OPA/Rego, Postgres RLS, authorization, or runtime egress controls
 20. `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_2026-06-19.md` before claiming VS2 implementation status or starting sensitive VS2 code changes
-21. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
-22. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
-23. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
+21. `docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md` before implementing VS3 on-prem security closure, trusted ConnectorHub/source substrate, Tool SDK, signed registry, or Agent Pack activation work
+22. `docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv` before designing or verifying VS3 scenario coverage
+23. `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md`
+24. `docs/agent/PROJECT_OPERATING_CONSTITUTION.md`
+25. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` only as compatible implementation guidance
 
 The product SoT is the product authority. Repository files show implementation reality, not permission to drift.
 
