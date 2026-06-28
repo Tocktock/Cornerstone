@@ -6655,6 +6655,7 @@ MANIFEST_GENERATOR_REQUIRED_TOKENS = [
     "rows = verifier._read_matrix()",
     "paths = verifier._required_manifest_paths(rows)",
     "root = verifier.ROOT.resolve()",
+    'files.sort(key=lambda item: item["path"])',
     "for source in verifier.SOURCE_INPUTS:",
     '"role": "source_input_not_implementation_proof"',
     '"claim_boundary": "source_reconciliation_only"',
@@ -12360,6 +12361,15 @@ def _build_scenario_delivery_unit_manifest(matrix_rows: list[dict[str, str]]) ->
     delivery_unit_type_counts = Counter(item["type"] for item in delivery_units)
     manifest = {
         "manifest_schema": "cornerstone.connectorhub.scenario_delivery_unit_manifest.v1",
+        "path_portability": {
+            "claim_boundary": "tmp_scenario_refs_are_regenerable_local_transcripts_not_durable_evidence",
+            "portable_report_path": SCENARIO_DELIVERY_UNIT_MANIFEST.relative_to(ROOT).as_posix(),
+            "regenerable_transcript_path_prefixes": ["tmp/scenario/"],
+            "durable_evidence_roots": [
+                "reports/scenario/connector-contract-adapter/",
+                "docs/verification-reports/",
+            ],
+        },
         "summary": {
             "scenario_set": "connector-contract-adapter",
             "ai_delivery_unit_count": len(delivery_units),
@@ -22179,6 +22189,27 @@ def _validate_path_portability(errors: list[str]) -> None:
                     "compact manifest has unguarded absolute path at "
                     f"{'.'.join(json_path)}"
                 )
+
+    if SCENARIO_DELIVERY_UNIT_MANIFEST.exists():
+        delivery_payload = json.loads(SCENARIO_DELIVERY_UNIT_MANIFEST.read_text())
+        portability = delivery_payload.get("path_portability")
+        expected_delivery_boundary = (
+            "tmp_scenario_refs_are_regenerable_local_transcripts_not_durable_evidence"
+        )
+        if not isinstance(portability, dict):
+            errors.append("scenario delivery-unit manifest missing path_portability")
+        else:
+            if portability.get("claim_boundary") != expected_delivery_boundary:
+                errors.append("scenario delivery-unit manifest path_portability claim_boundary mismatch")
+            expected_path = SCENARIO_DELIVERY_UNIT_MANIFEST.relative_to(ROOT).as_posix()
+            if portability.get("portable_report_path") != expected_path:
+                errors.append("scenario delivery-unit manifest portable_report_path mismatch")
+            prefixes = portability.get("regenerable_transcript_path_prefixes")
+            if "tmp/scenario/" in SCENARIO_DELIVERY_UNIT_MANIFEST.read_text(
+                encoding="utf-8",
+                errors="replace",
+            ) and (not isinstance(prefixes, list) or "tmp/scenario/" not in prefixes):
+                errors.append("scenario delivery-unit manifest tmp/scenario refs are not marked regenerable")
 
 
 def _validate_connectorhub_split_adr(errors: list[str]) -> None:

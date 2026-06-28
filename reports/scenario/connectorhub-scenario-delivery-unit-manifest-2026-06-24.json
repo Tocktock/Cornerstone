@@ -40062,6 +40062,17 @@
       "trace_ready": true
     }
   ],
+  "path_portability": {
+    "claim_boundary": "tmp_scenario_refs_are_regenerable_local_transcripts_not_durable_evidence",
+    "durable_evidence_roots": [
+      "reports/scenario/connector-contract-adapter/",
+      "docs/verification-reports/"
+    ],
+    "portable_report_path": "reports/scenario/connectorhub-scenario-delivery-unit-manifest-2026-06-24.json",
+    "regenerable_transcript_path_prefixes": [
+      "tmp/scenario/"
+    ]
+  },
   "refactor_hardening_trace": [
     {
       "claim_boundary": "refactor_hardening_trace_local_result_doc_only",

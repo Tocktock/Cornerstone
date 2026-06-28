@@ -34,6 +34,7 @@ def main() -> int:
                 "size_bytes": path.stat().st_size,
             }
         )
+    files.sort(key=lambda item: item["path"])
 
     source_inputs = []
     for source in verifier.SOURCE_INPUTS:

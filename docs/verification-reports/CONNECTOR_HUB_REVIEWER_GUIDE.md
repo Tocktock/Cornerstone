@@ -18,6 +18,8 @@ The 41 previous full `connector-contract-adapter*.json` reports are represented 
 
 Each compact report keeps a repo-relative portable report path and a `path_portability` block. Any remaining absolute `output_path` value is historical transcript metadata only. `tmp/scenario/...` refs are regenerable local transcript refs, not committed durable evidence.
 
+The scenario delivery-unit manifest also carries a top-level `path_portability` block. Its `tmp/scenario/...` values are local replay transcript references only; reviewers should rely on the committed compact reports and manifest hashes for durable evidence.
+
 ## Required Local Review Commands
 
 ```sh

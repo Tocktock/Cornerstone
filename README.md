@@ -107,8 +107,8 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_IMPLEMENTATION_REPORT_2026-06-19.md` | Superseded local deterministic VS2 implementation report |
 | `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_SCENARIO_SPECIFIC_REMEDIATION_REPORT_2026-06-19.md` | Superseded scenario-specific VS2 remediation report |
 | `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md` | Current generated VS2 verification status and supersession boundary |
-| `docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md` | Frozen ConnectorHub adoption contract: 40 AI-verifiable local delivery rows plus 7 human/external gates |
-| `docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_MATRIX.csv` | Machine-readable ConnectorHub scenario matrix: 40 AI-owned PASS rows, 7 HUMAN_REQUIRED rows |
+| `docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md` | Frozen ConnectorHub adoption contract; implementation status belongs to ConnectorHub reports and manifests |
+| `docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_MATRIX.csv` | Machine-readable ConnectorHub scenario matrix; current row status is reported by ConnectorHub verification artifacts |
 | `docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md` | ConnectorHub engineering trail index, source reconciliation, scenario-result links, verifier commands, and remaining proof surfaces |
 | `docs/verification-reports/CONNECTOR_HUB_HUMAN_GATES_PREPARATION_REPORT_2026-06-24.md` | Human-gate preparation report for H01-H07 packages, templates, structural validation, execution order, and no-PASS boundary |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
@@ -126,7 +126,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 - VS0 EVUX clean sign-off governance overlay: 16 task-scoped scenarios; verifier path `cornerstone scenario verify vs0-evux-governance`, 14 AI-verifiable rows, 2 HUMAN_REQUIRED, production release still false.
 - VS0 operator acceptance UI gate overlay: 13 task-scoped scenarios; local verifier path `cornerstone scenario verify vs0-operator-acceptance-ui`, 12 AI-verifiable PASS, 1 human-only row accepted by JiYong/Tars, full VS-1 main implementation unblocked.
 - VS2 policy/tenancy/egress overlay: 93 task-scoped scenarios; verifier path `cornerstone scenario verify vs2-policy-tenancy-egress`; current generated status is recorded in `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md`.
-- ConnectorHub adoption overlay: 47 task-scoped scenarios; verifier path `cornerstone scenario verify connector-contract-adapter`; current local fixture status is 40 AI-owned PASS rows and 7 HUMAN_REQUIRED rows for live/human/production proof.
+- ConnectorHub adoption overlay: 47 task-scoped scenarios; verifier path `cornerstone scenario verify connector-contract-adapter`; current generated status is recorded in `reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json` and `docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md`.
 - Release rule: no PASS without concrete scenario evidence.
 - CLI-native-first rule: no feature scenario can be marked PASS unless its native `cornerstone ...` CLI path is verified or the item is explicitly classified as a non-feature implementation internal.
 
