@@ -842,8 +842,8 @@
     },
     {
       "path": "scripts/verify_connectorhub_engineering_trail.py",
-      "sha256": "31d8e28d8911fb4e99dd0f2ab5daf8ab619ebc7a1d652c8198118b238dea9dc0",
-      "size_bytes": 1672029
+      "sha256": "dbd59283e1c39ec062ba55278a89cb78a58d08eed0e9a84ab0064fe2487cf00d",
+      "size_bytes": 1673738
     },
     {
       "path": "scripts/verify_connectorhub_local_evidence.sh",

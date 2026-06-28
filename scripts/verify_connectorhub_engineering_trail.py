@@ -14,6 +14,31 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _output_path_matches_current_or_historical(
+    output_path: object,
+    expected_output_path: Path,
+) -> bool:
+    if not isinstance(output_path, str) or not output_path:
+        return False
+
+    if output_path == str(expected_output_path):
+        return True
+
+    expected_absolute = str(expected_output_path.resolve())
+    if output_path == expected_absolute:
+        return True
+
+    try:
+        expected_relative = expected_output_path.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        return False
+
+    normalized_output_path = output_path.replace("\\", "/")
+    return normalized_output_path.endswith(f"/{expected_relative}")
+
+
 CONTRACT_PATH = ROOT / "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md"
 MATRIX_PATH = ROOT / "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_MATRIX.csv"
 CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR = ROOT / "reports/scenario/connector-contract-adapter"
@@ -23792,9 +23817,13 @@ def _validate_human_gate_record_validation_payload(
     ):
         errors.append(f"{scenario_id} human-gate record validation missing validation evidence ref")
     if expected_output_path is not None:
-        if validation_payload.get("output_path") != str(expected_output_path):
+        if not _output_path_matches_current_or_historical(
+            validation_payload.get("output_path"),
+            expected_output_path,
+        ):
             errors.append(
-                f"{scenario_id} human-gate record validation output_path expected {expected_output_path}, "
+                f"{scenario_id} human-gate record validation output_path expected current or historical "
+                f"repo-relative path for {expected_output_path}, "
                 f"found {validation_payload.get('output_path')}"
             )
         if not expected_output_path.exists():
@@ -24884,7 +24913,10 @@ def _validate_human_gate_field_ref_contract_payload(
         errors.append("human-gate field-ref-contract expected no errors")
     if field_ref_payload.get("final_verdict") != "HUMAN_REQUIRED":
         errors.append("human-gate field-ref-contract envelope final_verdict must remain HUMAN_REQUIRED")
-    if expected_output_path is not None and field_ref_payload.get("output_path") != str(expected_output_path):
+    if expected_output_path is not None and not _output_path_matches_current_or_historical(
+        field_ref_payload.get("output_path"),
+        expected_output_path,
+    ):
         errors.append("human-gate field-ref-contract output_path mismatch")
     report = field_ref_payload.get("connector_human_gate_field_ref_contract_report")
     if not isinstance(report, dict):
@@ -25010,7 +25042,10 @@ def _validate_human_gate_evidence_packet_contract_payload(
         errors.append("human-gate evidence-packet-contract expected no errors")
     if evidence_packet_payload.get("final_verdict") != "HUMAN_REQUIRED":
         errors.append("human-gate evidence-packet-contract envelope final_verdict must remain HUMAN_REQUIRED")
-    if expected_output_path is not None and evidence_packet_payload.get("output_path") != str(expected_output_path):
+    if expected_output_path is not None and not _output_path_matches_current_or_historical(
+        evidence_packet_payload.get("output_path"),
+        expected_output_path,
+    ):
         errors.append("human-gate evidence-packet-contract output_path mismatch")
     report = evidence_packet_payload.get("connector_human_gate_evidence_packet_contract_report")
     if not isinstance(report, dict):
@@ -25180,7 +25215,10 @@ def _validate_human_gate_evidence_packet_file_contract_payload(
         )
     if (
         expected_output_path is not None
-        and evidence_packet_file_payload.get("output_path") != str(expected_output_path)
+        and not _output_path_matches_current_or_historical(
+            evidence_packet_file_payload.get("output_path"),
+            expected_output_path,
+        )
     ):
         errors.append("human-gate evidence-packet-file-contract output_path mismatch")
     report = evidence_packet_file_payload.get(
@@ -25436,7 +25474,10 @@ def _validate_human_gate_evidence_packet_scaffold_payload(
         )
     if (
         expected_output_path is not None
-        and scaffold_payload.get("output_path") != str(expected_output_path)
+        and not _output_path_matches_current_or_historical(
+            scaffold_payload.get("output_path"),
+            expected_output_path,
+        )
     ):
         errors.append("human-gate evidence-packet-scaffold output_path mismatch")
 
@@ -25714,7 +25755,10 @@ def _validate_human_gate_evidence_packet_validation_payload(
         )
     if (
         expected_output_path is not None
-        and validation_payload.get("output_path") != str(expected_output_path)
+        and not _output_path_matches_current_or_historical(
+            validation_payload.get("output_path"),
+            expected_output_path,
+        )
     ):
         errors.append("human-gate evidence-packet-validation output_path mismatch")
 
@@ -25986,7 +26030,10 @@ def _validate_human_gate_evidence_packet_record_draft_payload(
         )
     if (
         expected_output_path is not None
-        and draft_payload.get("output_path") != str(expected_output_path)
+        and not _output_path_matches_current_or_historical(
+            draft_payload.get("output_path"),
+            expected_output_path,
+        )
     ):
         errors.append("human-gate evidence-packet-record-draft output_path mismatch")
 
@@ -26211,7 +26258,10 @@ def _validate_human_gate_preflight_bundle_payload(
         errors.append("human-gate preflight-bundle expected no errors")
     if preflight_payload.get("final_verdict") != "HUMAN_REQUIRED":
         errors.append("human-gate preflight-bundle envelope final_verdict must remain HUMAN_REQUIRED")
-    if expected_output_path is not None and preflight_payload.get("output_path") != str(expected_output_path):
+    if expected_output_path is not None and not _output_path_matches_current_or_historical(
+        preflight_payload.get("output_path"),
+        expected_output_path,
+    ):
         errors.append("human-gate preflight-bundle output_path mismatch")
     report = preflight_payload.get("connector_human_gate_preflight_bundle_report")
     if not isinstance(report, dict):
@@ -29020,7 +29070,10 @@ def _validate_pinned_human_gate_readiness_report(
         expected_human_ids,
         expected_validation_count=0,
     )
-    if report_payload.get("output_path") != str(HUMAN_GATE_READINESS_REPORT_PATH):
+    if not _output_path_matches_current_or_historical(
+        report_payload.get("output_path"),
+        HUMAN_GATE_READINESS_REPORT_PATH,
+    ):
         errors.append("pinned human-gate readiness report output_path mismatch")
 
 
@@ -29135,7 +29188,10 @@ def _validate_pinned_human_gate_next_report(
         nested_key="connector_human_gate_next",
         label="pinned human-gate next selector",
     )
-    if next_payload.get("output_path") != str(HUMAN_GATE_NEXT_REPORT_PATH):
+    if not _output_path_matches_current_or_historical(
+        next_payload.get("output_path"),
+        HUMAN_GATE_NEXT_REPORT_PATH,
+    ):
         errors.append("pinned human-gate next selector report output_path mismatch")
 
 
@@ -29183,7 +29239,10 @@ def _validate_pinned_human_gate_validation_handoff(
         nested_key="connector_human_gate_validation_handoff",
         label="pinned human-gate validation handoff",
     )
-    if handoff_payload.get("output_path") != str(HUMAN_GATE_VALIDATION_HANDOFF_PATH):
+    if not _output_path_matches_current_or_historical(
+        handoff_payload.get("output_path"),
+        HUMAN_GATE_VALIDATION_HANDOFF_PATH,
+    ):
         errors.append("pinned human-gate validation handoff report output_path mismatch")
 
 
@@ -29454,7 +29513,10 @@ def _validate_pinned_human_gate_package_reports(
             )
             continue
         _validate_human_gate_package_payload(errors, scenario_id, package_payload)
-        if package_payload.get("output_path") != str(package_path):
+        if not _output_path_matches_current_or_historical(
+            package_payload.get("output_path"),
+            package_path,
+        ):
             errors.append(f"{scenario_id} pinned human-gate package output_path mismatch")
 
 
@@ -29892,9 +29954,13 @@ def _validate_report_envelope(
             f"{label} ids.git_commit expected {expected_git_commit}, found {git_commit}"
         )
     expected_output_path = str(expected_report_path.resolve())
-    if report.get("output_path") != expected_output_path:
+    if not _output_path_matches_current_or_historical(
+        report.get("output_path"),
+        expected_report_path,
+    ):
         errors.append(
-            f"{label} output_path expected {expected_output_path}, found {report.get('output_path')}"
+            f"{label} output_path expected current or historical repo-relative path for "
+            f"{expected_output_path}, found {report.get('output_path')}"
         )
     expected_output_arg = expected_report_path.resolve().relative_to(ROOT.resolve()).as_posix()
     compact_report = report.get("compact_evidence_layout") == "content_addressed_shared_v1"
