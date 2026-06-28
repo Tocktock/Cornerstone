@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +26,8 @@ SHARED_SECTION_KEYS = [
 COMPACT_REPORT_SCHEMA = "cs.connector_contract_adapter.compact_report.v1"
 COMPACT_MANIFEST_SCHEMA = "cs.connector_contract_adapter.compact_manifest.v1"
 SHARED_EVIDENCE_SCHEMA = "cs.connector_contract_adapter.shared_evidence.v1"
+SHARED_EVIDENCE_INDEX_SCHEMA = "cs.connector_contract_adapter.shared_evidence_index.v1"
+COMPACT_EVIDENCE_LAYOUT = "content_addressed_objects_v1"
 PATH_PORTABILITY_CLAIM_BOUNDARY = (
     "absolute_paths_are_historical_transcript_metadata_not_portable_evidence"
 )
@@ -138,6 +141,108 @@ def _shared_section_refs(shared_sections: dict[str, Any]) -> dict[str, dict[str,
     return refs
 
 
+def _content_object_path(output_dir: Path, sha256: str) -> Path:
+    return output_dir / "objects" / "sha256" / sha256[:2] / f"{sha256}.json"
+
+
+def _content_object_ref(output_dir: Path, payload: Any) -> dict[str, Any]:
+    sha256 = _sha256_payload(payload)
+    encoded = _canonical_bytes(payload)
+    object_path = _content_object_path(output_dir, sha256)
+    object_path.parent.mkdir(parents=True, exist_ok=True)
+    object_path.write_bytes(encoded + b"\n")
+    return {
+        "path": _relative(object_path),
+        "sha256": sha256,
+        "size_bytes": len(encoded),
+    }
+
+
+def _section_object_refs(output_dir: Path, section_name: str, payload: Any) -> dict[str, Any]:
+    section_ref: dict[str, Any] = {
+        "sha256": _sha256_payload(payload),
+        "size_bytes": len(_canonical_bytes(payload)),
+    }
+    if isinstance(payload, list):
+        section_ref["type"] = "list"
+        section_ref["count"] = len(payload)
+        section_ref["items"] = [
+            {"index": index, **_content_object_ref(output_dir, item)}
+            for index, item in enumerate(payload)
+        ]
+        return section_ref
+    if isinstance(payload, dict):
+        section_ref["type"] = "dict"
+        section_ref["count"] = len(payload)
+        section_ref["entries"] = [
+            {"key": key, **_content_object_ref(output_dir, payload[key])}
+            for key in sorted(payload)
+        ]
+        return section_ref
+    raise ValueError(f"shared section {section_name} must be a JSON list or object")
+
+
+def _shared_evidence_summary(section_index: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    summaries: dict[str, dict[str, Any]] = {}
+    for section_name, section_ref in section_index.items():
+        summaries[section_name] = {
+            "count": section_ref.get("count"),
+            "sha256": section_ref.get("sha256"),
+            "size_bytes": section_ref.get("size_bytes"),
+            "type": section_ref.get("type"),
+        }
+    return summaries
+
+
+def _write_shared_evidence_index(
+    *,
+    output_dir: Path,
+    shared_sections: dict[str, Any],
+    report_date: str,
+) -> tuple[Path, dict[str, Any], dict[str, dict[str, Any]]]:
+    object_root = output_dir / "objects" / "sha256"
+    if object_root.exists():
+        shutil.rmtree(object_root)
+    section_index = {
+        section_name: _section_object_refs(output_dir, section_name, payload)
+        for section_name, payload in shared_sections.items()
+    }
+    object_paths = {
+        item["path"]
+        for section_ref in section_index.values()
+        for item in [*section_ref.get("items", []), *section_ref.get("entries", [])]
+    }
+    index_payload = {
+        "schema_version": SHARED_EVIDENCE_INDEX_SCHEMA,
+        "scenario_set": "connector-contract-adapter",
+        "report_date": report_date,
+        "layout": COMPACT_EVIDENCE_LAYOUT,
+        "object_root": _relative(object_root),
+        "path_portability": {
+            "portable_evidence_root": "reports/scenario/connector-contract-adapter",
+            "historical_absolute_path_fields": [
+                "objects referenced by sections.command_evidence may include historical transcript source paths",
+                "objects referenced by sections.connector_contract_evidence may include historical transcript source paths",
+            ],
+            "regenerable_transcript_path_prefixes": [
+                "tmp/scenario/",
+            ],
+            "claim_boundary": PATH_PORTABILITY_CLAIM_BOUNDARY,
+        },
+        "summary": {
+            "section_count": len(section_index),
+            "object_count": len(object_paths),
+            "deduplicated_object_ref_count": sum(
+                section_ref.get("count", 0) for section_ref in section_index.values()
+            ),
+        },
+        "sections": section_index,
+    }
+    index_path = output_dir / f"shared-evidence-index-{report_date}.json"
+    _write_json(index_path, index_payload)
+    return index_path, index_payload, _shared_evidence_summary(section_index)
+
+
 def _validate_shared_sections(
     aggregate: dict[str, Any],
     focused_reports: list[tuple[Path, str, dict[str, Any]]],
@@ -167,9 +272,9 @@ def _compact_envelope(
     source_path: Path,
     source_payload: dict[str, Any],
     output_path: Path,
-    shared_path: Path,
-    shared_sha256: str,
-    shared_section_refs: dict[str, dict[str, Any]],
+    shared_index_path: Path,
+    shared_index_sha256: str,
+    shared_section_summaries: dict[str, dict[str, Any]],
     scenario_results: list[dict[str, Any]],
     summary: dict[str, Any],
     scenario_filter: list[str] | None,
@@ -196,16 +301,18 @@ def _compact_envelope(
         if key in source_payload:
             envelope[key] = source_payload[key]
     envelope["compact_schema_version"] = COMPACT_REPORT_SCHEMA
-    envelope["compact_evidence_layout"] = "content_addressed_shared_v1"
+    envelope["compact_evidence_layout"] = COMPACT_EVIDENCE_LAYOUT
     envelope["source_report"] = _source_report_ref(source_path, source_payload)
     envelope["path_portability"] = _path_portability_ref(
         output_path=output_path,
         source_path=source_path,
     )
     envelope["shared_evidence_ref"] = {
-        "path": _relative(shared_path),
-        "sha256": shared_sha256,
-        "sections": shared_section_refs,
+        "path": _relative(shared_index_path),
+        "sha256": shared_index_sha256,
+        "layout": COMPACT_EVIDENCE_LAYOUT,
+        "object_root": "reports/scenario/connector-contract-adapter/objects/sha256",
+        "sections": shared_section_summaries,
     }
     envelope["summary"] = summary
     envelope["scenario_results"] = scenario_results
@@ -264,33 +371,15 @@ def compact_reports(
             raise ValueError(f"{_relative(path)} must contain exactly one matching scenario_result")
 
     shared_sections = _validate_shared_sections(aggregate, focused_reports)
-    shared_section_refs = _shared_section_refs(shared_sections)
-    shared_payload = {
-        "schema_version": SHARED_EVIDENCE_SCHEMA,
-        "scenario_set": "connector-contract-adapter",
-        "report_date": report_date,
-        "path_portability": {
-            "portable_evidence_root": "reports/scenario/connector-contract-adapter",
-            "historical_absolute_path_fields": [
-                "sections.command_evidence.[].stdout_json.artifact.source.path",
-                "sections.command_evidence.[].stdout_json.connector_capability_contract.source.path",
-                "sections.command_evidence.[].stdout_json.evidence_bundle.evidence_items.[].source.path",
-                "sections.command_evidence.[].stdout_json.evidence_refs.[]",
-                "sections.command_evidence.[].stdout_json.quarantine.manifest_path",
-            ],
-            "regenerable_transcript_path_prefixes": [
-                "tmp/scenario/",
-            ],
-            "claim_boundary": PATH_PORTABILITY_CLAIM_BOUNDARY,
-        },
-        "sections": shared_sections,
-        "section_refs": shared_section_refs,
-    }
-    shared_payload_sha256 = _sha256_payload(shared_payload)
-    shared_payload["sha256"] = shared_payload_sha256
-    shared_path = output_dir / f"shared-evidence-{report_date}.json"
-    _write_json(shared_path, shared_payload)
-    shared_file_sha256 = _sha256_file(shared_path)
+    shared_index_path, shared_index_payload, shared_section_summaries = _write_shared_evidence_index(
+        output_dir=output_dir,
+        shared_sections=shared_sections,
+        report_date=report_date,
+    )
+    legacy_shared_path = output_dir / f"shared-evidence-{report_date}.json"
+    if legacy_shared_path.exists():
+        legacy_shared_path.unlink()
+    shared_index_sha256 = _sha256_file(shared_index_path)
 
     aggregate_output_path = output_dir / f"aggregate-{report_date}.json"
     aggregate_summary = dict(aggregate.get("summary") or {})
@@ -298,9 +387,9 @@ def compact_reports(
         source_path=aggregate_path,
         source_payload=aggregate,
         output_path=aggregate_output_path,
-        shared_path=shared_path,
-        shared_sha256=shared_file_sha256,
-        shared_section_refs=shared_section_refs,
+        shared_index_path=shared_index_path,
+        shared_index_sha256=shared_index_sha256,
+        shared_section_summaries=shared_section_summaries,
         scenario_results=aggregate["scenario_results"],
         summary=aggregate_summary,
         scenario_filter=None,
@@ -318,9 +407,9 @@ def compact_reports(
             source_path=source_path,
             source_payload=source_payload,
             output_path=output_path,
-            shared_path=shared_path,
-            shared_sha256=shared_file_sha256,
-            shared_section_refs=shared_section_refs,
+            shared_index_path=shared_index_path,
+            shared_index_sha256=shared_index_sha256,
+            shared_section_summaries=shared_section_summaries,
             scenario_results=[row],
             summary=focused_summary,
             scenario_filter=[scenario_id],
@@ -340,15 +429,21 @@ def compact_reports(
         "schema_version": COMPACT_MANIFEST_SCHEMA,
         "scenario_set": "connector-contract-adapter",
         "report_date": report_date,
-        "layout": "content_addressed_shared_v1",
+        "layout": COMPACT_EVIDENCE_LAYOUT,
         "summary": {
             "source_full_report_count": len(focused_reports) + 1,
             "compact_report_count": len(scenario_entries) + 1,
             "focused_scenario_count": len(scenario_entries),
             "shared_section_count": len(shared_sections),
+            "shared_object_count": shared_index_payload["summary"]["object_count"],
             "source_total_size_bytes": aggregate_path.stat().st_size
             + sum(path.stat().st_size for path, _, _ in focused_reports),
-            "compact_total_size_bytes": shared_path.stat().st_size
+            "compact_total_size_bytes": shared_index_path.stat().st_size
+            + sum((ROOT / object_path).stat().st_size for object_path in {
+                item["path"]
+                for section_ref in shared_index_payload["sections"].values()
+                for item in [*section_ref.get("items", []), *section_ref.get("entries", [])]
+            })
             + aggregate_output_path.stat().st_size
             + sum((output_dir / "scenarios" / f"{entry['scenario_id']}.json").stat().st_size for entry in scenario_entries),
         },
@@ -361,10 +456,11 @@ def compact_reports(
             "claim_boundary": PATH_PORTABILITY_CLAIM_BOUNDARY,
         },
         "shared_evidence": {
-            "path": _relative(shared_path),
-            "sha256": _sha256_file(shared_path),
-            "payload_sha256": shared_payload_sha256,
-            "sections": shared_section_refs,
+            "path": _relative(shared_index_path),
+            "sha256": shared_index_sha256,
+            "layout": COMPACT_EVIDENCE_LAYOUT,
+            "object_root": _relative(output_dir / "objects" / "sha256"),
+            "sections": shared_section_summaries,
         },
         "aggregate_report": {
             "path": _relative(aggregate_output_path),

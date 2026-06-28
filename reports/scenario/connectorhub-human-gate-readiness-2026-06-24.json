@@ -1,12 +1,12 @@
 {
   "audit_refs": [
-    "audit:audit_cce046b5573f68a6"
+    "audit:audit_e51f6857ff017312"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate report",
   "connector_human_gate_readiness_report": {
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-28T02:50:26.260160Z",
+    "created_at": "2026-06-28T05:44:34.383260Z",
     "evidence_packet_ready_count": 7,
     "execution_queue": [
       {
@@ -199,7 +199,7 @@
       "validation_count": 0
     },
     "reject_conditions_ready_count": 7,
-    "report_id": "cshuman_report_01c47a65d56a0e10",
+    "report_id": "cshuman_report_11f41c28845852d7",
     "required_before_pass": [
       "Attach dated human records for H01 through H07 before changing any human row to PASS.",
       "Keep live-provider, physical-device, browser privacy, production-like VS2, live Action, UX/trust, and recovery evidence separate."
@@ -3033,7 +3033,7 @@
               "review_input_only": true,
               "scenario_count": 1,
               "schema_version": "cs.cli.v0",
-              "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
+              "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
               "status": "success"
             }
           ],
@@ -3289,7 +3289,7 @@
                 "review_input_only": true,
                 "scenario_count": 1,
                 "schema_version": "cs.cli.v0",
-                "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
+                "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
                 "status": "success"
               }
             ],
@@ -3534,7 +3534,7 @@
             },
             {
               "acceptance_sufficient": false,
-              "bytes": 5363,
+              "bytes": 5583,
               "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
               "command": "cornerstone scenario verify connector-contract-adapter",
               "json_valid": true,
@@ -3545,7 +3545,7 @@
               "review_input_only": true,
               "scenario_count": 1,
               "schema_version": "cs.cli.v0",
-              "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
+              "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
               "status": "success",
               "summary": {
                 "blocking": 0,
@@ -7336,16 +7336,16 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_readiness_report:cshuman_report_01c47a65d56a0e10"
+    "connector_human_gate_readiness_report:cshuman_report_11f41c28845852d7"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_readiness_report_id": "cshuman_report_01c47a65d56a0e10",
-    "git_commit": "da85c05"
+    "connector_human_gate_readiness_report_id": "cshuman_report_11f41c28845852d7",
+    "git_commit": "4b92d49"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
-  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/connectorhub-human-gate-readiness-2026-06-24.json",
+  "output_path": "/private/tmp/cornerstone-connectorhub-layout-narrow/reports/scenario/connectorhub-human-gate-readiness-2026-06-24.json",
   "owner_id": "local-user",
   "policy_decision_refs": [],
   "product": "CornerStone",
@@ -7363,9 +7363,9 @@
     "pass_claims_allowed_by_validations": 0,
     "product_claims_allowed_by_validations": 0,
     "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",
-    "readiness_report_id": "cshuman_report_01c47a65d56a0e10",
+    "readiness_report_id": "cshuman_report_11f41c28845852d7",
     "record_bodies_persisted_by_validations": 0,
-    "report_id": "cshuman_report_01c47a65d56a0e10",
+    "report_id": "cshuman_report_11f41c28845852d7",
     "scenario_count": 7,
     "scenario_delivery_unit_plan_approvals_collected": 0,
     "scenario_delivery_unit_plan_dependency_unlock_allowed": 0,

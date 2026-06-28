@@ -1,13 +1,13 @@
 {
   "audit_refs": [
-    "audit:audit_c053db1da7a97b42"
+    "audit:audit_5b28499c443291cf"
   ],
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone connector human-gate package",
   "connector_human_gate_package": {
     "approval_status": "pending",
     "completion_claim_boundary": "connectorhub_full_goal_requires_dated_accept_records_for_all_human_external_gates",
-    "created_at": "2026-06-28T02:50:20.962571Z",
+    "created_at": "2026-06-28T05:44:34.169850Z",
     "depends_on_human_gates": [],
     "execution_queue_item": {
       "depends_on": [],
@@ -167,7 +167,7 @@
           "review_input_only": true,
           "scenario_count": 1,
           "schema_version": "cs.cli.v0",
-          "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
+          "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
           "status": "success"
         }
       ],
@@ -423,7 +423,7 @@
             "review_input_only": true,
             "scenario_count": 1,
             "schema_version": "cs.cli.v0",
-            "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
+            "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
             "status": "success"
           }
         ],
@@ -668,7 +668,7 @@
         },
         {
           "acceptance_sufficient": false,
-          "bytes": 5363,
+          "bytes": 5583,
           "claim_boundary": "h04_local_baseline_snapshot_is_review_input_not_human_acceptance",
           "command": "cornerstone scenario verify connector-contract-adapter",
           "json_valid": true,
@@ -679,7 +679,7 @@
           "review_input_only": true,
           "scenario_count": 1,
           "schema_version": "cs.cli.v0",
-          "sha256": "f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3",
+          "sha256": "0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60",
           "status": "success",
           "summary": {
             "blocking": 0,
@@ -710,7 +710,7 @@
       "provider_mutations_executed_by_package": 0,
       "secret_material_read_by_package": false
     },
-    "package_id": "cshuman_0c4e342098676313",
+    "package_id": "cshuman_8edb73894adfe66a",
     "proof_boundary": {
       "local_fixture_rows_complete": true,
       "pass_claim_allowed_without_human_record": false,
@@ -1969,16 +1969,16 @@
   },
   "errors": [],
   "evidence_refs": [
-    "connector_human_gate_package:cshuman_0c4e342098676313"
+    "connector_human_gate_package:cshuman_8edb73894adfe66a"
   ],
   "final_verdict": "HUMAN_REQUIRED",
   "ids": {
-    "connector_human_gate_package_id": "cshuman_0c4e342098676313",
-    "git_commit": "da85c05"
+    "connector_human_gate_package_id": "cshuman_8edb73894adfe66a",
+    "git_commit": "4b92d49"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
-  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/connectorhub-human-gate-package-cs-ch-h04-2026-06-24.json",
+  "output_path": "/private/tmp/cornerstone-connectorhub-layout-narrow/reports/scenario/connectorhub-human-gate-package-cs-ch-h04-2026-06-24.json",
   "owner_id": "local-user",
   "policy_decision_refs": [],
   "product": "CornerStone",
@@ -1999,7 +1999,7 @@
     "local_baseline_preflight_bundle_report_count": 5,
     "local_baseline_preflight_command_plan_count": 3,
     "local_baseline_review_input_report_count": 5,
-    "package_id": "cshuman_0c4e342098676313",
+    "package_id": "cshuman_8edb73894adfe66a",
     "pass_claim_allowed_without_human_record": false,
     "product_claim_allowed": false,
     "product_feature_claims": "CONNECTOR_HUB_HUMAN_GATES_PREPARED_HUMAN_EVIDENCE_REQUIRED",

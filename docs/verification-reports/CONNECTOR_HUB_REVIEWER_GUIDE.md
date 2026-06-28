@@ -13,10 +13,11 @@ The 41 previous full `connector-contract-adapter*.json` reports are represented 
 
 - `reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json`
 - `reports/scenario/connector-contract-adapter/scenarios/CS-CH-001.json` through `CS-CH-040.json`
-- `reports/scenario/connector-contract-adapter/shared-evidence-2026-06-23.json`
+- `reports/scenario/connector-contract-adapter/shared-evidence-index-2026-06-23.json`
+- `reports/scenario/connector-contract-adapter/objects/sha256/`
 - `reports/scenario/connector-contract-adapter/manifest-2026-06-23.json`
 
-Each compact report keeps a repo-relative portable report path and a `path_portability` block. Any remaining absolute `output_path` value is historical transcript metadata only. `tmp/scenario/...` refs are regenerable local transcript refs, not committed durable evidence.
+Each compact report keeps a repo-relative portable report path and a `path_portability` block. The shared evidence index points to SHA-256-addressed JSON objects so repeated command/evidence payloads are stored once and referenced by digest. Any remaining absolute `output_path` value is historical transcript metadata only. `tmp/scenario/...` refs are regenerable local transcript refs, not committed durable evidence.
 
 The scenario delivery-unit manifest also carries a top-level `path_portability` block. Its `tmp/scenario/...` values are local replay transcript references only; reviewers should rely on the committed compact reports and manifest hashes for durable evidence.
 
@@ -27,6 +28,14 @@ scripts/verify_connectorhub_local_evidence.sh
 ```
 
 This default local gate runs whitespace, SoT docs, the ConnectorHub engineering-trail verifier, the full ConnectorHub CLI unittest suite, compact-report tests, the scaffold CLI unittest suite, and Python compile checks without depending on GitHub Actions.
+
+For the review-split plan specifically, run:
+
+```sh
+python3 scripts/verify_connectorhub_review_split.py
+```
+
+This validates `docs/verification-reports/CONNECTOR_HUB_REVIEW_SPLIT_MANIFEST_2026-06-28.json`, including slice order, scenario coverage, repo-relative path references, local-command boundaries, and the target module/test map. It is planning evidence only; it does not claim the PR has already been split.
 
 For a clean review workspace with current VS2 reusable proof state and Docker/network support, run:
 
@@ -43,7 +52,7 @@ Strict mode additionally runs `make verify-vs2-production-like`. This remains a 
 3. Inspect `docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md` for source reconciliation, remaining proof surfaces, and compact evidence refs.
 4. Inspect `docs/verification-reports/CONNECTOR_HUB_PR20_FEEDBACK_RESOLUTION_2026-06-28.md` for the finding-by-finding response, current local fixes, and remaining merge blockers.
 5. Run `python3 scripts/verify_connectorhub_engineering_trail.py` to validate matrix rows, compact hashes, focused gates, source-input hashes, path portability, and manifest exactness.
-6. Spot-check one compact focused report and the shared evidence manifest before reviewing scenario behavior.
+6. Spot-check one compact focused report, the shared evidence index, and one referenced object before reviewing scenario behavior.
 
 ## Split Recommendation
 

@@ -109,16 +109,21 @@ class ConnectorHubCompactReportsTest(unittest.TestCase):
             self.assertEqual(manifest["summary"]["compact_report_count"], 2)
 
             shared_path = output_dir / "shared-evidence-2026-06-23.json"
+            shared_index_path = output_dir / "shared-evidence-index-2026-06-23.json"
             aggregate_compact_path = output_dir / "aggregate-2026-06-23.json"
             focused_compact_path = output_dir / "scenarios/CS-CH-001.json"
-            self.assertTrue(shared_path.exists())
+            self.assertFalse(shared_path.exists())
+            self.assertTrue(shared_index_path.exists())
             self.assertTrue(aggregate_compact_path.exists())
             self.assertTrue(focused_compact_path.exists())
 
             focused_compact = json.loads(focused_compact_path.read_text())
-            shared_compact = json.loads(shared_path.read_text())
-            self.assertEqual(focused_compact["compact_evidence_layout"], "content_addressed_shared_v1")
-            self.assertEqual(focused_compact["shared_evidence_ref"]["path"], str(shared_path.relative_to(ROOT)))
+            shared_index = json.loads(shared_index_path.read_text())
+            self.assertEqual(focused_compact["compact_evidence_layout"], "content_addressed_objects_v1")
+            self.assertEqual(focused_compact["shared_evidence_ref"]["path"], str(shared_index_path.relative_to(ROOT)))
+            self.assertEqual(shared_index["layout"], "content_addressed_objects_v1")
+            self.assertEqual(shared_index["summary"]["section_count"], 7)
+            self.assertGreater(shared_index["summary"]["object_count"], 0)
             self.assertEqual(focused_compact["scenario_results"][0]["id"], "CS-CH-001")
             self.assertEqual(
                 focused_compact["path_portability"]["claim_boundary"],
@@ -133,17 +138,21 @@ class ConnectorHubCompactReportsTest(unittest.TestCase):
                 ["output_path", "source_report.output_path"],
             )
             self.assertEqual(
-                shared_compact["path_portability"]["claim_boundary"],
+                shared_index["path_portability"]["claim_boundary"],
                 "absolute_paths_are_historical_transcript_metadata_not_portable_evidence",
             )
             self.assertIn(
-                "sections.command_evidence.[].stdout_json.artifact.source.path",
-                shared_compact["path_portability"]["historical_absolute_path_fields"],
+                "objects referenced by sections.command_evidence may include historical transcript source paths",
+                shared_index["path_portability"]["historical_absolute_path_fields"],
             )
             self.assertEqual(
                 focused_compact["source_report"]["omitted_duplicate_section_refs"]["command_evidence"]["count"],
                 1,
             )
+            command_object_ref = shared_index["sections"]["command_evidence"]["items"][0]
+            command_object_path = ROOT / command_object_ref["path"]
+            self.assertTrue(command_object_path.exists())
+            self.assertEqual(command_object_path.read_text().strip(), json.dumps(sample_report(Path("x"))["command_evidence"][0], sort_keys=True, separators=(",", ":")))
 
 
 if __name__ == "__main__":

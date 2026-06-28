@@ -238,7 +238,7 @@ Current local baseline reports:
 | `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json` | `success` | 93 | `976e21f4f0142d788e06885a32d57a3fbb0e1672dc3b4dd7759afd57148a994b` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 | `reports/network/vs2-egress-proof.json` | `passed` | n/a | `26505a8b3db9d44ad99657a35cf38e4cc4bcd8dffd3e145fcb6b49a29fdde9ec` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 | `reports/security/vs2-local-range.json` | `passed` | n/a | `e6257b6076598b1376573c649d2b8c59b205ae2b99787cc44c368431675c9eff` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
-| `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` | `success` | 1 | `f41cd68b9b75f70a765cd14ab604c68e5819c0b03f497f00dc75c0b2b5c371b3` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
+| `reports/scenario/connector-contract-adapter/scenarios/CS-CH-036.json` | `success` | 1 | `0afb81b6b69c8f2e73d39f24ad04f7beea0e865bfb16242f9c63246ef0562d60` | `true` | `false` | `false` | `false` | `h04_local_baseline_snapshot_is_review_input_not_human_acceptance` |
 
 Required human delta:
 

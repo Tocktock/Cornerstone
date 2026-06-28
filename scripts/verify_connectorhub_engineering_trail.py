@@ -44,7 +44,10 @@ MATRIX_PATH = ROOT / "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_MATRIX.c
 CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR = ROOT / "reports/scenario/connector-contract-adapter"
 AGGREGATE_REPORT_PATH = CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR / "aggregate-2026-06-23.json"
 COMPACT_REPORT_MANIFEST_PATH = CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR / "manifest-2026-06-23.json"
-COMPACT_SHARED_EVIDENCE_PATH = CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR / "shared-evidence-2026-06-23.json"
+COMPACT_SHARED_EVIDENCE_INDEX_PATH = (
+    CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR / "shared-evidence-index-2026-06-23.json"
+)
+COMPACT_OBJECT_ROOT = CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR / "objects" / "sha256"
 HUMAN_GATE_READINESS_REPORT_PATH = ROOT / "reports/scenario/connectorhub-human-gate-readiness-2026-06-24.json"
 HUMAN_GATE_NEXT_REPORT_PATH = ROOT / "reports/scenario/connectorhub-human-gate-next-2026-06-24.json"
 HUMAN_GATE_VALIDATION_HANDOFF_PATH = (
@@ -60,6 +63,9 @@ VERIFICATION_DIR = ROOT / "docs/verification-reports"
 HUMAN_PREPARATION_REPORT = VERIFICATION_DIR / "CONNECTOR_HUB_HUMAN_GATES_PREPARATION_REPORT_2026-06-24.md"
 ENGINEERING_TRAIL_INDEX = VERIFICATION_DIR / "CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md"
 CONNECTORHUB_REVIEWER_GUIDE = VERIFICATION_DIR / "CONNECTOR_HUB_REVIEWER_GUIDE.md"
+CONNECTORHUB_REVIEW_SPLIT_MANIFEST = (
+    VERIFICATION_DIR / "CONNECTOR_HUB_REVIEW_SPLIT_MANIFEST_2026-06-28.json"
+)
 VS2_CURRENT_VERIFICATION_REPORT = (
     VERIFICATION_DIR / "VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md"
 )
@@ -73,6 +79,7 @@ SCENARIO_DELIVERY_UNIT_MANIFEST = ROOT / "reports/scenario/connectorhub-scenario
 ENGINEERING_TRAIL_MANIFEST_GENERATOR = ROOT / "scripts/generate_connectorhub_engineering_trail_manifest.py"
 COMPACT_REPORT_SCRIPT = ROOT / "scripts/compact_connectorhub_reports.py"
 CONNECTORHUB_LOCAL_GATE_SCRIPT = ROOT / "scripts/verify_connectorhub_local_evidence.sh"
+CONNECTORHUB_REVIEW_SPLIT_SCRIPT = ROOT / "scripts/verify_connectorhub_review_split.py"
 CONNECTOR_RUNTIME_PATH = ROOT / "packages/cornerstone_cli/connector.py"
 CONNECTOR_MAIN_PATH = ROOT / "packages/cornerstone_cli/main.py"
 CONNECTOR_CLI_TEST_PATH = ROOT / "tests/scenario/test_connectorhub_cli.py"
@@ -22013,6 +22020,98 @@ def _canonical_json_sha256(payload: object) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _load_content_object(ref: object, errors: list[str] | None, label: str) -> object:
+    if not isinstance(ref, dict):
+        if errors is not None:
+            errors.append(f"{label} object ref must be a JSON object")
+        return None
+    path_value = ref.get("path")
+    expected_sha = ref.get("sha256")
+    if not isinstance(path_value, str) or not path_value:
+        if errors is not None:
+            errors.append(f"{label} object ref missing path")
+        return None
+    if not isinstance(expected_sha, str) or not expected_sha:
+        if errors is not None:
+            errors.append(f"{label} object ref missing sha256")
+        return None
+    object_path = (ROOT / path_value).resolve()
+    try:
+        object_path.relative_to(COMPACT_OBJECT_ROOT.resolve())
+    except ValueError:
+        if errors is not None:
+            errors.append(f"{label} object path outside compact object root: {path_value}")
+        return None
+    if not object_path.exists():
+        if errors is not None:
+            errors.append(f"{label} object missing: {path_value}")
+        return None
+    payload = json.loads(object_path.read_text())
+    actual_sha = _canonical_json_sha256(payload)
+    if actual_sha != expected_sha and errors is not None:
+        errors.append(f"{label} object sha256 expected {expected_sha}, found {actual_sha}")
+    return payload
+
+
+def _expand_shared_evidence_index(
+    shared_index_payload: dict[str, object],
+    errors: list[str] | None,
+    label: str,
+) -> dict[str, object]:
+    sections = shared_index_payload.get("sections")
+    if not isinstance(sections, dict):
+        if errors is not None:
+            errors.append(f"{label} compact shared evidence index missing sections")
+        return {}
+    expanded: dict[str, object] = {}
+    for section_name, section_ref in sections.items():
+        if not isinstance(section_ref, dict):
+            if errors is not None:
+                errors.append(f"{label} compact section ref must be an object: {section_name}")
+            continue
+        section_type = section_ref.get("type")
+        if section_type == "list":
+            items = section_ref.get("items")
+            if not isinstance(items, list):
+                if errors is not None:
+                    errors.append(f"{label} compact list section missing items: {section_name}")
+                continue
+            rows: list[object] = []
+            for item in sorted(items, key=lambda ref: ref.get("index") if isinstance(ref, dict) else -1):
+                rows.append(_load_content_object(item, errors, f"{label} {section_name}"))
+            expanded[section_name] = rows
+        elif section_type == "dict":
+            entries = section_ref.get("entries")
+            if not isinstance(entries, list):
+                if errors is not None:
+                    errors.append(f"{label} compact dict section missing entries: {section_name}")
+                continue
+            mapping: dict[str, object] = {}
+            for entry in entries:
+                if not isinstance(entry, dict) or not isinstance(entry.get("key"), str):
+                    if errors is not None:
+                        errors.append(f"{label} compact dict section entry missing key: {section_name}")
+                    continue
+                mapping[entry["key"]] = _load_content_object(
+                    entry,
+                    errors,
+                    f"{label} {section_name}.{entry['key']}",
+                )
+            expanded[section_name] = mapping
+        else:
+            if errors is not None:
+                errors.append(f"{label} compact section type unsupported: {section_name}={section_type}")
+            continue
+        expected_section_sha = section_ref.get("sha256")
+        actual_section_sha = _canonical_json_sha256(expanded[section_name])
+        if expected_section_sha != actual_section_sha and errors is not None:
+            errors.append(
+                f"{label} compact section {section_name} sha256 expected "
+                f"{expected_section_sha}, found {actual_section_sha}"
+            )
+    return expanded
+
+
 def _load_connector_contract_report(
     report_path: Path,
     errors: list[str] | None = None,
@@ -22023,7 +22122,7 @@ def _load_connector_contract_report(
         if errors is not None:
             errors.append(f"{label} must be a JSON object: {report_path.relative_to(ROOT)}")
         return {}
-    if report.get("compact_evidence_layout") != "content_addressed_shared_v1":
+    if report.get("compact_evidence_layout") != "content_addressed_objects_v1":
         return report
 
     shared_ref = report.get("shared_evidence_ref")
@@ -22048,16 +22147,16 @@ def _load_connector_contract_report(
             f"{label} compact shared evidence sha256 expected {expected_shared_sha}, "
             f"found {actual_shared_sha}"
         )
-    shared_payload = json.loads(shared_path.read_text())
-    if not isinstance(shared_payload, dict):
+    shared_index_payload = json.loads(shared_path.read_text())
+    if not isinstance(shared_index_payload, dict):
         if errors is not None:
-            errors.append(f"{label} compact shared evidence must be a JSON object")
+            errors.append(f"{label} compact shared evidence index must be a JSON object")
         return report
-    sections = shared_payload.get("sections")
-    if not isinstance(sections, dict):
+    if shared_index_payload.get("layout") != "content_addressed_objects_v1":
         if errors is not None:
-            errors.append(f"{label} compact shared evidence missing sections")
+            errors.append(f"{label} compact shared evidence index layout mismatch")
         return report
+    sections = _expand_shared_evidence_index(shared_index_payload, errors, label)
     section_refs = shared_ref.get("sections") if isinstance(shared_ref.get("sections"), dict) else {}
     expanded = dict(report)
     for section_name, section_payload in sections.items():
@@ -22174,32 +22273,36 @@ def _validate_path_portability(errors: list[str]) -> None:
                     f"{report_path.relative_to(ROOT)}:{'.'.join(json_path)}"
                 )
 
-    if COMPACT_SHARED_EVIDENCE_PATH.exists():
-        shared_payload = json.loads(COMPACT_SHARED_EVIDENCE_PATH.read_text())
+    if COMPACT_SHARED_EVIDENCE_INDEX_PATH.exists():
+        shared_payload = json.loads(COMPACT_SHARED_EVIDENCE_INDEX_PATH.read_text())
         portability = shared_payload.get("path_portability")
         if not isinstance(portability, dict):
-            errors.append("compact shared evidence missing path_portability")
+            errors.append("compact shared evidence index missing path_portability")
         elif portability.get("claim_boundary") != expected_claim_boundary:
-            errors.append("compact shared evidence path_portability claim_boundary mismatch")
-        allowed_shared_absolute_paths = set()
-        if isinstance(portability, dict):
-            declared_fields = portability.get("historical_absolute_path_fields")
-            if isinstance(declared_fields, list):
-                allowed_shared_absolute_paths = {
-                    tuple(str(field).split("."))
-                    for field in declared_fields
-                    if isinstance(field, str)
-                }
-        if "tmp/scenario/" in COMPACT_SHARED_EVIDENCE_PATH.read_text(encoding="utf-8", errors="replace"):
+            errors.append("compact shared evidence index path_portability claim_boundary mismatch")
+        if "tmp/scenario/" in COMPACT_SHARED_EVIDENCE_INDEX_PATH.read_text(encoding="utf-8", errors="replace"):
             prefixes = portability.get("regenerable_transcript_path_prefixes") if isinstance(portability, dict) else None
             if not isinstance(prefixes, list) or "tmp/scenario/" not in prefixes:
-                errors.append("compact shared evidence tmp/scenario refs are not marked regenerable")
+                errors.append("compact shared evidence index tmp/scenario refs are not marked regenerable")
         for json_path, string_value in _json_string_paths(shared_payload):
-            if "/Users/" in string_value and json_path not in allowed_shared_absolute_paths:
+            if "/Users/" in string_value:
                 errors.append(
-                    "compact shared evidence has unguarded absolute path at "
+                    "compact shared evidence index has unguarded absolute path at "
                     f"{'.'.join(json_path)}"
                 )
+        if COMPACT_OBJECT_ROOT.exists():
+            object_paths = sorted(COMPACT_OBJECT_ROOT.glob("*/*.json"))
+            if not object_paths:
+                errors.append("compact object root has no sha256 objects")
+            if isinstance(portability, dict) and portability.get("claim_boundary") == expected_claim_boundary:
+                for object_path in object_paths:
+                    object_text = object_path.read_text(encoding="utf-8", errors="replace")
+                    if "tmp/scenario/" in object_text:
+                        prefixes = portability.get("regenerable_transcript_path_prefixes")
+                        if not isinstance(prefixes, list) or "tmp/scenario/" not in prefixes:
+                            errors.append(
+                                f"compact object tmp/scenario refs are not marked regenerable: {object_path.relative_to(ROOT)}"
+                            )
 
     if COMPACT_REPORT_MANIFEST_PATH.exists():
         manifest_payload = json.loads(COMPACT_REPORT_MANIFEST_PATH.read_text())
@@ -22275,6 +22378,123 @@ def _validate_connectorhub_split_adr(errors: list[str]) -> None:
             errors.append(f"ConnectorHub split ADR missing token: {token}")
 
 
+def _validate_connectorhub_review_split_manifest(errors: list[str]) -> None:
+    if not CONNECTORHUB_REVIEW_SPLIT_MANIFEST.exists():
+        errors.append(
+            "missing ConnectorHub review split manifest: "
+            f"{CONNECTORHUB_REVIEW_SPLIT_MANIFEST.relative_to(ROOT)}"
+        )
+        return
+    try:
+        payload = json.loads(CONNECTORHUB_REVIEW_SPLIT_MANIFEST.read_text())
+    except json.JSONDecodeError as error:
+        errors.append(f"ConnectorHub review split manifest invalid JSON: {error}")
+        return
+    if not isinstance(payload, dict):
+        errors.append("ConnectorHub review split manifest must be a JSON object")
+        return
+    expected_fields = {
+        "schema_version": "cs.connectorhub.review_split_manifest.v1",
+        "status": "draft_review_split",
+        "verdict": "needs_follow_up",
+        "claim_boundary": "split_manifest_is_review_planning_not_merge_or_implementation_completion",
+        "local_verification_command": "python3 scripts/verify_connectorhub_review_split.py",
+        "generated_for_pr": 20,
+    }
+    for key, expected in expected_fields.items():
+        if payload.get(key) != expected:
+            errors.append(
+                f"ConnectorHub review split manifest {key} expected {expected}, "
+                f"found {payload.get(key)}"
+            )
+    notes = payload.get("notes")
+    if not isinstance(notes, list):
+        errors.append("ConnectorHub review split manifest notes must be a list")
+    else:
+        for token in [
+            "It does not claim the branch has already been split.",
+            "It does not claim connector.py or test_connectorhub_cli.py refactoring is complete.",
+            "It does not require or add GitHub Actions workflows.",
+        ]:
+            if token not in notes:
+                errors.append(f"ConnectorHub review split manifest missing note: {token}")
+
+    slices = payload.get("slices")
+    if not isinstance(slices, list):
+        errors.append("ConnectorHub review split manifest slices must be a list")
+        return
+    expected_slice_ids = [
+        "PR20-A",
+        "PR20-B",
+        "PR20-C",
+        "PR20-D",
+        "PR20-E",
+        "PR20-F",
+        "PR20-G",
+        "PR20-H",
+    ]
+    observed_slice_ids = [item.get("slice_id") for item in slices if isinstance(item, dict)]
+    if observed_slice_ids != expected_slice_ids:
+        errors.append(f"ConnectorHub review split manifest slice order mismatch: {observed_slice_ids}")
+    runtime_expected = {
+        "PR20-C": {f"CS-CH-{number:03d}" for number in range(1, 15)},
+        "PR20-D": {f"CS-CH-{number:03d}" for number in range(15, 21)},
+        "PR20-E": {f"CS-CH-{number:03d}" for number in range(21, 29)},
+        "PR20-F": {f"CS-CH-{number:03d}" for number in range(29, 34)},
+        "PR20-G": {f"CS-CH-{number:03d}" for number in range(34, 41)},
+    }
+    runtime_observed: set[str] = set()
+    for item in slices:
+        if not isinstance(item, dict):
+            errors.append(f"ConnectorHub review split manifest slice must be an object: {item!r}")
+            continue
+        slice_id = item.get("slice_id")
+        scenario_ids = item.get("scenario_ids")
+        if not isinstance(scenario_ids, list) or not all(isinstance(value, str) for value in scenario_ids):
+            errors.append(f"ConnectorHub review split manifest {slice_id} scenario_ids invalid")
+            continue
+        scenario_set = set(scenario_ids)
+        if slice_id in runtime_expected:
+            if scenario_set != runtime_expected[slice_id]:
+                errors.append(
+                    f"ConnectorHub review split manifest {slice_id} scenario coverage mismatch: "
+                    f"{sorted(scenario_set)}"
+                )
+            runtime_observed.update(scenario_set)
+        if slice_id == "PR20-A" and scenario_set != EXPECTED_AI_SCENARIO_IDS | EXPECTED_HUMAN_SCENARIO_IDS:
+            errors.append("ConnectorHub review split manifest PR20-A must cover all ConnectorHub scenarios")
+        if slice_id == "PR20-B" and scenario_set != EXPECTED_AI_SCENARIO_IDS:
+            errors.append("ConnectorHub review split manifest PR20-B must cover all AI scenarios")
+        for path in item.get("required_paths", []):
+            if not isinstance(path, str) or not path:
+                errors.append(f"ConnectorHub review split manifest {slice_id} has invalid path: {path!r}")
+                continue
+            if ".github/workflows" in path or path.startswith("/"):
+                errors.append(f"ConnectorHub review split manifest {slice_id} invalid path boundary: {path}")
+            elif not (ROOT / path).exists():
+                errors.append(f"ConnectorHub review split manifest {slice_id} required path missing: {path}")
+        for command in item.get("local_commands", []):
+            if not isinstance(command, str) or not command:
+                errors.append(f"ConnectorHub review split manifest {slice_id} invalid command: {command!r}")
+                continue
+            lowered = command.lower()
+            if "gh workflow" in lowered or ".github/workflows" in lowered:
+                errors.append(
+                    f"ConnectorHub review split manifest {slice_id} command must not depend on workflow: "
+                    f"{command}"
+                )
+    if runtime_observed != EXPECTED_AI_SCENARIO_IDS:
+        errors.append(
+            "ConnectorHub review split manifest runtime slices must cover CS-CH-001..CS-CH-040 exactly"
+        )
+    target_modules = payload.get("target_module_map")
+    if not isinstance(target_modules, list) or "packages/cornerstone_cli/connector/human_gates.py" not in target_modules:
+        errors.append("ConnectorHub review split manifest target_module_map incomplete")
+    target_tests = payload.get("target_test_map")
+    if not isinstance(target_tests, list) or "tests/scenario/connectorhub/test_human_gates.py" not in target_tests:
+        errors.append("ConnectorHub review split manifest target_test_map incomplete")
+
+
 def _validate_connectorhub_feedback_resolution_report(errors: list[str]) -> None:
     if not CONNECTORHUB_FEEDBACK_RESOLUTION_REPORT.exists():
         errors.append(
@@ -22319,7 +22539,7 @@ def _required_manifest_paths(matrix_rows: list[dict[str, str]]) -> list[Path]:
         ROOT / "docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md",
         AGGREGATE_REPORT_PATH,
         COMPACT_REPORT_MANIFEST_PATH,
-        COMPACT_SHARED_EVIDENCE_PATH,
+        COMPACT_SHARED_EVIDENCE_INDEX_PATH,
         HUMAN_GATE_READINESS_REPORT_PATH,
         HUMAN_GATE_NEXT_REPORT_PATH,
         HUMAN_GATE_VALIDATION_HANDOFF_PATH,
@@ -22336,6 +22556,7 @@ def _required_manifest_paths(matrix_rows: list[dict[str, str]]) -> list[Path]:
         HUMAN_PREPARATION_REPORT,
         ENGINEERING_TRAIL_INDEX,
         CONNECTORHUB_REVIEWER_GUIDE,
+        CONNECTORHUB_REVIEW_SPLIT_MANIFEST,
         CONNECTORHUB_FEEDBACK_RESOLUTION_REPORT,
         VS2_CURRENT_VERIFICATION_REPORT,
         CONNECTORHUB_H04_ADR,
@@ -22345,6 +22566,7 @@ def _required_manifest_paths(matrix_rows: list[dict[str, str]]) -> list[Path]:
         ENGINEERING_TRAIL_MANIFEST_GENERATOR,
         COMPACT_REPORT_SCRIPT,
         CONNECTORHUB_LOCAL_GATE_SCRIPT,
+        CONNECTORHUB_REVIEW_SPLIT_SCRIPT,
         CONNECTOR_RUNTIME_PATH,
         CONNECTOR_MAIN_PATH,
         CONNECTOR_CLI_TEST_PATH,
@@ -22426,8 +22648,11 @@ def _validate_exact_artifact_sets(errors: list[str], matrix_rows: list[dict[str,
 
     observed_aggregate_reports = set(CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR.glob("aggregate-*.json"))
     observed_compact_manifests = set(CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR.glob("manifest-*.json"))
-    observed_compact_shared_evidence = set(
-        CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR.glob("shared-evidence-*.json")
+    observed_compact_shared_evidence_indexes = set(
+        CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR.glob("shared-evidence-index-*.json")
+    )
+    observed_legacy_compact_shared_evidence = set(
+        CONNECTOR_CONTRACT_ADAPTER_REPORT_DIR.glob("shared-evidence-[0-9][0-9][0-9][0-9]-*.json")
     )
     observed_stale_flat_reports = set(
         (ROOT / "reports/scenario").glob("connector-contract-adapter*.json")
@@ -22540,9 +22765,14 @@ def _validate_exact_artifact_sets(errors: list[str], matrix_rows: list[dict[str,
         ("aggregate JSON reports", {AGGREGATE_REPORT_PATH}, observed_aggregate_reports),
         ("compact evidence manifests", {COMPACT_REPORT_MANIFEST_PATH}, observed_compact_manifests),
         (
-            "compact shared evidence reports",
-            {COMPACT_SHARED_EVIDENCE_PATH},
-            observed_compact_shared_evidence,
+            "compact shared evidence indexes",
+            {COMPACT_SHARED_EVIDENCE_INDEX_PATH},
+            observed_compact_shared_evidence_indexes,
+        ),
+        (
+            "legacy compact shared evidence reports",
+            set(),
+            observed_legacy_compact_shared_evidence,
         ),
         ("engineering trail manifests", {ENGINEERING_TRAIL_MANIFEST}, observed_manifests),
         (
@@ -29963,7 +30193,7 @@ def _validate_report_envelope(
             f"{expected_output_path}, found {report.get('output_path')}"
         )
     expected_output_arg = expected_report_path.resolve().relative_to(ROOT.resolve()).as_posix()
-    compact_report = report.get("compact_evidence_layout") == "content_addressed_shared_v1"
+    compact_report = report.get("compact_evidence_layout") == "content_addressed_objects_v1"
     transcript = report.get("self_command_transcript")
     if not isinstance(transcript, dict):
         errors.append(f"{label} self_command_transcript must be present")
@@ -32523,6 +32753,7 @@ def main() -> int:
                     errors.append(f"engineering trail index missing {scenario_id} token: {token}")
         _validate_path_portability(errors)
         _validate_connectorhub_split_adr(errors)
+        _validate_connectorhub_review_split_manifest(errors)
         _validate_connectorhub_feedback_resolution_report(errors)
 
     manifest_paths = _required_manifest_paths(matrix_rows)

@@ -13,12 +13,14 @@ PR #20 is a broad ConnectorHub adoption overlay. It combines scenario contract c
 
 This ADR does not claim that the split has already happened. It records the required review and migration map so the current PR can stay a local evidence branch while future PRs are cut into safer review slices.
 
+The executable split-readiness manifest is `docs/verification-reports/CONNECTOR_HUB_REVIEW_SPLIT_MANIFEST_2026-06-28.json` and is verified locally by `python3 scripts/verify_connectorhub_review_split.py`.
+
 ## Decision
 
 Treat PR #20 as a draft evidence branch. Do not present it as a ConnectorHub milestone-complete merge candidate. The preferred split sequence is:
 
 1. Contract and matrix cleanup only.
-2. Compact evidence layout and verifier support.
+2. Compact evidence layout and verifier support. This includes the shared evidence index and SHA-256 object store.
 3. ConnectorPort setup and delivery core for `CS-CH-001` through `CS-CH-014`.
 4. GitHub selected-repository read-only lane for `CS-CH-015` through `CS-CH-020`.
 5. macOS, Chrome, Watch Rule, and Watch Result local fixture lane for `CS-CH-021` through `CS-CH-028`.
@@ -86,5 +88,6 @@ Negative:
 This ADR is guarded by:
 
 - `scripts/verify_connectorhub_engineering_trail.py`
+- `scripts/verify_connectorhub_review_split.py`
 - `scripts/verify_connectorhub_local_evidence.sh`
 - `docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md`
