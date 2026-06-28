@@ -44,7 +44,7 @@ Strict mode additionally runs the broader ConnectorHub CLI suite, scaffold suite
 
 ## Split Recommendation
 
-PR #20 should stay draft unless intentionally kept as a single evidence branch. A safer merge sequence is:
+PR #20 should stay draft unless intentionally kept as a single evidence branch. The formal split and module map is recorded in `docs/adr/ADR-0008-connectorhub-review-split-and-module-map.md`. A safer merge sequence is:
 
 1. Contract and matrix cleanup.
 2. Compact evidence layout and verifier support.
@@ -53,6 +53,8 @@ PR #20 should stay draft unless intentionally kept as a single evidence branch. 
 5. VS2 current verification report and H04 local-baseline handoff.
 6. Local reviewer-guide and verification-script wiring.
 7. Any later production-like integration test work.
+
+The current branch does not claim the `connector.py` or scenario-test split is already complete. The ADR defines the target package/test map and is guarded by `scripts/verify_connectorhub_engineering_trail.py`.
 
 ## H04 Substitution Boundary
 

@@ -51,21 +51,6 @@
       "size_bytes": 25074
     },
     {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h06-2026-06-24.json",
-      "sha256": "f944b46a84d502b7be3af54e46c0ca94a6b5e33007792a9a90efa49962384b1a",
-      "size_bytes": 8440
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h02-2026-06-24.json",
-      "sha256": "08eb039fb0881a97b06f196b1b6366d68ad09c56ab38c4f3d6283a1b1cbb06ea",
-      "size_bytes": 8632
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h05-2026-06-24.json",
-      "sha256": "2a9cdc06482d55794bebe66660d34f6c3814d4f8746cf2fe057e2a6aac882356",
-      "size_bytes": 8428
-    },
-    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h04-2026-06-24.json",
       "sha256": "fc8480e3d8969d1c9130c6323e916e132ec4e969ab1557f563985658ed58c078",
       "size_bytes": 8532
@@ -74,6 +59,16 @@
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h07-2026-06-24.json",
       "sha256": "384088de9e0ac20de610ea6286ed0d3f7f060ee6dd53a3e1f7d399c945de698b",
       "size_bytes": 8376
+    },
+    {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h05-2026-06-24.json",
+      "sha256": "2a9cdc06482d55794bebe66660d34f6c3814d4f8746cf2fe057e2a6aac882356",
+      "size_bytes": 8428
+    },
+    {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h06-2026-06-24.json",
+      "sha256": "f944b46a84d502b7be3af54e46c0ca94a6b5e33007792a9a90efa49962384b1a",
+      "size_bytes": 8440
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h01-2026-06-24.json",
@@ -86,19 +81,9 @@
       "size_bytes": 8752
     },
     {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h06-2026-06-24.json",
-      "sha256": "13cd769870e870f7e75346cf33e137139b7d2032851823aa867840282d993284",
-      "size_bytes": 45069
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h02-2026-06-24.json",
-      "sha256": "863680417ab5074a509b4fb312fe73d139cff41bb611c684469c4e6908c3178a",
-      "size_bytes": 31220
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h05-2026-06-24.json",
-      "sha256": "7ee027b946e5cb4a03bf5d3336b6d205fa9ff044da5ba7e84d2dbf9c3967227e",
-      "size_bytes": 37500
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-contract-cs-ch-h02-2026-06-24.json",
+      "sha256": "08eb039fb0881a97b06f196b1b6366d68ad09c56ab38c4f3d6283a1b1cbb06ea",
+      "size_bytes": 8632
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h04-2026-06-24.json",
@@ -111,6 +96,16 @@
       "size_bytes": 31224
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h05-2026-06-24.json",
+      "sha256": "7ee027b946e5cb4a03bf5d3336b6d205fa9ff044da5ba7e84d2dbf9c3967227e",
+      "size_bytes": 37500
+    },
+    {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h06-2026-06-24.json",
+      "sha256": "13cd769870e870f7e75346cf33e137139b7d2032851823aa867840282d993284",
+      "size_bytes": 45069
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h01-2026-06-24.json",
       "sha256": "0aee120d6eb2a225cc8addfb9411b0c94e478fd7fc9e1b7b8f34cc7fa4122bcc",
       "size_bytes": 29489
@@ -121,19 +116,9 @@
       "size_bytes": 37517
     },
     {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h06-2026-06-24.json",
-      "sha256": "ef0575fde78c1b8bb725fc4a92c67459c6d29ef44f1cec8771ef98e5f7048870",
-      "size_bytes": 29663
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h02-2026-06-24.json",
-      "sha256": "3b8da0103246a2d93d63156a1edb54e1fd42fb73a702ba70fbe7a921fc77cfa4",
-      "size_bytes": 21039
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h05-2026-06-24.json",
-      "sha256": "d4ec928c0a9b77e6c5ca738b7ebe6466fef3da3c8f9093d18270be863d7c9e9b",
-      "size_bytes": 25038
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-file-contract-cs-ch-h02-2026-06-24.json",
+      "sha256": "863680417ab5074a509b4fb312fe73d139cff41bb611c684469c4e6908c3178a",
+      "size_bytes": 31220
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h04-2026-06-24.json",
@@ -146,6 +131,16 @@
       "size_bytes": 21336
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h05-2026-06-24.json",
+      "sha256": "d4ec928c0a9b77e6c5ca738b7ebe6466fef3da3c8f9093d18270be863d7c9e9b",
+      "size_bytes": 25038
+    },
+    {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h06-2026-06-24.json",
+      "sha256": "ef0575fde78c1b8bb725fc4a92c67459c6d29ef44f1cec8771ef98e5f7048870",
+      "size_bytes": 29663
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h01-2026-06-24.json",
       "sha256": "1a166e2d0c6f66d2d38a06b3ac259a85a05751fd23d33a29c4b61aaf5cde3428",
       "size_bytes": 19889
@@ -156,19 +151,9 @@
       "size_bytes": 24920
     },
     {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h06-2026-06-24.json",
-      "sha256": "a513d8215eb9e4a9c5ba9912e2848d73e89a1268540215192e0248900325a4c2",
-      "size_bytes": 22295
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h02-2026-06-24.json",
-      "sha256": "69782a438481bff0ab5ae696892a9ccb509df38f1756aeb82e1e494adbef61c7",
-      "size_bytes": 17079
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h05-2026-06-24.json",
-      "sha256": "bc9eab192a86bd4761405e05a7fb641e34951f0a1464ed27f09cff428197e01a",
-      "size_bytes": 19450
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-scaffold-cs-ch-h02-2026-06-24.json",
+      "sha256": "3b8da0103246a2d93d63156a1edb54e1fd42fb73a702ba70fbe7a921fc77cfa4",
+      "size_bytes": 21039
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h04-2026-06-24.json",
@@ -181,6 +166,16 @@
       "size_bytes": 17156
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h05-2026-06-24.json",
+      "sha256": "bc9eab192a86bd4761405e05a7fb641e34951f0a1464ed27f09cff428197e01a",
+      "size_bytes": 19450
+    },
+    {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h06-2026-06-24.json",
+      "sha256": "a513d8215eb9e4a9c5ba9912e2848d73e89a1268540215192e0248900325a4c2",
+      "size_bytes": 22295
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h01-2026-06-24.json",
       "sha256": "f35e7d287674247e17f0b9cc054f6de651c1ba1748b33c339e702795d4cd8852",
       "size_bytes": 16290
@@ -191,19 +186,9 @@
       "size_bytes": 19405
     },
     {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h06-2026-06-24.json",
-      "sha256": "2b9bb8ba272049550a80d64996aa90c0211565498fd0b0011f05430670bc7338",
-      "size_bytes": 9485
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h02-2026-06-24.json",
-      "sha256": "788c9d39e4571e4cd199109c937f64e95da6100a1f65880c1a0f75773bfbe861",
-      "size_bytes": 9483
-    },
-    {
-      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h05-2026-06-24.json",
-      "sha256": "7bc3f54cc7c6bb0c8227141ba276ff6cd7ccfcfd9f1e84e4f2754157fa690738",
-      "size_bytes": 9485
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-validation-cs-ch-h02-2026-06-24.json",
+      "sha256": "69782a438481bff0ab5ae696892a9ccb509df38f1756aeb82e1e494adbef61c7",
+      "size_bytes": 17079
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h04-2026-06-24.json",
@@ -216,6 +201,16 @@
       "size_bytes": 9483
     },
     {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h05-2026-06-24.json",
+      "sha256": "7bc3f54cc7c6bb0c8227141ba276ff6cd7ccfcfd9f1e84e4f2754157fa690738",
+      "size_bytes": 9485
+    },
+    {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h06-2026-06-24.json",
+      "sha256": "2b9bb8ba272049550a80d64996aa90c0211565498fd0b0011f05430670bc7338",
+      "size_bytes": 9485
+    },
+    {
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h01-2026-06-24.json",
       "sha256": "1346da2d13aac5043c89b55e7d651a0e7b7ec53090231dc57bed166438c6b168",
       "size_bytes": 9483
@@ -224,6 +219,11 @@
       "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h03-2026-06-24.json",
       "sha256": "807b72f3f5d157956e65500d370959ff90daf6810b14da1df5c46e42da42d7f2",
       "size_bytes": 9485
+    },
+    {
+      "path": "reports/scenario/connectorhub-human-gate-evidence-packet-record-draft-cs-ch-h02-2026-06-24.json",
+      "sha256": "788c9d39e4571e4cd199109c937f64e95da6100a1f65880c1a0f75773bfbe861",
+      "size_bytes": 9483
     },
     {
       "path": "reports/scenario/connectorhub-human-gate-package-cs-ch-h01-2026-06-24.json",
@@ -337,13 +337,13 @@
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md",
-      "sha256": "3a46766fdabb762d5cbcc003bf5ef129051cd5a0f43facbf781af470bd94ca5d",
+      "sha256": "0e489dd0c25a6ae951f01df8723c27c7aff4d7f70fd51762a88835f74ac99ae5",
       "size_bytes": 639252
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md",
-      "sha256": "b7f10588660f420e3f9a9301245eb3c88db2cbe14230ef098ba92793db91dbcd",
-      "size_bytes": 3450
+      "sha256": "6d74f2b87fc395b086f1bf863288663620c9783474d37be221f5945e61dc4e06",
+      "size_bytes": 3774
     },
     {
       "path": "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md",
@@ -356,14 +356,19 @@
       "size_bytes": 2199
     },
     {
+      "path": "docs/adr/ADR-0008-connectorhub-review-split-and-module-map.md",
+      "sha256": "52d43b7dd6c4bef77882420855e60943cae480432bf88d2ce9397a09842bc19f",
+      "size_bytes": 3498
+    },
+    {
       "path": "reports/scenario/connectorhub-scenario-delivery-unit-manifest-2026-06-24.json",
       "sha256": "e2d8fa42c2ba5d6eefa738f26b09a74894613ba1dd98fa8b916afa01c76f59bd",
       "size_bytes": 3115528
     },
     {
       "path": "scripts/verify_connectorhub_engineering_trail.py",
-      "sha256": "165e6d651c3da4c4b7cd9516cd82fc2e5e230e352760585ce6cdea05e564c37e",
-      "size_bytes": 1666568
+      "sha256": "9b3c0a2965918230f708632f88fa88724780444f34c6a6129fbfd24313c078a8",
+      "size_bytes": 1668276
     },
     {
       "path": "scripts/generate_connectorhub_engineering_trail_manifest.py",
@@ -851,7 +856,7 @@
       "size_bytes": 14559
     }
   ],
-  "generated_at": "2026-06-28T03:21:07.061323+00:00",
+  "generated_at": "2026-06-28T03:28:32.082130+00:00",
   "manifest_schema": "cornerstone.connectorhub.engineering_trail_manifest.v1",
   "source_inputs": [
     {
@@ -876,7 +881,7 @@
   "summary": {
     "ai_pass_rows": 40,
     "claim_boundary": "local_fixture_and_local_vs2_topology_only",
-    "file_count": 170,
+    "file_count": 171,
     "human_required_rows": 7,
     "source_input_count": 2,
     "source_requirements_covered": 27,

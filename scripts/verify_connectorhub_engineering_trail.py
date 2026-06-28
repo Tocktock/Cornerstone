@@ -39,6 +39,7 @@ VS2_CURRENT_VERIFICATION_REPORT = (
     VERIFICATION_DIR / "VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md"
 )
 CONNECTORHUB_H04_ADR = ROOT / "docs/adr/ADR-0007-connectorhub-h04-local-baseline-substitution.md"
+CONNECTORHUB_SPLIT_ADR = ROOT / "docs/adr/ADR-0008-connectorhub-review-split-and-module-map.md"
 ENGINEERING_TRAIL_MANIFEST = ROOT / "reports/scenario/connectorhub-engineering-trail-manifest-2026-06-24.json"
 SCENARIO_DELIVERY_UNIT_MANIFEST = ROOT / "reports/scenario/connectorhub-scenario-delivery-unit-manifest-2026-06-24.json"
 ENGINEERING_TRAIL_MANIFEST_GENERATOR = ROOT / "scripts/generate_connectorhub_engineering_trail_manifest.py"
@@ -22095,6 +22096,7 @@ def _validate_path_portability(errors: list[str]) -> None:
         CONNECTORHUB_REVIEWER_GUIDE,
         VS2_CURRENT_VERIFICATION_REPORT,
         CONNECTORHUB_H04_ADR,
+        CONNECTORHUB_SPLIT_ADR,
         *[source["path"] for source in SOURCE_INPUTS],
     ]
     for path in repo_docs:
@@ -22179,6 +22181,40 @@ def _validate_path_portability(errors: list[str]) -> None:
                 )
 
 
+def _validate_connectorhub_split_adr(errors: list[str]) -> None:
+    if not CONNECTORHUB_SPLIT_ADR.exists():
+        errors.append(f"missing ConnectorHub split ADR: {CONNECTORHUB_SPLIT_ADR.relative_to(ROOT)}")
+        return
+    text = CONNECTORHUB_SPLIT_ADR.read_text()
+    required_tokens = [
+        "PR #20 is a broad ConnectorHub adoption overlay",
+        "Treat PR #20 as a draft evidence branch",
+        "Contract and matrix cleanup only.",
+        "Compact evidence layout and verifier support.",
+        "ConnectorPort setup and delivery core for `CS-CH-001` through `CS-CH-014`.",
+        "GitHub selected-repository read-only lane for `CS-CH-015` through `CS-CH-020`.",
+        "Local fixture Action lane for `CS-CH-029` through `CS-CH-033`.",
+        "VS2 production-like local rehearsal as a separate local/manual proof slice.",
+        "packages/cornerstone_cli/connector/",
+        "raw_access.py",
+        "github_readonly.py",
+        "capture_macos.py",
+        "capture_chrome.py",
+        "watch_rules.py",
+        "watch_results.py",
+        "action_preflight.py",
+        "audit_bridge.py",
+        "human_gates.py",
+        "tests/scenario/connectorhub/",
+        "No GitHub Actions workflow is required",
+        "scripts/verify_connectorhub_local_evidence.sh",
+        "not evidence that the refactor has already happened",
+    ]
+    for token in required_tokens:
+        if token not in text:
+            errors.append(f"ConnectorHub split ADR missing token: {token}")
+
+
 def _required_manifest_paths(matrix_rows: list[dict[str, str]]) -> list[Path]:
     paths = [
         MATRIX_PATH,
@@ -22204,6 +22240,7 @@ def _required_manifest_paths(matrix_rows: list[dict[str, str]]) -> list[Path]:
         CONNECTORHUB_REVIEWER_GUIDE,
         VS2_CURRENT_VERIFICATION_REPORT,
         CONNECTORHUB_H04_ADR,
+        CONNECTORHUB_SPLIT_ADR,
         SCENARIO_DELIVERY_UNIT_MANIFEST,
         Path(__file__).resolve(),
         ENGINEERING_TRAIL_MANIFEST_GENERATOR,
@@ -32345,6 +32382,7 @@ def main() -> int:
                 if token and token not in index_text:
                     errors.append(f"engineering trail index missing {scenario_id} token: {token}")
         _validate_path_portability(errors)
+        _validate_connectorhub_split_adr(errors)
 
     manifest_paths = _required_manifest_paths(matrix_rows)
     manifest_relative_paths = {
