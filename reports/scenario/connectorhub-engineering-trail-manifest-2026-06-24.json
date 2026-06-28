@@ -282,13 +282,13 @@
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_PR20_FEEDBACK_RESOLUTION_2026-06-28.md",
-      "sha256": "bedd8971183fd9535d808a59b783385e38b154f2c23d10b425a89a302dd28972",
-      "size_bytes": 10534
+      "sha256": "82c70558999ca10d12cdb7f6aac6351e41d402276fe677c753d54c196ffba0fd",
+      "size_bytes": 10739
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md",
-      "sha256": "f0e9f525459daea8792db8a0db07c071c9ce938009ac0a899aff5efdf71bbffb",
-      "size_bytes": 4900
+      "sha256": "aea389b61c712b0f0060974d0b06b3bf22302ae8655a9a0ca2480557f30e0cf9",
+      "size_bytes": 5123
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_REVIEW_SPLIT_MANIFEST_2026-06-28.json",
@@ -852,8 +852,8 @@
     },
     {
       "path": "scripts/verify_connectorhub_local_evidence.sh",
-      "sha256": "6e9a5eb425392ab6988a9277f3abf82cd3668fd800c83a530642fa101c94ba69",
-      "size_bytes": 929
+      "sha256": "7b62269bfdcff0bd6ca00326cf9bac81123239ce5aae4bde7d4f471a2ee5a4d2",
+      "size_bytes": 1017
     },
     {
       "path": "scripts/verify_connectorhub_review_split.py",
@@ -871,7 +871,7 @@
       "size_bytes": 7216
     }
   ],
-  "generated_at": "2026-06-28T06:14:09.257253+00:00",
+  "generated_at": "2026-06-28T06:39:01.842657+00:00",
   "manifest_schema": "cornerstone.connectorhub.engineering_trail_manifest.v1",
   "source_inputs": [
     {

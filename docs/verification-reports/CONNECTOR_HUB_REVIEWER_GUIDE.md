@@ -27,7 +27,7 @@ The scenario delivery-unit manifest also carries a top-level `path_portability` 
 scripts/verify_connectorhub_local_evidence.sh
 ```
 
-This default local gate runs whitespace, SoT docs, the ConnectorHub engineering-trail verifier, the full ConnectorHub CLI unittest suite, compact-report tests, the scaffold CLI unittest suite, and Python compile checks without depending on GitHub Actions.
+This default local gate runs whitespace, SoT docs, the ConnectorHub engineering-trail verifier, the ConnectorHub CLI unittest suite with VS2-heavy regression subtests skipped, compact-report tests, the scaffold CLI unittest suite with VS2-heavy regression subtests skipped, and Python compile checks without depending on GitHub Actions. The skip is explicit through `CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1`; Docker/VS2 rehearsal evidence belongs to the strict local gate below.
 
 For the review-split plan specifically, run:
 

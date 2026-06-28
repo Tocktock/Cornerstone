@@ -40,7 +40,7 @@ Default local evidence gate:
 scripts/verify_connectorhub_local_evidence.sh
 ```
 
-Default mode runs `git diff --check`, SoT docs verification, ConnectorHub engineering-trail verification, the full ConnectorHub CLI unittest suite, compact-report tests, scaffold CLI unittest suite, and `compileall`.
+Default mode runs `git diff --check`, SoT docs verification, ConnectorHub engineering-trail verification, ConnectorHub CLI unittest coverage with `CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1`, compact-report tests, scaffold CLI unittest coverage with `CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1`, and `compileall`. The default gate is intentionally non-Docker; VS2-heavy regression subtests move to the strict local/manual gate.
 
 Split-readiness gate:
 
