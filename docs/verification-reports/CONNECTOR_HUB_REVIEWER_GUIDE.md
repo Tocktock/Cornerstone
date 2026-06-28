@@ -41,8 +41,9 @@ Strict mode additionally runs the broader ConnectorHub CLI suite, scaffold suite
 1. Confirm the PR remains draft until local gate evidence and split strategy are agreed.
 2. Inspect `docs/scenario-contracts/CONNECTOR_HUB_APPLICATION_CONTRACT.md` for neutral contract status. PASS/HUMAN_REQUIRED counts belong to reports.
 3. Inspect `docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md` for source reconciliation, remaining proof surfaces, and compact evidence refs.
-4. Run `python3 scripts/verify_connectorhub_engineering_trail.py` to validate matrix rows, compact hashes, focused gates, source-input hashes, path portability, and manifest exactness.
-5. Spot-check one compact focused report and the shared evidence manifest before reviewing scenario behavior.
+4. Inspect `docs/verification-reports/CONNECTOR_HUB_PR20_FEEDBACK_RESOLUTION_2026-06-28.md` for the finding-by-finding response, current local fixes, and remaining merge blockers.
+5. Run `python3 scripts/verify_connectorhub_engineering_trail.py` to validate matrix rows, compact hashes, focused gates, source-input hashes, path portability, and manifest exactness.
+6. Spot-check one compact focused report and the shared evidence manifest before reviewing scenario behavior.
 
 ## Split Recommendation
 

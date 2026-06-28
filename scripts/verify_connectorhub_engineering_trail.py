@@ -40,6 +40,9 @@ VS2_CURRENT_VERIFICATION_REPORT = (
 )
 CONNECTORHUB_H04_ADR = ROOT / "docs/adr/ADR-0007-connectorhub-h04-local-baseline-substitution.md"
 CONNECTORHUB_SPLIT_ADR = ROOT / "docs/adr/ADR-0008-connectorhub-review-split-and-module-map.md"
+CONNECTORHUB_FEEDBACK_RESOLUTION_REPORT = (
+    VERIFICATION_DIR / "CONNECTOR_HUB_PR20_FEEDBACK_RESOLUTION_2026-06-28.md"
+)
 ENGINEERING_TRAIL_MANIFEST = ROOT / "reports/scenario/connectorhub-engineering-trail-manifest-2026-06-24.json"
 SCENARIO_DELIVERY_UNIT_MANIFEST = ROOT / "reports/scenario/connectorhub-scenario-delivery-unit-manifest-2026-06-24.json"
 ENGINEERING_TRAIL_MANIFEST_GENERATOR = ROOT / "scripts/generate_connectorhub_engineering_trail_manifest.py"
@@ -22104,6 +22107,7 @@ def _validate_path_portability(errors: list[str]) -> None:
         CONTRACT_PATH,
         ENGINEERING_TRAIL_INDEX,
         CONNECTORHUB_REVIEWER_GUIDE,
+        CONNECTORHUB_FEEDBACK_RESOLUTION_REPORT,
         VS2_CURRENT_VERIFICATION_REPORT,
         CONNECTORHUB_H04_ADR,
         CONNECTORHUB_SPLIT_ADR,
@@ -22246,6 +22250,44 @@ def _validate_connectorhub_split_adr(errors: list[str]) -> None:
             errors.append(f"ConnectorHub split ADR missing token: {token}")
 
 
+def _validate_connectorhub_feedback_resolution_report(errors: list[str]) -> None:
+    if not CONNECTORHUB_FEEDBACK_RESOLUTION_REPORT.exists():
+        errors.append(
+            "missing ConnectorHub PR20 feedback resolution report: "
+            f"{CONNECTORHUB_FEEDBACK_RESOLUTION_REPORT.relative_to(ROOT)}"
+        )
+        return
+    text = CONNECTORHUB_FEEDBACK_RESOLUTION_REPORT.read_text()
+    required_tokens = [
+        "Keep PR #20 draft",
+        "B1: draft/no visible CI",
+        "No GitHub Actions workflow is added.",
+        "scripts/verify_connectorhub_local_evidence.sh",
+        "B2: contract mixed status/PASS",
+        "B3: VS2 status inconsistent",
+        "B4: non-portable evidence paths",
+        "tmp/scenario/...` as regenerable local transcript refs",
+        "B5: PR too large",
+        "ADR-0008 defines the split sequence",
+        "M1: `connector.py`/test monolith",
+        "M2: Action lane boundary",
+        "M3: weak simulated egress checks",
+        "Controlled forbidden-sink hardening remains a future VS2 local/manual proof slice.",
+        "M4: milestone wording",
+        "M5: generated evidence hard to review",
+        "N1: README as status source",
+        "N2: downloaded source docs",
+        "N3: H04 substitution ADR",
+        "N4: trimmed stdout proof risk",
+        "full_report_path",
+        "full_report_sha256",
+        "PR #20 should remain draft and `needs-follow-up`",
+    ]
+    for token in required_tokens:
+        if token not in text:
+            errors.append(f"ConnectorHub feedback resolution report missing token: {token}")
+
+
 def _required_manifest_paths(matrix_rows: list[dict[str, str]]) -> list[Path]:
     paths = [
         MATRIX_PATH,
@@ -22269,6 +22311,7 @@ def _required_manifest_paths(matrix_rows: list[dict[str, str]]) -> list[Path]:
         HUMAN_PREPARATION_REPORT,
         ENGINEERING_TRAIL_INDEX,
         CONNECTORHUB_REVIEWER_GUIDE,
+        CONNECTORHUB_FEEDBACK_RESOLUTION_REPORT,
         VS2_CURRENT_VERIFICATION_REPORT,
         CONNECTORHUB_H04_ADR,
         CONNECTORHUB_SPLIT_ADR,
@@ -32414,6 +32457,7 @@ def main() -> int:
                     errors.append(f"engineering trail index missing {scenario_id} token: {token}")
         _validate_path_portability(errors)
         _validate_connectorhub_split_adr(errors)
+        _validate_connectorhub_feedback_resolution_report(errors)
 
     manifest_paths = _required_manifest_paths(matrix_rows)
     manifest_relative_paths = {

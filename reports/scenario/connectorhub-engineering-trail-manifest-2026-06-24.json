@@ -272,7 +272,7 @@
     },
     {
       "path": "docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md",
-      "sha256": "0e489dd0c25a6ae951f01df8723c27c7aff4d7f70fd51762a88835f74ac99ae5",
+      "sha256": "1c928d66556964208c66b2f4ed3550521008540da05ff6fb879baad2ec67c4be",
       "size_bytes": 639252
     },
     {
@@ -281,9 +281,14 @@
       "size_bytes": 56495
     },
     {
+      "path": "docs/verification-reports/CONNECTOR_HUB_PR20_FEEDBACK_RESOLUTION_2026-06-28.md",
+      "sha256": "14828ac9c036219b46961112f587f58eea358ac583937bf830b5f48ce4f5b4a8",
+      "size_bytes": 6732
+    },
+    {
       "path": "docs/verification-reports/CONNECTOR_HUB_REVIEWER_GUIDE.md",
-      "sha256": "5722ca11bfb83d78243b5a77b64ffdae8263d4fc5b732f9dc101f2ab4b9b2610",
-      "size_bytes": 4034
+      "sha256": "3b2614049a55c434414501a315868d00fe840d26637e4028b1aaddeed0b00b96",
+      "size_bytes": 4214
     },
     {
       "path": "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md",
@@ -837,8 +842,8 @@
     },
     {
       "path": "scripts/verify_connectorhub_engineering_trail.py",
-      "sha256": "47bfb630a79c9ae0db25544b1a0b5dd429ea96494f8d0c981b2d8b19e36219e4",
-      "size_bytes": 1670148
+      "sha256": "31d8e28d8911fb4e99dd0f2ab5daf8ab619ebc7a1d652c8198118b238dea9dc0",
+      "size_bytes": 1672029
     },
     {
       "path": "scripts/verify_connectorhub_local_evidence.sh",
@@ -856,7 +861,7 @@
       "size_bytes": 6414
     }
   ],
-  "generated_at": "2026-06-28T03:35:05.768502+00:00",
+  "generated_at": "2026-06-28T03:39:01.777910+00:00",
   "manifest_schema": "cornerstone.connectorhub.engineering_trail_manifest.v1",
   "source_inputs": [
     {
@@ -881,7 +886,7 @@
   "summary": {
     "ai_pass_rows": 40,
     "claim_boundary": "local_fixture_and_local_vs2_topology_only",
-    "file_count": 171,
+    "file_count": 172,
     "human_required_rows": 7,
     "source_input_count": 2,
     "source_requirements_covered": 27,
