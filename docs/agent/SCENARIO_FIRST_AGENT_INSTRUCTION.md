@@ -3,6 +3,11 @@
 **Replacement status:** Active implementation-agent process document.  
 **Source file:** `scenario_first_agent_instruction_final_en.md` uploaded by JiYong / Tars.
 
+**Goal-following overlay:** For long-running `/goal` work, use
+`docs/agent/PRIMARY_GOAL_INSTRUCTION_FOLLOWING.md` to keep the scenario-first
+direction while limiting execution to small verified slices with explicit
+checkpoints.
+
 ---
 
 # Scenario-First Agent Instruction — Final
