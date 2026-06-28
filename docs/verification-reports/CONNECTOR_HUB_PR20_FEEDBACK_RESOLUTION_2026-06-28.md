@@ -40,7 +40,15 @@ Default local evidence gate:
 scripts/verify_connectorhub_local_evidence.sh
 ```
 
-Default mode runs `git diff --check`, SoT docs verification, ConnectorHub engineering-trail verification, ConnectorHub CLI unittest coverage with `CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1`, compact-report tests, scaffold CLI unittest coverage with `CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1`, and `compileall`. The default gate is intentionally non-Docker; VS2-heavy regression subtests move to the strict local/manual gate.
+Default mode runs `git diff --check`, SoT docs verification, PR20 feedback-response verification, ConnectorHub engineering-trail verification, ConnectorHub CLI unittest coverage with `CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1`, compact-report tests, scaffold CLI unittest coverage with `CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1`, and `compileall`. The default gate is intentionally non-Docker; VS2-heavy regression subtests move to the strict local/manual gate.
+
+Feedback-response gate:
+
+```sh
+python3 scripts/verify_connectorhub_pr20_feedback.py
+```
+
+This command validates the B1-B5, M1-M5, and N1-N4 response surfaces: local-gate behavior, status delegation, compact evidence hashes, controlled egress sink evidence, action-lane wording, path portability boundaries, and explicit remaining split/monolith blockers.
 
 Split-readiness gate:
 
@@ -60,7 +68,7 @@ Strict mode adds `make verify-vs2-production-like`. It is not represented as Git
 
 ## Local Merge-Gate Rehearsal - 2026-06-28
 
-The review-required local command set was rerun after aligning the VS2 overclaim scanner with the README status-authority decision, expanding the default local evidence gate, and removing non-portable Postgres bind mounts from VS2 local probes. The latest clean-clone runtime evidence was captured at commit `b343393`.
+The review-required local command set was rerun after adding the PR20 feedback-response verifier and wiring it into the default local evidence gate. The latest clean-clone default gate was run from `/tmp/cornerstone-pr20-feedback-verify.L5KlLB`.
 
 | Command | Result | Evidence summary |
 | --- | --- | --- |
@@ -68,10 +76,11 @@ The review-required local command set was rerun after aligning the VS2 overclaim
 | `PATH="$PWD:$PATH" cornerstone scenario verify vs2-policy-tenancy-egress --reuse-vs2-local-proof-report reports/security/vs2-local-security-proof.json --json` | PASS | `status=success`; `86 PASS`, `0 blocking`, `7 HUMAN_REQUIRED`. |
 | `PATH="$PWD:$PATH" cornerstone scenario verify connector-contract-adapter --scenario CS-CH-036 --json` | PASS | `status=success`; `scenario_count=1`, `pass=1`, `blocking=0`; all egress topology checks true. |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_default_deny_egress_topology_cs_ch_036` | PASS | `Ran 1 test in 320.978s`; `OK`. |
-| `scripts/verify_connectorhub_local_evidence.sh` | PASS | Clean clone default gate included `git diff --check`, SoT docs, ConnectorHub engineering trail, full ConnectorHub CLI suite, compact report unittest, scaffold suite, and `compileall`. |
-| `python3 -m unittest tests.scenario.test_connectorhub_cli` | PASS | Covered by the clean-clone default gate: `Ran 84 tests in 255.951s`; `OK`. |
+| `scripts/verify_connectorhub_local_evidence.sh` | PASS | Clean clone default gate included `git diff --check`, SoT docs, PR20 feedback-response verifier, ConnectorHub engineering trail, review-split verifier, ConnectorHub CLI suite with VS2-heavy subtests skipped, compact report unittest, scaffold suite with VS2-heavy subtests skipped, and `compileall`. |
+| `python3 scripts/verify_connectorhub_pr20_feedback.py` | PASS | `14` findings covered; local gate guarded; compact evidence hashed; controlled sink proof present; unresolved split/monolith boundaries explicit. |
+| `env CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1 python3 -m unittest tests.scenario.test_connectorhub_cli` | PASS | Covered by the clean-clone default gate: `Ran 84 tests in 83.707s`; `OK (skipped=2)`. |
 | `python3 -m unittest tests.scenario.test_connectorhub_cli.ConnectorHubCliTests.test_connectorhub_default_deny_egress_topology_cs_ch_036` | PASS | Targeted clean-clone regression check after removing the bind mount: `Ran 1 test in 109.410s`; `OK`. |
-| `python3 -m unittest tests.scenario.test_scaffold_cli` | PASS | Covered by the clean-clone default gate: `Ran 53 tests in 272.216s`; `OK`. |
+| `env CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1 python3 -m unittest tests.scenario.test_scaffold_cli` | PASS | Covered by the clean-clone default gate: `Ran 53 tests in 87.498s`; `OK (skipped=5)`. |
 | `make verify-vs2-production-like` | PASS | Local command report `status=passed`; controlled provider/forbidden sink proof included; 8 scenario rows, all `PASS`. |
 
 Proof boundary remains unchanged: this is local deterministic and local production-like rehearsal evidence only. It does not claim live connector readiness, production security readiness, or human acceptance.

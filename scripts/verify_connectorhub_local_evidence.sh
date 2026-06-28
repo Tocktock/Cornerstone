@@ -11,6 +11,7 @@ run() {
 
 run git diff --check
 run scripts/verify_sot_docs.sh
+run python3 scripts/verify_connectorhub_pr20_feedback.py
 run python3 scripts/verify_connectorhub_engineering_trail.py
 run python3 scripts/verify_connectorhub_review_split.py
 run env CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1 python3 -m unittest tests.scenario.test_connectorhub_cli

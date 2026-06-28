@@ -27,7 +27,15 @@ The scenario delivery-unit manifest also carries a top-level `path_portability` 
 scripts/verify_connectorhub_local_evidence.sh
 ```
 
-This default local gate runs whitespace, SoT docs, the ConnectorHub engineering-trail verifier, the ConnectorHub CLI unittest suite with VS2-heavy regression subtests skipped, compact-report tests, the scaffold CLI unittest suite with VS2-heavy regression subtests skipped, and Python compile checks without depending on GitHub Actions. The skip is explicit through `CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1`; Docker/VS2 rehearsal evidence belongs to the strict local gate below.
+This default local gate runs whitespace, SoT docs, the PR20 feedback-response verifier, the ConnectorHub engineering-trail verifier, the ConnectorHub CLI unittest suite with VS2-heavy regression subtests skipped, compact-report tests, the scaffold CLI unittest suite with VS2-heavy regression subtests skipped, and Python compile checks without depending on GitHub Actions. The skip is explicit through `CORNERSTONE_SKIP_VS2_REGRESSION_TESTS=1`; Docker/VS2 rehearsal evidence belongs to the strict local gate below.
+
+For the feedback-response boundary specifically, run:
+
+```sh
+python3 scripts/verify_connectorhub_pr20_feedback.py
+```
+
+This validates the B1-B5, M1-M5, and N1-N4 response surfaces: local-gate behavior, status delegation, compact evidence hashes, controlled egress sink evidence, action-lane wording, path portability boundaries, and explicit remaining split/monolith blockers.
 
 For the review-split plan specifically, run:
 
