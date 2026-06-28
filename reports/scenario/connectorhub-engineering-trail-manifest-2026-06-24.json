@@ -317,7 +317,7 @@
     },
     {
       "path": "reports/scenario/connector-contract-adapter/manifest-2026-06-23.json",
-      "sha256": "28588e571877740d728fbcff0c527a5815ac5c79ddf3cd900c47505d11f977b1",
+      "sha256": "1af04e371c7c708f8e2bab18024e6dd1bc4390d4a75c2c3509b68b769344ee82",
       "size_bytes": 60324
     },
     {
@@ -871,7 +871,7 @@
       "size_bytes": 7216
     }
   ],
-  "generated_at": "2026-06-28T06:08:37.428148+00:00",
+  "generated_at": "2026-06-28T06:14:09.257253+00:00",
   "manifest_schema": "cornerstone.connectorhub.engineering_trail_manifest.v1",
   "source_inputs": [
     {
